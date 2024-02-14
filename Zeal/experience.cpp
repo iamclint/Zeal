@@ -16,9 +16,25 @@ std::string format_duration(std::chrono::milliseconds ms) {
 	return ss.str();
 }
 
+void Experience::check_reset()
+{
+	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+	static int zone_id = self->ZoneId;
+	static int prev_level = 0;
+
+	if (self->Level != prev_level) //level up or delevel
+		ExpInfo.clear();
+
+	if (zone_id != self->ZoneId) //zoned
+		ExpInfo.clear();
+
+	prev_level = self->Level;
+	zone_id = self->ZoneId;
+}
 
 void Experience::callback_main()
 {
+	check_reset();
 	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 	exp_per_hour_tot = 0;
 	exp_per_hour_pct_tot = 0;

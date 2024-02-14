@@ -18,6 +18,7 @@ class Experience
 {
 public:
 	void callback_main();
+	void check_reset();
 	Experience(class ZealService* zeal);
 	~Experience();
 	int exp;
@@ -26,5 +27,6 @@ public:
 	float exp_per_hour_pct_tot;
 	std::string ttl;
 	std::deque<_ExpData> ExpInfo;
+	
 };
 
