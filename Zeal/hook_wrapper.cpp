@@ -1,0 +1,69 @@
+#include "hook_wrapper.h"
+
+namespace Zeal
+{
+	namespace Memory
+	{
+		HookWrapper Hooks;
+	}
+}
+void hook::replace(int addr, int dest)
+{
+	if (*(BYTE*)addr == 0xE9 || *(BYTE*)addr == 0xE8)
+	{
+		destination = (DWORD)dest;
+		address = (DWORD)addr;
+		trampoline = mem::instruction_to_absolute_address(addr);
+		DWORD old;
+		VirtualProtect((LPVOID)addr, 0x5, PAGE_EXECUTE_READWRITE, &old);
+		memcpy(original_bytes, (LPVOID)addr, 5);
+		*(DWORD*)(addr + 1) = dest - addr - 5;
+		VirtualProtect((LPVOID)addr, 0x5, old, NULL);
+	}
+}
+
+void hook::detour(int addr, int dest)
+{
+
+	// Build a trampoline
+	trampoline = (int)malloc(orig_byte_count + 5); // A jump is 5 bytes
+	mem::copy(trampoline, original_bytes, orig_byte_count);
+
+	// Calculate the relative offsets
+	int orig_to_dest_offset = dest - addr - 5;
+	int trampoline_to_orig_offset = addr - trampoline - orig_byte_count;
+	
+
+	// Write the relative jump instruction at the end of the trampoline
+	mem::write<byte>(trampoline + orig_byte_count, 0xE9);
+	mem::write<int>(trampoline + orig_byte_count + 1, trampoline_to_orig_offset);
+
+	// Write the relative jump instruction at the original address
+	mem::write<byte>(addr, 0xE9);
+	mem::write<int>(addr + 1, orig_to_dest_offset);
+
+	// If there are more than 5 bytes of original instructions, fill the gap with NOPs
+	if (orig_byte_count > 5)
+		mem::mem_set(addr + 5, 0x90, orig_byte_count - 5);
+	
+}
+
+void hook::replace_call(int addr, int dest)
+{
+	replace(addr, dest);
+	mem::copy((int)&original_bytes, (BYTE*)dest, 5);
+}
+void hook::rehook()
+{
+
+	if (hook_type == hook_type_detour)
+		detour(address, destination);
+	else
+		replace_call(address, destination);
+}
+
+void hook::remove()
+{
+	mem::copy(address, original_bytes, orig_byte_count);
+	free((void*)trampoline);
+}
