@@ -1,4 +1,7 @@
 #pragma once
+//some structure information was found here
+//https://github.com/kevrgithub/eqmac/
+
 #include <Windows.h>
 #include "vectors.h"
 #define EQ_NUM_COMMANDS 277 // 0-276
@@ -545,7 +548,7 @@ namespace Zeal
 			/* ...... */
 		};
 
-		struct ThirdPersonZoom
+		struct Cam
 		{
 			/* 0x0000 */float zoom;
 			/* 0x0004 */float heading;

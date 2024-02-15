@@ -7,6 +7,7 @@
 
 bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG* color)
 {
+	ZealService* zeal = ZealService::get_instance();
 	switch (EqType)
 	{
 	case 80:
@@ -20,7 +21,7 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG*
 	}
 	case 81:
 	{
-		//Zeal::EqGame::CXStr_PrintString(str, "%.f", ZealService::get_instance()->gui->CharInfo->exp_per_hour_pct_tot);
+		Zeal::EqGame::CXStr_PrintString(str, "%.f", zeal->experience->exp_per_hour_pct_tot);
 		*unk = 1;
 		*color = 0xffc0c0c0;
 		return true;

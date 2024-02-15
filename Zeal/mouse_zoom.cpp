@@ -3,7 +3,7 @@
 #include "EqStructures.h"
 #include "EqAddresses.h"
 #include "Zeal.h"
-
+#include <thread>
 int zoom_speed = 3;
 void reset_zoom()
 {
@@ -18,6 +18,9 @@ static int zeal_cam = Zeal::EqEnums::CameraView::ThirdPerson3;
 bool can_move()
 {
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (!self || !self->CharInfo)
+        return false;
+
     if (self->CharInfo->StunnedState)
         return false;
     if (self->StandingState == Zeal::EqEnums::Stance::Standing || self->StandingState == Zeal::EqEnums::Stance::Ducking)
@@ -133,15 +136,18 @@ int handle_mouse_wheel(int delta)
 }
 
 float Smooth(short rawDelta, float smoothDelta) {
-    return std::lerp(smoothDelta, static_cast<float>(rawDelta), 1.0f / 1.7f);
+    return std::lerp(smoothDelta, static_cast<float>(rawDelta), 1.0f / 1.5f);
 }
 
 
 
-void __fastcall procMouse(int uk, int unused, int a1)
+void __fastcall procMouse(int eq, int unused, int a1)
 {
 
-    if (true) //maybe add some seting to toggle this feature on and off
+    ZealService* zeal = ZealService::get_instance();
+    if (eq)
+        zeal->mouse_zoom_hook->eq_ptr = eq;
+    if (true) //maybe add some setting to toggle this feature on and off
     {
         static float smoothMouseDeltaX = 0;
         static float smoothMouseDeltaY = 0;
@@ -151,11 +157,12 @@ void __fastcall procMouse(int uk, int unused, int a1)
         Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
         if (!self)
             return;
-        if (can_move())
+        if (can_move() && *Zeal::EqGame::is_right_mouse_down)
         {
-            smoothMouseDeltaX = Smooth(delta->x * 1.7f, smoothMouseDeltaX);
-            smoothMouseDeltaY = Smooth(delta->y * 1.7f, smoothMouseDeltaY);
-
+            smoothMouseDeltaX = Smooth(delta->x * zeal->mouse_zoom_hook->sensitivity_x, smoothMouseDeltaX);
+            smoothMouseDeltaY = Smooth(delta->y * zeal->mouse_zoom_hook->sensitivity_y, smoothMouseDeltaY);
+            delta->y = 0;
+            delta->x = 0;
             if (camera_view != Zeal::EqEnums::CameraView::FirstPerson)
             {
                 Zeal::EqGame::camera[camera_view].heading -= smoothMouseDeltaX;
@@ -188,12 +195,13 @@ void __fastcall procMouse(int uk, int unused, int a1)
         //    self->Heading = Zeal::EqGame::camera[camera_view].heading;
         //}
     }
-    else
+    /*else
     {
         if (uk!=123344)
-            ZealService::get_instance()->hooks->hook_map["procMouse"]->original(procMouse)(uk, unused, a1);
+           zeal->hooks->hook_map["procMouse"]->original(procMouse)(uk, unused, a1);
         return;
-    }
+    }*/
+    zeal->hooks->hook_map["procMouse"]->original(procMouse)(eq, unused, a1);
 }
 
 void __fastcall ProcessControls(int t, int unused)
@@ -266,19 +274,18 @@ MouseZoom::MouseZoom(ZealService* zeal)
     //    mem::mem_set(0x53fc9d, 0x90, 5); //proc mouse
     //    while (!ZealService::get_instance()->exit)
     //    {
-    //        static POINT prev_mouse_pos;
-    //        static bool was_mouse_down = false;
-    //        if (*Zeal::EqGame::is_right_mouse_down)
-    //        {
-    //            if (prev_mouse_pos.x == 0 && prev_mouse_pos.y == 0)
-    //                GetCursorPos(&prev_mouse_pos); //initialize 
+    //        //static POINT prev_mouse_pos;
+    //        //static bool was_mouse_down = false;
+    //      //  if (*Zeal::EqGame::is_right_mouse_down)
+    //       // {
+    //        if (*(int*)0x809478)
     //            Zeal::EqGame::EqGameInternal::ProcessMouseEvent();
-    //            procMouse(123344, 0, 0);
-    //        }
-    //        Sleep(10);
+    //            procMouse(0, 0, 0);
+    //        //}
+    //        Sleep(5);
     //    }
 
     //   });
     //test.detach();
-    //  Hooks->Add("HandleLook", 0x53f337, handle_key_move, hook_type_detour);
+//      Hooks->Add("HandleLook", 0x53f337, handle_key_move, hook_type_detour);
 }

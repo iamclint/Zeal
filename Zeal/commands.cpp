@@ -55,6 +55,8 @@ Commands::~Commands()
 }
 Commands::Commands(ZealService* zeal)
 {
+
+	//just going to use lambdas for simple commands
 	add("/autoinventory", { "/autoinv", "/ai" },
 		[](std::vector<std::string>& args) {
 			int a1 = *Zeal::EqGame::ptr_LocalPC;
@@ -62,5 +64,24 @@ Commands::Commands(ZealService* zeal)
 			Zeal::EqGame::EqGameInternal::auto_inventory(a1, a2, 0);
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
+
+	add("/hidecorpse", { "/hc", "/hideco" },
+		[](std::vector<std::string>& args) {
+			if (args.size() > 1 && args[1] == "looted")
+			{
+				ZealService::get_instance()->looting_hook->hide_looted = !ZealService::get_instance()->looting_hook->hide_looted;
+				if (ZealService::get_instance()->looting_hook->hide_looted)
+					Zeal::EqGame::print_chat("Corpses will be hidden after looting.");
+				else
+					Zeal::EqGame::print_chat("Corpses will no longer hidden after looting.");
+				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+			}
+			if (args.size() > 1 && args[1] == "none")
+			{
+				ZealService::get_instance()->looting_hook->hide_looted = false;
+				return false; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+			}
+		});
 	zeal->hooks->Add("commands", Zeal::EqGame::EqGameInternal::fn_interpretcmd, InterpretCommand, hook_type_detour, 9);
 }
+

@@ -24,27 +24,39 @@ void hook::replace(int addr, int dest)
 
 void hook::detour(int addr, int dest)
 {
-
-	// Build a trampoline
-	trampoline = (int)malloc(orig_byte_count + 5); // A jump is 5 bytes
-	mem::copy(trampoline, original_bytes, orig_byte_count);
-
-	// Calculate the relative offsets
 	int orig_to_dest_offset = dest - addr - 5;
-	int trampoline_to_orig_offset = addr - trampoline - orig_byte_count;
-	
+	if (*(byte*)addr == 0xE9) //a jump (already hooked by something lets play nice)
+	{
+		orig_byte_count = 5;
+		trampoline = (int)malloc(orig_byte_count);
+		int jmp_absolute = mem::instruction_to_absolute_address(addr);
+		int trampoline_to_orig_offset = jmp_absolute - trampoline - 5;
+		mem::write<byte>(trampoline, 0xE9);
+		mem::write<int>(trampoline + 1, trampoline_to_orig_offset);
+		mem::write<byte>(addr, 0xE9);
+		mem::write<int>(addr + 1, orig_to_dest_offset);
+		//there is no need to write a jump back to the original since we are just going to jump to their hook
+	}
+	else
+	{
+		// Build a trampoline
+		trampoline = (int)malloc(orig_byte_count + 5); // A jump is 5 bytes
+		mem::copy(trampoline, original_bytes, orig_byte_count);
+		// Calculate the relative offsets
+		int trampoline_to_orig_offset = addr - trampoline - orig_byte_count;
 
-	// Write the relative jump instruction at the end of the trampoline
-	mem::write<byte>(trampoline + orig_byte_count, 0xE9);
-	mem::write<int>(trampoline + orig_byte_count + 1, trampoline_to_orig_offset);
+		// Write the relative jump instruction at the end of the trampoline
+		mem::write<byte>(trampoline + orig_byte_count, 0xE9);
+		mem::write<int>(trampoline + orig_byte_count + 1, trampoline_to_orig_offset);
 
-	// Write the relative jump instruction at the original address
-	mem::write<byte>(addr, 0xE9);
-	mem::write<int>(addr + 1, orig_to_dest_offset);
+		// Write the relative jump instruction at the original address
+		mem::write<byte>(addr, 0xE9);
+		mem::write<int>(addr + 1, orig_to_dest_offset);
 
-	// If there are more than 5 bytes of original instructions, fill the gap with NOPs
-	if (orig_byte_count > 5)
-		mem::mem_set(addr + 5, 0x90, orig_byte_count - 5);
+		// If there are more than 5 bytes of original instructions, fill the gap with NOPs
+		if (orig_byte_count > 5)
+			mem::mem_set(addr + 5, 0x90, orig_byte_count - 5);
+	}
 	
 }
 

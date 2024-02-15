@@ -5,9 +5,9 @@
 class looting
 {
 public:
+	bool hide_looted;
 	looting(class ZealService* zeal);
 	~looting();
 
 private:
-	hook* hook;
 };

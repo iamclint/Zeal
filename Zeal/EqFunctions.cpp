@@ -148,7 +148,7 @@ namespace Zeal
 			//printf()
 			vsnprintf(buffer, 511, format, argptr);
 			va_end(argptr);
-			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 5, false);
+			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 0, false);
 
 		}
 		void print_chat_zeal(const char* data, short color, bool un)

@@ -8,13 +8,14 @@ ZealService::ZealService()
 
 
 	//initialize the hooked function classes
+	main_loop_hook = std::shared_ptr<MainLoop>(new MainLoop(this)); //other functions rely on this hook
 	cycle_target_hook = std::shared_ptr<CycleTarget>(new CycleTarget(this)); 
 	mouse_zoom_hook = std::shared_ptr<MouseZoom>(new MouseZoom(this)); 
 	looting_hook = std::shared_ptr<looting>(new looting(this));
 	labels_hook = std::shared_ptr<labels>(new labels(this));
 	binds_hook = std::shared_ptr<Binds>(new Binds(this));
 	commands_hook = std::shared_ptr<Commands>(new Commands(this));
-	main_loop_hook = std::shared_ptr<MainLoop>(new MainLoop(this));
+	
 	this->apply_patches();
 
 

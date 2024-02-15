@@ -72,11 +72,13 @@ class HookWrapper
 public:
 	std::unordered_map<std::string, hook*> hook_map;
 	template<typename X, typename T>
-	hook* Add(std::string name, X addr, T fnc, hook_type_ type, int byte_count = 5)
+	hook* Add(std::string name, X addr, T fnc, hook_type_ type, int byte_count = 5) //could have used zdys or capstone but keeping this a single compile with minimal libs and its not that hard to figure out the bytes
 	{
 		hook* x = new hook(addr, fnc, type, byte_count);
 		hook_map[name] = x;
 		x->hook_type = type;
+
+
 		return x;
 	}
 	~HookWrapper()

@@ -17,7 +17,7 @@ namespace Zeal
 		static BYTE* strafe_direction = (BYTE*)0x7985EB;
 		//static EqStructures::ControlledPlayer* _ControlledPlayer = (EqStructures::ControlledPlayer*)0x7f94e0;
 		static int* Display = (int*)0x7F9510;
-		static EqStructures::ThirdPersonZoom* camera = (EqStructures::ThirdPersonZoom*)0x799688;// 0x7996C0;
+		static EqStructures::Cam* camera = (EqStructures::Cam*)0x799688;// 0x7996C0;
 		static bool* is_right_mouse_down = (bool*)0x7985ea;
 		static int* mouse_hover_window = (int*)0x809DD8; //unsure
 		static int* camera_view = (int*)0x63BE68;
