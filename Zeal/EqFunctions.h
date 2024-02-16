@@ -33,7 +33,7 @@ namespace Zeal
 			static int fn_initkeyboardassignments = 0x42A9D7;
 			static int fn_executecmd = 0x54050c;
 			static int fn_interpretcmd = 0x54572f;
-			static int fn_main_loop = 0x53df6e;
+			static int fn_main_loop = 0x5473c3;
 			/*inline int fn_loadoptions = 0x536CE0;*/
 			static int fn_KeyboardPageHandleKeyboardMsg = 0x42c4fb;
 

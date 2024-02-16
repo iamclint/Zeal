@@ -102,7 +102,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <Optimization>MaxSpeed</Optimization>
     </ClCompile>
@@ -168,6 +168,7 @@
     <ClInclude Include="memory.h" />
     <ClInclude Include="camera_mods.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="Zeal.h" />
   </ItemGroup>
@@ -194,6 +195,9 @@
     </ClCompile>
     <ClCompile Include="vectors.cpp" />
     <ClCompile Include="Zeal.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Zeal.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -92,6 +92,12 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::print_chat("Zeal mouse look smoothing disabled.");
 			return true;
 		});
+	add("/camp", {},
+		[](std::vector<std::string>& args) {
+
+			Zeal::EqGame::change_stance(Stance::Sit);
+			return false;
+		});
 	zeal->hooks->Add("commands", Zeal::EqGame::EqGameInternal::fn_interpretcmd, InterpretCommand, hook_type_detour, 9);
 }
 

@@ -8,11 +8,11 @@ MainLoop::~MainLoop()
 
 }
 
-void __fastcall main_loop_hk(int t, int unk, HWND wnd)
+void main_loop_hk()
 {
 	ZealService* zeal = ZealService::get_instance();
 	zeal->main_loop_hook->do_callbacks();
-	zeal->hooks->hook_map["main_loop"]->original(main_loop_hk)(t, unk, wnd);
+	zeal->hooks->hook_map["main_loop"]->original(main_loop_hk)();
 }
 
 void MainLoop::do_callbacks()
