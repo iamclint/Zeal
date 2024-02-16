@@ -18,7 +18,7 @@ void AddIndex()
 	if (last_index >= near_ents.size())
 		last_index = 0;
 }
-Zeal::EqStructures::Entity* __fastcall get_nearest_ent(int cDisplay, int unused, float dist, byte type)
+Zeal::EqStructures::Entity* CycleTarget::get_next_ent(float dist, byte type)
 {
 	static ULONGLONG last_press = 0;
 	
@@ -34,7 +34,7 @@ Zeal::EqStructures::Entity* __fastcall get_nearest_ent(int cDisplay, int unused,
 	near_ents.clear();
 	for (auto& ent : visible_ents)
 	{
-		if (!ent->IsHidden && ent->Type == type && ent->HpCurrent > 0 && ent->Level>1 && ent->TargetType<66)
+		if (!ent->IsHidden && ent->Type == type && ent->HpCurrent > 0 && ent->Level>0 && ent->TargetType<66)
 		{
 			if (ent->PetOwnerSpawnId)
 			{
@@ -62,14 +62,13 @@ Zeal::EqStructures::Entity* __fastcall get_nearest_ent(int cDisplay, int unused,
 
 }
 
+CycleTarget::~CycleTarget()
+{
+	//hook->remove(); //hooks being removed from dllmain
+}
 
-		CycleTarget* cls_cycle_target=0;
-		CycleTarget::~CycleTarget()
-		{
-			//hook->remove(); //hooks being removed from dllmain
-		}
-
-		CycleTarget::CycleTarget(ZealService* zeal)
-		{
-			hook = zeal->hooks->Add("NearestEnt", Zeal::EqGame::EqGameInternal::fn_targetnearestnpc, get_nearest_ent, hook_type_detour, 6);
-		}
+CycleTarget::CycleTarget(ZealService* zeal)
+{
+	//originally this used a hook and replaced target nearest but now uses a bind
+	//	hook = zeal->hooks->Add("NearestEnt", Zeal::EqGame::EqGameInternal::fn_targetnearestnpc, get_nearest_ent, hook_type_detour, 6);
+}

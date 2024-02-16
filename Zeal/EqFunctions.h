@@ -57,6 +57,7 @@ namespace Zeal
 			static mem::function<int __stdcall()> LoadOptions = 0x536CE0;
 			static mem::function<int __fastcall(int t, int unk, int key, int type)> readKeyMapFromIni = 0x525520;
 			static mem::function<void __cdecl(int _char, int item, int)> auto_inventory = 0x4F0EEB;
+			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
 		//// Wrapper function to call CXStr_PrintString

@@ -86,25 +86,46 @@ void set_strafe(strafe_direction dir)
 void Binds::add_binds()
 {
 	//just start binds at 211 to avoid overwriting any existing cmd/bind
-	add_bind(211, "Strafe Left", "strafe_left", key_category::Movement, [](int state) {
-		if (!state && *Zeal::EqGame::strafe_direction == strafe_direction::Left)
+	add_bind(211, "Strafe Left", "StrafeLeft", key_category::Movement, [](int key_down) {
+		if (!key_down && *Zeal::EqGame::strafe_direction == strafe_direction::Left)
 		{
 			set_strafe(strafe_direction::None);
 		}
 		else
 			set_strafe(strafe_direction::Left);
 	});
-	add_bind(212, "Strafe Right", "strafe_right", key_category::Movement, [](int state) {
-		if (!state && *Zeal::EqGame::strafe_direction == strafe_direction::Right)
+	add_bind(212, "Strafe Right", "StrafeRight", key_category::Movement, [](int key_down) {
+		if (!key_down && *Zeal::EqGame::strafe_direction == strafe_direction::Right)
 			set_strafe(strafe_direction::None);
 		else
 			set_strafe(strafe_direction::Right);
 	});
-	add_bind(255, "Auto Inventory", "auto_inventory", key_category::Movement, [](int state) {
+	add_bind(213, "Cycle through nearest NPCs", "CycleTargetNPC", key_category::Target, [](int key_down) {
 
-		int a1 = *Zeal::EqGame::ptr_LocalPC;
-		int a2 = a1 + 0xD78;
-		Zeal::EqGame::EqGameInternal::auto_inventory(a1,a2, 0);
+		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_next_ent(250, 1);
+			if (ent)
+				Zeal::EqGame::set_target(ent);
+		}
+	});
+	add_bind(214, "Cycle through nearest PCs", "CycleTargetPC", key_category::Target, [](int key_down) {
+		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_next_ent(250, 0);
+			if (ent)
+				Zeal::EqGame::set_target(ent);
+		}
+		});
+
+	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) {
+
+		if (key_down)
+		{
+			int a1 = *Zeal::EqGame::ptr_LocalPC;
+			int a2 = a1 + 0xD78;
+			Zeal::EqGame::EqGameInternal::auto_inventory(a1, a2, 0);
+		}
 	});
 }
 

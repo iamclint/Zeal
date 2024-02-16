@@ -4,11 +4,16 @@
 #include <functional>
 #include <unordered_map>
 
-enum key_category
+enum key_category //this is bitwise so you can do multiple categorys by doing Movement | Target for example
 {
 	Movement = 1,
-	Combat = 2,
-	Target = 8
+	Commands = 2,
+	Spell = 4,
+	Target = 8,
+	Camera = 16,
+	Chat = 32,
+	UI = 64,
+	Macros = 128
 };
 
 enum strafe_direction

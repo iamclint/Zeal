@@ -11,6 +11,15 @@
 //		corpse->ActorInfo->IsInvisible = 1;
 //	ZealService::get_instance()->hooks->hook_map["FinalizeLoot"]->original(finalize_loot)(uk, lootwnd_ptr);
 //}
+
+
+void looting::set_hide_looted(bool val)
+{
+	hide_looted = val;
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "HideLooted", hide_looted);
+}
+
+
 void __fastcall release_loot(int uk, int lootwnd_ptr)
 {
 	ZealService* zeal = ZealService::get_instance();

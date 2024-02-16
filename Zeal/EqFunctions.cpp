@@ -102,7 +102,7 @@ namespace Zeal
 							bool x = s3dCollideSphereWithWorld(aloc);
 							if (!x)
 							{
-								aloc.Position.z += 20;
+								aloc.Position.z += 10;
 								x = s3dCollideSphereWithWorld(aloc);
 								if (!x)
 									add_to_list = false;

@@ -5,14 +5,17 @@
 #include "hook_wrapper.h"
 #include "EqFunctions.h"
 //hooks
+#include "commands.h"
 #include "cycle_target.h"
-#include "mouse_zoom.h"
+#include "camera_mods.h"
 #include "looting.h"
 #include "FindPattern.h"
 #include "labels.h"
 #include "binds.h"
-#include "commands.h"
+
+#include "IO_ini.h"
 #include "main_loop.h"
 #include "experience.h"
 #include "Zeal.h"
+
 extern HMODULE this_module;

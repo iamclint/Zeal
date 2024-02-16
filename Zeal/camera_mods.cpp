@@ -1,4 +1,4 @@
-#include "mouse_zoom.h"
+#include "camera_mods.h"
 #include "EqFunctions.h"
 #include "EqStructures.h"
 #include "EqAddresses.h"
@@ -126,7 +126,7 @@ void handle_zoom(int delta)
 
 int handle_mouse_wheel(int delta)
 {
-    if (!Zeal::EqGame::is_mouse_hovering_window())
+    if (!Zeal::EqGame::is_mouse_hovering_window() && ZealService::get_instance()->camera_mods->smoothing)
     {
         handle_zoom(delta);
         return 0;
@@ -146,8 +146,8 @@ void __fastcall procMouse(int eq, int unused, int a1)
 
     ZealService* zeal = ZealService::get_instance();
     if (eq)
-        zeal->mouse_zoom_hook->eq_ptr = eq;
-    if (true) //maybe add some setting to toggle this feature on and off
+        zeal->camera_mods->eq_ptr = eq;
+    if (zeal->camera_mods->smoothing) //maybe add some setting to toggle this feature on and off
     {
         static float smoothMouseDeltaX = 0;
         static float smoothMouseDeltaY = 0;
@@ -159,8 +159,8 @@ void __fastcall procMouse(int eq, int unused, int a1)
             return;
         if (can_move() && *Zeal::EqGame::is_right_mouse_down)
         {
-            smoothMouseDeltaX = Smooth(delta->x * zeal->mouse_zoom_hook->sensitivity_x, smoothMouseDeltaX);
-            smoothMouseDeltaY = Smooth(delta->y * zeal->mouse_zoom_hook->sensitivity_y, smoothMouseDeltaY);
+            smoothMouseDeltaX = Smooth(delta->x * zeal->camera_mods->sensitivity_x, smoothMouseDeltaX);
+            smoothMouseDeltaY = Smooth(delta->y * zeal->camera_mods->sensitivity_y, smoothMouseDeltaY);
             delta->y = 0;
             delta->x = 0;
             if (camera_view != Zeal::EqEnums::CameraView::FirstPerson)
@@ -206,6 +206,12 @@ void __fastcall procMouse(int eq, int unused, int a1)
 
 void __fastcall ProcessControls(int t, int unused)
 {
+    if (!ZealService::get_instance()->camera_mods->smoothing)
+    {
+        ZealService::get_instance()->hooks->hook_map["ProcessControls"]->original(ProcessControls)(t, unused);
+        return;
+    }
+
     DWORD camera_view = *Zeal::EqGame::camera_view;
     ZealService::get_instance()->hooks->hook_map["ProcessControls"]->original(ProcessControls)(t,unused);
 
@@ -251,14 +257,20 @@ void __fastcall ProcessControls(int t, int unused)
 
 }
 
-MouseZoom::~MouseZoom()
+CameraMods::~CameraMods()
 {
     mem::write<float>(Zeal::EqGame::max_pitch, 30.0f);
     mem::write<byte>(0x53fa50, 02);
     mem::write<byte>(0x53f648, 02);
 }
 
-MouseZoom::MouseZoom(ZealService* zeal)
+void CameraMods::set_smoothing(bool val)
+{
+    smoothing = val;
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "MouseSmoothing", smoothing);
+}
+
+CameraMods::CameraMods(ZealService* zeal)
 {
     static float max_pitch = 90.f;
     mem::write<int>(0x4db6e3, (int)&max_pitch); //the maximum pitch when zoomed out

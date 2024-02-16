@@ -40,7 +40,7 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 	zeal->hooks->hook_map["commands"]->original(InterpretCommand)(c, unused, player, cmd);
 }
 
-void Commands::add(std::string cmd, std::vector<std::string>aliases, std::function<bool(std::vector<std::string>&args)> callback)
+void ChatCommands::add(std::string cmd, std::vector<std::string>aliases, std::function<bool(std::vector<std::string>&args)> callback)
 {
 	CommandFunctions[cmd] = callback;
 	for (auto& a : aliases)
@@ -49,11 +49,11 @@ void Commands::add(std::string cmd, std::vector<std::string>aliases, std::functi
 	}
 }
 
-Commands::~Commands()
+ChatCommands::~ChatCommands()
 {
 
 }
-Commands::Commands(ZealService* zeal)
+ChatCommands::ChatCommands(ZealService* zeal)
 {
 
 	//just going to use lambdas for simple commands
@@ -69,7 +69,7 @@ Commands::Commands(ZealService* zeal)
 		[](std::vector<std::string>& args) {
 			if (args.size() > 1 && args[1] == "looted")
 			{
-				ZealService::get_instance()->looting_hook->hide_looted = !ZealService::get_instance()->looting_hook->hide_looted;
+				ZealService::get_instance()->looting_hook->set_hide_looted(!ZealService::get_instance()->looting_hook->hide_looted);
 				if (ZealService::get_instance()->looting_hook->hide_looted)
 					Zeal::EqGame::print_chat("Corpses will be hidden after looting.");
 				else
@@ -78,9 +78,19 @@ Commands::Commands(ZealService* zeal)
 			}
 			if (args.size() > 1 && args[1] == "none")
 			{
-				ZealService::get_instance()->looting_hook->hide_looted = false;
+				ZealService::get_instance()->looting_hook->set_hide_looted(false);
 				return false; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 			}
+		});
+	add("/smoothing", {},
+		[](std::vector<std::string>& args) {
+
+			ZealService::get_instance()->camera_mods->set_smoothing(!ZealService::get_instance()->camera_mods->smoothing);
+			if (ZealService::get_instance()->camera_mods->smoothing)
+				Zeal::EqGame::print_chat("Zeal mouse look smoothing enabled.");
+			else
+				Zeal::EqGame::print_chat("Zeal mouse look smoothing disabled.");
+			return true;
 		});
 	zeal->hooks->Add("commands", Zeal::EqGame::EqGameInternal::fn_interpretcmd, InterpretCommand, hook_type_detour, 9);
 }

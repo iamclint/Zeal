@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)$(ProjectName)\imgui-docking;$(SolutionDir)$(ProjectName);$(IncludePath)</IncludePath>
-    <OutDir>D:\Sony\TAKP PC V2.1c\TAKP PC V2.1</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <TargetExt>.asi</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -161,11 +161,12 @@
     <ClInclude Include="FindPattern.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="hook_wrapper.h" />
+    <ClInclude Include="IO_ini.h" />
     <ClInclude Include="labels.h" />
     <ClInclude Include="looting.h" />
     <ClInclude Include="main_loop.h" />
     <ClInclude Include="memory.h" />
-    <ClInclude Include="mouse_zoom.h" />
+    <ClInclude Include="camera_mods.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="Zeal.h" />
@@ -184,7 +185,7 @@
     <ClCompile Include="looting.cpp" />
     <ClCompile Include="main_loop.cpp" />
     <ClCompile Include="memory.cpp" />
-    <ClCompile Include="mouse_zoom.cpp" />
+    <ClCompile Include="camera_mods.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

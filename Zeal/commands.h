@@ -4,16 +4,14 @@
 #include <functional>
 #include <unordered_map>
 
-class Commands
+class ChatCommands
 {
 public:
-	Commands(class ZealService* zeal);
-	~Commands();
+	ChatCommands(class ZealService* zeal);
+	~ChatCommands();
 	void add(std::string cmd, std::vector<std::string> aliases, std::function<bool(std::vector<std::string>& args)> callback);
 	std::unordered_map<std::string, std::function<bool(std::vector<std::string>& args)>*> CommandAliases;
 	std::unordered_map<std::string, std::function<bool(std::vector<std::string>& args)>> CommandFunctions;
-private:
-	hook* hook;
 };
 
 

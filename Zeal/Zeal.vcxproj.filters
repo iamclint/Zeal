@@ -60,10 +60,7 @@
     <ClInclude Include="vectors.h">
       <Filter>Header Files\helpers</Filter>
     </ClInclude>
-    <ClInclude Include="cycle_target.h">
-      <Filter>Header Files\hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="mouse_zoom.h">
+    <ClInclude Include="camera_mods.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
     <ClInclude Include="FindPattern.h">
@@ -90,6 +87,12 @@
     <ClInclude Include="experience.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
+    <ClInclude Include="cycle_target.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="IO_ini.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -113,10 +116,7 @@
     <ClCompile Include="vectors.cpp">
       <Filter>Source Files\helpers</Filter>
     </ClCompile>
-    <ClCompile Include="cycle_target.cpp">
-      <Filter>Source Files\hooks</Filter>
-    </ClCompile>
-    <ClCompile Include="mouse_zoom.cpp">
+    <ClCompile Include="camera_mods.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="FindPattern.cpp">
@@ -141,6 +141,9 @@
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="experience.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="cycle_target.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>
