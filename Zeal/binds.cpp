@@ -87,17 +87,15 @@ void Binds::add_binds()
 {
 	//just start binds at 211 to avoid overwriting any existing cmd/bind
 	add_bind(211, "Strafe Left", "StrafeLeft", key_category::Movement, [](int key_down) {
-		if (!key_down && *Zeal::EqGame::strafe_direction == strafe_direction::Left)
-		{
+		if (!key_down )
 			set_strafe(strafe_direction::None);
-		}
-		else if (key_down)
+		else
 			set_strafe(strafe_direction::Left);
 	});
 	add_bind(212, "Strafe Right", "StrafeRight", key_category::Movement, [](int key_down) {
-		if (!key_down && *Zeal::EqGame::strafe_direction == strafe_direction::Right)
+		if (!key_down)
 			set_strafe(strafe_direction::None);
-		else if (key_down)
+		else
 			set_strafe(strafe_direction::Right);
 	});
 	add_bind(213, "Cycle through nearest NPCs", "CycleTargetNPC", key_category::Target, [](int key_down) {
