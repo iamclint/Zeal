@@ -58,6 +58,7 @@ namespace Zeal
 			static mem::function<int __fastcall(int t, int unk, int key, int type)> readKeyMapFromIni = 0x525520;
 			static mem::function<void __cdecl(int _char, int item, int)> auto_inventory = 0x4F0EEB;
 			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;
+			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_say = 0x4f8172;
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
 		//// Wrapper function to call CXStr_PrintString
@@ -97,5 +98,7 @@ namespace Zeal
 		bool is_targetable(Zeal::EqStructures::Entity* ent);
 		bool is_in_game();
 		void change_stance(Stance new_stance);
+		void do_say(bool hide_local, const char* format, ...);
+		void do_say(bool hide_local, std::string data);
 	}
 }

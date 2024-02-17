@@ -134,11 +134,62 @@ namespace Zeal
 			}
 			return rval;
 		}
+
+		std::vector<std::string> splitStringByNewLine(const std::string& str) {
+			std::vector<std::string> tokens;
+			std::istringstream iss(str);
+			std::string token;
+
+			while (std::getline(iss, token, '\n')) {
+				tokens.push_back(token);
+			}
+
+			return tokens;
+		}
+
+		void do_say(bool hide_local, const char* format, ...)
+		{
+			byte* orig=0;
+			if (hide_local)
+			{
+				orig = mem::mem_set(0x538672, 0x90, 13);
+			}
+
+			va_list argptr;
+			char buffer[512];
+			va_start(argptr, format);
+			//printf()
+			vsnprintf(buffer, 511, format, argptr);
+			va_end(argptr);
+
+			EqGameInternal::do_say(get_self(), buffer);
+
+			if (hide_local && orig)
+			{
+				mem::copy(0x538672, orig, 13);
+				delete orig;
+			}
+
+		}
+		void do_say(bool hide_local, std::string data)
+		{
+			byte* orig=0;
+			if (hide_local)
+				orig = mem::mem_set(0x4f828b, 0x90, 13);
+
+			EqGameInternal::do_say(get_self(), data.c_str());
+
+			if (hide_local && orig)
+			{
+				mem::copy(0x4f828b, orig, 13);
+				delete orig;
+			}
+		}
 		void print_chat(std::string data)
 		{
-			std::string msg = "[ZEAL] " + std::string(data);
-
-			EqGameInternal::print_chat(*(int*)0x809478, 0, msg.c_str(), 5, false);
+			std::vector<std::string> vd = splitStringByNewLine(data);
+			for (auto& d : vd)
+				EqGameInternal::print_chat(*(int*)0x809478, 0, d.c_str(), 0, false);
 		}
 		void print_chat(const char* format, ...)
 		{

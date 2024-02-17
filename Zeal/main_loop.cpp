@@ -27,5 +27,5 @@ void MainLoop::add_callback(std::function<void()> callback_function)
 
 MainLoop::MainLoop(ZealService* zeal)
 {
-	zeal->hooks->Add("main_loop", Zeal::EqGame::EqGameInternal::fn_main_loop, main_loop_hk, hook_type_detour, 9);
+	zeal->hooks->Add("main_loop", Zeal::EqGame::EqGameInternal::fn_main_loop, main_loop_hk, hook_type_detour);
 }

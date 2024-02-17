@@ -282,9 +282,9 @@ CameraMods::CameraMods(ZealService* zeal)
     mem::write<byte>(0x53fa50, 03); //change strafe 
     mem::write<byte>(0x53f648, 03);
     zeal->main_loop_hook->add_callback([this]() { callback_main();  });
-	zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour, 6);
-    zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour, 10);
-    zeal->hooks->Add("ProcessControls", 0x53f337, ProcessControls, hook_type_detour, 9);
+	zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
+    zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
+    zeal->hooks->Add("ProcessControls", 0x53f337, ProcessControls, hook_type_detour);
     //std::thread test([]() {
     //    mem::mem_set(0x5243D5, 0x90, 5);//processmousevent
     //    mem::mem_set(0x524392, 0x90, 5); //processmousevent

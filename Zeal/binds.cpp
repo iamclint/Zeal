@@ -156,6 +156,6 @@ Binds::Binds(ZealService* zeal)
 	mem::write(0x42C52F, (byte)0xEB); //remove the check for max index of 116 being stored in client ini
 	mem::write(0x52485A, (int)256); //increase this for loop to look through all 256
 	mem::write(0x52591C, (int)(Zeal::EqGame::ptr_AlternateKeyMap + (256 * 4))); //fix another for loop to loop through all 256
-	zeal->hooks->Add("initbinds", Zeal::EqGame::EqGameInternal::fn_initkeyboardassignments, InitKeyboardAssignments, hook_type_detour, 6);
+	zeal->hooks->Add("initbinds", Zeal::EqGame::EqGameInternal::fn_initkeyboardassignments, InitKeyboardAssignments, hook_type_detour);
 	zeal->hooks->Add("executecmd", Zeal::EqGame::EqGameInternal::fn_executecmd, ExecuteCmd, hook_type_detour);
 }

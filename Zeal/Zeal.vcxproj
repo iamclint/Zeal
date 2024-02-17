@@ -182,6 +182,7 @@
     <ClCompile Include="experience.cpp" />
     <ClCompile Include="FindPattern.cpp" />
     <ClCompile Include="hook_wrapper.cpp" />
+    <ClCompile Include="InstructionLength.h" />
     <ClCompile Include="labels.cpp" />
     <ClCompile Include="looting.cpp" />
     <ClCompile Include="main_loop.cpp" />

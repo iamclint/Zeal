@@ -149,6 +149,9 @@
     <ClCompile Include="cycle_target.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
+    <ClCompile Include="InstructionLength.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Zeal.rc">
