@@ -91,13 +91,13 @@ void Binds::add_binds()
 		{
 			set_strafe(strafe_direction::None);
 		}
-		else
+		else if (key_down)
 			set_strafe(strafe_direction::Left);
 	});
 	add_bind(212, "Strafe Right", "StrafeRight", key_category::Movement, [](int key_down) {
 		if (!key_down && *Zeal::EqGame::strafe_direction == strafe_direction::Right)
 			set_strafe(strafe_direction::None);
-		else
+		else if (key_down)
 			set_strafe(strafe_direction::Right);
 	});
 	add_bind(213, "Cycle through nearest NPCs", "CycleTargetNPC", key_category::Target, [](int key_down) {

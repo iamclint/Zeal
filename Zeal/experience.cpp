@@ -21,6 +21,8 @@ void Experience::check_reset()
 	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 	static int zone_id = self->ZoneId;
 	static int prev_level = 0;
+	if (exp_per_hour_pct_tot < 0)
+		ExpInfo.clear();
 
 	if (self->Level != prev_level) //level up or delevel
 		ExpInfo.clear();
