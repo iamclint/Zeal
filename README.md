@@ -2,11 +2,13 @@
 QOL tool for the takp client
 
 <b>Commands</b>
-/autoinventory (/autoinv, /ai)  [takes whats on your cursor and inventories it]
-/hidecorpse looted  (/hc, /hideco) [hides a corpse after you have looted it]
+/autoinventory  [takes whats on your cursor and inventories it]
+/hidecorpse looted  [hides a corpse after you have looted it]
 /smoothing [toggles zeals mouse look smoothing methods]
 /camp [auto sits]
-
+/sll [shows you your current loot lockouts on quarm]  
+/help zeal [shows the custom zeal commands]
+  
 <b>Binds</b>
 Cycle through nearest NPCs 
 Cycle through nearest PCs
