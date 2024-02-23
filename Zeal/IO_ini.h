@@ -18,6 +18,17 @@ private:
 public:
     IO_ini(const std::string& filename) : filename(filename) {   };
 
+    bool exists(const std::string& section, const std::string& key) const {
+        char buffer[256];
+        DWORD bytesRead = GetPrivateProfileStringA(section.c_str(), key.c_str(), "", buffer, sizeof(buffer), filename.c_str());
+
+        if (bytesRead == 0) {
+            return false;
+        }
+        return true;
+    }
+
+
     template<typename T>
     T getValue(const std::string& section, const std::string& key) const {
         char buffer[256];

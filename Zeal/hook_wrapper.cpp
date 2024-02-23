@@ -55,7 +55,7 @@ void hook::detour(int addr, int dest)
 
 		// If there are more than 5 bytes of original instructions, fill the gap with NOPs
 		if (orig_byte_count > 5)
-			mem::mem_set(addr + 5, 0x90, orig_byte_count - 5);
+			mem::set(addr + 5, 0x90, orig_byte_count - 5);
 	}
 	
 }

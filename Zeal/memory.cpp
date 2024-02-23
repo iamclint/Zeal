@@ -99,34 +99,31 @@ namespace mem
 		if (protections[target].size)
 			VirtualProtect((PVOID*)target, protections[target].size, protections[target].orig, nullptr);
 	}
-	byte* mem_set(int target, int val, int size)
+	void set(int target, int val, int size, BYTE* buffer)
 	{
 		DWORD oldprotect;
-		byte* x = new byte[size];
-
 		VirtualProtect((PVOID*)target, size, PAGE_EXECUTE_READWRITE, &oldprotect);
-		memcpy(x, (void*)target, size);
+		if (buffer)
+			memcpy(buffer, (void*)target, size);
 		memset((void*)target, val, size);
 		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
-		return x;
 	}
-	byte* copy(int target, byte* source, int size)
+	void copy(int target, byte* source, int size, BYTE* buffer)
 	{
 		DWORD oldprotect;
-		byte* x = new byte[size];
 		VirtualProtect((PVOID*)target, size, PAGE_EXECUTE_READWRITE, &oldprotect);
-		memcpy((void*)x, (const void*)target, size);
+		if (buffer)
+			memcpy((void*)buffer, (const void*)target, size);
 		memcpy((void*)target, (const void*)source, size);
 		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
-		return x;
 	}
-	byte* mem_get(int target, int size)
+	void get(int target, int size, BYTE* buffer)
 	{
+		if (!buffer)
+			return;
 		DWORD oldprotect;
-		byte* x = new byte[size];
 		VirtualProtect((PVOID*)target, size, PAGE_EXECUTE_READWRITE, &oldprotect);
-		memcpy((void*)x, (const void*)target, size);
+		memcpy((void*)buffer, (const void*)target, size);
 		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
-		return x;
 	}
 }

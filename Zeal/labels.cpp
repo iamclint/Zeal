@@ -4,6 +4,13 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 
+void default_empty(Zeal::EqStructures::CXSTR* str, int* unk, ULONG* color)
+{
+	*unk = 1;
+	*color = 0xffc0c0c0;
+	Zeal::EqGame::CXStr_PrintString(str, "");
+}
+
 
 bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG* color)
 {
@@ -24,6 +31,25 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG*
 		Zeal::EqGame::CXStr_PrintString(str, "%.f", zeal->experience->exp_per_hour_pct_tot);
 		*unk = 1;
 		*color = 0xffc0c0c0;
+		return true;
+	}
+	case 82:
+	{
+		Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
+		if (target && target->PetOwnerSpawnId > 0)
+		{
+			Zeal::EqStructures::Entity* owner = Zeal::EqGame::get_entity_by_id(target->PetOwnerSpawnId);
+			if (owner)
+			{
+				Zeal::EqGame::CXStr_PrintString(str, "%s", owner->Name);
+				*unk = 1;
+				*color = 0xffc0c0c0;
+			}
+		}
+		else
+		{
+			default_empty(str, unk, color);
+		}
 		return true;
 	}
 	default:

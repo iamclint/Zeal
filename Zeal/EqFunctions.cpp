@@ -29,6 +29,11 @@ namespace Zeal
 			return actor_loc;
 		}
 
+		bool game_wants_input()
+		{
+			return EqGameInternal::UI_ChatInputCheck();
+		}
+
 		void get_camera_location()
 		{
 			DWORD addr = *(DWORD*)0x7f99d4; //game pointer to function
@@ -46,21 +51,44 @@ namespace Zeal
 				pop ecx
 			}
 		}
+		Vec3 get_ent_head_pos(Zeal::EqStructures::Entity* ent)
+		{
+			Vec3 head_pos = ent->Position;
+			head_pos.z += ent->Height;
+			return head_pos;
+		}
+		Vec3 get_player_head_pos()
+		{
+			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+			Vec3 head_pos = self->Position;
+			head_pos.z += (self->CameraHeightOffset - self->ModelHeightOffset); //standing
+			if (self->StandingState == Stance::Duck || self->StandingState == Stance::Sit)
+				head_pos.z -= self->Height/3;// self->CameraHeightOffset - self->ModelHeightOffset;
+			else if (self->StandingState!=Stance::Stand)
+				head_pos.z = self->Position.z;
+			return head_pos;
+		}
 
-		bool s3dCollideSphereWithWorld(EqStructures::ActorLocation& acp)
+		bool is_in_character_select()
+		{
+			return *(int*)0x63d5d8!=0;
+		}
+
+		bool CollideWithWorld(Vec3 start, Vec3 end, Vec3& result, char collision_type, bool debug)
 		{
 			DWORD disp = *(int*)Zeal::EqGame::Display;
-			DWORD addr = 0x4b3c45;
-			float c_x = *(float*)(disp + 0x1c);
-			float c_y = *(float*)(disp + 0x20);
-			float c_z = *(float*)(disp + 0x24);
+			char x = EqGameInternal::s3dCollideSphereWithWorld(disp, 0, start.x, start.y, start.z, end.x, end.y, end.z, (float*)&result.x, (float*)&result.y, (float*)&result.z, collision_type);
 
-			char x = EqGameInternal::s3dCollideSphereWithWorld(disp, 0, c_x, c_y, c_z + 5.0, acp.Position.x, acp.Position.y, acp.Position.z + 5, nullptr, nullptr, nullptr, 0x3);
-			return x==0;
+			if (debug)
+			{
+				print_chat("start: %s  end: %s dist: %f result: %i", start.toString().c_str(), end.toString().c_str(), result.Dist(end), x);
+			}
+			return result.Dist(end)>0.1; //return true if there was a collision
 		}
 
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable)
 		{
+			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 			get_camera_location();
 			DWORD disp = *(int*)Zeal::EqGame::Display;
 			int ent_count = 0;
@@ -87,27 +115,39 @@ namespace Zeal
 			}
 			int* cObject = *(int**)(disp + 0x2CDC);
 			Zeal::EqStructures::Entity* current_ent;
+			
 			std::vector<Zeal::EqStructures::Entity*> rEnts;
 			for (int i = 0; i < ent_count; i++)
 			{
 				if (*cObject)
 				{
-					bool add_to_list = true;
+					bool add_to_list = !only_targetable;
 					current_ent = *(Zeal::EqStructures::Entity**)(*cObject + 0x60);
 					if (current_ent && current_ent->Position.Dist2D(Zeal::EqGame::get_self()->Position)<= mdist)
 					{
 						if (only_targetable)
 						{
-							Zeal::EqStructures::ActorLocation aloc = get_actor_location((int)*cObject);
-							bool x = s3dCollideSphereWithWorld(aloc);
-							if (!x)
+							Vec3 result;
+							Vec3 ent_head = get_ent_head_pos(current_ent);
+							Vec3 my_head = self->Position;
+							my_head.z += self->Height;
+							std::vector<std::pair<Vec3, Vec3>> collision_checks =
 							{
-								aloc.Position.z += 10;
-								x = s3dCollideSphereWithWorld(aloc);
-								if (!x)
-									add_to_list = false;
+								{my_head, ent_head}, //face to face
+								{my_head, current_ent->Position}, //your face to their feet
+								{self->Position, current_ent->Position}, //your feet to their feet
+								{self->Position, ent_head}, //your feet to their face
+							};
+						
+							for (int i = 0; auto& [pos1, pos2] : collision_checks)
+							{
+								if (!CollideWithWorld(pos1, pos2, result, 0x3, false)) //had no collision
+								{
+									add_to_list = true;
+									break; //we don't really care which version of this had no world collision so break the for loop
+								}
+								i++;
 							}
-							
 						}
 						if (current_ent != EqGame::get_self() && !current_ent->IsHidden && current_ent->HpCurrent > 0 && add_to_list)
 							rEnts.push_back(current_ent);
@@ -149,11 +189,9 @@ namespace Zeal
 
 		void do_say(bool hide_local, const char* format, ...)
 		{
-			byte* orig=0;
+			byte orig[13] = {0};
 			if (hide_local)
-			{
-				orig = mem::mem_set(0x538672, 0x90, 13);
-			}
+				mem::set(0x538672, 0x90, 13, orig);
 
 			va_list argptr;
 			char buffer[512];
@@ -167,22 +205,20 @@ namespace Zeal
 			if (hide_local && orig)
 			{
 				mem::copy(0x538672, orig, 13);
-				delete orig;
 			}
 
 		}
 		void do_say(bool hide_local, std::string data)
 		{
-			byte* orig=0;
+			byte orig[13] = {0};
 			if (hide_local)
-				orig = mem::mem_set(0x4f828b, 0x90, 13);
+				mem::set(0x4f828b, 0x90, 13, orig);
 
 			EqGameInternal::do_say(get_self(), data.c_str());
 
 			if (hide_local && orig)
 			{
 				mem::copy(0x4f828b, orig, 13);
-				delete orig;
 			}
 		}
 		void print_chat(std::string data)
@@ -263,15 +299,13 @@ namespace Zeal
 		{
 			return *Zeal::EqGame::mouse_hover_window!=0;
 		}
-		int set_camera_position(Zeal::EqStructures::CameraSetting pos)
-		{
-			static mem::function<int __fastcall(int* t, int unk, int disp_4, int disp_8, Zeal::EqStructures::CameraSetting* pos)> SetCameraLocation = *(int*)Zeal::EqGame::EqGameInternal::fn_s_t3dSetCameraLocation;
-			int display = *(int*)Zeal::EqGame::Display;
-			if (pos.Heading==0)
-				return SetCameraLocation(get_display(), 0, *(int*)(display + 4), *(int*)(display + 8), *(Zeal::EqStructures::CameraSetting**)(display + 0x1C));
-			else
-				return SetCameraLocation(get_display(), 0, *(int*)(display + 4), *(int*)(display + 8), &pos);
-		}
+	
+		//void set_camera_position(Vec3* pos)
+		//{
+		//	int cam_position_ptr = *(int*)((*(int*)Zeal::EqGame::Display) + 0x8);
+		//	Vec3* cam_pos = (Vec3*)(cam_position_ptr) + 0xC);
+		//	*cam_pos = *pos;
+		//}
 
 		void CXStr_PrintString(Zeal::EqStructures::CXSTR* str, const char* format, ...)
 		{
@@ -434,14 +468,7 @@ namespace Zeal
 		void change_stance(Stance new_stance)
 		{
 			if (Self->StandingState != (BYTE)new_stance)
-			{
-				//print_chat("Current Stance 0x%x   New Stance 0x%x", Self->StandingState, new_stance);
-				EqGameInternal::change_stance(get_self(), 0, new_stance);
-			}
-			else
-			{
-				//print_chat("Cannot change to new stance as its already your stance");
-			}
+				EqGameInternal::change_stance(get_self(), 0, new_stance); //EQPlayer::ChangePosition
 		}
 	}
 }

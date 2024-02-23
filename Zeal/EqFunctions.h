@@ -69,11 +69,12 @@ namespace Zeal
 		//	va_end(args);
 		//	return result;
 		//}
-
+		bool is_in_char_select();
+		bool game_wants_input(); //returns true if the game wants text input so it doesn't run binds
 		void CXStr_PrintString(Zeal::EqStructures::CXSTR* str, const char* format, ...);
-
+		Vec3 get_player_head_pos();
 		inline Zeal::EqStructures::GuildName* guild_names = (Zeal::EqStructures::GuildName*)0x7F9C94;
-		bool s3dCollideSphereWithWorld(EqStructures::ActorLocation& acp);
+		bool CollideWithWorld(Vec3 start, Vec3 end, Vec3& result, char collision_type = 0x3, bool debug = false);
 		void get_camera_location();
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable = true);
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor);
@@ -89,7 +90,7 @@ namespace Zeal
 		Zeal::EqStructures::CameraInfo* get_camera();
 		Zeal::EqStructures::Entity* get_entity_by_id(short id);
 		Zeal::EqStructures::Entity* get_entity_by_parent_id(short parent_id);
-		int set_camera_position(Zeal::EqStructures::CameraSetting pos);
+		//void set_camera_position(Vec3* pos);
 		int* get_display();
 		float heading_to_yaw(float heading);
 		bool is_mouse_hovering_window();
