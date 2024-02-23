@@ -22,4 +22,11 @@ Auto Inventory
 <b>Label Types</b>
 80 Mana/Max Mana 
 81 Exp Per Hour Percentage 
+
+<b>Building</b>
+32bit x86
+file extension .asi
+
+<b>Installation</b>
+move zeal.asi into the root of your game folder
 </pre>
