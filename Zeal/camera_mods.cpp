@@ -206,6 +206,8 @@ void CameraMods::set_smoothing(bool val)
 {
     smoothing = val;
     ZealService::get_instance()->ini->setValue<bool>("Zeal", "MouseSmoothing", smoothing);
+    if (!smoothing)
+        toggle_zeal_cam(false);
 }
 
 void CameraMods::callback_main()
