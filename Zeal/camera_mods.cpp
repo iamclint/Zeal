@@ -112,6 +112,7 @@ void CameraMods::toggle_zeal_cam(bool enabled)
     }
     else if (original_cam[0] != 0x0)
     {
+        current_zoom = 0;
         *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
         mem::copy(0x4db8ce, original_cam, 6);
     }
@@ -170,6 +171,9 @@ void CameraMods::proc_mouse()
             delta->y = 0;
             delta->x = 0;
 
+            if (*(byte*)0x7985E8)
+                smoothMouseDeltaY = -smoothMouseDeltaY;
+
             if (fabs(smoothMouseDeltaX) > 0.1)
                 self->MovementSpeedHeading = -smoothMouseDeltaX;
             else
@@ -221,8 +225,6 @@ void CameraMods::callback_main()
         fps = 1000.0 / elapsedTime;
     }
 
-    
-
     sensitivity_x = .7 * (fps / 144.f);
     sensitivity_y = .3 * (fps / 144.f);
 
@@ -231,13 +233,13 @@ void CameraMods::callback_main()
     sensitivity_x *= multiplier;
     sensitivity_y *= multiplier;
     lastTime = currentTime;
-    if (!*Zeal::EqGame::is_right_mouse_down && Zeal::EqGame::is_in_game())
+    if (!*Zeal::EqGame::is_right_mouse_down && Zeal::EqGame::is_in_game() && smoothing)
     {
         if (*Zeal::EqGame::camera_view == zeal_cam)
             update_cam();
     }
-    if (!Zeal::EqGame::is_in_game())
-        reset_cam();
+    //if (!Zeal::EqGame::is_in_game())
+    //    reset_cam();
 }
 
 void CameraMods::reset_cam()
