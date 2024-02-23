@@ -21,8 +21,6 @@ ZealService::ZealService()
 
 	if (!ini->exists("Zeal", "MouseSmoothing"))
 		ini->setValue<bool>("Zeal", "MouseSmoothing", true);
-	if (!ini->exists("Zeal", "HideLooted"))
-		ini->setValue<bool>("Zeal", "HideLooted", true);
 	//load settings from eqclient.ini
 	camera_mods->smoothing = ini->getValue<bool>("Zeal", "MouseSmoothing");
 	looting_hook->hide_looted = ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
