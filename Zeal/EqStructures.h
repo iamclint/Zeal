@@ -186,9 +186,28 @@ namespace Zeal
 			/* ...... */
 		} EQITEMINFO, * PEQITEMINFO;
 
+		struct ViewActor
+		{
+			/* 0x0000 */ DWORD Unknown0000;
+			/* 0x0004 */ DWORD Unknown0004;
+			/* 0x0008 */ DWORD Unknown0008;
+			/* 0x000C */ DWORD Unknown000C;
+			/* 0x0010 */ Vec3 Position;
+			/* 0x001C */ DWORD Unknown001C;
+			/* 0x0020 */ DWORD Unknown0020;
+			/* 0x0024 */ DWORD Unknown0024;
+			/* 0x0028 */ DWORD RegionNumber;
+			/* 0x002C */ struct _EQACTORCOLLISIONINFO* CollisionInfo;
+			/* 0x0030 */ DWORD Unknown0030;
+			/* 0x0034 */ FLOAT ScaleFactor;
+			/* 0x0038 */ FLOAT BoundingRadius;
+			/* 0x003C */ BYTE Unknown003C[36];
+			/* 0x0060 */ struct Entity* Entity;
+		};
+
 		struct ActorInfo
 		{
-			/* 0x0000 */ struct _EQACTORINSTANCEINFO* ActorInstance;
+			/* 0x0000 */ ViewActor* ViewActor_;
 			/* 0x0004 */ struct _EQLIGHTINFO* LightInfo; // PointLight
 			/* 0x0008 */ char ActorDef[64]; // xxx_ACTORDEF string (HUM_ACTORDEF, ELM_ACTORDEF, etc)
 			/* 0x0048 */ FLOAT Z;

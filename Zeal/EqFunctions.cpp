@@ -69,6 +69,49 @@ namespace Zeal
 			return head_pos;
 		}
 
+		Zeal::EqStructures::ViewActor* get_view_actor()
+		{
+			Zeal::EqStructures::ViewActor* v = *(Zeal::EqStructures::ViewActor**)Zeal::EqGame::ViewActor;
+			return v;
+		}
+
+		Zeal::EqStructures::Entity* get_view_actor_entity()
+		{
+			return get_view_actor()->Entity;
+		}
+
+		bool is_view_actor_me()
+		{
+			if (get_self() && get_self()->ActorInfo)
+			{
+				int my_view_actor = (int)get_self()->ActorInfo->ViewActor_;
+				if ((int)get_view_actor()== my_view_actor)
+					return true;
+			}
+			return false;
+		}
+
+
+
+
+		Vec3 get_view_actor_head_pos()
+		{
+			if (get_view_actor())
+			{
+				Zeal::EqStructures::Entity* self = get_view_actor()->Entity;
+				Vec3 head_pos = self->Position;
+				head_pos.z += (self->CameraHeightOffset - self->ModelHeightOffset); //standing
+				if (self->StandingState == Stance::Duck || self->StandingState == Stance::Sit)
+					head_pos.z -= self->Height / 3;// self->CameraHeightOffset - self->ModelHeightOffset;
+				else if (self->StandingState != Stance::Stand)
+					head_pos.z = self->Position.z;
+				return head_pos;
+			}
+			else
+			{
+				return { 0,0,0 };
+			}
+		}
 		bool is_in_character_select()
 		{
 			return *(int*)0x63d5d8!=0;

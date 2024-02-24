@@ -14,7 +14,8 @@ bool can_move()
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     if (!self || !self->CharInfo)
         return false;
-
+    if (!Zeal::EqGame::is_view_actor_me())
+        return false;
     if (self->CharInfo->StunnedState)
         return false;
     if (self->StandingState == Zeal::EqEnums::Stance::Standing || self->StandingState == Zeal::EqEnums::Stance::Ducking)
@@ -65,9 +66,11 @@ Vec3 calculatePositionBehind(const Vec3& playerHead, float distance, float playe
 
 bool CameraMods::update_cam()
 {
-    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_view_actor_entity();
+    if (!self)
+        return false;
     Zeal::EqStructures::CameraInfo* cam = Zeal::EqGame::get_camera();
-    Vec3 head_pos = Zeal::EqGame::get_player_head_pos();
+    Vec3 head_pos = Zeal::EqGame::get_view_actor_head_pos();
     Vec3 wanted_pos = calculatePositionBehind(head_pos, current_zoom, self->Heading, -zeal_cam_pitch);
     bool rval = Zeal::EqGame::collide_with_world(head_pos, wanted_pos, wanted_pos);
     cam->Position = wanted_pos;
@@ -190,8 +193,11 @@ void CameraMods::proc_mouse()
                 }
                 else
                 {
-                    self->Pitch -= smoothMouseDeltaY / 2.f;
-                    self->Pitch = std::clamp(self->Pitch, -89.9f, 89.9f);
+                    if (Zeal::EqGame::is_view_actor_me())
+                    {
+                        self->Pitch -= smoothMouseDeltaY / 2.f;
+                        self->Pitch = std::clamp(self->Pitch, -89.9f, 89.9f);
+                    }
                 }
             }
         }
@@ -261,6 +267,18 @@ void _fastcall doCharacterSelection(int t, int u)
     zeal->hooks->hook_map["DoCharacterSelection"]->original(doCharacterSelection)(t, u);
 }
 
+//void __fastcall SetInitialCameraLocation(int t, int unused, Zeal::EqStructures::ActorInfo* view_actor)
+//{
+//    ZealService* zeal = ZealService::get_instance();
+//    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+//    if (view_actor)
+//    {
+//        if (self && self->ActorInfo)
+//        Zeal::EqGame::print_chat("View actor changed to 0x%x  0x%x", view_actor, (int)self->ActorInfo->ViewActor_);
+//    }
+//    zeal->hooks->hook_map["SetInitialCameraLocation"]->original(SetInitialCameraLocation)(t, unused, view_actor);
+//}
+
 CameraMods::CameraMods(ZealService* zeal)
 {
     mem::write<byte>(0x53fa50, 03); //allow for strafing whenever in zeal cam
@@ -273,6 +291,7 @@ CameraMods::CameraMods(ZealService* zeal)
 	zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("DoCharacterSelection", 0x53b9cf, doCharacterSelection, hook_type_detour);
+   // zeal->hooks->Add("SetInitialCameraLocation", 0x4ac9f7, SetInitialCameraLocation, hook_type_detour);
 }
 
 CameraMods::~CameraMods()

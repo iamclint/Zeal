@@ -74,12 +74,15 @@ namespace Zeal
 		bool game_wants_input(); //returns true if the game wants text input so it doesn't run binds
 		void CXStr_PrintString(Zeal::EqStructures::CXSTR* str, const char* format, ...);
 		Vec3 get_player_head_pos();
+		Vec3 get_view_actor_head_pos();
+		Zeal::EqStructures::Entity* get_view_actor_entity();
 		inline Zeal::EqStructures::GuildName* guild_names = (Zeal::EqStructures::GuildName*)0x7F9C94;
 		bool collide_with_world(Vec3 start, Vec3 end, Vec3& result, char collision_type = 0x3, bool debug = false);
 		void get_camera_location();
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable = true);
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor);
 		bool can_target(Zeal::EqStructures::Entity* ent);
+		bool is_view_actor_me();
 		void print_chat(std::string data);
 		void print_chat(const char* format, ...);
 		void print_chat_zeal(const char* data, short color, bool un);
