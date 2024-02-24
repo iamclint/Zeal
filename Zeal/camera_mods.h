@@ -23,13 +23,13 @@ public:
 	void update_zoom(float zoom);
 	void toggle_zeal_cam(bool enabled);
 	void proc_mouse();
-	void reset_cam();
 	WNDPROC prev_wndproc;
 	HWND game_hwnd;
 	CameraMods(class ZealService* pHookWrapper);
 	~CameraMods();
 private:
-
+	void RegisterRawInput();
+	bool shutting_down = false;
 	Vec2 previous_mouse_pos;
 	Vec2 mouse_delta;
 	BYTE original_cam[6] = { 0 };

@@ -64,18 +64,11 @@ Vec3 calculatePositionBehind(const Vec3& playerHead, float distance, float playe
 
     return positionBehind;
 }
-
 bool CameraMods::update_cam()
 {
-    if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::FirstPerson && *(byte*)0x4db8ce == 0x90)
-    {
-        toggle_zeal_cam(false);
-    }
-    if (*Zeal::EqGame::camera_view == zeal_cam && *(byte*)0x4db8ce != 0x90)
-    {
-        toggle_zeal_cam(true);
-        current_zoom = zoom_speed*4;
-    }
+    if (!smoothing)
+        return false;
+    
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_view_actor_entity();
     if (!self)
         return false;
@@ -122,13 +115,14 @@ void CameraMods::toggle_zeal_cam(bool enabled)
     {
         *Zeal::EqGame::camera_view = zeal_cam;
         zeal_cam_pitch = self->Pitch;
-        mem::set(0x4db8ce, 0x90, 6, original_cam); //nop the games camera animation
+        mem::set(0x4db8ce, 0x90, 6, original_cam[0] == 0x0 ? original_cam : 0);
     }
     else if (original_cam[0] != 0x0)
     {
         self->Pitch = zeal_cam_pitch;
         current_zoom = 0;
-        *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
+        if (*Zeal::EqGame::camera_view==zeal_cam)
+            *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
         mem::copy(0x4db8ce, original_cam, 6);
     }
 }
@@ -164,7 +158,7 @@ int handle_mouse_wheel(int delta)
 void CameraMods::proc_mouse()
 {
 
-    if (smoothing) //maybe add some setting to toggle this feature on and off
+    if (smoothing && (*Zeal::EqGame::camera_view == zeal_cam || *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::FirstPerson)) //maybe add some setting to toggle this feature on and off
     {
         static float smoothMouseDeltaX = 0;
         static float smoothMouseDeltaY = 0;
@@ -180,6 +174,9 @@ void CameraMods::proc_mouse()
             float delta_x = delta->x;
             smoothMouseDeltaX = Smooth(delta_x * sensitivity_x, smoothMouseDeltaX);
             smoothMouseDeltaY = Smooth(delta_y * sensitivity_y, smoothMouseDeltaY);
+            if (fabs(smoothMouseDeltaX) > 5)
+                smoothMouseDeltaY /= 2;
+            ZealService::get_instance()->labels_hook->print_debug_info("delta x %f  delta y %f", smoothMouseDeltaX, smoothMouseDeltaY);
             delta->y = 0;
             delta->x = 0;
 
@@ -240,6 +237,17 @@ void CameraMods::set_smoothing(bool val)
 
 void CameraMods::callback_main()
 {
+    static int prev_view = *Zeal::EqGame::camera_view;
+    if (prev_view != *Zeal::EqGame::camera_view && smoothing)
+    {
+        if (*Zeal::EqGame::camera_view != zeal_cam)
+            toggle_zeal_cam(false);
+        else
+        {
+            toggle_zeal_cam(true);
+            current_zoom = zoom_speed*4;
+        }
+    }
     Zeal::EqStructures::CameraInfo* cam = Zeal::EqGame::get_camera();
     if (!cam)
         return;
@@ -262,40 +270,21 @@ void CameraMods::callback_main()
         if (*Zeal::EqGame::camera_view == zeal_cam)
             update_cam();
     }
-    //if (!Zeal::EqGame::is_in_game())
-    //    reset_cam();
+    prev_view = *Zeal::EqGame::camera_view;
 }
 
-void CameraMods::reset_cam()
-{
-    if (original_cam && *(BYTE*)0x4db8ce == 0x90)
-    {
-        *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
-        mem::copy(0x4db8ce, (BYTE*)original_cam, 6); //re-enable games camera movement
-    }
-}
 void _fastcall doCharacterSelection(int t, int u)
 {
     ZealService* zeal = ZealService::get_instance();
-    zeal->camera_mods->reset_cam();
+    zeal->camera_mods->toggle_zeal_cam(false);
     zeal->hooks->hook_map["DoCharacterSelection"]->original(doCharacterSelection)(t, u);
 }
-
-//void __fastcall SetInitialCameraLocation(int t, int unused, Zeal::EqStructures::ActorInfo* view_actor)
-//{
-//    ZealService* zeal = ZealService::get_instance();
-//    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-//    if (view_actor)
-//    {
-//        if (self && self->ActorInfo)
-//        Zeal::EqGame::print_chat("View actor changed to 0x%x  0x%x", view_actor, (int)self->ActorInfo->ViewActor_);
-//    }
-//    zeal->hooks->hook_map["SetInitialCameraLocation"]->original(SetInitialCameraLocation)(t, unused, view_actor);
-//}
 
 
 CameraMods::CameraMods(ZealService* zeal)
 {
+    
+  //  RegisterRawInput();
     mem::write<byte>(0x53fa50, 03); //allow for strafing whenever in zeal cam
     mem::write<byte>(0x53f648, 03); //allow for strafing whenever in zeal cam
     smoothing = true;
@@ -311,5 +300,6 @@ CameraMods::CameraMods(ZealService* zeal)
 
 CameraMods::~CameraMods()
 {
-    reset_cam();
+//    SetWindowLongPtr(game_hwnd, GWLP_WNDPROC, (LONG_PTR)prev_wndproc);
+    toggle_zeal_cam(false);
 }
