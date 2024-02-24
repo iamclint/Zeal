@@ -35,6 +35,8 @@ public:
 	void add_binds();
 	void add_bind(int index, const char* name, const char* short_name, int category, std::function<void(int state)> callback);
 private:
+	void set_strafe(strafe_direction dir);
+	strafe_direction current_strafe=strafe_direction::None;
 	hook* hook;
 };
 

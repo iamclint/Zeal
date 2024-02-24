@@ -61,11 +61,12 @@ void Binds::read_ini()
 	}
 }
 
-void set_strafe(strafe_direction dir) 
+void Binds::set_strafe(strafe_direction dir) 
 {
 	//slightly revised so the game properly sets speed based on encumber and handles the stance checks
 	if (dir == strafe_direction::None)
 	{
+		current_strafe = strafe_direction::None;
 		ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x5, 0, 0);
 		ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x6, 0, 0);
 		mem::write<byte>(0x53F633, 0x75); //reset the jump to be conditional
@@ -76,9 +77,17 @@ void set_strafe(strafe_direction dir)
 		mem::write<byte>(0x53F633, 0xEB); //make this jump unconditional
 		mem::write<byte>(0x53FA3B, 0xEB);
 		if (dir == strafe_direction::Right)
+		{
+			current_strafe = strafe_direction::Right;
+			ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x6, 0, 0);
 			ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x5, 1, 0);
+		}
 		else
+		{
+			current_strafe = strafe_direction::Left;
+			ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x5, 0, 0);
 			ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x6, 1, 0);
+		}
 
 	}
 }
@@ -86,16 +95,16 @@ void set_strafe(strafe_direction dir)
 void Binds::add_binds()
 {
 	//just start binds at 211 to avoid overwriting any existing cmd/bind
-	add_bind(211, "Strafe Left", "StrafeLeft", key_category::Movement, [](int key_down) {
-		if (!key_down )
+	add_bind(211, "Strafe Left", "StrafeLeft", key_category::Movement, [this](int key_down) {
+		if (!key_down && current_strafe==strafe_direction::Left)
 			set_strafe(strafe_direction::None);
-		else
+		else if (key_down)
 			set_strafe(strafe_direction::Left);
 	});
-	add_bind(212, "Strafe Right", "StrafeRight", key_category::Movement, [](int key_down) {
-		if (!key_down)
+	add_bind(212, "Strafe Right", "StrafeRight", key_category::Movement, [this](int key_down) {
+		if (!key_down && current_strafe == strafe_direction::Right)
 			set_strafe(strafe_direction::None);
-		else
+		else if (key_down)
 			set_strafe(strafe_direction::Right);
 	});
 	add_bind(213, "Cycle through nearest NPCs", "CycleTargetNPC", key_category::Target, [](int key_down) {
