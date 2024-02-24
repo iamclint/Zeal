@@ -4,15 +4,15 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 
-void default_empty(Zeal::EqStructures::CXSTR* str, int* unk, ULONG* color)
+void default_empty(Zeal::EqStructures::CXSTR* str, bool* override_color, ULONG* color)
 {
-	*unk = 1;
+	*override_color = 1;
 	*color = 0xffc0c0c0;
 	Zeal::EqGame::CXStr_PrintString(str, "");
 }
 
 
-bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG* color)
+bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, bool* override_color, ULONG* color)
 {
 	ZealService* zeal = ZealService::get_instance();
 	switch (EqType)
@@ -22,15 +22,13 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG*
 		int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
 		int mana = Zeal::EqGame::EqGameInternal::get_cur_mana(*Zeal::EqGame::ptr_LocalPC, 0);
 		Zeal::EqGame::CXStr_PrintString(str, "%d/%d", mana, max_mana);
-		*unk = 1;
-		*color = 0xffc0c0c0;
+		*override_color = false;
 		return true;
 	}
 	case 81:
 	{
 		Zeal::EqGame::CXStr_PrintString(str, "%.f", zeal->experience->exp_per_hour_pct_tot);
-		*unk = 1;
-		*color = 0xffc0c0c0;
+		*override_color = false;
 		return true;
 	}
 	case 82:
@@ -42,13 +40,12 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG*
 			if (owner)
 			{
 				Zeal::EqGame::CXStr_PrintString(str, "%s", owner->Name);
-				*unk = 1;
-				*color = 0xffc0c0c0;
+				*override_color = false;
 			}
 		}
 		else
 		{
-			default_empty(str, unk, color);
+			default_empty(str, override_color, color);
 		}
 		return true;
 	}
@@ -56,22 +53,20 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG*
 	{
 		int mana = Zeal::EqGame::EqGameInternal::get_cur_mana(*Zeal::EqGame::ptr_LocalPC, 0);
 		Zeal::EqGame::CXStr_PrintString(str, "%d", mana);
-		*unk = 1;
-		*color = 0xffc0c0c0;
+		*override_color = false;
 		return true;
 	}
 	case 125:
 	{
 		int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
 		Zeal::EqGame::CXStr_PrintString(str, "%d", max_mana);
-		*unk = 1;
-		*color = 0xffc0c0c0;
+		*override_color = false;
 		return true;
 	}
 	default:
 		break;
 	}
-	return ZealService::get_instance()->hooks->hook_map["GetLabel"]->original(GetLabelFromEq)(EqType, str, unk, color);
+	return ZealService::get_instance()->hooks->hook_map["GetLabel"]->original(GetLabelFromEq)(EqType, str, override_color, color);
 }
 
 int GetGaugeFromEq(int EqType, Zeal::EqStructures::CXSTR* str)
