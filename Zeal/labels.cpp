@@ -52,6 +52,22 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, int* unk, ULONG*
 		}
 		return true;
 	}
+	case 124:
+	{
+		int mana = Zeal::EqGame::EqGameInternal::get_cur_mana(*Zeal::EqGame::ptr_LocalPC, 0);
+		Zeal::EqGame::CXStr_PrintString(str, "%d", mana);
+		*unk = 1;
+		*color = 0xffc0c0c0;
+		return true;
+	}
+	case 125:
+	{
+		int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
+		Zeal::EqGame::CXStr_PrintString(str, "%d", max_mana);
+		*unk = 1;
+		*color = 0xffc0c0c0;
+		return true;
+	}
 	default:
 		break;
 	}
