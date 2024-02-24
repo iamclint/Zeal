@@ -45,7 +45,7 @@ namespace Zeal
 			static mem::function<char __fastcall(int, int, float, float, float, float, float, float, float*, float*, float* , char) > s3dCollideSphereWithWorld = 0x4b3c45;
 			static mem::function<short __fastcall(int, int)> get_max_mana = 0x4B9483;
 			static mem::function<short __fastcall(int, int)> get_cur_mana = 0x4b9450;
-			static mem::function<int __stdcall(int, Vec3*)> t3dGetRegionNumberFromWorldAndXYZ = 0x0;
+			static mem::function<int __cdecl(int, Vec3*)> t3dGetRegionNumberFromWorldAndXYZ = 0x0;
 			static mem::function<short __fastcall(Zeal::EqStructures::Entity*,int unused, unsigned char)> change_stance = 0x50be3c;
 			static mem::function<void __fastcall(DWORD, int unused, DWORD)> ui_something = 0x536bae;
 			static mem::function<float __stdcall(float input_heading)> fix_heading = 0x4a2eed;

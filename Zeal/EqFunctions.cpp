@@ -75,9 +75,9 @@ namespace Zeal
 		}
 		int get_region_from_pos(Vec3* pos)
 		{
-			EqGameInternal::t3dGetRegionNumberFromWorldAndXYZ = mem::function<int __stdcall(int, Vec3*)>(*(int*)0x07f9a30);
+			EqGameInternal::t3dGetRegionNumberFromWorldAndXYZ = mem::function<int __cdecl(int, Vec3*)>(*(int*)0x07f9a30);
 			int rval = EqGameInternal::t3dGetRegionNumberFromWorldAndXYZ(*(int*)((*(int*)Zeal::EqGame::Display)+0x4), pos);
-			__asm pop ecx
+			
 			return rval;
 		}
 		bool collide_with_world(Vec3 start, Vec3 end, Vec3& result, char collision_type, bool debug)

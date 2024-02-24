@@ -73,7 +73,7 @@ bool CameraMods::update_cam()
     cam->Position = wanted_pos;
     cam->Heading = self->Heading;
     cam->Pitch = get_pitch(cam->Position, head_pos);
-    //cam->RegionNumber = Zeal::EqGame::get_region_from_pos(&cam->Position);
+    cam->RegionNumber = Zeal::EqGame::get_region_from_pos(&cam->Position);
     return rval;
 }
 
