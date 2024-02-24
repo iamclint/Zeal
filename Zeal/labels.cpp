@@ -63,6 +63,13 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, bool* override_c
 		*override_color = false;
 		return true;
 	}
+	case 255: //debug label
+	{
+		int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
+		Zeal::EqGame::CXStr_PrintString(str, "%s", ZealService::get_instance()->labels_hook->debug_info.c_str());
+		*override_color = false;
+		return true;
+	}
 	default:
 		break;
 	}
@@ -84,6 +91,21 @@ int GetGaugeFromEq(int EqType, Zeal::EqStructures::CXSTR* str)
 	}
 
 	return ZealService::get_instance()->hooks->hook_map["GetGauge"]->original(GetGaugeFromEq)(EqType, str);
+}
+
+void labels::print_debug_info(std::string data)
+{
+	debug_info = data;
+}
+void labels::print_debug_info(const char* format, ...)
+{
+	va_list argptr;
+	char buffer[512];
+	va_start(argptr, format);
+	//printf()
+	vsnprintf(buffer, 511, format, argptr);
+	va_end(argptr);
+	debug_info = buffer;
 }
 
 void labels::callback_main()

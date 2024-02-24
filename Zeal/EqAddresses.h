@@ -16,7 +16,8 @@ namespace Zeal
 		static int* ptr_PrimaryKeyMap = (int*)0x7CD84C;
 		static int* ptr_AlternateKeyMap = (int*)0x7CDC4C;
 		static BYTE* strafe_direction = (BYTE*)0x7985EB;
-		//static EqStructures::ControlledPlayer* _ControlledPlayer = (EqStructures::ControlledPlayer*)0x7f94e0;
+		static float* strafe_speed = (float*)0x799780;
+		static EqStructures::Entity* _ControlledPlayer = (EqStructures::Entity*)0x7f94e0;
 		static int* Display = (int*)0x7F9510;
 		static EqStructures::Cam* camera = (EqStructures::Cam*)0x799688;// 0x7996C0;
 		static bool* is_right_mouse_down = (bool*)0x7985ea;

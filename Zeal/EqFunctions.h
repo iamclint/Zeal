@@ -60,6 +60,7 @@ namespace Zeal
 			static mem::function<void __cdecl(int _char, int item, int)> auto_inventory = 0x4F0EEB;
 			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;
 			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_say = 0x4f8172;
+			static mem::function<float __fastcall(int, int)> encum_factor = 0x4bb9c7;
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
 		//// Wrapper function to call CXStr_PrintString
@@ -75,6 +76,7 @@ namespace Zeal
 		void CXStr_PrintString(Zeal::EqStructures::CXSTR* str, const char* format, ...);
 		Vec3 get_player_head_pos();
 		Vec3 get_view_actor_head_pos();
+		float encum_factor();
 		Zeal::EqStructures::Entity* get_view_actor_entity();
 		inline Zeal::EqStructures::GuildName* guild_names = (Zeal::EqStructures::GuildName*)0x7F9C94;
 		bool collide_with_world(Vec3 start, Vec3 end, Vec3& result, char collision_type = 0x3, bool debug = false);
@@ -91,6 +93,7 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_target();
 		Zeal::EqStructures::Entity* get_entity_list();
 		Zeal::EqStructures::Entity* get_self();
+		Zeal::EqStructures::Entity* get_controlled();
 		Zeal::EqStructures::CameraInfo* get_camera();
 		Zeal::EqStructures::Entity* get_entity_by_id(short id);
 		Zeal::EqStructures::Entity* get_entity_by_parent_id(short parent_id);

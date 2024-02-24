@@ -24,11 +24,13 @@ public:
 	void toggle_zeal_cam(bool enabled);
 	void proc_mouse();
 	void reset_cam();
+	WNDPROC prev_wndproc;
+	HWND game_hwnd;
 	CameraMods(class ZealService* pHookWrapper);
 	~CameraMods();
 private:
 
-	POINT previous_mouse_pos;
+	Vec2 previous_mouse_pos;
 	Vec2 mouse_delta;
 	BYTE original_cam[6] = { 0 };
 	std::chrono::steady_clock::time_point lastTime;

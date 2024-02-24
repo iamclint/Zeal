@@ -67,28 +67,29 @@ void Binds::set_strafe(strafe_direction dir)
 	if (dir == strafe_direction::None)
 	{
 		current_strafe = strafe_direction::None;
-		ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x5, 0, 0);
-		ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x6, 0, 0);
-		mem::write<byte>(0x53F633, 0x75); //reset the jump to be conditional
-		mem::write<byte>(0x53FA3B, 0x75);
+		*Zeal::EqGame::strafe_direction = 0;
+		*Zeal::EqGame::strafe_speed = 0;
+		if (orig_reset_strafe[0]!=0)
+			mem::copy(0x53f424, orig_reset_strafe, 7);
 	}
 	else
 	{
-		mem::write<byte>(0x53F633, 0xEB); //make this jump unconditional
-		mem::write<byte>(0x53FA3B, 0xEB);
+		if (orig_reset_strafe[0] == 0)
+			mem::set(0x53f424, 0x90, 7, orig_reset_strafe);
+		else if (*(BYTE*)0x53f424 != 0x90)
+			mem::set(0x53f424, 0x90, 7);
+
+	
 		if (dir == strafe_direction::Right)
 		{
 			current_strafe = strafe_direction::Right;
-			ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x6, 0, 0);
-			ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x5, 1, 0);
+			*Zeal::EqGame::strafe_direction = 0x2;
 		}
 		else
 		{
 			current_strafe = strafe_direction::Left;
-			ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x5, 0, 0);
-			ZealService::get_instance()->hooks->hook_map["executecmd"]->original(ExecuteCmd)(0x6, 1, 0);
+			*Zeal::EqGame::strafe_direction = 0x1;
 		}
-
 	}
 }
 
@@ -151,10 +152,37 @@ void Binds::add_bind(int cmd, const char* name, const char* short_name, int cate
 	KeyMapFunctions[cmd] = callback;
 }
 
+void Binds::main_loop()
+{
+	if (current_strafe != strafe_direction::None)
+	{
+		Zeal::EqStructures::Entity* controlled_player = Zeal::EqGame::get_controlled();
+		float encumberance = Zeal::EqGame::encum_factor();
+		*Zeal::EqGame::strafe_speed = encumberance + encumberance;
+		if (controlled_player->IsSneaking || controlled_player->StandingState == Stance::Duck)
+			*Zeal::EqGame::strafe_speed *= .5f;
+		if (controlled_player->ActorInfo && controlled_player->ActorInfo->MovementSpeedModifier < 0)
+			*Zeal::EqGame::strafe_speed *= .5f;
+		if (controlled_player->ActorInfo && controlled_player->ActorInfo->Unsure_Strafe_Calc != 0)
+			*Zeal::EqGame::strafe_speed *= .25f;
+		if (controlled_player->ActorInfo && controlled_player->ActorInfo->MovementSpeedModifier < -1000.0f)
+		{
+			*Zeal::EqGame::strafe_direction = 0;
+			*Zeal::EqGame::strafe_speed = 0;
+		}
+		if (controlled_player->StandingState != Stance::Duck && controlled_player->StandingState != Stance::Stand)
+		{
+			*Zeal::EqGame::strafe_direction = 0;
+			*Zeal::EqGame::strafe_speed = 0;
+		}
+	}
+}
+
 
 
 Binds::Binds(ZealService* zeal)
 {
+	zeal->main_loop_hook->add_callback([this]() { main_loop(); });
 	for (int i = 0; i < 128; i++)
 		KeyMapNames[i] = *(char**)(0x611220 + (i * 4)); //copy the original short names to the new array
 	mem::write(0x52507A, (int)KeyMapNames);//write ini keymap

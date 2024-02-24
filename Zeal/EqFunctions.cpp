@@ -68,7 +68,13 @@ namespace Zeal
 				head_pos.z = self->Position.z;
 			return head_pos;
 		}
-
+		float encum_factor()
+		{
+			if (*(int*)EqGame::_ControlledPlayer == *(int*)EqGame::Self)
+				return EqGameInternal::encum_factor(*Zeal::EqGame::ptr_LocalPC, 0);
+			else
+				return 1.0f;
+		}
 		Zeal::EqStructures::ViewActor* get_view_actor()
 		{
 			Zeal::EqStructures::ViewActor* v = *(Zeal::EqStructures::ViewActor**)Zeal::EqGame::ViewActor;
@@ -335,6 +341,10 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_self()
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::Self;
+		}
+		Zeal::EqStructures::Entity* get_controlled()
+		{
+			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::_ControlledPlayer;
 		}
 		Zeal::EqStructures::CameraInfo* get_camera()
 		{

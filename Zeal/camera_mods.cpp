@@ -5,7 +5,8 @@
 #include "Zeal.h"
 #include <thread>
 #include <algorithm>
-float Smooth(short rawDelta, float smoothDelta) {
+#include <windowsx.h>
+float Smooth(float rawDelta, float smoothDelta) {
     return std::lerp(smoothDelta, static_cast<float>(rawDelta), 1.0f / 1.5f);
 }
 static int zeal_cam = Zeal::EqEnums::CameraView::ThirdPerson3;
@@ -66,6 +67,15 @@ Vec3 calculatePositionBehind(const Vec3& playerHead, float distance, float playe
 
 bool CameraMods::update_cam()
 {
+    if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::FirstPerson && *(byte*)0x4db8ce == 0x90)
+    {
+        toggle_zeal_cam(false);
+    }
+    if (*Zeal::EqGame::camera_view == zeal_cam && *(byte*)0x4db8ce != 0x90)
+    {
+        toggle_zeal_cam(true);
+        current_zoom = zoom_speed*4;
+    }
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_view_actor_entity();
     if (!self)
         return false;
@@ -188,7 +198,7 @@ void CameraMods::proc_mouse()
             {
                 if (*Zeal::EqGame::camera_view == zeal_cam)
                 {
-                    zeal_cam_pitch -= smoothMouseDeltaY / 2.f;
+                    zeal_cam_pitch -= smoothMouseDeltaY;
                     zeal_cam_pitch = std::clamp(zeal_cam_pitch, -89.9f, 89.9f);
                 }
                 else
@@ -260,6 +270,7 @@ void CameraMods::reset_cam()
 {
     if (original_cam && *(BYTE*)0x4db8ce == 0x90)
     {
+        *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
         mem::copy(0x4db8ce, (BYTE*)original_cam, 6); //re-enable games camera movement
     }
 }
@@ -281,6 +292,7 @@ void _fastcall doCharacterSelection(int t, int u)
 //    }
 //    zeal->hooks->hook_map["SetInitialCameraLocation"]->original(SetInitialCameraLocation)(t, unused, view_actor);
 //}
+
 
 CameraMods::CameraMods(ZealService* zeal)
 {

@@ -253,7 +253,9 @@ namespace Zeal
 			/* 0x00BC */ FLOAT MovementSpeedModifier; // how much slower/faster you move
 			/* 0x00C0 */ BYTE Unknown00C0[196];
 			/* 0x0184 */ DWORD Animation;
-			/* 0x0188 */ BYTE Unknown0188[44];
+			/* 0x0188 */ BYTE Unknown0188[16];
+			/* 0x0198 */ int Unsure_Strafe_Calc;
+			/* 0x019C */ BYTE Unknown019c[24];
 			/* 0x01B4 */ DWORD IsInvisible; // NPCs only? used by /hidecorpses command
 			/* 0x01B8 */ BYTE Unknown01B8[168];
 			/* 0x0260 */ DWORD IsHoldingBoth;
