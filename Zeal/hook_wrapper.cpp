@@ -25,10 +25,12 @@ void hook::replace(int addr, int dest)
 void hook::detour(int addr, int dest)
 {
 	int orig_to_dest_offset = dest - addr - 5;
+	DWORD old_protect;
 	if (*(byte*)addr == 0xE9) //a jump (already hooked by something lets play nice)
 	{
 		orig_byte_count = 5;
 		trampoline = (int)malloc(orig_byte_count);
+		VirtualProtect((LPVOID)trampoline, orig_byte_count, PAGE_EXECUTE_READWRITE, &old_protect);
 		int jmp_absolute = mem::instruction_to_absolute_address(addr);
 		int trampoline_to_orig_offset = jmp_absolute - trampoline - 5;
 		mem::write<byte>(trampoline, 0xE9);
@@ -41,6 +43,7 @@ void hook::detour(int addr, int dest)
 	{
 		// Build a trampoline
 		trampoline = (int)malloc(orig_byte_count + 5); // A jump is 5 bytes
+		VirtualProtect((LPVOID)trampoline, orig_byte_count+5, PAGE_EXECUTE_READWRITE, &old_protect);
 		mem::copy(trampoline, original_bytes, orig_byte_count);
 		// Calculate the relative offsets
 		int trampoline_to_orig_offset = addr - trampoline - orig_byte_count;
