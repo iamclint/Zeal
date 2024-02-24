@@ -73,8 +73,14 @@ namespace Zeal
 		{
 			return *(int*)0x63d5d8!=0;
 		}
-
-		bool CollideWithWorld(Vec3 start, Vec3 end, Vec3& result, char collision_type, bool debug)
+		int get_region_from_pos(Vec3* pos)
+		{
+			EqGameInternal::t3dGetRegionNumberFromWorldAndXYZ = mem::function<int __stdcall(int, Vec3*)>(*(int*)0x07f9a30);
+			int rval = EqGameInternal::t3dGetRegionNumberFromWorldAndXYZ(*(int*)((*(int*)Zeal::EqGame::Display)+0x4), pos);
+			__asm pop ecx
+			return rval;
+		}
+		bool collide_with_world(Vec3 start, Vec3 end, Vec3& result, char collision_type, bool debug)
 		{
 			DWORD disp = *(int*)Zeal::EqGame::Display;
 			char x = EqGameInternal::s3dCollideSphereWithWorld(disp, 0, start.x, start.y, start.z, end.x, end.y, end.z, (float*)&result.x, (float*)&result.y, (float*)&result.z, collision_type);
@@ -141,7 +147,7 @@ namespace Zeal
 						
 							for (int i = 0; auto& [pos1, pos2] : collision_checks)
 							{
-								if (!CollideWithWorld(pos1, pos2, result, 0x3, false)) //had no collision
+								if (!collide_with_world(pos1, pos2, result, 0x3, false)) //had no collision
 								{
 									add_to_list = true;
 									break; //we don't really care which version of this had no world collision so break the for loop
@@ -319,7 +325,7 @@ namespace Zeal
 				EqGameInternal::CXStr_PrintString(str, buffer);
 		}
 
-		std::string ClassName(int class_id)
+		std::string class_name(int class_id)
 		{
 			std::string class_string = "";
 			int modified_class_id = class_id;
@@ -386,7 +392,7 @@ namespace Zeal
 				class_string += " GuildMaster";
 			return class_string;
 		}
-		std::string ClassNameShort(int class_id)
+		std::string class_name_short(int class_id)
 		{
 			std::string class_string = "";
 			int modified_class_id = class_id;

@@ -89,7 +89,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
 
-	add("/hidecorpse", { "/hc", "/hideco" },
+	add("/hidecorpse", { "/hc", "/hideco", "/hidec"},
 		[](std::vector<std::string>& args) {
 			if (args.size() > 1 && caseInsensitiveStringCompare(args[1], "looted"))
 			{

@@ -13,6 +13,7 @@ public:
 	bool smoothing;
 	float height;
 	float fps;
+	float zeal_cam_pitch;
 	float current_zoom = 0;
 	float zoom_speed = 5.f;
 	void set_smoothing(bool val);

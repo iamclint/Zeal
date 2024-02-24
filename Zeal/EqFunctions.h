@@ -45,6 +45,7 @@ namespace Zeal
 			static mem::function<char __fastcall(int, int, float, float, float, float, float, float, float*, float*, float* , char) > s3dCollideSphereWithWorld = 0x4b3c45;
 			static mem::function<short __fastcall(int, int)> get_max_mana = 0x4B9483;
 			static mem::function<short __fastcall(int, int)> get_cur_mana = 0x4b9450;
+			static mem::function<int __stdcall(int, Vec3*)> t3dGetRegionNumberFromWorldAndXYZ = 0x0;
 			static mem::function<short __fastcall(Zeal::EqStructures::Entity*,int unused, unsigned char)> change_stance = 0x50be3c;
 			static mem::function<void __fastcall(DWORD, int unused, DWORD)> ui_something = 0x536bae;
 			static mem::function<float __stdcall(float input_heading)> fix_heading = 0x4a2eed;
@@ -74,7 +75,7 @@ namespace Zeal
 		void CXStr_PrintString(Zeal::EqStructures::CXSTR* str, const char* format, ...);
 		Vec3 get_player_head_pos();
 		inline Zeal::EqStructures::GuildName* guild_names = (Zeal::EqStructures::GuildName*)0x7F9C94;
-		bool CollideWithWorld(Vec3 start, Vec3 end, Vec3& result, char collision_type = 0x3, bool debug = false);
+		bool collide_with_world(Vec3 start, Vec3 end, Vec3& result, char collision_type = 0x3, bool debug = false);
 		void get_camera_location();
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable = true);
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor);
@@ -94,12 +95,13 @@ namespace Zeal
 		int* get_display();
 		float heading_to_yaw(float heading);
 		bool is_mouse_hovering_window();
-		std::string ClassNameShort(int class_id);
-		std::string ClassName(int class_id);
+		std::string class_name_short(int class_id);
+		std::string class_name(int class_id);
 		bool is_targetable(Zeal::EqStructures::Entity* ent);
 		bool is_in_game();
 		void change_stance(Stance new_stance);
 		void do_say(bool hide_local, const char* format, ...);
 		void do_say(bool hide_local, std::string data);
+		int get_region_from_pos(Vec3* pos);
 	}
 }
