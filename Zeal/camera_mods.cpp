@@ -219,9 +219,12 @@ void __fastcall procMouse(int eq, int unused, int a1)
 
 void CameraMods::set_smoothing(bool val)
 {
+    DWORD camera_view = *Zeal::EqGame::camera_view;
     smoothing = val;
     ZealService::get_instance()->ini->setValue<bool>("Zeal", "MouseSmoothing", smoothing);
-    if (!smoothing)
+    if (smoothing && camera_view==zeal_cam)
+        toggle_zeal_cam(smoothing);
+    else
         toggle_zeal_cam(false);
 }
 
