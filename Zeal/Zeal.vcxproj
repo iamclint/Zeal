@@ -168,6 +168,7 @@
     <ClInclude Include="main_loop.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="camera_mods.h" />
+	<ClInclude Include="InstructionLength.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="vectors.h" />
@@ -178,23 +179,15 @@
     <ClCompile Include="commands.cpp" />
     <ClCompile Include="cycle_target.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="EqAddresses.h" />
     <ClCompile Include="EqFunctions.cpp" />
     <ClCompile Include="experience.cpp" />
     <ClCompile Include="FindPattern.cpp" />
     <ClCompile Include="hook_wrapper.cpp" />
-    <ClCompile Include="InstructionLength.h" />
     <ClCompile Include="labels.cpp" />
     <ClCompile Include="looting.cpp" />
     <ClCompile Include="main_loop.cpp" />
     <ClCompile Include="memory.cpp" />
     <ClCompile Include="camera_mods.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="vectors.cpp" />
     <ClCompile Include="Zeal.cpp" />
   </ItemGroup>
