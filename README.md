@@ -22,6 +22,8 @@ Auto Inventory
 <b>Label Types</b>
 80 Mana/Max Mana 
 81 Exp Per Hour Percentage 
+124 Current Mana
+125 Max Mana
 
 <b>Building</b>
 32bit x86
