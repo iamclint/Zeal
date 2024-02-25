@@ -12,7 +12,7 @@ ZealService::ZealService()
 	labels_hook = std::shared_ptr<labels>(new labels(this));
 	binds_hook = std::shared_ptr<Binds>(new Binds(this));
 	commands_hook = std::shared_ptr<ChatCommands>(new ChatCommands(this));
-
+	raid_hook = std::shared_ptr<raid>(new raid(this));
 	this->apply_patches();
 
 	camera_mods = std::shared_ptr<CameraMods>(new CameraMods(this));

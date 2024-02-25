@@ -129,14 +129,14 @@ void Binds::add_binds()
 		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-			std::vector<Zeal::EqStructures::_EQITEMINFO*> containers;
-			std::vector<Zeal::EqStructures::_EQITEMINFO*> opened_containers;
+			std::vector<std::pair<Zeal::EqStructures::_EQITEMINFO*,int>> containers;
+			std::vector<Zeal::EqStructures::_EQITEMINFO*> opened_containers; //don't need an index to close 
 			for (int i = 0; i < 8; i++) //8 inventory slots for containers
 			{
 				Zeal::EqStructures::_EQITEMINFO* item = self->CharInfo->InventoryPackItem[i];
 				if (item->IsContainer)
-					containers.push_back(item);
-				if (item->IsContainer && item->Container.IsOpen)
+					containers.push_back({ item, i });
+				if (item->IsContainer && item->Container.IsOpen) 
 					opened_containers.push_back(item);
 			}
 
@@ -147,11 +147,10 @@ void Binds::add_binds()
 			}
 			else
 			{
-				for (int i = 0; auto& c : containers)
+				for (auto& [c, index] : containers)
 				{
 					if (c->IsContainer && !c->Container.IsOpen)
-						Zeal::EqGame::EqGameInternal::OpenContainer(*Zeal::EqGame::ptr_ContainerMgr, 0, (int)&c->Name, 22 + i);
-					i++;
+						Zeal::EqGame::EqGameInternal::OpenContainer(*Zeal::EqGame::ptr_ContainerMgr, 0, (int)&c->Name, 22 + index);
 				}
 			}
 

@@ -14,6 +14,7 @@ public:
 	std::shared_ptr<ChatCommands> commands_hook = nullptr;
 	std::shared_ptr<MainLoop> main_loop_hook = nullptr;
 	std::shared_ptr<CameraMods> camera_mods = nullptr;
+	std::shared_ptr<raid> raid_hook = nullptr;
 
 
 	//other features

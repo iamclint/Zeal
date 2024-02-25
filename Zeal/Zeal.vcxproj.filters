@@ -96,12 +96,15 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InstructionLength.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="raid.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="hook_wrapper.cpp">
@@ -112,9 +115,6 @@
     </ClCompile>
     <ClCompile Include="EqFunctions.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EqAddresses.h">
-      <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="vectors.cpp">
       <Filter>Source Files\helpers</Filter>
@@ -149,8 +149,8 @@
     <ClCompile Include="cycle_target.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
-    <ClCompile Include="InstructionLength.h">
-      <Filter>Header Files</Filter>
+    <ClCompile Include="raid.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
