@@ -25,23 +25,23 @@ bool can_move()
 }
 float get_pitch(Vec3 cameraPos, Vec3 targetPos) {
     Vec3 direction = targetPos - cameraPos;
-    float horizontalDistance = direction.Length2D();
-    float verticalDistance = direction.z;
+    float horizontalDistance = (float)direction.Length2D();
+    float verticalDistance = (float)direction.z;
     float pitch = std::atan2(verticalDistance, horizontalDistance);
-    float pitchDegrees = pitch * (180.0 / M_PI);
+    float pitchDegrees = pitch * (180.0f / (float)M_PI);
 
     // Scale the pitch to fit into the [-128, 128] range
-    pitchDegrees *= (128.0 / 90.0);
+    pitchDegrees *= (128.0f / 90.0f);
 
     return pitchDegrees;
 }
 
 Vec3 calculatePositionBehind(const Vec3& playerHead, float distance, float playerYaw, float pitch) {
-    float yaw_rads = playerYaw * (2 * M_PI) / 512.0f;
-    float yaw_deg = yaw_rads * (180.0 / M_PI);
+    float yaw_rads = playerYaw * (2.0f * (float)M_PI) / 512.0f;
+    float yaw_deg = yaw_rads * (180.0f / (float)M_PI);
 
     // Convert pitch to radians
-    float pitch_rads = pitch * (M_PI / 180.0f);
+    float pitch_rads = pitch * ((float)M_PI / 180.0f);
 
     Vec3 positionBehind;
 
@@ -254,11 +254,11 @@ void CameraMods::callback_main()
     auto currentTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
     if (elapsedTime > 0) {
-        fps = 1000.0 / elapsedTime;
+        fps = 1000.0f / elapsedTime;
     }
 
-    sensitivity_x = .7 * (fps / 144.f);
-    sensitivity_y = .3 * (fps / 144.f);
+    sensitivity_x = .7f * (fps / 144.f);
+    sensitivity_y = .3f * (fps / 144.f);
 
     float current_sens = (float)(*(byte*)0x798b0c);
     float multiplier = current_sens / 4.0f;
