@@ -134,10 +134,12 @@ void Binds::add_binds()
 			for (int i = 0; i < 8; i++) //8 inventory slots for containers
 			{
 				Zeal::EqStructures::_EQITEMINFO* item = self->CharInfo->InventoryPackItem[i];
-				if (item->IsContainer)
+				if (item && item->IsContainer && item->Container.Capacity>0)
+				{
 					containers.push_back({ item, i });
-				if (item->IsContainer && item->Container.IsOpen) 
-					opened_containers.push_back(item);
+					if (item->Container.IsOpen)
+						opened_containers.push_back(item);
+				}
 			}
 
 
