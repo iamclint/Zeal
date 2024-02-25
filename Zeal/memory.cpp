@@ -61,7 +61,11 @@ namespace mem
 		while (Module32Next(hModuleSnap, &me32))
 		{
 			std::wstring mn = me32.szModule;
-			std::string name = std::string(mn.begin(), mn.end());
+			std::string name;
+			std::transform(mn.begin(), mn.end(), std::back_inserter(name), [](wchar_t c) {
+				return (char)c;
+				});
+
 			std::regex re(regex_str, std::regex_constants::icase);
 			std::smatch match;
 			if (std::regex_search(name, match, re))
