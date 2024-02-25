@@ -125,7 +125,39 @@ void Binds::add_binds()
 				Zeal::EqGame::set_target(ent);
 		}
 		});
+	add_bind(214, "Toggle all containers", "OpenCloseContainers", key_category::UI | key_category::Commands, [](int key_down) {
+		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+			std::vector<Zeal::EqStructures::_EQITEMINFO*> containers;
+			std::vector<Zeal::EqStructures::_EQITEMINFO*> opened_containers;
+			for (int i = 0; i < 8; i++) //8 inventory slots for containers
+			{
+				Zeal::EqStructures::_EQITEMINFO* item = self->CharInfo->InventoryPackItem[i];
+				if (item->IsContainer)
+					containers.push_back(item);
+				if (item->IsContainer && item->Container.IsOpen)
+					opened_containers.push_back(item);
+			}
 
+
+			if (opened_containers.size() == containers.size()) //all the containers are open..
+			{
+				Zeal::EqGame::EqGameInternal::CloseAllContainers(*Zeal::EqGame::ptr_ContainerMgr, 0);
+			}
+			else
+			{
+				for (int i = 0; auto& c : containers)
+				{
+					if (c->IsContainer && !c->Container.IsOpen)
+						Zeal::EqGame::EqGameInternal::OpenContainer(*Zeal::EqGame::ptr_ContainerMgr, 0, (int)&c->Name, 22 + i);
+					i++;
+				}
+			}
+
+
+		}
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) {
 
 		if (key_down)

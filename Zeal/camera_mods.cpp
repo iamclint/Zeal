@@ -176,7 +176,7 @@ void CameraMods::proc_mouse()
             smoothMouseDeltaY = Smooth(delta_y * sensitivity_y, smoothMouseDeltaY);
             if (fabs(smoothMouseDeltaX) > 5)
                 smoothMouseDeltaY /= 2;
-            ZealService::get_instance()->labels_hook->print_debug_info("delta x %f  delta y %f", smoothMouseDeltaX, smoothMouseDeltaY);
+            //ZealService::get_instance()->labels_hook->print_debug_info("delta x %f  delta y %f", smoothMouseDeltaX, smoothMouseDeltaY);
             delta->y = 0;
             delta->x = 0;
 
@@ -221,7 +221,10 @@ void __fastcall procMouse(int eq, int unused, int a1)
     if (eq)
         zeal->camera_mods->eq_ptr = eq;
     zeal->camera_mods->proc_mouse();
-    zeal->hooks->hook_map["procMouse"]->original(procMouse)(eq, unused, a1);
+    if (eq == 0)
+        return;
+    else
+        zeal->hooks->hook_map["procMouse"]->original(procMouse)(eq, unused, a1);
 }
 
 void CameraMods::set_smoothing(bool val)
@@ -280,11 +283,8 @@ void _fastcall doCharacterSelection(int t, int u)
     zeal->hooks->hook_map["DoCharacterSelection"]->original(doCharacterSelection)(t, u);
 }
 
-
 CameraMods::CameraMods(ZealService* zeal)
 {
-    
-  //  RegisterRawInput();
     mem::write<byte>(0x53fa50, 03); //allow for strafing whenever in zeal cam
     mem::write<byte>(0x53f648, 03); //allow for strafing whenever in zeal cam
     smoothing = true;
@@ -300,6 +300,7 @@ CameraMods::CameraMods(ZealService* zeal)
 
 CameraMods::~CameraMods()
 {
+    shutting_down = true;
 //    SetWindowLongPtr(game_hwnd, GWLP_WNDPROC, (LONG_PTR)prev_wndproc);
     toggle_zeal_cam(false);
 }

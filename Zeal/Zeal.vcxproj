@@ -168,7 +168,7 @@
     <ClInclude Include="main_loop.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="camera_mods.h" />
-	<ClInclude Include="InstructionLength.h" />
+    <ClInclude Include="InstructionLength.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="vectors.h" />

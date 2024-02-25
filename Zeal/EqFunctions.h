@@ -61,6 +61,8 @@ namespace Zeal
 			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;
 			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_say = 0x4f8172;
 			static mem::function<float __fastcall(int, int)> encum_factor = 0x4bb9c7;
+			static mem::function<float __fastcall(int, int, int, int)> OpenContainer = 0x4168bd;
+			static mem::function<float __fastcall(int, int)> CloseAllContainers = 0x416a43;
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
 		//// Wrapper function to call CXStr_PrintString

@@ -76,6 +76,13 @@ namespace Zeal
 	namespace EqStructures
 	{
 
+		struct KeyboardModifiers
+		{
+			int Shift;
+			int Ctrl;
+			int Alt;
+		};
+
 		struct KeyboardInput
 		{
 			int forward;
