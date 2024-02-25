@@ -28,7 +28,7 @@ ZealService::ZealService()
 
 void ZealService::apply_patches()
 {
-	const char sit_stand_patch[] = { 0xEB, 0x1A };
+	const char sit_stand_patch[] = { (char)0xEB, (char)0x1A };
 	mem::write(0x42d14d, sit_stand_patch); //fix pet sit shortcut crash (makes default return of function the sit/stand button not sure why its passing in 0)
 }
 

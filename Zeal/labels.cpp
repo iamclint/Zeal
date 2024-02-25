@@ -84,7 +84,7 @@ int GetGaugeFromEq(int EqType, Zeal::EqStructures::CXSTR* str)
 		case 23:
 		{
 			float fpct = zeal->experience->exp_per_hour_pct_tot / 100.f;
-			return 1000.f * fpct;
+			return (int)(1000.f * fpct);
 		}
 		default:
 			break;

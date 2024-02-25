@@ -62,7 +62,7 @@ void Experience::callback_main()
 		float total_hour_to_level = experience_needed / exp_per_hour_tot;
 		float total_minutes_to_level = total_hour_to_level * 60;
 		float total_seconds_to_level = total_minutes_to_level * 60;
-		int toal_ms_to_level = total_seconds_to_level * 1000;
+		int toal_ms_to_level = (int)(total_seconds_to_level * 1000);
 		ms_to_level = std::chrono::milliseconds(toal_ms_to_level);
 	}
 	ttl = format_duration(ms_to_level);

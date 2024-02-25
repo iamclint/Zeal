@@ -105,6 +105,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				ZealService::get_instance()->looting_hook->set_hide_looted(false);
 				return false; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 			}
+			return false;
 		});
 	add("/smoothing", {},
 		[](std::vector<std::string>& args) {

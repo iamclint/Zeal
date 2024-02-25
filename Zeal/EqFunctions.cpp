@@ -1,3 +1,4 @@
+#include <windows.h>
 #include "EqFunctions.h"
 #include "EqAddresses.h"
 namespace Zeal
