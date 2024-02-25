@@ -31,10 +31,12 @@ public:
 	char* KeyMapNames[256] = { 0 };
 	int ptr_binds = 0;
 	std::unordered_map<int, std::function<void(int state)>> KeyMapFunctions;
+	std::pair<int, int> last_targets;
 	void read_ini();
 	void add_binds();
 	void add_bind(int index, const char* name, const char* short_name, int category, std::function<void(int state)> callback);
 	void main_loop();
+	void on_zone();
 private:
 	void set_strafe(strafe_direction dir);
 	strafe_direction current_strafe=strafe_direction::None;

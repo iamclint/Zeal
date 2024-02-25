@@ -134,15 +134,13 @@ void Binds::add_binds()
 			for (int i = 0; i < 8; i++) //8 inventory slots for containers
 			{
 				Zeal::EqStructures::_EQITEMINFO* item = self->CharInfo->InventoryPackItem[i];
-				if (item && item->IsContainer && item->Container.Capacity>0)
+				if (item && item->OpenType==1 && item->Container.Capacity>0)
 				{
 					containers.push_back({ item, i });
 					if (item->Container.IsOpen)
 						opened_containers.push_back(item);
 				}
 			}
-
-
 			if (opened_containers.size() == containers.size()) //all the containers are open..
 			{
 				Zeal::EqGame::EqGameInternal::CloseAllContainers(*Zeal::EqGame::ptr_ContainerMgr, 0);
@@ -151,12 +149,36 @@ void Binds::add_binds()
 			{
 				for (auto& [c, index] : containers)
 				{
-					if (c->IsContainer && !c->Container.IsOpen)
+					if (!c->Container.IsOpen)
 						Zeal::EqGame::EqGameInternal::OpenContainer(*Zeal::EqGame::ptr_ContainerMgr, 0, (int)&c->Name, 22 + index);
 				}
 			}
 
 
+		}
+		});
+	add_bind(215, "ToggleLastTwo", "Toggle last two targets", key_category::Target, [this](int key_down) {
+		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
+			if (target)
+			{
+				if (last_targets.first == target->SpawnId && last_targets.second!=0)
+				{
+					Zeal::EqStructures::Entity* ent = Zeal::EqGame::get_entity_by_id(last_targets.second);
+					if (ent)
+						Zeal::EqGame::set_target(ent);
+				}
+			}
+			else
+			{
+				if (last_targets.first != 0)
+				{
+					Zeal::EqStructures::Entity* ent = Zeal::EqGame::get_entity_by_id(last_targets.first);
+					if (ent)
+						Zeal::EqGame::set_target(ent);
+				}
+			}
 		}
 		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) {
@@ -187,6 +209,13 @@ void Binds::add_bind(int cmd, const char* name, const char* short_name, int cate
 
 void Binds::main_loop()
 {
+
+	if (Zeal::EqGame::get_target() && Zeal::EqGame::get_target()->SpawnId != last_targets.first)
+	{
+		last_targets.second = last_targets.first;
+		last_targets.first = Zeal::EqGame::get_target()->SpawnId;
+	}
+
 	if (current_strafe != strafe_direction::None)
 	{
 		Zeal::EqStructures::Entity* controlled_player = Zeal::EqGame::get_controlled();
@@ -211,11 +240,18 @@ void Binds::main_loop()
 	}
 }
 
+void Binds::on_zone()
+{
+	Zeal::EqGame::print_chat("zoned");
+	last_targets.first = 0;
+	last_targets.second = 0;
+}
 
 
 Binds::Binds(ZealService* zeal)
 {
-	zeal->main_loop_hook->add_callback([this]() { main_loop(); });
+	zeal->main_loop_hook->add_callback([this]() { main_loop(); }, callback_fn::MainLoop);
+	zeal->main_loop_hook->add_callback([this]() { on_zone(); }, callback_fn::Zone);
 	for (int i = 0; i < 128; i++)
 		KeyMapNames[i] = *(char**)(0x611220 + (i * 4)); //copy the original short names to the new array
 	mem::write(0x52507A, (int)KeyMapNames);//write ini keymap

@@ -102,6 +102,9 @@
     <ClInclude Include="raid.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="eqstr.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -150,6 +153,9 @@
       <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="raid.cpp">
+      <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="eqstr.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>

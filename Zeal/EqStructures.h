@@ -176,7 +176,7 @@ namespace Zeal
 			/* 0x00AF */ BYTE NoRent; // 0x00 = True, 0xFF = False
 			/* 0x00B0 */ BYTE NoDrop; // 0x00 = True, 0xFF = False
 			/* 0x00B1 */ BYTE Size; // EQ_ITEM_SIZE_x
-			/* 0x00B2 */ BYTE IsContainer;
+			/* 0x00B2 */ BYTE OpenType; //0x1 = bag, 0x2 = letter
 			/* 0x00B3 */ BYTE Unknown00B3;
 			/* 0x00B4 */ WORD Id;
 			/* 0x00B6 */ WORD Icon;

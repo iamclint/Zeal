@@ -13,6 +13,7 @@
 #include "labels.h"
 #include "binds.h"
 #include "raid.h"
+#include "eqstr.h"
 
 #include "IO_ini.h"
 #include "main_loop.h"

@@ -157,6 +157,7 @@
     <ClInclude Include="commands.h" />
     <ClInclude Include="cycle_target.h" />
     <ClInclude Include="EqFunctions.h" />
+    <ClInclude Include="eqstr.h" />
     <ClInclude Include="EqStructures.h" />
     <ClInclude Include="experience.h" />
     <ClInclude Include="FindPattern.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="cycle_target.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="EqFunctions.cpp" />
+    <ClCompile Include="eqstr.cpp" />
     <ClCompile Include="experience.cpp" />
     <ClCompile Include="FindPattern.cpp" />
     <ClCompile Include="hook_wrapper.cpp" />
