@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Zeal.h"
 ZealService* ZealService::ptr_service = nullptr;
 ZealService::ZealService()
