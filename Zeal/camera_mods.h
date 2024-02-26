@@ -14,8 +14,9 @@ public:
 	float height;
 	float fps;
 	float zeal_cam_pitch;
-	float current_zoom = 0;
+	float current_zoom = 0.f;
 	float zoom_speed = 5.f;
+	float desired_zoom = 0.f;
 	void set_smoothing(bool val);
 	void callback_main();
 	bool update_cam(); //returns true on collision
@@ -28,8 +29,7 @@ public:
 	CameraMods(class ZealService* pHookWrapper);
 	~CameraMods();
 private:
-	void RegisterRawInput();
-	bool shutting_down = false;
+	void LerpCameraZooom();
 	Vec2 previous_mouse_pos;
 	Vec2 mouse_delta;
 	BYTE original_cam[6] = { 0 };

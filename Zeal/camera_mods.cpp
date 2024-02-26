@@ -89,13 +89,8 @@ void CameraMods::mouse_wheel(int delta)
     DWORD camera_view = *Zeal::EqGame::camera_view;
     if (delta == 120)
     {
-        if (camera_view != Zeal::EqEnums::CameraView::FirstPerson)
-        {
-            if (current_zoom <= zoom_speed && camera_view == zeal_cam)
-                toggle_zeal_cam(false);
-            else if (camera_view == zeal_cam)
-                update_zoom(-zoom_speed);
-        }
+        if (camera_view == zeal_cam)
+            update_zoom(-zoom_speed);
     }
     else if (delta == -120)
     {
@@ -128,16 +123,16 @@ void CameraMods::toggle_zeal_cam(bool enabled)
 }
 void CameraMods::update_zoom(float zoom)
 {
-    current_zoom += zoom;
-    if (current_zoom > 100)
-        current_zoom = 100;
-    if (current_zoom < 0)
-        current_zoom = 0;
+    desired_zoom += zoom;
+    if (desired_zoom > 100)
+        desired_zoom = 100;
+    if (desired_zoom < 0)
+        desired_zoom = 0;
     if (update_cam()) //there was a collision
     {
         if (zoom > 0)
         {
-            current_zoom -= zoom;
+            desired_zoom -= zoom;
             update_cam();
         }
     }
@@ -157,8 +152,7 @@ int handle_mouse_wheel(int delta)
 
 void CameraMods::proc_mouse()
 {
-
-    if (smoothing && (*Zeal::EqGame::camera_view == zeal_cam || *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::FirstPerson)) //maybe add some setting to toggle this feature on and off
+    if (smoothing && (*Zeal::EqGame::camera_view == zeal_cam || *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::FirstPerson)) 
     {
         static float smoothMouseDeltaX = 0;
         static float smoothMouseDeltaY = 0;
@@ -197,12 +191,14 @@ void CameraMods::proc_mouse()
                 {
                     zeal_cam_pitch -= smoothMouseDeltaY;
                     zeal_cam_pitch = std::clamp(zeal_cam_pitch, -89.9f, 89.9f);
+                    if (Zeal::EqGame::KeyMods->Shift)
+                        self->Pitch = zeal_cam_pitch;
                 }
                 else
                 {
                     if (Zeal::EqGame::is_view_actor_me())
                     {
-                        self->Pitch -= smoothMouseDeltaY / 2.f;
+                        self->Pitch -= smoothMouseDeltaY;
                         self->Pitch = std::clamp(self->Pitch, -89.9f, 89.9f);
                     }
                 }
@@ -238,9 +234,26 @@ void CameraMods::set_smoothing(bool val)
         toggle_zeal_cam(false);
 }
 
+void CameraMods::LerpCameraZooom() 
+{
+    if (*Zeal::EqGame::camera_view == zeal_cam)
+    {
+        current_zoom = current_zoom + (desired_zoom - current_zoom) * .3f; //linear interpolation
+        if (current_zoom < .5)
+            toggle_zeal_cam(false);
+    }
+}
+
 void CameraMods::callback_main()
 {
     static int prev_view = *Zeal::EqGame::camera_view;
+
+    if (smoothing)
+    {
+        LerpCameraZooom();
+    }
+
+
     if (prev_view != *Zeal::EqGame::camera_view && smoothing)
     {
         if (*Zeal::EqGame::camera_view != zeal_cam)
@@ -248,9 +261,12 @@ void CameraMods::callback_main()
         else
         {
             toggle_zeal_cam(true);
-            current_zoom = zoom_speed*4;
+            desired_zoom = zoom_speed;
         }
     }
+
+
+
     Zeal::EqStructures::CameraInfo* cam = Zeal::EqGame::get_camera();
     if (!cam)
         return;
@@ -300,7 +316,5 @@ CameraMods::CameraMods(ZealService* zeal)
 
 CameraMods::~CameraMods()
 {
-    shutting_down = true;
-//    SetWindowLongPtr(game_hwnd, GWLP_WNDPROC, (LONG_PTR)prev_wndproc);
     toggle_zeal_cam(false);
 }
