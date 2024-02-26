@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="binds.h" />
+    <ClInclude Include="chat.h" />
     <ClInclude Include="commands.h" />
     <ClInclude Include="cycle_target.h" />
     <ClInclude Include="EqFunctions.h" />
@@ -178,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="binds.cpp" />
+    <ClCompile Include="chat.cpp" />
     <ClCompile Include="commands.cpp" />
     <ClCompile Include="cycle_target.cpp" />
     <ClCompile Include="dllmain.cpp" />

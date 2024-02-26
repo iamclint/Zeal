@@ -14,6 +14,7 @@
 #include "binds.h"
 #include "raid.h"
 #include "eqstr.h"
+#include "chat.h"
 
 #include "IO_ini.h"
 #include "main_loop.h"

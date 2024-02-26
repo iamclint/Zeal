@@ -19,7 +19,7 @@ ZealService::ZealService()
 	camera_mods = std::shared_ptr<CameraMods>(new CameraMods(this, ini.get()));
 	cycle_target = std::shared_ptr<CycleTarget>(new CycleTarget(this));
 	experience = std::shared_ptr<Experience>(new Experience(this));
-
+	chat_hook = std::shared_ptr<chat>(new chat(this, ini.get()));
 
 
 	looting_hook->hide_looted = ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
