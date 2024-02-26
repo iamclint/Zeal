@@ -16,14 +16,12 @@ ZealService::ZealService()
 	eqstr_hook = std::shared_ptr<eqstr>(new eqstr(this));
 	this->apply_patches();
 
-	camera_mods = std::shared_ptr<CameraMods>(new CameraMods(this));
+	camera_mods = std::shared_ptr<CameraMods>(new CameraMods(this, ini.get()));
 	cycle_target = std::shared_ptr<CycleTarget>(new CycleTarget(this));
 	experience = std::shared_ptr<Experience>(new Experience(this));
 
-	if (!ini->exists("Zeal", "MouseSmoothing"))
-		ini->setValue<bool>("Zeal", "MouseSmoothing", true);
-	//load settings from eqclient.ini
-	camera_mods->smoothing = ini->getValue<bool>("Zeal", "MouseSmoothing");
+
+
 	looting_hook->hide_looted = ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
 }
 

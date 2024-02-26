@@ -110,11 +110,49 @@ ChatCommands::ChatCommands(ZealService* zeal)
 	add("/smoothing", {},
 		[](std::vector<std::string>& args) {
 
-			ZealService::get_instance()->camera_mods->set_smoothing(!ZealService::get_instance()->camera_mods->smoothing);
-			if (ZealService::get_instance()->camera_mods->smoothing)
-				Zeal::EqGame::print_chat("Zeal mouse look smoothing enabled.");
+			if (args.size() == 3) //the first arg is the command name itself
+			{
+				float x_sens = 0;
+				float y_sens = 0;
+				try {
+					x_sens = std::stof(args[1]);
+					ZealService::get_instance()->camera_mods->user_sensitivity_x = x_sens;
+				}
+				catch (const std::invalid_argument& e) {
+					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
+					return true;
+				}
+				catch (const std::out_of_range& e) {
+					Zeal::EqGame::print_chat("Out of range: %s", e.what());
+					return true;
+				}
+				try {
+					y_sens = std::stof(args[2]);
+					ZealService::get_instance()->camera_mods->user_sensitivity_y = y_sens;
+				}
+				catch (const std::invalid_argument& e) {
+					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
+					return true;
+				}
+				catch (const std::out_of_range& e) {
+					Zeal::EqGame::print_chat("Out of range: %s", e.what());
+					return true;
+				}
+				ZealService::get_instance()->camera_mods->set_smoothing(true);
+
+				
+				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", ZealService::get_instance()->camera_mods->user_sensitivity_x);
+				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", ZealService::get_instance()->camera_mods->user_sensitivity_y);
+				Zeal::EqGame::print_chat("New camera sensitivity [%f] [%f]", ZealService::get_instance()->camera_mods->user_sensitivity_x, ZealService::get_instance()->camera_mods->user_sensitivity_y);
+			}
 			else
-				Zeal::EqGame::print_chat("Zeal mouse look smoothing disabled.");
+			{
+				ZealService::get_instance()->camera_mods->set_smoothing(!ZealService::get_instance()->camera_mods->smoothing);
+				if (ZealService::get_instance()->camera_mods->smoothing)
+					Zeal::EqGame::print_chat("Zeal mouse look smoothing enabled.");
+				else
+					Zeal::EqGame::print_chat("Zeal mouse look smoothing disabled.");
+			}
 			return true;
 		});
 	add("/camp", {},

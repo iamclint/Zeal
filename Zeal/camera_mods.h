@@ -7,8 +7,8 @@ class CameraMods
 {
 public:
 	std::chrono::steady_clock::time_point prevTime; 
-	float sensitivity_x = 0.7f;
-	float sensitivity_y = 0.4f;
+	float user_sensitivity_x = 0.7f;
+	float user_sensitivity_y = 0.3f;
 	int eq_ptr = 0;
 	bool smoothing;
 	float height;
@@ -26,9 +26,12 @@ public:
 	void proc_mouse();
 	WNDPROC prev_wndproc;
 	HWND game_hwnd;
-	CameraMods(class ZealService* pHookWrapper);
+	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:
+	float sensitivity_x = 0.7f;
+	float sensitivity_y = 0.4f;
+	void LoadSettings(class IO_ini* ini);
 	void LerpCameraZooom();
 	Vec2 previous_mouse_pos;
 	Vec2 mouse_delta;

@@ -276,8 +276,8 @@ void CameraMods::callback_main()
         fps = 1000.0f / elapsedTime;
     }
 
-    sensitivity_x = .7f * (fps / 144.f);
-    sensitivity_y = .3f * (fps / 144.f);
+    sensitivity_x = user_sensitivity_x * (fps / 144.f);
+    sensitivity_y = user_sensitivity_y * (fps / 144.f);
 
     float current_sens = (float)(*(byte*)0x798b0c);
     float multiplier = current_sens / 4.0f;
@@ -298,12 +298,27 @@ void _fastcall doCharacterSelection(int t, int u)
     zeal->camera_mods->toggle_zeal_cam(false);
     zeal->hooks->hook_map["DoCharacterSelection"]->original(doCharacterSelection)(t, u);
 }
+void CameraMods::LoadSettings(IO_ini* ini)
+{
 
-CameraMods::CameraMods(ZealService* zeal)
+    if (!ini->exists("Zeal", "MouseSmoothing"))
+        ini->setValue<bool>("Zeal", "MouseSmoothing", true);
+    if (!ini->exists("Zeal", "MouseSensitivityX"))
+        ini->setValue<float>("Zeal", "MouseSensitivityX", user_sensitivity_x);
+    if (!ini->exists("Zeal", "MouseSensitivityY"))
+        ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
+
+    smoothing = ini->getValue<bool>("Zeal", "MouseSmoothing");
+    user_sensitivity_x = ini->getValue<float>("Zeal", "MouseSensitivityX");
+    user_sensitivity_y = ini->getValue<float>("Zeal", "MouseSensitivityY");
+}
+CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {
     mem::write<byte>(0x53fa50, 03); //allow for strafing whenever in zeal cam
     mem::write<byte>(0x53f648, 03); //allow for strafing whenever in zeal cam
-    smoothing = true;
+
+    LoadSettings(ini);
+
     lastTime = std::chrono::steady_clock::now();
     fps = 0;
     height = 0;
