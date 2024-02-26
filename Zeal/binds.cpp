@@ -125,7 +125,7 @@ void Binds::add_binds()
 				Zeal::EqGame::set_target(ent);
 		}
 		});
-	add_bind(214, "Toggle all containers", "OpenCloseContainers", key_category::UI | key_category::Commands, [](int key_down) {
+	add_bind(215, "Toggle all containers", "OpenCloseContainers", key_category::UI | key_category::Commands, [](int key_down) {
 		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
@@ -157,7 +157,7 @@ void Binds::add_binds()
 
 		}
 		});
-	add_bind(215, "ToggleLastTwo", "Toggle last two targets", key_category::Target, [this](int key_down) {
+	add_bind(216, "Toggle last two targets", "ToggleLastTwo", key_category::Target, [this](int key_down) {
 		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
