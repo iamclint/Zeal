@@ -155,7 +155,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return true;
 		});
-	add("/camp", {},
+	add("/camp", {"/camp server", "/camp desktop"},
 		[](std::vector<std::string>& args) {
 
 			Zeal::EqGame::change_stance(Stance::Sit);
