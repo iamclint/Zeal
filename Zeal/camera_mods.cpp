@@ -281,8 +281,8 @@ void CameraMods::callback_main()
 
     if (*Zeal::EqGame::camera_view == zeal_cam)
     {
-        sensitivity_x = user_sensitivity_x_3rd;
-        sensitivity_y = user_sensitivity_y_3rd;
+        sensitivity_x = user_sensitivity_x_3rd * (fps / 144.f);
+        sensitivity_y = user_sensitivity_y_3rd * (fps / 144.f);
     }
 
     float current_sens = (float)(*(byte*)0x798b0c);
