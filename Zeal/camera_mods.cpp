@@ -279,6 +279,12 @@ void CameraMods::callback_main()
     sensitivity_x = user_sensitivity_x * (fps / 144.f);
     sensitivity_y = user_sensitivity_y * (fps / 144.f);
 
+    if (*Zeal::EqGame::camera_view == zeal_cam)
+		{
+        sensitivity_x = user_sensitivity_x_3rd;
+        sensitivity_y = user_sensitivity_y_3rd;
+    }
+
     float current_sens = (float)(*(byte*)0x798b0c);
     float multiplier = current_sens / 4.0f;
     sensitivity_x *= multiplier;
@@ -307,10 +313,17 @@ void CameraMods::LoadSettings(IO_ini* ini)
         ini->setValue<float>("Zeal", "MouseSensitivityX", user_sensitivity_x);
     if (!ini->exists("Zeal", "MouseSensitivityY"))
         ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
+    if (!ini->exists("Zeal", "MouseSensitivityX3rd"))
+        ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x);
+    if (!ini->exists("Zeal", "MouseSensitivityY3rd"))
+        ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y);
 
     smoothing = ini->getValue<bool>("Zeal", "MouseSmoothing");
     user_sensitivity_x = ini->getValue<float>("Zeal", "MouseSensitivityX");
     user_sensitivity_y = ini->getValue<float>("Zeal", "MouseSensitivityY");
+    user_sensitivity_x_3rd = ini->getValue<float>("Zeal", "MouseSensitivityX3rd");
+    user_sensitivity_y_3rd = ini->getValue<float>("Zeal", "MouseSensitivityY3rd");
+
 }
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {

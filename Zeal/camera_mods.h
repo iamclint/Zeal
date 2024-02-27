@@ -9,6 +9,8 @@ public:
 	std::chrono::steady_clock::time_point prevTime; 
 	float user_sensitivity_x = 0.7f;
 	float user_sensitivity_y = 0.3f;
+	float user_sensitivity_x_3rd = 0.7f;
+	float user_sensitivity_y_3rd = 0.3f;
 	int eq_ptr = 0;
 	bool smoothing;
 	float height;
