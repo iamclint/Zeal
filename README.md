@@ -25,9 +25,14 @@ ___
 - `/timestamp`
   - **Aliases:** `/tms`
   - **Description:** Shows message timestamps.
+
+- `/outputfile`
+  - **Arguments:** `inventory [optional_name]`
+  - **Example:** `/outputfile inventory my_inventory`
+  - **Description:** `inventory` outputs information about your equipment, inventory bag slots, held item, and bank slots to a file.
 ___
 ### Binds
-- Cycle through nearest NPCs 
+- Cycle through nearest NPCs
 - Cycle through nearest PCs
 - Strafe Right
 - Strafe Left
@@ -39,8 +44,8 @@ ___
   - `23` EXP Per Hour
 
 - **Label EqType's**
-  - `80` Mana/Max Mana 
-  - `81` Exp Per Hour Percentage 
+  - `80` Mana/Max Mana
+  - `81` Exp Per Hour Percentage
   - `124` Current Mana
   - `125` Max Mana
 ___
