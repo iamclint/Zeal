@@ -107,7 +107,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
-	add("/smoothing", {},
+	add("/zealcam", {"/smoothing"},
 		[](std::vector<std::string>& args) {
 
 			if (args.size() == 3) //the first arg is the command name itself

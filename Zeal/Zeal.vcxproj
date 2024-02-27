@@ -157,6 +157,7 @@
     <ClInclude Include="chat.h" />
     <ClInclude Include="commands.h" />
     <ClInclude Include="cycle_target.h" />
+    <ClInclude Include="EqAddresses.h" />
     <ClInclude Include="EqFunctions.h" />
     <ClInclude Include="eqstr.h" />
     <ClInclude Include="EqStructures.h" />

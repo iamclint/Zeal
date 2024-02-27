@@ -108,6 +108,9 @@
     <ClInclude Include="chat.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="EqAddresses.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
