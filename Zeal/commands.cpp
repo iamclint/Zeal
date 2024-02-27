@@ -235,6 +235,26 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			Zeal::EqGame::do_say(true, "#showlootlockouts");
 			return true;
 		});
+	add("/zeal", { "/zea" },
+		[this](std::vector<std::string>& args) {
+			if (args.size() == 1)
+			{
+				std::stringstream ss;
+				ss << "Version: display current Zeal version" << std::endl;
+				Zeal::EqGame::print_chat(ss.str());
+				return true;
+			}
+			if (args.size() > 1 && caseInsensitiveStringCompare(args[1], "version"))
+			{
+				std::stringstream ss;
+				ss << "Zeal version: " << ZEAL_VERSION << std::endl;
+
+				Zeal::EqGame::print_chat(ss.str());
+				return true;
+			}
+			return false;
+
+		});
 	add("/help", {"/hel"},
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)
@@ -276,26 +296,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 			
-		});
-	add("/zeal", { "/zea" },
-		[this](std::vector<std::string>& args) {
-			if (args.size() == 1)
-			{
-				std::stringstream ss;
-				ss << "Version: display current Zeal version" << std::endl;
-				Zeal::EqGame::print_chat(ss.str());
-				return true;
-			}
-			if (args.size() > 1 && caseInsensitiveStringCompare(args[1], "version"))
-			{
-				std::stringstream ss;
-				ss << "Zeal version: " << ZEAL_VERSION << std::endl;
-
-				Zeal::EqGame::print_chat(ss.str());
-				return true;
-			}
-			return false;
-
 		});
 	zeal->hooks->Add("commands", Zeal::EqGame::EqGameInternal::fn_interpretcmd, InterpretCommand, hook_type_detour);
 }
