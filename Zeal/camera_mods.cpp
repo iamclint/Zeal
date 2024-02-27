@@ -314,9 +314,9 @@ void CameraMods::LoadSettings(IO_ini* ini)
     if (!ini->exists("Zeal", "MouseSensitivityY"))
         ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
     if (!ini->exists("Zeal", "MouseSensitivityX3rd"))
-        ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x);
+        ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x_3rd);
     if (!ini->exists("Zeal", "MouseSensitivityY3rd"))
-        ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y);
+        ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y_3rd);
 
     smoothing = ini->getValue<bool>("Zeal", "MouseSmoothing");
     user_sensitivity_x = ini->getValue<float>("Zeal", "MouseSensitivityX");
