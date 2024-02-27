@@ -46,7 +46,7 @@ ___
   - `124` Current Mana
   - `125` Max Mana
 ___
-###Building and Installation
+### Building and Installation
 <br>
 32bit x86
 <br>
