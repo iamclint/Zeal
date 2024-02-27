@@ -117,6 +117,47 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				try {
 					x_sens = std::stof(args[1]);
 					ZealService::get_instance()->camera_mods->user_sensitivity_x = x_sens;
+					ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd = x_sens;
+				}
+				catch (const std::invalid_argument& e) {
+					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
+					return true;
+				}
+				catch (const std::out_of_range& e) {
+					Zeal::EqGame::print_chat("Out of range: %s", e.what());
+					return true;
+				}
+				try {
+					y_sens = std::stof(args[2]);
+					ZealService::get_instance()->camera_mods->user_sensitivity_y = y_sens;
+					ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd = y_sens;
+				}
+				catch (const std::invalid_argument& e) {
+					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
+					return true;
+				}
+				catch (const std::out_of_range& e) {
+					Zeal::EqGame::print_chat("Out of range: %s", e.what());
+					return true;
+				}
+				ZealService::get_instance()->camera_mods->set_smoothing(true);
+
+				
+				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", ZealService::get_instance()->camera_mods->user_sensitivity_x);
+				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", ZealService::get_instance()->camera_mods->user_sensitivity_y);
+				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
+				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
+				Zeal::EqGame::print_chat("New camera sensitivity [%f] [%f]", ZealService::get_instance()->camera_mods->user_sensitivity_x, ZealService::get_instance()->camera_mods->user_sensitivity_y);
+			}
+			else if (args.size() == 5)
+			{
+				float x_sens = 0;
+				float y_sens = 0;
+				float x_sens_3rd = 0;
+				float y_sens_3rd = 0;
+				try {
+					x_sens = std::stof(args[1]);
+					ZealService::get_instance()->camera_mods->user_sensitivity_x = x_sens;
 				}
 				catch (const std::invalid_argument& e) {
 					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
@@ -138,13 +179,40 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					Zeal::EqGame::print_chat("Out of range: %s", e.what());
 					return true;
 				}
+				try {
+					x_sens_3rd = std::stof(args[3]);
+					ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd = x_sens_3rd;
+				}
+				catch (const std::invalid_argument& e) {
+					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
+					return true;
+				}
+				catch (const std::out_of_range& e) {
+					Zeal::EqGame::print_chat("Out of range: %s", e.what());
+					return true;
+				}
+				try {
+					y_sens_3rd = std::stof(args[4]);
+					ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd = y_sens_3rd;
+				}
+				catch (const std::invalid_argument& e) {
+					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
+					return true;
+				}
+				catch (const std::out_of_range& e) {
+					Zeal::EqGame::print_chat("Out of range: %s", e.what());
+					return true;
+				}
 				ZealService::get_instance()->camera_mods->set_smoothing(true);
 
-				
+
 				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", ZealService::get_instance()->camera_mods->user_sensitivity_x);
 				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", ZealService::get_instance()->camera_mods->user_sensitivity_y);
-				Zeal::EqGame::print_chat("New camera sensitivity [%f] [%f]", ZealService::get_instance()->camera_mods->user_sensitivity_x, ZealService::get_instance()->camera_mods->user_sensitivity_y);
-			}
+				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
+				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
+
+				Zeal::EqGame::print_chat("New camera sensitivity FirstPerson: [%f] [%f] ThirdPerson: [%f] [%f]", ZealService::get_instance()->camera_mods->user_sensitivity_x, ZealService::get_instance()->camera_mods->user_sensitivity_y, ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd, ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
+			} 
 			else
 			{
 				ZealService::get_instance()->camera_mods->set_smoothing(!ZealService::get_instance()->camera_mods->smoothing);
