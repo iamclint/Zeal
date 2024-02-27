@@ -18,6 +18,7 @@ public:
 	std::shared_ptr<raid> raid_hook = nullptr;
 	std::shared_ptr<eqstr> eqstr_hook = nullptr;
 	std::shared_ptr<chat> chat_hook = nullptr;
+  std::shared_ptr<OutputFile> outputfile_hook = nullptr;
 
 
 	//other features

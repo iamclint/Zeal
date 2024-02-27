@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <cctype>
 
-bool caseInsensitiveStringCompare(const std::string& str1, const std::string& str2) {
+static bool caseInsensitiveStringCompare(const std::string& str1, const std::string& str2) {
 	// Check if the strings are of different lengths, if so, they can't match
 	if (str1.length() != str2.length()) {
 		return false;

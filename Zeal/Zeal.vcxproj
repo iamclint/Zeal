@@ -173,6 +173,7 @@
     <ClInclude Include="camera_mods.h" />
     <ClInclude Include="InstructionLength.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="outputfile.h" />
     <ClInclude Include="raid.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="vectors.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="main_loop.cpp" />
     <ClCompile Include="memory.cpp" />
     <ClCompile Include="camera_mods.cpp" />
+    <ClInclude Include="outputfile.cpp" />
     <ClCompile Include="raid.cpp" />
     <ClCompile Include="vectors.cpp" />
     <ClCompile Include="Zeal.cpp" />
