@@ -207,7 +207,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
 				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
 
-				Zeal::EqGame::print_chat("New camera sensitivity First: [%f] [%f] Third: [%f] [%f]", ZealService::get_instance()->camera_mods->user_sensitivity_x, ZealService::get_instance()->camera_mods->user_sensitivity_y, ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd, ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
+				Zeal::EqGame::print_chat("New camera sensitivity FirstPerson: [%f] [%f] ThirdPerson: [%f] [%f]", ZealService::get_instance()->camera_mods->user_sensitivity_x, ZealService::get_instance()->camera_mods->user_sensitivity_y, ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd, ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
 			} 
 			else
 			{
