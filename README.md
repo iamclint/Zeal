@@ -4,9 +4,10 @@ ___
   - **Aliases:** `/hideco`, `/hidec`, `/hc`
   - **Description:** Hides a corpse after you have looted it.
 
-- `/hidecorpse looted`
+- `/hidecorpse`
+  - **Arguments:** `looted`, `none`
   - **Aliases:** `/hideco`, `/hidec`, `/hc`
-  - **Description:** Hides a corpse after you have looted it.
+  - **Description:** `looted` Hides a corpse after you have looted it., `none` reveals all hidden corpses
 
 - `/showlootlockouts`
   - **Aliases:** `/showlootlockout`, `/showlockout`, `/sll`
