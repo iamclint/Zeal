@@ -1,51 +1,55 @@
-<pre>
-QOL tool for the takp client
+### Commands
+___
+- `/hidecorpse`
+  - **Aliases:** `/hideco`, `/hidec`, `/hc`
+  - **Description:** Hides a corpse after you have looted it.
 
-<b>Commands</b>
-/autoinventory  [takes whats on your cursor and inventories it]
-/autoinv [short code for /autoinventory]
-/ai [short code for /autoinventory]
+- `/hidecorpse looted`
+  - **Aliases:** `/hideco`, `/hidec`, `/hc`
+  - **Description:** Hides a corpse after you have looted it.
 
-/hidecorpse looted  [hides a corpse after you have looted it]
-/hideco [short code for /hidecorpse]
-/hidec [short code for /autoinventory]
-/hc [short code for /autoinventory]
+- `/showlootlockouts`
+  - **Aliases:** `/showlootlockout`, `/showlockout`, `/sll`
+  - **Description:** Shows you your current loot lockouts on Quarm.
 
-/showlootlockouts [shows you your current loot lockouts on quarm]
-/showlootlockout [short code for /showlootlockouts]
-/showlockout [short code for /showlootlockouts]
-/sll [short code for /showlootlockouts]
+- `/zealcam`
+  - **Aliases:** `/smoothing`
+  - **Arguments:** `x y`
+  - **Example:** `/zealcam 0.7 0.2`
+  - **Description:** Toggles Zeal's mouse look smoothing methods.
 
-/smoothing [toggles zeals mouse look smoothing methods]
-/smoothing x y [/smoothing 0.7 0.2 to add custom smoothing sensitivity]
+- `/camp`
+  - **Description:** Auto sits before camping.
 
-/camp [auto sits]
+- `/help zeal`
+  - **Description:** Shows the custom Zeal commands.
 
-/help zeal [shows the custom zeal commands]
+- `/timestamp`
+  - **Aliases:** `/tms`
+  - **Description:** Shows message timestamps.
+___
+### Binds
+- Cycle through nearest NPCs 
+- Cycle through nearest PCs
+- Strafe Right
+- Strafe Left
+- Auto Inventory
+- Toggle last 2 targets
+___
+### UI
+- **Gauge EqType's**
+  - `23` EXP Per Hour
 
-/timestamp [shows message timestamps]
-/tms [short code for /timestamp]
-  
-<b>Binds</b>
-Cycle through nearest NPCs 
-Cycle through nearest PCs
-Strafe Right
-Strafe Left
-Auto Inventory
-
-<b>Gauge Types</b>
-23  EXP Per Hour 
-
-<b>Label Types</b>
-80 Mana/Max Mana 
-81 Exp Per Hour Percentage 
-124 Current Mana
-125 Max Mana
-
-<b>Building</b>
+- **Label EqType's**
+  - `80` Mana/Max Mana 
+  - `81` Exp Per Hour Percentage 
+  - `124` Current Mana
+  - `125` Max Mana
+___
+###Building and Installation
+<br>
 32bit x86
+<br>
 file extension .asi
-
-<b>Installation</b>
+<br>
 move zeal.asi into the root of your game folder
-</pre>
