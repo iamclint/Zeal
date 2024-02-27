@@ -14,8 +14,8 @@ ___
 
 - `/zealcam`
   - **Aliases:** `/smoothing`
-  - **Arguments:** `x y`
-  - **Example:** `/zealcam 0.7 0.2`
+  - **Arguments:** `x y 3rdperson_x 3rdperson_y`
+  - **Example:** `/zealcam 0.7 0.2 0.7 0.2` if 3rd person arguments are not supplied, the first x and y are applied to both
   - **Description:** Toggles Zeal's mouse look smoothing methods.
 
 - `/camp`
