@@ -19,6 +19,10 @@ ___
 - `/camp`
   - **Description:** Auto sits before camping.
 
+- `/zeal`
+  - **Arguments:** `version`
+  - **Description:** Shows the version of zeal.
+
 - `/help zeal`
   - **Description:** Shows the custom Zeal commands.
 
