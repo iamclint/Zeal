@@ -8,8 +8,8 @@ QOL tool for the takp client
 
 /hidecorpse looted  [hides a corpse after you have looted it]
 /hideco [short code for /hidecorpse]
-/hidec [short code for /autoinventory]
-/hc [short code for /autoinventory]
+/hidec [short code for /hidecorpse]
+/hc [short code for /hidecorpse]
 
 /showlootlockouts [shows you your current loot lockouts on quarm]
 /showlootlockout [short code for /showlootlockouts]
@@ -19,26 +19,26 @@ QOL tool for the takp client
 /smoothing [toggles zeals mouse look smoothing methods]
 /smoothing x y [/smoothing 0.7 0.2 to add custom smoothing sensitivity]
 
-/camp [auto sits]
+/camp (server|desktop) [auto sits]
 
 /help zeal [shows the custom zeal commands]
 
 /timestamp [shows message timestamps]
 /tms [short code for /timestamp]
-  
+
 <b>Binds</b>
-Cycle through nearest NPCs 
+Cycle through nearest NPCs
 Cycle through nearest PCs
 Strafe Right
 Strafe Left
 Auto Inventory
 
 <b>Gauge Types</b>
-23  EXP Per Hour 
+23  EXP Per Hour
 
 <b>Label Types</b>
-80 Mana/Max Mana 
-81 Exp Per Hour Percentage 
+80 Mana/Max Mana
+81 Exp Per Hour Percentage
 124 Current Mana
 125 Max Mana
 
