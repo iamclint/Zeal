@@ -1,10 +1,6 @@
 ### Commands
 ___
 - `/hidecorpse`
-  - **Aliases:** `/hideco`, `/hidec`, `/hc`
-  - **Description:** Hides a corpse after you have looted it.
-
-- `/hidecorpse`
   - **Arguments:** `looted`, `none`
   - **Aliases:** `/hideco`, `/hidec`, `/hc`
   - **Description:** `looted` Hides a corpse after you have looted it., `none` reveals all hidden corpses
