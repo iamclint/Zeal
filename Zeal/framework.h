@@ -15,6 +15,7 @@
 #include "raid.h"
 #include "eqstr.h"
 #include "chat.h"
+#include "outputfile.h"
 
 #include "IO_ini.h"
 #include "main_loop.h"
