@@ -25,6 +25,11 @@ ___
 - `/timestamp`
   - **Aliases:** `/tms`
   - **Description:** Shows message timestamps.
+
+- `/zeal`
+  - **Arguments:** `version`
+  - **Description:** Shows the version of zeal.
+
 ___
 ### Binds
 - Cycle through nearest NPCs 
