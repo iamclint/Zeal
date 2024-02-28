@@ -10,10 +10,17 @@ Binds::~Binds()
 void ExecuteCmd(int cmd, int isdown, int unk2)
 {
 	ZealService* zeal = ZealService::get_instance();
-	if (zeal->binds_hook->KeyMapFunctions.count(cmd) > 0)
-		zeal->binds_hook->KeyMapFunctions[cmd](isdown);
-	else
-		zeal->hooks->hook_map["executecmd"]->original(ExecuteCmd)(cmd, isdown, unk2);
+	//if (!Zeal::EqGame::game_wants_input())
+	{
+		if (zeal->binds_hook->KeyMapFunctions.count(cmd) > 0)
+			zeal->binds_hook->KeyMapFunctions[cmd](isdown);
+		else
+			zeal->hooks->hook_map["executecmd"]->original(ExecuteCmd)(cmd, isdown, unk2);
+	}
+	//else
+	//{
+	//	zeal->hooks->hook_map["executecmd"]->original(ExecuteCmd)(cmd, isdown, unk2);
+	//}
 }
 
 void __fastcall InitKeyboardAssignments(int t, int unused)
@@ -64,7 +71,7 @@ void Binds::read_ini()
 void Binds::set_strafe(strafe_direction dir) 
 {
 	//slightly revised so the game properly sets speed based on encumber and handles the stance checks
-	if (dir == strafe_direction::None)
+	if (dir == strafe_direction::None || !Zeal::EqGame::can_move())
 	{
 		current_strafe = strafe_direction::None;
 		*Zeal::EqGame::strafe_direction = 0;
@@ -97,6 +104,7 @@ void Binds::add_binds()
 {
 	//just start binds at 211 to avoid overwriting any existing cmd/bind
 	add_bind(211, "Strafe Left", "StrafeLeft", key_category::Movement, [this](int key_down) {
+
 		if (!key_down && current_strafe==strafe_direction::Left)
 			set_strafe(strafe_direction::None);
 		else if (key_down)

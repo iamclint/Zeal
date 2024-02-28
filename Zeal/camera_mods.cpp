@@ -11,19 +11,7 @@ float Smooth(float rawDelta, float smoothDelta) {
     return std::lerp(smoothDelta, static_cast<float>(rawDelta), 1.0f / 1.5f);
 }
 static int zeal_cam = Zeal::EqEnums::CameraView::ThirdPerson3;
-bool can_move()
-{
-    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_controlled();
-    if (!self || !self->CharInfo)
-        return false;
-    if (!Zeal::EqGame::is_view_actor_me())
-        return false;
-    if (self->CharInfo->StunnedState)
-        return false;
-    if (self->StandingState == Zeal::EqEnums::Stance::Standing || self->StandingState == Zeal::EqEnums::Stance::Ducking)
-        return true;
-    return false;
-}
+
 float get_pitch(Vec3 cameraPos, Vec3 targetPos) {
     Vec3 direction = targetPos - cameraPos;
     float horizontalDistance = (float)direction.Length2D();
@@ -178,7 +166,7 @@ void CameraMods::proc_mouse()
             if (*(byte*)0x7985E8)
                 smoothMouseDeltaY = -smoothMouseDeltaY;
 
-            if (can_move())
+            if (Zeal::EqGame::can_move())
             {
                 if (fabs(smoothMouseDeltaX) > 0.1)
                     self->MovementSpeedHeading = -smoothMouseDeltaX;

@@ -32,7 +32,13 @@ namespace Zeal
 
 		bool game_wants_input()
 		{
-			return EqGameInternal::UI_ChatInputCheck();
+			int r = EqGameInternal::UI_ChatInputCheck();
+			//int wnd = EqGameInternal::GetFocusWnd(*(int*)0x809db4, 0);
+			//if (wnd)
+			//{
+			//	int f = EqGameInternal::CXWndIsType(wnd, 0, 2);
+			//}
+			return r;
 		}
 
 		void get_camera_location()
@@ -144,6 +150,20 @@ namespace Zeal
 				print_chat("start: %s  end: %s dist: %f result: %i", start.toString().c_str(), end.toString().c_str(), result.Dist(end), x);
 			}
 			return result.Dist(end)>0.1; //return true if there was a collision
+		}
+
+		bool can_move()
+		{
+			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_controlled();
+			if (!self)
+				return false;
+			if (!Zeal::EqGame::is_view_actor_me())
+				return false;
+			if (self->CharInfo && self->CharInfo->StunnedState)
+				return false;
+			if (self->StandingState == Zeal::EqEnums::Stance::Standing || self->StandingState == Zeal::EqEnums::Stance::Ducking)
+				return true;
+			return false;
 		}
 
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable)
