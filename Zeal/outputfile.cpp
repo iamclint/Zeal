@@ -191,7 +191,7 @@ void OutputFile::write_to_file(std::string data, std::string file_arg, std::stri
 
 OutputFile::OutputFile(ZealService* zeal)
 {
-  zeal->commands_hook->add("/outputfile", {},
+  zeal->commands_hook->add("/outputfile", { "/output", "/out" },
     [this](std::vector<std::string>& args) {
       if (args.size() == 1 || args.size() > 3)
       {
