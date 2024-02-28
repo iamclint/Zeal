@@ -16,6 +16,10 @@ ___
   - **Example:** `/zealcam 0.7 0.2 0.7 0.2` if 3rd person arguments are not supplied, the first x and y are applied to both
   - **Description:** Toggles Zeal's mouse look smoothing methods.
 
+- `/autoinventory`
+  - **Aliases:** `/autoinv`, `/ai`
+  - **Description:** Drops whatever is on your cursor into your inventory.
+
 - `/camp`
   - **Description:** Auto sits before camping.
 
@@ -31,6 +35,7 @@ ___
   - **Description:** Shows message timestamps.
 
 - `/outputfile`
+  - **Aliases:** `/output`, `/out`
   - **Arguments:** `inventory [optional_name]`
   - **Example:** `/outputfile inventory my_inventory`
   - **Description:** `inventory` outputs information about your equipment, inventory bag slots, held item, and bank slots to a file.
