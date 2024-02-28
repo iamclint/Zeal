@@ -64,8 +64,8 @@ namespace Zeal
 			static mem::function<float __fastcall(int, int)> encum_factor = 0x4bb9c7;
 			static mem::function<float __fastcall(int, int, int, int)> OpenContainer = 0x4168bd;
 			static mem::function<float __fastcall(int, int)> CloseAllContainers = 0x416a43;
-			static mem::function<float __fastcall(int, int)> GetFocusWnd = 0x5a07c0;
-			static mem::function<float __fastcall(int, int, int)> CXWndIsType = 0x571300;
+			static mem::function<int __fastcall(int, int)> GetFocusWnd = 0x5a07c0;
+			static mem::function<int __fastcall(int, int, int)> CXWndIsType = 0x571300;
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
 		//// Wrapper function to call CXStr_PrintString

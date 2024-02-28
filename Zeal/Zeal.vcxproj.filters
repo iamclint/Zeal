@@ -108,11 +108,14 @@
     <ClInclude Include="chat.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
-    <ClInclude Include="outputfile.h">
-      <Filter>Header Files\hooks</Filter>
-    </ClInclude>
     <ClInclude Include="EqAddresses.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="outputfile.h">
+      <Filter>Header Files\other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -170,8 +173,11 @@
     <ClCompile Include="chat.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
+    <ClCompile Include="StringUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="outputfile.cpp">
-      <Filter>Source Files\hooks</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

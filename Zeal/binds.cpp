@@ -10,17 +10,17 @@ Binds::~Binds()
 void ExecuteCmd(int cmd, int isdown, int unk2)
 {
 	ZealService* zeal = ZealService::get_instance();
-	//if (!Zeal::EqGame::game_wants_input())
+	if (!Zeal::EqGame::game_wants_input()) //checks if the game wants keyboard input... don't call our binds when the game wants input
 	{
 		if (zeal->binds_hook->KeyMapFunctions.count(cmd) > 0)
 			zeal->binds_hook->KeyMapFunctions[cmd](isdown);
 		else
 			zeal->hooks->hook_map["executecmd"]->original(ExecuteCmd)(cmd, isdown, unk2);
 	}
-	//else
-	//{
-	//	zeal->hooks->hook_map["executecmd"]->original(ExecuteCmd)(cmd, isdown, unk2);
-	//}
+	else
+	{
+		zeal->hooks->hook_map["executecmd"]->original(ExecuteCmd)(cmd, isdown, unk2);
+	}
 }
 
 void __fastcall InitKeyboardAssignments(int t, int unused)
@@ -118,7 +118,7 @@ void Binds::add_binds()
 	});
 	add_bind(213, "Cycle through nearest NPCs", "CycleTargetNPC", key_category::Target, [](int key_down) {
 
-		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_next_ent(250, 1);
 			if (ent)
@@ -126,7 +126,7 @@ void Binds::add_binds()
 		}
 	});
 	add_bind(214, "Cycle through nearest PCs", "CycleTargetPC", key_category::Target, [](int key_down) {
-		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_next_ent(250, 0);
 			if (ent)
@@ -134,7 +134,7 @@ void Binds::add_binds()
 		}
 		});
 	add_bind(215, "Toggle all containers", "OpenCloseContainers", key_category::UI | key_category::Commands, [](int key_down) {
-		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 			std::vector<std::pair<Zeal::EqStructures::_EQITEMINFO*,int>> containers;
@@ -166,7 +166,7 @@ void Binds::add_binds()
 		}
 		});
 	add_bind(216, "Toggle last two targets", "ToggleLastTwo", key_category::Target, [this](int key_down) {
-		if (!key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
 			if (target)

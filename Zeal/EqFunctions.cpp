@@ -32,13 +32,12 @@ namespace Zeal
 
 		bool game_wants_input()
 		{
-			int r = EqGameInternal::UI_ChatInputCheck();
-			//int wnd = EqGameInternal::GetFocusWnd(*(int*)0x809db4, 0);
-			//if (wnd)
-			//{
-			//	int f = EqGameInternal::CXWndIsType(wnd, 0, 2);
-			//}
-			return r;
+			int chat_input = EqGameInternal::UI_ChatInputCheck();
+			int focused_wnd = EqGameInternal::GetFocusWnd(*(int*)0x809db4, 0);
+			bool focused_window_needs_input = false;
+			if (focused_wnd)
+				focused_window_needs_input = EqGameInternal::CXWndIsType(focused_wnd, 0, 2);
+			return chat_input!=0 || focused_window_needs_input;
 		}
 
 		void get_camera_location()
