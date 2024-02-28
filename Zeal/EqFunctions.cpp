@@ -88,10 +88,10 @@ namespace Zeal
 		}
 
 		bool is_view_actor_me()
-		{
-			if (get_self() && get_self()->ActorInfo)
+		{	
+			if (get_controlled() && get_controlled()->ActorInfo)
 			{
-				int my_view_actor = (int)get_self()->ActorInfo->ViewActor_;
+				int my_view_actor = (int)get_controlled()->ActorInfo->ViewActor_;
 				if ((int)get_view_actor()== my_view_actor)
 					return true;
 			}

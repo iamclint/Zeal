@@ -12,7 +12,7 @@ public:
 	float user_sensitivity_x_3rd = 0.7f;
 	float user_sensitivity_y_3rd = 0.3f;
 	int eq_ptr = 0;
-	bool smoothing;
+	bool enabled;
 	float height;
 	float fps;
 	float zeal_cam_pitch;
@@ -34,7 +34,7 @@ private:
 	float sensitivity_x = 0.7f;
 	float sensitivity_y = 0.4f;
 	void LoadSettings(class IO_ini* ini);
-	void LerpCameraZooom();
+	void InterpolateZoom();
 	Vec2 previous_mouse_pos;
 	Vec2 mouse_delta;
 	BYTE original_cam[6] = { 0 };

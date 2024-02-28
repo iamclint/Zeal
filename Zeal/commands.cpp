@@ -5,41 +5,16 @@
 #include "Zeal.h"
 #include <algorithm>
 #include <cctype>
-
-static bool caseInsensitiveStringCompare(const std::string& str1, const std::string& str2) {
-	// Check if the strings are of different lengths, if so, they can't match
-	if (str1.length() != str2.length()) {
-		return false;
-	}
-
-	// Convert both strings to lowercase and then compare
-	std::string str1Lower = str1;
-	std::string str2Lower = str2;
-	std::transform(str1Lower.begin(), str1Lower.end(), str1Lower.begin(), ::tolower);
-	std::transform(str2Lower.begin(), str2Lower.end(), str2Lower.begin(), ::tolower);
-
-	// Now, perform a case-insensitive comparison
-	return str1Lower == str2Lower;
-}
+#include "StringUtil.h"
 
 
-std::vector<std::string> splitStringBySpace(const std::string& str) {
-	std::vector<std::string> tokens;
-	std::istringstream iss(str);
-	std::string token;
 
-	while (std::getline(iss, token, ' ')) {
-		tokens.push_back(token);
-	}
-
-	return tokens;
-}
 
 void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 {
 	ZealService* zeal = ZealService::get_instance();
 	std::string str_cmd = cmd;
-	std::vector<std::string> args = splitStringBySpace(str_cmd);
+	std::vector<std::string> args =  StringUtil::split(str_cmd," ");
 
 	if (args.size() > 0)
 	{
@@ -88,141 +63,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			Zeal::EqGame::EqGameInternal::auto_inventory(a1, a2, 0);
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
-
-	add("/hidecorpse", { "/hc", "/hideco", "/hidec"},
-		[](std::vector<std::string>& args) {
-			if (args.size() > 1 && caseInsensitiveStringCompare(args[1], "looted"))
-			{
-				ZealService::get_instance()->looting_hook->set_hide_looted(!ZealService::get_instance()->looting_hook->hide_looted);
-				if (ZealService::get_instance()->looting_hook->hide_looted)
-					Zeal::EqGame::print_chat("Corpses will be hidden after looting.");
-				else
-					Zeal::EqGame::print_chat("Corpses will no longer be hidden after looting.");
-				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
-			}
-			if (args.size() > 1 && args[1] == "none")
-			{
-				ZealService::get_instance()->looting_hook->set_hide_looted(false);
-				return false; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
-			}
-			return false;
-		});
-	add("/zealcam", {"/smoothing"},
-		[](std::vector<std::string>& args) {
-
-			if (args.size() == 3) //the first arg is the command name itself
-			{
-				float x_sens = 0;
-				float y_sens = 0;
-				try {
-					x_sens = std::stof(args[1]);
-					ZealService::get_instance()->camera_mods->user_sensitivity_x = x_sens;
-					ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd = x_sens;
-				}
-				catch (const std::invalid_argument& e) {
-					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
-					return true;
-				}
-				catch (const std::out_of_range& e) {
-					Zeal::EqGame::print_chat("Out of range: %s", e.what());
-					return true;
-				}
-				try {
-					y_sens = std::stof(args[2]);
-					ZealService::get_instance()->camera_mods->user_sensitivity_y = y_sens;
-					ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd = y_sens;
-				}
-				catch (const std::invalid_argument& e) {
-					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
-					return true;
-				}
-				catch (const std::out_of_range& e) {
-					Zeal::EqGame::print_chat("Out of range: %s", e.what());
-					return true;
-				}
-				ZealService::get_instance()->camera_mods->set_smoothing(true);
-
-				
-				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", ZealService::get_instance()->camera_mods->user_sensitivity_x);
-				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", ZealService::get_instance()->camera_mods->user_sensitivity_y);
-				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
-				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
-				Zeal::EqGame::print_chat("New camera sensitivity [%f] [%f]", ZealService::get_instance()->camera_mods->user_sensitivity_x, ZealService::get_instance()->camera_mods->user_sensitivity_y);
-			}
-			else if (args.size() == 5)
-			{
-				float x_sens = 0;
-				float y_sens = 0;
-				float x_sens_3rd = 0;
-				float y_sens_3rd = 0;
-				try {
-					x_sens = std::stof(args[1]);
-					ZealService::get_instance()->camera_mods->user_sensitivity_x = x_sens;
-				}
-				catch (const std::invalid_argument& e) {
-					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
-					return true;
-				}
-				catch (const std::out_of_range& e) {
-					Zeal::EqGame::print_chat("Out of range: %s", e.what());
-					return true;
-				}
-				try {
-					y_sens = std::stof(args[2]);
-					ZealService::get_instance()->camera_mods->user_sensitivity_y = y_sens;
-				}
-				catch (const std::invalid_argument& e) {
-					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
-					return true;
-				}
-				catch (const std::out_of_range& e) {
-					Zeal::EqGame::print_chat("Out of range: %s", e.what());
-					return true;
-				}
-				try {
-					x_sens_3rd = std::stof(args[3]);
-					ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd = x_sens_3rd;
-				}
-				catch (const std::invalid_argument& e) {
-					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
-					return true;
-				}
-				catch (const std::out_of_range& e) {
-					Zeal::EqGame::print_chat("Out of range: %s", e.what());
-					return true;
-				}
-				try {
-					y_sens_3rd = std::stof(args[4]);
-					ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd = y_sens_3rd;
-				}
-				catch (const std::invalid_argument& e) {
-					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
-					return true;
-				}
-				catch (const std::out_of_range& e) {
-					Zeal::EqGame::print_chat("Out of range: %s", e.what());
-					return true;
-				}
-				ZealService::get_instance()->camera_mods->set_smoothing(true);
-
-
-				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", ZealService::get_instance()->camera_mods->user_sensitivity_x);
-				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", ZealService::get_instance()->camera_mods->user_sensitivity_y);
-				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
-				ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
-
-				Zeal::EqGame::print_chat("New camera sensitivity FirstPerson: [%f] [%f] ThirdPerson: [%f] [%f]", ZealService::get_instance()->camera_mods->user_sensitivity_x, ZealService::get_instance()->camera_mods->user_sensitivity_y, ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd, ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
-			} 
-			else
-			{
-				ZealService::get_instance()->camera_mods->set_smoothing(!ZealService::get_instance()->camera_mods->smoothing);
-				if (ZealService::get_instance()->camera_mods->smoothing)
-					Zeal::EqGame::print_chat("Zeal mouse look smoothing enabled.");
-				else
-					Zeal::EqGame::print_chat("Zeal mouse look smoothing disabled.");
-			}
-			return true;
-		});
 	add("/camp", {},
 		[](std::vector<std::string>& args) {
 
@@ -240,15 +80,13 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			if (args.size() == 1)
 			{
 				std::stringstream ss;
-				ss << "Version: display current Zeal version" << std::endl;
-				Zeal::EqGame::print_chat(ss.str());
+				Zeal::EqGame::print_chat("Available args: version"); //leave room for more args on this command for later
 				return true;
 			}
-			if (args.size() > 1 && caseInsensitiveStringCompare(args[1], "version"))
+			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "version"))
 			{
 				std::stringstream ss;
 				ss << "Zeal version: " << ZEAL_VERSION << std::endl;
-
 				Zeal::EqGame::print_chat(ss.str());
 				return true;
 			}
@@ -270,7 +108,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::print_chat(ss.str());
 				return true;
 			}
-			if (args.size() > 1 && caseInsensitiveStringCompare(args[1],"zeal"))
+			if (args.size() > 1 && StringUtil::caseInsensitive(args[1],"zeal"))
 			{
 				std::stringstream ss;
 				ss << "List of commands" << std::endl;

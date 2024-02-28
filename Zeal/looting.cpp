@@ -3,7 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
-
+#include "StringUtil.h"
 //void __fastcall finalize_loot(int uk, int lootwnd_ptr)
 //{
 //	Zeal::EqStructures::Entity* corpse =  Zeal::EqGame::get_active_corpse();
@@ -35,6 +35,25 @@ looting::~looting()
 
 looting::looting(ZealService* zeal)
 {
+	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" },
+		[this](std::vector<std::string>& args) {
+			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "looted"))
+			{
+				set_hide_looted(!hide_looted);
+				if (hide_looted)
+					Zeal::EqGame::print_chat("Corpses will be hidden after looting.");
+				else
+					Zeal::EqGame::print_chat("Corpses will no longer be hidden after looting.");
+				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+			}
+			if (args.size() > 1 && args[1] == "none")
+			{
+				set_hide_looted(false);
+				return false; 
+			}
+			return false;
+		});
+
 	hide_looted = false;
 	zeal->hooks->Add("ReleaseLoot", Zeal::EqGame::EqGameInternal::fn_releaseloot, release_loot, hook_type_detour);
 }

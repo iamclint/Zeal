@@ -1,11 +1,8 @@
 #include "outputfile.h"
-#include "EqStructures.h"
-#include "EqAddresses.h"
-#include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
 #include <fstream>
-
+#include "StringUtil.h"
 enum EquipSlot {
   LeftEar,
   Head,
@@ -56,23 +53,6 @@ static std::string IDToEquipSlot(int equipSlot) {
     default:{}break;
   }
   return "Unknown";
-}
-
-// copied this over for now, maybe this should be centralized at some point.
-static bool caseInsensitiveStringCompare(const std::string& str1, const std::string& str2) {
-  // Check if the strings are of different lengths, if so, they can't match
-  if (str1.length() != str2.length()) {
-    return false;
-  }
-
-  // Convert both strings to lowercase and then compare
-  std::string str1Lower = str1;
-  std::string str2Lower = str2;
-  std::transform(str1Lower.begin(), str1Lower.end(), str1Lower.begin(), ::tolower);
-  std::transform(str2Lower.begin(), str2Lower.end(), str2Lower.begin(), ::tolower);
-
-  // Now, perform a case-insensitive comparison
-  return str1Lower == str2Lower;
 }
 
 static bool ItemIsContainer(Zeal::EqStructures::EQITEMINFO* item) {
@@ -192,10 +172,10 @@ void OutputFile::export_inventory(std::vector<std::string>& args) {
     optional_name = args[2];
   }
   write_to_file(ss.str(), "Inventory", optional_name);
-  }
+}
 
-  void OutputFile::write_to_file(std::string data, std::string file_arg, std::string optional_name)
-  {
+void OutputFile::write_to_file(std::string data, std::string file_arg, std::string optional_name)
+{
   std::string filename = optional_name;
   if (filename.empty()) {
     filename = Zeal::EqGame::get_self()->CharInfo->Name;
@@ -218,7 +198,7 @@ OutputFile::OutputFile(ZealService* zeal)
         Zeal::EqGame::print_chat("usage: /outputfile [inventory] [optional filename]");
         return true;
       }
-      if (args.size() > 1 && caseInsensitiveStringCompare(args[1], "inventory"))
+      if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "inventory"))
       {
         export_inventory(args);
         return true;

@@ -7,11 +7,11 @@ ZealService::ZealService()
 	hooks = std::shared_ptr<HookWrapper>(new HookWrapper());
 	ini = std::shared_ptr<IO_ini>(new IO_ini(".\\eqclient.ini")); //other functions rely on this hook
 	//initialize the hooked function classes
+	commands_hook = std::shared_ptr<ChatCommands>(new ChatCommands(this)); //other classes below rely on this class on initialize
 	main_loop_hook = std::shared_ptr<MainLoop>(new MainLoop(this)); //other functions rely on this hook
 	looting_hook = std::shared_ptr<looting>(new looting(this));
 	labels_hook = std::shared_ptr<labels>(new labels(this));
 	binds_hook = std::shared_ptr<Binds>(new Binds(this));
-	commands_hook = std::shared_ptr<ChatCommands>(new ChatCommands(this));
 	raid_hook = std::shared_ptr<raid>(new raid(this));
 	eqstr_hook = std::shared_ptr<eqstr>(new eqstr(this));
 	this->apply_patches();
@@ -20,7 +20,7 @@ ZealService::ZealService()
 	cycle_target = std::shared_ptr<CycleTarget>(new CycleTarget(this));
 	experience = std::shared_ptr<Experience>(new Experience(this));
 	chat_hook = std::shared_ptr<chat>(new chat(this, ini.get()));
-  outputfile_hook = std::shared_ptr<OutputFile>(new OutputFile(this));
+	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
 
 
 	looting_hook->hide_looted = ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
