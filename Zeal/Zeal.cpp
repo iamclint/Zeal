@@ -21,6 +21,7 @@ ZealService::ZealService()
 	experience = std::shared_ptr<Experience>(new Experience(this));
 	chat_hook = std::shared_ptr<chat>(new chat(this, ini.get()));
 	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
+  buff_timers = std::shard_ptr<BuffTimers>(new BuffTimers(this));
 
 
 	looting_hook->hide_looted = ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
