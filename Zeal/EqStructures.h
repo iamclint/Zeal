@@ -323,7 +323,7 @@ namespace Zeal
 			/* 0x0002 */ BYTE Modifier; // divide by 10 to get Bard song modifier
 			/* 0x0003 */ BYTE Unknown0003;
 			/* 0x0004 */ WORD SpellId;
-			/* 0x0006 */ WORD Ticks; //  duration in ticks ; seconds = ticks * 3
+			/* 0x0006 */ WORD Ticks; //  duration in ticks ; seconds = ticks * 6
 			/* 0x0008 */ WORD Unknown0008;
 			/* 0x000A */
 		};
