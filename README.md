@@ -14,7 +14,7 @@ ___
   - **Aliases:** `/smoothing`
   - **Arguments:** `x y 3rdperson_x 3rdperson_y`
   - **Example:** `/zealcam 0.7 0.2 0.7 0.2` if 3rd person arguments are not supplied, the first x and y are applied to both
-  - **Description:** Toggles Zeal's mouse look smoothing methods.
+  - **Description:** Toggles Zeal's mouse look smoothing methods, the first 2 arguments are first person sensitivity, and the last 2 are for 3rd person
 
 - `/autoinventory`
   - **Aliases:** `/autoinv`, `/ai`
@@ -39,6 +39,9 @@ ___
   - **Arguments:** `inventory [optional_name]`
   - **Example:** `/outputfile inventory my_inventory`
   - **Description:** `inventory` outputs information about your equipment, inventory bag slots, held item, and bank slots to a file.
+ 
+- `/buffs`
+  - **Description:** Outputs the players buff timers to the chat only if they are using OldUI.
 ___
 ### Binds
 - Cycle through nearest NPCs

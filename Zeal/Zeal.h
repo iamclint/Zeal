@@ -25,6 +25,7 @@ public:
 	std::shared_ptr<OutputFile> outputfile = nullptr;
 	std::shared_ptr<Experience> experience = nullptr;
 	std::shared_ptr<CycleTarget> cycle_target = nullptr;
+  std::shared_ptr<BuffTimers> buff_timers = nullptr;
 	
 
 	bool exit = false;
