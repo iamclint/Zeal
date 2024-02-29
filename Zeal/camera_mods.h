@@ -7,6 +7,7 @@ class CameraMods
 {
 public:
 	std::chrono::steady_clock::time_point prevTime; 
+	const float max_zoom_out = 100;
 	float user_sensitivity_x = 0.7f;
 	float user_sensitivity_y = 0.3f;
 	float user_sensitivity_x_3rd = 0.7f;
@@ -35,6 +36,8 @@ private:
 	float sensitivity_y = 0.4f;
 	void LoadSettings(class IO_ini* ini);
 	void InterpolateZoom();
+	void handle_binds(int cmd, bool is_down);
+	int current_key_cmd = 0;
 	Vec2 previous_mouse_pos;
 	Vec2 mouse_delta;
 	BYTE original_cam[6] = { 0 };

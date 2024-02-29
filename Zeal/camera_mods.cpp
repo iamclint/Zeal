@@ -113,8 +113,8 @@ void CameraMods::toggle_zeal_cam(bool enabled)
 void CameraMods::update_zoom(float zoom)
 {
     desired_zoom += zoom;
-    if (desired_zoom > 100)
-        desired_zoom = 100;
+    if (desired_zoom > max_zoom_out)
+        desired_zoom = max_zoom_out;
     if (desired_zoom < 0)
         desired_zoom = 0;
     if (update_cam()) //there was a collision
@@ -138,6 +138,8 @@ int handle_mouse_wheel(int delta)
     else
         return ZealService::get_instance()->hooks->hook_map["HandleMouseWheel"]->original(handle_mouse_wheel)(delta);
 }
+
+
 
 void CameraMods::proc_mouse()
 {
@@ -233,14 +235,68 @@ void CameraMods::InterpolateZoom()
     }
 }
 
+
+void CameraMods::handle_binds(int cmd, bool is_down)
+{
+    DWORD camera_view = *Zeal::EqGame::camera_view;
+    if ((enabled && camera_view == zeal_cam) || (enabled && cmd == 19)) //allow zoom out
+    {
+        if (is_down)
+        {
+            current_key_cmd = cmd;
+           
+        }
+        else
+            current_key_cmd = 0;
+    }
+    else
+    current_key_cmd = 0;
+}
+
+
 void CameraMods::callback_main()
 {
     static int prev_view = *Zeal::EqGame::camera_view;
+    DWORD camera_view = *Zeal::EqGame::camera_view;
+
+    if (camera_view != zeal_cam && current_key_cmd!=19)
+        current_key_cmd = 0;
+
+    if (camera_view == Zeal::EqEnums::CameraView::FirstPerson && current_key_cmd == 19)
+    {
+        mouse_wheel(-120);
+    }
 
     if (enabled)
     {
         InterpolateZoom();
+        switch (current_key_cmd)
+        {
+        case 15: //up
+            zeal_cam_pitch -= 0.3f;
+            break;
+        case 16: //down
+            zeal_cam_pitch += 0.3f;
+            break;
+        case 18: //zoom in
+            {
+            if (desired_zoom > 0);
+                desired_zoom -= .3;
+            }
+            break;
+        case 19: //zoom out
+            desired_zoom += .3;
+            if (desired_zoom > max_zoom_out)
+                desired_zoom = max_zoom_out;
+            break;
+        }
     }
+    else
+    {
+        current_key_cmd = 0;
+    }
+
+
 
 
     if (prev_view != *Zeal::EqGame::camera_view && enabled)
@@ -316,6 +372,8 @@ void CameraMods::LoadSettings(IO_ini* ini)
     user_sensitivity_y_3rd = ini->getValue<float>("Zeal", "MouseSensitivityY3rd");
 
 }
+
+
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {
     mem::write<byte>(0x53fa50, 03); //allow for strafing whenever in zeal cam
@@ -401,8 +459,15 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
             }
             return true;
         });
-   // zeal->hooks->Add("SetInitialCameraLocation", 0x4ac9f7, SetInitialCameraLocation, hook_type_detour);
-}
+    zeal->binds_hook->replace_bind(15, [this](int state) { handle_binds(15, state); return false; });
+    zeal->binds_hook->replace_bind(115, [this](int state) { handle_binds(15, state); return false; });
+    zeal->binds_hook->replace_bind(111, [this](int state) { handle_binds(15, state); return false; });
+    zeal->binds_hook->replace_bind(16, [this](int state) { handle_binds(16, state); return false; });
+    zeal->binds_hook->replace_bind(116, [this](int state) { handle_binds(16, state); return false; });
+    zeal->binds_hook->replace_bind(112, [this](int state) { handle_binds(16, state); return false; });
+    zeal->binds_hook->replace_bind(18, [this](int state) { handle_binds(18, state); return false; });
+    zeal->binds_hook->replace_bind(19, [this](int state) { handle_binds(19, state); return false; });
+   }
 
 CameraMods::~CameraMods()
 {

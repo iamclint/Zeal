@@ -10,8 +10,15 @@ Binds::~Binds()
 void ExecuteCmd(int cmd, int isdown, int unk2)
 {
 	ZealService* zeal = ZealService::get_instance();
+	
 	if (!Zeal::EqGame::game_wants_input()) //checks if the game wants keyboard input... don't call our binds when the game wants input
 	{
+		if (zeal->binds_hook->ReplacementFunctions.count(cmd) > 0)
+		{
+			if (zeal->binds_hook->ReplacementFunctions[cmd](isdown)) //if the replacement function returns true, end here otherwise its really just adding more to the command 
+				return;
+		}
+
 		if (zeal->binds_hook->KeyMapFunctions.count(cmd) > 0)
 			zeal->binds_hook->KeyMapFunctions[cmd](isdown);
 		else
@@ -213,6 +220,11 @@ void Binds::add_bind(int cmd, const char* name, const char* short_name, int cate
 	Zeal::EqGame::EqGameInternal::InitKeyBindStr((options + cmd * 0x8 + 0x20c), 0, (char*)name);
 	*(int*)((options + cmd * 0x8 + 0x210)) = category;
 	KeyMapFunctions[cmd] = callback;
+}
+
+void Binds::replace_bind(int cmd, std::function<bool(int state)> callback)
+{
+	ReplacementFunctions[cmd] = callback;
 }
 
 void Binds::main_loop()
