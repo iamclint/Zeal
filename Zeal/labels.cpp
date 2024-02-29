@@ -19,6 +19,8 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, bool* override_c
 	{
 	case 80:
 	{
+		if (!zeal->experience)
+			return true;
 		int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
 		int mana = Zeal::EqGame::EqGameInternal::get_cur_mana(*Zeal::EqGame::ptr_LocalPC, 0);
 		Zeal::EqGame::CXStr_PrintString(str, "%d/%d", mana, max_mana);
@@ -27,6 +29,8 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, bool* override_c
 	}
 	case 81:
 	{
+		if (!zeal->experience)
+			return true;
 		Zeal::EqGame::CXStr_PrintString(str, "%.f", zeal->experience->exp_per_hour_pct_tot);
 		*override_color = false;
 		return true;
@@ -83,6 +87,8 @@ int GetGaugeFromEq(int EqType, Zeal::EqStructures::CXSTR* str)
 	{
 		case 23:
 		{
+			if (!zeal->experience) //possible nullptr crash (race condition)
+				return 0;
 			float fpct = zeal->experience->exp_per_hour_pct_tot / 100.f;
 			return (int)(1000.f * fpct);
 		}
