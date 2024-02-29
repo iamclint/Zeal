@@ -5,21 +5,23 @@
 // the spell name based on the spell id.
 void BuffTimers::print_timers(void) {
   std::stringstream ss;
+  bool apply_delimeter[EQ_NUM_BUFFS]{};
 
   auto CharInfo = Zeal::EqGame::get_self()->CharInfo;
   for (size_t i = 0; i < EQ_NUM_BUFFS; ++i) {
-    WORD SpellId = CharInfo->Buff[i].SpellId;
-    if (SpellId != USHRT_MAX) {
-      if (i != 0)
-        ss << ", ";
+    WORD BuffId = CharInfo->Buff[i].SpellId;
+    apply_delimeter[i] = (BuffID != USHRT_MAX);
+  }
+  apply_delimeter[0] = false;
 
+  for (size_t i = 0; i < EQ_NUM_BUFFS; ++i) {
+    WORD BuffId = CharInfo->Buff[i].SpellId;
+    if (BuffId != USHRT_MAX) {
       int Mins = ((CharInfo->Buff[i].Ticks) * 6) / 60;
       int Secs = ((CharInfo->Buff[i].Ticks) * 6) % 60;
-      if (i != EQ_NUM_BUFFS)
-        ss << "(" << i + 1 << ")" << " " << Mins << "m" << Secs << "s";
-      else
-        ss << "(" << i + 1 << ")" << " " << Mins << "m" << Secs << "s" << std::endl;
-    }
+
+      if (apply_delimeter[i]) { ss << ", "; }
+      ss << "(" << i + 1 << ")" << " " << Mins << "m" << Secs << "s";
   }
 
   Zeal::EqGame::print_chat(ss.str());
