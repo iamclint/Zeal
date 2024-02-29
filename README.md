@@ -39,6 +39,9 @@ ___
   - **Arguments:** `inventory [optional_name]`
   - **Example:** `/outputfile inventory my_inventory`
   - **Description:** `inventory` outputs information about your equipment, inventory bag slots, held item, and bank slots to a file.
+ 
+- `/buffs`
+  - **Description:** Outputs the players buff timers to the chat only if they are using OldUI.
 ___
 ### Binds
 - Cycle through nearest NPCs
