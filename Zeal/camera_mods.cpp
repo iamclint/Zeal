@@ -76,12 +76,12 @@ void CameraMods::mouse_wheel(int delta)
 {
     Zeal::EqStructures::CameraInfo* cam = Zeal::EqGame::get_camera();
     DWORD camera_view = *Zeal::EqGame::camera_view;
-    if (delta == 120)
+    if (delta > 0)
     {
         if (camera_view == zeal_cam)
             update_zoom(-zoom_speed);
     }
-    else if (delta == -120)
+    else if (delta < 0)
     {
         if (camera_view == Zeal::EqEnums::CameraView::FirstPerson)
         {
@@ -279,10 +279,8 @@ void CameraMods::callback_main()
             zeal_cam_pitch += 0.3f;
             break;
         case 18: //zoom in
-            {
-            if (desired_zoom > 0);
+            if (desired_zoom > 0)
                 desired_zoom -= .3;
-            }
             break;
         case 19: //zoom out
             desired_zoom += .3;
