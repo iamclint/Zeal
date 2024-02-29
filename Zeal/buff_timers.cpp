@@ -10,7 +10,7 @@ void BuffTimers::print_timers(void) {
   auto CharInfo = Zeal::EqGame::get_self()->CharInfo;
   for (size_t i = 0; i < EQ_NUM_BUFFS; ++i) {
     WORD BuffId = CharInfo->Buff[i].SpellId;
-    apply_delimeter[i] = (BuffID != USHRT_MAX);
+    apply_delimeter[i] = (BuffId != USHRT_MAX);
   }
   apply_delimeter[0] = false;
 
@@ -22,6 +22,7 @@ void BuffTimers::print_timers(void) {
 
       if (apply_delimeter[i]) { ss << ", "; }
       ss << "(" << i + 1 << ")" << " " << Mins << "m" << Secs << "s";
+    }
   }
 
   Zeal::EqGame::print_chat(ss.str());
