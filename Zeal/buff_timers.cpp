@@ -34,7 +34,7 @@ void BuffTimers::print_timers(void) {
   }
   else
   {
-    oss << "[Buffs]: None";
+    oss << "[Buffs] None";
   }
 
   Zeal::EqGame::print_chat(oss.str());
