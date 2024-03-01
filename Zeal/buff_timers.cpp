@@ -16,7 +16,7 @@ void BuffTimers::print_timers(void) {
   for (size_t i = 0; i < EQ_NUM_BUFFS; ++i) {
     WORD BuffId = CharInfo->Buff[i].SpellId;
     if (BuffId != USHRT_MAX) {
-      activeBuffs.push_back(BuffDetials({ i, CharInfo->Buff[i] }));
+      activeBuffs.push_back(BuffDetails({ i, CharInfo->Buff[i] }));
     }
   }
 
