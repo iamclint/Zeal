@@ -44,10 +44,12 @@ BuffTimers::BuffTimers(ZealService* zeal)
 {
   is_OldUI = ZealService::get_instance()->ini->getValue<bool>("Defaults", "OldUI");
 
-  zeal->commands_hook->add("/buffs", {},
-    [this](std::vector<std::string>& args) {
-      if (is_OldUI) { print_timers(); }
-      return true;
-    }
-  );
+  if (is_OldUI) {
+    zeal->commands_hook->add("/buffs", {},
+      [this](std::vector<std::string>& args) {
+        print_timers();
+        return true;
+      }
+    );
+  }
 }
