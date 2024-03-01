@@ -29,7 +29,11 @@ namespace Zeal
 
 			return actor_loc;
 		}
-
+		bool show_context_menu()
+		{
+			int wnd_hovered = EqGameInternal::CXWndIsHovered(*(int*)0x809db4, 0, *(int*)0x8092e8, *(int*)0x8092ec);
+			return wnd_hovered;
+		}
 		bool game_wants_input()
 		{
 			int chat_input = EqGameInternal::UI_ChatInputCheck();

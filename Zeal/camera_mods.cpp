@@ -303,7 +303,7 @@ void CameraMods::callback_main()
         mouse_wheel(-120);
     }
 
-    if (*Zeal::EqGame::is_left_mouse_down)
+    if (*Zeal::EqGame::is_left_mouse_down && camera_view == Zeal::EqEnums::CameraView::ZealCam && !Zeal::EqGame::game_wants_input())
     {
         if (!lmouse_time)
         {
@@ -331,6 +331,7 @@ void CameraMods::callback_main()
         }
         lmouse_time = 0;
     }
+
     if (enabled)
     {
         InterpolateZoom();
