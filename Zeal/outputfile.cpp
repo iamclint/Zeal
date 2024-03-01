@@ -74,7 +74,7 @@ void OutputFile::export_inventory(std::vector<std::string>& args)
   std::ostringstream oss;
   oss << "Location" << t << "Name" << t << "ID" << t << "Count" << t << "Slots" << std::endl;
 
-  // Proceossing Equipment
+  // Processing Equipment
   for (size_t i = 0; i < EQ_NUM_INVENTORY_SLOTS; ++i) {
     auto item = Zeal::EqGame::get_self()->CharInfo->InventoryItem[i];
     // EQITEMINFO->EquipSlot value only updates when a load happens. Don't use it for this.
@@ -86,7 +86,7 @@ void OutputFile::export_inventory(std::vector<std::string>& args)
     }
   }
 
-  // Proceossing Inventory Slots
+  // Processing Inventory Slots
   for (size_t i = 0; i < EQ_NUM_INVENTORY_PACK_SLOTS; ++i) {
     auto item = Zeal::EqGame::get_self()->CharInfo->InventoryPackItem[i];
     if (item != nullptr) {
@@ -114,7 +114,7 @@ void OutputFile::export_inventory(std::vector<std::string>& args)
     }
   }
 
-  // Proceoss Cursor Item
+  // Process Cursor Item
   {
     auto item = Zeal::EqGame::get_self()->CharInfo->CursorItem;
     if (item != nullptr) {
@@ -142,7 +142,7 @@ void OutputFile::export_inventory(std::vector<std::string>& args)
     }
   }
 
-  // Proceoss Bank Items
+  // Process Bank Items
   for (size_t i = 0; i < EQ_NUM_INVENTORY_BANK_SLOTS; ++i) {
     auto item = Zeal::EqGame::get_self()->CharInfo->InventoryBankItem[i];
     if (item != nullptr) {
@@ -221,7 +221,7 @@ void OutputFile::write_to_file(std::string data, std::string file_arg, std::stri
 
 OutputFile::OutputFile(ZealService* zeal)
 {
-  zeal->commands_hook->add("/outputfile", { "/output", "/out", },
+  zeal->commands_hook->add("/outputfile", { "/output", "/out" },
     [this](std::vector<std::string>& args) {
       if (args.size() == 1 || args.size() > 3)
       {
