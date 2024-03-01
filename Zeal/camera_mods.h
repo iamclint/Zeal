@@ -17,6 +17,7 @@ public:
 	float height;
 	float fps;
 	float zeal_cam_pitch;
+	float zeal_cam_yaw;
 	float current_zoom = 0.f;
 	float zoom_speed = 5.f;
 	float desired_zoom = 0.f;
@@ -32,6 +33,9 @@ public:
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:
+	ULONGLONG lmouse_time = 0;
+	POINT lmouse_cursor_pos;
+	bool hide_cursor = false;
 	float sensitivity_x = 0.7f;
 	float sensitivity_y = 0.4f;
 	void LoadSettings(class IO_ini* ini);

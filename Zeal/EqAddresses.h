@@ -23,6 +23,7 @@ namespace Zeal
 		static int* Display = (int*)0x7F9510;
 		static EqStructures::Cam* camera = (EqStructures::Cam*)0x799688;// 0x7996C0;
 		static bool* is_right_mouse_down = (bool*)0x7985ea;
+		static bool* is_left_mouse_down = (bool*)0x798614;
 		static int* mouse_hover_window = (int*)0x809DD8; //unsure
 		static int* camera_view = (int*)0x63BE68;
 		static int max_pitch = 0x5e86d0;
