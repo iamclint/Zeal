@@ -280,7 +280,6 @@ void CameraMods::handle_binds(int cmd, bool is_down)
         if (is_down)
         {
             current_key_cmd = cmd;
-           
         }
         else
             current_key_cmd = 0;
@@ -289,6 +288,14 @@ void CameraMods::handle_binds(int cmd, bool is_down)
     current_key_cmd = 0;
 }
 
+// check to help fix left mouse panning from preventing repositioning the game in windowed mode.
+static bool is_over_title_bar(void)
+{
+  // was going to reuse Zeal::EqStructures::MouseDelta* but the values flow over INT16
+  //Zeal::EqStructures::MouseDelta* mouse_pos = (Zeal::EqStructures::MouseDelta*)0x798580;
+  WORD mouse_y = *(WORD*)0x798582;
+  return (mouse_y >= 0xE6FF && mouse_y <= 0xFFFF);
+}
 
 void CameraMods::callback_main()
 {
@@ -303,14 +310,15 @@ void CameraMods::callback_main()
         mouse_wheel(-120);
     }
 
-    if (*Zeal::EqGame::is_left_mouse_down && camera_view == Zeal::EqEnums::CameraView::ZealCam && !Zeal::EqGame::game_wants_input())
+    if (*Zeal::EqGame::is_left_mouse_down && camera_view == Zeal::EqEnums::CameraView::ZealCam &&
+        !Zeal::EqGame::game_wants_input() && !is_over_title_bar())
     {
         if (!lmouse_time)
         {
             hide_cursor = true;
             lmouse_time = GetTickCount64();
         }
-        
+
         if (GetTickCount64() - lmouse_time > 200)
         {
             if (hide_cursor)

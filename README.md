@@ -36,10 +36,12 @@ ___
 
 - `/outputfile`
   - **Aliases:** `/output`, `/out`
-  - **Arguments:** `inventory [optional_name]`
+  - **Arguments:** `inventory | spellbook` `[optional_name]`
   - **Example:** `/outputfile inventory my_inventory`
-  - **Description:** `inventory` outputs information about your equipment, inventory bag slots, held item, and bank slots to a file.
- 
+  - **Description:**
+    - `inventory` outputs information about your equipment, inventory bag slots, held item, and bank slots to a file.
+    - `spellbook` outputs a list of all spell ids current scribed in your spellbook.
+
 - `/buffs`
   - **Description:** Outputs the players buff timers to the chat only if they are using OldUI.
 ___

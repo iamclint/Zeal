@@ -23,7 +23,7 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 		{
 			cmd_handled = zeal->commands_hook->CommandFunctions[args[0]].callback(args);
 		}
-		else 
+		else
 		{
 			for (auto& m : zeal->commands_hook->CommandFunctions)
 			{
@@ -37,8 +37,11 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 				}
 			}
 		}
-		if (cmd_handled)
+		if (cmd_handled) {
+			cmd[0] = '\0';
 			return;
+			return;
+		}
 	}
 	zeal->hooks->hook_map["commands"]->original(InterpretCommand)(c, unused, player, cmd);
 }
