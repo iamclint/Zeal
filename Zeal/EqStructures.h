@@ -39,7 +39,8 @@ namespace Zeal
 			ThirdPerson2,
 			ThirdPerson3,
 			ThirdPerson4,
-			ZealCam
+			ZealCam,
+			TotalCameras
 		};
 		enum Stance
 		{

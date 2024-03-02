@@ -6,12 +6,15 @@
 class CameraMods
 {
 public:
-	std::chrono::steady_clock::time_point prevTime; 
+	std::chrono::steady_clock::time_point prevTime;
 	const float max_zoom_out = 100;
 	float user_sensitivity_x = 0.7f;
 	float user_sensitivity_y = 0.3f;
 	float user_sensitivity_x_3rd = 0.7f;
 	float user_sensitivity_y_3rd = 0.3f;
+	bool camera3_strafe_enabled = true;
+	bool camera4_strafe_enabled = true;
+	bool toggle_to_zeal_cam_enabled = true;
 	int eq_ptr = 0;
 	bool enabled;
 	float height;
@@ -29,6 +32,7 @@ public:
 	void toggle_zeal_cam(bool enabled);
 	void proc_mouse();
 	void handle_binds(int cmd, bool is_down);
+	void handle_cycle_camera_views(int cmd, bool is_down);
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:
