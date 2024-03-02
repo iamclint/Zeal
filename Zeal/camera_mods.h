@@ -28,8 +28,7 @@ public:
 	void update_zoom(float zoom);
 	void toggle_zeal_cam(bool enabled);
 	void proc_mouse();
-	WNDPROC prev_wndproc;
-	HWND game_hwnd;
+	void handle_binds(int cmd, bool is_down);
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:
@@ -40,7 +39,6 @@ private:
 	float sensitivity_y = 0.4f;
 	void LoadSettings(class IO_ini* ini);
 	void InterpolateZoom();
-	void handle_binds(int cmd, bool is_down);
 	int current_key_cmd = 0;
 	Vec2 previous_mouse_pos;
 	Vec2 mouse_delta;

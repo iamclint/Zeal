@@ -10,6 +10,15 @@
 float Smooth(float rawDelta, float smoothDelta) {
     return std::lerp(smoothDelta, static_cast<float>(rawDelta), 1.0f / 1.5f);
 }
+int angleDifference(int angle1, int angle2) {
+    int abs_diff = abs(angle1 - angle2);
+    if (abs_diff > 256) {
+        return 512 - abs_diff;
+    }
+    else {
+        return abs_diff;
+    }
+}
 float get_pitch(Vec3 cameraPos, Vec3 targetPos) {
     Vec3 direction = targetPos - cameraPos;
     float horizontalDistance = (float)direction.Length2D();
@@ -179,6 +188,14 @@ void CameraMods::proc_mouse()
         bool rbutton = *Zeal::EqGame::is_right_mouse_down;
         if (!self)
             return;
+
+        if (camera_view == Zeal::EqEnums::CameraView::ZealCam && rbutton && Zeal::EqGame::can_move())
+        {
+            //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
+            if (fabs(angleDifference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
+                Zeal::EqGame::get_self()->Heading = zeal_cam_yaw;
+        }
+
         if (rbutton || (camera_view== Zeal::EqEnums::CameraView::ZealCam && lbutton))
         {
             float delta_y = delta->y;
@@ -191,23 +208,23 @@ void CameraMods::proc_mouse()
             delta->y = 0;
             delta->x = 0;
 
-            if (*(byte*)0x7985E8 && rbutton)
+            if (*(byte*)0x7985E8) //invert
                 smoothMouseDeltaY = -smoothMouseDeltaY;
 
             if (Zeal::EqGame::can_move())
             {
-
                 if (rbutton)
                 {
-                    
                     if (fabs(smoothMouseDeltaX) > 0.1)
                         self->MovementSpeedHeading = -smoothMouseDeltaX;
                     else
                         self->MovementSpeedHeading = 0;
                     zeal_cam_yaw = self->Heading;
                 }
-                else
-                    zeal_cam_yaw -= smoothMouseDeltaX;
+            }
+            if (lbutton || (rbutton && !Zeal::EqGame::can_move()))
+            {
+                zeal_cam_yaw -= smoothMouseDeltaX;
             }
 
 
@@ -310,8 +327,7 @@ void CameraMods::callback_main()
         mouse_wheel(-120);
     }
 
-    if (*Zeal::EqGame::is_left_mouse_down && camera_view == Zeal::EqEnums::CameraView::ZealCam &&
-        !Zeal::EqGame::game_wants_input() && !is_over_title_bar())
+    if (enabled && *Zeal::EqGame::is_left_mouse_down && camera_view == Zeal::EqEnums::CameraView::ZealCam && !is_over_title_bar() && !Zeal::EqGame::is_game_ui_window_hovered())
     {
         if (!lmouse_time)
         {
@@ -343,8 +359,22 @@ void CameraMods::callback_main()
     if (enabled)
     {
         InterpolateZoom();
+
+
         switch (current_key_cmd)
         {
+        case 5:
+        {
+            if (camera_view == Zeal::EqEnums::CameraView::ZealCam)
+            {
+                //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
+                if (fabs(angleDifference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
+                    Zeal::EqGame::get_self()->Heading = zeal_cam_yaw;
+                else
+                    zeal_cam_yaw = Zeal::EqGame::get_self()->Heading;
+            }
+            break;
+        }
         case 15: //up
             zeal_cam_pitch -= 0.3f;
             if (zeal_cam_pitch <= -89.99f)

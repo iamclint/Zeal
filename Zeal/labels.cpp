@@ -55,23 +55,32 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, bool* override_c
 	}
 	case 124:
 	{
-		int mana = Zeal::EqGame::EqGameInternal::get_cur_mana(*Zeal::EqGame::ptr_LocalPC, 0);
-		Zeal::EqGame::CXStr_PrintString(str, "%d", mana);
-		*override_color = false;
+		if (*Zeal::EqGame::ptr_LocalPC)
+		{
+			int mana = Zeal::EqGame::EqGameInternal::get_cur_mana(*Zeal::EqGame::ptr_LocalPC, 0);
+			Zeal::EqGame::CXStr_PrintString(str, "%d", mana);
+			*override_color = false;
+		}
 		return true;
 	}
 	case 125:
 	{
-		int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
-		Zeal::EqGame::CXStr_PrintString(str, "%d", max_mana);
-		*override_color = false;
+		if (*Zeal::EqGame::ptr_LocalPC)
+		{
+			int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
+			Zeal::EqGame::CXStr_PrintString(str, "%d", max_mana);
+			*override_color = false;
+		}
 		return true;
 	}
 	case 255: //debug label
 	{
-		int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
-		Zeal::EqGame::CXStr_PrintString(str, "%s", ZealService::get_instance()->labels_hook->debug_info.c_str());
-		*override_color = false;
+		if (*Zeal::EqGame::ptr_LocalPC)
+		{
+			int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
+			Zeal::EqGame::CXStr_PrintString(str, "%s", ZealService::get_instance()->labels_hook->debug_info.c_str());
+			*override_color = false;
+		}
 		return true;
 	}
 	default:

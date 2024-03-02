@@ -66,7 +66,8 @@ namespace Zeal
 			static mem::function<float __fastcall(int, int)> CloseAllContainers = 0x416a43;
 			static mem::function<int __fastcall(int, int)> GetFocusWnd = 0x5a07c0;
 			static mem::function<int __fastcall(int, int, int)> CXWndIsType = 0x571300;
-			static mem::function<int __fastcall(int, int, int, int)> CXWndIsHovered = 0x5A02F0;
+			static mem::function<int __fastcall(int, int, int, int)> CXWndShowContextMenu = 0x5A02F0;
+			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
 		//// Wrapper function to call CXStr_PrintString
@@ -111,6 +112,7 @@ namespace Zeal
 		bool is_mouse_hovering_window();
 		std::string class_name_short(int class_id);
 		std::string class_name(int class_id);
+		bool is_game_ui_window_hovered();
 		bool is_targetable(Zeal::EqStructures::Entity* ent);
 		bool is_in_game();
 		void change_stance(Stance new_stance);

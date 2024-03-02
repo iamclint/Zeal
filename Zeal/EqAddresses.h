@@ -12,6 +12,10 @@ namespace Zeal
 		static EqStructures::Entity* GroupList = (Zeal::EqStructures::Entity*)0x7913F8;
 		static EqStructures::ViewActor* ViewActor = (EqStructures::ViewActor*)0x63D6C0;
 		static EqStructures::KeyboardModifiers* KeyMods = (EqStructures::KeyboardModifiers*)0x799738;
+		static EqStructures::CXWndManager* WndManager = *(EqStructures::CXWndManager**)0x809db4;
+		static EqStructures::EQWND* LootWnd = *(EqStructures::EQWND**)0x63d65c;
+		static EqStructures::EQWND* SpellBookWnd = *(EqStructures::EQWND**)0x63D64C;
+		
 		static DWORD* ptr_LocalPC = (DWORD*)0x7F94E8;
 		static int* ptr_ContainerMgr = (int*)0x63d6b8;
 		static int* ptr_COptionsWnd = (int*)0x63d634;

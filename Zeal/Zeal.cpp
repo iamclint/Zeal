@@ -22,10 +22,29 @@ ZealService::ZealService()
 	chat_hook = std::shared_ptr<chat>(new chat(this, ini.get()));
 	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
 	buff_timers = std::shared_ptr<BuffTimers>(new BuffTimers(this));
+	auto_stand = std::shared_ptr<AutoStand>(new AutoStand(this));
 
-
+	binds_hook->replace_bind(5, [this](int state) {
+		camera_mods->handle_binds(5, state); 
+		auto_stand->handle_binds(5, state);
+		return false;
+	}); //turn right
+	binds_hook->replace_bind(6, [this](int state) {
+		camera_mods->handle_binds(5, state); 
+		auto_stand->handle_binds(6, state);
+		return false;
+	}); //turn left
+	binds_hook->replace_bind(3, [this](int state) {
+		auto_stand->handle_binds(5, state);
+		return false;
+	}); //foward
+	binds_hook->replace_bind(4, [this](int state) {
+		auto_stand->handle_binds(5, state);
+		return false;
+	}); //back
 	looting_hook->hide_looted = ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
 }
+
 
 void ZealService::apply_patches()
 {

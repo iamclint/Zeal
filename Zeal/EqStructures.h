@@ -92,6 +92,76 @@ namespace Zeal
 			int left;
 		};
 
+		struct EQCXSTR
+		{
+			/* 0x0000*/ DWORD Font; // 1,6 = Window Title or Button Text, 8 = Hot Button Small Text
+			/* 0x0004*/ DWORD MaxLength;
+			/* 0x0008*/ DWORD Length;
+			/* 0x000C*/ DWORD Encoding; // 0 = ASCII, 1 = Unicode
+			/* 0x0010*/ PCRITICAL_SECTION Lock;
+			/* 0x0014*/ CHAR Text[1]; // use Length and MaxLength
+		};
+
+		struct EQCXRECT
+		{
+			DWORD X1;
+			DWORD Y1;
+			DWORD X2;
+			DWORD Y2;
+		};
+
+		struct EQFONT
+		{
+			/* 0x0000 */ DWORD Unknown0000;
+			/* 0x0004 */ DWORD Size;
+		};
+
+
+		struct EQWND
+		{
+			/* 0x0000 */ DWORD Unknown0000; // struct _CSIDLWNDVFTABLE *pvfTable; struct _CXWNDVFTABLE *pvfTable;
+			/* 0x0004 */ DWORD MouseHoverTimer;
+			/* 0x0008 */ DWORD Unknown0008; // usually equals 2000
+			/* 0x000C */ DWORD Unknown000C; // usually equals 500
+			/* 0x0010 */ BYTE Unknown0010;
+			/* 0x0011 */ BYTE Unknown0011;
+			/* 0x0012 */ BYTE IsLocked;
+			/* 0x0013 */ BYTE Unknown0013;
+			/* 0x0014 */ PVOID Unknown0014;
+			/* 0x0018 */ DWORD Unknown0018;
+			/* 0x001C */ EQWND* ParentWnd;
+			/* 0x0020 */ EQWND* FirstChildWnd;
+			/* 0x0024 */ EQWND* NextSiblingWnd;
+			/* 0x0028 */ BYTE HasChildren;
+			/* 0x0029 */ BYTE HasSiblings;
+			/* 0x002A */ BYTE Unknown0030[2];
+			/* 0x002C */ DWORD Flags;
+			/* 0x0030 */ EQCXRECT Location;
+			/* 0x0040 */ EQCXRECT LocationPlaceholder; // used when minimizing the window
+			/* 0x0050 */ BYTE IsVisible; // show
+			/* 0x0051 */ BYTE IsEnabled;
+			/* 0x0052 */ BYTE IsMinimized;
+			/* 0x0053 */ BYTE Unknown0053;
+			/* 0x0054 */ BYTE IsOpen;
+			/* 0x0055 */ BYTE Unknown0055;
+			/* 0x0056 */ BYTE IsMouseOver; // mouse is hovering over
+			/* 0x0057 */ BYTE Unknown0057;
+			/* 0x0058 */ DWORD WindowStyleFlags;
+			/* 0x005C */ EQFONT* FontPointer;
+			/* 0x0060 */ EQCXSTR Text;
+			/* 0x0064 */ EQCXSTR ToolTipText;
+			/* 0x0068 */ BYTE Unknown0068[28];
+			/* 0x0084 */ EQCXSTR XmlToolTipText;
+			/* 0x0088 */ BYTE Unknown0088[22];
+			/* 0x009E */ BYTE AlphaTransparency;
+			/* 0x009F */ BYTE Unknown009F;
+			/* 0x00A0 */ BYTE ZLayer;
+			/* 0x00A1 */ BYTE Unknown00A1[7];
+			/* 0x00A8 */ DWORD DrawTemplate;
+			/* 0x00AC */
+		};
+
+
 		struct CXSTR {
 			/*0x00*/   DWORD   Font;            // maybe, dont know.  04 = Window 01 = button
 			/*0x04*/   DWORD   MaxLength;
@@ -101,7 +171,13 @@ namespace Zeal
 			/*0x14*/   CHAR    Text[1]; // Stub, can be anywhere from Length to MaxLength (which is how much is malloc'd to this CXStr)
 		};
 
-
+		struct CXWndManager
+		{
+			/* 0x0000 */ BYTE unknown0[0x30];
+			/* 0x0030 */ int ptr_focused_wnd;
+			/* 0x0034 */ BYTE unknown34[0x8];
+			/* 0x0030 */ int ptr_hovered_wnd;
+		};
 		typedef struct _EQITEMCOMMONINFO
 		{
 			/* 0x00E4 */ INT8 Strength;       // STR

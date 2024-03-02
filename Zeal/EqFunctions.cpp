@@ -31,8 +31,15 @@ namespace Zeal
 		}
 		bool show_context_menu()
 		{
-			int wnd_hovered = EqGameInternal::CXWndIsHovered(*(int*)0x809db4, 0, *(int*)0x8092e8, *(int*)0x8092ec);
-			return wnd_hovered;
+			int ctx = EqGameInternal::CXWndShowContextMenu(*(int*)0x809db4, 0, *(int*)0x8092e8, *(int*)0x8092ec);
+			return ctx;
+		}
+		bool is_game_ui_window_hovered()
+		{
+			if (EqGame::WndManager)
+				return EqGame::WndManager->ptr_hovered_wnd!=0;
+			else
+				return false;
 		}
 		bool game_wants_input()
 		{
@@ -554,7 +561,7 @@ namespace Zeal
 		}
 		void change_stance(Stance new_stance)
 		{
-			if (Self->StandingState != (BYTE)new_stance)
+			if (Self && Self->StandingState != (BYTE)new_stance)
 				EqGameInternal::change_stance(get_self(), 0, new_stance); //EQPlayer::ChangePosition
 		}
 	}

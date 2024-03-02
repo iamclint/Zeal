@@ -13,7 +13,7 @@ void BuffTimers::print_timers(void) {
   std::ostringstream oss;
 
   auto CharInfo = Zeal::EqGame::get_self()->CharInfo;
-  for (size_t i = 0; i < EQ_NUM_BUFFS; ++i) {
+  for (int i = 0; i < EQ_NUM_BUFFS; ++i) {
     WORD BuffId = CharInfo->Buff[i].SpellId;
     if (BuffId != USHRT_MAX) {
       activeBuffs.push_back(BuffDetails({ i, CharInfo->Buff[i] }));
@@ -21,11 +21,11 @@ void BuffTimers::print_timers(void) {
   }
 
   if (activeBuffs.size() != 0) {
-    for (size_t i = 0; i <  activeBuffs.size(); ++i) {
+    for (int i = 0; i <  activeBuffs.size(); ++i) {
       BuffDetails details = activeBuffs[i];
       if (details.Buff.SpellId != USHRT_MAX) {
-        int Mins = ((details.Buff[i].Ticks) * 6) / 60;
-        int Secs = ((details.Buff[i].Ticks) * 6) % 60;
+        int Mins = ((details.Buff.Ticks) * 6) / 60;
+        int Secs = ((details.Buff.Ticks) * 6) % 60;
 
         oss << "(" << details.BuffSlot + 1 << ")" << " " << Mins << "m" << Secs << "s";
         if ((i+1) != activeBuffs.size()) { oss << ", "; }

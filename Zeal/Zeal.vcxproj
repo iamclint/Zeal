@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="auto_stand.h" />
     <ClInclude Include="binds.h" />
     <ClInclude Include="buff_timers.h" />
     <ClInclude Include="chat.h" />
@@ -182,6 +183,7 @@
     <ClInclude Include="Zeal.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="auto_stand.cpp" />
     <ClCompile Include="binds.cpp" />
     <ClCompile Include="buff_timers.cpp" />
     <ClCompile Include="chat.cpp" />
