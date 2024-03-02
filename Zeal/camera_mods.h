@@ -14,7 +14,7 @@ public:
 	float user_sensitivity_y_3rd = 0.3f;
 	bool camera3_strafe_enabled = true;
 	bool camera4_strafe_enabled = true;
-	bool toggle_to_zeal_cam_enabled = true;
+	bool cycle_to_zeal_cam_enabled = true;
 	int eq_ptr = 0;
 	bool enabled;
 	float height;

@@ -515,11 +515,11 @@ void CameraMods::LoadSettings(IO_ini* ini)
         ini->setValue<bool>("Zeal", "Camera3StrafeEnabled", true);
     if (!ini->exists("Zeal", "Camera4StrafeEnabled"))
         ini->setValue<bool>("Zeal", "Camera4StrafeEnabled", true);
-    if (!ini->exists("Zeal", "ToggleToZealCamEnabled"))
-        ini->setValue<bool>("Zeal", "ToggleToZealCamEnabled", true);
+    if (!ini->exists("Zeal", "CycleToZealCamEnabled"))
+        ini->setValue<bool>("Zeal", "CycleToZealCamEnabled", true);
     camera3_strafe_enabled = ini->getValue<bool>("Zeal", "Camera3StrafeEnabled");
     camera4_strafe_enabled = ini->getValue<bool>("Zeal", "Camera4StrafeEnabled");
-    toggle_to_zeal_cam_enabled = ini->getValue<bool>("Zeal", "ToggleToZealCamEnabled");
+    cycle_to_zeal_cam_enabled = ini->getValue<bool>("Zeal", "CycleToZealCamEnabled");
 }
 
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
@@ -529,7 +529,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     mem::write<byte>(0x53fa50, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
     mem::write<byte>(0x53f648, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
 
-    if (toggle_to_zeal_cam_enabled)
+    if (cycle_to_zeal_cam_enabled)
       mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::TotalCameras); //allow for the camera toggle hotkey to cycle through the new camera
     else
       mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::ZealCam);
