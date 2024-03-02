@@ -6,6 +6,12 @@ ___
   - **Example:** `/hidecorpse looted`
   - **Description:** `looted` Hides a corpse after you have looted it., `none` reveals all hidden corpses
 
+- `/showhelm`
+  - **Aliases:** `/helm`
+  - **Arguments:** `on, off`
+  - **Example:** `/showhelm on`
+  - **Description:** Toggles your helmet.
+
 - `/showlootlockouts`
   - **Aliases:** `/showlootlockout`, `/showlockout`, `/sll`
   - **Description:** Shows you your current loot lockouts on Quarm.
