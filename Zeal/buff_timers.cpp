@@ -21,7 +21,7 @@ void BuffTimers::print_timers(void) {
   }
 
   if (activeBuffs.size() != 0) {
-    for (int i = 0; i <  activeBuffs.size(); ++i) {
+    for (size_t i = 0; i <  activeBuffs.size(); ++i) {
       BuffDetails details = activeBuffs[i];
       if (details.Buff.SpellId != USHRT_MAX) {
         int Mins = ((details.Buff.Ticks) * 6) / 60;

@@ -7,9 +7,6 @@
 #include <cctype>
 #include "StringUtil.h"
 
-
-
-
 void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -39,7 +36,6 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 		}
 		if (cmd_handled) {
 			cmd[0] = '\0';
-			return;
 			return;
 		}
 	}
@@ -72,7 +68,27 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			Zeal::EqGame::change_stance(Stance::Sit);
 			return false;
 		});
-	add("/showlootlockouts", {"/sll", "/showlootlockout", "/showlockouts"},
+	add("/showhelm", { "/helm" },
+		[](std::vector<std::string>& args) {
+			if (args.size() == 1)
+			{
+				Zeal::EqGame::print_chat("usage: /showhelm [on | off]");
+				return true;
+			}
+			if (args.size() > 1 && args.size() < 3) {
+				if (StringUtil::caseInsensitive(args[1], "on")) {
+					Zeal::EqGame::do_say(true, "#showhelm on");
+					return true;
+				}
+				else if (StringUtil::caseInsensitive(args[1], "off"))
+				{
+					Zeal::EqGame::do_say(true, "#showhelm off");
+					return true;
+				}
+			}
+			return false;
+		});
+	add("/showlootlockouts", { "/sll", "/showlootlockout", "/showlockouts" },
 		[](std::vector<std::string>& args) {
 
 			Zeal::EqGame::do_say(true, "#showlootlockouts");
@@ -82,7 +98,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)
 			{
-				std::stringstream ss;
 				Zeal::EqGame::print_chat("Available args: version"); //leave room for more args on this command for later
 				return true;
 			}
@@ -94,9 +109,8 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				return true;
 			}
 			return false;
-
 		});
-	add("/help", {"/hel"},
+	add("/help", { "/hel" },
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)
 			{
@@ -136,7 +150,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				return true;
 			}
 			return false;
-			
 		});
 	zeal->hooks->Add("commands", Zeal::EqGame::EqGameInternal::fn_interpretcmd, InterpretCommand, hook_type_detour);
 }
