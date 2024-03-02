@@ -1,7 +1,7 @@
 #include "buff_timers.h"
 #include "Zeal.h"
 
-BuffDetails::BuffDetails(int index, Zeal::EqStructures::_EQBUFFINFO info) :
+BuffDetails::BuffDetails(size_t index, Zeal::EqStructures::_EQBUFFINFO info) :
   BuffSlot(index), Buff(info)
 {
 }
@@ -13,7 +13,7 @@ void BuffTimers::print_timers(void) {
   std::ostringstream oss;
 
   auto CharInfo = Zeal::EqGame::get_self()->CharInfo;
-  for (int i = 0; i < EQ_NUM_BUFFS; ++i) {
+  for (size_t i = 0; i < EQ_NUM_BUFFS; ++i) {
     WORD BuffId = CharInfo->Buff[i].SpellId;
     if (BuffId != USHRT_MAX) {
       activeBuffs.push_back(BuffDetails({ i, CharInfo->Buff[i] }));
@@ -21,7 +21,7 @@ void BuffTimers::print_timers(void) {
   }
 
   if (activeBuffs.size() != 0) {
-    for (int i = 0; i <  activeBuffs.size(); ++i) {
+    for (size_t i = 0; i <  activeBuffs.size(); ++i) {
       BuffDetails details = activeBuffs[i];
       if (details.Buff.SpellId != USHRT_MAX) {
         int Mins = ((details.Buff.Ticks) * 6) / 60;

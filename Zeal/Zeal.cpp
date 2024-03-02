@@ -25,12 +25,12 @@ ZealService::ZealService()
 	auto_stand = std::shared_ptr<AutoStand>(new AutoStand(this));
 
 	binds_hook->replace_bind(5, [this](int state) {
-		camera_mods->handle_binds(5, state); 
+		camera_mods->handle_camera_motion_binds(5, state); 
 		auto_stand->handle_binds(5, state);
 		return false;
 	}); //turn right
 	binds_hook->replace_bind(6, [this](int state) {
-		camera_mods->handle_binds(5, state); 
+		camera_mods->handle_camera_motion_binds(5, state); 
 		auto_stand->handle_binds(6, state);
 		return false;
 	}); //turn left

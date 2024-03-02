@@ -25,7 +25,7 @@ public: //methods
 	{
 		remove();
 	}
-	hook() : address{}, original_bytes{}, destination{}, trampoline{}, hook_type{ hook_type_detour } { };
+	hook() : orig_byte_count{0}, address {}, original_bytes{}, destination{}, trampoline{}, hook_type{ hook_type_detour } { };
 	template<typename X, typename T>
 	hook(X addr, T dest, hook_type_ hooktype = hook_type_detour, int byte_count = 5)
 	{

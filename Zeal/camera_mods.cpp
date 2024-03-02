@@ -7,60 +7,8 @@
 #include <algorithm>
 #include <windowsx.h>
 #include "StringUtil.h"
+#include "camera_math.h"
 
-float Smooth(float rawDelta, float smoothDelta) {
-    return std::lerp(smoothDelta, static_cast<float>(rawDelta), 1.0f / 1.5f);
-}
-int angleDifference(int angle1, int angle2) {
-    int abs_diff = abs(angle1 - angle2);
-    if (abs_diff > 256) {
-        return 512 - abs_diff;
-    }
-    else {
-        return abs_diff;
-    }
-}
-float get_pitch(Vec3 cameraPos, Vec3 targetPos) {
-    Vec3 direction = targetPos - cameraPos;
-    float horizontalDistance = (float)direction.Length2D();
-    float verticalDistance = (float)direction.z;
-    float pitch = std::atan2(verticalDistance, horizontalDistance);
-    float pitchDegrees = pitch * (180.0f / (float)M_PI);
-
-    // Scale the pitch to fit into the [-128, 128] range
-    pitchDegrees *= (128.0f / 90.0f);
-
-    return pitchDegrees;
-}
-
-Vec3 calculatePositionBehind(const Vec3& playerHead, float distance, float playerYaw, float pitch) {
-    float yaw_rads = playerYaw * (2.0f * (float)M_PI) / 512.0f;
-    float yaw_deg = yaw_rads * (180.0f / (float)M_PI);
-
-    // Convert pitch to radians
-    float pitch_rads = pitch * ((float)M_PI / 180.0f);
-
-    Vec3 positionBehind;
-
-    // Calculate the position behind based on player's orientation and pitch
-    float horizontalDistance = distance * cos(pitch_rads);
-    float verticalDistance = distance * sin(pitch_rads);
-
-    static Vec3 last_good;
-    // Limit vertical distance to prevent camera from moving too far above the player's head
-    if (pitch_rads > -M_PI / 2 && pitch_rads < M_PI / 2) {
-        positionBehind.x = playerHead.x - horizontalDistance * cos(yaw_rads);
-        positionBehind.y = playerHead.y - horizontalDistance * sin(yaw_rads);
-        positionBehind.z = playerHead.z + verticalDistance;
-        last_good = positionBehind;
-    }
-    else {
-        // If pitch is too steep, keep the camera level with the player's head
-        positionBehind = last_good;
-    }
-
-    return positionBehind;
-}
 bool CameraMods::update_cam()
 {
     if (!enabled)
@@ -71,11 +19,11 @@ bool CameraMods::update_cam()
         return false;
     Zeal::EqStructures::CameraInfo* cam = Zeal::EqGame::get_camera();
     Vec3 head_pos = Zeal::EqGame::get_view_actor_head_pos();
-    Vec3 wanted_pos = calculatePositionBehind(head_pos, current_zoom, zeal_cam_yaw/*self->Heading*/, -zeal_cam_pitch);
+    Vec3 wanted_pos = camera_math::get_cam_pos_behind(head_pos, current_zoom, zeal_cam_yaw/*self->Heading*/, -zeal_cam_pitch);
     bool rval = Zeal::EqGame::collide_with_world(head_pos, wanted_pos, wanted_pos);
     cam->Position = wanted_pos;
     cam->Heading = zeal_cam_yaw;// self->Heading;
-    cam->Pitch = get_pitch(cam->Position, head_pos);
+    cam->Pitch = camera_math::get_pitch(cam->Position, head_pos);
     cam->RegionNumber = Zeal::EqGame::get_region_from_pos(&cam->Position);
     return rval;
 }
@@ -100,29 +48,7 @@ void CameraMods::mouse_wheel(int delta)
            update_zoom(zoom_speed);
     }
 }
-float toZealPitch(float game_pitch) {
-    float scaledAmplitude = (game_pitch / 128.0f) * 90.0f;
-    if (scaledAmplitude > 89.99f) {
-        scaledAmplitude = 89.99f;
-    }
-    else if (scaledAmplitude < -89.99f) {
-        scaledAmplitude = -89.99f;
-    }
 
-    return scaledAmplitude;
-}
-float toGamePitch(float zeal_pitch) {
-    float normalizedAmplitude = zeal_pitch / 90.0f;
-    float unscaledAmplitude = normalizedAmplitude * 128.0f;
-    if (unscaledAmplitude > 128.0f) {
-        unscaledAmplitude = 128.0f;
-    }
-    else if (unscaledAmplitude < -128.0f) {
-        unscaledAmplitude = -128.0f;
-    }
-
-    return unscaledAmplitude;
-}
 
 void CameraMods::toggle_zeal_cam(bool enabled)
 {
@@ -130,14 +56,14 @@ void CameraMods::toggle_zeal_cam(bool enabled)
     if (enabled)
     {
         *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::ZealCam;
-        zeal_cam_pitch = toZealPitch(self->Pitch);
+        zeal_cam_pitch = camera_math::pitch_to_normal(self->Pitch);
         zeal_cam_yaw = self->Heading;
         desired_zoom += zoom_speed;
         mem::set(0x4db8ce, 0x90, 6, original_cam[0] == 0x0 ? original_cam : 0);
     }
     else if (original_cam[0] != 0x0)
     {
-        self->Pitch = toGamePitch(zeal_cam_pitch);
+        self->Pitch = camera_math::pitch_to_game(zeal_cam_pitch);
         current_zoom = 0;
         if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
             *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
@@ -190,19 +116,19 @@ void CameraMods::proc_mouse()
         if (!self)
             return;
 
-        if (camera_view == Zeal::EqEnums::CameraView::ZealCam && rbutton && Zeal::EqGame::can_move())
+        if (check_snap && camera_view == Zeal::EqEnums::CameraView::ZealCam && rbutton && Zeal::EqGame::can_move())
         {
             //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
-            if (fabs(angleDifference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
+            if (fabs(camera_math::angle_difference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
                 Zeal::EqGame::get_self()->Heading = zeal_cam_yaw;
         }
-
+        check_snap = false;
         if (rbutton || (camera_view== Zeal::EqEnums::CameraView::ZealCam && lbutton))
         {
             float delta_y = delta->y;
             float delta_x = delta->x;
-            smoothMouseDeltaX = Smooth(delta_x * sensitivity_x, smoothMouseDeltaX);
-            smoothMouseDeltaY = Smooth(delta_y * sensitivity_y, smoothMouseDeltaY);
+            smoothMouseDeltaX = camera_math::lerp(delta_x * sensitivity_x, smoothMouseDeltaX);
+            smoothMouseDeltaY = camera_math::lerp(delta_y * sensitivity_y, smoothMouseDeltaY);
             if (fabs(smoothMouseDeltaX) > 5)
                 smoothMouseDeltaY /= 2;
             //ZealService::get_instance()->labels_hook->print_debug_info("delta x %f  delta y %f", smoothMouseDeltaX, smoothMouseDeltaY);
@@ -237,7 +163,7 @@ void CameraMods::proc_mouse()
                     zeal_cam_pitch -= smoothMouseDeltaY;
                     zeal_cam_pitch = std::clamp(zeal_cam_pitch, -89.9f, 89.9f);
                     if (Zeal::EqGame::KeyMods->Shift)
-                        self->Pitch = toGamePitch(zeal_cam_pitch);
+                        self->Pitch = camera_math::pitch_to_game(zeal_cam_pitch);
                 }
                 else
                 {
@@ -279,8 +205,10 @@ void CameraMods::set_smoothing(bool val)
         toggle_zeal_cam(false);
 }
 
-void CameraMods::InterpolateZoom() 
+void CameraMods::interpolate_zoom() 
 {
+    if (!enabled)
+        return;
     if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
     {
         current_zoom = current_zoom + (desired_zoom - current_zoom) * .3f; //linear interpolation
@@ -290,19 +218,22 @@ void CameraMods::InterpolateZoom()
 }
 
 
-void CameraMods::handle_binds(int cmd, bool is_down)
+void CameraMods::handle_camera_motion_binds(int cmd, bool is_down)
 {
     DWORD camera_view = *Zeal::EqGame::camera_view;
-    if ((enabled && camera_view == Zeal::EqEnums::CameraView::ZealCam) || (enabled && cmd == 19)) //allow zoom out
+    if (!enabled)
+    {
+        current_key_cmd = 0;
+        return;
+    }
+    if ((camera_view == Zeal::EqEnums::CameraView::ZealCam) || (cmd == 19)) //allow zoom out
     {
         if (is_down)
-        {
             current_key_cmd = cmd;
-        }
         else
             current_key_cmd = 0;
+        return;
     }
-    else
     current_key_cmd = 0;
 }
 
@@ -311,13 +242,8 @@ void CameraMods::handle_binds(int cmd, bool is_down)
 void CameraMods::handle_cycle_camera_views(int cmd, bool is_down)
 {
   DWORD camera_view = *Zeal::EqGame::camera_view;
-  if (enabled && cmd == 20)
+  if (cmd == 20) //removed enabled
   {
-    if (is_down) // setting current_key_cmd doesn't seem necessary in this case, but I may be misunderstanding...
-      current_key_cmd = cmd;
-    else
-      current_key_cmd = 0;
-
     int strafe_camera_count = Zeal::EqEnums::CameraView::TotalCameras;
     if (camera_view == Zeal::EqEnums::CameraView::ThirdPerson3 && !camera3_strafe_enabled)
     {
@@ -346,12 +272,16 @@ static bool is_over_title_bar(void)
   return (mouse_y >= 0xE6FF && mouse_y <= 0xFFFF);
 }
 
-void CameraMods::callback_main()
-{
-    static int prev_view = *Zeal::EqGame::camera_view;
-    DWORD camera_view = *Zeal::EqGame::camera_view;
 
-    if (camera_view != Zeal::EqEnums::CameraView::ZealCam && current_key_cmd!=19)
+void CameraMods::tick_key_move()
+{
+    if (!enabled)
+    {
+        current_key_cmd = 0;
+        return;
+    }
+    DWORD camera_view = *Zeal::EqGame::camera_view;
+    if (camera_view != Zeal::EqEnums::CameraView::ZealCam && current_key_cmd != 19)
         current_key_cmd = 0;
 
     if (camera_view == Zeal::EqEnums::CameraView::FirstPerson && current_key_cmd == 19)
@@ -382,76 +312,48 @@ void CameraMods::callback_main()
     else
     {
         if (lmouse_time)
-        {
             mem::write<byte>(0x53edef, 0x75);
-        }
         lmouse_time = 0;
     }
 
-    if (enabled)
+    switch (current_key_cmd)
     {
-        InterpolateZoom();
-
-
-        switch (current_key_cmd)
-        {
-        case 5:
-        {
-            if (camera_view == Zeal::EqEnums::CameraView::ZealCam)
-            {
-                //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
-                if (fabs(angleDifference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
-                    Zeal::EqGame::get_self()->Heading = zeal_cam_yaw;
-                else
-                    zeal_cam_yaw = Zeal::EqGame::get_self()->Heading;
-            }
-            break;
-        }
-        case 15: //up
-            zeal_cam_pitch -= 0.3f;
-            if (zeal_cam_pitch <= -89.99f)
-                zeal_cam_pitch = -89.99f;
-            break;
-        case 16: //down
-            zeal_cam_pitch += 0.3f;
-            if (zeal_cam_pitch >= 89.99f)
-                zeal_cam_pitch = 89.99f;
-            break;
-        case 18: //zoom in
-            if (desired_zoom > 0)
-                desired_zoom -= .3;
-            break;
-        case 19: //zoom out
-            desired_zoom += .3;
-            if (desired_zoom > max_zoom_out)
-                desired_zoom = max_zoom_out;
-            break;
-        }
-    }
-    else
+    case 5:
     {
-        current_key_cmd = 0;
-    }
-
-
-
-
-    if (prev_view != *Zeal::EqGame::camera_view && enabled)
-    {
-        if (*Zeal::EqGame::camera_view != Zeal::EqEnums::CameraView::ZealCam)
-            toggle_zeal_cam(false);
-        else
+        if (camera_view == Zeal::EqEnums::CameraView::ZealCam)
         {
-            toggle_zeal_cam(true);
-            desired_zoom = zoom_speed;
+            //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
+            if (fabs(camera_math::angle_difference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
+                Zeal::EqGame::get_self()->Heading = zeal_cam_yaw;
+            else
+                zeal_cam_yaw = Zeal::EqGame::get_self()->Heading;
         }
+        break;
     }
+    case 15: //up
+        zeal_cam_pitch -= 0.3f;
+        if (zeal_cam_pitch <= -89.99f)
+            zeal_cam_pitch = -89.99f;
+        break;
+    case 16: //down
+        zeal_cam_pitch += 0.3f;
+        if (zeal_cam_pitch >= 89.99f)
+            zeal_cam_pitch = 89.99f;
+        break;
+    case 18: //zoom in
+        if (desired_zoom > 0)
+            desired_zoom -= .3f;
+        break;
+    case 19: //zoom out
+        desired_zoom += .3f;
+        if (desired_zoom > max_zoom_out)
+            desired_zoom = max_zoom_out;
+        break;
+    }
+}
 
-
-
-    Zeal::EqStructures::CameraInfo* cam = Zeal::EqGame::get_camera();
-    if (!cam)
-        return;
+void CameraMods::update_fps_sensitivity()
+{
     auto currentTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
     if (elapsedTime > 0) {
@@ -472,10 +374,36 @@ void CameraMods::callback_main()
     sensitivity_x *= multiplier;
     sensitivity_y *= multiplier;
     lastTime = currentTime;
-    if (!*Zeal::EqGame::is_right_mouse_down && Zeal::EqGame::is_in_game() && enabled)
+}
+
+void CameraMods::callback_main()
+{
+    static int prev_view = *Zeal::EqGame::camera_view;
+    DWORD camera_view = *Zeal::EqGame::camera_view;
+    if (enabled)
     {
-        if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
-            update_cam();
+        interpolate_zoom();
+        update_fps_sensitivity();
+        tick_key_move();
+
+        if (prev_view != *Zeal::EqGame::camera_view) //this simply checks if your camera type has changed
+        {
+            if (*Zeal::EqGame::camera_view != Zeal::EqEnums::CameraView::ZealCam)
+            {
+                toggle_zeal_cam(false);
+            }
+            else
+            {
+                toggle_zeal_cam(true);
+                desired_zoom = zoom_speed;
+            }
+        }
+        
+
+        if (!*Zeal::EqGame::is_right_mouse_down && Zeal::EqGame::is_in_game() && *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
+        {
+           update_cam();
+        }
     }
     prev_view = *Zeal::EqGame::camera_view;
 }
@@ -487,7 +415,7 @@ void _fastcall doCharacterSelection(int t, int u)
     zeal->hooks->hook_map["DoCharacterSelection"]->original(doCharacterSelection)(t, u);
 }
 
-void CameraMods::LoadSettings(IO_ini* ini)
+void CameraMods::load_settings(IO_ini* ini)
 {
     if (!ini->exists("Zeal", "MouseSmoothing"))
         ini->setValue<bool>("Zeal", "MouseSmoothing", true);
@@ -521,7 +449,7 @@ void CameraMods::LoadSettings(IO_ini* ini)
 
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {
-    LoadSettings(ini);
+    load_settings(ini);
 
     mem::write<byte>(0x53fa50, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
     mem::write<byte>(0x53f648, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
@@ -609,14 +537,14 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
             }
             return true;
         });
-    zeal->binds_hook->replace_bind(15,  [this](int state) { handle_binds(15, state); return false; });
-    zeal->binds_hook->replace_bind(115, [this](int state) { handle_binds(15, state); return false; });
-    zeal->binds_hook->replace_bind(111, [this](int state) { handle_binds(15, state); return false; });
-    zeal->binds_hook->replace_bind(16,  [this](int state) { handle_binds(16, state); return false; });
-    zeal->binds_hook->replace_bind(116, [this](int state) { handle_binds(16, state); return false; });
-    zeal->binds_hook->replace_bind(112, [this](int state) { handle_binds(16, state); return false; });
-    zeal->binds_hook->replace_bind(18,  [this](int state) { handle_binds(18, state); return false; });
-    zeal->binds_hook->replace_bind(19,  [this](int state) { handle_binds(19, state); return false; });
+    zeal->binds_hook->replace_bind(15,  [this](int state) { handle_camera_motion_binds(15, state); return false; });
+    zeal->binds_hook->replace_bind(115, [this](int state) { handle_camera_motion_binds(15, state); return false; });
+    zeal->binds_hook->replace_bind(111, [this](int state) { handle_camera_motion_binds(15, state); return false; });
+    zeal->binds_hook->replace_bind(16,  [this](int state) { handle_camera_motion_binds(16, state); return false; });
+    zeal->binds_hook->replace_bind(116, [this](int state) { handle_camera_motion_binds(16, state); return false; });
+    zeal->binds_hook->replace_bind(112, [this](int state) { handle_camera_motion_binds(16, state); return false; });
+    zeal->binds_hook->replace_bind(18,  [this](int state) { handle_camera_motion_binds(18, state); return false; });
+    zeal->binds_hook->replace_bind(19,  [this](int state) { handle_camera_motion_binds(19, state); return false; });
     zeal->binds_hook->replace_bind(20,  [this](int state) { handle_cycle_camera_views(20, state); return false; });
 }
 

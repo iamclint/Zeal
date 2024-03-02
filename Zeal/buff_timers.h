@@ -6,9 +6,9 @@
 class BuffDetails
 {
 public:
-  BuffDetails(int index, Zeal::EqStructures::_EQBUFFINFO buff);
+  BuffDetails(size_t index, Zeal::EqStructures::_EQBUFFINFO buff);
   ~BuffDetails() {};
-  int BuffSlot;
+  size_t BuffSlot;
   Zeal::EqStructures::_EQBUFFINFO Buff;
 };
 
