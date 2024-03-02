@@ -65,7 +65,7 @@ bool CameraMods::update_cam()
 {
     if (!enabled)
         return false;
-    
+
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_view_actor_entity();
     if (!self)
         return false;
@@ -313,26 +313,23 @@ void CameraMods::handle_cycle_camera_views(int cmd, bool is_down)
   DWORD camera_view = *Zeal::EqGame::camera_view;
   if (enabled && cmd == 20)
   {
-    if (is_down) {
+    if (is_down) // setting current_key_cmd doesn't seem necessary in this case, but I may be misunderstanding...
       current_key_cmd = cmd;
-
-      int strafe_camera_count = Zeal::EqEnums::CameraView::TotalCameras;
-      if (camera_view == Zeal::EqEnums::CameraView::ThirdPerson3 && !camera3_strafe_enabled)
-      {
-        strafe_camera_count = Zeal::EqEnums::CameraView::ThirdPerson2;
-      }
-      else if (camera_view == Zeal::EqEnums::CameraView::ThirdPerson4 && !camera4_strafe_enabled)
-      {
-        strafe_camera_count = Zeal::EqEnums::CameraView::ThirdPerson2;
-      }
-
-      mem::write<byte>(0x53fa50, strafe_camera_count);
-      mem::write<byte>(0x53f648, strafe_camera_count);
-    }
     else
-    {
       current_key_cmd = 0;
+
+    int strafe_camera_count = Zeal::EqEnums::CameraView::TotalCameras;
+    if (camera_view == Zeal::EqEnums::CameraView::ThirdPerson3 && !camera3_strafe_enabled)
+    {
+      strafe_camera_count = Zeal::EqEnums::CameraView::ThirdPerson2;
     }
+    else if (camera_view == Zeal::EqEnums::CameraView::ThirdPerson4 && !camera4_strafe_enabled)
+    {
+      strafe_camera_count = Zeal::EqEnums::CameraView::ThirdPerson2;
+    }
+
+    mem::write<byte>(0x53fa50, strafe_camera_count);
+    mem::write<byte>(0x53f648, strafe_camera_count);
   }
   else
   {
