@@ -24,8 +24,8 @@ namespace camera_math
 
         return unscaledAmplitude;
     }
-    float lerp(float rawDelta, float smoothDelta) {
-        return std::lerp(smoothDelta, static_cast<float>(rawDelta), 1.0f / 1.5f);
+    float lerp(float rawDelta, float smoothDelta, float t) {
+        return std::lerp(smoothDelta, static_cast<float>(rawDelta), t);
     }
     float angle_difference(float angle1, float angle2) {
         int abs_diff = fabs(angle1 - angle2);

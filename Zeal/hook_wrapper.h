@@ -34,6 +34,7 @@ public: //methods
 		address = (int)addr;
 		destination = (int)dest;
 		hook_type = hooktype;
+		trampoline = 0;
 		mem::copy((int)original_bytes, (BYTE*)addr, byte_count);
 
 		switch (hook_type)

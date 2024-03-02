@@ -3,7 +3,7 @@
 #include "EqAddresses.h"
 void AutoStand::handle_binds(int cmd, bool key_down)
 {
-	if (!Zeal::EqGame::game_wants_input())
+	if (!Zeal::EqGame::game_wants_input() && key_down)
 	{
 		if (!Zeal::EqGame::KeyMods->Alt && !Zeal::EqGame::KeyMods->Shift && !Zeal::EqGame::KeyMods->Ctrl)
 		{

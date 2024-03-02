@@ -12,8 +12,8 @@ void ExecuteCmd(int cmd, int isdown, int unk2)
 	ZealService* zeal = ZealService::get_instance();
 	if (!Zeal::EqGame::game_wants_input()) //checks if the game wants keyboard input... don't call our binds when the game wants input
 	{
-		if (isdown)
-			Zeal::EqGame::print_chat("cmd: %i", cmd);
+		//if (isdown)
+		//	Zeal::EqGame::print_chat("cmd: %i", cmd);
 		if (zeal->binds_hook->ReplacementFunctions.count(cmd) > 0)
 		{
 			if (zeal->binds_hook->ReplacementFunctions[cmd](isdown)) //if the replacement function returns true, end here otherwise its really just adding more to the command 

@@ -103,7 +103,9 @@ int handle_mouse_wheel(int delta)
 
 void CameraMods::proc_mouse()
 {
-    if (enabled && (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam || *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::FirstPerson))
+    if (!enabled)
+        return;
+    if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam || *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::FirstPerson)
     {
         static float smoothMouseDeltaX = 0;
         static float smoothMouseDeltaY = 0;
@@ -116,22 +118,22 @@ void CameraMods::proc_mouse()
         if (!self)
             return;
 
-        if (check_snap && camera_view == Zeal::EqEnums::CameraView::ZealCam && rbutton && Zeal::EqGame::can_move())
-        {
-            //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
-            if (fabs(camera_math::angle_difference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
-                Zeal::EqGame::get_self()->Heading = zeal_cam_yaw;
-        }
-        check_snap = false;
+ 
         if (rbutton || (camera_view== Zeal::EqEnums::CameraView::ZealCam && lbutton))
         {
             float delta_y = delta->y;
             float delta_x = delta->x;
-            smoothMouseDeltaX = camera_math::lerp(delta_x * sensitivity_x, smoothMouseDeltaX);
-            smoothMouseDeltaY = camera_math::lerp(delta_y * sensitivity_y, smoothMouseDeltaY);
+            float t = 1.0f / 1.5f;
+            /*if (fps < 50)
+            {
+                delta_y *= fps/2;
+                delta_x *= fps/2;
+            }*/
+            smoothMouseDeltaX = camera_math::lerp(delta_x * sensitivity_x, smoothMouseDeltaX, t);
+            smoothMouseDeltaY = camera_math::lerp(delta_y * sensitivity_y, smoothMouseDeltaY, t);
             if (fabs(smoothMouseDeltaX) > 5)
                 smoothMouseDeltaY /= 2;
-            //ZealService::get_instance()->labels_hook->print_debug_info("delta x %f  delta y %f", smoothMouseDeltaX, smoothMouseDeltaY);
+
             delta->y = 0;
             delta->x = 0;
 
@@ -143,10 +145,17 @@ void CameraMods::proc_mouse()
                 if (rbutton)
                 {
                     if (fabs(smoothMouseDeltaX) > 0.1)
-                        self->MovementSpeedHeading = -smoothMouseDeltaX;
+                        self->MovementSpeedHeading = -smoothMouseDeltaX/1000;
                     else
                         self->MovementSpeedHeading = 0;
-                    zeal_cam_yaw = self->Heading;
+
+                    if (camera_view == Zeal::EqEnums::CameraView::ZealCam)
+                    {
+                        zeal_cam_yaw -= smoothMouseDeltaX;
+                        self->Heading = zeal_cam_yaw;
+                    }
+                    else
+                        self->Heading += -smoothMouseDeltaX;
                 }
             }
             if (lbutton || (rbutton && !Zeal::EqGame::can_move()))
@@ -179,7 +188,6 @@ void CameraMods::proc_mouse()
            update_cam();
     }
 }
-
 
 void __fastcall procMouse(int eq, int unused, int a1)
 {
@@ -280,6 +288,7 @@ void CameraMods::tick_key_move()
         current_key_cmd = 0;
         return;
     }
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     DWORD camera_view = *Zeal::EqGame::camera_view;
     if (camera_view != Zeal::EqEnums::CameraView::ZealCam && current_key_cmd != 19)
         current_key_cmd = 0;
@@ -320,13 +329,15 @@ void CameraMods::tick_key_move()
     {
     case 5:
     {
-        if (camera_view == Zeal::EqEnums::CameraView::ZealCam)
+        if (camera_view == Zeal::EqEnums::CameraView::ZealCam && (self->StandingState==Stance::Stand || self->StandingState == Stance::Duck))
         {
             //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
-            if (fabs(camera_math::angle_difference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
-                Zeal::EqGame::get_self()->Heading = zeal_cam_yaw;
+            if (fabs(camera_math::angle_difference(zeal_cam_yaw, self->Heading)) > 5 && fps>40)
+            {
+                self->Heading = zeal_cam_yaw;
+            }
             else
-                zeal_cam_yaw = Zeal::EqGame::get_self()->Heading;
+                zeal_cam_yaw = self->Heading;
         }
         break;
     }
@@ -447,6 +458,24 @@ void CameraMods::load_settings(IO_ini* ini)
     cycle_to_zeal_cam_enabled = ini->getValue<bool>("Zeal", "CycleToZealCamEnabled");
 }
 
+void CameraMods::proc_rmousedown(int x, int y)
+{
+    DWORD camera_view = *Zeal::EqGame::camera_view;
+    if (camera_view == Zeal::EqEnums::CameraView::ZealCam && Zeal::EqGame::can_move())
+    {
+        //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
+        if (fabs(camera_math::angle_difference(zeal_cam_yaw, Zeal::EqGame::get_self()->Heading)) > 5)
+            Zeal::EqGame::get_self()->Heading = zeal_cam_yaw;
+    }
+}
+
+void __stdcall procRightMouse(int x, int y)
+{
+    ZealService* zeal = ZealService::get_instance();
+    zeal->camera_mods->proc_rmousedown(x,y);
+    zeal->hooks->hook_map["procRightMouse"]->original(procRightMouse)(x, y);
+}
+
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {
     load_settings(ini);
@@ -455,17 +484,18 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     mem::write<byte>(0x53f648, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
 
     if (cycle_to_zeal_cam_enabled)
-      mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::TotalCameras); //allow for the camera toggle hotkey to cycle through the new camera
+        mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::TotalCameras); //allow for the camera toggle hotkey to cycle through the new camera
     else
-      mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::ZealCam);
+        mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::ZealCam);
 
     lastTime = std::chrono::steady_clock::now();
     fps = 0;
     height = 0;
     zeal->main_loop_hook->add_callback([this]() { callback_main();  });
-	  zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
+    zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("DoCharacterSelection", 0x53b9cf, doCharacterSelection, hook_type_detour);
+    zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
 
     zeal->commands_hook->add("/zealcam", { "/smoothing" },
         [this](std::vector<std::string>& args) {
@@ -489,11 +519,11 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 user_sensitivity_x_3rd = x_sens;
                 user_sensitivity_y_3rd = y_sens;
                 set_smoothing(true);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX",user_sensitivity_x);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY",user_sensitivity_y);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd",user_sensitivity_x_3rd);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd",user_sensitivity_y_3rd);
-                Zeal::EqGame::print_chat("New camera sensitivity [%f] [%f]",user_sensitivity_x,user_sensitivity_y);
+                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", user_sensitivity_x);
+                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
+                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x_3rd);
+                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y_3rd);
+                Zeal::EqGame::print_chat("New camera sensitivity [%f] [%f]", user_sensitivity_x, user_sensitivity_y);
             }
             else if (args.size() == 5)
             {
@@ -517,38 +547,40 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 user_sensitivity_x_3rd = x_sens_3rd;
                 user_sensitivity_y_3rd = y_sens_3rd;
                 set_smoothing(true);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX",user_sensitivity_x);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY",user_sensitivity_y);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd",user_sensitivity_x_3rd);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd",user_sensitivity_y_3rd);
+                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", user_sensitivity_x);
+                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
+                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x_3rd);
+                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y_3rd);
 
-                Zeal::EqGame::print_chat("New camera sensitivity FirstPerson: [%f] [%f] ThirdPerson: [%f] [%f]",user_sensitivity_x,user_sensitivity_y,user_sensitivity_x_3rd,user_sensitivity_y_3rd);
+                Zeal::EqGame::print_chat("New camera sensitivity FirstPerson: [%f] [%f] ThirdPerson: [%f] [%f]", user_sensitivity_x, user_sensitivity_y, user_sensitivity_x_3rd, user_sensitivity_y_3rd);
             }
             else
             {
-               set_smoothing(!ZealService::get_instance()->camera_mods->enabled);
-               if (ZealService::get_instance()->camera_mods->enabled)
-               {
-                   Zeal::EqGame::print_chat("Zealcam enabled");
-                   Zeal::EqGame::print_chat("camera sensitivity FirstPerson : [% f] [% f] ThirdPerson : [% f] [% f] ", user_sensitivity_x, user_sensitivity_y, user_sensitivity_x_3rd, user_sensitivity_y_3rd);
-               }
+                set_smoothing(!ZealService::get_instance()->camera_mods->enabled);
+                if (ZealService::get_instance()->camera_mods->enabled)
+                {
+                    Zeal::EqGame::print_chat("Zealcam enabled");
+                    Zeal::EqGame::print_chat("camera sensitivity FirstPerson : [% f] [% f] ThirdPerson : [% f] [% f] ", user_sensitivity_x, user_sensitivity_y, user_sensitivity_x_3rd, user_sensitivity_y_3rd);
+                }
                 else
                     Zeal::EqGame::print_chat("Zealcam disabled");
             }
             return true;
         });
-    zeal->binds_hook->replace_bind(15,  [this](int state) { handle_camera_motion_binds(15, state); return false; });
+    zeal->binds_hook->replace_bind(15, [this](int state) { handle_camera_motion_binds(15, state); return false; });
     zeal->binds_hook->replace_bind(115, [this](int state) { handle_camera_motion_binds(15, state); return false; });
     zeal->binds_hook->replace_bind(111, [this](int state) { handle_camera_motion_binds(15, state); return false; });
-    zeal->binds_hook->replace_bind(16,  [this](int state) { handle_camera_motion_binds(16, state); return false; });
+    zeal->binds_hook->replace_bind(16, [this](int state) { handle_camera_motion_binds(16, state); return false; });
     zeal->binds_hook->replace_bind(116, [this](int state) { handle_camera_motion_binds(16, state); return false; });
     zeal->binds_hook->replace_bind(112, [this](int state) { handle_camera_motion_binds(16, state); return false; });
-    zeal->binds_hook->replace_bind(18,  [this](int state) { handle_camera_motion_binds(18, state); return false; });
-    zeal->binds_hook->replace_bind(19,  [this](int state) { handle_camera_motion_binds(19, state); return false; });
-    zeal->binds_hook->replace_bind(20,  [this](int state) { handle_cycle_camera_views(20, state); return false; });
+    zeal->binds_hook->replace_bind(18, [this](int state) { handle_camera_motion_binds(18, state); return false; });
+    zeal->binds_hook->replace_bind(19, [this](int state) { handle_camera_motion_binds(19, state); return false; });
+    zeal->binds_hook->replace_bind(20, [this](int state) { handle_cycle_camera_views(20, state); return false; });
+
 }
 
 CameraMods::~CameraMods()
 {
+    shutting_down = true;
     toggle_zeal_cam(false);
 }

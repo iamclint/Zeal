@@ -8,9 +8,9 @@ class CameraMods
 public:
 	std::chrono::steady_clock::time_point prevTime;
 	const float max_zoom_out = 100;
-	float user_sensitivity_x = 0.7f;
+	float user_sensitivity_x = 0.3f;
 	float user_sensitivity_y = 0.3f;
-	float user_sensitivity_x_3rd = 0.7f;
+	float user_sensitivity_x_3rd = 0.3f;
 	float user_sensitivity_y_3rd = 0.3f;
 	bool camera3_strafe_enabled = true;
 	bool camera4_strafe_enabled = true;
@@ -33,6 +33,7 @@ public:
 	void proc_mouse();
 	void handle_camera_motion_binds(int cmd, bool is_down);
 	void handle_cycle_camera_views(int cmd, bool is_down);
+	void proc_rmousedown(int x, int y);
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:
@@ -45,10 +46,10 @@ private:
 	void load_settings(class IO_ini* ini);
 	void interpolate_zoom();
 	int current_key_cmd = 0;
-	Vec2 previous_mouse_pos;
-	Vec2 mouse_delta;
 	BYTE original_cam[6] = { 0 };
 	std::chrono::steady_clock::time_point lastTime;
+	Vec2 local_delta = { 0, 0 };
+	bool shutting_down = false;
 	void tick_key_move();
 	void update_fps_sensitivity();
 };

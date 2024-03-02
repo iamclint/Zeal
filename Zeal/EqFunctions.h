@@ -68,6 +68,7 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int, int)> CXWndIsType = 0x571300;
 			static mem::function<int __fastcall(int, int, int, int)> CXWndShowContextMenu = 0x5A02F0;
 			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
+			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
 		//// Wrapper function to call CXStr_PrintString
