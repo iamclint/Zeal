@@ -179,6 +179,7 @@
     <ClInclude Include="outputfile.h" />
     <ClInclude Include="raid.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="spellsets.h" />
     <ClInclude Include="StringUtil.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="Zeal.h" />
@@ -204,6 +205,7 @@
     <ClCompile Include="camera_mods.cpp" />
     <ClCompile Include="outputfile.cpp" />
     <ClCompile Include="raid.cpp" />
+    <ClCompile Include="spellsets.cpp" />
     <ClCompile Include="StringUtil.cpp" />
     <ClCompile Include="vectors.cpp" />
     <ClCompile Include="Zeal.cpp" />

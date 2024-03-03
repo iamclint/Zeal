@@ -14,6 +14,7 @@ ZealService::ZealService()
 	binds_hook = std::shared_ptr<Binds>(new Binds(this));
 	raid_hook = std::shared_ptr<raid>(new raid(this));
 	eqstr_hook = std::shared_ptr<eqstr>(new eqstr(this));
+	spell_sets = std::shared_ptr<SpellSets>(new SpellSets(this));
 	this->apply_patches();
 
 	camera_mods = std::shared_ptr<CameraMods>(new CameraMods(this, ini.get()));
@@ -23,6 +24,8 @@ ZealService::ZealService()
 	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
 	buff_timers = std::shared_ptr<BuffTimers>(new BuffTimers(this));
 	auto_stand = std::shared_ptr<AutoStand>(new AutoStand(this));
+	
+
 
 	binds_hook->replace_bind(5, [this](int state) {
 		camera_mods->handle_camera_motion_binds(5, state); 

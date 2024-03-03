@@ -18,6 +18,7 @@ public:
 	std::shared_ptr<raid> raid_hook = nullptr;
 	std::shared_ptr<eqstr> eqstr_hook = nullptr;
 	std::shared_ptr<chat> chat_hook = nullptr;
+	std::shared_ptr<SpellSets> spell_sets = nullptr;
 
 
 	//other features
@@ -26,6 +27,7 @@ public:
 	std::shared_ptr<CycleTarget> cycle_target = nullptr;
 	std::shared_ptr<BuffTimers> buff_timers = nullptr;
 	std::shared_ptr<AutoStand> auto_stand = nullptr;
+	
 	
 
 	bool exit = false;

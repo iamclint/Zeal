@@ -580,17 +580,29 @@ namespace Zeal
 
 		namespace Spells
 		{
-			int GetSpellWnd()
+			int GetCastSpellWnd()
 			{
 				return *(int*)0x63d648;
 			}
+			int GetSpellBookWnd()
+			{
+				return *(int*)0x63d64C;
+			}
+			void OpenBook()
+			{
+				EqGameInternal::Spells::OpenBook(GetSpellBookWnd(), 0);
+			}
+			void Memorize(int book_index, int gem_index)
+			{
+				EqGameInternal::Spells::BeginMemorize(GetSpellBookWnd(), 0, book_index, gem_index, false);
+			}
 			void Forget(int index) 
 			{
-				EqGameInternal::CastSpellWnd::ForgetMemorizedSpell(GetSpellWnd(), 0, index-1);
+				EqGameInternal::Spells::ForgetMemorizedSpell(GetCastSpellWnd(), 0, index);
 			}
 			void UpdateGems(int index)
 			{
-				EqGameInternal::CastSpellWnd::ForgetMemorizedSpell(GetSpellWnd(), 0, index-1);
+				EqGameInternal::Spells::UpdateSpellGems(GetCastSpellWnd(), 0, index);
 			}
 		}
 

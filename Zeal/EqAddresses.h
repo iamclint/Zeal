@@ -15,6 +15,7 @@ namespace Zeal
 		static EqStructures::CXWndManager* WndManager = *(EqStructures::CXWndManager**)0x809db4;
 		static EqStructures::EQWND* LootWnd = *(EqStructures::EQWND**)0x63d65c;
 		static EqStructures::EQWND* SpellBookWnd = *(EqStructures::EQWND**)0x63D64C;
+		static EqStructures::EQWND* SpellCastWnd = *(EqStructures::EQWND**)0x63D648;
 		
 		static DWORD* ptr_LocalPC = (DWORD*)0x7F94E8;
 		static int* ptr_ContainerMgr = (int*)0x63d6b8;

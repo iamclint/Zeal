@@ -11,12 +11,17 @@
 #include <string>
 #include <map>
 #include <stdexcept>
-
+#include "EqFunctions.h"
 class IO_ini {
 private:
     std::string filename;
 public:
     IO_ini(const std::string& filename) : filename(filename) {   };
+
+    void set(std::string path)
+    {
+        filename = path;
+    }
 
     bool exists(const std::string& section, const std::string& key) const {
         char buffer[256];
@@ -30,7 +35,7 @@ public:
 
 
     template<typename T>
-    T getValue(const std::string& section, const std::string& key) const {
+    T getValue(std::string section, std::string key) const {
         char buffer[256];
         DWORD bytesRead = GetPrivateProfileStringA(section.c_str(), key.c_str(), "", buffer, sizeof(buffer), filename.c_str());
 

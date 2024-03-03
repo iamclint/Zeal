@@ -70,10 +70,12 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
 			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
 
-			namespace CastSpellWnd
+			namespace Spells
 			{
+				static mem::function<void __fastcall(int, int, int, int, bool)> BeginMemorize = 0x434a05;
 				static mem::function<void __fastcall(int, int, int)> ForgetMemorizedSpell = 0x40a662;
 				static mem::function<void __fastcall(int, int, int)> UpdateSpellGems = 0x40a8b7;
+				static mem::function<void __fastcall(int, int)> OpenBook = 0x43441F;
 			}
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
@@ -87,7 +89,8 @@ namespace Zeal
 		//}
 		namespace Spells
 		{
-			//index is 1-8
+			void OpenBook();
+			void Memorize(int book_index, int gem_index);
 			void Forget(int index);
 			void UpdateGems(int index);
 		}

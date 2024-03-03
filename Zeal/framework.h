@@ -22,6 +22,7 @@
 #include "experience.h"
 #include "buff_timers.h"
 #include "auto_stand.h"
+#include "spellsets.h"
 
 #include "Zeal.h"
 

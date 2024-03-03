@@ -128,24 +128,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
-	add("/forget", {  },
-		[this](std::vector<std::string>& args) {
-			if (args.size() == 1)
-			{
-				Zeal::EqGame::print_chat("Usage: /forget spell_index"); //leave room for more args on this command for later
-				return true;
-			}
-			if (args.size() > 1)
-			{
-				int index = 0;
-				if (StringUtil::tryParse(args[1], &index))
-				{
-					Zeal::EqGame::Spells::Forget(index);
-				}
-				return true;
-			}
-			return false;
-		});
+
 	add("/help", { "/hel" },
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)
