@@ -122,7 +122,9 @@ void labels::print_debug_info(const char* format, ...)
 	vsnprintf(buffer, 511, format, argptr);
 	va_end(argptr);
 	if (debug_info.length()>0)
-	debug_info += "\n" + std::string(buffer);
+		debug_info += "\n" + std::string(buffer);
+	else
+		debug_info += std::string(buffer);
 }
 
 void labels::callback_main()

@@ -73,10 +73,10 @@ namespace Zeal
 
 			namespace Spells
 			{
-				static mem::function<void __fastcall(int, int, int, int, bool)> BeginMemorize = 0x434a05;
-				static mem::function<void __fastcall(int, int, int)> ForgetMemorizedSpell = 0x40a662;
-				static mem::function<void __fastcall(int, int, int)> UpdateSpellGems = 0x40a8b7;
-				static mem::function<void __fastcall(int, int)> OpenBook = 0x43441F;
+				static mem::function<void __fastcall(Zeal::EqStructures::EQWND*, int, int, int, bool)> BeginMemorize = 0x434a05;
+				static mem::function<void __fastcall(Zeal::EqStructures::EQWND*, int, int)> ForgetMemorizedSpell = 0x40a662;
+				static mem::function<void __fastcall(Zeal::EqStructures::EQWND*, int, int)> UpdateSpellGems = 0x40a8b7;
+				static mem::function<void __fastcall(Zeal::EqStructures::EQWND*, int)> OpenBook = 0x43441F;
 			}
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
@@ -94,13 +94,6 @@ namespace Zeal
 			void Memorize(int book_index, int gem_index);
 			void Forget(int index);
 			void UpdateGems(int index);
-		}
-		namespace Windows
-		{
-			EqStructures::CXWndManager* WndManager();
-			EqStructures::EQWND* LootWnd();
-			EqStructures::EQWND* SpellBookWnd();
-			EqStructures::EQWND* SpellCastWnd();
 		}
 		bool is_new_ui();
 		HWND get_game_window();

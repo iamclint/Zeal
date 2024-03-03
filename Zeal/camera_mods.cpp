@@ -8,7 +8,7 @@
 #include <windowsx.h>
 #include "StringUtil.h"
 #include "camera_math.h"
-//#define debug_cam
+#define debug_cam
 bool CameraMods::update_cam()
 {
     if (!enabled)
@@ -302,8 +302,7 @@ void CameraMods::tick_key_move()
 #ifdef debug_cam
     ZealService::get_instance()->labels_hook->print_debug_info("M1: [%i]\nCam: [%i]\nOverTitleBar: [%i]\nIsGameUiHovered: [%i]", *Zeal::EqGame::is_left_mouse_down, camera_view, is_over_title_bar(), Zeal::EqGame::is_game_ui_window_hovered());
 #endif
-
-    if (*Zeal::EqGame::is_left_mouse_down && camera_view == Zeal::EqEnums::CameraView::ZealCam && !is_over_title_bar() && !Zeal::EqGame::is_game_ui_window_hovered())
+    if (!*Zeal::EqGame::is_right_mouse_down && *Zeal::EqGame::is_left_mouse_down && camera_view == Zeal::EqEnums::CameraView::ZealCam && !is_over_title_bar() && !Zeal::EqGame::is_game_ui_window_hovered())
     {
         if (!lmouse_time)
         {

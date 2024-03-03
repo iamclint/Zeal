@@ -128,7 +128,14 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
-
+	add("/alarm", {},
+		[this, zeal](std::vector<std::string>& args) {
+			if (Zeal::EqGame::Windows->CAlarm)
+				Zeal::EqGame::Windows->CAlarm->IsVisible = true;
+			else
+				Zeal::EqGame::print_chat("Alarm window not found");
+			return true;
+		});
 	add("/help", { "/hel" },
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)

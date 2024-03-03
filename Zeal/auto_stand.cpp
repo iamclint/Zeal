@@ -7,12 +7,12 @@ void AutoStand::handle_binds(int cmd, bool key_down)
 	{
 		if (!Zeal::EqGame::KeyMods->Alt && !Zeal::EqGame::KeyMods->Shift && !Zeal::EqGame::KeyMods->Ctrl)
 		{
-			if (Zeal::EqGame::Windows::LootWnd() && Zeal::EqGame::Windows::LootWnd()->IsOpen && Zeal::EqGame::Windows::LootWnd()->IsVisible)
+			if (Zeal::EqGame::Windows->CLoot && Zeal::EqGame::Windows->CLoot->IsOpen && Zeal::EqGame::Windows->CLoot->IsVisible)
 			{
-				Zeal::EqGame::EqGameInternal::CLootWndDeactivate((int)Zeal::EqGame::Windows::LootWnd(), 0);
+				Zeal::EqGame::EqGameInternal::CLootWndDeactivate((int)Zeal::EqGame::Windows->CLoot, 0);
 				return;
 			}
-			else if (Zeal::EqGame::Windows::SpellBookWnd() && Zeal::EqGame::Windows::SpellBookWnd()->IsVisible)
+			else if (Zeal::EqGame::Windows->CSpellBook && Zeal::EqGame::Windows->CSpellBook->IsVisible)
 				return;
 			
 			if (Zeal::EqGame::get_self() && Zeal::EqGame::get_self()->StandingState == Zeal::EqEnums::Stance::Sitting)

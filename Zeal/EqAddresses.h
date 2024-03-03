@@ -4,6 +4,13 @@ namespace Zeal
 {
 	namespace EqGame
 	{
+
+		template<typename T>
+		struct pPtr
+		{
+			T* ptr;
+		};
+
 		static EqStructures::Entity* Self = (Zeal::EqStructures::Entity*)0x7F94CC;
 		static EqStructures::Entity* Target = (Zeal::EqStructures::Entity*)0x7F94EC;
 		static EqStructures::Entity* Active_Corpse = (Zeal::EqStructures::Entity*)0x7f9500;
@@ -12,7 +19,7 @@ namespace Zeal
 		static EqStructures::Entity* GroupList = (Zeal::EqStructures::Entity*)0x7913F8;
 		static EqStructures::ViewActor* ViewActor = (EqStructures::ViewActor*)0x63D6C0;
 		static EqStructures::KeyboardModifiers* KeyMods = (EqStructures::KeyboardModifiers*)0x799738;
-
+		static EqStructures::pInstWindows* Windows = (EqStructures::pInstWindows*)0x63D5CC;
 		
 		static DWORD* ptr_LocalPC = (DWORD*)0x7F94E8;
 		static int* ptr_ContainerMgr = (int*)0x63d6b8;

@@ -675,5 +675,69 @@ namespace Zeal
 			float unk6;
 			float unk7;
 		};
+
+		struct pInstWindows
+		{
+			void* CContextMenuManager;  // 0x63D5CC
+			EQWND* CChatManager;  // 0x63D5D0
+			EQWND* uknownWnd1;  // 0x63D5D4
+			EQWND* CharacterSelect;  // 0x63D5D8
+			EQWND* CFacePick;  // 0x63D5DC
+			EQWND* CItemDisplayManager;  // 0x63D5E0
+			EQWND* CNote;  // 0x63D5E4
+			EQWND* CHelp;  // 0x63D5E8
+			EQWND* CBook;  // 0x63D5EC
+			EQWND* CPetInfo;  // 0x63D5F0
+			EQWND* CTrain;  // 0x63D5F4
+			EQWND* CSkills;  // 0x63D5F8
+			EQWND* CSkillsSelect;  // 0x63D5FC
+			EQWND* CFriends;  // 0x63D600
+			EQWND* CAA;  // 0x63D604
+			EQWND* CGroup;  // 0x63D608
+			EQWND* CLoadskin;  // 0x63D60C
+			EQWND* CAlarm;  // 0x63D610
+			EQWND* CMusicPlayer;  // 0x63D614
+			EQWND* CRaid;  // 0x63D618
+			EQWND* CRaidOptions;  // 0x63D61C
+			EQWND* CBreath;  // 0x63D620
+			EQWND* CTarget;  // 0x63D624
+			EQWND* CHotButton;  // 0x63D628
+			EQWND* CColorPicker;  // 0x63D62C
+			EQWND* CPlayer;  // 0x63D630
+			EQWND* COptions;  // 0x63D634
+			EQWND* CBuffWindowNORMAL;  // 0x63D638
+			EQWND* CharacterCreation;  // 0x63D63C
+			EQWND* CCursorAttachment;  // 0x63D640
+			EQWND* CCasting;  // 0x63D644
+			EQWND* CCastSpell;  // 0x63D648
+			EQWND* CSpellBook;  // 0x63D64C
+			EQWND* CInventory;  // 0x63D650
+			EQWND* CBank;  // 0x63D654
+			EQWND* CQuantity;  // 0x63D658
+			EQWND* CLoot;  // 0x63D65C
+			EQWND* CActions;  // 0x63D660
+			EQWND* CMerchant;  // 0x63D664
+			EQWND* CTrade;  // 0x63D668
+			EQWND* CSelector;  // 0x63D66C
+			EQWND* CBazaar;  // 0x63D670
+			EQWND* CBazaarSearch;  // 0x63D674
+			EQWND* CGive;  // 0x63D678
+			EQWND* CTracking;  // 0x63D67C
+			EQWND* CInspect;  // 0x63D680
+			EQWND* CSocialEdit;  // 0x63D684
+			EQWND* CFeedback;  // 0x63D688
+			EQWND* CBugReport;  // 0x63D68C
+			EQWND* CVideoModes;  // 0x63D690
+			EQWND* CTextEntry;  // 0x63D694
+			EQWND* CFileSelection;  // 0x63D698
+			EQWND* CCompass;  // 0x63D69C
+			EQWND* CPlayerNotes;  // 0x63D6A0
+			EQWND* CGemsGame;  // 0x63D6A4
+			EQWND* CTimeLeft;  // 0x63D6A8
+			EQWND* CPetitionQ;  // 0x63D6AC
+			EQWND* CSoulmark;  // 0x63D6B0
+			void* CInvSlotMgr;  // 0x63D6B4
+			void* CContainerMgr;  // 0x63D6B8
+		};
 	}
 }

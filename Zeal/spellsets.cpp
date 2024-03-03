@@ -2,6 +2,48 @@
 #include "Zeal.h"
 #include "StringUtil.h"
 #include "EqAddresses.h"
+
+//class CMQMenuWnd : public CCustomMenu
+//{
+//public:
+//    CMQMenuWnd(CXRect rect) :CCustomMenu(rect)
+//    {
+//        SetWndNotification(CMQMenuWnd);
+//    }
+//
+//    ~CMQMenuWnd()
+//    {
+//    }
+//    int WndNotification(CXWnd* pWnd, unsigned int Message, void* data)
+//    {
+//        bool bFound = false;
+//        int slot = 0;
+//        PEQCASTSPELLWINDOW addr = (PEQCASTSPELLWINDOW)pCastSpellWnd;
+//        for (; slot < 8; slot++) {
+//            PEQCASTSPELLGEM address = addr->SpellSlots[slot];
+//            if (address == LastSpellGemClicked) {
+//                bFound = true;
+//                break;
+//            }
+//        }
+//        if (bFound) {
+//            std::string SpellName = GetSpellNameByID((DWORD)data - 0x10000);
+//            if (SpellName == "Unknown Spell") {
+//                WriteChatf("ERROR: Spell not found in struct, has there been a patch?");
+//                return 0;
+//            }
+//            CHAR szTemp[256] = { 0 };
+//            sprintf_s(szTemp, "%d \"%s\"", slot + 1, SpellName.c_str());
+//            MemSpell(GetCharInfo()->pSpawn, szTemp);
+//        }
+//        else {
+//            WriteChatf("ERROR: Slot not found in struct, has there been a patch?");
+//        }
+//        return 1;
+//    };
+//};
+
+
 void SpellSets::save(const std::string& name)
 {
     std::stringstream ss;
@@ -56,7 +98,7 @@ void SpellSets::load(const std::string& name)
     if (mem_buffer.size())
     {
         original_stance = (Stance)Zeal::EqGame::get_self()->StandingState;
-        if (Zeal::EqGame::Windows::SpellBookWnd() && !Zeal::EqGame::Windows::SpellBookWnd()->IsVisible)
+        if (Zeal::EqGame::Windows->CSpellBook && !Zeal::EqGame::Windows->CSpellBook->IsVisible)
             Zeal::EqGame::Spells::OpenBook();
 
         Zeal::EqGame::Spells::Memorize(mem_buffer.back().first, mem_buffer.back().second);
@@ -65,17 +107,17 @@ void SpellSets::load(const std::string& name)
 
 void SpellSets::finished_memorizing(int a1, int a2)
 {
-    if (Zeal::EqGame::Windows::SpellBookWnd() && !Zeal::EqGame::Windows::SpellBookWnd()->IsVisible)
+    if (Zeal::EqGame::Windows->CSpellBook && !Zeal::EqGame::Windows->CSpellBook->IsVisible)
         mem_buffer.clear();
     if (mem_buffer.size())
     {
         mem_buffer.pop_back();
         if (mem_buffer.size())
             Zeal::EqGame::Spells::Memorize(mem_buffer.back().first, mem_buffer.back().second);
-        else if (Zeal::EqGame::Windows::SpellBookWnd()->IsVisible)
+        else if (Zeal::EqGame::Windows->CSpellBook->IsVisible)
         {
             Zeal::EqGame::change_stance(original_stance);
-            Zeal::EqGame::Windows::SpellBookWnd()->IsVisible = false;
+            Zeal::EqGame::Windows->CSpellBook->IsVisible = false;
         }
     }
 }
@@ -90,7 +132,7 @@ void __fastcall FinishMemorizing(int t, int u, int a1, int a2)
 
 void SpellSets::callback_main()
 {
-    if (Zeal::EqGame::Windows::SpellBookWnd() && !Zeal::EqGame::Windows::SpellBookWnd()->IsVisible && mem_buffer.size())
+    if (Zeal::EqGame::Windows->CSpellBook && !Zeal::EqGame::Windows->CSpellBook->IsVisible && mem_buffer.size())
         mem_buffer.clear();
 }
 SpellSets::SpellSets(ZealService* zeal)
@@ -98,6 +140,7 @@ SpellSets::SpellSets(ZealService* zeal)
     zeal->main_loop_hook->add_callback([this]() { callback_main();  });
     zeal->hooks->Add("FinishMemorizing", 0x434b38, FinishMemorizing, hook_type_detour);
     ini = std::shared_ptr<IO_ini>(new IO_ini(".\\spellsets.ini"));
+
     zeal->commands_hook->add("/spellset", {},
         [this, zeal](std::vector<std::string>& args) {
             if (args.size() < 2)
