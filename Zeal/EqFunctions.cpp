@@ -65,10 +65,12 @@ namespace Zeal
 		bool game_wants_input()
 		{
 			int chat_input = EqGameInternal::UI_ChatInputCheck();
-			int focused_wnd = EqGameInternal::GetFocusWnd(*(int*)0x809db4, 0);
 			bool focused_window_needs_input = false;
-			if (focused_wnd)
-				focused_window_needs_input = EqGameInternal::CXWndIsType(focused_wnd, 0, 2);
+			if (is_new_ui()) {
+				int focused_wnd = EqGameInternal::GetFocusWnd(*(int*)0x809db4, 0);
+				if (focused_wnd)
+					focused_window_needs_input = EqGameInternal::CXWndIsType(focused_wnd, 0, 2);
+			}
 			return chat_input!=0 || focused_window_needs_input;
 		}
 
