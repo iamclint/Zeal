@@ -576,5 +576,23 @@ namespace Zeal
 			else
 				return 0;
 		}
+
+
+		namespace Spells
+		{
+			int GetSpellWnd()
+			{
+				return *(int*)0x63d648;
+			}
+			void Forget(int index) 
+			{
+				EqGameInternal::CastSpellWnd::ForgetMemorizedSpell(GetSpellWnd(), 0, index-1);
+			}
+			void UpdateGems(int index)
+			{
+				EqGameInternal::CastSpellWnd::ForgetMemorizedSpell(GetSpellWnd(), 0, index-1);
+			}
+		}
+
 	}
 }

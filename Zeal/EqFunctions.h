@@ -69,6 +69,12 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int, int, int)> CXWndShowContextMenu = 0x5A02F0;
 			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
 			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
+
+			namespace CastSpellWnd
+			{
+				static mem::function<void __fastcall(int, int, int)> ForgetMemorizedSpell = 0x40a662;
+				static mem::function<void __fastcall(int, int, int)> UpdateSpellGems = 0x40a8b7;
+			}
 			//inline mem::functiona<int, Zeal::EqStructures::CXSTR*, const char*, ...> CXStr_PrintString(reinterpret_cast<int(__cdecl*)(Zeal::EqStructures::CXSTR*, const char*, ...)>(0x578110));
 		}
 		//// Wrapper function to call CXStr_PrintString
@@ -79,6 +85,12 @@ namespace Zeal
 		//	va_end(args);
 		//	return result;
 		//}
+		namespace Spells
+		{
+			//index is 1-8
+			void Forget(int index);
+			void UpdateGems(int index);
+		}
 		bool is_new_ui();
 		HWND get_game_window();
 		bool is_in_char_select();
