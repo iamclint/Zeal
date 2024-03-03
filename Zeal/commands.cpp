@@ -63,6 +63,23 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			Zeal::EqGame::EqGameInternal::auto_inventory(a1, a2, 0);
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
+	add("/clearchat", {},
+		[](std::vector<std::string>& args) {
+			// each line can hold up to 256 characters but typically doesnt reach that far.
+			// each unused line is set with '@\0', so lets clear to that
+			if (!Zeal::EqGame::is_new_ui()) {
+				int start = 0x799D8D;
+				int end = 0x7B908D;
+				while (start != end) {
+					mem::write<WORD>(start, 0x4000);
+					start += 256;
+				}
+				// max scrollbar height doesn't reset properly here. Need to figure out why still.
+				return true;
+			}
+
+			return false;
+		});
 	add("/camp", {},
 		[](std::vector<std::string>& args) {
 
