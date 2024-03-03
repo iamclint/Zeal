@@ -564,5 +564,17 @@ namespace Zeal
 			if (Self && Self->StandingState != (BYTE)new_stance)
 				EqGameInternal::change_stance(get_self(), 0, new_stance); //EQPlayer::ChangePosition
 		}
+		bool is_new_ui()
+		{
+			return *(BYTE*)0x8092D8;
+		}
+		HWND get_game_window()
+		{
+			HMODULE eqw = GetModuleHandleA("eqw.dll");
+			if (eqw)
+				return *(HWND*)((DWORD)eqw + 0x97A4);
+			else
+				return 0;
+		}
 	}
 }

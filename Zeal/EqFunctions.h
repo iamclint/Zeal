@@ -79,6 +79,8 @@ namespace Zeal
 		//	va_end(args);
 		//	return result;
 		//}
+		bool is_new_ui();
+		HWND get_game_window();
 		bool is_in_char_select();
 		bool show_context_menu();
 		bool game_wants_input(); //returns true if the game wants text input so it doesn't run binds

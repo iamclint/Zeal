@@ -65,8 +65,8 @@ void CameraMods::toggle_zeal_cam(bool enabled)
     {
         self->Pitch = camera_math::pitch_to_game(zeal_cam_pitch);
         current_zoom = 0;
-        if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
-            *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
+        if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam && Zeal::EqGame::is_in_game())
+           *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
         mem::copy(0x4db8ce, original_cam, 6);
     }
 }
@@ -231,18 +231,18 @@ void CameraMods::handle_camera_motion_binds(int cmd, bool is_down)
     DWORD camera_view = *Zeal::EqGame::camera_view;
     if (!enabled)
     {
-        current_key_cmd = 0;
+        cmd_key_map.clear();
         return;
     }
     if ((camera_view == Zeal::EqEnums::CameraView::ZealCam) || (cmd == 19)) //allow zoom out
     {
         if (is_down)
-            current_key_cmd = cmd;
+            cmd_key_map[cmd] = true;
         else
-            current_key_cmd = 0;
+            cmd_key_map[cmd] = false;
         return;
     }
-    current_key_cmd = 0;
+    cmd_key_map[cmd] = false;
 }
 
 // didn't want to clutter handle_binds() with specific logic to this situation.
@@ -267,7 +267,7 @@ void CameraMods::handle_cycle_camera_views(int cmd, bool is_down)
   }
   else
   {
-    current_key_cmd = 0;
+      cmd_key_map.clear();
   }
 }
 
@@ -285,15 +285,16 @@ void CameraMods::tick_key_move()
 {
     if (!enabled)
     {
-        current_key_cmd = 0;
+        if (cmd_key_map.size())
+            cmd_key_map.clear();
         return;
     }
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     DWORD camera_view = *Zeal::EqGame::camera_view;
-    if (camera_view != Zeal::EqEnums::CameraView::ZealCam && current_key_cmd != 19)
-        current_key_cmd = 0;
+    //if (camera_view != Zeal::EqEnums::CameraView::ZealCam && current_key_cmd != 19)
+    //    current_key_cmd = 0;
 
-    if (camera_view == Zeal::EqEnums::CameraView::FirstPerson && current_key_cmd == 19)
+    if (camera_view == Zeal::EqEnums::CameraView::FirstPerson && cmd_key_map[19])
     {
         mouse_wheel(-120);
     }
@@ -306,16 +307,20 @@ void CameraMods::tick_key_move()
             lmouse_time = GetTickCount64();
         }
 
-        if (GetTickCount64() - lmouse_time > 200)
+        if (GetTickCount64() - lmouse_time > 200 )
         {
-            if (hide_cursor)
+            HWND gwnd = Zeal::EqGame::get_game_window();
+            if (gwnd == WindowFromPoint(lmouse_cursor_pos))
             {
-                GetCursorPos(&lmouse_cursor_pos);
-                mem::write<byte>(0x53edef, 0xEB);
-                hide_cursor = false;
+                if (hide_cursor)
+                {
+                    GetCursorPos(&lmouse_cursor_pos);
+                    mem::write<byte>(0x53edef, 0xEB);
+                    hide_cursor = false;
+                }
+                proc_mouse();
+                SetCursorPos(lmouse_cursor_pos.x, lmouse_cursor_pos.y);
             }
-            proc_mouse();
-            SetCursorPos(lmouse_cursor_pos.x, lmouse_cursor_pos.y);
         }
     }
     else
@@ -324,42 +329,48 @@ void CameraMods::tick_key_move()
             mem::write<byte>(0x53edef, 0x75);
         lmouse_time = 0;
     }
-
-    switch (current_key_cmd)
+    for (auto& [current_key_cmd, down] : cmd_key_map)
     {
-    case 5:
-    {
-        if (camera_view == Zeal::EqEnums::CameraView::ZealCam && (self->StandingState==Stance::Stand || self->StandingState == Stance::Duck))
+        if (down)
         {
-            //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
-            if (fabs(camera_math::angle_difference(zeal_cam_yaw, self->Heading)) > 5 && fps>40)
+            switch (current_key_cmd)
             {
-                self->Heading = zeal_cam_yaw;
+            case 5:
+            case 6:
+            {
+                if (camera_view == Zeal::EqEnums::CameraView::ZealCam && (self->StandingState == Stance::Stand || self->StandingState == Stance::Duck))
+                {
+                    //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
+                    if (fabs(camera_math::angle_difference(zeal_cam_yaw, self->Heading)) > 5 && fps > 40)
+                    {
+                        self->Heading = zeal_cam_yaw;
+                    }
+                    else
+                        zeal_cam_yaw = self->Heading;
+                }
+                break;
             }
-            else
-                zeal_cam_yaw = self->Heading;
+            case 15: //up
+                zeal_cam_pitch -= 0.3f;
+                if (zeal_cam_pitch <= -89.99f)
+                    zeal_cam_pitch = -89.99f;
+                break;
+            case 16: //down
+                zeal_cam_pitch += 0.3f;
+                if (zeal_cam_pitch >= 89.99f)
+                    zeal_cam_pitch = 89.99f;
+                break;
+            case 18: //zoom in
+                if (desired_zoom > 0)
+                    desired_zoom -= .3f;
+                break;
+            case 19: //zoom out
+                desired_zoom += .3f;
+                if (desired_zoom > max_zoom_out)
+                    desired_zoom = max_zoom_out;
+                break;
+            }
         }
-        break;
-    }
-    case 15: //up
-        zeal_cam_pitch -= 0.3f;
-        if (zeal_cam_pitch <= -89.99f)
-            zeal_cam_pitch = -89.99f;
-        break;
-    case 16: //down
-        zeal_cam_pitch += 0.3f;
-        if (zeal_cam_pitch >= 89.99f)
-            zeal_cam_pitch = 89.99f;
-        break;
-    case 18: //zoom in
-        if (desired_zoom > 0)
-            desired_zoom -= .3f;
-        break;
-    case 19: //zoom out
-        desired_zoom += .3f;
-        if (desired_zoom > max_zoom_out)
-            desired_zoom = max_zoom_out;
-        break;
     }
 }
 
@@ -391,7 +402,7 @@ void CameraMods::callback_main()
 {
     static int prev_view = *Zeal::EqGame::camera_view;
     DWORD camera_view = *Zeal::EqGame::camera_view;
-    if (enabled)
+    if (enabled && Zeal::EqGame::is_in_game())
     {
         interpolate_zoom();
         update_fps_sensitivity();

@@ -35,7 +35,8 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 			}
 		}
 		if (cmd_handled) {
-			cmd[0] = '\0';
+			if (!Zeal::EqGame::is_new_ui())
+				cmd[0] = '\0';
 			return;
 		}
 	}

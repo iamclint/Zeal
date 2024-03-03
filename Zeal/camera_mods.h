@@ -45,7 +45,7 @@ private:
 	float sensitivity_y = 0.4f;
 	void load_settings(class IO_ini* ini);
 	void interpolate_zoom();
-	int current_key_cmd = 0;
+	std::unordered_map<int, bool> cmd_key_map;
 	BYTE original_cam[6] = { 0 };
 	std::chrono::steady_clock::time_point lastTime;
 	Vec2 local_delta = { 0, 0 };
