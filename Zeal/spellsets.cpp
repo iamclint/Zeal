@@ -56,7 +56,7 @@ void SpellSets::load(const std::string& name)
     if (mem_buffer.size())
     {
         original_stance = (Stance)Zeal::EqGame::get_self()->StandingState;
-        if (Zeal::EqGame::SpellBookWnd && !Zeal::EqGame::SpellBookWnd->IsVisible)
+        if (Zeal::EqGame::Windows::SpellBookWnd() && !Zeal::EqGame::Windows::SpellBookWnd()->IsVisible)
             Zeal::EqGame::Spells::OpenBook();
 
         Zeal::EqGame::Spells::Memorize(mem_buffer.back().first, mem_buffer.back().second);
@@ -65,17 +65,17 @@ void SpellSets::load(const std::string& name)
 
 void SpellSets::finished_memorizing(int a1, int a2)
 {
-    if (Zeal::EqGame::SpellBookWnd && !Zeal::EqGame::SpellBookWnd->IsVisible)
+    if (Zeal::EqGame::Windows::SpellBookWnd() && !Zeal::EqGame::Windows::SpellBookWnd()->IsVisible)
         mem_buffer.clear();
     if (mem_buffer.size())
     {
         mem_buffer.pop_back();
         if (mem_buffer.size())
             Zeal::EqGame::Spells::Memorize(mem_buffer.back().first, mem_buffer.back().second);
-        else if (Zeal::EqGame::SpellBookWnd)
+        else if (Zeal::EqGame::Windows::SpellBookWnd()->IsVisible)
         {
             Zeal::EqGame::change_stance(original_stance);
-            Zeal::EqGame::SpellBookWnd->IsVisible = false;
+            Zeal::EqGame::Windows::SpellBookWnd()->IsVisible = false;
         }
     }
 }
@@ -90,7 +90,7 @@ void __fastcall FinishMemorizing(int t, int u, int a1, int a2)
 
 void SpellSets::callback_main()
 {
-    if (Zeal::EqGame::SpellBookWnd && !Zeal::EqGame::SpellBookWnd->IsVisible && mem_buffer.size())
+    if (Zeal::EqGame::Windows::SpellBookWnd() && !Zeal::EqGame::Windows::SpellBookWnd()->IsVisible && mem_buffer.size())
         mem_buffer.clear();
 }
 SpellSets::SpellSets(ZealService* zeal)

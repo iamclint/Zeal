@@ -79,6 +79,7 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, bool* override_c
 		{
 			int max_mana = Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
 			Zeal::EqGame::CXStr_PrintString(str, "%s", ZealService::get_instance()->labels_hook->debug_info.c_str());
+			ZealService::get_instance()->labels_hook->debug_info = "";
 			*override_color = false;
 		}
 		return true;
@@ -120,7 +121,8 @@ void labels::print_debug_info(const char* format, ...)
 	//printf()
 	vsnprintf(buffer, 511, format, argptr);
 	va_end(argptr);
-	debug_info = buffer;
+	if (debug_info.length()>0)
+	debug_info += "\n" + std::string(buffer);
 }
 
 void labels::callback_main()

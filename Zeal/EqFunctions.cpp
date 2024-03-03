@@ -5,6 +5,27 @@ namespace Zeal
 {
 	namespace EqGame
 	{
+
+		namespace Windows
+		{
+			EqStructures::CXWndManager* WndManager()
+			{
+				return *(EqStructures::CXWndManager**)0x809db4;
+			}
+			EqStructures::EQWND* LootWnd()
+			{
+				return *(EqStructures::EQWND**)0x63d65c;
+			}
+			EqStructures::EQWND* SpellBookWnd()
+			{
+				return *(EqStructures::EQWND**)0x63D64C;
+			}
+			EqStructures::EQWND* SpellCastWnd()
+			{
+				return *(EqStructures::EQWND**)0x63D648;
+			}
+		}
+
 		float heading_to_yaw(float heading)
 		{
 			float y = 512 - heading;
@@ -36,8 +57,8 @@ namespace Zeal
 		}
 		bool is_game_ui_window_hovered()
 		{
-			if (EqGame::WndManager)
-				return EqGame::WndManager->ptr_hovered_wnd!=0;
+			if (Windows::WndManager())
+				return Windows::WndManager()->ptr_hovered_wnd!=0;
 			else
 				return false;
 		}

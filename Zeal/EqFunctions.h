@@ -70,6 +70,7 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
 			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
 
+
 			namespace Spells
 			{
 				static mem::function<void __fastcall(int, int, int, int, bool)> BeginMemorize = 0x434a05;
@@ -93,6 +94,13 @@ namespace Zeal
 			void Memorize(int book_index, int gem_index);
 			void Forget(int index);
 			void UpdateGems(int index);
+		}
+		namespace Windows
+		{
+			EqStructures::CXWndManager* WndManager();
+			EqStructures::EQWND* LootWnd();
+			EqStructures::EQWND* SpellBookWnd();
+			EqStructures::EQWND* SpellCastWnd();
 		}
 		bool is_new_ui();
 		HWND get_game_window();
