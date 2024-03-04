@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cctype>
 #include "StringUtil.h"
-#include <thread>
 
 void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 {
