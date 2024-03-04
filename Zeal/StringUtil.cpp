@@ -1,7 +1,7 @@
 #include "StringUtil.h"
 #include <algorithm>
 #include <sstream>
-#include <Zeal.h>
+#include "Zeal.h"
 namespace StringUtil
 {
 	bool caseInsensitive(const std::string& str1, const std::string& str2) {
