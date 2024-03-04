@@ -20,6 +20,7 @@ void BuffTimers::print_timers(void) {
     }
   }
 
+  oss << "[Buffs] ";
   if (activeBuffs.size() != 0) {
     for (size_t i = 0; i <  activeBuffs.size(); ++i) {
       BuffDetails details = activeBuffs[i];
@@ -34,8 +35,9 @@ void BuffTimers::print_timers(void) {
   }
   else
   {
-    oss << "[Buffs] None";
+    oss << "None";
   }
+  oss << std::endl;
 
   Zeal::EqGame::print_chat(oss.str());
 }
