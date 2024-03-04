@@ -150,7 +150,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					if (StringUtil::caseInsensitive(args[1], "set")) {
 						int minutes = 0;
 						int seconds = 0;
-						int delim[2] = { args[2].find("m"), args[2].find("s") };
+						size_t delim[2] = { args[2].find("m"), args[2].find("s") };
 						if (StringUtil::tryParse(args[2].substr(0, delim[0]), &minutes) &&
 								StringUtil::tryParse(args[2].substr(delim[0]+1, delim[1]), &seconds))
 						{
