@@ -24,8 +24,10 @@ void __fastcall release_loot(int uk, int lootwnd_ptr)
 {
 	ZealService* zeal = ZealService::get_instance();
 	Zeal::EqStructures::Entity* corpse = Zeal::EqGame::get_active_corpse();
-	if (corpse && zeal->looting_hook->hide_looted) 
+	if (corpse && zeal->looting_hook->hide_looted && corpse->Type==2)
+	{
 		corpse->ActorInfo->IsInvisible = 1; //this is the flag set by /hidecorpse all (so /hidecorpse none will reshow these hidden corpses)
+	}
 	zeal->hooks->hook_map["ReleaseLoot"]->original(release_loot)(uk, lootwnd_ptr);
 }
 

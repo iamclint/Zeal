@@ -136,6 +136,34 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::print_chat("Alarm window not found");
 			return true;
 		});
+	//add("/tunnelfps", {},
+	//	[this, zeal](std::vector<std::string>& args) {
+	//			Zeal::EqStructures::Entity* current_ent = Zeal::EqGame::get_entity_list();
+	//			static bool hidden_state = false;
+	//			if (Zeal::EqGame::get_self()->ZoneId == 22)
+	//			{
+	//				hidden_state = !hidden_state;
+
+	//				float radius = 200.f;
+	//				if (args.size() > 1)
+	//					StringUtil::tryParse(args[1], &radius);
+
+
+	//				Vec3 banker_pos = { -1764, -50, 4 };
+	//	
+
+	//				while (current_ent->Next)
+	//				{
+	//					if (radius > 0 && current_ent->Position.Dist2D(banker_pos)<radius && current_ent->Type==0)
+	//					{
+	//						current_ent->IsHidden = hidden_state;
+	//					}
+	//					current_ent = current_ent->Next;
+	//				}
+	//			}
+
+	//		return true;
+	//	});
 	add("/help", { "/hel" },
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)

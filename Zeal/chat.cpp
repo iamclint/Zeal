@@ -19,23 +19,23 @@ std::string generateTimestampedString(const char* message) {
     return oss.str();
 }
 
-void __fastcall PrintChat(int t, int unused, const char* data, short color, bool u)
+void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u)
 {
 	chat* c = ZealService::get_instance()->chat_hook.get();
     if (c->timestamps && strlen(data)>0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {
         mem::write<byte>(0x5380C9, 0xEB); // don't log information so we can manipulate data before between chat and logs
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data).c_str(), color, u);
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data).c_str(), color_index, u);
         mem::write<byte>(0x5380C9, 0x75); //reset the logging
 
         mem::write<byte>(0x53805B, 0xEB); //disable print chat for NewUI
         mem::write<byte>(0x538090, 0xEB); //disable print chat for OldUI
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data, color, u);
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data, color_index, u);
         mem::write<byte>(0x538090, 0x74); //reset print chat for OldUI
         mem::write<byte>(0x53805B, 0x74); //reset print chat for NewUI
     }
     else
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data, color, u);
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data, color_index, u);
 
 }
 

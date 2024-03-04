@@ -33,6 +33,23 @@ public:
         return true;
     }
 
+    std::vector<std::string> getSectionNames() {
+        std::vector<std::string> sectionNames;
+        const DWORD bufferSize = 4096; // Adjust buffer size as needed
+        char buffer[bufferSize];
+
+        DWORD result = GetPrivateProfileSectionNamesA(buffer, bufferSize, filename.c_str());
+        if (result == 0) {
+            std::cerr << "Failed to read INI file: " << filename << std::endl;
+            return sectionNames;
+        }
+
+        for (char* p = buffer; *p != '\0'; p += strlen(p) + 1) {
+            sectionNames.push_back(p);
+        }
+
+        return sectionNames;
+    }
 
     template<typename T>
     T getValue(std::string section, std::string key) const {

@@ -107,6 +107,8 @@ void SpellSets::load(const std::string& name)
 
 void SpellSets::finished_memorizing(int a1, int a2)
 {
+    if (!Zeal::EqGame::Windows->CSpellBook)
+        return;
     if (Zeal::EqGame::Windows->CSpellBook && !Zeal::EqGame::Windows->CSpellBook->IsVisible)
         mem_buffer.clear();
     if (mem_buffer.size())
@@ -145,7 +147,7 @@ SpellSets::SpellSets(ZealService* zeal)
         [this, zeal](std::vector<std::string>& args) {
             if (args.size() < 2)
             {
-                Zeal::EqGame::print_chat("usage: /spellset save [name]");
+                Zeal::EqGame::print_chat("usage: /spellset save/load/list [name]");
             }
             else
             {
@@ -156,6 +158,19 @@ SpellSets::SpellSets(ZealService* zeal)
                 if (StringUtil::caseInsensitive(args[1], "load"))
                 {
                     load(args[2]);
+                }
+                if (StringUtil::caseInsensitive(args[1], "list"))
+                {
+                    std::stringstream ss;
+                    ss << ".\\" << Zeal::EqGame::get_self()->Name << "_spellsets.ini";
+                    ini->set(ss.str());
+                    std::vector<std::string> sets = ini->getSectionNames();
+                    Zeal::EqGame::print_chat("--- spell sets (%i) ---", sets.size());
+                    for (auto& set : sets)
+                    {
+                        Zeal::EqGame::print_chat(set);
+                    }
+                    Zeal::EqGame::print_chat("--- end of spell sets ---", sets.size());
                 }
             }
             return true;
