@@ -44,7 +44,7 @@ ZealService::ZealService()
 		auto_stand->handle_movement_binds(6, state);
 		return false;
 	}); //turn left
-	for (int bind_index = 51; bind_index < 58; ++bind_index) {
+	for (int bind_index = 51; bind_index < 59; ++bind_index) {
 		binds_hook->replace_bind(bind_index, [this, bind_index](int state) {
 			auto_stand->handle_spellcast_binds(bind_index);
 			return false;
