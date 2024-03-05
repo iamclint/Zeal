@@ -24,27 +24,38 @@ ZealService::ZealService()
 	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
 	buff_timers = std::shared_ptr<BuffTimers>(new BuffTimers(this));
 	auto_stand = std::shared_ptr<AutoStand>(new AutoStand(this));
+	alarm = std::shared_ptr<Alarm>(new Alarm(this));
 	
 
-
+	binds_hook->replace_bind(3, [this](int state) {
+		auto_stand->handle_movement_binds(3, state);
+		return false;
+	}); //foward
+	binds_hook->replace_bind(4, [this](int state) {
+		auto_stand->handle_movement_binds(4, state);
+		return false;
+	}); //back
 	binds_hook->replace_bind(5, [this](int state) {
 		camera_mods->handle_camera_motion_binds(5, state); 
-		auto_stand->handle_binds(5, state);
+		auto_stand->handle_movement_binds(5, state);
 		return false;
 	}); //turn right
 	binds_hook->replace_bind(6, [this](int state) {
 		camera_mods->handle_camera_motion_binds(6, state); 
-		auto_stand->handle_binds(6, state);
+		auto_stand->handle_movement_binds(6, state);
 		return false;
 	}); //turn left
-	binds_hook->replace_bind(3, [this](int state) {
-		auto_stand->handle_binds(5, state);
+	for (int bind_index = 51; bind_index < 59; ++bind_index) {
+		binds_hook->replace_bind(bind_index, [this, bind_index](int state) {
+			auto_stand->handle_spellcast_binds(bind_index);
+			return false;
+		}); // spellcasting auto-stand
+	}
+	binds_hook->replace_bind(72, [this](int state) {
+		Zeal::EqGame::change_stance(Stance::Sit);
 		return false;
-	}); //foward
-	binds_hook->replace_bind(4, [this](int state) {
-		auto_stand->handle_binds(5, state);
-		return false;
-	}); //back
+	}); // hotkey camp auto-sit
+
 	looting_hook->hide_looted = ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
 }
 
