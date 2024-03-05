@@ -21,6 +21,8 @@ std::string generateTimestampedString(const char* message) {
 
 void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u)
 {
+   // if (color_index == 4)
+    //    color_index = 325;
 	chat* c = ZealService::get_instance()->chat_hook.get();
     if (c->timestamps && strlen(data)>0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {

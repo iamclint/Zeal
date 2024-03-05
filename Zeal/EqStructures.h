@@ -739,5 +739,13 @@ namespace Zeal
 			void* CInvSlotMgr;  // 0x63D6B4
 			void* CContainerMgr;  // 0x63D6B8
 		};
+
+		struct EQCommand
+		{
+			int string_id;
+			const char* name;
+			const char* localized_name;
+			int fn;
+		};
 	}
 }

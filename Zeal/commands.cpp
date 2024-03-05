@@ -164,6 +164,12 @@ ChatCommands::ChatCommands(ZealService* zeal)
 
 	//		return true;
 	//	});
+		add("/findcmd", {},
+		[this, zeal](std::vector<std::string>& args) {
+				
+
+			return true;
+		});
 	add("/help", { "/hel" },
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)

@@ -69,6 +69,7 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int, int, int)> CXWndShowContextMenu = 0x5A02F0;
 			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
 			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
+			static mem::function<int __fastcall(int, int)> ProcessControls = 0x53F337;
 
 
 			namespace Spells
