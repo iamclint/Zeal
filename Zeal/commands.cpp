@@ -130,11 +130,45 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		});
 	add("/alarm", {},
 		[this, zeal](std::vector<std::string>& args) {
-			if (Zeal::EqGame::Windows->CAlarm)
-				Zeal::EqGame::Windows->CAlarm->IsVisible = true;
-			else
-				Zeal::EqGame::print_chat("Alarm window not found");
-			return true;
+			if (Zeal::EqGame::is_new_ui()) {
+				if (Zeal::EqGame::Windows->CAlarm)
+					Zeal::EqGame::Windows->CAlarm->IsVisible = true;
+				else
+					Zeal::EqGame::print_chat("Alarm window not found");
+
+				return true;
+			}
+			else {
+				if (args.size() == 1) {
+					std::ostringstream oss;
+					oss << "-- ALARM COMMANDS --" << std::endl << "/alarm set #m#s" << std::endl << "/alarm halt" << std::endl;
+					Zeal::EqGame::print_chat(oss.str());
+					return true;
+				}
+				if (args.size() > 1 && args.size() < 4) {
+					if (StringUtil::caseInsensitive(args[1], "set")) {
+						int minutes = 0;
+						int seconds = 0;
+						size_t delim[2] = { args[2].find("m"), args[2].find("s") };
+						if (StringUtil::tryParse(args[2].substr(0, delim[0]), &minutes) &&
+								StringUtil::tryParse(args[2].substr(delim[0]+1, delim[1]), &seconds))
+						{
+							zeal->alarm->Set(minutes, seconds);
+							return true;
+						}
+						else
+						{
+							Zeal::EqGame::print_chat("[Alarm] Failed to parse the specified duration.");
+							return true;
+						}
+					}
+					else if (StringUtil::caseInsensitive(args[1], "halt")) {
+						zeal->alarm->Halt();
+						return true;
+					}
+				}
+			}
+			return false;
 		});
 	//add("/tunnelfps", {},
 	//	[this, zeal](std::vector<std::string>& args) {

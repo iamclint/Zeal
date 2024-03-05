@@ -24,6 +24,7 @@ ZealService::ZealService()
 	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
 	buff_timers = std::shared_ptr<BuffTimers>(new BuffTimers(this));
 	auto_stand = std::shared_ptr<AutoStand>(new AutoStand(this));
+	alarm = std::shared_ptr<Alarm>(new Alarm(this));
 	
 
 
