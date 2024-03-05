@@ -15,13 +15,11 @@ void AutoStand::handle_movement_binds(int cmd, bool key_down)
 			}
 			else if (Zeal::EqGame::Windows->CSpellBook && Zeal::EqGame::Windows->CSpellBook->IsVisible)
 			{
-				Zeal::EqGame::change_stance(Stance::Stand);
-				Zeal::EqGame::Windows->CSpellBook->IsVisible = false;
+				//Zeal::EqGame::change_stance(Stance::Stand);
+				//Zeal::EqGame::Windows->CSpellBook->IsVisible = false;
 				return;
 			}
-			
-			if (Zeal::EqGame::get_self() && Zeal::EqGame::get_self()->StandingState == Zeal::EqEnums::Stance::Sitting)
-				Zeal::EqGame::change_stance(Stance::Stand);
+			Zeal::EqGame::change_stance(Stance::Stand);
 		}
 	}
 }
@@ -36,13 +34,11 @@ void AutoStand::handle_spellcast_binds(int cmd)
 		}
 		else if (Zeal::EqGame::Windows->CSpellBook && Zeal::EqGame::Windows->CSpellBook->IsVisible)
 		{
-			Zeal::EqGame::change_stance(Stance::Stand);
-			Zeal::EqGame::Windows->CSpellBook->IsVisible = false;
+			//Zeal::EqGame::change_stance(Stance::Stand);
+			//Zeal::EqGame::Windows->CSpellBook->IsVisible = false;
 			return;
 		}
-
-		if (Zeal::EqGame::get_self() && Zeal::EqGame::get_self()->StandingState == Zeal::EqEnums::Stance::Sitting)
-			Zeal::EqGame::change_stance(Stance::Stand);
+		Zeal::EqGame::change_stance(Stance::Stand);
 	}
 }
 
