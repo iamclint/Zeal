@@ -50,6 +50,9 @@ ___
 
 - `/buffs`
   - **Description:** Outputs the players buff timers to the chat only if they are using OldUI.
+
+- `/bluecon`
+  - **Description:** Changes the blue con color to usercolor #70 which is otherwise unused, you can edit in the options window.
 ___
 ### Binds
 - Cycle through nearest NPCs
@@ -58,6 +61,7 @@ ___
 - Strafe Left
 - Auto Inventory
 - Toggle last 2 targets
+- Reply target
 ___
 ### UI
 - **Gauge EqType's**
