@@ -1,4 +1,4 @@
-### Zeal Features
+### Features
 - Huge camera motion improvement in the third person and sensitivity for first person
 - Additional binds
 - Additional commands
