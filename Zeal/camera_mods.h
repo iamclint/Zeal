@@ -8,10 +8,10 @@ class CameraMods
 public:
 	std::chrono::steady_clock::time_point prevTime;
 	const float max_zoom_out = 100;
-	float user_sensitivity_x = 0.3f;
-	float user_sensitivity_y = 0.3f;
-	float user_sensitivity_x_3rd = 0.3f;
-	float user_sensitivity_y_3rd = 0.3f;
+	float user_sensitivity_x = 0.1f;
+	float user_sensitivity_y = 0.1f;
+	float user_sensitivity_x_3rd = 0.1f;
+	float user_sensitivity_y_3rd = 0.1f;
 	bool camera3_strafe_enabled = true;
 	bool camera4_strafe_enabled = true;
 	bool cycle_to_zeal_cam_enabled = true;
