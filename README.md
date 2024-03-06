@@ -2,8 +2,8 @@
 - Huge camera motion improvement in the third person and sensitivity for first person
 - Additional binds
 - Additional commands
-- Verious bug fixes
-  
+- Various bug fixes
+- Add free for all for raid loot, requires ui change or /setloottype 4
 ### Commands
 ___
 - `/hidecorpse`
