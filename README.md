@@ -1,3 +1,6 @@
+### Zeal Features
+- `Huge camera motion improvement in the third person and sensitivity for first person`
+- 
 ### Commands
 ___
 - `/hidecorpse`
@@ -53,6 +56,10 @@ ___
 
 - `/bluecon`
   - **Description:** Changes the blue con color to usercolor #70 which is otherwise unused, you can edit in the options window.
+
+- `/alarm`
+  - **Arguments:** `oldui`
+  - **Description:** Re-opens the alarm window, if oldui is specified it allows for an alarm on it.
 ___
 ### Binds
 - Cycle through nearest NPCs
