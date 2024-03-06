@@ -21,9 +21,9 @@ std::string generateTimestampedString(const char* message) {
 
 void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u)
 {
-   // if (color_index == 4)
-    //    color_index = 325;
 	chat* c = ZealService::get_instance()->chat_hook.get();
+    if (color_index == 4 && c->bluecon)
+        color_index = 325;
     if (c->timestamps && strlen(data)>0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {
         mem::write<byte>(0x5380C9, 0xEB); // don't log information so we can manipulate data before between chat and logs
@@ -45,8 +45,11 @@ void chat::LoadSettings(IO_ini* ini)
 {
 	if (!ini->exists("Zeal", "ChatTimestamps"))
 		ini->setValue<bool>("Zeal", "ChatTimestamps", false);
+    if (!ini->exists("Zeal", "Bluecon"))
+        ini->setValue<bool>("Zeal", "Bluecon", false);
 
-	timestamps = ini->getValue<bool>("Zeal", "ChatTimestamps");
+    bluecon = ini->getValue<bool>("Zeal", "Bluecon");
+    timestamps = ini->getValue<bool>("Zeal", "ChatTimestamps");
 }
 
 chat::chat(ZealService* zeal, IO_ini* ini)
@@ -59,6 +62,17 @@ chat::chat(ZealService* zeal, IO_ini* ini)
                 Zeal::EqGame::print_chat("Timestamps enabled");
             else
                 Zeal::EqGame::print_chat("Timestamps disabled");
+
+            return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+        });
+    zeal->commands_hook->add("/bluecon", { },
+        [this](std::vector<std::string>& args) {
+            bluecon = !bluecon;
+            ZealService::get_instance()->ini->setValue<bool>("Zeal", "Bluecon", bluecon);
+            if (bluecon)
+                Zeal::EqGame::print_chat("Blue con color is now set to usercolor 70");
+            else
+                Zeal::EqGame::print_chat("Default blue con color.");
 
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });

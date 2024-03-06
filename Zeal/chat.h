@@ -6,6 +6,7 @@ class chat
 {
 public:
 	bool timestamps=false;
+	bool bluecon = false;
 	chat(class ZealService* pHookWrapper, class IO_ini* ini);
 	~chat();
 private:

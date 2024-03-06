@@ -197,6 +197,12 @@ void Binds::add_binds()
 			}
 		}
 		});
+	add_bind(217, "Reply Target", "ReplyTarget", key_category::Target, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqGame::EqGameInternal::ReplyTarget(Zeal::EqGame::get_self(), "");
+		}
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) {
 
 		if (key_down)

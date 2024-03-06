@@ -70,7 +70,7 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
 			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
 			static mem::function<int __fastcall(int, int)> ProcessControls = 0x53F337;
-
+			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> ReplyTarget = 0x4ff62d;
 
 			namespace Spells
 			{
