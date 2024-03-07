@@ -500,7 +500,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     mem::write<byte>(0x53fa50, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
     mem::write<byte>(0x53f648, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
 
-    if (cycle_to_zeal_cam_enabled)
+    if (enabled && cycle_to_zeal_cam_enabled)
         mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::TotalCameras); //allow for the camera toggle hotkey to cycle through the new camera
     else
         mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::ZealCam);
@@ -578,9 +578,14 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 {
                     Zeal::EqGame::print_chat("Zealcam enabled");
                     Zeal::EqGame::print_chat("camera sensitivity FirstPerson : [% f] [% f] ThirdPerson : [% f] [% f] ", user_sensitivity_x, user_sensitivity_y, user_sensitivity_x_3rd, user_sensitivity_y_3rd);
+                    if (cycle_to_zeal_cam_enabled)
+                        mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::TotalCameras);
                 }
                 else
+                {
                     Zeal::EqGame::print_chat("Zealcam disabled");
+                    mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::ZealCam);
+                }
             }
             return true;
         });
