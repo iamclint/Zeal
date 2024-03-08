@@ -52,9 +52,14 @@ void AutoStand::handle_movement_binds(int cmd, bool key_down)
 					// how do we close corpse without closing the window?
 					return;
 				}
-				// spellbook handler here
-				// left and right arrows dont turn pages on oldui by default
-				// so we probably wont add support for other keys
+				else if (Zeal::EqGame::OldUI::spellbook_window_open())
+				{
+					// left and right arrows dont turn pages on oldui by default
+					// so I'm not sure if we'll add support for other keys
+					if (cmd == 4) { return; }
+					else if (cmd == 5 && !spellbook_left_autostand)  { return; }
+					else if (cmd == 6 && !spellbook_right_autostand) { return; }
+				}
 			}
 
 			// not in a window, handle things normally. (why did this check get removed?)
@@ -91,7 +96,10 @@ void AutoStand::handle_spellcast_binds(int cmd)
 				// how do we close corpse without closing the window?
 				return;
 			}
-			// need spellbook handler
+			else if (Zeal::EqGame::OldUI::spellbook_window_open())
+			{
+				return;
+			}
 		}
 
 		// not in a window, handle things normally
