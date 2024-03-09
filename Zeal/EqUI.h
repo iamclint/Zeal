@@ -233,7 +233,7 @@ namespace Zeal
 				/* 0x0000 */ BYTE unknown0[0x30];
 				/* 0x0030 */ int ptr_focused_wnd;
 				/* 0x0034 */ BYTE unknown34[0x8];
-				/* 0x0030 */ int ptr_hovered_wnd;
+				/* 0x0040 */ int ptr_hovered_wnd;
 			};
 
 
@@ -271,6 +271,10 @@ namespace Zeal
 					ContextMenuVTable* newtbl = new ContextMenuVTable();
 					mem::copy((int)newtbl, (int)fnTable, sizeof(ContextMenuVTable));
 					fnTable = newtbl;
+				}
+				void RemoveAllMenuItems()
+				{
+					reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417a7f)(this);
 				}
 				/*0x000*/   ContextMenuVTable* fnTable;
 				/*0x004*/   DWORD   Unknown0x004; /* set to 0 in CXWnd::Refade*/
@@ -412,6 +416,10 @@ namespace Zeal
 				{
 					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int, CXPoint, EQWND*)>(0x41822D)(this, index, pt, menu);
 				}
+				int RemoveMenu(int menu_index, bool has_siblings)
+				{
+					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int,bool)>(0x417E1B)(this, menu_index, has_siblings);
+				}
 				/*0x0000*/ BYTE Unknown0x0000[0x128];//yeah i know its a window...
 				/*0x0128*/ void* Menus[0x400];
 				/*0x1128*/ DWORD MenuCount;
@@ -435,7 +443,7 @@ namespace Zeal
 			public:
 				void Forget(int index) const
 				{
-					reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x434a05)(this, index);
+					reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a662)(this, index);
 				}
 				void UpdateSpellGems(int index) const
 				{

@@ -48,7 +48,6 @@ void __fastcall EnterZone(int t, int unused, int hwnd)
 	zeal->hooks->hook_map["EnterZone"]->original(EnterZone)(t, unused, hwnd);
 }
 
-
 MainLoop::MainLoop(ZealService* zeal)
 {
 	//zeal->hooks->Add("main_loop", Zeal::EqGame::EqGameInternal::fn_main_loop, main_loop_hk, hook_type_detour);

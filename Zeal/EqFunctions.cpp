@@ -594,7 +594,7 @@ namespace Zeal
 			}
 			void Memorize(int book_index, int gem_index)
 			{
-				if (Zeal::EqGame::Windows->SpellBook && !Zeal::EqGame::Windows->SpellBook->IsVisible)
+				if (Windows->SpellBook && !Windows->SpellBook->IsVisible)
 					Zeal::EqGame::Spells::OpenBook();
 				Windows->SpellBook->BeginMemorize(book_index, gem_index, false);
 			}

@@ -8,7 +8,7 @@
 #include <windowsx.h>
 #include "StringUtil.h"
 #include "camera_math.h"
-#define debug_cam
+//#define debug_cam
 bool CameraMods::update_cam()
 {
     if (!enabled)
@@ -318,11 +318,11 @@ void CameraMods::tick_key_move()
         if (GetTickCount64() - lmouse_time > 200 )
         {
             HWND gwnd = Zeal::EqGame::get_game_window();
+            GetCursorPos(&lmouse_cursor_pos);
             if (gwnd == WindowFromPoint(lmouse_cursor_pos))
             {
                 if (hide_cursor)
                 {
-                    GetCursorPos(&lmouse_cursor_pos);
                     mem::write<byte>(0x53edef, 0xEB);
                     hide_cursor = false;
                 }
