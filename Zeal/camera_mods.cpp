@@ -17,9 +17,16 @@ bool CameraMods::update_cam()
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_view_actor_entity();
     if (!self)
         return false;
+
+
+
     Zeal::EqStructures::CameraInfo* cam = Zeal::EqGame::get_camera();
     Vec3 head_pos = Zeal::EqGame::get_view_actor_head_pos();
     Vec3 wanted_pos = camera_math::get_cam_pos_behind(head_pos, current_zoom, zeal_cam_yaw/*self->Heading*/, -zeal_cam_pitch);
+
+#ifdef debug_cam
+    ZealService::get_instance()->labels_hook->print_debug_info("View actor: %i\nHead: %s\nWanted: %s", self, head_pos.toString().c_str(), wanted_pos.toString().c_str());
+#endif
     bool rval = Zeal::EqGame::collide_with_world(head_pos, wanted_pos, wanted_pos);
     cam->Position = wanted_pos;
     cam->Heading = zeal_cam_yaw;// self->Heading;
@@ -187,6 +194,7 @@ void CameraMods::proc_mouse()
         if (camera_view == Zeal::EqEnums::CameraView::ZealCam)
            update_cam();
     }
+
 }
 
 void __fastcall procMouse(int eq, int unused, int a1)
@@ -299,9 +307,6 @@ void CameraMods::tick_key_move()
         mouse_wheel(-120);
     }
 
-#ifdef debug_cam
-    ZealService::get_instance()->labels_hook->print_debug_info("M1: [%i]\nCam: [%i]\nOverTitleBar: [%i]\nIsGameUiHovered: [%i]", *Zeal::EqGame::is_left_mouse_down, camera_view, is_over_title_bar(), Zeal::EqGame::is_game_ui_window_hovered());
-#endif
     if (!*Zeal::EqGame::is_right_mouse_down && *Zeal::EqGame::is_left_mouse_down && camera_view == Zeal::EqEnums::CameraView::ZealCam && !is_over_title_bar() && !Zeal::EqGame::is_game_ui_window_hovered())
     {
         if (!lmouse_time)
@@ -432,6 +437,7 @@ void CameraMods::callback_main()
         {
            update_cam();
         }
+           
     }
     prev_view = *Zeal::EqGame::camera_view;
 }

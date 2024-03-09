@@ -112,6 +112,15 @@ namespace mem
 		memset((void*)target, val, size);
 		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
 	}
+	void copy(int target, int source, int size, BYTE* buffer)
+	{
+		DWORD oldprotect;
+		VirtualProtect((PVOID*)target, size, PAGE_EXECUTE_READWRITE, &oldprotect);
+		if (buffer)
+			memcpy((void*)buffer, (const void*)target, size);
+		memcpy((void*)target, (const void*)source, size);
+		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
+	}
 	void copy(int target, byte* source, int size, BYTE* buffer)
 	{
 		DWORD oldprotect;

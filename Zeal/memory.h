@@ -46,6 +46,7 @@ namespace mem
 
 	void set(int target, int val, int size, BYTE* orig_buffer = nullptr);
 	void copy(int target, BYTE* source, int size, BYTE* orig_buffer = nullptr);
+	void copy(int target, int source, int size, BYTE* orig_buffer = nullptr);
 	void get(int target, int size, BYTE* buffer = nullptr);
 	void unprotect_memory(PVOID target, size_t size);
 	void reset_memory_protection(PVOID target);

@@ -13,7 +13,7 @@
 #define EQ_NUM_INVENTORY_PACK_SLOTS 8
 #define EQ_NUM_INVENTORY_BANK_SLOTS 8
 #define EQ_NUM_SKILLS 74
-#define EQ_NUM_SPELL_BOOK_SPELLS 250 // 32 pages, 8 spells per page, should be 256?
+#define EQ_NUM_SPELL_BOOK_SPELLS 512
 #define EQ_NUM_SPAWNS 8192
 #define EQ_NUM_GUILDS 512
 #define EQ_NUM_LOOT_WINDOW_ITEMS 30
@@ -93,92 +93,6 @@ namespace Zeal
 			int left;
 		};
 
-		struct EQCXSTR
-		{
-			/* 0x0000*/ DWORD Font; // 1,6 = Window Title or Button Text, 8 = Hot Button Small Text
-			/* 0x0004*/ DWORD MaxLength;
-			/* 0x0008*/ DWORD Length;
-			/* 0x000C*/ DWORD Encoding; // 0 = ASCII, 1 = Unicode
-			/* 0x0010*/ PCRITICAL_SECTION Lock;
-			/* 0x0014*/ CHAR Text[1]; // use Length and MaxLength
-		};
-
-		struct EQCXRECT
-		{
-			DWORD X1;
-			DWORD Y1;
-			DWORD X2;
-			DWORD Y2;
-		};
-
-		struct EQFONT
-		{
-			/* 0x0000 */ DWORD Unknown0000;
-			/* 0x0004 */ DWORD Size;
-		};
-
-
-		struct EQWND
-		{
-			/* 0x0000 */ DWORD Unknown0000; // struct _CSIDLWNDVFTABLE *pvfTable; struct _CXWNDVFTABLE *pvfTable;
-			/* 0x0004 */ DWORD MouseHoverTimer;
-			/* 0x0008 */ DWORD Unknown0008; // usually equals 2000
-			/* 0x000C */ DWORD Unknown000C; // usually equals 500
-			/* 0x0010 */ BYTE Unknown0010;
-			/* 0x0011 */ BYTE Unknown0011;
-			/* 0x0012 */ BYTE IsLocked;
-			/* 0x0013 */ BYTE Unknown0013;
-			/* 0x0014 */ PVOID Unknown0014;
-			/* 0x0018 */ DWORD Unknown0018;
-			/* 0x001C */ EQWND* ParentWnd;
-			/* 0x0020 */ EQWND* FirstChildWnd;
-			/* 0x0024 */ EQWND* NextSiblingWnd;
-			/* 0x0028 */ BYTE HasChildren;
-			/* 0x0029 */ BYTE HasSiblings;
-			/* 0x002A */ BYTE Unknown0030[2];
-			/* 0x002C */ DWORD Flags;
-			/* 0x0030 */ EQCXRECT Location;
-			/* 0x0040 */ EQCXRECT LocationPlaceholder; // used when minimizing the window
-			/* 0x0050 */ BYTE IsVisible; // show
-			/* 0x0051 */ BYTE IsEnabled;
-			/* 0x0052 */ BYTE IsMinimized;
-			/* 0x0053 */ BYTE Unknown0053;
-			/* 0x0054 */ BYTE IsOpen;
-			/* 0x0055 */ BYTE Unknown0055;
-			/* 0x0056 */ BYTE IsMouseOver; // mouse is hovering over
-			/* 0x0057 */ BYTE Unknown0057;
-			/* 0x0058 */ DWORD WindowStyleFlags;
-			/* 0x005C */ EQFONT* FontPointer;
-			/* 0x0060 */ EQCXSTR Text;
-			/* 0x0064 */ EQCXSTR ToolTipText;
-			/* 0x0068 */ BYTE Unknown0068[28];
-			/* 0x0084 */ EQCXSTR XmlToolTipText;
-			/* 0x0088 */ BYTE Unknown0088[22];
-			/* 0x009E */ BYTE AlphaTransparency;
-			/* 0x009F */ BYTE Unknown009F;
-			/* 0x00A0 */ BYTE ZLayer;
-			/* 0x00A1 */ BYTE Unknown00A1[7];
-			/* 0x00A8 */ DWORD DrawTemplate;
-			/* 0x00AC */
-		};
-
-
-		struct CXSTR {
-			/*0x00*/   DWORD   Font;            // maybe, dont know.  04 = Window 01 = button
-			/*0x04*/   DWORD   MaxLength;
-			/*0x08*/   DWORD   Length;
-			/*0x0c*/   BOOL    Encoding; // 0: ASCII, 1:Unicode
-			/*0x10*/   PCRITICAL_SECTION pLock;
-			/*0x14*/   CHAR    Text[1]; // Stub, can be anywhere from Length to MaxLength (which is how much is malloc'd to this CXStr)
-		};
-
-		struct CXWndManager
-		{
-			/* 0x0000 */ BYTE unknown0[0x30];
-			/* 0x0030 */ int ptr_focused_wnd;
-			/* 0x0034 */ BYTE unknown34[0x8];
-			/* 0x0030 */ int ptr_hovered_wnd;
-		};
 		typedef struct _EQITEMCOMMONINFO
 		{
 			/* 0x00E4 */ INT8 Strength;       // STR
@@ -432,7 +346,6 @@ namespace Zeal
 			/* 0x0264 */ _EQBUFFINFO Buff[EQ_NUM_BUFFS];
 			/* 0x02FA */ BYTE Unknown02FA[1080];
 			/* 0x0732 */ WORD SpellBook[EQ_NUM_SPELL_BOOK_SPELLS];
-			/* 0x0926 */ BYTE Unknown0926[524];
 			/* 0x0B32 */ WORD MemorizedSpell[EQ_NUM_SPELL_GEMS]; // spell gem spell ids
 			/* 0x0B42 */ BYTE Unknown0B42[14];
 			/* 0x0B50 */ WORD Unknown0B50;
@@ -675,71 +588,62 @@ namespace Zeal
 			float unk6;
 			float unk7;
 		};
+		struct SPELL {
+			/*0x000*/   DWORD   ID;
+			/*0x004*/   FLOAT   Range;
+			/*0x008*/   FLOAT   AERange;
+			/*0x00c*/	FLOAT	PushBack;
+			/*0x010*/   BYTE    Unknown0x00c[0x04];
+			/*0x014*/   DWORD   CastTime;
+			/*0x018*/   DWORD   FizzleTime;
+			/*0x01c*/   DWORD   RecastTime;
+			/*0x020*/   DWORD   DurationType;       //DurationFormula on Lucy 
+			/*0x024*/   DWORD   DurationValue1;
+			/*0x028*/   BYTE   Unknown0x028[0x4];
+			/*0x02c**/  WORD	Mana;
 
-		struct pInstWindows
-		{
-			void* CContextMenuManager;  // 0x63D5CC
-			EQWND* CChatManager;  // 0x63D5D0
-			EQWND* uknownWnd1;  // 0x63D5D4
-			EQWND* CharacterSelect;  // 0x63D5D8
-			EQWND* CFacePick;  // 0x63D5DC
-			EQWND* CItemDisplayManager;  // 0x63D5E0
-			EQWND* CNote;  // 0x63D5E4
-			EQWND* CHelp;  // 0x63D5E8
-			EQWND* CBook;  // 0x63D5EC
-			EQWND* CPetInfo;  // 0x63D5F0
-			EQWND* CTrain;  // 0x63D5F4
-			EQWND* CSkills;  // 0x63D5F8
-			EQWND* CSkillsSelect;  // 0x63D5FC
-			EQWND* CFriends;  // 0x63D600
-			EQWND* CAA;  // 0x63D604
-			EQWND* CGroup;  // 0x63D608
-			EQWND* CLoadskin;  // 0x63D60C
-			EQWND* CAlarm;  // 0x63D610
-			EQWND* CMusicPlayer;  // 0x63D614
-			EQWND* CRaid;  // 0x63D618
-			EQWND* CRaidOptions;  // 0x63D61C
-			EQWND* CBreath;  // 0x63D620
-			EQWND* CTarget;  // 0x63D624
-			EQWND* CHotButton;  // 0x63D628
-			EQWND* CColorPicker;  // 0x63D62C
-			EQWND* CPlayer;  // 0x63D630
-			EQWND* COptions;  // 0x63D634
-			EQWND* CBuffWindowNORMAL;  // 0x63D638
-			EQWND* CharacterCreation;  // 0x63D63C
-			EQWND* CCursorAttachment;  // 0x63D640
-			EQWND* CCasting;  // 0x63D644
-			EQWND* CCastSpell;  // 0x63D648
-			EQWND* CSpellBook;  // 0x63D64C
-			EQWND* CInventory;  // 0x63D650
-			EQWND* CBank;  // 0x63D654
-			EQWND* CQuantity;  // 0x63D658
-			EQWND* CLoot;  // 0x63D65C
-			EQWND* CActions;  // 0x63D660
-			EQWND* CMerchant;  // 0x63D664
-			EQWND* CTrade;  // 0x63D668
-			EQWND* CSelector;  // 0x63D66C
-			EQWND* CBazaar;  // 0x63D670
-			EQWND* CBazaarSearch;  // 0x63D674
-			EQWND* CGive;  // 0x63D678
-			EQWND* CTracking;  // 0x63D67C
-			EQWND* CInspect;  // 0x63D680
-			EQWND* CSocialEdit;  // 0x63D684
-			EQWND* CFeedback;  // 0x63D688
-			EQWND* CBugReport;  // 0x63D68C
-			EQWND* CVideoModes;  // 0x63D690
-			EQWND* CTextEntry;  // 0x63D694
-			EQWND* CFileSelection;  // 0x63D698
-			EQWND* CCompass;  // 0x63D69C
-			EQWND* CPlayerNotes;  // 0x63D6A0
-			EQWND* CGemsGame;  // 0x63D6A4
-			EQWND* CTimeLeft;  // 0x63D6A8
-			EQWND* CPetitionQ;  // 0x63D6AC
-			EQWND* CSoulmark;  // 0x63D6B0
-			void* CInvSlotMgr;  // 0x63D6B4
-			void* CContainerMgr;  // 0x63D6B8
+			/*0x02e*/   short    Base[0x0c];  //has to be signed for  ShowSpellSlotInfo to work      //Base1-Base12 
+			/*0x046**/   short    Max[0x0c];  //has to be signed for  ShowSpellSlotInfo to work        //Max1-Max12 
+
+			/*0x05e**/  WORD   BookIcon;
+			/*0x060**/  WORD   GemIcon;
+
+			/*0x062**/   WORD   ReagentId[0x4];     //ReagentId1-ReagentId4 
+			/*0x06a**/   WORD   ReagentCount[0x4];  //ReagentCount1-ReagentCount4 
+			/*0x072*/   BYTE	Unknown0x072[0x8];
+			/*0x07a**/   BYTE	Calc[0x0c];         //Calc1-Calc12 
+			/*0x086*/   BYTE	LightType;
+			/*0x087*/   BYTE	SpellType;          //0=detrimental, 1=Beneficial, 2=Beneficial, Group Only
+			/*0x088*/   BYTE	Unknown0x088;
+			/*0x089**/	BYTE	Resist; //0=un 1=mr 2=fr 3=cr 4=pr 5=dr 6=chromatic
+			/*0x08a**/	BYTE   Attrib[0xc];
+			/*0x096**/   BYTE    TargetType;         // 03=Group v1, 04=PB AE, 05=Single, 06=Self, 08=Targeted AE, 0e=Pet, 28=AE PC v2, 29=Group v2
+			/*0x097**/   BYTE	FizzleAdj;
+			/*0x098**/   BYTE	Skill;
+			/*0x099*/   BYTE    Location;            // 01=Outdoors, 02=dungeons, ff=Any 
+			/*0x09a*/   BYTE	Environment;
+			/*0x09b*/   BYTE	TimeOfDay;		     // 0=any, 1=day only, 2=night only
+			/*0x09c*/	BYTE	Unknown0x13e;
+			/*0x09d**/   BYTE    Level[0xf];         // per class. 
+			/*0x0a7*/   BYTE    Unknown0x14f[0x10];
+			/*0x0bc**/   BYTE    CastingAnim;
+			/*0x0bd*/	BYTE	Unknown0x0bd[0x13];
+			/*0x0d0**/   CHAR* Name;
+			/*0x0d4**/   CHAR* Target;
+			/*0x0d8**/   CHAR* Extra;			// This is 'Extra' from Lucy (portal shortnames etc)
+			/*0x0dc**/   CHAR* Unknown0x0dc;
+			/*0x0e0**/   CHAR* Unknown0x0e0;
+			/*0x0e4**/   CHAR* CastOnYou;
+			/*0x0e8**/   CHAR* CastOnAnother;
+			/*0x0ec**/   CHAR* WearOff;
+			/*0x0f0*/   BYTE	Unknown0x0f0[0x1c];
+			/*0x10c**/   BYTE	ResistAdj;
+			/*0x10d*/   BYTE	Unknown0x10d[0xb];
+			/*0x114*/
 		};
-
+		struct SPELLMGR {
+			 SPELL* Spells[4000];
+		};
 		struct EQCommand
 		{
 			int string_id;

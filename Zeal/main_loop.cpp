@@ -8,11 +8,11 @@ MainLoop::~MainLoop()
 
 }
 
-void main_loop_hk()
+void __fastcall main_loop_hk(int t, int unused)
 {
 	ZealService* zeal = ZealService::get_instance();
 	zeal->main_loop_hook->do_callbacks(callback_fn::MainLoop);
-	zeal->hooks->hook_map["main_loop"]->original(main_loop_hk)();
+	zeal->hooks->hook_map["main_loop"]->original(main_loop_hk)(t, unused);
 }
 
 void MainLoop::do_callbacks(callback_fn fn)
@@ -51,6 +51,7 @@ void __fastcall EnterZone(int t, int unused, int hwnd)
 
 MainLoop::MainLoop(ZealService* zeal)
 {
-	zeal->hooks->Add("main_loop", Zeal::EqGame::EqGameInternal::fn_main_loop, main_loop_hk, hook_type_detour);
+	//zeal->hooks->Add("main_loop", Zeal::EqGame::EqGameInternal::fn_main_loop, main_loop_hk, hook_type_detour);
+	zeal->hooks->Add("main_loop", 0x4aa8bc, main_loop_hk, hook_type_detour);
 	zeal->hooks->Add("EnterZone", 0x53D2C4, EnterZone, hook_type_detour);
 }

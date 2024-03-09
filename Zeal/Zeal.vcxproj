@@ -165,6 +165,7 @@
     <ClInclude Include="EqFunctions.h" />
     <ClInclude Include="eqstr.h" />
     <ClInclude Include="EqStructures.h" />
+    <ClInclude Include="EqUI.h" />
     <ClInclude Include="experience.h" />
     <ClInclude Include="FindPattern.h" />
     <ClInclude Include="framework.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="outputfile.h" />
     <ClInclude Include="raid.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SpellCategories.h" />
     <ClInclude Include="spellsets.h" />
     <ClInclude Include="StringUtil.h" />
     <ClInclude Include="vectors.h" />

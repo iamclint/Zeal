@@ -2,9 +2,10 @@
 #include "EqStructures.h"
 #include "EqAddresses.h"
 #include "EqFunctions.h"
+#include "EqUI.h"
 #include "Zeal.h"
 
-void default_empty(Zeal::EqStructures::CXSTR* str, bool* override_color, ULONG* color)
+void default_empty(Zeal::EqUI::CXSTR* str, bool* override_color, ULONG* color)
 {
 	*override_color = 1;
 	*color = 0xffc0c0c0;
@@ -12,7 +13,7 @@ void default_empty(Zeal::EqStructures::CXSTR* str, bool* override_color, ULONG* 
 }
 
 
-bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, bool* override_color, ULONG* color)
+bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, ULONG* color)
 {
 	ZealService* zeal = ZealService::get_instance();
 	switch (EqType)
@@ -90,7 +91,7 @@ bool GetLabelFromEq(int EqType, Zeal::EqStructures::CXSTR* str, bool* override_c
 	return ZealService::get_instance()->hooks->hook_map["GetLabel"]->original(GetLabelFromEq)(EqType, str, override_color, color);
 }
 
-int GetGaugeFromEq(int EqType, Zeal::EqStructures::CXSTR* str)
+int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 {
 	ZealService* zeal = ZealService::get_instance();
 	switch (EqType)

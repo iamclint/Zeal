@@ -37,6 +37,9 @@
     <Filter Include="Header Files\other">
       <UniqueIdentifier>{ea0b750a-50aa-4748-b13c-f4ea87ac3bd1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\everquest">
+      <UniqueIdentifier>{e5b39775-cb23-4102-bd7f-bbe1b3043de2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -50,12 +53,6 @@
     </ClInclude>
     <ClInclude Include="hook_wrapper.h">
       <Filter>Header Files\memory</Filter>
-    </ClInclude>
-    <ClInclude Include="EqFunctions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EqStructures.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vectors.h">
       <Filter>Header Files\helpers</Filter>
@@ -108,9 +105,6 @@
     <ClInclude Include="chat.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
-    <ClInclude Include="EqAddresses.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StringUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -131,6 +125,21 @@
     </ClInclude>
     <ClInclude Include="alarm.h">
       <Filter>Header Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="EqAddresses.h">
+      <Filter>Header Files\everquest</Filter>
+    </ClInclude>
+    <ClInclude Include="EqFunctions.h">
+      <Filter>Header Files\everquest</Filter>
+    </ClInclude>
+    <ClInclude Include="EqStructures.h">
+      <Filter>Header Files\everquest</Filter>
+    </ClInclude>
+    <ClInclude Include="EqUI.h">
+      <Filter>Header Files\everquest</Filter>
+    </ClInclude>
+    <ClInclude Include="SpellCategories.h">
+      <Filter>Header Files\everquest</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -200,14 +209,14 @@
     <ClCompile Include="auto_stand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="camera_math.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="spellsets.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="alarm.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="camera_math.cpp">
+      <Filter>Source Files\helpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

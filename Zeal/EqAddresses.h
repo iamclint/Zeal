@@ -1,5 +1,6 @@
 #pragma once
 #include "EqStructures.h"
+#include "EqUI.h"
 namespace Zeal
 {
 	namespace EqGame
@@ -19,7 +20,8 @@ namespace Zeal
 		static EqStructures::Entity* GroupList = (Zeal::EqStructures::Entity*)0x7913F8;
 		static EqStructures::ViewActor* ViewActor = (EqStructures::ViewActor*)0x63D6C0;
 		static EqStructures::KeyboardModifiers* KeyMods = (EqStructures::KeyboardModifiers*)0x799738;
-		static EqStructures::pInstWindows* Windows = (EqStructures::pInstWindows*)0x63D5CC;
+		static EqUI::pInstWindows* Windows = (EqUI::pInstWindows*)0x63D5CC;
+		//static EqStructures::SPELLMGR* SpellsMgr = (EqStructures::SPELLMGR*)0x805CB0;
 		
 		static DWORD* ptr_LocalPC = (DWORD*)0x7F94E8;
 		static int* ptr_ContainerMgr = (int*)0x63d6b8;

@@ -37,7 +37,7 @@ namespace Zeal
 		}
 		bool is_game_ui_window_hovered()
 		{
-			EqStructures::CXWndManager* mgr = *(EqStructures::CXWndManager**)0x809db4;
+			EqUI::CXWndManager* mgr = *(EqUI::CXWndManager**)0x809db4;
 			if (mgr)
 				return mgr->ptr_hovered_wnd!=0;
 			else
@@ -377,6 +377,10 @@ namespace Zeal
 			}
 			return 0;
 		}
+		Zeal::EqStructures::SPELLMGR* get_spell_mgr()
+		{
+			return *(Zeal::EqStructures::SPELLMGR**)0x805CB0;
+		}
 		Zeal::EqStructures::Entity* get_self()
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::Self;
@@ -405,7 +409,7 @@ namespace Zeal
 		//	*cam_pos = *pos;
 		//}
 
-		void CXStr_PrintString(Zeal::EqStructures::CXSTR* str, const char* format, ...)
+		void CXStr_PrintString(Zeal::EqUI::CXSTR* str, const char* format, ...)
 		{
 				va_list argptr;
 				char buffer[512];
@@ -584,29 +588,23 @@ namespace Zeal
 
 		namespace Spells
 		{
-			int GetCastSpellWnd()
-			{
-				return *(int*)0x63d648;
-			}
-			int GetSpellBookWnd()
-			{
-				return *(int*)0x63d64C;
-			}
 			void OpenBook()
 			{
-				EqGameInternal::Spells::OpenBook(Windows->CSpellBook, 0);
+				Windows->SpellBook->OpenBook();
 			}
 			void Memorize(int book_index, int gem_index)
 			{
-				EqGameInternal::Spells::BeginMemorize(Windows->CSpellBook, 0, book_index, gem_index, false);
+				if (Zeal::EqGame::Windows->SpellBook && !Zeal::EqGame::Windows->SpellBook->IsVisible)
+					Zeal::EqGame::Spells::OpenBook();
+				Windows->SpellBook->BeginMemorize(book_index, gem_index, false);
 			}
 			void Forget(int index) 
 			{
-				EqGameInternal::Spells::ForgetMemorizedSpell(Windows->CCastSpell, 0, index);
+				Windows->SpellGems->Forget(index);
 			}
 			void UpdateGems(int index)
 			{
-				EqGameInternal::Spells::UpdateSpellGems(Windows->CCastSpell, 0, index);
+				Windows->SpellGems->UpdateSpellGems(index);
 			}
 		}
 
