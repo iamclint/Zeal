@@ -1,3 +1,9 @@
+### Features
+- Huge camera motion improvement in the third person and sensitivity for first person
+- Additional binds
+- Additional commands
+- Various bug fixes
+- Add free for all for raid loot, requires ui change or /setloottype 4
 ### Commands
 ___
 - `/hidecorpse`
@@ -50,6 +56,13 @@ ___
 
 - `/buffs`
   - **Description:** Outputs the players buff timers to the chat only if they are using OldUI.
+
+- `/bluecon`
+  - **Description:** Changes the blue con color to usercolor #70 which is otherwise unused, you can edit in the options window.
+
+- `/alarm`
+  - **Arguments:** `oldui`
+  - **Description:** Re-opens the alarm window, if oldui is specified it allows for an alarm on it.
 ___
 ### Binds
 - Cycle through nearest NPCs
@@ -58,6 +71,7 @@ ___
 - Strafe Left
 - Auto Inventory
 - Toggle last 2 targets
+- Reply target
 ___
 ### UI
 - **Gauge EqType's**

@@ -23,7 +23,7 @@ ZealService::ZealService()
 	chat_hook = std::shared_ptr<chat>(new chat(this, ini.get()));
 	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
 	buff_timers = std::shared_ptr<BuffTimers>(new BuffTimers(this));
-	auto_stand = std::shared_ptr<AutoStand>(new AutoStand(this));
+	auto_stand = std::shared_ptr<AutoStand>(new AutoStand(this, ini.get()));
 	alarm = std::shared_ptr<Alarm>(new Alarm(this));
 	
 

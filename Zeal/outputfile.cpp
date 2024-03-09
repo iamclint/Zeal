@@ -59,118 +59,139 @@ static std::string IDToEquipSlot(int equipSlot)
 
 static bool ItemIsContainer(Zeal::EqStructures::EQITEMINFO* item)
 {
-  return item->OpenType == 0x1;
+  return (item->OpenType == 1 && item->Container.Capacity > 0);
 }
 
-static bool ItemIosstackable(Zeal::EqStructures::EQITEMINFO* item)
+static bool ItemIsStackable(Zeal::EqStructures::EQITEMINFO* item)
 {
   return ((item->Common.IsStackable) && (item->Common.SpellId == 0));
 }
 
 void OutputFile::export_inventory(std::vector<std::string>& args)
 {
-  std::string t = "\t"; // output spacer
+  Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 
   std::ostringstream oss;
+  std::string t = "\t"; // output spacer
   oss << "Location" << t << "Name" << t << "ID" << t << "Count" << t << "Slots" << std::endl;
 
   // Processing Equipment
   for (size_t i = 0; i < EQ_NUM_INVENTORY_SLOTS; ++i) {
-    auto item = Zeal::EqGame::get_self()->CharInfo->InventoryItem[i];
+    Zeal::EqStructures::EQITEMINFO* item = self->CharInfo->InventoryItem[i];
     // EQITEMINFO->EquipSlot value only updates when a load happens. Don't use it for this.
-    if (item != nullptr) {
+    if (item) {
       oss << IDToEquipSlot(i) << t << item->Name << t << item->Id << t << 1 << t << 0 << std::endl;
     }
     else {
-      oss << IDToEquipSlot(i) << t << "Empty" << t << "0" << t << "0" << t << "0" << std::endl;
+      oss << IDToEquipSlot(i) << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
     }
   }
 
-  // Processing Inventory Slots
-  for (size_t i = 0; i < EQ_NUM_INVENTORY_PACK_SLOTS; ++i) {
-    auto item = Zeal::EqGame::get_self()->CharInfo->InventoryPackItem[i];
-    if (item != nullptr) {
-      if (ItemIsContainer(item)) {
-        int capacity = static_cast<int>(item->Container.Capacity);
-        oss << "General" << i + 1 << t << item->Name << t << item->Id << t << 1 << t << capacity << std::endl;
-        for (int j = 0; j < capacity; ++j) {
-          auto bag_item = item->Container.Item[j];
-          if (bag_item != nullptr) {
-            int stack_count = ItemIosstackable(bag_item) ? static_cast<int>(bag_item->Common.StackCount) : 1;
-            oss << "General" << i + 1 << "-Slot" << j + 1 << t << bag_item->Name << t << bag_item->Id << t << stack_count << t << 0 << std::endl;
+  { // Processing Inventory Slots
+    for (size_t i = 0; i < EQ_NUM_INVENTORY_PACK_SLOTS; ++i) {
+      Zeal::EqStructures::EQITEMINFO* item = self->CharInfo->InventoryPackItem[i];
+      if (item) {
+        if (ItemIsContainer(item)) {
+          int capacity = static_cast<int>(item->Container.Capacity);
+          oss << "General" << i + 1 << t << item->Name << t << item->Id << t << 1 << t << capacity << std::endl;
+          for (int j = 0; j < capacity; ++j) {
+            Zeal::EqStructures::EQITEMINFO* bag_item = item->Container.Item[j];
+            if (bag_item) {
+              int stack_count = ItemIsStackable(bag_item) ? static_cast<int>(bag_item->Common.StackCount) : 1;
+              oss << "General" << i + 1 << "-Slot" << j + 1 << t << bag_item->Name << t << bag_item->Id << t << stack_count << t << 0 << std::endl;
+            }
+            else {
+              oss << "General" << i + 1 << "-Slot" << j + 1 << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
+            }
           }
-          else {
-            oss << "General" << i + 1 << "-Slot" << j + 1 << t << "Empty" << t << "0" << t << "0" << t << "0" << std::endl;
-          }
+        }
+        else {
+          int stack_count = ItemIsStackable(item) ? static_cast<int>(item->Common.StackCount) : 1;
+          oss << "General" << i + 1 << t << item->Name << t << item->Id << t << stack_count << t << 0 << std::endl;
         }
       }
       else {
-        int stack_count = ItemIosstackable(item) ? static_cast<int>(item->Common.StackCount) : 1;
-        oss << "General" << i + 1 << t << item->Name << t << item->Id << t << stack_count << t << 0 << std::endl;
+        oss << "General" << i + 1 << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
       }
     }
-    else {
-      oss << "General" << i + 1 << t << "Empty" << t << "0" << t << "0" << t << "0" << std::endl;
-    }
+    ULONGLONG coin = 0;
+    coin += static_cast<ULONGLONG>(self->CharInfo->Platinum) * 1000;
+    coin += static_cast<ULONGLONG>(self->CharInfo->Gold) * 100;
+    coin += static_cast<ULONGLONG>(self->CharInfo->Silver) * 10;
+    coin += self->CharInfo->Copper;
+    oss << "General-Coin" << t << "Currency" << t << 0 << t << coin << t << 0 << std::endl;
   }
 
-  // Process Cursor Item
-  {
-    auto item = Zeal::EqGame::get_self()->CharInfo->CursorItem;
-    if (item != nullptr) {
+  { // Process Cursor Item
+    Zeal::EqStructures::EQITEMINFO* item = self->CharInfo->CursorItem;
+    if (item) {
       if (ItemIsContainer(item)) {
         int capacity = static_cast<int>(item->Container.Capacity);
         oss << "Held" << t << item->Name << t << item->Id << t << 1 << t << capacity << std::endl;
         for (int i = 0; i < capacity; ++i) {
-          auto bag_item = item->Container.Item[i];
-          if (bag_item != nullptr) {
-            int stack_count = ItemIosstackable(bag_item) ? static_cast<int>(bag_item->Common.StackCount) : 1;
+          Zeal::EqStructures::EQITEMINFO* bag_item = item->Container.Item[i];
+          if (bag_item) {
+            int stack_count = ItemIsStackable(bag_item) ? static_cast<int>(bag_item->Common.StackCount) : 1;
             oss << "Held" << "-Slot" << i + 1 << t << bag_item->Name << t << bag_item->Id << t << stack_count << t << 0 << std::endl;
           }
           else {
-            oss << "Held" << "-Slot" << i + 1 << t << "Empty" << t << "0" << t << "0" << t << "0" << std::endl;
+            oss << "Held" << "-Slot" << i + 1 << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
           }
         }
       }
       else {
-        int stack_count = ItemIosstackable(item) ? static_cast<int>(item->Common.StackCount) : 1;
+        int stack_count = ItemIsStackable(item) ? static_cast<int>(item->Common.StackCount) : 1;
         oss << "Held" << t << item->Name << t << item->Id << t << stack_count << t << 0 << std::endl;
       }
     }
     else {
-      oss << "Held" << t << "Empty" << t << "0" << t << "0" << t << "0" << std::endl;
+      ULONGLONG coin = 0;
+      coin += static_cast<ULONGLONG>(self->CharInfo->CursorPlatinum) * 1000;
+      coin += static_cast<ULONGLONG>(self->CharInfo->CursorGold) * 100;
+      coin += static_cast<ULONGLONG>(self->CharInfo->CursorSilver) * 10;
+      coin += self->CharInfo->CursorCopper;
+
+      if (coin != 0)
+        oss << "Held" << t << "Currency" << t << 0 << t << coin << t << 0 << std::endl;
+      else
+        oss << "Held" << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
     }
   }
 
-  // Process Bank Items
-  for (size_t i = 0; i < EQ_NUM_INVENTORY_BANK_SLOTS; ++i) {
-    auto item = Zeal::EqGame::get_self()->CharInfo->InventoryBankItem[i];
-    if (item != nullptr) {
-      if (ItemIsContainer(item)) {
-        int capacity = static_cast<int>(item->Container.Capacity);
-        oss << "Bank" << i + 1 << t << item->Name << t << item->Id << t << 1 << t << capacity << std::endl;
-        for (int j = 0; j < capacity; ++j) {
-          auto bag_item = item->Container.Item[j];
-          if (bag_item != nullptr) {
-            int stack_count = ItemIosstackable(bag_item) ? static_cast<int>(bag_item->Common.StackCount) : 1;
-            oss << "Bank" << i + 1 << "-Slot" << j + 1 << t << bag_item->Name << t << bag_item->Id << t << stack_count << t << 0 << std::endl;
+  { // Process Bank Items
+    for (size_t i = 0; i < EQ_NUM_INVENTORY_BANK_SLOTS; ++i) {
+      Zeal::EqStructures::EQITEMINFO* item = self->CharInfo->InventoryBankItem[i];
+      if (item) {
+        if (ItemIsContainer(item)) {
+          int capacity = static_cast<int>(item->Container.Capacity);
+          oss << "Bank" << i + 1 << t << item->Name << t << item->Id << t << 1 << t << capacity << std::endl;
+          for (int j = 0; j < capacity; ++j) {
+            Zeal::EqStructures::EQITEMINFO* bag_item = item->Container.Item[j];
+            if (bag_item) {
+              int stack_count = ItemIsStackable(bag_item) ? static_cast<int>(bag_item->Common.StackCount) : 1;
+              oss << "Bank" << i + 1 << "-Slot" << j + 1 << t << bag_item->Name << t << bag_item->Id << t << stack_count << t << 0 << std::endl;
+            }
+            else {
+              oss << "Bank" << i + 1 << "-Slot" << j + 1 << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
+            }
           }
-          else {
-            oss << "Bank" << i + 1 << "-Slot" << j + 1 << t << "Empty" << t << "0" << t << "0" << t << "0" << std::endl;
-          }
+        }
+        else {
+          int stack_count = ItemIsStackable(item) ? static_cast<int>(item->Common.StackCount) : 1;
+          oss << "Bank" << i + 1 << t << item->Name << t << item->Id << t << stack_count << t << 0 << std::endl;
         }
       }
       else {
-        int stack_count = ItemIosstackable(item) ? static_cast<int>(item->Common.StackCount) : 1;
-        oss << "Bank" << i + 1 << t << item->Name << t << item->Id << t << stack_count << t << 0 << std::endl;
+        oss << "Bank" << i + 1 << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
       }
     }
-    else {
-      oss << "Bank" << i + 1 << t << "Empty" << t << "0" << t << "0" << t << "0" << std::endl;
-    }
+    ULONGLONG coin = 0;
+    coin += static_cast<ULONGLONG>(self->CharInfo->BankPlatinum) * 1000;
+    coin += static_cast<ULONGLONG>(self->CharInfo->BankGold) * 100;
+    coin += static_cast<ULONGLONG>(self->CharInfo->BankSilver) * 10;
+    coin += self->CharInfo->BankCopper;
+    oss << "Bank-Coin" << t << "Currency" << t << 0 << t << coin << t << 0 << std::endl;
   }
-
-  //Zeal::EqGame::print_chat(oss.str()); // debug purposes
 
   std::string optional_name = "";
   if (args.size() > 2) {
@@ -184,18 +205,17 @@ void OutputFile::export_inventory(std::vector<std::string>& args)
 // so we'll settle for just printing out that information for now.
 void OutputFile::export_spellbook(std::vector<std::string>& args)
 {
-  std::stringstream oss;
+  Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 
+  std::stringstream oss;
   oss << "Index\tSpell Id" << std::endl;
   for (size_t i = 0; i < EQ_NUM_SPELL_BOOK_SPELLS; ++i) {
-    auto SpellId = Zeal::EqGame::get_self()->CharInfo->SpellBook[i];
+    WORD SpellId = self->CharInfo->SpellBook[i];
     // EQITEMINFO->EquipSlot value only updates when a load happens. Don't use it for this.
     if (SpellId != USHRT_MAX) {
       oss << i << "\t" << SpellId << std::endl;
     }
   }
-
-  //Zeal::EqGame::print_chat(oss.str()); // debug purposes
 
   std::string optional_name = "";
   if (args.size() > 2) {
