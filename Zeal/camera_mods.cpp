@@ -242,15 +242,16 @@ void CameraMods::handle_camera_motion_binds(int cmd, bool is_down)
         cmd_key_map.clear();
         return;
     }
-    if ((camera_view == Zeal::EqEnums::CameraView::ZealCam) || (cmd == 19)) //allow zoom out
-    {
+
+   // if ((camera_view == Zeal::EqEnums::CameraView::ZealCam) || (cmd == 19)) //allow zoom out
+ //   {
         if (is_down)
             cmd_key_map[cmd] = true;
         else
             cmd_key_map[cmd] = false;
-        return;
-    }
-    cmd_key_map[cmd] = false;
+   //     return;
+  //  }
+ //   cmd_key_map[cmd] = false;
 }
 
 // didn't want to clutter handle_binds() with specific logic to this situation.
@@ -362,14 +363,14 @@ void CameraMods::tick_key_move()
                 break;
             }
             case 15: //up
-                zeal_cam_pitch -= 0.3f;
-                if (zeal_cam_pitch <= -89.99f)
-                    zeal_cam_pitch = -89.99f;
+                //zeal_cam_pitch -= 0.3f;
+                //if (zeal_cam_pitch <= -89.99f)
+                //    zeal_cam_pitch = -89.99f;
                 break;
             case 16: //down
-                zeal_cam_pitch += 0.3f;
-                if (zeal_cam_pitch >= 89.99f)
-                    zeal_cam_pitch = 89.99f;
+                //zeal_cam_pitch += 0.3f;
+                //if (zeal_cam_pitch >= 89.99f)
+                //    zeal_cam_pitch = 89.99f;
                 break;
             case 18: //zoom in
                 if (desired_zoom > 0)
