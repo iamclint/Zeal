@@ -159,6 +159,7 @@ void CameraMods::proc_mouse()
                     if (camera_view == Zeal::EqEnums::CameraView::ZealCam)
                     {
                         zeal_cam_yaw -= smoothMouseDeltaX;
+                        zeal_cam_yaw = fmodf(zeal_cam_yaw, 512.f); //eventually the player would stop turning but camera would without normalizing
                         self->Heading = zeal_cam_yaw;
                     }
                     else
@@ -409,7 +410,16 @@ void CameraMods::update_fps_sensitivity()
     sensitivity_y *= multiplier;
     lastTime = currentTime;
 }
-
+void CameraMods::callback_render()
+{
+    if (enabled)
+    {
+        if (!*Zeal::EqGame::is_right_mouse_down && Zeal::EqGame::is_in_game() && *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
+        {
+            update_cam();
+        }
+    }
+}
 void CameraMods::callback_main()
 {
     static int prev_view = *Zeal::EqGame::camera_view;
@@ -434,21 +444,15 @@ void CameraMods::callback_main()
         }
         
 
-        if (!*Zeal::EqGame::is_right_mouse_down && Zeal::EqGame::is_in_game() && *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
-        {
-           update_cam();
-        }
            
     }
     prev_view = *Zeal::EqGame::camera_view;
 }
-
-void _fastcall doCharacterSelection(int t, int u)
+void CameraMods::callback_characterselect()
 {
     ZealService* zeal = ZealService::get_instance();
     zeal->camera_mods->toggle_zeal_cam(false);
-    zeal->hooks->hook_map["DoCharacterSelection"]->original(doCharacterSelection)(t, u);
-}
+ }
 
 void CameraMods::load_settings(IO_ini* ini)
 {
@@ -516,9 +520,10 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     fps = 0;
     height = 0;
     zeal->main_loop_hook->add_callback([this]() { callback_main();  });
+    zeal->main_loop_hook->add_callback([this]() { callback_render();  }, callback_fn::Render);
+    zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
     zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
-    zeal->hooks->Add("DoCharacterSelection", 0x53b9cf, doCharacterSelection, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
 
     zeal->commands_hook->add("/zealcam", { "/smoothing" },

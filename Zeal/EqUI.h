@@ -7,7 +7,7 @@ namespace Zeal
 		struct BaseVTable
 		{
 			/*0000*/ LPVOID IsValid; 
-			/*0004*/ LPVOID  vector_deleting_destructor; 
+			/*0004*/ LPVOID  Deconstructor; 
 			/*0008*/ LPVOID  DrawNC; 
 			/*000C*/ LPVOID  PostDraw; 
 			/*0010*/ LPVOID  PostDraw2; 
@@ -245,7 +245,6 @@ namespace Zeal
 					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, CXRect)>(0x417785)(this, cxwnd, a1, r);
 					SetupCustomVTable();
 				}
-				
 				void AddSeparator() const {
 					reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417A41)(this);
 					
@@ -266,15 +265,24 @@ namespace Zeal
 					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, ARGBCOLOR)>(0x579eb0)(this, index, 0x1, color);
 					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, ARGBCOLOR)>(0x579eb0)(this, index, 0x2, color);
 				}
+				static void __fastcall Deconstructor(int t, int unused, int f)
+				{
+					return; //handle the deconstruction in our code
+				}
 				void SetupCustomVTable()
 				{
 					ContextMenuVTable* newtbl = new ContextMenuVTable();
 					mem::copy((int)newtbl, (int)fnTable, sizeof(ContextMenuVTable));
 					fnTable = newtbl;
+					//fnTable->basic.Deconstructor = Deconstructor;//if you can make visual studio use a class member here or get the address of it without it complaining, go ahead
 				}
 				void RemoveAllMenuItems()
 				{
 					reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417a7f)(this);
+				}
+				void Deconstruct(int a)
+				{
+					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int)>(this->fnTable->basic.Deconstructor)(this,a);
 				}
 				/*0x000*/   ContextMenuVTable* fnTable;
 				/*0x004*/   DWORD   Unknown0x004; /* set to 0 in CXWnd::Refade*/
@@ -416,9 +424,9 @@ namespace Zeal
 				{
 					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int, CXPoint, EQWND*)>(0x41822D)(this, index, pt, menu);
 				}
-				int RemoveMenu(int menu_index, bool has_siblings)
+				int RemoveMenu(int menu_index, bool remove_children)
 				{
-					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int,bool)>(0x417E1B)(this, menu_index, has_siblings);
+					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int,bool)>(0x417E1B)(this, menu_index, remove_children);
 				}
 				/*0x0000*/ BYTE Unknown0x0000[0x128];//yeah i know its a window...
 				/*0x0128*/ void* Menus[0x400];

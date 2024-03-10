@@ -68,6 +68,30 @@ void hook::replace_call(int addr, int dest)
 	replace(addr, dest);
 	mem::copy((int)&original_bytes, (BYTE*)dest, 5);
 }
+void hook::replace_vtable(int addr, int index, int dest)
+{
+	mem::copy((int)&original_bytes, (BYTE*)dest, 4);
+	int orig_addr = ((int*)addr)[index];
+	DWORD old_protect;
+	orig_byte_count = 4;
+	trampoline = (int)malloc(5);
+	VirtualProtect((LPVOID)trampoline, 5, PAGE_EXECUTE_READWRITE, &old_protect);
+	mem::write<byte>(trampoline, 0xE9);
+	mem::write<int>(trampoline + 1, orig_addr);
+	mem::write<int>(addr, dest);
+}
+void hook::replace_vtable(int addr, int dest)
+{
+	mem::copy((int)&original_bytes, (BYTE*)dest, 4);
+	DWORD old_protect;
+	orig_byte_count = 4;
+	trampoline = (int)malloc(5);
+	VirtualProtect((LPVOID)trampoline, 5, PAGE_EXECUTE_READWRITE, &old_protect);
+	int trampoline_to_orig_offset = *(int*)addr - trampoline - 5;
+	mem::write<byte>(trampoline, 0xE9);
+	mem::write<int>(trampoline + 1, trampoline_to_orig_offset);
+	mem::write<int>(addr, dest);
+}
 void hook::rehook()
 {
 

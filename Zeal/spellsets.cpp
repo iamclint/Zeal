@@ -128,11 +128,11 @@ void SpellSets::handle_menu_mem(int book_index, int gem_index)
 }
 static int __fastcall SpellSetRButtonUp(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
 {
+    Zeal::EqGame::print_chat("Message: %i  data: %i", Message, data);
     return 1;
 }
 static int __stdcall SpellSetMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
 {
-    Zeal::EqGame::print_chat("Message: %i  data: %i", Message, data);
     ZealService::get_instance()->spell_sets->load(ZealService::get_instance()->spell_sets->spellset_map[(int)data]);
     return 1;
 }
@@ -180,7 +180,7 @@ static int __stdcall SpellsMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned in
 }
 
 
-int __fastcall SpellGemWnd_HandleRButtonUp(Zeal::EqUI::SpellGem* gem, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
+static int __fastcall SpellGemWnd_HandleRButtonUp(Zeal::EqUI::SpellGem* gem, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
     ZealService* zeal = ZealService::get_instance();
     if (gem->spellicon == -1)
@@ -191,12 +191,11 @@ int __fastcall SpellGemWnd_HandleRButtonUp(Zeal::EqUI::SpellGem* gem, int unused
     return zeal->hooks->hook_map["SpellGemRbutton"]->original(SpellGemWnd_HandleRButtonUp)(gem, unused, pt, flag);
 }
 
-int __fastcall SpellGemWnd_Book_HandleRButtonUp(Zeal::EqUI::pInstWindows* btn, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
+static int __fastcall SpellGemWnd_Book_HandleRButtonUp(Zeal::EqUI::EQWND* btn, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
     ZealService* zeal = ZealService::get_instance();
-    if (Zeal::EqGame::Windows->SpellBook && !Zeal::EqGame::Windows->SpellBook->IsVisible) //if the spell book is open it causes the menu to popup when you right click a spell
-        Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(zeal->spell_sets->SpellSetMenuIndex, pt, (Zeal::EqUI::EQWND*)zeal->spell_sets->spellset_menu);
-    return zeal->hooks->hook_map["SpellGemBookRbutton"]->original(SpellGemWnd_Book_HandleRButtonUp)(btn, unused, pt, flag);
+    Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(zeal->spell_sets->SpellSetMenuIndex, pt, (Zeal::EqUI::EQWND*)zeal->spell_sets->spellset_menu);
+    return zeal->hooks->hook_map["SpellGemWnd_Book_HandleRButtonUp"]->original(SpellGemWnd_Book_HandleRButtonUp)(btn, unused, pt, flag);
 }
 
 
@@ -209,20 +208,33 @@ bool compareBySpellLevel(const Zeal::EqStructures::SPELL* a, const Zeal::EqStruc
 
 void SpellSets::destroy_context_menus()
 {
-    if (menu)
+    if (Zeal::EqGame::Windows->ContextMenuManager)
     {
-        for (auto& [ind, men] : MenuMap)
-            men->RemoveAllMenuItems();
-        spellset_menu->RemoveAllMenuItems();
-        //Zeal::EqGame::Windows->ContextMenuManager->RemoveMenu(SpellMenuIndex, true);
-        //Zeal::EqGame::Windows->ContextMenuManager->RemoveMenu(SpellSetMenuIndex, false);
+        for (auto it = MenuMap.rbegin(); it != MenuMap.rend(); ++it) {
+            auto [index, cmenu] = *it;
+            cmenu->RemoveAllMenuItems();
+            cmenu->Deconstruct(0x0);
+            for (int i = index; i < Zeal::EqGame::Windows->ContextMenuManager->MenuCount - 1; i++)
+            {
+                Zeal::EqGame::Windows->ContextMenuManager->Menus[i] = Zeal::EqGame::Windows->ContextMenuManager->Menus[i + 1];
+            }
+            Zeal::EqGame::Windows->ContextMenuManager->MenuCount--;
+            Zeal::EqGame::Windows->ContextMenuManager->Menus[Zeal::EqGame::Windows->ContextMenuManager->MenuCount];
+        }
+        menu = 0;
+        spellset_menu = 0;
         MenuMap.clear();
+        //this has a memory leak and causes you to not be able to load other ui
     }
 }
 void SpellSets::create_context_menus(bool force)
 {
-    if ((!menu || force)  && Zeal::EqGame::get_self())
+    if ((!menu || force)  && Zeal::EqGame::get_self() && Zeal::EqGame::is_in_game())
     {
+        ZealService* zeal = ZealService::get_instance();
+        if (zeal->hooks->hook_map.count("SpellGemWnd_Book_HandleRButtonUp")==0)
+            zeal->hooks->Add("SpellGemWnd_Book_HandleRButtonUp", &Zeal::EqGame::Windows->SpellGems->SpellBook->vtbl->HandleRButtonUp, SpellGemWnd_Book_HandleRButtonUp, hook_type_vtable);
+
         Zeal::EqStructures::EQCHARINFO* self_char = Zeal::EqGame::get_self()->CharInfo;
         std::vector<Zeal::EqStructures::SPELL*> spells;
         for (int N = 0; N < EQ_NUM_SPELL_BOOK_SPELLS; N++) {
@@ -278,8 +290,8 @@ void SpellSets::create_context_menus(bool force)
         }
         SpellMenuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(menu);
         MenuMap[SpellMenuIndex] = menu;
-
-        spellset_menu = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
+        if (!spellset_menu)
+            spellset_menu = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
         spellset_menu->HasChildren = 1;
         spellset_menu->fnTable->basic.WndNotification = SpellSetMenuNotification;
         spellset_menu->fnTable->basic.HandleRButtonUp = SpellSetRButtonUp;
@@ -298,20 +310,27 @@ void SpellSets::create_context_menus(bool force)
             i++;
         }
         SpellSetMenuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(spellset_menu);
+        MenuMap[SpellSetMenuIndex] = spellset_menu;
     }
 }
 
+void SpellSets::callback_cleanui()
+{
+    destroy_context_menus();
+}
+void SpellSets::callback_characterselect()
+{
+    //destroy_context_menus();
+}
 SpellSets::SpellSets(ZealService* zeal)
 {
     ini = std::shared_ptr<IO_ini>(new IO_ini(".\\spellsets.ini"));
-    zeal->main_loop_hook->add_callback([this]() { callback_main();  });
+    zeal->main_loop_hook->add_callback([this]() { callback_main();  }, callback_fn::Render);
+    zeal->main_loop_hook->add_callback([this]() { callback_cleanui();  }, callback_fn::CleanUI);
+    zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
     zeal->hooks->Add("FinishMemorizing", 0x434b38, FinishMemorizing, hook_type_detour);
     zeal->hooks->Add("FinishScribing", 0x43501f, FinishScribing, hook_type_detour);
     zeal->hooks->Add("SpellGemRbutton", 0x5A67B0, SpellGemWnd_HandleRButtonUp, hook_type_detour);
-    zeal->hooks->Add("SpellGemBookRbutton", 0x5955c0, SpellGemWnd_Book_HandleRButtonUp, hook_type_detour);
-
-    
-
     zeal->commands_hook->add("/spellset", {},
         [this, zeal](std::vector<std::string>& args) {
             if (args.size() < 2)

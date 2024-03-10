@@ -26,6 +26,8 @@ public:
 	float desired_zoom = 0.f;
 	void set_smoothing(bool val);
 	void callback_main();
+	void callback_render();
+	void callback_characterselect();
 	bool update_cam(); //returns true on collision
 	void mouse_wheel(int delta);
 	void update_zoom(float zoom);

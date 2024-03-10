@@ -27,8 +27,8 @@ public:
 	int SpellMenuIndex = 0;
 	int SpellSetMenuIndex = 0;
 	std::unordered_map<std::string, std::unordered_map<std::string, std::list<menudata>>>  SpellCategory;
-	std::unordered_map<int, Zeal::EqUI::ContextMenu*> MenuMap;
-	std::unordered_map<int, std::string> spellset_map;
+	std::map<int, Zeal::EqUI::ContextMenu*> MenuMap;
+	std::map<int, std::string> spellset_map;
 	Zeal::EqUI::SpellGem* last_gem_clicked=0;
 	std::vector<std::pair<int, int>> mem_buffer;
 	void handle_menu_mem(int book_index, int gem_index);
@@ -36,7 +36,9 @@ public:
 	~SpellSets();
 private:
 	Stance original_stance;
+	void callback_cleanui();
 	void callback_main();
+	void callback_characterselect();
 };
 
 

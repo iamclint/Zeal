@@ -10,11 +10,14 @@ enum hook_type_
 {
 	hook_type_replace_call,
 	hook_type_jmp,
-	hook_type_detour
+	hook_type_detour,
+	hook_type_vtable
 };
 class hook
 {
 private:
+	void replace_vtable(int addr, int index, int dest);
+	void replace_vtable(int addr, int dest);
 	void replace_call(int addr, int dest);
 	void replace(int addr, int dest);
 	void detour(int addr, int dest);
@@ -54,6 +57,11 @@ public: //methods
 				replace_call((int)addr, (int)dest);
 				break;
 			}
+			case hook_type_vtable:
+			{
+				replace_vtable((int)addr, (int)dest);
+				break;
+			}
 		}
 	}
 	template<typename T>
@@ -76,12 +84,17 @@ public:
 	template<typename X, typename T>
 	hook* Add(std::string name, X addr, T fnc, hook_type_ type, int byte_count = -1) //could have used zdys or capstone but keeping this a single compile with minimal libs and its not that hard to figure out the bytes
 	{
-		if (byte_count == -1)
+		if (type != hook_type_vtable)
 		{
-			byte_count = Zeal::InstructionLength((unsigned char*)addr);
-			while (byte_count < 5) //you need 5 bytes for a jmp
-				byte_count += Zeal::InstructionLength((unsigned char*)(addr + byte_count));
+			if (byte_count == -1)
+			{
+				byte_count = Zeal::InstructionLength((unsigned char*)addr);
+				while (byte_count < 5) //you need 5 bytes for a jmp
+					byte_count += Zeal::InstructionLength((unsigned char*)(addr + byte_count));
+			}
 		}
+		else
+			byte_count = 4;
 		hook* x = new hook(addr, fnc, type, byte_count);
 		hook_map[name] = x;
 		x->hook_type = type;

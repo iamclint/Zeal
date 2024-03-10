@@ -6,7 +6,10 @@
 enum class callback_fn
 {
 	MainLoop,
-	Zone
+	Zone,
+	CleanUI,
+	Render,
+	CharacterSelect
 };
 class MainLoop
 {
@@ -16,7 +19,6 @@ public:
 	MainLoop(class ZealService* zeal);
 	~MainLoop();
 private:
-	std::vector<std::function<void()>> callback_functions;
-	std::vector<std::function<void()>> callback_functions_zone;
+	std::unordered_map<callback_fn, std::vector<std::function<void()>>> callback_functions;
 };
 
