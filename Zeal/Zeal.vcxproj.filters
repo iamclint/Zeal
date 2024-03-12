@@ -114,17 +114,11 @@
     <ClInclude Include="buff_timers.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
-    <ClInclude Include="auto_stand.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="camera_math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="spellsets.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="alarm.h">
-      <Filter>Header Files\hooks</Filter>
     </ClInclude>
     <ClInclude Include="EqAddresses.h">
       <Filter>Header Files\everquest</Filter>
@@ -140,6 +134,15 @@
     </ClInclude>
     <ClInclude Include="SpellCategories.h">
       <Filter>Header Files\everquest</Filter>
+    </ClInclude>
+    <ClInclude Include="alarm.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="auto_stand.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="netstat.h">
+      <Filter>Header Files\other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -206,17 +209,20 @@
     <ClCompile Include="buff_timers.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
-    <ClCompile Include="auto_stand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="spellsets.cpp">
-      <Filter>Source Files\hooks</Filter>
-    </ClCompile>
-    <ClCompile Include="alarm.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="camera_math.cpp">
       <Filter>Source Files\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="alarm.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="auto_stand.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="netstat.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

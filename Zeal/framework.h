@@ -24,6 +24,7 @@
 #include "auto_stand.h"
 #include "spellsets.h"
 #include "alarm.h"
+#include "netstat.h"
 
 #include "Zeal.h"
 
