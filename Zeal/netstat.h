@@ -1,6 +1,7 @@
 #pragma once
 #include "hook_wrapper.h"
 #include "memory.h"
+#include "IO_ini.h"
 
 class Netstat
 {
@@ -18,4 +19,3 @@ private:
 
 	bool netstat_flag_was_reset = true;
 };
-
