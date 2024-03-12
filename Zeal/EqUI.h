@@ -205,8 +205,12 @@ namespace Zeal
 
 					struct _CXSTR* SidlScreen;
 					DWORD   SlotID;
+					DWORD	Caret_Start;
 				};
-				/*0x104*/   LPVOID SidlPiece; /* CScreenPieceTemplate (important) */
+				union {
+					/*0x104*/   LPVOID SidlPiece; /* CScreenPieceTemplate (important) */
+					DWORD Caret_End;
+				};
 				/*0x108*/   BYTE    Checked;
 				/*0x109*/   BYTE    Highlighted;
 				/*0x10a*/   BYTE    Unused0x10a[0x2];
@@ -230,10 +234,13 @@ namespace Zeal
 
 			struct CXWndManager
 			{
-				/* 0x0000 */ BYTE unknown0[0x30];
-				/* 0x0030 */ int ptr_focused_wnd;
+				/* 0x0000 */ BYTE unknown0[0x28];
+				/* 0x0028 */ EQWND* ActiveEdit;
+				/* 0x002C */ int unknown1;
+				/* 0x0030 */ EQWND* Focused;
 				/* 0x0034 */ BYTE unknown34[0x8];
-				/* 0x0040 */ int ptr_hovered_wnd;
+				/* 0x0040 */ EQWND* Hovered;
+				
 			};
 
 
@@ -411,6 +418,15 @@ namespace Zeal
 				CXPoint(int _x, int _y) : x(_x), y(_y) {};
 			};
 
+			class CChatManager : public EQWND
+			{
+			public: //this class is a complete hack lol
+				EQWND* GetActiveChatWindow() const {
+					return reinterpret_cast<EQWND * (__thiscall*)(const CChatManager*)>(0x41114A)(this);
+				}
+			};
+
+
 			class CContextMenuManager
 			{
 			public: //this class is a complete hack lol
@@ -466,7 +482,7 @@ namespace Zeal
 			struct pInstWindows
 			{
 				CContextMenuManager* ContextMenuManager;  // 0x63D5CC
-				EQWND* ChatManager;  // 0x63D5D0
+				CChatManager* ChatManager;  // 0x63D5D0
 				EQWND* uknownWnd1;  // 0x63D5D4
 				EQWND* CharacterSelect;  // 0x63D5D8
 				EQWND* FacePick;  // 0x63D5DC

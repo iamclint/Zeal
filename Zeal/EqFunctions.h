@@ -128,5 +128,6 @@ namespace Zeal
 		void do_say(bool hide_local, const char* format, ...);
 		void do_say(bool hide_local, std::string data);
 		int get_region_from_pos(Vec3* pos);
+		EqUI::CXWndManager* get_wnd_manager();
 	}
 }

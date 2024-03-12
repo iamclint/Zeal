@@ -35,11 +35,15 @@ namespace Zeal
 			int ctx = EqGameInternal::CXWndShowContextMenu(*(int*)0x809db4, 0, *(int*)0x8092e8, *(int*)0x8092ec);
 			return ctx;
 		}
+		EqUI::CXWndManager* get_wnd_manager()
+		{
+			return *(EqUI::CXWndManager**)0x809db4;
+		}
 		bool is_game_ui_window_hovered()
 		{
 			EqUI::CXWndManager* mgr = *(EqUI::CXWndManager**)0x809db4;
 			if (mgr)
-				return mgr->ptr_hovered_wnd!=0;
+				return mgr->Hovered!=0;
 			else
 				return false;
 		}

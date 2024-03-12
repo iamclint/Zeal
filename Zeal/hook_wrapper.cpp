@@ -82,7 +82,7 @@ void hook::replace_vtable(int addr, int index, int dest)
 }
 void hook::replace_vtable(int addr, int dest)
 {
-	mem::copy((int)&original_bytes, (BYTE*)dest, 4);
+	mem::copy((int)&original_bytes, (BYTE*)addr, 4);
 	DWORD old_protect;
 	orig_byte_count = 4;
 	trampoline = (int)malloc(5);
