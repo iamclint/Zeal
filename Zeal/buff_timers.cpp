@@ -44,9 +44,7 @@ void BuffTimers::print_timers(void) {
 
 BuffTimers::BuffTimers(ZealService* zeal)
 {
-  is_OldUI = ZealService::get_instance()->ini->getValue<bool>("Defaults", "OldUI");
-
-  if (is_OldUI) {
+  if (!Zeal::EqGame::is_new_ui()) {
     zeal->commands_hook->add("/buffs", {},
       [this](std::vector<std::string>& args) {
         print_timers();
