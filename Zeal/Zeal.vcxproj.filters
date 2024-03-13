@@ -138,7 +138,7 @@
     <ClInclude Include="alarm.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
-    <ClInclude Include="auto_stand.h">
+    <ClInclude Include="player_movement.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
     <ClInclude Include="netstat.h">
@@ -218,11 +218,11 @@
     <ClCompile Include="alarm.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
-    <ClCompile Include="auto_stand.cpp">
+    <ClCompile Include="player_movement.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="netstat.cpp">
-      <Filter>Source Files\hooks</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

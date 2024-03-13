@@ -76,54 +76,11 @@ void Binds::read_ini()
 	}
 }
 
-void Binds::set_strafe(strafe_direction dir) 
-{
-	//slightly revised so the game properly sets speed based on encumber and handles the stance checks
-	if (dir == strafe_direction::None || !Zeal::EqGame::can_move())
-	{
-		current_strafe = strafe_direction::None;
-		*Zeal::EqGame::strafe_direction = 0;
-		*Zeal::EqGame::strafe_speed = 0;
-		if (orig_reset_strafe[0]!=0)
-			mem::copy(0x53f424, orig_reset_strafe, 7);
-	}
-	else
-	{
-		if (orig_reset_strafe[0] == 0)
-			mem::set(0x53f424, 0x90, 7, orig_reset_strafe);
-		else if (*(BYTE*)0x53f424 != 0x90)
-			mem::set(0x53f424, 0x90, 7);
-
-	
-		if (dir == strafe_direction::Right)
-		{
-			current_strafe = strafe_direction::Right;
-			*Zeal::EqGame::strafe_direction = 0x2;
-		}
-		else
-		{
-			current_strafe = strafe_direction::Left;
-			*Zeal::EqGame::strafe_direction = 0x1;
-		}
-	}
-}
-
 void Binds::add_binds()
 {
 	//just start binds at 211 to avoid overwriting any existing cmd/bind
-	add_bind(211, "Strafe Left", "StrafeLeft", key_category::Movement, [this](int key_down) {
-
-		if (!key_down && current_strafe==strafe_direction::Left)
-			set_strafe(strafe_direction::None);
-		else if (key_down)
-			set_strafe(strafe_direction::Left);
-	});
-	add_bind(212, "Strafe Right", "StrafeRight", key_category::Movement, [this](int key_down) {
-		if (!key_down && current_strafe == strafe_direction::Right)
-			set_strafe(strafe_direction::None);
-		else if (key_down)
-			set_strafe(strafe_direction::Right);
-	});
+	add_bind(211, "Strafe Left",	"StrafeLeft",		key_category::Movement,	[this](int key_down) {});	// stub
+	add_bind(212, "Strafe Right", "StrafeRight",	key_category::Movement, [this](int key_down) {});	// stub
 	add_bind(213, "Cycle through nearest NPCs", "CycleTargetNPC", key_category::Target, [](int key_down) {
 
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
@@ -241,29 +198,6 @@ void Binds::main_loop()
 	{
 		last_targets.second = last_targets.first;
 		last_targets.first = Zeal::EqGame::get_target()->SpawnId;
-	}
-
-	if (current_strafe != strafe_direction::None)
-	{
-		Zeal::EqStructures::Entity* controlled_player = Zeal::EqGame::get_controlled();
-		float encumberance = Zeal::EqGame::encum_factor();
-		*Zeal::EqGame::strafe_speed = encumberance + encumberance;
-		if (controlled_player->IsSneaking || controlled_player->StandingState == Stance::Duck)
-			*Zeal::EqGame::strafe_speed *= .5f;
-		if (controlled_player->ActorInfo && controlled_player->ActorInfo->MovementSpeedModifier < 0)
-			*Zeal::EqGame::strafe_speed *= .5f;
-		if (controlled_player->ActorInfo && controlled_player->ActorInfo->Unsure_Strafe_Calc != 0)
-			*Zeal::EqGame::strafe_speed *= .25f;
-		if (controlled_player->ActorInfo && controlled_player->ActorInfo->MovementSpeedModifier < -1000.0f)
-		{
-			*Zeal::EqGame::strafe_direction = 0;
-			*Zeal::EqGame::strafe_speed = 0;
-		}
-		if (controlled_player->StandingState != Stance::Duck && controlled_player->StandingState != Stance::Stand)
-		{
-			*Zeal::EqGame::strafe_direction = 0;
-			*Zeal::EqGame::strafe_speed = 0;
-		}
 	}
 }
 

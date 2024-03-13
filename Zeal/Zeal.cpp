@@ -23,27 +23,27 @@ ZealService::ZealService()
 	chat_hook = std::shared_ptr<chat>(new chat(this, ini.get()));
 	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
 	buff_timers = std::shared_ptr<BuffTimers>(new BuffTimers(this));
-	auto_stand = std::shared_ptr<AutoStand>(new AutoStand(this, ini.get()));
+	movement = std::shared_ptr<PlayerMovement>(new PlayerMovement(this, binds_hook.get(), ini.get()));
 	alarm = std::shared_ptr<Alarm>(new Alarm(this));
 	netstat = std::shared_ptr<Netstat>(new Netstat(this, ini.get()));
 	
 
 	binds_hook->replace_bind(3, [this](int state) {
-		auto_stand->handle_movement_binds(3, state);
+		movement->handle_movement_binds(3, state);
 		return false;
 	}); //foward
 	binds_hook->replace_bind(4, [this](int state) {
-		auto_stand->handle_movement_binds(4, state);
+		movement->handle_movement_binds(4, state);
 		return false;
 	}); //back
 	binds_hook->replace_bind(5, [this](int state) {
 		camera_mods->handle_camera_motion_binds(5, state);
-		auto_stand->handle_movement_binds(5, state);
+		movement->handle_movement_binds(5, state);
 		return false;
 	}); //turn right
 	binds_hook->replace_bind(6, [this](int state) {
 		camera_mods->handle_camera_motion_binds(6, state);
-		auto_stand->handle_movement_binds(6, state);
+		movement->handle_movement_binds(6, state);
 		return false;
 	}); //turn left
 	binds_hook->replace_bind(30, [this](int state) {
@@ -52,7 +52,7 @@ ZealService::ZealService()
 	});
 	for (int bind_index = 51; bind_index < 59; ++bind_index) {
 		binds_hook->replace_bind(bind_index, [this, bind_index](int state) {
-			auto_stand->handle_spellcast_binds(bind_index);
+			movement->handle_spellcast_binds(bind_index);
 			return false;
 		}); // spellcasting auto-stand
 	}
