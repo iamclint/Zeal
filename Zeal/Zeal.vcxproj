@@ -154,7 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="alarm.h" />
-    <ClInclude Include="auto_stand.h" />
+    <ClInclude Include="player_movement.h" />
     <ClInclude Include="binds.h" />
     <ClInclude Include="buff_timers.h" />
     <ClInclude Include="camera_math.h" />
@@ -190,7 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
-    <ClCompile Include="auto_stand.cpp" />
+    <ClCompile Include="player_movement.cpp" />
     <ClCompile Include="binds.cpp" />
     <ClCompile Include="buff_timers.cpp" />
     <ClCompile Include="camera_math.cpp" />

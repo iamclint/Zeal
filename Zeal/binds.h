@@ -16,13 +16,6 @@ enum key_category //this is bitwise so you can do multiple categorys by doing Mo
 	Macros = 128
 };
 
-enum strafe_direction
-{
-	None,
-	Left,
-	Right
-};
-
 class Binds
 {
 public:
@@ -39,10 +32,4 @@ public:
 	void replace_bind(int cmd, std::function<bool(int state)> callback);
 	void main_loop();
 	void on_zone();
-private:
-	void set_strafe(strafe_direction dir);
-	strafe_direction current_strafe=strafe_direction::None;
-	BYTE orig_reset_strafe[7] = { 0 };
 };
-
-
