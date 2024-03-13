@@ -90,458 +90,465 @@ namespace Zeal
 			/*0x170*/
 		};
 		struct pCXSTR
+		{
+			/*0x00*/   DWORD   Font;            // maybe, dont know.  04 = Window 01 = button
+			/*0x04*/   DWORD   MaxLength;
+			/*0x08*/   DWORD   Length;
+			/*0x0c*/   BOOL    Encoding; // 0: ASCII, 1:Unicode
+			/*0x10*/   PCRITICAL_SECTION pLock;
+			/*0x14*/   CHAR    Text[1]; // Stub, can be anywhere from Length to MaxLength (which is how much is malloc'd to this CXStr)
+		};
+		struct CXSTR {
+			CXSTR(const char* data)
 			{
-				/*0x00*/   DWORD   Font;            // maybe, dont know.  04 = Window 01 = button
-				/*0x04*/   DWORD   MaxLength;
-				/*0x08*/   DWORD   Length;
-				/*0x0c*/   BOOL    Encoding; // 0: ASCII, 1:Unicode
-				/*0x10*/   PCRITICAL_SECTION pLock;
-				/*0x14*/   CHAR    Text[1]; // Stub, can be anywhere from Length to MaxLength (which is how much is malloc'd to this CXStr)
-			};
-			struct CXSTR {
-				CXSTR(const char* data)
-				{
-					reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x575F30)(this, data);
-				}
-				CXSTR(std::string data)
-				{
-					reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x575F30)(this, data.c_str());
-				}
-				pCXSTR* ptr;
-			};
-
-			struct CXRect
+				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x575F30)(this, data);
+			}
+			CXSTR(std::string data)
 			{
-				int Left;
-				int Top;
-				int Right;
-				int Bottom;
-			};
-
-			struct EQFONT
+				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x575F30)(this, data.c_str());
+			}
+			void Assure(int length, int encoding)
 			{
-				/* 0x0000 */ DWORD Unknown0000;
-				/* 0x0004 */ DWORD Size;
-			};
-
-			struct ARGBCOLOR {
-				union {
-					struct {
-						BYTE B;
-						BYTE G;
-						BYTE R;
-						BYTE A;
-					};
-					DWORD ARGB;
-				};
-				ARGBCOLOR(BYTE _R, BYTE _G, BYTE _B, BYTE _A) : A(_A), R(_R), G(_G), B(_B) {};
-				ARGBCOLOR(DWORD _ARGB) : ARGB(_ARGB) {};
-				ARGBCOLOR() : A{}, R{}, G{}, B{} {};
-
-			};
-
-			struct EQWND
-			{
-				/* 0x0000 */ BaseVTable* vtbl;
-				/* 0x0004 */ DWORD MouseHoverTimer;
-				/* 0x0008 */ DWORD Unknown0008;
-				/* 0x000C */ DWORD Unknown000C;
-				/* 0x0010 */ BYTE Unknown0010;
-				/* 0x0011 */ BYTE Unknown0011;
-				/* 0x0012 */ BYTE IsLocked;
-				/* 0x0013 */ BYTE Unknown0013;
-				/* 0x0014 */ PVOID Unknown0014;
-				/* 0x0018 */ DWORD Unknown0018;
-				/* 0x001C */ EQWND* ParentWnd;
-				/* 0x0020 */ EQWND* FirstChildWnd;
-				/* 0x0024 */ EQWND* NextSiblingWnd;
-				/* 0x0028 */ BYTE HasChildren;
-				/* 0x0029 */ BYTE HasSiblings;
-				/* 0x002A */ BYTE Unknown0030[2];
-				/* 0x002C */ DWORD Flags;
-				/* 0x0030 */ CXRect Location;
-				/* 0x0040 */ CXRect LocationPlaceholder; // used when minimizing the window
-				/* 0x0050 */ BYTE IsVisible; // show
-				/* 0x0051 */ BYTE IsEnabled;
-				/* 0x0052 */ BYTE IsMinimized;
-				/* 0x0053 */ BYTE Unknown0053;
-				/* 0x0054 */ BYTE IsOpen;
-				/* 0x0055 */ BYTE Unknown0055;
-				/* 0x0056 */ BYTE IsMouseOver; // mouse is hovering over
-				/* 0x0057 */ BYTE Unknown0057;
-				/* 0x0058 */ DWORD WindowStyleFlags;
-				/* 0x005C */ EQFONT* FontPointer;
-				/* 0x0060 */ CXSTR Text;
-				/* 0x0064 */ CXSTR ToolTipText;
-				/* 0x0068 */ BYTE Unknown0068[28];
-				/* 0x0084 */ CXSTR XmlToolTipText;
-				/* 0x0088 */ BYTE Unknown0088[22];
-				/* 0x009E */ BYTE AlphaTransparency;
-				/* 0x009F */ BYTE Unknown009F;
-				/* 0x00A0 */ BYTE ZLayer;
-				/* 0x00A1 */ BYTE Unknown00A1[7];
-				/* 0x00A8 */ DWORD DrawTemplate;
-				/*0x0ac*/   BYTE    Unknown0x0ac[0x4];
-				/*0x0b0*/   DWORD   ZLayer2;
-				/*0x0b4*/   BYTE   Unknown0x0b4[0x28];
-				/*0x0dc*/   DWORD   FadeTickCount;
-				/*0x0e0*/   BYTE    Unknown0x0f8; /* CXWnd::StartFade */
-				/*0x0e1*/   BYTE    Unknown0x0f9; /* CXWnd::StartFade */
-				/*0x0e2*/   BYTE    Unknown0x0fa;
-				/*0x0e3*/   BYTE    Unknown0x0fb;
-				/*0x0e4*/   DWORD   Unknown0x0fc; /* CXWnd::StartFade, CXWnd::Minimize */
-				/*0x0e8*/   DWORD   VScrollMax;
-				/*0x0ec*/   DWORD   VScrollPos;
-				/*0x0f0*/   DWORD   HScrollMax;
-				/*0x0f4*/   DWORD   HScrollPos;
-				/*0x0f8*/   BYTE    ValidCXWnd;
-				/*0x0f9*/   BYTE    Unused0x0f9[0x3];
-				/*0x0fc*/   union {
-
-					struct _CXSTR* SidlText;
-					DWORD Items;
-				};
-				/*0x100*/   union {
-
-					struct _CXSTR* SidlScreen;
-					DWORD   SlotID;
-					DWORD	Caret_Start;
-				};
-				union {
-					/*0x104*/   LPVOID SidlPiece; /* CScreenPieceTemplate (important) */
-					DWORD Caret_End;
-				};
-				/*0x108*/   BYTE    Checked;
-				/*0x109*/   BYTE    Highlighted;
-				/*0x10a*/   BYTE    Unused0x10a[0x2];
-				/*0x10c*/   DWORD   TextureAnim; /* used in CSidlScreenWnd::AddButtonToRadioGroup */
-				/*0x110*/   struct _CXSTR* InputText;
-				/*0x114*/   DWORD   Selector;
-				/*0x118*/   DWORD   PushToSelector;
-				/*0x11c*/   DWORD   EnableINIStorage;
-				/*0x120*/   union {
-
-					struct _CXSTR* INIStorageName;
-					struct _EQINVSLOT* pEQInvSlot;
-				};
-				/*0x124*/   DWORD   Unknown0x124; /* CTextureAnimation */
-				/*0x128*/   DWORD   Unknown0x128; /* CTextureAnimation */
-				/*0x12c*/   DWORD  ContextMenu; /* CTextureAnimation its an id for the menu*/
-				/*0x130*/	DWORD   Unknown0x130; /* CTextureAnimation */
-			};
-
-
-
-			struct CXWndManager
-			{
-				/* 0x0000 */ BYTE unknown0[0x28];
-				/* 0x0028 */ EQWND* ActiveEdit;
-				/* 0x002C */ int unknown1;
-				/* 0x0030 */ EQWND* Focused;
-				/* 0x0034 */ BYTE unknown34[0x8];
-				/* 0x0040 */ EQWND* Hovered;
+				reinterpret_cast<void(__thiscall*)(const CXSTR*, int, int)>(0x575A60)(this, length, encoding);
 				
+			}
+			pCXSTR* Data;
+		};
+
+		struct CXRect
+		{
+			int Left;
+			int Top;
+			int Right;
+			int Bottom;
+		};
+
+		struct EQFONT
+		{
+			/* 0x0000 */ DWORD Unknown0000;
+			/* 0x0004 */ DWORD Size;
+		};
+
+		struct ARGBCOLOR {
+			union {
+				struct {
+					BYTE B;
+					BYTE G;
+					BYTE R;
+					BYTE A;
+				};
+				DWORD ARGB;
 			};
+			ARGBCOLOR(BYTE _R, BYTE _G, BYTE _B, BYTE _A) : A(_A), R(_R), G(_G), B(_B) {};
+			ARGBCOLOR(DWORD _ARGB) : ARGB(_ARGB) {};
+			ARGBCOLOR() : A{}, R{}, G{}, B{} {};
 
+		};
 
-			class ContextMenu
-			{
-			public:
-				ContextMenu(int cxwnd, int a1, CXRect r)
-				{
-					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, CXRect)>(0x417785)(this, cxwnd, a1, r);
-					SetupCustomVTable();
-				}
-				void AddSeparator() const {
-					reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417A41)(this);
-					
-				}
-				void EnableMenuItem(int index, bool toggle)
-				{
-					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, bool)>(0x417a93)(this, index, toggle);
-				}
-				void EnableLine(int index, bool toggle) //this one doesn't forcibly change the color
-				{
-					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, bool)>(0x579f90)(this, index, toggle);
-				}
-				int AddMenuItem(CXSTR data, int index, bool disp_activated=false) const {
-					return reinterpret_cast<int(__thiscall*)(const ContextMenu*, CXSTR, int, bool)>(0x417910)(this, data, index, disp_activated);
-				}
-				void SetItemColor(int index, ARGBCOLOR color)
-				{
-					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, ARGBCOLOR)>(0x579eb0)(this, index, 0x1, color);
-					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, ARGBCOLOR)>(0x579eb0)(this, index, 0x2, color);
-				}
-				static void __fastcall Deconstructor(int t, int unused, int f)
-				{
-					return; //handle the deconstruction in our code
-				}
-				void SetupCustomVTable()
-				{
-					ContextMenuVTable* newtbl = new ContextMenuVTable();
-					mem::copy((int)newtbl, (int)fnTable, sizeof(ContextMenuVTable));
-					fnTable = newtbl;
-					//fnTable->basic.Deconstructor = Deconstructor;//if you can make visual studio use a class member here or get the address of it without it complaining, go ahead
-				}
-				void RemoveAllMenuItems()
-				{
-					reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417a7f)(this);
-				}
-				void Deconstruct(int a)
-				{
-					reinterpret_cast<void(__thiscall*)(const ContextMenu*, int)>(this->fnTable->basic.Deconstructor)(this,a);
-				}
-				/*0x000*/   ContextMenuVTable* fnTable;
-				/*0x004*/   DWORD   Unknown0x004; /* set to 0 in CXWnd::Refade*/
-				/*0x008*/   DWORD   TimeMouseOver; /* "Delay" in ini*/
-				/*0x00c*/   DWORD   FadeDuration; /* "Duration" in ini*/
-				/*0x010*/   BYTE    FadeToAlpha; /* set to 1 in CXWnd::Refade */
-				/*0x011*/   BYTE    Unknown0x011; /* Faded? */
-				/*0x012*/   BYTE    Locked;
-				/*0x013*/   BYTE    Unknown0x013;
-				/*0x014*/   BYTE    Clickable;
-				/*0x015*/   BYTE    Unknown0x015;
-				/*0x016*/   BYTE    Unknown0x016;
-				/*0x017*/   BYTE    Unknown0x017;
-				/*0x018*/   BYTE    Unknown0x018[0x04];
-				/*0x01c*/   struct  _CSIDLWND* pParentWindow; /* If this is NULL, coordinates are absolute...*/
-				/*0x020*/   struct  _CSIDLWND* pChildren;
-				/*0x024*/   struct  _CSIDLWND* pSiblings;  /* its a tree.*/
-				/*0x028*/   BYTE    HasChildren; /*CXWnd__GetFirstChildWnd*/
-				/*0x029*/   BYTE    HasSiblings;/*CXWnd__GetNextSib*/
-				/*0x02a*/   BYTE    Unknown0x02a[0x2];
-				/*0x02c*/   DWORD   XMLIndex;
-				/*0x030*/   RECT    Location;
-				/*0x040*/   RECT    OldLocation;
-				/*0x050*/   BYTE    dShow;
-				/*0x051*/   BYTE    Enabled;
-				/*0x052*/   BYTE    Minimized;
-				/*0x053*/   BYTE    Unknown0x053; /*ontilebox*/
-				/*0x054*/   BYTE    Unknown0x054;
-				/*0x055*/   BYTE    Unknown0x055;
-				/*0x056*/   BYTE    MouseOver;
-				/*0x057*/   BYTE    Unknown0x057;
-				/*0x058*/   DWORD   WindowStyle; /* bit 1 - vertical scroll, bit 2 - horizontal scroll, bit 4 - title bar?, bit 8 - border*/
-				/*0x05c*/   DWORD   TextureFont; /*its a CTextureFont* */
-				/*0x060*/   struct _CXSTR* WindowText;
-				/*0x064*/   struct _CXSTR* Tooltip;
-				/*0x068*/   DWORD   UnknownCW; /* CXWnd::SetLookLikeParent*/
-				/*0x06c*/   ARGBCOLOR BGColor; /* "BGTint.Red", green, blue*/
-				/*0x070*/   DWORD    Unknown0x070;
-				/*0x074*/   BYTE    Unknown0x074[0x4];
-				/*0x078*/   FLOAT    Unknown0x078;
-				/*0x07C*/   BYTE    Unknown0x07C[0x4];
-				/*0x080*/   DWORD   BGType; /* "BGType" in ini */
-				/*0x084*/   struct _CXSTR* XMLToolTip;
-				/*0x088*/   BYTE    Unknown0x088[0x14];
-				/*0x09c*/   BYTE    Alpha; /* "Alpha" in ini */
-				/*0x09d*/   BYTE    Fades; /* "Fades" in ini */
-				/*0x09e*/   BYTE    Unknown0x0aa;
-				/*0x09f*/   BYTE    Unknown0x0ab;
-				/*0x0a0*/   BYTE    Unknown0x0a0[0x8];
-				/*0x0a8*/   LPVOID  DrawTemplate;
-				/*0x0ac*/   BYTE    Unknown0x0ac[0x4];
-				/*0x0b0*/   DWORD   ZLayer;
-				/*0x0b4*/   BYTE   Unknown0x0b4[0x28];
-				/*0x0dc*/   DWORD   FadeTickCount;
-				/*0x0e0*/   BYTE    Unknown0x0f8; /* CXWnd::StartFade */
-				/*0x0e1*/   BYTE    Unknown0x0f9; /* CXWnd::StartFade */
-				/*0x0e2*/   BYTE    Unknown0x0fa;
-				/*0x0e3*/   BYTE    Unknown0x0fb;
-				/*0x0e4*/   DWORD   Unknown0x0fc; /* CXWnd::StartFade, CXWnd::Minimize */
-				/*0x0e8*/   DWORD   VScrollMax;
-				/*0x0ec*/   DWORD   VScrollPos;
-				/*0x0f0*/   DWORD   HScrollMax;
-				/*0x0f4*/   DWORD   HScrollPos;
-				/*0x0f8*/   BYTE    ValidCXWnd;
-				/*0x0f9*/   BYTE    Unused0x0f9[0x3];
-				/*0x0fc*/   union {
-					struct _CXSTR* SidlText;
-					DWORD Items;
-				};
-				/*0x100*/   union {
-					struct _CXSTR* SidlScreen;
-					DWORD   SlotID;
-				};
+		struct EQWND
+		{
+			/* 0x0000 */ BaseVTable* vtbl;
+			/* 0x0004 */ DWORD MouseHoverTimer;
+			/* 0x0008 */ DWORD Unknown0008;
+			/* 0x000C */ DWORD Unknown000C;
+			/* 0x0010 */ BYTE Unknown0010;
+			/* 0x0011 */ BYTE Unknown0011;
+			/* 0x0012 */ BYTE IsLocked;
+			/* 0x0013 */ BYTE Unknown0013;
+			/* 0x0014 */ PVOID Unknown0014;
+			/* 0x0018 */ DWORD Unknown0018;
+			/* 0x001C */ EQWND* ParentWnd;
+			/* 0x0020 */ EQWND* FirstChildWnd;
+			/* 0x0024 */ EQWND* NextSiblingWnd;
+			/* 0x0028 */ BYTE HasChildren;
+			/* 0x0029 */ BYTE HasSiblings;
+			/* 0x002A */ BYTE Unknown0030[2];
+			/* 0x002C */ DWORD Flags;
+			/* 0x0030 */ CXRect Location;
+			/* 0x0040 */ CXRect LocationPlaceholder; // used when minimizing the window
+			/* 0x0050 */ BYTE IsVisible; // show
+			/* 0x0051 */ BYTE IsEnabled;
+			/* 0x0052 */ BYTE IsMinimized;
+			/* 0x0053 */ BYTE Unknown0053;
+			/* 0x0054 */ BYTE IsOpen;
+			/* 0x0055 */ BYTE Unknown0055;
+			/* 0x0056 */ BYTE IsMouseOver; // mouse is hovering over
+			/* 0x0057 */ BYTE Unknown0057;
+			/* 0x0058 */ DWORD WindowStyleFlags;
+			/* 0x005C */ EQFONT* FontPointer;
+			/* 0x0060 */ CXSTR Text;
+			/* 0x0064 */ CXSTR ToolTipText;
+			/* 0x0068 */ ARGBCOLOR TextColor;
+			/* 0x006C */ ARGBCOLOR ToolTipTextColor;
+			/* 0x006C */ BYTE Unknown0068[20];
+			/* 0x0084 */ CXSTR XmlToolTipText;
+			/* 0x0088 */ BYTE Unknown0088[22];
+			/* 0x009E */ BYTE AlphaTransparency;
+			/* 0x009F */ BYTE Unknown009F;
+			/* 0x00A0 */ BYTE ZLayer;
+			/* 0x00A1 */ BYTE Unknown00A1[7];
+			/* 0x00A8 */ DWORD DrawTemplate;
+			/*0x0ac*/   BYTE    Unknown0x0ac[0x4];
+			/*0x0b0*/   DWORD   ZLayer2;
+			/*0x0b4*/   BYTE   Unknown0x0b4[0x28];
+			/*0x0dc*/   DWORD   FadeTickCount;
+			/*0x0e0*/   BYTE    Unknown0x0f8; /* CXWnd::StartFade */
+			/*0x0e1*/   BYTE    Unknown0x0f9; /* CXWnd::StartFade */
+			/*0x0e2*/   BYTE    Unknown0x0fa;
+			/*0x0e3*/   BYTE    Unknown0x0fb;
+			/*0x0e4*/   DWORD   Unknown0x0fc; /* CXWnd::StartFade, CXWnd::Minimize */
+			/*0x0e8*/   DWORD   VScrollMax;
+			/*0x0ec*/   DWORD   VScrollPos;
+			/*0x0f0*/   DWORD   HScrollMax;
+			/*0x0f4*/   DWORD   HScrollPos;
+			/*0x0f8*/   BYTE    ValidCXWnd;
+			/*0x0f9*/   BYTE    Unused0x0f9[0x3];
+			/*0x0fc*/   union {
+
+				struct _CXSTR* SidlText;
+				DWORD Items;
+			};
+			/*0x100*/   union {
+
+				struct _CXSTR* SidlScreen;
+				DWORD   SlotID;
+				DWORD	Caret_Start;
+			};
+			union {
 				/*0x104*/   LPVOID SidlPiece; /* CScreenPieceTemplate (important) */
-				/*0x108*/   BYTE    Checked;
-				/*0x109*/   BYTE    Highlighted;
-				/*0x10a*/   BYTE    Unused0x10a[0x2];
-				/*0x10c*/   DWORD   TextureAnim; /* used in CSidlScreenWnd::AddButtonToRadioGroup */
-				/*0x110*/   struct _CXSTR* InputText;
-				/*0x114*/   DWORD   Selector;
-				/*0x118*/   DWORD   PushToSelector;
-				/*0x11c*/   DWORD   EnableINIStorage;
-				/*0x120*/   union {
-					struct _CXSTR* INIStorageName;
-					struct _EQINVSLOT* pEQInvSlot;
-				};
-				/*0x124*/   DWORD   Unknown0x124; /* CTextureAnimation */
-				/*0x128*/   DWORD   Unknown0x128; /* CTextureAnimation */
-				/*0x12c*/   DWORD  ContextMenu1; /* CTextureAnimation its an id for the menu*/
-				/*0x130*/	int* Unknown0x130; /* CTextureAnimation */
-				/*0x134*/	BYTE Unknown0x134;
-				/*0x135*/	BYTE Unknown0x135;
-				/*0x136*/	BYTE Unknown0x136;
-				/*0x137*/	BYTE Unknown0x137;
-				/*0x138*/	BYTE Unknown0x138;
-				/*0x139*/	BYTE Unknown0x139;
-				/*0x13a*/	BYTE Unknown0x13a;
-				/*0x13b*/	BYTE Unknown0x13b;
-				/*0x13c*/	int* Unknown0x13c;
-				/*0x140*/	int* Unknown0x140;
-				/*0x144*/	BYTE Unknown0x144;
-				/*0x145*/	BYTE Unknown0x145;
-				/*0x146*/	BYTE Unknown0x146;
-				/*0x147*/	BYTE Unknown0x147;
-				/*0x148*/	int* Unknown0x148;
-				/*0x14c*/	DWORD Unknown0x14c;
-				/*0x150*/	int* Unknown0x150;
-				/*0x154*/	DWORD Unknown0x154;
-				/*0x158*/	int* Unknown0x158;
-				/*0x15c*/	DWORD Unknown0x15c;
-				/*0x160*/	int* Unknown0x160;
-				/*0x164*/	DWORD Unknown0x164;
-				/*0x168*/	int* Unknown0x168;
-				/*0x16c*/	DWORD Unknown0x16c;
-				/*0x170*/	int* Unknown0x170;
-				/*0x174*/	DWORD Unknown0x174;
-				/*0x178*/	int* Unknown0x178;
-				/*0x17c*/	DWORD Unknown0x17c;
-
+				DWORD Caret_End;
 			};
+			/*0x108*/   BYTE    Checked;
+			/*0x109*/   BYTE    Highlighted;
+			/*0x10a*/   BYTE    Unused0x10a[0x2];
+			/*0x10c*/   DWORD   TextureAnim; /* used in CSidlScreenWnd::AddButtonToRadioGroup */
+			/*0x110*/   struct _CXSTR* InputText;
+			/*0x114*/   DWORD   Selector;
+			/*0x118*/   DWORD   PushToSelector;
+			/*0x11c*/   DWORD   EnableINIStorage;
+			/*0x120*/   union {
 
-			struct CXPoint
+				struct _CXSTR* INIStorageName;
+				struct _EQINVSLOT* pEQInvSlot;
+			};
+			/*0x124*/   DWORD   Unknown0x124; /* CTextureAnimation */
+			/*0x128*/   DWORD   Unknown0x128; /* CTextureAnimation */
+			/*0x12c*/   DWORD  ContextMenu; /* CTextureAnimation its an id for the menu*/
+			/*0x130*/	DWORD   Unknown0x130; /* CTextureAnimation */
+		};
+
+
+
+		struct CXWndManager
+		{
+			/* 0x0000 */ BYTE unknown0[0x28];
+			/* 0x0028 */ EQWND* ActiveEdit;
+			/* 0x002C */ int unknown1;
+			/* 0x0030 */ EQWND* Focused;
+			/* 0x0034 */ BYTE unknown34[0x8];
+			/* 0x0040 */ EQWND* Hovered;
+				
+		};
+
+
+		class ContextMenu
+		{
+		public:
+			ContextMenu(int cxwnd, int a1, CXRect r)
 			{
-				int x;
-				int y;
-				CXPoint(int _x, int _y) : x(_x), y(_y) {};
-			};
-
-			class CChatManager : public EQWND
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, CXRect)>(0x417785)(this, cxwnd, a1, r);
+				SetupCustomVTable();
+			}
+			void AddSeparator() const {
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417A41)(this);
+					
+			}
+			void EnableMenuItem(int index, bool toggle)
 			{
-			public: //this class is a complete hack lol
-				EQWND* GetActiveChatWindow() const {
-					return reinterpret_cast<EQWND * (__thiscall*)(const CChatManager*)>(0x41114A)(this);
-				}
-			};
-
-
-			class CContextMenuManager
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, bool)>(0x417a93)(this, index, toggle);
+			}
+			void EnableLine(int index, bool toggle) //this one doesn't forcibly change the color
 			{
-			public: //this class is a complete hack lol
-				int GetDefaultMenuIndex() const {
-					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*)>(0x4137C2)(this);
-				}
-				int AddMenu(ContextMenu* context_menu) const {
-					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, ContextMenu*)>(0x417ED4)(this, context_menu);
-				}
-				int PopupMenu(int index, CXPoint pt, EQWND* menu)
-				{
-					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int, CXPoint, EQWND*)>(0x41822D)(this, index, pt, menu);
-				}
-				int RemoveMenu(int menu_index, bool remove_children)
-				{
-					return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int,bool)>(0x417E1B)(this, menu_index, remove_children);
-				}
-				/*0x0000*/ BYTE Unknown0x0000[0x128];//yeah i know its a window...
-				/*0x0128*/ void* Menus[0x400];
-				/*0x1128*/ DWORD MenuCount;
-			};
-
-			class SpellBookWnd : public EQWND
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, bool)>(0x579f90)(this, index, toggle);
+			}
+			int AddMenuItem(CXSTR data, int index, bool disp_activated=false) const {
+				return reinterpret_cast<int(__thiscall*)(const ContextMenu*, CXSTR, int, bool)>(0x417910)(this, data, index, disp_activated);
+			}
+			void SetItemColor(int index, ARGBCOLOR color)
 			{
-			public:
-				void BeginMemorize(int book_index, int gem_index, bool unsure) const
-				{
-					reinterpret_cast<void(__thiscall*)(const EQWND*, int, int, bool)>(0x434a05)(this, book_index, gem_index, unsure);
-				}
-				void OpenBook() const
-				{
-					reinterpret_cast<void(__thiscall*)(const EQWND*)>(0x43441F)(this);
-				}
-			};
-
-			class SpellGemsWnd
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, ARGBCOLOR)>(0x579eb0)(this, index, 0x1, color);
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, ARGBCOLOR)>(0x579eb0)(this, index, 0x2, color);
+			}
+			static void __fastcall Deconstructor(int t, int unused, int f)
 			{
-			public:
-				void Forget(int index) const
-				{
-					reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a662)(this, index);
-				}
-				void UpdateSpellGems(int index) const
-				{
-					reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a8b7)(this, index);
-				}
-				EQWND sidl;
-				/*0x134*/ BYTE Unknown0x134[0x08];
-				/*0x13C*/ SpellGem* SpellSlots[0x8];
-				/*0x15C*/ EQWND* SpellBook;
-			};
-
-			struct pInstWindows
+				return; //handle the deconstruction in our code
+			}
+			void SetupCustomVTable()
 			{
-				CContextMenuManager* ContextMenuManager;  // 0x63D5CC
-				CChatManager* ChatManager;  // 0x63D5D0
-				EQWND* uknownWnd1;  // 0x63D5D4
-				EQWND* CharacterSelect;  // 0x63D5D8
-				EQWND* FacePick;  // 0x63D5DC
-				EQWND* ItemDisplayManager;  // 0x63D5E0
-				EQWND* Note;  // 0x63D5E4
-				EQWND* Help;  // 0x63D5E8
-				EQWND* Book;  // 0x63D5EC
-				EQWND* PetInfo;  // 0x63D5F0
-				EQWND* Train;  // 0x63D5F4
-				EQWND* Skills;  // 0x63D5F8
-				EQWND* SkillsSelect;  // 0x63D5FC
-				EQWND* Friends;  // 0x63D600
-				EQWND* AA;  // 0x63D604
-				EQWND* Group;  // 0x63D608
-				EQWND* Loadskin;  // 0x63D60C
-				EQWND* Alarm;  // 0x63D610
-				EQWND* MusicPlayer;  // 0x63D614
-				EQWND* Raid;  // 0x63D618
-				EQWND* RaidOptions;  // 0x63D61C
-				EQWND* Breath;  // 0x63D620
-				EQWND* Target;  // 0x63D624
-				EQWND* HotButton;  // 0x63D628
-				EQWND* ColorPicker;  // 0x63D62C
-				EQWND* Player;  // 0x63D630
-				EQWND* Options;  // 0x63D634
-				EQWND* BuffWindowNORMAL;  // 0x63D638
-				EQWND* CharacterCreation;  // 0x63D63C
-				EQWND* CursorAttachment;  // 0x63D640
-				EQWND* Casting;  // 0x63D644
-				SpellGemsWnd* SpellGems;  // 0x63D648
-				SpellBookWnd* SpellBook;  // 0x63D64C
-				EQWND* Inventory;  // 0x63D650
-				EQWND* Bank;  // 0x63D654
-				EQWND* Quantity;  // 0x63D658
-				EQWND* Loot;  // 0x63D65C
-				EQWND* Actions;  // 0x63D660
-				EQWND* Merchant;  // 0x63D664
-				EQWND* Trade;  // 0x63D668
-				EQWND* Selector;  // 0x63D66C
-				EQWND* Bazaar;  // 0x63D670
-				EQWND* BazaarSearch;  // 0x63D674
-				EQWND* Give;  // 0x63D678
-				EQWND* Tracking;  // 0x63D67C
-				EQWND* Inspect;  // 0x63D680
-				EQWND* SocialEdit;  // 0x63D684
-				EQWND* Feedback;  // 0x63D688
-				EQWND* BugReport;  // 0x63D68C
-				EQWND* VideoModes;  // 0x63D690
-				EQWND* TextEntry;  // 0x63D694
-				EQWND* FileSelection;  // 0x63D698
-				EQWND* Compass;  // 0x63D69C
-				EQWND* PlayerNotes;  // 0x63D6A0
-				EQWND* GemsGame;  // 0x63D6A4
-				EQWND* TimeLeft;  // 0x63D6A8
-				EQWND* PetitionQ;  // 0x63D6AC
-				EQWND* Soulmark;  // 0x63D6B0
-				void* InvSlotMgr;  // 0x63D6B4
-				void* ContainerMgr;  // 0x63D6B8
+				ContextMenuVTable* newtbl = new ContextMenuVTable();
+				mem::copy((int)newtbl, (int)fnTable, sizeof(ContextMenuVTable));
+				fnTable = newtbl;
+				//fnTable->basic.Deconstructor = Deconstructor;//if you can make visual studio use a class member here or get the address of it without it complaining, go ahead
+			}
+			void RemoveAllMenuItems()
+			{
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417a7f)(this);
+			}
+			void Deconstruct(int a)
+			{
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int)>(this->fnTable->basic.Deconstructor)(this,a);
+			}
+			/*0x000*/   ContextMenuVTable* fnTable;
+			/*0x004*/   DWORD   Unknown0x004; /* set to 0 in CXWnd::Refade*/
+			/*0x008*/   DWORD   TimeMouseOver; /* "Delay" in ini*/
+			/*0x00c*/   DWORD   FadeDuration; /* "Duration" in ini*/
+			/*0x010*/   BYTE    FadeToAlpha; /* set to 1 in CXWnd::Refade */
+			/*0x011*/   BYTE    Unknown0x011; /* Faded? */
+			/*0x012*/   BYTE    Locked;
+			/*0x013*/   BYTE    Unknown0x013;
+			/*0x014*/   BYTE    Clickable;
+			/*0x015*/   BYTE    Unknown0x015;
+			/*0x016*/   BYTE    Unknown0x016;
+			/*0x017*/   BYTE    Unknown0x017;
+			/*0x018*/   BYTE    Unknown0x018[0x04];
+			/*0x01c*/   struct  _CSIDLWND* pParentWindow; /* If this is NULL, coordinates are absolute...*/
+			/*0x020*/   struct  _CSIDLWND* pChildren;
+			/*0x024*/   struct  _CSIDLWND* pSiblings;  /* its a tree.*/
+			/*0x028*/   BYTE    HasChildren; /*CXWnd__GetFirstChildWnd*/
+			/*0x029*/   BYTE    HasSiblings;/*CXWnd__GetNextSib*/
+			/*0x02a*/   BYTE    Unknown0x02a[0x2];
+			/*0x02c*/   DWORD   XMLIndex;
+			/*0x030*/   RECT    Location;
+			/*0x040*/   RECT    OldLocation;
+			/*0x050*/   BYTE    dShow;
+			/*0x051*/   BYTE    Enabled;
+			/*0x052*/   BYTE    Minimized;
+			/*0x053*/   BYTE    Unknown0x053; /*ontilebox*/
+			/*0x054*/   BYTE    Unknown0x054;
+			/*0x055*/   BYTE    Unknown0x055;
+			/*0x056*/   BYTE    MouseOver;
+			/*0x057*/   BYTE    Unknown0x057;
+			/*0x058*/   DWORD   WindowStyle; /* bit 1 - vertical scroll, bit 2 - horizontal scroll, bit 4 - title bar?, bit 8 - border*/
+			/*0x05c*/   EQFONT*   TextureFont; /*its a CTextureFont* */
+			/*0x060*/   struct _CXSTR* WindowText;
+			/*0x064*/   struct _CXSTR* Tooltip;
+			/*0x068*/   DWORD   UnknownCW; /* CXWnd::SetLookLikeParent*/
+			/*0x06c*/   ARGBCOLOR BGColor; /* "BGTint.Red", green, blue*/
+			/*0x070*/   DWORD    Unknown0x070;
+			/*0x074*/   BYTE    Unknown0x074[0x4];
+			/*0x078*/   FLOAT    Unknown0x078;
+			/*0x07C*/   BYTE    Unknown0x07C[0x4];
+			/*0x080*/   DWORD   BGType; /* "BGType" in ini */
+			/*0x084*/   struct _CXSTR* XMLToolTip;
+			/*0x088*/   BYTE    Unknown0x088[0x14];
+			/*0x09c*/   BYTE    Alpha; /* "Alpha" in ini */
+			/*0x09d*/   BYTE    Fades; /* "Fades" in ini */
+			/*0x09e*/   BYTE    Unknown0x0aa;
+			/*0x09f*/   BYTE    Unknown0x0ab;
+			/*0x0a0*/   BYTE    Unknown0x0a0[0x8];
+			/*0x0a8*/   LPVOID  DrawTemplate;
+			/*0x0ac*/   BYTE    Unknown0x0ac[0x4];
+			/*0x0b0*/   DWORD   ZLayer;
+			/*0x0b4*/   BYTE   Unknown0x0b4[0x28];
+			/*0x0dc*/   DWORD   FadeTickCount;
+			/*0x0e0*/   BYTE    Unknown0x0f8; /* CXWnd::StartFade */
+			/*0x0e1*/   BYTE    Unknown0x0f9; /* CXWnd::StartFade */
+			/*0x0e2*/   BYTE    Unknown0x0fa;
+			/*0x0e3*/   BYTE    Unknown0x0fb;
+			/*0x0e4*/   DWORD   Unknown0x0fc; /* CXWnd::StartFade, CXWnd::Minimize */
+			/*0x0e8*/   DWORD   VScrollMax;
+			/*0x0ec*/   DWORD   VScrollPos;
+			/*0x0f0*/   DWORD   HScrollMax;
+			/*0x0f4*/   DWORD   HScrollPos;
+			/*0x0f8*/   BYTE    ValidCXWnd;
+			/*0x0f9*/   BYTE    Unused0x0f9[0x3];
+			/*0x0fc*/   union {
+				struct _CXSTR* SidlText;
+				DWORD Items;
 			};
+			/*0x100*/   union {
+				struct _CXSTR* SidlScreen;
+				DWORD   SlotID;
+			};
+			/*0x104*/   LPVOID SidlPiece; /* CScreenPieceTemplate (important) */
+			/*0x108*/   BYTE    Checked;
+			/*0x109*/   BYTE    Highlighted;
+			/*0x10a*/   BYTE    Unused0x10a[0x2];
+			/*0x10c*/   DWORD   TextureAnim; /* used in CSidlScreenWnd::AddButtonToRadioGroup */
+			/*0x110*/   struct _CXSTR* InputText;
+			/*0x114*/   DWORD   Selector;
+			/*0x118*/   DWORD   PushToSelector;
+			/*0x11c*/   DWORD   EnableINIStorage;
+			/*0x120*/   union {
+				struct _CXSTR* INIStorageName;
+				struct _EQINVSLOT* pEQInvSlot;
+			};
+			/*0x124*/   DWORD   Unknown0x124; /* CTextureAnimation */
+			/*0x128*/   DWORD   Unknown0x128; /* CTextureAnimation */
+			/*0x12c*/   DWORD  ContextMenu1; /* CTextureAnimation its an id for the menu*/
+			/*0x130*/	int* Unknown0x130; /* CTextureAnimation */
+			/*0x134*/	BYTE Unknown0x134;
+			/*0x135*/	BYTE Unknown0x135;
+			/*0x136*/	BYTE Unknown0x136;
+			/*0x137*/	BYTE Unknown0x137;
+			/*0x138*/	BYTE Unknown0x138;
+			/*0x139*/	BYTE Unknown0x139;
+			/*0x13a*/	BYTE Unknown0x13a;
+			/*0x13b*/	BYTE Unknown0x13b;
+			/*0x13c*/	int* Unknown0x13c;
+			/*0x140*/	int* Unknown0x140;
+			/*0x144*/	BYTE Unknown0x144;
+			/*0x145*/	BYTE Unknown0x145;
+			/*0x146*/	BYTE Unknown0x146;
+			/*0x147*/	BYTE Unknown0x147;
+			/*0x148*/	int* Unknown0x148;
+			/*0x14c*/	DWORD Unknown0x14c;
+			/*0x150*/	int* Unknown0x150;
+			/*0x154*/	DWORD Unknown0x154;
+			/*0x158*/	int* Unknown0x158;
+			/*0x15c*/	DWORD Unknown0x15c;
+			/*0x160*/	int* Unknown0x160;
+			/*0x164*/	DWORD Unknown0x164;
+			/*0x168*/	int* Unknown0x168;
+			/*0x16c*/	DWORD Unknown0x16c;
+			/*0x170*/	int* Unknown0x170;
+			/*0x174*/	DWORD Unknown0x174;
+			/*0x178*/	int* Unknown0x178;
+			/*0x17c*/	DWORD Unknown0x17c;
+
+		};
+
+		struct CXPoint
+		{
+			int x;
+			int y;
+			CXPoint(int _x, int _y) : x(_x), y(_y) {};
+		};
+
+		class CChatManager : public EQWND
+		{
+		public: //this class is a complete hack lol
+			EQWND* GetActiveChatWindow() const {
+				return reinterpret_cast<EQWND * (__thiscall*)(const CChatManager*)>(0x41114A)(this);
+			}
+		};
+
+
+		class CContextMenuManager
+		{
+		public: //this class is a complete hack lol
+			int GetDefaultMenuIndex() const {
+				return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*)>(0x4137C2)(this);
+			}
+			int AddMenu(ContextMenu* context_menu) const {
+				return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, ContextMenu*)>(0x417ED4)(this, context_menu);
+			}
+			int PopupMenu(int index, CXPoint pt, EQWND* menu)
+			{
+				return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int, CXPoint, EQWND*)>(0x41822D)(this, index, pt, menu);
+			}
+			int RemoveMenu(int menu_index, bool remove_children)
+			{
+				return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int,bool)>(0x417E1B)(this, menu_index, remove_children);
+			}
+			/*0x0000*/ BYTE Unknown0x0000[0x128];//yeah i know its a window...
+			/*0x0128*/ void* Menus[0x400];
+			/*0x1128*/ DWORD MenuCount;
+		};
+
+		class SpellBookWnd : public EQWND
+		{
+		public:
+			void BeginMemorize(int book_index, int gem_index, bool unsure) const
+			{
+				reinterpret_cast<void(__thiscall*)(const EQWND*, int, int, bool)>(0x434a05)(this, book_index, gem_index, unsure);
+			}
+			void OpenBook() const
+			{
+				reinterpret_cast<void(__thiscall*)(const EQWND*)>(0x43441F)(this);
+			}
+		};
+
+		class SpellGemsWnd
+		{
+		public:
+			void Forget(int index) const
+			{
+				reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a662)(this, index);
+			}
+			void UpdateSpellGems(int index) const
+			{
+				reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a8b7)(this, index);
+			}
+			EQWND sidl;
+			/*0x134*/ BYTE Unknown0x134[0x08];
+			/*0x13C*/ SpellGem* SpellSlots[0x8];
+			/*0x15C*/ EQWND* SpellBook;
+		};
+
+		struct pInstWindows
+		{
+			CContextMenuManager* ContextMenuManager;  // 0x63D5CC
+			CChatManager* ChatManager;  // 0x63D5D0
+			EQWND* uknownWnd1;  // 0x63D5D4
+			EQWND* CharacterSelect;  // 0x63D5D8
+			EQWND* FacePick;  // 0x63D5DC
+			EQWND* ItemDisplayManager;  // 0x63D5E0
+			EQWND* Note;  // 0x63D5E4
+			EQWND* Help;  // 0x63D5E8
+			EQWND* Book;  // 0x63D5EC
+			EQWND* PetInfo;  // 0x63D5F0
+			EQWND* Train;  // 0x63D5F4
+			EQWND* Skills;  // 0x63D5F8
+			EQWND* SkillsSelect;  // 0x63D5FC
+			EQWND* Friends;  // 0x63D600
+			EQWND* AA;  // 0x63D604
+			EQWND* Group;  // 0x63D608
+			EQWND* Loadskin;  // 0x63D60C
+			EQWND* Alarm;  // 0x63D610
+			EQWND* MusicPlayer;  // 0x63D614
+			EQWND* Raid;  // 0x63D618
+			EQWND* RaidOptions;  // 0x63D61C
+			EQWND* Breath;  // 0x63D620
+			EQWND* Target;  // 0x63D624
+			EQWND* HotButton;  // 0x63D628
+			EQWND* ColorPicker;  // 0x63D62C
+			EQWND* Player;  // 0x63D630
+			EQWND* Options;  // 0x63D634
+			EQWND* BuffWindowNORMAL;  // 0x63D638
+			EQWND* CharacterCreation;  // 0x63D63C
+			EQWND* CursorAttachment;  // 0x63D640
+			EQWND* Casting;  // 0x63D644
+			SpellGemsWnd* SpellGems;  // 0x63D648
+			SpellBookWnd* SpellBook;  // 0x63D64C
+			EQWND* Inventory;  // 0x63D650
+			EQWND* Bank;  // 0x63D654
+			EQWND* Quantity;  // 0x63D658
+			EQWND* Loot;  // 0x63D65C
+			EQWND* Actions;  // 0x63D660
+			EQWND* Merchant;  // 0x63D664
+			EQWND* Trade;  // 0x63D668
+			EQWND* Selector;  // 0x63D66C
+			EQWND* Bazaar;  // 0x63D670
+			EQWND* BazaarSearch;  // 0x63D674
+			EQWND* Give;  // 0x63D678
+			EQWND* Tracking;  // 0x63D67C
+			EQWND* Inspect;  // 0x63D680
+			EQWND* SocialEdit;  // 0x63D684
+			EQWND* Feedback;  // 0x63D688
+			EQWND* BugReport;  // 0x63D68C
+			EQWND* VideoModes;  // 0x63D690
+			EQWND* TextEntry;  // 0x63D694
+			EQWND* FileSelection;  // 0x63D698
+			EQWND* Compass;  // 0x63D69C
+			EQWND* PlayerNotes;  // 0x63D6A0
+			EQWND* GemsGame;  // 0x63D6A4
+			EQWND* TimeLeft;  // 0x63D6A8
+			EQWND* PetitionQ;  // 0x63D6AC
+			EQWND* Soulmark;  // 0x63D6B0
+			void* InvSlotMgr;  // 0x63D6B4
+			void* ContainerMgr;  // 0x63D6B8
+		};
 
 
 

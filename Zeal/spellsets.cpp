@@ -294,7 +294,7 @@ void SpellSets::create_context_menus(bool force)
             spellset_menu = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
         spellset_menu->HasChildren = 1;
         spellset_menu->fnTable->basic.WndNotification = SpellSetMenuNotification;
-        spellset_menu->fnTable->basic.HandleRButtonUp = SpellSetRButtonUp;
+        //spellset_menu->fnTable->basic.HandleRButtonUp = SpellSetRButtonUp;
         std::stringstream ss;
         ss << ".\\" << Zeal::EqGame::get_self()->Name << "_spellsets.ini";
         ini->set(ss.str());

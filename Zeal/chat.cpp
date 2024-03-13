@@ -3,6 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
+#include <algorithm>
 
 std::string ReadFromClipboard() {
     std::string text;
@@ -19,25 +20,33 @@ std::string ReadFromClipboard() {
     }
     return text;
 }
-bool SetClipboardText(const std::string& text) {
+void SetClipboardText(const std::string& text) {
     if (OpenClipboard(nullptr)) {
         EmptyClipboard();
-        HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, text.size() + 1); // +1 for null terminator
-        if (hMem != nullptr) {
-            char* pData = static_cast<char*>(GlobalLock(hMem));
-            if (pData != nullptr) {
-                memcpy(pData, text.c_str(), text.size() + 1);
-                GlobalUnlock(hMem);
-                SetClipboardData(CF_TEXT, hMem);
-                CloseClipboard();
-                return true;
+        HGLOBAL hClipboardData = GlobalAlloc(GMEM_MOVEABLE, text.length() + 1);
+        if (hClipboardData != nullptr) {
+            char* buffer = static_cast<char*>(GlobalLock(hClipboardData));
+            if (buffer != nullptr) {
+                memcpy(buffer, text.c_str(), text.length());
+                buffer[text.length()] = '\0'; // Null-terminate the string
+                GlobalUnlock(hClipboardData);
+                SetClipboardData(CF_TEXT, hClipboardData);
             }
-            GlobalFree(hMem);
+            else {
+                std::cerr << "Failed to lock clipboard memory." << std::endl;
+            }
+        }
+        else {
+            std::cerr << "Failed to allocate memory for clipboard data." << std::endl;
         }
         CloseClipboard();
     }
-    return false;
+    else {
+        std::cerr << "Failed to open clipboard." << std::endl;
+    }
 }
+
+
 std::string StripSpecialCharacters(const std::string& input) {
     std::string result = input;
     result.erase(std::remove_if(result.begin(), result.end(), [](char c) {
@@ -90,79 +99,110 @@ void chat::LoadSettings(IO_ini* ini)
         ini->setValue<bool>("Zeal", "ChatTimestamps", false);
     if (!ini->exists("Zeal", "Bluecon"))
         ini->setValue<bool>("Zeal", "Bluecon", false);
-
+    if (!ini->exists("Zeal", "ZealInput"))
+        ini->setValue<bool>("Zeal", "ZealInput", true);
     bluecon = ini->getValue<bool>("Zeal", "Bluecon");
     timestamps = ini->getValue<bool>("Zeal", "ChatTimestamps");
+    zealinput = ini->getValue<bool>("Zeal", "ZealInput");
 }
+
+enum last_caret_dir
+{
+    none,
+    left,
+    right
+};
 
 void __fastcall HandleKey(int t, int u, UINT32 key, int KeyDown)
 {
+    if (!Zeal::EqGame::is_new_ui() || !ZealService::get_instance()->chat_hook->zealinput)
+        return ZealService::get_instance()->hooks->hook_map["HandleKey"]->original(HandleKey)(t, u, key, KeyDown);
+
     Zeal::EqUI::CXWndManager* mgr = Zeal::EqGame::get_wnd_manager();
-    Zeal::EqUI::EQWND* active_chat = mgr->ActiveEdit;
+    Zeal::EqUI::EQWND* active_edit = mgr->ActiveEdit;
     if (Zeal::EqGame::game_wants_input() && KeyDown && mgr->ActiveEdit == mgr->Focused)
     {
+        if (!active_edit->Text.Data)
+            active_edit->Text.Assure(32, 0);
 
-        Zeal::EqGame::print_chat("chat key: %x  uk: %x", key, KeyDown);
-        static int last_highlight_dir = 0;
-
+        static last_caret_dir last_highlight_dir = last_caret_dir::none;
+        
             switch (key)
             {
             case 0x1: //escape
             {
-                mgr->Focused = active_chat->ParentWnd;
+                mgr->Focused = active_edit->ParentWnd;
                 return;
             }
             case 0xC7: //home
             {
-                active_chat->Caret_Start = 0;
+                active_edit->Caret_Start = 0;
                 if (!Zeal::EqGame::KeyMods->Shift)
-                    active_chat->Caret_End = 0;
-                last_highlight_dir = 1;
+                    active_edit->Caret_End = 0;
+                last_highlight_dir = last_caret_dir::left;
                 return;
             }
             case 0xCF: //end
             {
-                active_chat->Caret_End = active_chat->Text.ptr->Length;
+                active_edit->Caret_End = active_edit->Text.Data->Length;
                 if (!Zeal::EqGame::KeyMods->Shift)
-                    active_chat->Caret_Start = active_chat->Caret_End;
-                last_highlight_dir = 2;
+                    active_edit->Caret_Start = active_edit->Caret_End;
+                last_highlight_dir = last_caret_dir::right;
                 return;
             }
             case 0xCB: //left arrow
-                if (active_chat->Caret_Start > 0)
-                {
-                    if (last_highlight_dir==2 && Zeal::EqGame::KeyMods->Shift) //right
-                        active_chat->Caret_End--;
-                    else if (active_chat->Caret_Start)
-                    {
-                        active_chat->Caret_Start--;
-                        if (!Zeal::EqGame::KeyMods->Shift)
-                            active_chat->Caret_End = active_chat->Caret_Start;
-                        last_highlight_dir = 1;
-                    }
 
-                    if (active_chat->Caret_End == active_chat->Caret_Start)
-                        last_highlight_dir = 0;
+                if (last_highlight_dir == last_caret_dir::right && Zeal::EqGame::KeyMods->Shift && active_edit->Caret_End != active_edit->Caret_Start)
+                {
+                    active_edit->Caret_End--;
                 }
+                else
+                {
+                    if (Zeal::EqGame::KeyMods->Shift)
+                    {
+                        if (active_edit->Caret_Start > 0)
+                            active_edit->Caret_Start--;
+                        last_highlight_dir = last_caret_dir::left;
+                    }
+                    else
+                    {
+                        if (active_edit->Caret_Start>0)
+                            active_edit->Caret_Start--;
+                        active_edit->Caret_End=active_edit->Caret_Start;
+                    }
+                    
+                }
+                if (active_edit->Caret_End == active_edit->Caret_Start)
+                    last_highlight_dir = last_caret_dir::none;
                 return;
             case 0xCD: //right arrow
-                if (last_highlight_dir == 1 && Zeal::EqGame::KeyMods->Shift) //left
-                    active_chat->Caret_Start++;
-                else if (active_chat->Caret_End < active_chat->Text.ptr->Length)
+                if (last_highlight_dir == last_caret_dir::left && Zeal::EqGame::KeyMods->Shift && active_edit->Caret_End != active_edit->Caret_Start)
                 {
-                    active_chat->Caret_End++;
-                    if (!Zeal::EqGame::KeyMods->Shift)
-                        active_chat->Caret_Start= active_chat->Caret_End;
-                    last_highlight_dir = 2;
+                    active_edit->Caret_Start++;
                 }
+                else
+                {
+                    if (Zeal::EqGame::KeyMods->Shift)
+                    {
+                        if (active_edit->Caret_End < active_edit->Text.Data->Length)
+                            active_edit->Caret_End++;
+                        last_highlight_dir = last_caret_dir::right;
+                    }
+                    else
+                    {
+                        if (active_edit->Caret_End < active_edit->Text.Data->Length)
+                            active_edit->Caret_End++;
+                        active_edit->Caret_Start = active_edit->Caret_End;
+                    }
 
-                if (active_chat->Caret_End == active_chat->Caret_Start)
-                    last_highlight_dir = 0;
+                }
+                if (active_edit->Caret_End == active_edit->Caret_Start)
+                    last_highlight_dir = last_caret_dir::none;
                 return;
             }
         
         if (!Zeal::EqGame::KeyMods->Shift)
-            last_highlight_dir = 0;
+            last_highlight_dir = last_caret_dir::none;
 
         if (Zeal::EqGame::KeyMods->Ctrl)
         {
@@ -170,27 +210,48 @@ void __fastcall HandleKey(int t, int u, UINT32 key, int KeyDown)
             {
                 case 0x2F: //v
                 {
-                    const char* temp_text = StripSpecialCharacters(ReadFromClipboard()).c_str();
-                    int str_pos = (int)&(active_chat->Text.ptr->Text) + (active_chat->Caret_Start);
-                    mem::copy(str_pos, (int)temp_text, strlen(temp_text));
-                    active_chat->Text.ptr->Length += strlen(temp_text);
-                    active_chat->Text.ptr->Encoding = 0;
-                    active_chat->Caret_Start += strlen(temp_text);
-                    active_chat->Caret_End = active_chat->Caret_Start;
+                    
+                    std::string temp_text = StripSpecialCharacters(ReadFromClipboard());
+                    int len_highlighted = active_edit->Caret_End - active_edit->Caret_Start;
+                    int len_paste = temp_text.length();
+                    int len_after = active_edit->Text.Data->Length - len_highlighted;
+                    int remaining_space = 256 - active_edit->Text.Data->Length + len_highlighted;
+
+                    // Determine how much data can be pasted without overflowing the limit
+                    int paste_length = std::min<int>(len_paste, remaining_space);
+
+                    if (active_edit->Caret_End < 256 && active_edit->Text.Data->Length>0)
+                    {
+                        // Shift text after the highlighted portion to the right
+                        memmove(active_edit->Text.Data->Text + active_edit->Caret_End + paste_length,
+                            active_edit->Text.Data->Text + active_edit->Caret_End,
+                            len_after);
+                    }
+
+                    // Copy text from clipboard into the gap created by the shift, up to the remaining space
+                    memcpy(active_edit->Text.Data->Text + active_edit->Caret_Start, temp_text.c_str(), paste_length);
+
+                    // Update Caret_Start, Caret_End, and Length
+                    active_edit->Caret_Start += paste_length;
+                    active_edit->Caret_End = active_edit->Caret_Start;
+                    active_edit->Text.Data->Length = std::min<int>(active_edit->Text.Data->Length + paste_length - len_highlighted, 256);
+                    active_edit->Text.Data->Encoding = 0;
+                    active_edit->Text.Assure(active_edit->Text.Data->Length, 0);
                     return;
                 }
                 case 0x1E: //a
                 {
-                    active_chat->Caret_Start = 0;
-                    active_chat->Caret_End = active_chat->Text.ptr->Length;
+                    active_edit->Caret_Start = 0;
+                    active_edit->Caret_End = active_edit->Text.Data->Length;
                     return;
                 }
                 case 0x2E: //c
                 {
-                    if (active_chat->Caret_End - active_chat->Caret_Start > 0)
+                    if (active_edit->Caret_End - active_edit->Caret_Start > 0)
                     {
-                        int len = active_chat->Caret_End - active_chat->Caret_Start;
-                        int start = active_chat->Caret_Start;
+                        int len_highlighted = active_edit->Caret_End - active_edit->Caret_Start;
+                        std::string highlighted_text(active_edit->Text.Data->Text + active_edit->Caret_Start, active_edit->Text.Data->Text + active_edit->Caret_End);
+                        SetClipboardText(highlighted_text);
                     }
                     return;
                 }
@@ -201,11 +262,25 @@ void __fastcall HandleKey(int t, int u, UINT32 key, int KeyDown)
     ZealService::get_instance()->hooks->hook_map["HandleKey"]->original(HandleKey)(t,u,key,KeyDown);
 }
 
-
+void chat::set_input_color(Zeal::EqUI::ARGBCOLOR col)
+{
+    Zeal::EqUI::CXWndManager* mgr = Zeal::EqGame::get_wnd_manager();
+    if (!mgr)
+        return;
+    Zeal::EqUI::EQWND* active_edit = mgr->ActiveEdit;
+    if (active_edit)
+        active_edit->TextColor = col; 
+}
 
 
 chat::chat(ZealService* zeal, IO_ini* ini)
 {
+    zeal->main_loop_hook->add_callback([this]() { 
+        if (zealinput)
+            set_input_color(Zeal::EqUI::ARGBCOLOR(0xFF, 0xEE, 0xAA, 0xFF));//goldish input color
+        else
+            set_input_color(Zeal::EqUI::ARGBCOLOR(0xFF, 0xFF, 0xFF, 0xFF));
+    });
     zeal->commands_hook->add("/timestamp", { "/tms" },
         [this](std::vector<std::string>& args) {
             timestamps = !timestamps;
@@ -214,6 +289,17 @@ chat::chat(ZealService* zeal, IO_ini* ini)
                 Zeal::EqGame::print_chat("Timestamps enabled");
             else
                 Zeal::EqGame::print_chat("Timestamps disabled");
+
+            return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+        });
+    zeal->commands_hook->add("/zealinput", { "/zinput" },
+        [this](std::vector<std::string>& args) {
+            zealinput = !zealinput;
+            ZealService::get_instance()->ini->setValue<bool>("Zeal", "ZealInput", zealinput);
+            if (zealinput)
+                Zeal::EqGame::print_chat("Zeal special input enabled");
+            else
+                Zeal::EqGame::print_chat("Zeal special input disabled");
 
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
@@ -235,4 +321,6 @@ chat::chat(ZealService* zeal, IO_ini* ini)
 }
 chat::~chat()
 {
+    set_input_color(Zeal::EqUI::ARGBCOLOR(0xFF, 0xFF, 0xFF, 0xFF));
 }
+
