@@ -39,6 +39,10 @@ ___
   - **Arguments:** `version`
   - **Description:** Shows the version of zeal.
 
+- `/zealinput`
+  - **Arguments:** ``
+  - **Description:** toggles the zeal input setup for any input in game, giving you a more modern input (ctrl+c, ctrl+v, left, right, shift left+right for highlighting, home, end ect).
+
 - `/help zeal`
   - **Description:** Shows the custom Zeal commands.
 
