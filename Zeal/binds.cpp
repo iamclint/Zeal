@@ -203,7 +203,7 @@ void Binds::main_loop()
 
 void Binds::on_zone()
 {
-	//Zeal::EqGame::print_chat("zoned");
+	Zeal::EqGame::print_chat("zoned");
 	last_targets.first = 0;
 	last_targets.second = 0;
 }

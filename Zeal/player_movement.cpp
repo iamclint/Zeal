@@ -43,8 +43,7 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 						case 212:
 							CloseSpellbook();
 							break;
-						default:
-							return;
+						default: { return; }
 					}
 				}
 			}
