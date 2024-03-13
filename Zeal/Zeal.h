@@ -28,6 +28,7 @@ public:
 	std::shared_ptr<BuffTimers> buff_timers = nullptr;
 	std::shared_ptr<AutoStand> auto_stand = nullptr;
 	std::shared_ptr<Alarm> alarm = nullptr;
+	std::shared_ptr<Netstat> netstat = nullptr;
 	
 	
 

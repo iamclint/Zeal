@@ -177,6 +177,7 @@
     <ClInclude Include="memory.h" />
     <ClInclude Include="camera_mods.h" />
     <ClInclude Include="InstructionLength.h" />
+    <ClInclude Include="netstat.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="outputfile.h" />
     <ClInclude Include="raid.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="main_loop.cpp" />
     <ClCompile Include="memory.cpp" />
     <ClCompile Include="camera_mods.cpp" />
+    <ClCompile Include="netstat.cpp" />
     <ClCompile Include="outputfile.cpp" />
     <ClCompile Include="raid.cpp" />
     <ClCompile Include="spellsets.cpp" />

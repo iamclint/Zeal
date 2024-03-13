@@ -208,6 +208,8 @@ bool compareBySpellLevel(const Zeal::EqStructures::SPELL* a, const Zeal::EqStruc
 
 void SpellSets::destroy_context_menus()
 {
+    if (!Zeal::EqGame::is_new_ui()) { return; } // prevent callback crashing oldui
+
     if (Zeal::EqGame::Windows->ContextMenuManager)
     {
         for (auto it = MenuMap.rbegin(); it != MenuMap.rend(); ++it) {
@@ -229,6 +231,8 @@ void SpellSets::destroy_context_menus()
 }
 void SpellSets::create_context_menus(bool force)
 {
+    if (!Zeal::EqGame::is_new_ui()) { return; } // prevent callback crashing oldui
+
     if ((!menu || force)  && Zeal::EqGame::get_self() && Zeal::EqGame::is_in_game())
     {
         ZealService* zeal = ZealService::get_instance();
@@ -331,44 +335,48 @@ SpellSets::SpellSets(ZealService* zeal)
     zeal->hooks->Add("FinishMemorizing", 0x434b38, FinishMemorizing, hook_type_detour);
     zeal->hooks->Add("FinishScribing", 0x43501f, FinishScribing, hook_type_detour);
     zeal->hooks->Add("SpellGemRbutton", 0x5A67B0, SpellGemWnd_HandleRButtonUp, hook_type_detour);
-    zeal->commands_hook->add("/spellset", {},
-        [this, zeal](std::vector<std::string>& args) {
-            if (args.size() < 2)
-            {
-                Zeal::EqGame::print_chat("usage: /spellset save/load/list [name]");
-            }
-            else
-            {
-                if (StringUtil::caseInsensitive(args[1], "test"))
+    // wrap it for now to prevent users form crashing themselves on oldui until functionality potentially gets added.
+    if (Zeal::EqGame::is_new_ui())
+    {
+        zeal->commands_hook->add("/spellset", {},
+            [this, zeal](std::vector<std::string>& args) {
+                if (args.size() < 2)
                 {
-                    destroy_context_menus();
-                    create_context_menus(true);
+                    Zeal::EqGame::print_chat("usage: /spellset save/load/list [name]");
                 }
-                if (StringUtil::caseInsensitive(args[1], "save"))
+                else
                 {
-                    save(args[2]);
-                }
-                if (StringUtil::caseInsensitive(args[1], "load"))
-                {
-                    load(args[2]);
-                }
-                if (StringUtil::caseInsensitive(args[1], "list"))
-                {
-                    std::stringstream ss;
-                    ss << ".\\" << Zeal::EqGame::get_self()->Name << "_spellsets.ini";
-                    ini->set(ss.str());
-                    std::vector<std::string> sets = ini->getSectionNames();
-                    Zeal::EqGame::print_chat("--- spell sets (%i) ---", sets.size());
-                    for (auto& set : sets)
+                    if (StringUtil::caseInsensitive(args[1], "test"))
                     {
-                        Zeal::EqGame::print_chat(set);
+                        destroy_context_menus();
+                        create_context_menus(true);
                     }
-                    Zeal::EqGame::print_chat("--- end of spell sets ---", sets.size());
+                    if (StringUtil::caseInsensitive(args[1], "save"))
+                    {
+                        save(args[2]);
+                    }
+                    if (StringUtil::caseInsensitive(args[1], "load"))
+                    {
+                        load(args[2]);
+                    }
+                    if (StringUtil::caseInsensitive(args[1], "list"))
+                    {
+                        std::stringstream ss;
+                        ss << ".\\" << Zeal::EqGame::get_self()->Name << "_spellsets.ini";
+                        ini->set(ss.str());
+                        std::vector<std::string> sets = ini->getSectionNames();
+                        Zeal::EqGame::print_chat("--- spell sets (%i) ---", sets.size());
+                        for (auto& set : sets)
+                        {
+                            Zeal::EqGame::print_chat(set);
+                        }
+                        Zeal::EqGame::print_chat("--- end of spell sets ---", sets.size());
+                    }
                 }
+                return true;
             }
-            return true;
-        }
-    );
+        );
+    };
 }
 SpellSets::~SpellSets()
 {
