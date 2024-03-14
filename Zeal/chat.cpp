@@ -100,7 +100,7 @@ void chat::LoadSettings(IO_ini* ini)
     if (!ini->exists("Zeal", "Bluecon"))
         ini->setValue<bool>("Zeal", "Bluecon", false);
     if (!ini->exists("Zeal", "ZealInput"))
-        ini->setValue<bool>("Zeal", "ZealInput", true);
+        ini->setValue<bool>("Zeal", "ZealInput", false);
     bluecon = ini->getValue<bool>("Zeal", "Bluecon");
     timestamps = ini->getValue<bool>("Zeal", "ChatTimestamps");
     zealinput = ini->getValue<bool>("Zeal", "ZealInput");
