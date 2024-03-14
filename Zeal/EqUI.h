@@ -145,6 +145,85 @@ namespace Zeal
 
 		};
 
+		struct BasicWnd
+		{
+			/* 0x0000 */ BaseVTable* vtbl;
+			/* 0x0004 */ DWORD MouseHoverTimer;
+			/* 0x0008 */ DWORD Unknown0008;
+			/* 0x000C */ DWORD Unknown000C;
+			/* 0x0010 */ BYTE Unknown0010;
+			/* 0x0011 */ BYTE Unknown0011;
+			/* 0x0012 */ BYTE IsLocked;
+			/* 0x0013 */ BYTE Unknown0013;
+			/* 0x0014 */ PVOID Unknown0014;
+			/* 0x0018 */ DWORD Unknown0018;
+			/* 0x001C */ struct EQWND* ParentWnd;
+			/* 0x0020 */ struct EQWND* FirstChildWnd;
+			/* 0x0024 */ struct EQWND* NextSiblingWnd;
+			/* 0x0028 */ BYTE HasChildren;
+			/* 0x0029 */ BYTE HasSiblings;
+			/* 0x002A */ BYTE Unknown0030[2];
+			/* 0x002C */ DWORD Flags;
+			/* 0x0030 */ CXRect Location;
+			/* 0x0040 */ CXRect LocationPlaceholder; // used when minimizing the window
+			/* 0x0050 */ BYTE IsVisible; // show
+			/* 0x0051 */ BYTE IsEnabled;
+			/* 0x0052 */ BYTE IsMinimized;
+			/* 0x0053 */ BYTE Unknown0053;
+			/* 0x0054 */ BYTE IsOpen;
+			/* 0x0055 */ BYTE Unknown0055;
+			/* 0x0056 */ BYTE IsMouseOver; // mouse is hovering over
+			/* 0x0057 */ BYTE Unknown0057;
+			/* 0x0058 */ DWORD WindowStyleFlags;
+			/* 0x005C */ EQFONT* FontPointer;
+			/* 0x0060 */ CXSTR Text;
+			/* 0x0064 */ CXSTR ToolTipText;
+			/* 0x0068 */ ARGBCOLOR TextColor;
+			/* 0x006C */ ARGBCOLOR ToolTipTextColor;
+			/* 0x006C */ BYTE Unknown0068[20];
+			/* 0x0084 */ CXSTR XmlToolTipText;
+			/* 0x0088 */ BYTE Unknown0088[22];
+			/* 0x009E */ BYTE AlphaTransparency;
+			/* 0x009F */ BYTE Unknown009F;
+			/* 0x00A0 */ BYTE ZLayer;
+			/* 0x00A1 */ BYTE Unknown00A1[7];
+			/* 0x00A8 */ DWORD DrawTemplate;
+			/*0x0ac*/   BYTE    Unknown0x0ac[0x4];
+			/*0x0b0*/   DWORD   ZLayer2;
+			/*0x0b4*/   BYTE   Unknown0x0b4[0x28];
+			/*0x0dc*/   DWORD   FadeTickCount;
+			/*0x0e0*/   BYTE    Unknown0x0f8; /* CXWnd::StartFade */
+			/*0x0e1*/   BYTE    Unknown0x0f9; /* CXWnd::StartFade */
+			/*0x0e2*/   BYTE    Unknown0x0fa;
+			/*0x0e3*/   BYTE    Unknown0x0fb;
+			/*0x0e4*/   DWORD   Unknown0x0fc; /* CXWnd::StartFade, CXWnd::Minimize */
+			/*0x0e8*/   DWORD   VScrollMax;
+			/*0x0ec*/   DWORD   VScrollPos;
+			/*0x0f0*/   DWORD   HScrollMax;
+			/*0x0f4*/   DWORD   HScrollPos;
+			/*0x0f8*/   BYTE    ValidCXWnd;
+			/*0x0f9*/   BYTE    Unused0x0f9[0x3];
+			/*0x0fc*/   union {
+
+				struct _CXSTR* SidlText;
+				DWORD Items;
+			};
+			/*0x100*/   union {
+
+				struct _CXSTR* SidlScreen;
+				DWORD   SlotID;
+				DWORD	Caret_Start;
+			};
+			union {
+				/*0x104*/   LPVOID SidlPiece; /* CScreenPieceTemplate (important) */
+				DWORD Caret_End;
+			};
+			/*0x108*/   BYTE    Checked;
+			/*0x109*/   BYTE    Highlighted;
+			/*0x10a*/   BYTE    Unused0x10a[0x2];
+			/*0x10c*/   DWORD   TextureAnim; /* used in CSidlScreenWnd::AddButtonToRadioGroup */
+			/*0x110*/   CXSTR   InputText;
+		};
 		struct EQWND
 		{
 			/* 0x0000 */ BaseVTable* vtbl;
@@ -222,7 +301,7 @@ namespace Zeal
 			/*0x109*/   BYTE    Highlighted;
 			/*0x10a*/   BYTE    Unused0x10a[0x2];
 			/*0x10c*/   DWORD   TextureAnim; /* used in CSidlScreenWnd::AddButtonToRadioGroup */
-			/*0x110*/   struct _CXSTR* InputText;
+			/*0x110*/   CXSTR   InputText;
 			/*0x114*/   DWORD   Selector;
 			/*0x118*/   DWORD   PushToSelector;
 			/*0x11c*/   DWORD   EnableINIStorage;
@@ -237,12 +316,36 @@ namespace Zeal
 			/*0x130*/	DWORD   Unknown0x130; /* CTextureAnimation */
 		};
 
-
-
+		struct EditWnd : public BasicWnd
+		{
+			//void ReplaceSelection(const char* data, int length)
+			//{
+			//	reinterpret_cast<void(__thiscall*)(const EditWnd*, const char*, int)>(0x5a41b0)(this, data, length);
+			//}
+			void ReplaceSelection(CXSTR data, bool filter_input)
+			{
+				reinterpret_cast<void(__thiscall*)(const EditWnd*, CXSTR, int)>(0x5a3f00)(this, data, filter_input);
+			}
+			int GetInputLength()
+			{
+				return this->InputText.Data->Length - (this->item_link_count * 9);
+			}
+			/* 0x0114 */ int LinkStartIndex[10]; 
+			/* 0x013C */ int LinkEndIndex[10];
+			/* 0x0164 */ BYTE UnknownBytes[0xA0];
+			/* 0x0204 */ int item_link_count;
+			/* 0x0208 */ int uk1;
+			/* 0x020C */ int uk2;
+			/* 0x0210 */ int next_is_item_link;
+		};
+		struct ChatWnd : public EQWND
+		{
+			/*0x134*/ EditWnd* edit;
+		};
 		struct CXWndManager
 		{
 			/* 0x0000 */ BYTE unknown0[0x28];
-			/* 0x0028 */ EQWND* ActiveEdit;
+			/* 0x0028 */ EditWnd* ActiveEdit;
 			/* 0x002C */ int unknown1;
 			/* 0x0030 */ EQWND* Focused;
 			/* 0x0034 */ BYTE unknown34[0x8];
@@ -428,8 +531,8 @@ namespace Zeal
 		class CChatManager : public EQWND
 		{
 		public: //this class is a complete hack lol
-			EQWND* GetActiveChatWindow() const {
-				return reinterpret_cast<EQWND * (__thiscall*)(const CChatManager*)>(0x41114A)(this);
+			struct ChatWnd* GetActiveChatWindow() const {
+				return reinterpret_cast<struct ChatWnd* (__thiscall*)(const CChatManager*)>(0x41114A)(this);
 			}
 		};
 
