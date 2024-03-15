@@ -106,149 +106,119 @@ void chat::LoadSettings(IO_ini* ini)
     zealinput = ini->getValue<bool>("Zeal", "ZealInput");
 }
 
-enum last_caret_dir
+enum class caret_dir : int
 {
     none,
     left,
     right
 };
 
-void __fastcall HandleKey(int t, int u, UINT32 key, int KeyDown)
+enum class eq_modifier_keys : int
 {
-    Zeal::EqUI::CXWndManager* mgr = Zeal::EqGame::get_wnd_manager();
-    if (!Zeal::EqGame::is_new_ui() || !ZealService::get_instance()->chat_hook->zealinput || !mgr->ActiveEdit)
-        return ZealService::get_instance()->hooks->hook_map["HandleKey"]->original(HandleKey)(t, u, key, KeyDown);
-     
-    Zeal::EqUI::EditWnd* active_edit = mgr->ActiveEdit;
+    none = 0,
+    shift = 1,
+    ctrl = 2,
+    alt = 4
+};
 
-    //Zeal::EqGame::print_chat("Wants input: %i  keydown: %i  activedit: %x  focused: %x start: %i end: %i", Zeal::EqGame::game_wants_input(), KeyDown, mgr->ActiveEdit, mgr->Focused, active_edit->Caret_Start, active_edit->Caret_End);
-    if (Zeal::EqGame::game_wants_input() && KeyDown)
+void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
+    static caret_dir highlight_direction = dir;
+    DWORD move_index = 0;
+    DWORD* caret = &active_edit->Caret_End;
+
+    if (Zeal::EqGame::KeyMods->Shift && active_edit->Caret_End == active_edit->Caret_Start)
+        highlight_direction = dir;
+    else if (!Zeal::EqGame::KeyMods->Shift)
+        highlight_direction = caret_dir::none;
+
+    if (dir == caret_dir::left)
     {
+        caret = &active_edit->Caret_Start;
+        if (highlight_direction == caret_dir::right && Zeal::EqGame::KeyMods->Shift)
+            caret = &active_edit->Caret_End;
+
+        move_index = *caret - 1;
+        if (move_index < 0)
+            move_index = 0;
+    }
+    else
+    {
+        caret = &active_edit->Caret_End;
+        if (highlight_direction == caret_dir::left && Zeal::EqGame::KeyMods->Shift)
+            caret = &active_edit->Caret_Start;
+        move_index = *caret + 1;
+        if (move_index > active_edit->InputText.Data->Length)
+            move_index = active_edit->InputText.Data->Length;
+    }
+       
+
+    for (DWORD i = 0; i < active_edit->item_link_count; i++) {
+        if ((dir == caret_dir::left && active_edit->LinkEndIndex[i]-1 == move_index) ||
+            (dir == caret_dir::right && active_edit->LinkStartIndex[i]+1 == move_index)) {
+            move_index = (dir == caret_dir::left) ? active_edit->LinkStartIndex[i] : active_edit->LinkEndIndex[i];
+            break;
+        }
+    }
+
+
+    if (dir == caret_dir::left) {
+        *caret = move_index;
+        if (!Zeal::EqGame::KeyMods->Shift)
+            active_edit->Caret_End = move_index;
+    } else {
+        *caret = move_index;
+        if (!Zeal::EqGame::KeyMods->Shift)
+            active_edit->Caret_Start = move_index;
+    }
+
+
+}
+
+void __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 key, int modifier, int keydown)
+{
+    //Zeal::EqGame::print_chat("EditWnd: 0x%x key: %x modifier: %i state: %i", active_edit, key, modifier, keydown);
+    //you can use a bitwise & operator on the modifier with eq_modifier_keys to check key states
+    if (keydown)
+    {
+
         if (!active_edit->InputText.Data)
             active_edit->InputText.Assure(32, 0);
 
-        static last_caret_dir last_highlight_dir = last_caret_dir::none;
-        
-            switch (key)
-            {
-            case 0x1: //escape
-            {
-                mgr->Focused = active_edit->ParentWnd;
-                return;
-            }
-            case 0xC7: //home
-            {
-                active_edit->Caret_Start = 0;
-                if (!Zeal::EqGame::KeyMods->Shift)
-                    active_edit->Caret_End = 0;
-                last_highlight_dir = last_caret_dir::left;
-                return;
-            }
-            case 0xCF: //end
-            {
-                active_edit->Caret_End = active_edit->GetInputLength();
-                if (!Zeal::EqGame::KeyMods->Shift)
-                    active_edit->Caret_Start = active_edit->Caret_End;
-                last_highlight_dir = last_caret_dir::right;
-                return;
-            }
-            case 0xCB: //left arrow
+        static caret_dir last_highlight_dir = caret_dir::none;
 
-                if (last_highlight_dir == last_caret_dir::right && Zeal::EqGame::KeyMods->Shift && active_edit->Caret_End != active_edit->Caret_Start)
-                {
-                    active_edit->Caret_End--;
-                }
-                else
-                {
-                    if (Zeal::EqGame::KeyMods->Shift)
-                    {
-                        if (active_edit->Caret_Start > 0)
-                        {
-                            int move_index = active_edit->Caret_Start - 1;
-                            for (int i = 0; i < active_edit->item_link_count; i++)
-                            {
-                                if (active_edit->LinkEndIndex[i] == move_index)
-                                {
-                                    move_index = active_edit->LinkStartIndex[i]-1;
-                                    break;
-                                }
-                            }
-                            active_edit->Caret_Start = move_index;
-                        }
-                        last_highlight_dir = last_caret_dir::left;
-                    }
-                    else
-                    {
-                        if (active_edit->Caret_Start > 0)
-                        {
-                            int move_index = active_edit->Caret_Start - 1;
-                            for (int i = 0; i < active_edit->item_link_count; i++)
-                            {
-                                if (active_edit->LinkEndIndex[i] == move_index)
-                                {
-                                    move_index = active_edit->LinkStartIndex[i]-1;
-                                    break;
-                                }
-                            }
-                            active_edit->Caret_Start = move_index;
-                        }
-                        active_edit->Caret_End=active_edit->Caret_Start;
-                    }
-                    
-                }
-                if (active_edit->Caret_End == active_edit->Caret_Start)
-                    last_highlight_dir = last_caret_dir::none;
-                return;
-            case 0xCD: //right arrow
-                if (last_highlight_dir == last_caret_dir::left && Zeal::EqGame::KeyMods->Shift && active_edit->Caret_End != active_edit->Caret_Start)
-                {
-                    active_edit->Caret_Start++;
-                }
-                else
-                {
-                    if (Zeal::EqGame::KeyMods->Shift)
-                    {
-                        if (active_edit->Caret_End < active_edit->GetInputLength())
-                        {
-                            int move_index = active_edit->Caret_End + 1;
-                            for (int i = 0; i < active_edit->item_link_count; i++)
-                            {
-                                if (active_edit->LinkStartIndex[i] == move_index)
-                                {
-                                    move_index = active_edit->LinkEndIndex[i];
-                                    break;
-                                }
-                            }
-                            active_edit->Caret_End=move_index;
-                        }
-                        last_highlight_dir = last_caret_dir::right;
-                    }
-                    else
-                    {
-                        if (active_edit->Caret_End < active_edit->GetInputLength())
-                        {
-                            int move_index = active_edit->Caret_End + 1;
-                            for (int i = 0; i < active_edit->item_link_count; i++)
-                            {
-                                if (active_edit->LinkStartIndex[i] == move_index)
-                                {
-                                    move_index = active_edit->LinkEndIndex[i];
-                                    break;
-                                }
-                            }
-                            active_edit->Caret_End = move_index;
-                        }
-                        active_edit->Caret_Start = active_edit->Caret_End;
-                    }
+        switch (key)
+        {
+        case 0x1: //escape
+        {
+            Zeal::EqGame::get_wnd_manager()->Focused = active_edit->ParentWnd;
+            return;
+        }
+        case 0xC7: //home
+        {
+            active_edit->Caret_Start = 0;
+            if (!Zeal::EqGame::KeyMods->Shift)
+                active_edit->Caret_End = 0;
+            last_highlight_dir = caret_dir::left;
+            return;
+        }
+        case 0xCF: //end
+        {
+            active_edit->Caret_End = active_edit->GetInputLength();
+            if (!Zeal::EqGame::KeyMods->Shift)
+                active_edit->Caret_Start = active_edit->Caret_End;
+            last_highlight_dir = caret_dir::right;
+            return;
+        }
+        case 0xCB: //left arrow
+            move_caret(active_edit, caret_dir::left);
+            return;
+        case 0xCD: //right arrow
+            move_caret(active_edit, caret_dir::right);
+            return;
+        }
 
-                }
-                if (active_edit->Caret_End == active_edit->Caret_Start)
-                    last_highlight_dir = last_caret_dir::none;
-                return;
-            }
-        
         if (!Zeal::EqGame::KeyMods->Shift)
-            last_highlight_dir = last_caret_dir::none;
+            last_highlight_dir = caret_dir::none;
 
         if (Zeal::EqGame::KeyMods->Ctrl)
         {
@@ -256,8 +226,9 @@ void __fastcall HandleKey(int t, int u, UINT32 key, int KeyDown)
             {
                 case 0x2F: //v
                 {
-                    active_edit->next_is_item_link = 1;
                     std::string temp_text = StripSpecialCharacters(ReadFromClipboard());
+                    active_edit->InputText.Assure(temp_text.length()+active_edit->InputText.Data->Length, 0);
+
                     active_edit->ReplaceSelection(temp_text.c_str(), false);
                     return;
                 }
@@ -272,16 +243,19 @@ void __fastcall HandleKey(int t, int u, UINT32 key, int KeyDown)
                     if (active_edit->Caret_End - active_edit->Caret_Start > 0)
                     {
                         int len_highlighted = active_edit->Caret_End - active_edit->Caret_Start;
-                        int link_count = 0;
-                        for (int i = 0; i < active_edit->item_link_count; i++)
+                        int highlighted_link_count = 0;
+                        int links_prior = 0;
+                        for (DWORD i = 0; i < active_edit->item_link_count; i++)
                         {
-                            if (active_edit->LinkStartIndex[i] <= active_edit->Caret_End && active_edit->LinkStartIndex[i]>=active_edit->Caret_Start)
-                            {
-                                link_count++;
-                                break;
-                            }
+                            if (active_edit->LinkStartIndex[i] < active_edit->Caret_Start)
+                                links_prior++;
+                            if (active_edit->LinkEndIndex[i] <= active_edit->Caret_End && active_edit->LinkStartIndex[i] >= active_edit->Caret_Start)
+                                highlighted_link_count++;
                         }
-                        std::string highlighted_text(active_edit->InputText.Data->Text + active_edit->Caret_Start, active_edit->InputText.Data->Text + active_edit->Caret_End + (link_count*9));
+
+                        int new_caret_start = active_edit->Caret_Start + (links_prior * 9);
+                        int new_caret_end = active_edit->Caret_End + (links_prior * 9);
+                        std::string highlighted_text(active_edit->InputText.Data->Text + new_caret_start, active_edit->InputText.Data->Text + new_caret_end + (highlighted_link_count * 9));
                         SetClipboardText(highlighted_text);
                     }
                     return;
@@ -289,9 +263,9 @@ void __fastcall HandleKey(int t, int u, UINT32 key, int KeyDown)
             }
         }
     }
-
-    ZealService::get_instance()->hooks->hook_map["HandleKey"]->original(HandleKey)(t,u,key,KeyDown);
+    return ZealService::get_instance()->hooks->hook_map["EditWndHandleKey"]->original(EditWndHandleKey)(active_edit, u, key, modifier, keydown);
 }
+
 
 void chat::set_input_color(Zeal::EqUI::ARGBCOLOR col)
 {
@@ -306,15 +280,6 @@ void chat::set_input_color(Zeal::EqUI::ARGBCOLOR col)
 
 chat::chat(ZealService* zeal, IO_ini* ini)
 {
-    //zeal->main_loop_hook->add_callback([this]() { 
-    //    if (zealinput && Zeal::EqGame::game_wants_input())
-    //    {
-    //        if (zealinput)
-    //            set_input_color(Zeal::EqUI::ARGBCOLOR(0xFF, 0xEE, 0xAA, 0xFF));//goldish input color
-    //        else
-    //            set_input_color(Zeal::EqUI::ARGBCOLOR(0xFF, 0xFF, 0xFF, 0xFF));
-    //    }
-    //});
     zeal->commands_hook->add("/timestamp", { "/tms" },
         [this](std::vector<std::string>& args) {
             timestamps = !timestamps;
@@ -351,10 +316,10 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     LoadSettings(ini);
 
     zeal->hooks->Add("PrintChat", 0x537f99, PrintChat, hook_type_detour); //add extra prints for new loot types
-    zeal->hooks->Add("HandleKey", 0x59e780, HandleKey, hook_type_detour); //add extra prints for new loot types
+    zeal->hooks->Add("EditWndHandleKey", 0x5A3010, EditWndHandleKey, hook_type_detour); //this makes more sense than the hook I had previously
+  
 }
 chat::~chat()
 {
-   // set_input_color(Zeal::EqUI::ARGBCOLOR(0xFF, 0xFF, 0xFF, 0xFF));
 }
 

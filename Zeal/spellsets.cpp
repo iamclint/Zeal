@@ -328,6 +328,9 @@ void SpellSets::callback_characterselect()
 }
 SpellSets::SpellSets(ZealService* zeal)
 {
+    menu = 0;
+    original_stance = Stand;
+    spellset_menu = 0;
     ini = std::shared_ptr<IO_ini>(new IO_ini(".\\spellsets.ini"));
     zeal->main_loop_hook->add_callback([this]() { callback_main();  }, callback_fn::Render);
     zeal->main_loop_hook->add_callback([this]() { callback_cleanui();  }, callback_fn::CleanUI);

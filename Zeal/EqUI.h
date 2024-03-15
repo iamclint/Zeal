@@ -330,21 +330,31 @@ namespace Zeal
 			{
 				return this->InputText.Data->Length - (this->item_link_count * 9);
 			}
-			/* 0x0114 */ int LinkStartIndex[10]; 
-			/* 0x013C */ int LinkEndIndex[10];
+			/* 0x0114 */ DWORD LinkStartIndex[10]; 
+			/* 0x013C */ DWORD LinkEndIndex[10];
 			/* 0x0164 */ BYTE UnknownBytes[0xA0];
-			/* 0x0204 */ int item_link_count;
-			/* 0x0208 */ int uk1;
-			/* 0x020C */ int uk2;
-			/* 0x0210 */ int next_is_item_link;
+			/* 0x0204 */ DWORD item_link_count;
+			/* 0x0208 */ BYTE uk1[3];
+			/* 0x020B */ BYTE SomeFlag;
+			/* 0x020C */ DWORD uk2;
+			/* 0x0210 */ DWORD AlphaNumericOnly;
 		};
 		struct ChatWnd : public EQWND
 		{
 			/*0x134*/ EditWnd* edit;
 		};
+		struct EQKey
+		{
+			/* 0x0000 */ UINT32 code;
+			/* 0x0004 */ int timestamp;
+			/* 0x0008 */ int unk;
+			/* 0x0010 */ int isDown;
+			/* 0x0014 */ int whoknows;
+		};
 		struct CXWndManager
 		{
-			/* 0x0000 */ BYTE unknown0[0x28];
+			/* 0x0000 */ BYTE unknown0[0x14];
+			/* 0x0014 */ EQKey LastKey;
 			/* 0x0028 */ EditWnd* ActiveEdit;
 			/* 0x002C */ int unknown1;
 			/* 0x0030 */ EQWND* Focused;
