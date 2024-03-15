@@ -123,7 +123,7 @@ enum class eq_modifier_keys : int
 
 void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
     static caret_dir highlight_direction = dir;
-    DWORD move_index = 0;
+    int move_index = 0;
     DWORD* caret = &active_edit->Caret_End;
 
     if (Zeal::EqGame::KeyMods->Shift && active_edit->Caret_End == active_edit->Caret_Start)
@@ -147,8 +147,8 @@ void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
         if (highlight_direction == caret_dir::left && Zeal::EqGame::KeyMods->Shift)
             caret = &active_edit->Caret_Start;
         move_index = *caret + 1;
-        if (move_index > active_edit->InputText.Data->Length)
-            move_index = active_edit->InputText.Data->Length;
+        if (move_index > active_edit->GetInputLength())
+            move_index = active_edit->GetInputLength();
     }
        
 
