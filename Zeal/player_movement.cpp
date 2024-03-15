@@ -60,13 +60,13 @@ static void CloseSpellbook(void)
 
 void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 {
-	// no movement autostand while in eye of zomm
-	if (UsingEyeOfZomm()) { return; }
-
 	if (!Zeal::EqGame::game_wants_input() && key_down)
 	{
 		if (!Zeal::EqGame::KeyMods->Alt && !Zeal::EqGame::KeyMods->Shift && !Zeal::EqGame::KeyMods->Ctrl)
 		{
+			// no movement autostand while in eye of zomm
+			if (UsingEyeOfZomm()) { return; }
+
 			if (Zeal::EqGame::is_new_ui())
 			{
 				if (Zeal::EqGame::Windows->Loot && Zeal::EqGame::Windows->Loot->IsOpen && Zeal::EqGame::Windows->Loot->IsVisible)
