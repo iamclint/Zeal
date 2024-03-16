@@ -12,6 +12,13 @@ ___
   - **Example:** `/hidecorpse looted`
   - **Description:** `looted` Hides a corpse after you have looted it., `none` reveals all hidden corpses
 
+- `/spellset`
+  - **Arguments:** `save`, `load`, `delete`
+  - **Example:** `/spellset save buffs`
+  - **Example:** `/spellset load buffs`
+  - **Example:** `/spellset delete buffs`
+  - **Description:** allows you to save and load spellsets
+
 - `/showhelm`
   - **Aliases:** `/helm`
   - **Arguments:** `on, off`
