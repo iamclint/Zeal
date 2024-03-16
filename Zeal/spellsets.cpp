@@ -151,7 +151,7 @@ static int __fastcall SpellSetRButtonUp(Zeal::EqUI::EQWND* pWnd, int unused, Zea
     if (pWnd->SelectedIndex != -1)
     {
         SpellSets* ss = ZealService::get_instance()->spell_sets.get();
-        if (pWnd->SelectedIndex < ss->spellsets.size()+2)
+        if ((size_t)pWnd->SelectedIndex < ss->spellsets.size()+2)
         {
             ss->ui_selected_name = ss->spellsets[pWnd->SelectedIndex-2];
             Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(ss->SpellSetDeleteIndex, pt, (Zeal::EqUI::EQWND*)ss->spellset_delete);
@@ -250,7 +250,7 @@ void SpellSets::destroy_context_menus()
             auto [index, cmenu] = *it;
             cmenu->RemoveAllMenuItems();
             cmenu->Deconstruct(0x0);
-            for (int i = index; i < Zeal::EqGame::Windows->ContextMenuManager->MenuCount - 1; i++)
+            for (unsigned int i = index; i < Zeal::EqGame::Windows->ContextMenuManager->MenuCount - 1; i++)
             {
                 Zeal::EqGame::Windows->ContextMenuManager->Menus[i] = Zeal::EqGame::Windows->ContextMenuManager->Menus[i + 1];
             }

@@ -28,9 +28,9 @@ namespace camera_math
         return std::lerp(smoothDelta, static_cast<float>(rawDelta), t);
     }
     float angle_difference(float angle1, float angle2) {
-        int abs_diff = fabs(angle1 - angle2);
-        if (abs_diff > 256) {
-            return 512 - abs_diff;
+        float abs_diff = fabs(angle1 - angle2);
+        if (abs_diff > 256.0f) {
+            return 512.0f - abs_diff;
         }
         else {
             return abs_diff;
