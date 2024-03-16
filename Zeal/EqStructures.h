@@ -447,6 +447,11 @@ namespace Zeal
 
 		struct Entity
 		{
+			void ChangeStance(BYTE new_stance)
+			{
+				if (this && this->StandingState != new_stance)
+					reinterpret_cast<void(__thiscall*)(Entity*, unsigned char)>(0x50be3c)(this, new_stance);
+			}
 			/* 0x0000 */ BYTE Unknown0000; // always equals 0x03
 			/* 0x0001 */ CHAR Name[30]; // [0x1E]
 			/* 0x001F */ BYTE Unknown001F[37];

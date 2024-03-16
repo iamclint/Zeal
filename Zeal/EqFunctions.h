@@ -48,7 +48,6 @@ namespace Zeal
 			static mem::function<short __fastcall(int, int)> get_max_mana = 0x4B9483;
 			static mem::function<short __fastcall(int, int)> get_cur_mana = 0x4b9450;
 			static mem::function<int __cdecl(int, Vec3*)> t3dGetRegionNumberFromWorldAndXYZ = 0x0;
-			static mem::function<short __fastcall(Zeal::EqStructures::Entity*,int unused, unsigned char)> change_stance = 0x50be3c;
 			static mem::function<void __fastcall(DWORD, int unused, DWORD)> ui_something = 0x536bae;
 			static mem::function<float __stdcall(float input_heading)> fix_heading = 0x4a2eed;
 			static mem::function<void __stdcall()> ProcessMouseEvent = 0x525db4;
@@ -124,7 +123,6 @@ namespace Zeal
 		bool is_game_ui_window_hovered();
 		bool is_targetable(Zeal::EqStructures::Entity* ent);
 		bool is_in_game();
-		void change_stance(Stance new_stance);
 		void do_say(bool hide_local, const char* format, ...);
 		void do_say(bool hide_local, std::string data);
 		int get_region_from_pos(Vec3* pos);

@@ -85,7 +85,7 @@ void SpellSets::finished_memorizing(int a1, int a2)
             Zeal::EqGame::Spells::Memorize(mem_buffer.back().first, mem_buffer.back().second);
         else if (Zeal::EqGame::Windows->SpellBook->IsVisible)
         {
-            Zeal::EqGame::change_stance(original_stance);
+            Zeal::EqGame::get_self()->ChangeStance(original_stance);
             Zeal::EqGame::Windows->SpellBook->IsVisible = false;
         }
     }

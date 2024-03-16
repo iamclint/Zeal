@@ -80,8 +80,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		});
 	add("/camp", {},
 		[](std::vector<std::string>& args) {
-
-			Zeal::EqGame::change_stance(Stance::Sit);
+			Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 			return false;
 		});
 	add("/showhelm", { "/helm" },

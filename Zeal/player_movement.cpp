@@ -2,59 +2,9 @@
 #include "Zeal.h"
 #include "EqAddresses.h"
 
-enum PerspectiveSpells // This was all I could find on the database. Please update if there are any missing.
-{
-	SHIFTING_SIGHT = 84,
-	EYE_OF_ZOMM = 323,
-	SIGHT_GRAFT = 361,
-	ASSIDUOUS_VISION = 384,
-	CAST_SIGHT = 407,
-	BIND_SIGHT = 500,
-	VISION = 580,
-	LYSSAS_SOLIDARITY_OF_VISION = 721,
-	EYE_OF_TALLON = 1720,
-};
-
-static bool HasActivePerspectiveModifier(void)
-{
-	auto CharInfo = Zeal::EqGame::get_self()->CharInfo;
-	for (size_t i = 0; i < EQ_NUM_BUFFS; ++i)
-	{
-		switch (CharInfo->Buff[i].SpellId)
-		{
-			case SHIFTING_SIGHT:
-			case EYE_OF_ZOMM:
-			case SIGHT_GRAFT:
-			case ASSIDUOUS_VISION:
-			case CAST_SIGHT:
-			case BIND_SIGHT:
-			case VISION:
-			case LYSSAS_SOLIDARITY_OF_VISION:
-			case EYE_OF_TALLON:
-				return true;
-				break;
-			default:{}break;
-		}
-	}
-
-	return false;
-}
-
-static bool UsingEyeOfZomm(void)
-{
-	auto CharInfo = Zeal::EqGame::get_self()->CharInfo;
-	for (size_t i = 0; i < EQ_NUM_BUFFS; ++i)
-	{
-		if (CharInfo->Buff[i].SpellId == EYE_OF_ZOMM || CharInfo->Buff[i].SpellId == EYE_OF_TALLON)
-			return true;
-	}
-
-	return false;
-}
-
 static void CloseSpellbook(void)
 {
-	Zeal::EqGame::change_stance(Stance::Stand);
+	Zeal::EqGame::get_self()->ChangeStance(Stance::Stand);
 	Zeal::EqGame::Windows->SpellBook->IsVisible = false;
 }
 
@@ -64,9 +14,6 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 	{
 		if (!Zeal::EqGame::KeyMods->Alt && !Zeal::EqGame::KeyMods->Shift && !Zeal::EqGame::KeyMods->Ctrl)
 		{
-			// no movement autostand while in eye of zomm
-			if (UsingEyeOfZomm()) { return; }
-
 			if (Zeal::EqGame::is_new_ui())
 			{
 				if (Zeal::EqGame::Windows->Loot && Zeal::EqGame::Windows->Loot->IsOpen && Zeal::EqGame::Windows->Loot->IsVisible)
@@ -76,9 +23,6 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 				}
 				else if (Zeal::EqGame::Windows->SpellBook && Zeal::EqGame::Windows->SpellBook->IsVisible)
 				{
-					// no spellbook autostand while in modified perspective.
-					if (HasActivePerspectiveModifier()) { return; }
-
 					switch (cmd) {
 						case 3:
 							CloseSpellbook();
@@ -112,9 +56,6 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 				}
 				else if (Zeal::EqGame::OldUI::spellbook_window_open())
 				{
-					// no spellbook autostand while in modified perspective.
-					if (HasActivePerspectiveModifier()) { return; }
-
 					// left and right arrows dont turn pages on oldui by default
 					// so I'm not sure if we'll add support for other keys
 					if (cmd == 4) { return; }
@@ -123,10 +64,10 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 				}
 			}
 
-			switch (Zeal::EqGame::get_self()->StandingState)
+			switch (Zeal::EqGame::get_controlled()->StandingState)
 			{
 				case Zeal::EqEnums::Stance::Sitting:
-					Zeal::EqGame::change_stance(Stance::Stand);
+					Zeal::EqGame::get_controlled()->ChangeStance(Stance::Stand);
 					break;
 				default: { return; }
 			}
@@ -166,7 +107,7 @@ void PlayerMovement::handle_spellcast_binds(int cmd)
 		switch (Zeal::EqGame::get_self()->StandingState)
 		{
 			case Zeal::EqEnums::Stance::Sitting:
-				Zeal::EqGame::change_stance(Stance::Stand);
+				Zeal::EqGame::get_self()->ChangeStance(Stance::Stand);
 				break;
 			default: { return; }
 		}

@@ -57,7 +57,7 @@ ZealService::ZealService()
 		}); // spellcasting auto-stand
 	}
 	binds_hook->replace_bind(72, [this](int state) {
-		Zeal::EqGame::change_stance(Stance::Sit);
+		Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 		return false;
 	}); // hotkey camp auto-sit
 

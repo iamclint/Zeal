@@ -571,11 +571,6 @@ namespace Zeal
 		{
 			return *Zeal::EqGame::in_game;
 		}
-		void change_stance(Stance new_stance)
-		{
-			if (Self && Self->StandingState != (BYTE)new_stance)
-				EqGameInternal::change_stance(get_self(), 0, new_stance); //EQPlayer::ChangePosition
-		}
 		bool is_new_ui()
 		{
 			return *(BYTE*)0x8092D8;
