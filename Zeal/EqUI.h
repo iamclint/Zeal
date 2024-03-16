@@ -226,6 +226,10 @@ namespace Zeal
 		};
 		struct EQWND
 		{
+			void show(bool unkown, bool visible)
+			{
+				reinterpret_cast<void(__thiscall*)(const EQWND*, bool, bool)>(0x572310)(this, unkown, visible);
+			}
 			/* 0x0000 */ BaseVTable* vtbl;
 			/* 0x0004 */ DWORD MouseHoverTimer;
 			/* 0x0008 */ DWORD Unknown0008;
@@ -304,7 +308,11 @@ namespace Zeal
 			/*0x110*/   CXSTR   InputText;
 			/*0x114*/   DWORD   Selector;
 			/*0x118*/   DWORD   PushToSelector;
-			/*0x11c*/   DWORD   EnableINIStorage;
+			union
+			{
+				/*0x11c*/   DWORD   EnableINIStorage;
+				/*0x11c*/   int   SelectedIndex;
+			};
 			/*0x120*/   union {
 
 				struct _CXSTR* INIStorageName;
@@ -491,7 +499,7 @@ namespace Zeal
 			/*0x110*/   struct _CXSTR* InputText;
 			/*0x114*/   DWORD   Selector;
 			/*0x118*/   DWORD   PushToSelector;
-			/*0x11c*/   DWORD   EnableINIStorage;
+			/*0x11c*/   int   SelectedIndex;
 			/*0x120*/   union {
 				struct _CXSTR* INIStorageName;
 				struct _EQINVSLOT* pEQInvSlot;

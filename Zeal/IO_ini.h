@@ -51,6 +51,18 @@ public:
         return sectionNames;
     }
 
+    bool deleteSection(const std::string& sectionName) {
+        // Delete the section and its contents by writing an empty string to it
+        if (!WritePrivateProfileSectionA(sectionName.c_str(), nullptr, filename.c_str())) 
+        {
+            return false;
+        }
+        else 
+        {
+            return true;
+        }
+    }
+
     template<typename T>
     T getValue(std::string section, std::string key) const {
         char buffer[256];
