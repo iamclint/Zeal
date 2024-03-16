@@ -160,13 +160,11 @@ void Binds::add_binds()
 			Zeal::EqGame::EqGameInternal::ReplyTarget(Zeal::EqGame::get_self(), "");
 		}
 		});
-	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) {
-
+	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) 
+	{
 		if (key_down)
 		{
-			int a1 = *Zeal::EqGame::ptr_LocalPC;
-			int a2 = a1 + 0xD78;
-			Zeal::EqGame::EqGameInternal::auto_inventory(a1, a2, 0);
+			Zeal::EqGame::EqGameInternal::auto_inventory(Zeal::EqGame::get_char_info(), Zeal::EqGame::get_char_info()->CursorItem, 0);
 		}
 	});
 }

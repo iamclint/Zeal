@@ -321,6 +321,18 @@ namespace Zeal
 		};
 		struct EQCHARINFO
 		{
+			float encum_factor()
+			{
+				return reinterpret_cast<float(__thiscall*)(EQCHARINFO*)>(0x4bb9c7)(this);
+			}
+			short max_mana()
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*)>(0x4B9483)(this);
+			} 
+			short mana()
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*)>(0x4b9450)(this);
+			}
 			/* 0x0000 */ BYTE Unknown0000[2];
 			/* 0x0002 */ CHAR Name[64]; // [0x40]
 			/* 0x0042 */ CHAR LastName[70]; // [0x46] ; surname or title

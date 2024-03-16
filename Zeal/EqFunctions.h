@@ -58,7 +58,7 @@ namespace Zeal
 			static mem::function<int __cdecl(Zeal::EqUI::CXSTR*, const char* format)> CXStr_PrintString = 0x578110;
 			static mem::function<int __stdcall()> LoadOptions = 0x536CE0;
 			static mem::function<int __fastcall(int t, int unk, int key, int type)> readKeyMapFromIni = 0x525520;
-			static mem::function<void __cdecl(int _char, int item, int)> auto_inventory = 0x4F0EEB;
+			static mem::function<void __cdecl(Zeal::EqStructures::EQCHARINFO* _char, Zeal::EqStructures::_EQITEMINFO* Item, int)> auto_inventory = 0x4F0EEB;
 			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;
 			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_say = 0x4f8172;
 			static mem::function<float __fastcall(int, int)> encum_factor = 0x4bb9c7;
@@ -105,6 +105,7 @@ namespace Zeal
 		void print_chat_zeal(const char* data, short color, bool un);
 		void set_target(Zeal::EqStructures::Entity* target);
 		bool can_move();
+		Zeal::EqStructures::EQCHARINFO* get_char_info();
 		Zeal::EqStructures::Entity* get_active_corpse();
 		Zeal::EqStructures::Entity* get_target();
 		Zeal::EqStructures::Entity* get_entity_list();

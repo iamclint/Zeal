@@ -24,7 +24,7 @@ namespace Zeal
 		static EqUI::CXWndManager* WndManager = (EqUI::CXWndManager*)0x809DB4;
 		//static EqStructures::SPELLMGR* SpellsMgr = (EqStructures::SPELLMGR*)0x805CB0;
 		
-		static DWORD* ptr_LocalPC = (DWORD*)0x7F94E8;
+		//static DWORD* ptr_LocalPC = (DWORD*)0x7F94E8;
 		static int* ptr_ContainerMgr = (int*)0x63d6b8;
 		static int* ptr_COptionsWnd = (int*)0x63d634;
 		static int* ptr_PrimaryKeyMap = (int*)0x7CD84C;

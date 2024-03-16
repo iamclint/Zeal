@@ -96,9 +96,14 @@ namespace Zeal
 		float encum_factor()
 		{
 			if (*(int*)EqGame::_ControlledPlayer == *(int*)EqGame::Self)
-				return EqGameInternal::encum_factor(*Zeal::EqGame::ptr_LocalPC, 0);
+				return get_char_info()->encum_factor();
 			else
 				return 1.0f;
+		}
+
+		Zeal::EqStructures::EQCHARINFO* get_char_info()
+		{
+			return (Zeal::EqStructures::EQCHARINFO*)(*(int*)0x7F94E8);
 		}
 		Zeal::EqStructures::ViewActor* get_view_actor()
 		{
