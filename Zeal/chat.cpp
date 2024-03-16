@@ -173,8 +173,7 @@ void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
 
 
 }
-
-void __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 key, int modifier, int keydown)
+int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 key, int modifier, char keydown)
 {
     //Zeal::EqGame::print_chat("EditWnd: 0x%x key: %x modifier: %i state: %i", active_edit, key, modifier, keydown);
     //you can use a bitwise & operator on the modifier with eq_modifier_keys to check key states
@@ -191,7 +190,7 @@ void __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32
         case 0x1: //escape
         {
             Zeal::EqGame::get_wnd_manager()->Focused = active_edit->ParentWnd;
-            return;
+            return 0;
         }
         case 0xC7: //home
         {
@@ -199,7 +198,7 @@ void __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32
             if (!Zeal::EqGame::KeyMods->Shift)
                 active_edit->Caret_End = 0;
             last_highlight_dir = caret_dir::left;
-            return;
+            return 0;
         }
         case 0xCF: //end
         {
@@ -207,14 +206,14 @@ void __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32
             if (!Zeal::EqGame::KeyMods->Shift)
                 active_edit->Caret_Start = active_edit->Caret_End;
             last_highlight_dir = caret_dir::right;
-            return;
+            return 0;
         }
         case 0xCB: //left arrow
             move_caret(active_edit, caret_dir::left);
-            return;
+            return 0;
         case 0xCD: //right arrow
             move_caret(active_edit, caret_dir::right);
-            return;
+            return 0;
         }
 
         if (!Zeal::EqGame::KeyMods->Shift)
@@ -230,13 +229,13 @@ void __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32
                     active_edit->InputText.Assure(temp_text.length()+active_edit->InputText.Data->Length, 0);
 
                     active_edit->ReplaceSelection(temp_text.c_str(), false);
-                    return;
+                    return 0;
                 }
                 case 0x1E: //a
                 {
                     active_edit->Caret_Start = 0;
                     active_edit->Caret_End = active_edit->GetInputLength();
-                    return;
+                    return 0;
                 }
                 case 0x2E: //c
                 {
@@ -258,7 +257,7 @@ void __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32
                         std::string highlighted_text(active_edit->InputText.Data->Text + new_caret_start, active_edit->InputText.Data->Text + new_caret_end + (highlighted_link_count * 9));
                         SetClipboardText(highlighted_text);
                     }
-                    return;
+                    return 0;
                 }
             }
         }
