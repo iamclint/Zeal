@@ -4,7 +4,7 @@
 
 static void CloseSpellbook(void)
 {
-	Zeal::EqGame::change_stance(Stance::Stand);
+	Zeal::EqGame::get_self()->ChangeStance(Stance::Stand);
 	Zeal::EqGame::Windows->SpellBook->IsVisible = false;
 }
 
@@ -28,19 +28,19 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 							CloseSpellbook();
 							break;
 						case 5: // default should be turn page left (not implemented)
-							if (!spellbook_left_autostand)
-								return;
-							else
-								CloseSpellbook();
+							if (!spellbook_left_autostand) { return; }
+							CloseSpellbook();
 							break;
 						case 6: // default to turn page right (not implemented)
-							if (!spellbook_right_autostand)
-								return;
-							else
-								CloseSpellbook();
+							if (!spellbook_right_autostand) { return; }
+							CloseSpellbook();
 							break;
 						case 211:
+							if (!spellbook_left_strafe_autostand) { return; }
+							CloseSpellbook();
+							break;
 						case 212:
+							if (!spellbook_right_strafe_autostand) { return; }
 							CloseSpellbook();
 							break;
 						default: { return; }
@@ -64,11 +64,10 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 				}
 			}
 
-			// not in a window, handle things normally. (why did this check get removed?)
-			switch (Zeal::EqGame::get_self()->StandingState)
+			switch (Zeal::EqGame::get_controlled()->StandingState)
 			{
 				case Zeal::EqEnums::Stance::Sitting:
-					Zeal::EqGame::change_stance(Stance::Stand);
+					Zeal::EqGame::get_controlled()->ChangeStance(Stance::Stand);
 					break;
 				default: { return; }
 			}
@@ -108,7 +107,7 @@ void PlayerMovement::handle_spellcast_binds(int cmd)
 		switch (Zeal::EqGame::get_self()->StandingState)
 		{
 			case Zeal::EqEnums::Stance::Sitting:
-				Zeal::EqGame::change_stance(Stance::Stand);
+				Zeal::EqGame::get_self()->ChangeStance(Stance::Stand);
 				break;
 			default: { return; }
 		}
@@ -179,15 +178,22 @@ void PlayerMovement::load_settings(IO_ini* ini)
 		ini->setValue<bool>("Zeal", "LeftTurnSpellbookAutostand", false);
 	if (!ini->exists("Zeal", "RightTurnSpellbookAutostand"))
 		ini->setValue<bool>("Zeal", "RightTurnSpellbookAutostand", false);
+	if (!ini->exists("Zeal", "LeftStrafeSpellbookAutostand"))
+		ini->setValue<bool>("Zeal", "LeftStrafeSpellbookAutostand", true);
+	if (!ini->exists("Zeal", "RightStrafeSpellbookAutostand"))
+		ini->setValue<bool>("Zeal", "RightStrafeSpellbookAutostand", true);
 
 	spellbook_left_autostand = ini->getValue<bool>("Zeal", "LeftTurnSpellbookAutostand");
 	spellbook_right_autostand = ini->getValue<bool>("Zeal", "RightTurnSpellbookAutostand");
+	spellbook_left_strafe_autostand = ini->getValue<bool>("Zeal", "LeftStrafeSpellbookAutostand");
+	spellbook_right_strafe_autostand = ini->getValue<bool>("Zeal", "RightStrafeSpellbookAutostand");
 }
 
 PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_ini* ini)
 {
 	load_settings(ini);
 
+	// ISSUE: Mapping LEFT/RIGHT arrow keys to strafe on TAKP2.1 client fails to function.
 	binds->replace_bind(211, [this](int state) {
 		if (!state && current_strafe == strafe_direction::Left)
 		{
