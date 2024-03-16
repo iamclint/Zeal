@@ -399,7 +399,7 @@ namespace Zeal
 			/* 0x0D5C */ BYTE Unknown0D5C[20];
 			/* 0x0D70 */ DWORD ZoneId;
 			/* 0x0D74 */ struct _EQSPAWNINFO* SpawnInfo;
-			/* 0x0D78 */ struct _EQITEMINFO* CursorItem;
+			/* 0x0D78 */  _EQITEMINFO* CursorItem;
 			union
 			{
 				/* 0x0D7C */ struct _EQINVENTORY Inventory;

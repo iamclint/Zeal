@@ -164,7 +164,7 @@ void Binds::add_binds()
 	{
 		if (key_down)
 		{
-			Zeal::EqGame::EqGameInternal::auto_inventory(Zeal::EqGame::get_char_info(), Zeal::EqGame::get_char_info()->CursorItem, 0);
+			Zeal::EqGame::EqGameInternal::auto_inventory(Zeal::EqGame::get_char_info(), &Zeal::EqGame::get_char_info()->CursorItem, 0);
 		}
 	});
 }

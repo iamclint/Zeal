@@ -20,7 +20,7 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 	{
 	case 80:
 	{
-		if (!zeal->experience)
+		if (!zeal->experience && Zeal::EqGame::get_char_info())
 			return true;
 		int max_mana = Zeal::EqGame::get_char_info()->max_mana();//  Zeal::EqGame::EqGameInternal::get_max_mana(*Zeal::EqGame::ptr_LocalPC, 0);
 		int mana = Zeal::EqGame::get_char_info()->mana(); //Zeal::EqGame::EqGameInternal::get_cur_mana(*Zeal::EqGame::ptr_LocalPC, 0);
@@ -56,13 +56,15 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 	}
 	case 124:
 	{
-		Zeal::EqGame::CXStr_PrintString(str, "%d", Zeal::EqGame::get_char_info()->mana());
+		if (Zeal::EqGame::get_char_info())
+			Zeal::EqGame::CXStr_PrintString(str, "%d", Zeal::EqGame::get_char_info()->mana());
 		*override_color = false;
 		return true;
 	}
 	case 125:
 	{
-		Zeal::EqGame::CXStr_PrintString(str, "%d", Zeal::EqGame::get_char_info()->max_mana());
+		if (Zeal::EqGame::get_char_info())
+			Zeal::EqGame::CXStr_PrintString(str, "%d", Zeal::EqGame::get_char_info()->max_mana());
 		*override_color = false;
 		return true;
 	}
