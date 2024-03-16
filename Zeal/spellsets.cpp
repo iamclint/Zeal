@@ -126,9 +126,9 @@ void SpellSets::handle_menu_mem(int book_index, int gem_index)
     mem_buffer.push_back({ book_index,gem_index });
     Zeal::EqGame::Spells::Memorize(book_index, gem_index);
 }
-static int __fastcall SpellSetRButtonUp(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
+static int __fastcall SpellSetRButtonUp(Zeal::EqUI::EQWND* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
-    Zeal::EqGame::print_chat("Message: %i  data: %i", Message, data);
+    Zeal::EqGame::print_chat("point: %i %i  flag: %i wnd: 0x%x  selector: %i", pt.x, pt.y, flag, pWnd, pWnd->Selector);
     return 1;
 }
 static int __stdcall SpellSetMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
@@ -298,7 +298,8 @@ void SpellSets::create_context_menus(bool force)
             spellset_menu = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
         spellset_menu->HasChildren = 1;
         spellset_menu->fnTable->basic.WndNotification = SpellSetMenuNotification;
-        //spellset_menu->fnTable->basic.HandleRButtonUp = SpellSetRButtonUp;
+        spellset_menu->fnTable->basic.HandleRButtonUp = SpellSetRButtonUp;
+       // Zeal::EqGame::print_chat("context rclick = 0x%x", spellset_menu->fnTable->basic.HandleRButtonUp);
         std::stringstream ss;
         ss << ".\\" << Zeal::EqGame::get_self()->Name << "_spellsets.ini";
         ini->set(ss.str());
@@ -343,7 +344,7 @@ SpellSets::SpellSets(ZealService* zeal)
     {
         zeal->commands_hook->add("/spellset", {},
             [this, zeal](std::vector<std::string>& args) {
-                if (args.size() < 2)
+                if (args.size() < 3)
                 {
                     Zeal::EqGame::print_chat("usage: /spellset save/load/list [name]");
                 }
