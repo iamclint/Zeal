@@ -19,12 +19,13 @@ public:
 private:
 	void set_strafe(strafe_direction dir);
 	void callback_main();
-	void load_settings(IO_ini* ini);
+	void load_settings();
 	bool spellbook_left_autostand;
 	bool spellbook_right_autostand;
 	bool spellbook_left_strafe_autostand;
 	bool spellbook_right_strafe_autostand;
 	strafe_direction current_strafe = strafe_direction::None;
 	BYTE orig_reset_strafe[7] = { 0 };
+	IO_ini* ini_handle;
 };
 
