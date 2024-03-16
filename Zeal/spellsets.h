@@ -33,7 +33,7 @@ public:
 	int SpellMenuIndex = 0;
 	int SpellSetMenuIndex = 0;
 	int SpellSetDeleteIndex = 0;
-	std::unordered_map<std::string, std::unordered_map<std::string, std::list<menudata>>>  SpellCategory;
+	std::map<std::string, std::map<std::string, std::list<menudata>>>  SpellCategory;
 	std::map<int, Zeal::EqUI::ContextMenu*> MenuMap;
 	std::map<int, std::string> spellset_map;
 	std::vector<std::string> spellsets;
