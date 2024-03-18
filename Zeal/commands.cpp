@@ -79,6 +79,20 @@ ChatCommands::ChatCommands(ZealService* zeal)
 	add("/camp", {},
 		[](std::vector<std::string>& args) {
 			Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
+			// Prepare arguments for the /outputfile command, including the "inventory" argument
+			std::vector<std::string> outputinv_args;
+			outputinv_args.push_back("/outputfile");
+			outputinv_args.push_back("inventory");
+			// Invoke the functionality associated with the /outputfile command directly
+			ZealService::get_instance()->commands_hook->CommandFunctions["/outputfile"].callback(outputinv_args);
+
+			// Prepare arguments for the /outputfile command, including the "spellbook" argument
+			std::vector<std::string> outputbook_args;
+			outputbook_args.push_back("/outputfile");
+			outputbook_args.push_back("spellbook");
+			// Invoke the functionality associated with the /outputfile command directly
+			ZealService::get_instance()->commands_hook->CommandFunctions["/outputfile"].callback(outputbook_args);
+			
 			return false;
 		});
 	add("/showhelm", { "/helm" },
