@@ -78,19 +78,14 @@ namespace Zeal
 		}
 		Vec3 get_ent_head_pos(Zeal::EqStructures::Entity* ent)
 		{
-			Vec3 head_pos = ent->Position;
-			head_pos.z += ent->Height;
+			Vec3 head_pos = ent->ActorInfo->DagHead->Position;
+			//head_pos.z += ent->Height;
 			return head_pos;
 		}
 		Vec3 get_player_head_pos()
 		{
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-			Vec3 head_pos = self->Position;
-			head_pos.z += (self->CameraHeightOffset - self->ModelHeightOffset); //standing
-			if (self->StandingState == Stance::Duck || self->StandingState == Stance::Sit)
-				head_pos.z -= self->Height/3;// self->CameraHeightOffset - self->ModelHeightOffset;
-			else if (self->StandingState!=Stance::Stand)
-				head_pos.z = self->Position.z;
+			Vec3 head_pos = self->ActorInfo->DagHead->Position;
 			return head_pos;
 		}
 		float encum_factor()
@@ -135,12 +130,7 @@ namespace Zeal
 			if (get_view_actor())
 			{
 				Zeal::EqStructures::Entity* self = get_view_actor()->Entity;
-				Vec3 head_pos = self->Position;
-				head_pos.z += (self->CameraHeightOffset - self->ModelHeightOffset); //standing
-				if (self->StandingState == Stance::Duck || self->StandingState == Stance::Sit)
-					head_pos.z -= self->Height / 3;// self->CameraHeightOffset - self->ModelHeightOffset;
-				else if (self->StandingState != Stance::Stand)
-					head_pos.z = self->Position.z;
+				Vec3 head_pos = self->ActorInfo->DagHead->Position;
 				return head_pos;
 			}
 			else

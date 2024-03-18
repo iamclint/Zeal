@@ -320,7 +320,7 @@ namespace Zeal
 			};
 			/*0x124*/   DWORD   Unknown0x124; /* CTextureAnimation */
 			/*0x128*/   DWORD   Unknown0x128; /* CTextureAnimation */
-			/*0x12c*/   DWORD  ContextMenu; /* CTextureAnimation its an id for the menu*/
+			/*0x12c*/   DWORD   ContextMenu; /* CTextureAnimation its an id for the menu*/
 			/*0x130*/	DWORD   Unknown0x130; /* CTextureAnimation */
 		};
 
@@ -552,6 +552,8 @@ namespace Zeal
 			struct ChatWnd* GetActiveChatWindow() const {
 				return reinterpret_cast<struct ChatWnd* (__thiscall*)(const CChatManager*)>(0x41114A)(this);
 			}
+			EQWND* ChatWindows[32];
+			DWORD MaxChatWindows;
 		};
 
 
