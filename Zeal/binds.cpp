@@ -16,7 +16,8 @@ void ExecuteCmd(int cmd, int isdown, int unk2)
 		//	Zeal::EqGame::print_chat("cmd: %i unk2: 0x%x down: %i", cmd, unk2, isdown);
 		if (zeal->binds_hook->ReplacementFunctions.count(cmd) > 0)
 		{
-			if (zeal->binds_hook->ReplacementFunctions[cmd](isdown)) //if the replacement function returns true, end here otherwise its really just adding more to the command 
+			for (auto& fn : zeal->binds_hook->ReplacementFunctions[cmd])
+			if (fn(isdown)) //if the replacement function returns true, end here otherwise its really just adding more to the command 
 				return;
 		}
 
@@ -186,7 +187,7 @@ void Binds::add_bind(int cmd, const char* name, const char* short_name, int cate
 
 void Binds::replace_bind(int cmd, std::function<bool(int state)> callback)
 {
-	ReplacementFunctions[cmd] = callback;
+	ReplacementFunctions[cmd].push_back(callback);
 }
 
 void Binds::main_loop()
