@@ -127,10 +127,24 @@ namespace Zeal
 
 		Vec3 get_view_actor_head_pos()
 		{
+			//print_chat("movement: %i", get_view_actor()->Entity->ActorInfo->MovementType);
+			//if (get_view_actor())
+			//{
+			//	Zeal::EqStructures::Entity* self = get_view_actor()->Entity;
+			//	Vec3 head_pos = self->Position;
+			//	Vec3 dag_pos = self->ActorInfo->DagHeadPoint->Position;
+			//	head_pos.z = dag_pos.z;
+			//	return head_pos;
+			//}
 			if (get_view_actor())
 			{
 				Zeal::EqStructures::Entity* self = get_view_actor()->Entity;
-				Vec3 head_pos = self->ActorInfo->DagHead->Position;
+				Vec3 head_pos = self->Position;
+				head_pos.z += (self->CameraHeightOffset - self->ModelHeightOffset)-0.5; //standing
+				//if (self->StandingState == Stance::Duck || self->StandingState == Stance::Sit)
+				//	head_pos.z -= self->Height / 3;// self->CameraHeightOffset - self->ModelHeightOffset;
+				//else if (self->StandingState != Stance::Stand)
+				//	head_pos.z = self->Position.z;
 				return head_pos;
 			}
 			else
