@@ -74,6 +74,20 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 		}
 		return true;
 	}
+	case 134:
+	{
+		if (Zeal::EqGame::get_controlled() && Zeal::EqGame::get_controlled()->ActorInfo)
+		{
+			if (Zeal::EqGame::get_controlled()->ActorInfo->CastingSpellId) {
+				int spell_id = Zeal::EqGame::get_controlled()->ActorInfo->CastingSpellId;
+				Zeal::EqStructures::SPELL* casting_spell = Zeal::EqGame::get_spell_mgr()->Spells[spell_id];
+				Zeal::EqGame::CXStr_PrintString(str, "%s", casting_spell->Name);
+				*override_color = false;
+			}
+			
+		}
+		return true;
+	}
 	case 255: //debug label
 	{
 		if (*Zeal::EqGame::ptr_LocalPC)
