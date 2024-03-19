@@ -78,8 +78,8 @@ namespace Zeal
 		}
 		Vec3 get_ent_head_pos(Zeal::EqStructures::Entity* ent)
 		{
-			Vec3 head_pos = ent->ActorInfo->DagHead->Position;
-			//head_pos.z += ent->Height;
+			Vec3 head_pos = ent->Position;
+			head_pos.z += ent->Height;
 			return head_pos;
 		}
 		Vec3 get_player_head_pos()

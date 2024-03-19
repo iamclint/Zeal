@@ -147,6 +147,26 @@ namespace Zeal
 
 		struct BasicWnd
 		{
+			void SetFocus()
+			{
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(0x572290)(this);
+			}
+			void SetupCustomVTable()
+			{
+				BaseVTable* newtbl = new BaseVTable();
+				mem::copy((int)newtbl, (int)vtbl, sizeof(BaseVTable));
+				vtbl = newtbl;
+				mem::unprotect_memory(vtbl, sizeof(BaseVTable));
+			}
+			void show(bool unkown, bool visible)
+			{
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, bool, bool)>(0x572310)(this, unkown, visible);
+			}
+			BasicWnd* GetChildItem(CXSTR name)
+			{
+				return reinterpret_cast<BasicWnd*(__thiscall*)(const BasicWnd*, CXSTR)>(0x570320)(this, name);
+			}
+
 			/* 0x0000 */ BaseVTable* vtbl;
 			/* 0x0004 */ DWORD MouseHoverTimer;
 			/* 0x0008 */ DWORD Unknown0008;
@@ -224,88 +244,9 @@ namespace Zeal
 			/*0x10c*/   DWORD   TextureAnim; /* used in CSidlScreenWnd::AddButtonToRadioGroup */
 			/*0x110*/   CXSTR   InputText;
 		};
-		struct EQWND
+		struct EQWND : BasicWnd
 		{
-			void show(bool unkown, bool visible)
-			{
-				reinterpret_cast<void(__thiscall*)(const EQWND*, bool, bool)>(0x572310)(this, unkown, visible);
-			}
-			/* 0x0000 */ BaseVTable* vtbl;
-			/* 0x0004 */ DWORD MouseHoverTimer;
-			/* 0x0008 */ DWORD Unknown0008;
-			/* 0x000C */ DWORD Unknown000C;
-			/* 0x0010 */ BYTE Unknown0010;
-			/* 0x0011 */ BYTE Unknown0011;
-			/* 0x0012 */ BYTE IsLocked;
-			/* 0x0013 */ BYTE Unknown0013;
-			/* 0x0014 */ PVOID Unknown0014;
-			/* 0x0018 */ DWORD Unknown0018;
-			/* 0x001C */ EQWND* ParentWnd;
-			/* 0x0020 */ EQWND* FirstChildWnd;
-			/* 0x0024 */ EQWND* NextSiblingWnd;
-			/* 0x0028 */ BYTE HasChildren;
-			/* 0x0029 */ BYTE HasSiblings;
-			/* 0x002A */ BYTE Unknown0030[2];
-			/* 0x002C */ DWORD Flags;
-			/* 0x0030 */ CXRect Location;
-			/* 0x0040 */ CXRect LocationPlaceholder; // used when minimizing the window
-			/* 0x0050 */ BYTE IsVisible; // show
-			/* 0x0051 */ BYTE IsEnabled;
-			/* 0x0052 */ BYTE IsMinimized;
-			/* 0x0053 */ BYTE Unknown0053;
-			/* 0x0054 */ BYTE IsOpen;
-			/* 0x0055 */ BYTE Unknown0055;
-			/* 0x0056 */ BYTE IsMouseOver; // mouse is hovering over
-			/* 0x0057 */ BYTE Unknown0057;
-			/* 0x0058 */ DWORD WindowStyleFlags;
-			/* 0x005C */ EQFONT* FontPointer;
-			/* 0x0060 */ CXSTR Text;
-			/* 0x0064 */ CXSTR ToolTipText;
-			/* 0x0068 */ ARGBCOLOR TextColor;
-			/* 0x006C */ ARGBCOLOR ToolTipTextColor;
-			/* 0x006C */ BYTE Unknown0068[20];
-			/* 0x0084 */ CXSTR XmlToolTipText;
-			/* 0x0088 */ BYTE Unknown0088[22];
-			/* 0x009E */ BYTE AlphaTransparency;
-			/* 0x009F */ BYTE Unknown009F;
-			/* 0x00A0 */ BYTE ZLayer;
-			/* 0x00A1 */ BYTE Unknown00A1[7];
-			/* 0x00A8 */ DWORD DrawTemplate;
-			/*0x0ac*/   BYTE    Unknown0x0ac[0x4];
-			/*0x0b0*/   DWORD   ZLayer2;
-			/*0x0b4*/   BYTE   Unknown0x0b4[0x28];
-			/*0x0dc*/   DWORD   FadeTickCount;
-			/*0x0e0*/   BYTE    Unknown0x0f8; /* CXWnd::StartFade */
-			/*0x0e1*/   BYTE    Unknown0x0f9; /* CXWnd::StartFade */
-			/*0x0e2*/   BYTE    Unknown0x0fa;
-			/*0x0e3*/   BYTE    Unknown0x0fb;
-			/*0x0e4*/   DWORD   Unknown0x0fc; /* CXWnd::StartFade, CXWnd::Minimize */
-			/*0x0e8*/   DWORD   VScrollMax;
-			/*0x0ec*/   DWORD   VScrollPos;
-			/*0x0f0*/   DWORD   HScrollMax;
-			/*0x0f4*/   DWORD   HScrollPos;
-			/*0x0f8*/   BYTE    ValidCXWnd;
-			/*0x0f9*/   BYTE    Unused0x0f9[0x3];
-			/*0x0fc*/   union {
-
-				struct _CXSTR* SidlText;
-				DWORD Items;
-			};
-			/*0x100*/   union {
-
-				struct _CXSTR* SidlScreen;
-				DWORD   SlotID;
-				DWORD	Caret_Start;
-			};
-			union {
-				/*0x104*/   LPVOID SidlPiece; /* CScreenPieceTemplate (important) */
-				DWORD Caret_End;
-			};
-			/*0x108*/   BYTE    Checked;
-			/*0x109*/   BYTE    Highlighted;
-			/*0x10a*/   BYTE    Unused0x10a[0x2];
-			/*0x10c*/   DWORD   TextureAnim; /* used in CSidlScreenWnd::AddButtonToRadioGroup */
-			/*0x110*/   CXSTR   InputText;
+		
 			/*0x114*/   DWORD   Selector;
 			/*0x118*/   DWORD   PushToSelector;
 			union
@@ -323,6 +264,35 @@ namespace Zeal
 			/*0x12c*/   DWORD   ContextMenu; /* CTextureAnimation its an id for the menu*/
 			/*0x130*/	DWORD   Unknown0x130; /* CTextureAnimation */
 		};
+		struct ItemDisplayWnd : EQWND
+		{
+			void SetItem(struct Zeal::EqStructures::_EQITEMINFO* Item, bool unk)
+			{
+				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*, struct Zeal::EqStructures::_EQITEMINFO *, bool)>(0x423640)(this, Item, unk);
+			}
+			void SetSpell(short spell_id, bool unk, int unk2)
+			{
+				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*, short, bool, int)>(0x425957)(this, spell_id, unk, unk2);
+			}
+			
+			/* 0x0134 */ struct EQWND* ItemDescription; // the item stats text window
+			/* 0x0138 */ BYTE Unknown0138[4];
+			/* 0x013C */ struct EQWND* IconBtn; // the item stats text window
+			/* 0x0140 */ BYTE Unknown0140[4];
+			/* 0x0144 */ CXSTR DisplayText; // the item name is the title text
+			/* 0x0148 */ CXSTR WindowTitle; // the item stats text
+			/* 0x014C */ struct Zeal::EqStructures::_EQITEMINFO* Item;
+		};
+
+
+		struct LootWnd : public EQWND
+		{
+			/* 0x0134 */ DWORD Unk1;
+			/* 0x0138 */ DWORD ItemSlotIndex[EQ_NUM_LOOT_WINDOW_ITEMS];
+			/* 0x01B0 */ DWORD Timer;
+			/* 0x01B4 */ PVOID Unknown01B4;
+			/* 0x01B8 */ Zeal::EqStructures::_EQITEMINFO* Item[EQ_NUM_LOOT_WINDOW_ITEMS];
+		};
 
 		struct EditWnd : public BasicWnd
 		{
@@ -338,6 +308,10 @@ namespace Zeal
 			{
 				return this->InputText.Data->Length - (this->item_link_count * 9);
 			}
+			void SetText(CXSTR data)
+			{
+				reinterpret_cast<void(__thiscall*)(const EditWnd*, CXSTR)>(0x5a3d00)(this, data);
+			}
 			/* 0x0114 */ DWORD LinkStartIndex[10]; 
 			/* 0x013C */ DWORD LinkEndIndex[10];
 			/* 0x0164 */ BYTE UnknownBytes[0xA0];
@@ -349,7 +323,8 @@ namespace Zeal
 		};
 		struct ChatWnd : public EQWND
 		{
-			/*0x134*/ EditWnd* edit;
+			/*0x134*/ EditWnd* unk;
+			/*0x138*/ EditWnd* edit;
 		};
 		struct EQKey
 		{
@@ -616,7 +591,7 @@ namespace Zeal
 			EQWND* uknownWnd1;  // 0x63D5D4
 			EQWND* CharacterSelect;  // 0x63D5D8
 			EQWND* FacePick;  // 0x63D5DC
-			EQWND* ItemDisplayManager;  // 0x63D5E0
+			ItemDisplayWnd* ItemWnd;  // 0x63D5E0
 			EQWND* Note;  // 0x63D5E4
 			EQWND* Help;  // 0x63D5E8
 			EQWND* Book;  // 0x63D5EC
@@ -647,7 +622,7 @@ namespace Zeal
 			EQWND* Inventory;  // 0x63D650
 			EQWND* Bank;  // 0x63D654
 			EQWND* Quantity;  // 0x63D658
-			EQWND* Loot;  // 0x63D65C
+			LootWnd* Loot;  // 0x63D65C
 			EQWND* Actions;  // 0x63D660
 			EQWND* Merchant;  // 0x63D664
 			EQWND* Trade;  // 0x63D668

@@ -9,7 +9,8 @@ enum class callback_fn
 	Zone,
 	CleanUI,
 	Render,
-	CharacterSelect
+	CharacterSelect,
+	InitUI
 };
 class MainLoop
 {
