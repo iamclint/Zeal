@@ -80,6 +80,7 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 		{
 			if (Zeal::EqGame::get_controlled()->ActorInfo->CastingSpellId) {
 				int spell_id = Zeal::EqGame::get_controlled()->ActorInfo->CastingSpellId;
+				if (spell_id == 65535) spell_id = 0; // avoid crash while player is not casting a spell
 				Zeal::EqStructures::SPELL* casting_spell = Zeal::EqGame::get_spell_mgr()->Spells[spell_id];
 				Zeal::EqGame::CXStr_PrintString(str, "%s", casting_spell->Name);
 				*override_color = false;
