@@ -29,6 +29,7 @@ public:
 	std::shared_ptr<PlayerMovement> movement = nullptr;
 	std::shared_ptr<Alarm> alarm = nullptr;
 	std::shared_ptr<Netstat> netstat = nullptr;
+	std::shared_ptr<UIOptions> ui = nullptr;
 	
 	
 

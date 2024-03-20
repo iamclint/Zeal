@@ -185,6 +185,7 @@
     <ClInclude Include="SpellCategories.h" />
     <ClInclude Include="spellsets.h" />
     <ClInclude Include="StringUtil.h" />
+    <ClInclude Include="UIOptions.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="Zeal.h" />
   </ItemGroup>
@@ -213,6 +214,7 @@
     <ClCompile Include="raid.cpp" />
     <ClCompile Include="spellsets.cpp" />
     <ClCompile Include="StringUtil.cpp" />
+    <ClCompile Include="UIOptions.cpp" />
     <ClCompile Include="vectors.cpp" />
     <ClCompile Include="Zeal.cpp" />
   </ItemGroup>

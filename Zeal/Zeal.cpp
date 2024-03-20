@@ -26,7 +26,7 @@ ZealService::ZealService()
 	movement = std::shared_ptr<PlayerMovement>(new PlayerMovement(this, binds_hook.get(), ini.get()));
 	alarm = std::shared_ptr<Alarm>(new Alarm(this));
 	netstat = std::shared_ptr<Netstat>(new Netstat(this, ini.get()));
-	
+	ui = std::shared_ptr<UIOptions>(new UIOptions(this, ini.get()));
 
 	binds_hook->replace_bind(3, [this](int state) {
 		movement->handle_movement_binds(3, state);
