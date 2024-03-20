@@ -39,6 +39,9 @@ ___
   - **Aliases:** `/autoinv`, `/ai`
   - **Description:** Drops whatever is on your cursor into your inventory.
 
+- `/sit`
+  - **Description:** The /sit command now accepts "on" as an argument. Using "/sit on" will always make you sit, even if you are currently sitting. This matches the game's native "/sit off" which always makes you stand even if you are currently standing. The "/sit" command will continue to toggle sit/stand state if the argument provided is not on or off.
+
 - `/camp`
   - **Description:** Auto sits before camping.
 
