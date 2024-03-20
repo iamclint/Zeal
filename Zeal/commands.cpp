@@ -79,7 +79,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 	add("/sit", {},
 		[](std::vector<std::string>& args) {
 			if (args.size() > 1 && args.size() < 3) {
-				if (StringUtil::caseInsensitive(args[1], "on")) {
+				if (StringUtil::caseInsensitive(args[1], "on") || StringUtil::caseInsensitive(args[1], "down")) {
 					Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 					return true;
 				}
