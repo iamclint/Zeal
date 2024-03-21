@@ -203,7 +203,22 @@ namespace Zeal
 			/* 0x003C */ BYTE Unknown003C[36];
 			/* 0x0060 */ struct Entity* Entity;
 		};
-
+		struct EQDAGINFO
+		{
+			/* 0x0000 */ DWORD Unknown0000;
+			/* 0x0004 */ PCHAR Name; // x_DAG, x_POINT_DAG, etc
+			/* 0x0008 */ struct _EQSTRINGSPRITE* StringSprite;
+			/* 0x000C */ struct _EQDAGINFO* Parent;
+			/* 0x0010 */ struct _EQMODELINFO* ModelInfo;
+			/* 0x0014 */ struct _EQTRACKINFO* Track1;
+			/* 0x0018 */ struct _EQTRACKINFO* Track2;
+			/* 0x001C */ BYTE Unknown001C[96];
+			/* 0x007C */ Vec3 Position;
+			/* 0x0088 */ BYTE Unknown0088[96];
+			/* 0x00E8 */ DWORD NumChildren;
+			/* 0x00EC */ struct _EQDAGCHILDREN* Children;
+			/* ...... */
+		};
 		struct ActorInfo
 		{
 			/* 0x0000 */ ViewActor* ViewActor_;
@@ -269,12 +284,12 @@ namespace Zeal
 			/* 0x027F */ BYTE Unknown027F;
 			/* 0x0280 */ BYTE Unknown0280[4];
 			/* 0x0284 */ struct _EQMODELINFO* ModelInfo;
-			/* 0x0288 */ struct _EQDAGINFO* DagHeadPoint;
-			/* 0x028C */ struct _EQDAGINFO* DagHead;
-			/* 0x0290 */ struct _EQDAGINFO* DagUnknown;
-			/* 0x0294 */ struct _EQDAGINFO* DagRightPoint;
-			/* 0x0298 */ struct _EQDAGINFO* DagLeftPoint;
-			/* 0x029C */ struct _EQDAGINFO* DagShieldPoint;
+			/* 0x0288 */ EQDAGINFO* DagHeadPoint;
+			/* 0x028C */ EQDAGINFO* DagHead;
+			/* 0x0290 */ EQDAGINFO* DagUnknown;
+			/* 0x0294 */ EQDAGINFO* DagRightPoint;
+			/* 0x0298 */ EQDAGINFO* DagLeftPoint;
+			/* 0x029C */ EQDAGINFO* DagShieldPoint;
 			/* 0x02A0 */ BYTE Unknown02A0[128];
 			/* 0x0320 */ BYTE MovementType; // 0 = None, 4 = Walking, 6 = Running, 7 = Swimming
 			/* 0x0321 */ BYTE Unknown0321[12];

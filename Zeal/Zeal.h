@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-#define ZEAL_VERSION "0.1.32"
+#define ZEAL_VERSION "0.1.35"
 
 class ZealService
 {
@@ -29,6 +29,7 @@ public:
 	std::shared_ptr<PlayerMovement> movement = nullptr;
 	std::shared_ptr<Alarm> alarm = nullptr;
 	std::shared_ptr<Netstat> netstat = nullptr;
+	std::shared_ptr<UIOptions> ui = nullptr;
 	
 	
 

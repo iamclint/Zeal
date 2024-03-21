@@ -281,35 +281,17 @@ chat::chat(ZealService* zeal, IO_ini* ini)
 {
     zeal->commands_hook->add("/timestamp", { "/tms" },
         [this](std::vector<std::string>& args) {
-            timestamps = !timestamps;
-            ZealService::get_instance()->ini->setValue<bool>("Zeal", "ChatTimestamps", timestamps);
-            if (timestamps)
-                Zeal::EqGame::print_chat("Timestamps enabled");
-            else
-                Zeal::EqGame::print_chat("Timestamps disabled");
-
+            set_timestamp(!timestamps);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
     zeal->commands_hook->add("/zealinput", { "/zinput" },
         [this](std::vector<std::string>& args) {
-            zealinput = !zealinput;
-            ZealService::get_instance()->ini->setValue<bool>("Zeal", "ZealInput", zealinput);
-            if (zealinput)
-                Zeal::EqGame::print_chat("Zeal special input enabled");
-            else
-                Zeal::EqGame::print_chat("Zeal special input disabled");
-
+            set_input(!zealinput);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
     zeal->commands_hook->add("/bluecon", { },
         [this](std::vector<std::string>& args) {
-            bluecon = !bluecon;
-            ZealService::get_instance()->ini->setValue<bool>("Zeal", "Bluecon", bluecon);
-            if (bluecon)
-                Zeal::EqGame::print_chat("Blue con color is now set to usercolor 70");
-            else
-                Zeal::EqGame::print_chat("Default blue con color.");
-
+            set_bluecon(!bluecon);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
     LoadSettings(ini);
@@ -317,6 +299,33 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("PrintChat", 0x537f99, PrintChat, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("EditWndHandleKey", 0x5A3010, EditWndHandleKey, hook_type_detour); //this makes more sense than the hook I had previously
   
+}
+void chat::set_input(bool val)
+{
+    zealinput = val;
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "ZealInput", zealinput);
+    if (zealinput)
+        Zeal::EqGame::print_chat("Zeal special input enabled");
+    else
+        Zeal::EqGame::print_chat("Zeal special input disabled");
+}
+void chat::set_timestamp(bool val)
+{
+    timestamps = val;
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "ChatTimestamps", timestamps);
+    if (timestamps)
+        Zeal::EqGame::print_chat("Timestamps enabled");
+    else
+        Zeal::EqGame::print_chat("Timestamps disabled");
+}
+void chat::set_bluecon(bool val)
+{
+    bluecon = val;
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "Bluecon", bluecon);
+    if (bluecon)
+        Zeal::EqGame::print_chat("Blue con color is now set to usercolor 70");
+    else
+        Zeal::EqGame::print_chat("Default blue con color.");
 }
 chat::~chat()
 {

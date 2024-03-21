@@ -24,7 +24,7 @@ public:
 	char* KeyMapNames[256] = { 0 };
 	int ptr_binds = 0;
 	std::unordered_map<int, std::function<void(int state)>> KeyMapFunctions;
-	std::unordered_map<int, std::function<bool(int state)>> ReplacementFunctions;
+	std::unordered_map<int, std::vector<std::function<bool(int state)>>> ReplacementFunctions;
 	std::pair<int, int> last_targets;
 	void read_ini();
 	void add_binds();

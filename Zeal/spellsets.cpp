@@ -228,7 +228,10 @@ static int __fastcall SpellGemWnd_HandleRButtonUp(Zeal::EqUI::SpellGem* gem, int
 static int __fastcall SpellGemWnd_Book_HandleRButtonUp(Zeal::EqUI::EQWND* btn, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
     ZealService* zeal = ZealService::get_instance();
-    Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(zeal->spell_sets->SpellSetMenuIndex, pt, (Zeal::EqUI::EQWND*)zeal->spell_sets->spellset_menu);
+    if (btn == Zeal::EqGame::Windows->SpellGems->SpellBook)
+    {
+        Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(zeal->spell_sets->SpellSetMenuIndex, pt, (Zeal::EqUI::EQWND*)zeal->spell_sets->spellset_menu);
+    }
     return zeal->hooks->hook_map["SpellGemWnd_Book_HandleRButtonUp"]->original(SpellGemWnd_Book_HandleRButtonUp)(btn, unused, pt, flag);
 }
 

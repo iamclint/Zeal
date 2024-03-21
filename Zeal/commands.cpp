@@ -76,6 +76,16 @@ ChatCommands::ChatCommands(ZealService* zeal)
 
 			return false;
 		});
+	add("/sit", {},
+		[](std::vector<std::string>& args) {
+			if (args.size() > 1 && args.size() < 3) {
+				if (StringUtil::caseInsensitive(args[1], "on") || StringUtil::caseInsensitive(args[1], "down")) {
+					Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
+					return true;
+				}
+			}
+			return false;
+		});
 	add("/camp", {},
 		[](std::vector<std::string>& args) {
 			Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
@@ -122,6 +132,24 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				return true;
 			}
 			return false;
+		});
+	add("/clientmanatick", { "/cmt" },
+		[this](std::vector<std::string>& args) {
+			BYTE orig1[7] = { 0x66, 0x01, 0xBE, 0x9A, 0x0, 0x0, 0x0 }; //0x4C3F93
+			BYTE orig2[7] = { 0x66, 0x01, 0x87, 0x9A, 0x0, 0x0, 0x0 }; //0x4c7642
+			if (*(BYTE*)0x4C3F93 == 0x90)
+			{
+				mem::copy(0x4C3F93, (int)orig1, sizeof(orig1));
+				mem::copy(0x4C7642, (int)orig2, sizeof(orig2));
+				Zeal::EqGame::print_chat("Client sided mana tick re-enabled");
+			}
+			else
+			{
+				mem::set(0x4C3F93, 0x90, sizeof(orig1));
+				mem::set(0x4C7642, 0x90, sizeof(orig2));
+				Zeal::EqGame::print_chat("Client sided mana tick disabled");
+			}
+			return true;
 		});
 	add("/alarm", {},
 		[this, zeal](std::vector<std::string>& args) {

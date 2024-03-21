@@ -144,6 +144,9 @@
     <ClInclude Include="netstat.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
+    <ClInclude Include="UIOptions.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -222,6 +225,9 @@
       <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="netstat.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="UIOptions.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>

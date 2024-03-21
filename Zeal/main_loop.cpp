@@ -46,7 +46,12 @@ void __fastcall enterzone_hk(int t, int unused, int hwnd)
 	zeal->main_loop_hook->do_callbacks(callback_fn::Zone);
 	zeal->hooks->hook_map["EnterZone"]->original(enterzone_hk)(t, unused, hwnd);
 }
-
+void __fastcall initgameui_hk(int t, int u)
+{
+	ZealService* zeal = ZealService::get_instance();
+	zeal->hooks->hook_map["InitGameUI"]->original(initgameui_hk)(t, u);
+	zeal->main_loop_hook->do_callbacks(callback_fn::InitUI);
+}
 void __stdcall clean_up_ui()
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -62,4 +67,5 @@ MainLoop::MainLoop(ZealService* zeal)
 	zeal->hooks->Add("EnterZone", 0x53D2C4, enterzone_hk, hook_type_detour);
 	zeal->hooks->Add("CleanUpUI", 0x4A6EBC, clean_up_ui, hook_type_detour);
 	zeal->hooks->Add("DoCharacterSelection", 0x53b9cf, charselect_hk, hook_type_detour);
+	zeal->hooks->Add("InitGameUI", 0x4a60b5, initgameui_hk, hook_type_detour);
 }

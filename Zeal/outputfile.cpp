@@ -275,9 +275,15 @@ OutputFile::OutputFile(ZealService* zeal)
       }
       if (args.size() > 1) {
         if (StringUtil::caseInsensitive(args[1], "inventory"))
+        {
+          Zeal::EqGame::print_chat("Outputting inventory...");
           export_inventory(args);
+        }
         else if (StringUtil::caseInsensitive(args[1], "spellbook"))
+        {
+          Zeal::EqGame::print_chat("Outputting spellbook...");
           export_spellbook(args);
+        }
         else if (StringUtil::caseInsensitive(args[1], "raidlist"))
           export_raidlist(args);
       }
