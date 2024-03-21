@@ -128,5 +128,7 @@ namespace Zeal
 		void do_say(bool hide_local, std::string data);
 		int get_region_from_pos(Vec3* pos);
 		EqUI::CXWndManager* get_wnd_manager();
+		std::vector<Zeal::EqStructures::RaidMember*> get_raid_list();
+		std::string generateTimestamp();
 	}
 }

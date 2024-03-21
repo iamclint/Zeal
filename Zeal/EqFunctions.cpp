@@ -122,7 +122,25 @@ namespace Zeal
 			return false;
 		}
 
+		std::vector<Zeal::EqStructures::RaidMember*> get_raid_list()
+		{
+			short raid_size = *(short*)0x794F9C;
+			std::vector<Zeal::EqStructures::RaidMember*> raid_member_list;
 
+			if (raid_size <= 0) {
+				return raid_member_list;
+			}
+
+			for (int i = 0; i < 72; i++) // 12 groups x 6 members per group = 72 slots, sometimes gaps so need to check all
+			{
+				Zeal::EqStructures::RaidMember* raid_member = (Zeal::EqStructures::RaidMember*)(RaidMemberList + (0x0000D0 * i));
+				if (raid_member->Name[0] != '\0') {
+					raid_member_list.push_back(raid_member);
+				}
+			}
+
+			return raid_member_list;
+		}
 
 
 		Vec3 get_view_actor_head_pos()
@@ -351,7 +369,16 @@ namespace Zeal
 
 			EqGameInternal::print_chat(*(int*)0x809478, 0, msg.c_str(), color, un);
 		}
-		
+		std::string generateTimestamp() {
+			time_t rawtime;
+			struct tm timeinfo;
+			time(&rawtime);
+			localtime_s(&timeinfo, &rawtime);
+
+			std::ostringstream oss;
+			oss << std::put_time(&timeinfo, "%Y-%m-%d_%H-%M-%S");
+			return oss.str();
+		}		
 		Zeal::EqStructures::Entity* get_active_corpse()
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::Active_Corpse;
