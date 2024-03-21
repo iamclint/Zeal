@@ -41,6 +41,7 @@ namespace Zeal
 		static int max_pitch = 0x5e86d0;
 		static EqStructures::KeyboardInput* KeyInput = (EqStructures::KeyboardInput*)0x7ce058;
 		static char* in_game = (char*)0x798550;
+		static int RaidMemberList = 0x791518;
 		
 		//Vec3* camera_position = *(Vec3**)0x9c08128;
 	}

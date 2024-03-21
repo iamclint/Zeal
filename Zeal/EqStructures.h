@@ -544,7 +544,19 @@ namespace Zeal
 		{
 			char name[512][0x60];
 		};
-
+		struct RaidMember // starts at 0x791518, size 0x00D0
+		{			
+			/* 0x0000 */ CHAR Name[64];
+			/* 0x0040 */ CHAR PlayerLevel[2];
+			/* 0x0042 */ BYTE Unknown0042[6];
+			/* 0x0048 */ CHAR Class[64];
+			/* 0x0088 */ BYTE Unknown0048[64];
+			/* 0x00C8 */ BYTE Unknown00C8; // always 2 ?
+			/* 0x00C9 */ BYTE Unknown00C9;
+			/* 0x00CA */ BYTE Unknown00CA;
+			/* 0x00CB */ BYTE IsGroupLeader; // 0: not leader 1: leader
+			/* 0x00CC */ DWORD GroupNumber; // FFFFFFFF if ungrouped
+		};
 		struct MouseDelta
 		{
 			INT16 x;
