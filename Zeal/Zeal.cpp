@@ -15,6 +15,7 @@ ZealService::ZealService()
 	raid_hook = std::shared_ptr<raid>(new raid(this));
 	eqstr_hook = std::shared_ptr<eqstr>(new eqstr(this));
 	spell_sets = std::shared_ptr<SpellSets>(new SpellSets(this));
+	item_displays = std::shared_ptr<ItemDisplay>(new ItemDisplay(this, ini.get()));
 	this->apply_patches();
 
 	camera_mods = std::shared_ptr<CameraMods>(new CameraMods(this, ini.get()));

@@ -1,0 +1,83 @@
+#include "item_display.h"
+#include "EqStructures.h"
+#include "EqAddresses.h"
+#include "EqFunctions.h"
+#include "Zeal.h"
+#include <algorithm>
+void ItemDisplay::init_ui()
+{
+	if (!display_windows.size())
+	{
+
+		display_windows.push_back(Zeal::EqGame::Windows->ItemWnd);
+		for (int i = 0; i < max_item_displays; i++)
+		{
+			display_windows.push_back(new Zeal::EqUI::ItemDisplayWnd());
+			reinterpret_cast<Zeal::EqUI::ItemDisplayWnd* (__thiscall*)(const Zeal::EqUI::ItemDisplayWnd*, int unk)>(0x423331)(display_windows.back(), 0);
+		}
+	}
+}
+Zeal::EqUI::ItemDisplayWnd* ItemDisplay::get_available_window(Zeal::EqStructures::_EQITEMINFO* item)
+{
+
+	if (item)
+	{
+		/*check if the item is already being displayed*/
+		for (auto& w : display_windows)
+		{
+			if (w->Item.Id == item->Id)
+			{
+				w->Activate();
+				return w;
+			}
+		}
+	}
+
+	for (auto& w : display_windows)
+	{
+		if (!w->IsVisible)
+		{
+			w->Activate();
+			return w;
+		}
+	}
+	return display_windows.back();
+}
+void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, Zeal::EqStructures::_EQITEMINFO* item, bool show)
+{
+	ZealService* zeal = ZealService::get_instance();
+	wnd = zeal->item_displays->get_available_window(item);
+	zeal->hooks->hook_map["SetItem"]->original(SetItem)(wnd, unused, item, show);
+}
+void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_id, bool show, int unknown)
+{
+	ZealService* zeal = ZealService::get_instance();
+	wnd = zeal->item_displays->get_available_window(0);
+	zeal->hooks->hook_map["SetSpell"]->original(SetSpell)(wnd, unused, spell_id, show, unknown);
+}
+
+ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
+{
+	//init_ui(); /*for testing only must be in game before its loaded or you will crash*/
+	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
+	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
+	zeal->main_loop_hook->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
+	zeal->binds_hook->replace_bind(0xC8, [this](int state) { 
+		for (auto rit = display_windows.rbegin(); rit != display_windows.rend(); ++rit) {
+			Zeal::EqUI::ItemDisplayWnd* wnd = *rit;
+			if (wnd->IsVisible)
+			{
+				wnd->IsVisible = false;
+				return true;
+			}
+		}
+		return false; 
+	});
+	mem::write<BYTE>(0x4090AB, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature
+	mem::set(0x421EBF, 0x90, 14); //remove the auto focus of the main item window and handle it ourselves
+	//0x798984 --render distance
+}
+ItemDisplay::~ItemDisplay()
+{
+}
+

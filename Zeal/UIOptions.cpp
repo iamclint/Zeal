@@ -57,7 +57,7 @@ void UIOptions::InitUI()
 
 UIOptions::UIOptions(ZealService* zeal, IO_ini* ini)
 {
-	InitUI();
+	//InitUI(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick, hook_type_detour); //add extra prints for new loot types
 	zeal->main_loop_hook->add_callback([this]() { InitUI(); }, callback_fn::InitUI);
 }

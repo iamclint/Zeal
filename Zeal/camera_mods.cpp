@@ -414,7 +414,7 @@ void CameraMods::update_fps_sensitivity()
 }
 void CameraMods::callback_render()
 {
-    if (enabled)
+    if (enabled && Zeal::EqGame::is_in_game())
     {
         if (!*Zeal::EqGame::is_right_mouse_down && Zeal::EqGame::is_in_game() && *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
         {

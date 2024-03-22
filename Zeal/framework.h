@@ -16,6 +16,7 @@
 #include "chat.h"
 #include "IO_ini.h"
 #include "main_loop.h"
+#include "item_display.h"
 // other features
 #include "cycle_target.h"
 #include "outputfile.h"

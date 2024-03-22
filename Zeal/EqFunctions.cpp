@@ -158,7 +158,7 @@ namespace Zeal
 			{
 				Zeal::EqStructures::Entity* self = get_view_actor()->Entity;
 				Vec3 head_pos = self->Position;
-				head_pos.z += (self->CameraHeightOffset - self->ModelHeightOffset)-0.5; //standing
+				head_pos.z += (self->CameraHeightOffset - self->ModelHeightOffset)-0.5f; //standing
 				//if (self->StandingState == Stance::Duck || self->StandingState == Stance::Sit)
 				//	head_pos.z -= self->Height / 3;// self->CameraHeightOffset - self->ModelHeightOffset;
 				//else if (self->StandingState != Stance::Stand)

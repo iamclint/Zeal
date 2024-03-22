@@ -70,6 +70,14 @@ namespace Zeal
 			/*00F4*/ LPVOID  SetAttributesFromSidl; 
 			/*00F8*/ LPVOID  DefineImages; 
 		};
+		struct ItemDisplayVtable
+		{
+			BaseVTable basic;
+			/*0x0FC*/ LPVOID  Unknown1;
+			/*0x100*/ LPVOID  Unknown2;
+			/*0x104*/ LPVOID  Unknown3;
+			/*0x108*/ LPVOID  Activate;
+		};
 		struct ContextMenuVTable
 		{
 			BaseVTable basic;
@@ -99,6 +107,7 @@ namespace Zeal
 			/*0x14*/   CHAR    Text[1]; // Stub, can be anywhere from Length to MaxLength (which is how much is malloc'd to this CXStr)
 		};
 		struct CXSTR {
+			CXSTR() {};
 			CXSTR(const char* data)
 			{
 				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x575F30)(this, data);
@@ -147,6 +156,7 @@ namespace Zeal
 
 		struct BasicWnd
 		{
+			BasicWnd() {};
 			void SetFocus()
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(0x572290)(this);
@@ -246,6 +256,7 @@ namespace Zeal
 		};
 		struct EQWND : BasicWnd
 		{
+			EQWND() {};
 		
 			/*0x114*/   DWORD   Selector;
 			/*0x118*/   DWORD   PushToSelector;
@@ -266,6 +277,11 @@ namespace Zeal
 		};
 		struct ItemDisplayWnd : EQWND
 		{
+			ItemDisplayWnd() {};
+			void Activate()
+			{
+				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*)>(0x423606)(this);
+			}
 			void SetItem(struct Zeal::EqStructures::_EQITEMINFO* Item, bool unk)
 			{
 				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*, struct Zeal::EqStructures::_EQITEMINFO *, bool)>(0x423640)(this, Item, unk);
@@ -274,14 +290,17 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*, short, bool, int)>(0x425957)(this, spell_id, unk, unk2);
 			}
-			
+
+
 			/* 0x0134 */ struct EQWND* ItemDescription; // the item stats text window
 			/* 0x0138 */ BYTE Unknown0138[4];
 			/* 0x013C */ struct EQWND* IconBtn; // the item stats text window
 			/* 0x0140 */ BYTE Unknown0140[4];
 			/* 0x0144 */ CXSTR DisplayText; // the item name is the title text
 			/* 0x0148 */ CXSTR WindowTitle; // the item stats text
-			/* 0x014C */ struct Zeal::EqStructures::_EQITEMINFO* Item;
+			/* 0x014C */ Zeal::EqStructures::_EQITEMINFO Item;
+			//BYTE Filler[0xEC];
+
 		};
 
 
