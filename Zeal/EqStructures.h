@@ -483,10 +483,7 @@ namespace Zeal
 			/* 0x0001 */ CHAR Name[30]; // [0x1E]
 			/* 0x001F */ BYTE Unknown001F[37];
 			/* 0x0044 */ DWORD ZoneId; // EQ_ZONE_ID_x
-			Vec3 Position;
-			///* 0x0048 */ FLOAT Y;
-			///* 0x004C */ FLOAT X;
-			///* 0x0050 */ FLOAT Z;
+			/* 0x0048 */ Vec3 Position;
 			/* 0x0054 */ FLOAT Heading; // camera view left/right, yaw
 			/* 0x0058 */ FLOAT Unk;
 			/* 0x005C */ FLOAT MovementSpeed;

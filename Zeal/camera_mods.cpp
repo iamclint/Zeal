@@ -67,6 +67,7 @@ void CameraMods::toggle_zeal_cam(bool enabled)
         zeal_cam_yaw = self->Heading;
         desired_zoom += zoom_speed;
         mem::set(0x4db8ce, 0x90, 6, original_cam[0] == 0x0 ? original_cam : 0);
+        mem::write<BYTE>(0x4db8d9, 0xEB); //fix the camera bad location print
     }
     else if (original_cam[0] != 0x0)
     {
@@ -75,6 +76,7 @@ void CameraMods::toggle_zeal_cam(bool enabled)
         if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam && Zeal::EqGame::is_in_game())
            *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
         mem::copy(0x4db8ce, original_cam, 6);
+        mem::write<BYTE>(0x4db8d9, 0x74); //fix the camera bad location print
     }
 }
 void CameraMods::update_zoom(float zoom)

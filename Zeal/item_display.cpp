@@ -58,7 +58,7 @@ void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_
 
 ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 {
-	//init_ui(); /*for testing only must be in game before its loaded or you will crash*/
+	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
 	zeal->main_loop_hook->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
@@ -76,6 +76,8 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 	mem::write<BYTE>(0x4090AB, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature
 	mem::set(0x421EBF, 0x90, 14); //remove the auto focus of the main item window and handle it ourselves
 	//0x798984 --render distance
+	//0x798918 --fog maybe
+	//0x5e780c --render distance multiplier? reused for multiple things would have to remap it
 }
 ItemDisplay::~ItemDisplay()
 {

@@ -170,9 +170,8 @@ void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
         if (!Zeal::EqGame::KeyMods->Shift)
             active_edit->Caret_Start = move_index;
     }
-
-
 }
+
 int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 key, int modifier, char keydown)
 {
     //Zeal::EqGame::print_chat("EditWnd: 0x%x key: %x modifier: %i state: %i", active_edit, key, modifier, keydown);
@@ -223,6 +222,16 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
         {
             switch (key)
             {
+                case 0xCB: //left arrow
+                {
+                    move_caret(active_edit, caret_dir::left);
+                    return 0;
+                }
+                case 0xCD: //right arrow
+                {
+                    move_caret(active_edit, caret_dir::right);
+                    return 0;
+                }
                 case 0x2F: //v
                 {
                     std::string temp_text = StripSpecialCharacters(ReadFromClipboard());
