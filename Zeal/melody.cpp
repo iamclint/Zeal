@@ -10,10 +10,10 @@ void Melody::start()
 {
     if (songs.size())
     {
-        current_index = 0;
+        current_index = -1;
         active = true;
         Zeal::EqGame::print_chat("You begin playing a melody.");
-        Zeal::EqGame::get_char_info()->cast(songs.front(), Zeal::EqGame::get_char_info()->MemorizedSpell[songs.front()], 0, 0);
+        //Zeal::EqGame::get_char_info()->cast(songs.front(), Zeal::EqGame::get_char_info()->MemorizedSpell[songs.front()], 0, 0);
     }
 }
 void Melody::end()
@@ -46,15 +46,18 @@ void Melody::tick()
     }
     if (active)
     {
-        if (!Zeal::EqGame::Windows->Casting->IsVisible)
+        static ULONGLONG casting_timestamp = GetTickCount64();
+        if (!Zeal::EqGame::Windows->Casting->IsVisible && GetTickCount64()- casting_timestamp >500)
         {
             stop_cast();
             current_index++;
-            if (current_index > songs.size())
+            if (current_index >= songs.size())
                 current_index = 0;
             Zeal::EqGame::get_char_info()->cast(songs[current_index], Zeal::EqGame::get_char_info()->MemorizedSpell[songs[current_index]], 0, 0);
-
         }
+        else if (Zeal::EqGame::Windows->Casting->IsVisible)
+            casting_timestamp = GetTickCount64();
+
     }
 
 }
@@ -70,6 +73,7 @@ Melody::Melody(ZealService* zeal, IO_ini* ini)
                 Zeal::EqGame::print_chat("A melody can only consist of 5 songs");
                 return true;
             }
+            songs.clear();
             for (int i = 1; i < args.size(); i++) //start at argument 1 because 0 is the command itself
             {
                 int current_gem = -1;

@@ -385,9 +385,7 @@ namespace Zeal
 			/* 0x0B42 */ BYTE Unknown0B42[14];
 			/* 0x0B50 */ WORD Unknown0B50;
 			/* 0x0B52 */ WORD Unknown0B52;
-			/* 0x0B54 */ FLOAT ZoneEnterY;
-			/* 0x0B58 */ FLOAT ZoneEnterX;
-			/* 0x0B5C */ FLOAT ZoneEnterZ;
+			/* 0x0B54 */ Vec3 ZoneEnter;
 			/* 0x0B60 */ FLOAT Unknown0060;
 			/* 0x0B64 */ BYTE StandingState; // EQ_STANDING_STATE_x
 			/* 0x0B65 */ BYTE Unknown0B65[3];

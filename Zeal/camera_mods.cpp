@@ -327,7 +327,7 @@ void CameraMods::tick_key_move()
             GetCursorPos(&cursor_pos_for_window);
             if (gwnd == WindowFromPoint(cursor_pos_for_window))
             {
-                if (hide_cursor && GetTickCount64() - lmouse_time>pan_delay+50)
+                if (hide_cursor && GetTickCount64() - lmouse_time>pan_delay)
                 {
                     mem::write<byte>(0x53edef, 0xEB);
                     hide_cursor = false;
@@ -416,11 +416,12 @@ void CameraMods::update_fps_sensitivity()
 }
 void CameraMods::callback_render()
 {
-    if (enabled && Zeal::EqGame::is_in_game())
+    if (enabled)
     {
-        if (!*Zeal::EqGame::is_right_mouse_down && Zeal::EqGame::is_in_game() && *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
+        if (Zeal::EqGame::is_in_game() && !*Zeal::EqGame::is_right_mouse_down && *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
         {
-            update_cam();
+            if (Zeal::EqGame::get_self()->Position.Dist(Zeal::EqGame::get_char_info()->ZoneEnter) != 0)
+                update_cam();
         }
     }
 }
@@ -534,13 +535,14 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
     zeal->commands_hook->add("/pandelay", { "/pd" },
-        [this](std::vector<std::string>& args) {
+        [this, ini](std::vector<std::string>& args) {
             int delay = 200;
-            if (args.size() == 1)
+            if (args.size() == 2)
             {
                 if (StringUtil::tryParse(args[1], &delay))
                 {
                     pan_delay = delay;
+                    ini->setValue<int>("Zeal", "PanDelay", pan_delay);
                     Zeal::EqGame::print_chat("Click to pan delay is now %i", pan_delay);
                 }
             }
