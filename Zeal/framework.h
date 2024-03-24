@@ -17,6 +17,7 @@
 #include "IO_ini.h"
 #include "main_loop.h"
 #include "item_display.h"
+#include "melody.h"
 // other features
 #include "cycle_target.h"
 #include "outputfile.h"

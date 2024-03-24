@@ -348,6 +348,14 @@ namespace Zeal
 			{
 				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*)>(0x4b9450)(this);
 			}
+			int cast(UINT gem, short spell_id, int* item, short un)
+			{
+				return reinterpret_cast<int(__thiscall*)(EQCHARINFO*, UINT, short, int*, short)>(0x4c483b)(this, gem, spell_id, item, un);
+			}
+			void stop_cast(UINT reason, short spell_id)
+			{
+				return reinterpret_cast<void(__thiscall*)(EQCHARINFO*, UINT, short)>(0x4cb510)(this, reason, spell_id);
+			}
 			/* 0x0000 */ BYTE Unknown0000[2];
 			/* 0x0002 */ CHAR Name[64]; // [0x40]
 			/* 0x0042 */ CHAR LastName[70]; // [0x46] ; surname or title

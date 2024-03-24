@@ -117,9 +117,6 @@
     <ClInclude Include="camera_math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="spellsets.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EqAddresses.h">
       <Filter>Header Files\everquest</Filter>
     </ClInclude>
@@ -148,6 +145,12 @@
       <Filter>Header Files\other</Filter>
     </ClInclude>
     <ClInclude Include="item_display.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="spellsets.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="melody.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
   </ItemGroup>
@@ -234,6 +237,9 @@
       <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="item_display.cpp">
+      <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="melody.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>

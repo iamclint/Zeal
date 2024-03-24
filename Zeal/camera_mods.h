@@ -39,6 +39,7 @@ public:
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:
+	int pan_delay = 200;
 	bool check_snap = false;
 	ULONGLONG lmouse_time = 0;
 	POINT lmouse_cursor_pos;

@@ -155,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="alarm.h" />
     <ClInclude Include="item_display.h" />
+    <ClInclude Include="melody.h" />
     <ClInclude Include="player_movement.h" />
     <ClInclude Include="binds.h" />
     <ClInclude Include="buff_timers.h" />
@@ -193,6 +194,7 @@
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
     <ClCompile Include="item_display.cpp" />
+    <ClCompile Include="melody.cpp" />
     <ClCompile Include="player_movement.cpp" />
     <ClCompile Include="binds.cpp" />
     <ClCompile Include="buff_timers.cpp" />

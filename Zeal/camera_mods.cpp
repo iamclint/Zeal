@@ -320,14 +320,14 @@ void CameraMods::tick_key_move()
             lmouse_time = GetTickCount64();
         }
 
-        if (GetTickCount64() - lmouse_time > 5 )
+        if (GetTickCount64() - lmouse_time > pan_delay)
         {
             HWND gwnd = Zeal::EqGame::get_game_window();
             POINT cursor_pos_for_window;
             GetCursorPos(&cursor_pos_for_window);
             if (gwnd == WindowFromPoint(cursor_pos_for_window))
             {
-                if (hide_cursor && GetTickCount64() - lmouse_time>100)
+                if (hide_cursor && GetTickCount64() - lmouse_time>pan_delay+50)
                 {
                     mem::write<byte>(0x53edef, 0xEB);
                     hide_cursor = false;
@@ -485,6 +485,10 @@ void CameraMods::load_settings(IO_ini* ini)
         ini->setValue<bool>("Zeal", "Camera4StrafeEnabled", true);
     if (!ini->exists("Zeal", "CycleToZealCamEnabled"))
         ini->setValue<bool>("Zeal", "CycleToZealCamEnabled", true);
+    if (!ini->exists("Zeal", "PanDelay"))
+        ini->setValue<int>("Zeal", "PanDelay", 200);
+
+    pan_delay = ini->getValue<int>("Zeal", "PanDelay");
     camera3_strafe_enabled = ini->getValue<bool>("Zeal", "Camera3StrafeEnabled");
     camera4_strafe_enabled = ini->getValue<bool>("Zeal", "Camera4StrafeEnabled");
     cycle_to_zeal_cam_enabled = ini->getValue<bool>("Zeal", "CycleToZealCamEnabled");
@@ -529,7 +533,21 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
-
+    zeal->commands_hook->add("/pandelay", { "/pd" },
+        [this](std::vector<std::string>& args) {
+            int delay = 200;
+            if (args.size() == 1)
+            {
+                if (StringUtil::tryParse(args[1], &delay))
+                {
+                    pan_delay = delay;
+                    Zeal::EqGame::print_chat("Click to pan delay is now %i", pan_delay);
+                }
+            }
+            else
+                Zeal::EqGame::print_chat("Invalid arguments for pandelay example usage: /pandelay 200");
+            return true;
+        });
     zeal->commands_hook->add("/zealcam", { "/smoothing" },
         [this](std::vector<std::string>& args) {
             if (args.size() == 2 && StringUtil::caseInsensitive(args[1], "info"))
