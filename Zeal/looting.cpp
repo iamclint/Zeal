@@ -64,6 +64,7 @@ static int __fastcall LinkAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Z
 
 looting::looting(ZealService* zeal)
 {
+	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
 	zeal->main_loop_hook->add_callback([this]() {
 		Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Loot->GetChildItem("LinkAllButton");
 		if (btn)
@@ -90,30 +91,6 @@ looting::looting(ZealService* zeal)
 			}
 			return false;
 		});
-	//zeal->commands_hook->add("/icon", { },
-	//	[this](std::vector<std::string>& args) {
-	//		Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->ItemWnd->GetChildItem("IconButton");
-	//		if (btn)
-	//		{
-	//			Zeal::EqGame::Windows->ItemWnd->SetItem()
-	//			Zeal::EqGame::print_chat("button found 0x%x", btn);
-	//		}
-	//		else
-	//		{
-	//			Zeal::EqGame::print_chat("button not found");
-	//		}
-	//		return true;
-	//	});
-	zeal->commands_hook->add("/lw", { },
-		[this](std::vector<std::string>& args) {
-			Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Loot->GetChildItem("LinkAllButton");
-			if (btn)
-			{
-				btn->SetupCustomVTable();
-				btn->vtbl->HandleLButtonDown = LinkAllButtonDown;
-			}
-			return true;
-		});
-	hide_looted = false;
+	
 	zeal->hooks->Add("ReleaseLoot", Zeal::EqGame::EqGameInternal::fn_releaseloot, release_loot, hook_type_detour);
 }

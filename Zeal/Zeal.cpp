@@ -62,7 +62,7 @@ ZealService::ZealService()
 		return false;
 	}); // hotkey camp auto-sit
 
-	looting_hook->hide_looted = ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
+	
 }
 
 

@@ -315,20 +315,20 @@ void CameraMods::tick_key_move()
     {
         if (!lmouse_time)
         {
+            GetCursorPos(&lmouse_cursor_pos);
             hide_cursor = true;
             lmouse_time = GetTickCount64();
         }
 
-        if (GetTickCount64() - lmouse_time > 200 )
+        if (GetTickCount64() - lmouse_time > 5 )
         {
             HWND gwnd = Zeal::EqGame::get_game_window();
             POINT cursor_pos_for_window;
             GetCursorPos(&cursor_pos_for_window);
             if (gwnd == WindowFromPoint(cursor_pos_for_window))
             {
-                if (hide_cursor)
+                if (hide_cursor && GetTickCount64() - lmouse_time>100)
                 {
-                    GetCursorPos(&lmouse_cursor_pos);
                     mem::write<byte>(0x53edef, 0xEB);
                     hide_cursor = false;
                 }
