@@ -36,8 +36,13 @@ void Experience::check_reset()
 
 void Experience::callback_main()
 {
-	check_reset();
 	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+	if (!self || !Zeal::EqGame::is_in_game())
+		return;
+	if (!self->CharInfo)
+		return;
+
+	check_reset();
 	exp_per_hour_tot = 0;
 	exp_per_hour_pct_tot = 0;
 	int total_gained = 0;

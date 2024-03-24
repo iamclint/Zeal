@@ -8,7 +8,8 @@
 
 void Melody::start()
 {
-    if (songs.size())
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_controlled();
+    if (songs.size() && Zeal::EqGame::is_in_game() && self && self->CharInfo && !self->CharInfo->StunnedState)
     {
         current_index = -1;
         active = true;
