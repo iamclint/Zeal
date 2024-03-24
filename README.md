@@ -6,6 +6,11 @@
 - Add free for all for raid loot, requires ui change or /setloottype 4
 ### Commands
 ___
+- `/pandelay`
+  - **Arguments:** `ms delay`, `none`
+  - **Example:** `/pandelay 200`
+  - **Description:** changes the amount of delay before left click panning will start to happen
+    
 - `/hidecorpse`
   - **Arguments:** `looted`, `none`
   - **Aliases:** `/hideco`, `/hidec`, `/hc`
