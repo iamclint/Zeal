@@ -71,11 +71,19 @@ Melody::Melody(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("StopCast", 0x4cb510, StopCast, hook_type_detour); //add extra prints for new loot types
     zeal->commands_hook->add("/melody", { },
         [this](std::vector<std::string>& args) {
+            if (Zeal::EqGame::get_char_info()->Class != 8)
+            {
+                Zeal::EqGame::print_chat("Only bards can keep a melody.");
+                songs.clear();
+                return true;
+            }
+
             if (args.size() > 6)
             {
                 Zeal::EqGame::print_chat("A melody can only consist of 5 songs");
                 return true;
             }
+
             songs.clear();
             for (int i = 1; i < args.size(); i++) //start at argument 1 because 0 is the command itself
             {
