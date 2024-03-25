@@ -34,7 +34,8 @@ void __fastcall StopCast(int t, int u, BYTE reason, short spell_id)
 }
 void Melody::stop_cast()
 {
-    ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)((int)Zeal::EqGame::get_char_info(), 0, 0, Zeal::EqGame::get_char_info()->MemorizedSpell[songs[current_index]]);
+    if (current_index>=0)
+        ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)((int)Zeal::EqGame::get_char_info(), 0, 0, Zeal::EqGame::get_char_info()->MemorizedSpell[songs[current_index]]);
 }
 
 void Melody::tick()
