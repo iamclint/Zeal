@@ -6,6 +6,11 @@
 - Add free for all for raid loot, requires ui change or /setloottype 4
 ### Commands
 ___
+- `/melody`
+  - **Arguments:** `song gem #'s (maximum of 5)`
+  - **Example:** `/melody 1 4 2 3`
+  - **Description:** plays songs in order until interrupted in any fashion.
+    
 - `/pandelay`
   - **Arguments:** `ms delay`, `none`
   - **Example:** `/pandelay 200`
