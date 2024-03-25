@@ -381,7 +381,7 @@ namespace Zeal
 			/* 0x0264 */ _EQBUFFINFO Buff[EQ_NUM_BUFFS];
 			/* 0x02FA */ BYTE Unknown02FA[1080];
 			/* 0x0732 */ WORD SpellBook[EQ_NUM_SPELL_BOOK_SPELLS];
-			/* 0x0B32 */ WORD MemorizedSpell[EQ_NUM_SPELL_GEMS]; // spell gem spell ids
+			/* 0x0B32 */ SHORT MemorizedSpell[EQ_NUM_SPELL_GEMS]; // spell gem spell ids
 			/* 0x0B42 */ BYTE Unknown0B42[14];
 			/* 0x0B50 */ WORD Unknown0B50;
 			/* 0x0B52 */ WORD Unknown0B52;

@@ -14,7 +14,6 @@ void Melody::start()
         current_index = -1;
         active = true;
         Zeal::EqGame::print_chat("You begin playing a melody.");
-        //Zeal::EqGame::get_char_info()->cast(songs.front(), Zeal::EqGame::get_char_info()->MemorizedSpell[songs.front()], 0, 0);
     }
 }
 void Melody::end()
@@ -45,7 +44,7 @@ void Melody::tick()
         end();
         return;
     }
-    if (active)
+    if (active && Zeal::EqGame::get_char_info())
     {
         static ULONGLONG casting_timestamp = GetTickCount64();
         if (!Zeal::EqGame::Windows->Casting->IsVisible && GetTickCount64()- casting_timestamp >500)
@@ -54,7 +53,10 @@ void Melody::tick()
             current_index++;
             if (current_index >= songs.size())
                 current_index = 0;
-            Zeal::EqGame::get_char_info()->cast(songs[current_index], Zeal::EqGame::get_char_info()->MemorizedSpell[songs[current_index]], 0, 0);
+
+            int current_gem = songs[current_index];
+            if (Zeal::EqGame::get_char_info()->MemorizedSpell[current_gem]!=-1)
+                Zeal::EqGame::get_char_info()->cast(current_gem, Zeal::EqGame::get_char_info()->MemorizedSpell[current_gem], 0, 0);
         }
         else if (Zeal::EqGame::Windows->Casting->IsVisible)
             casting_timestamp = GetTickCount64();
@@ -80,7 +82,17 @@ Melody::Melody(ZealService* zeal, IO_ini* ini)
                 int current_gem = -1;
                 if (StringUtil::tryParse(args[i], &current_gem) && current_gem<9 && current_gem>0)
                 {
-                    songs.push_back(current_gem - 1); //make it base 0
+                    current_gem--; //base 0
+                    if (Zeal::EqGame::get_char_info()->MemorizedSpell[current_gem] != -1)
+                    {
+                        songs.push_back(current_gem);
+                    }
+                    else
+                    {
+                        Zeal::EqGame::print_chat("Error spell gem %i is empty", current_gem+1);
+                        songs.clear();
+                        return true;
+                    }
                 }
                 else
                 {
