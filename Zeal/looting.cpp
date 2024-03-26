@@ -67,6 +67,7 @@ looting::looting(ZealService* zeal)
 	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
 	zeal->main_loop_hook->add_callback([this]() {
 		Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Loot->GetChildItem("LinkAllButton");
+		mem::unprotect_memory(&btn, 4);
 		if (btn)
 		{
 			btn->SetupCustomVTable();

@@ -4,19 +4,31 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
+
+
+void __fastcall Deconstruct(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, BYTE reason)
+{
+	Zeal::EqGame::get_wnd_manager()->Unknown0x8 -= 1;
+}
+
 void ItemDisplay::init_ui()
 {
-	if (!display_windows.size())
+	display_windows.clear();
+	display_windows.push_back(Zeal::EqGame::Windows->ItemWnd);
+	for (int i = 0; i < max_item_displays; i++)
 	{
-
-		display_windows.push_back(Zeal::EqGame::Windows->ItemWnd);
-		for (int i = 0; i < max_item_displays; i++)
-		{
-			display_windows.push_back(new Zeal::EqUI::ItemDisplayWnd());
-			reinterpret_cast<Zeal::EqUI::ItemDisplayWnd* (__thiscall*)(const Zeal::EqUI::ItemDisplayWnd*, int unk)>(0x423331)(display_windows.back(), 0);
-		}
+		Zeal::EqUI::ItemDisplayWnd* new_wnd = new Zeal::EqUI::ItemDisplayWnd();
+		display_windows.push_back(new_wnd);
+		reinterpret_cast<Zeal::EqUI::ItemDisplayWnd* (__thiscall*)(const Zeal::EqUI::ItemDisplayWnd*, int unk)>(0x423331)(new_wnd, 0);
+		new_wnd->SetupCustomVTable();
+		new_wnd->vtbl->Deconstructor = Deconstruct;
+		new_wnd->Location.Top += 20 * (i + 1);
+		new_wnd->Location.Left += 20 * (i + 1);
+		new_wnd->Location.Bottom += 20 * (i + 1);
+		new_wnd->Location.Right += 20 * (i + 1);
 	}
 }
+
 Zeal::EqUI::ItemDisplayWnd* ItemDisplay::get_available_window(Zeal::EqStructures::_EQITEMINFO* item)
 {
 
@@ -58,10 +70,11 @@ void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_
 
 ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 {
-	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
+	//if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
 	zeal->main_loop_hook->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
+	//zeal->main_loop_hook->add_callback([this]() { clean_ui(); }, callback_fn::CleanUI);
 	zeal->binds_hook->replace_bind(0xC8, [this](int state) { 
 		for (auto rit = display_windows.rbegin(); rit != display_windows.rend(); ++rit) {
 			Zeal::EqUI::ItemDisplayWnd* wnd = *rit;

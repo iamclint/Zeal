@@ -7,13 +7,14 @@ class Melody
 public:
 	void start();
 	void end();
+	int current_index = 0;
 	Melody(class ZealService* pHookWrapper, class IO_ini* ini);
 	~Melody();
 private:
 	void tick();
 	void stop_cast();
 	bool active = false;
-	int current_index = 0;
+	
 	std::vector<int> songs;
 };
 

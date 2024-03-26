@@ -278,6 +278,14 @@ namespace Zeal
 		struct ItemDisplayWnd : EQWND
 		{
 			ItemDisplayWnd() {};
+			void SetupCustomVTable()
+			{
+				ItemDisplayVtable* newtbl = new ItemDisplayVtable();
+				mem::copy((int)newtbl, (int)vtbl, sizeof(ItemDisplayVtable));
+				vtbl = (BaseVTable*)newtbl;
+				mem::unprotect_memory(vtbl, sizeof(ItemDisplayVtable));
+				
+			}
 			void Activate()
 			{
 				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*)>(0x423606)(this);
@@ -355,7 +363,11 @@ namespace Zeal
 		};
 		struct CXWndManager
 		{
-			/* 0x0000 */ BYTE unknown0[0x14];
+			/* 0x0000 */ DWORD Unknown0x0;
+			/* 0x0004 */ DWORD Unknown0x4;
+			/* 0x0008 */ DWORD Unknown0x8;
+			/* 0x000C */ DWORD Unknown0xC;
+			/* 0x0010 */ DWORD Unknown0x10;
 			/* 0x0014 */ EQKey LastKey;
 			/* 0x0028 */ EditWnd* ActiveEdit;
 			/* 0x002C */ int unknown1;
