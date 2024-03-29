@@ -35,6 +35,7 @@ void __fastcall StopCast(int t, int u, BYTE reason, short spell_id)
         ZealService::get_instance()->melody->current_index--;
     ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)(t, u, reason, spell_id);
 }
+
 void Melody::stop_cast()
 {
     if (current_index>=0)
@@ -62,7 +63,7 @@ void Melody::tick()
 
             stop_cast();
             current_index++;
-            if (current_index >= songs.size())
+            if (current_index >= songs.size() || current_index<0)
                 current_index = 0;
 
             int current_gem = songs[current_index];
@@ -71,15 +72,13 @@ void Melody::tick()
         }
         else if (Zeal::EqGame::Windows->Casting->IsVisible)
             casting_timestamp = GetTickCount64();
-
-
     }
-
 }
 
 Melody::Melody(ZealService* zeal, IO_ini* ini)
 {
     zeal->main_loop_hook->add_callback([this]() { tick();  });
+    zeal->main_loop_hook->add_callback([this]() { end(); }, callback_fn::CharacterSelect);
     zeal->hooks->Add("StopCast", 0x4cb510, StopCast, hook_type_detour); //add extra prints for new loot types
     zeal->commands_hook->add("/melody", { },
         [this](std::vector<std::string>& args) {

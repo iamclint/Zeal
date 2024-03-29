@@ -83,6 +83,8 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+		EqStructures::Everquest* get_eq();
+		int get_gamestate();
 		bool is_new_ui();
 		HWND get_game_window();
 		bool is_in_char_select();

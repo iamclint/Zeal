@@ -29,6 +29,11 @@ void _fastcall charselect_hk(int t, int u)
 	zeal->hooks->hook_map["DoCharacterSelection"]->original(charselect_hk)(t, u);
 }
 
+void MainLoop::eml()
+{
+	do_callbacks(callback_fn::EndMainLoop);
+}
+
 void MainLoop::do_callbacks(callback_fn fn)
 {
 	for (auto& f : callback_functions[fn])
@@ -58,7 +63,6 @@ void __stdcall clean_up_ui()
 	zeal->main_loop_hook->do_callbacks(callback_fn::CleanUI);
 	zeal->hooks->hook_map["CleanUpUI"]->original(clean_up_ui)();
 }
-
 
 MainLoop::MainLoop(ZealService* zeal)
 {

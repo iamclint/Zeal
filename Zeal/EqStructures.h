@@ -1,6 +1,7 @@
 #pragma once
 //some structure information was found here
 //https://github.com/kevrgithub/eqmac/
+//https://github.com/MMOBugs/EQMac
 
 #include <Windows.h>
 #include "vectors.h"
@@ -20,6 +21,12 @@
 #define EQ_NUM_HOTBUTTONS 10
 #define EQ_NUM_HOTBUTTONS_TOTAL 100
 #define EQ_NUM_CONTAINER_SLOTS 10
+#define GAMESTATE_CHARSELECT    1
+#define GAMESTATE_SOMETHING     4
+#define GAMESTATE_INGAME        5
+#define GAMESTATE_PRECHARSELECT 6
+#define GAMESTATE_LOGGINGIN     253
+#define GAMESTATE_UNLOADING     255
 namespace Zeal
 {
 	namespace EqEnums
@@ -476,6 +483,12 @@ namespace Zeal
 			/* 0x1709 */ BYTE Unknown1709[2475];
 			/* 0x20B4 */ struct _EQITEMINFO* InventoryBankItem[EQ_NUM_INVENTORY_BANK_SLOTS];
 			/* ...... */
+		};
+
+		struct Everquest
+		{
+			/*0x000*/ BYTE Unknown[0x5AC];
+			/*0x5AC*/ int game_state;
 		};
 
 		struct Entity

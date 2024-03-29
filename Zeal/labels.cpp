@@ -16,6 +16,8 @@ void default_empty(Zeal::EqUI::CXSTR* str, bool* override_color, ULONG* color)
 bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, ULONG* color)
 {
 	ZealService* zeal = ZealService::get_instance();
+	if (!Zeal::EqGame::is_in_game())
+		return ZealService::get_instance()->hooks->hook_map["GetLabel"]->original(GetLabelFromEq)(EqType, str, override_color, color);
 	switch (EqType)
 	{
 	case 80:

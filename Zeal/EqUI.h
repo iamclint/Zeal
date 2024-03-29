@@ -75,8 +75,8 @@ namespace Zeal
 			BaseVTable basic;
 			/*0x0FC*/ LPVOID  Unknown1;
 			/*0x100*/ LPVOID  Unknown2;
-			/*0x104*/ LPVOID  Unknown3;
-			/*0x108*/ LPVOID  Activate;
+			/*0x104*/ LPVOID  Activate;
+			/*0x108*/ LPVOID  Unknown3;
 		};
 		struct ContextMenuVTable
 		{
@@ -287,6 +287,10 @@ namespace Zeal
 				
 			}
 			void Activate()
+			{
+				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*)>(0x423606)(this);
+			}
+			void Unk3()
 			{
 				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*)>(0x423606)(this);
 			}

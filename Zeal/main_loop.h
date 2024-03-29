@@ -10,7 +10,8 @@ enum class callback_fn
 	CleanUI,
 	Render,
 	CharacterSelect,
-	InitUI
+	InitUI,
+	EndMainLoop
 };
 class MainLoop
 {
@@ -19,6 +20,7 @@ public:
 	void add_callback(std::function<void()> callback_function, callback_fn fn = callback_fn::MainLoop);
 	MainLoop(class ZealService* zeal);
 	~MainLoop();
+	void eml();
 private:
 	std::unordered_map<callback_fn, std::vector<std::function<void()>>> callback_functions;
 };

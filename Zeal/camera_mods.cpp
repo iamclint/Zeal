@@ -63,15 +63,19 @@ void CameraMods::toggle_zeal_cam(bool enabled)
     if (enabled)
     {
         *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::ZealCam;
-        zeal_cam_pitch = camera_math::pitch_to_normal(self->Pitch);
-        zeal_cam_yaw = self->Heading;
+        if (self) 
+        {
+            zeal_cam_pitch = camera_math::pitch_to_normal(self->Pitch);
+            zeal_cam_yaw = self->Heading;
+        }
         desired_zoom += zoom_speed;
         mem::set(0x4db8ce, 0x90, 6, original_cam[0] == 0x0 ? original_cam : 0);
         mem::write<BYTE>(0x4db8d9, 0xEB); //fix the camera bad location print
     }
     else if (original_cam[0] != 0x0)
     {
-        self->Pitch = camera_math::pitch_to_game(zeal_cam_pitch);
+        if (self)
+            self->Pitch = camera_math::pitch_to_game(zeal_cam_pitch);
         current_zoom = 0;
         if (*Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam && Zeal::EqGame::is_in_game())
            *Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::FirstPerson;
@@ -530,7 +534,8 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     height = 0;
     zeal->main_loop_hook->add_callback([this]() { callback_main();  });
     zeal->main_loop_hook->add_callback([this]() { callback_render();  }, callback_fn::Render);
-    zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
+    //zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
+    zeal->main_loop_hook->add_callback([this]() { callback_characterselect(); }, callback_fn::EndMainLoop);
     zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);

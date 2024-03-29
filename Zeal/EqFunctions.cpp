@@ -369,6 +369,17 @@ namespace Zeal
 
 			EqGameInternal::print_chat(*(int*)0x809478, 0, msg.c_str(), color, un);
 		}
+		int get_gamestate()
+		{
+			if (get_eq())
+				return get_eq()->game_state;
+			return -1;
+		}
+		EqStructures::Everquest* get_eq()
+		{
+			return *(EqStructures::Everquest**)0x809478;
+		}
+
 		std::string generateTimestamp() {
 			time_t rawtime;
 			struct tm timeinfo;
@@ -605,7 +616,10 @@ namespace Zeal
 		}
 		bool is_in_game()
 		{
-			return *Zeal::EqGame::in_game;
+			if (get_gamestate() != -1)
+				return get_gamestate() == GAMESTATE_INGAME;
+			else
+				return false;
 		}
 		bool is_new_ui()
 		{

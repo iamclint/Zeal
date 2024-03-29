@@ -9,6 +9,11 @@ Binds::~Binds()
 
 void ExecuteCmd(int cmd, int isdown, int unk2)
 {
+	if (cmd == 0xd2)
+	{
+		ZealService* zeal = ZealService::get_instance();
+		zeal->main_loop_hook->eml();
+	}
 	ZealService* zeal = ZealService::get_instance();
 	if (!Zeal::EqGame::game_wants_input()) //checks if the game wants keyboard input... don't call our binds when the game wants input
 	{
