@@ -517,6 +517,12 @@ void __stdcall procRightMouse(int x, int y)
     zeal->hooks->hook_map["procRightMouse"]->original(procRightMouse)(x, y);
 }
 
+void CameraMods::set_pan_delay(int value_ms)
+{
+   pan_delay = value_ms;
+   ZealService::get_instance()->ini->setValue<int>("Zeal", "PanDelay", pan_delay);
+}
+
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {
     load_settings(ini);
@@ -546,8 +552,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
             {
                 if (StringUtil::tryParse(args[1], &delay))
                 {
-                    pan_delay = delay;
-                    ini->setValue<int>("Zeal", "PanDelay", pan_delay);
+                    set_pan_delay(delay);
                     Zeal::EqGame::print_chat("Click to pan delay is now %i", pan_delay);
                 }
             }

@@ -36,10 +36,11 @@ public:
 	void handle_camera_motion_binds(int cmd, bool is_down);
 	void handle_cycle_camera_views(int cmd, bool is_down);
 	void proc_rmousedown(int x, int y);
+	int pan_delay = 200;
+	void set_pan_delay(int value_ms);
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:
-	int pan_delay = 200;
 	bool check_snap = false;
 	ULONGLONG lmouse_time = 0;
 	POINT lmouse_cursor_pos;
