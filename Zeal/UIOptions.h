@@ -9,7 +9,15 @@ public:
 	void InitUI();
 	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*)>> checkbox_callbacks;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> checkbox_names;
-	void AddCheckboxCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback); \
+	std::unordered_map<Zeal::EqUI::SliderWnd*, std::function<void(Zeal::EqUI::SliderWnd*)>> slider_callbacks;
+	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> slider_names;
+	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*)>> combo_callbacks;
+	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> combo_names;
+	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> label_names;
+	void AddCheckboxCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback);
+	void AddSliderCallback(std::string name, std::function<void(Zeal::EqUI::SliderWnd*)> callback);
+	void AddComboCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback);
+	void AddLabel(std::string name);
 	void SetChecked(std::string name, bool checked);
 	UIOptions(class ZealService* pHookWrapper, class IO_ini* ini);
 	~UIOptions();

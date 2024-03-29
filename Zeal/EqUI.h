@@ -314,7 +314,23 @@ namespace Zeal
 			//BYTE Filler[0xEC];
 
 		};
+		struct SliderWnd : EQWND
+		{
+			SliderWnd() {};
+			void SetupCustomVTable()
+			{
+				BaseVTable* newtbl = new BaseVTable();
+				mem::copy((int)newtbl, (int)vtbl, sizeof(BaseVTable));
+				vtbl = (BaseVTable*)newtbl;
+				mem::unprotect_memory(vtbl, sizeof(BaseVTable));
 
+			}
+			/* 0x0134 */ int val1;
+			/* 0x0138 */ BYTE Unknown0138[4];
+			/* 0x013C */ int val2; 
+			/* 0x0140 */ int val3;
+			/* 0x0144 */ BYTE Unknown0144[0xC]; // the item name is the title text
+		};
 
 		struct LootWnd : public EQWND
 		{

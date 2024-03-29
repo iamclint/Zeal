@@ -75,7 +75,8 @@ void ItemDisplay::clean_ui()
 {
 	for (auto& w : display_windows)
 	{
-		w->IsVisible = false;
+		if (w)
+			w->IsVisible = false;
 	}
 }
 

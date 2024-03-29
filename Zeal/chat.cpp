@@ -82,11 +82,7 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
         ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data).c_str(), color_index, u);
         mem::write<byte>(0x5380C9, 0x75); //reset the logging
 
-        mem::write<byte>(0x53805B, 0xEB); //disable print chat for NewUI
-        mem::write<byte>(0x538090, 0xEB); //disable print chat for OldUI
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data, color_index, u);
-        mem::write<byte>(0x538090, 0x74); //reset print chat for OldUI
-        mem::write<byte>(0x53805B, 0x74); //reset print chat for NewUI
+        reinterpret_cast<void(__cdecl*)( const char* data)>(0x5240dc)(data); //add to log
     }
     else
         ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data, color_index, u);
