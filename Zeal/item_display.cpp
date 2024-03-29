@@ -59,8 +59,7 @@ void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, Zeal::EqStr
 	ZealService* zeal = ZealService::get_instance();
 	wnd = zeal->item_displays->get_available_window(item);
 	zeal->hooks->hook_map["SetItem"]->original(SetItem)(wnd, unused, item, show);
-	wnd->IconBtn->ZLayer = 255;
-	wnd->IconBtn->ZLayer2 = 255;
+	wnd->IconBtn->ZLayer = wnd->ZLayer;
 	wnd->Activate();
 }
 void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_id, bool show, int unknown)
@@ -68,9 +67,16 @@ void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_
 	ZealService* zeal = ZealService::get_instance();
 	wnd = zeal->item_displays->get_available_window(0);
 	zeal->hooks->hook_map["SetSpell"]->original(SetSpell)(wnd, unused, spell_id, show, unknown);
-	wnd->IconBtn->ZLayer = 255;
-	wnd->IconBtn->ZLayer2 = 255;
+	wnd->IconBtn->ZLayer = wnd->ZLayer;
 	wnd->Activate();
+}
+
+void ItemDisplay::clean_ui()
+{
+	for (auto& w : display_windows)
+	{
+		w->IsVisible = false;
+	}
 }
 
 ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
@@ -79,7 +85,7 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
 	zeal->main_loop_hook->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
-	//zeal->main_loop_hook->add_callback([this]() { clean_ui(); }, callback_fn::CleanUI);
+	zeal->main_loop_hook->add_callback([this]() { clean_ui(); }, callback_fn::CleanUI);
 	zeal->binds_hook->replace_bind(0xC8, [this](int state) { 
 		for (auto rit = display_windows.rbegin(); rit != display_windows.rend(); ++rit) {
 			Zeal::EqUI::ItemDisplayWnd* wnd = *rit;
