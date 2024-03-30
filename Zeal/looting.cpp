@@ -16,8 +16,8 @@
 void looting::set_hide_looted(bool val)
 {
 	hide_looted = val;
-	ZealService::get_instance()->ui->SetChecked("Zeal_HideCorpse", hide_looted);
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "HideLooted", hide_looted);
+	ZealService::get_instance()->ui->UpdateOptions();
 }
 
 

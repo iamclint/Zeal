@@ -226,6 +226,7 @@ void CameraMods::set_smoothing(bool val)
         toggle_zeal_cam(enabled);
     else
         toggle_zeal_cam(false);
+    ZealService::get_instance()->ui->UpdateOptions();
 }
 
 void CameraMods::interpolate_zoom() 
@@ -521,6 +522,7 @@ void CameraMods::set_pan_delay(int value_ms)
 {
    pan_delay = value_ms;
    ZealService::get_instance()->ini->setValue<int>("Zeal", "PanDelay", pan_delay);
+   ZealService::get_instance()->ui->UpdateOptions();
 }
 
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)

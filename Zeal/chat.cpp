@@ -313,6 +313,7 @@ void chat::set_input(bool val)
         Zeal::EqGame::print_chat("Zeal special input enabled");
     else
         Zeal::EqGame::print_chat("Zeal special input disabled");
+    ZealService::get_instance()->ui->UpdateOptions();
 }
 void chat::set_timestamp(bool val)
 {
@@ -322,6 +323,7 @@ void chat::set_timestamp(bool val)
         Zeal::EqGame::print_chat("Timestamps enabled");
     else
         Zeal::EqGame::print_chat("Timestamps disabled");
+    ZealService::get_instance()->ui->UpdateOptions();
 }
 void chat::set_bluecon(bool val)
 {
@@ -331,6 +333,7 @@ void chat::set_bluecon(bool val)
         Zeal::EqGame::print_chat("Blue con color is now set to usercolor 70");
     else
         Zeal::EqGame::print_chat("Default blue con color.");
+    ZealService::get_instance()->ui->UpdateOptions();
 }
 chat::~chat()
 {
