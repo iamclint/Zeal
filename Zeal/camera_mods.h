@@ -38,6 +38,7 @@ public:
 	void proc_rmousedown(int x, int y);
 	int pan_delay = 200;
 	void set_pan_delay(int value_ms);
+	void update_sensitivity();
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:

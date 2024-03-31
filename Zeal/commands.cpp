@@ -59,6 +59,88 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			Zeal::EqGame::EqGameInternal::auto_inventory(Zeal::EqGame::get_char_info(), &Zeal::EqGame::get_char_info()->CursorItem, 0);
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
+	add("/autobank", { "/autoba", "/ab" },
+		[](std::vector<std::string>& args) {
+			if (Zeal::EqGame::Windows->Bank && Zeal::EqGame::Windows->Bank->IsVisible)
+			{
+				if (Zeal::EqGame::get_char_info()->BankGold > 0)
+				{
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 1, Zeal::EqGame::get_char_info()->BankGold);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 2, -1);
+				}
+				if (Zeal::EqGame::get_char_info()->BankSilver > 0)
+				{
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 2, Zeal::EqGame::get_char_info()->BankSilver);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 3, -1);
+				}
+				if (Zeal::EqGame::get_char_info()->BankCopper > 0)
+				{
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 3, Zeal::EqGame::get_char_info()->BankCopper);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 0, -1);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 1, -1);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 2, -1);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 3, -1);
+				}
+
+				if (Zeal::EqGame::get_char_info()->Gold > 0)
+				{
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 1, Zeal::EqGame::get_char_info()->Gold);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 2, -1);
+				}
+				if (Zeal::EqGame::get_char_info()->Silver > 0)
+				{
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 2, Zeal::EqGame::get_char_info()->Silver);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 3, -1);
+				}
+				if (Zeal::EqGame::get_char_info()->Copper > 0)
+				{
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 3, Zeal::EqGame::get_char_info()->Copper);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 0, -1);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 1, -1);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 2, -1);
+					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 3, -1);
+				}
+			}
+			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+		});
+	add("/fov", { },
+		[](std::vector<std::string>& args) {
+			Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
+			if (ci)
+			{
+				float fov = 0;
+				if (args.size()>1 && StringUtil::tryParse(args[1], &fov))
+				{
+					ci->FieldOfView = fov;
+				}
+				else
+				{
+					Zeal::EqGame::print_chat("Current FOV [%f]", ci->FieldOfView);
+				}
+			
+			}
+			
+			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+		});
+	add("/aspectratio", { "/ar"},
+		[](std::vector<std::string>& args) {
+			Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
+			if (ci)
+			{
+				float ar = 0;
+				if (args.size() > 1 && StringUtil::tryParse(args[1], &ar))
+				{
+					ci->AspectRatio = ar;
+				}
+				else
+				{
+					Zeal::EqGame::print_chat("Current Aspect Ratio [%f]", ci->AspectRatio);
+				}
+
+			}
+
+			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+		});
 	add("/clearchat", {},
 		[](std::vector<std::string>& args) {
 			// each line can hold up to 256 characters but typically doesnt reach that far.

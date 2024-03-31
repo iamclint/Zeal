@@ -176,6 +176,10 @@ namespace Zeal
 			{
 				return reinterpret_cast<BasicWnd*(__thiscall*)(const BasicWnd*, CXSTR)>(0x570320)(this, name);
 			}
+			int WndNotification(int a1, int a2, int a3)
+			{
+				return reinterpret_cast<int(__thiscall*)(const BasicWnd*, int,int,int)>(vtbl->WndNotification)(this, a1, a2, a3);
+			}
 
 			/* 0x0000 */ BaseVTable* vtbl;
 			/* 0x0004 */ DWORD MouseHoverTimer;

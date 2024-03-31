@@ -525,6 +525,15 @@ void CameraMods::set_pan_delay(int value_ms)
    ZealService::get_instance()->ui->UpdateOptions();
 }
 
+void CameraMods::update_sensitivity()
+{
+    ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", user_sensitivity_x);
+    ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
+    ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x_3rd);
+    ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y_3rd);
+    ZealService::get_instance()->ui->UpdateOptions();
+}
+
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {
     load_settings(ini);
@@ -584,10 +593,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 user_sensitivity_x_3rd = x_sens;
                 user_sensitivity_y_3rd = y_sens;
                 set_smoothing(true);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", user_sensitivity_x);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x_3rd);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y_3rd);
+                update_sensitivity();
                 Zeal::EqGame::print_chat("New camera sensitivity [%f] [%f]", user_sensitivity_x, user_sensitivity_y);
             }
             else if (args.size() == 5)
@@ -612,11 +618,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 user_sensitivity_x_3rd = x_sens_3rd;
                 user_sensitivity_y_3rd = y_sens_3rd;
                 set_smoothing(true);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX", user_sensitivity_x);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x_3rd);
-                ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y_3rd);
-
+                update_sensitivity();
                 Zeal::EqGame::print_chat("New camera sensitivity FirstPerson: [%f] [%f] ThirdPerson: [%f] [%f]", user_sensitivity_x, user_sensitivity_y, user_sensitivity_x_3rd, user_sensitivity_y_3rd);
             }
             else
