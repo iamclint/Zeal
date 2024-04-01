@@ -338,6 +338,12 @@ namespace Zeal
 
 		struct LootWnd : public EQWND
 		{
+			void RequestLootSlot(UINT slot, BYTE inventory)
+			{
+				reinterpret_cast<void(__thiscall*)(const LootWnd*, UINT, bool)>(0x426b02)(this, slot, inventory);
+			}
+
+			
 			/* 0x0134 */ DWORD Unk1;
 			/* 0x0138 */ DWORD ItemSlotIndex[EQ_NUM_LOOT_WINDOW_ITEMS];
 			/* 0x01B0 */ DWORD Timer;

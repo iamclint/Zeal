@@ -271,5 +271,5 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 			return false;
 		}
 	);
-	zeal->main_loop_hook->add_callback([this]() { callback_main(); }, callback_fn::MainLoop);
+	zeal->callbacks->add_callback([this]() { callback_main(); }, callback_fn::MainLoop);
 }

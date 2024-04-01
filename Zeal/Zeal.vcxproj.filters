@@ -78,7 +78,7 @@
     <ClInclude Include="commands.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
-    <ClInclude Include="main_loop.h">
+    <ClInclude Include="callbacks.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
     <ClInclude Include="experience.h">
@@ -191,7 +191,7 @@
     <ClCompile Include="commands.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
-    <ClCompile Include="main_loop.cpp">
+    <ClCompile Include="callbacks.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="experience.cpp">

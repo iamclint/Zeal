@@ -12,7 +12,7 @@ void ExecuteCmd(int cmd, int isdown, int unk2)
 	if (cmd == 0xd2)
 	{
 		ZealService* zeal = ZealService::get_instance();
-		zeal->main_loop_hook->eml();
+		zeal->callbacks->eml();
 	}
 	ZealService* zeal = ZealService::get_instance();
 	if (!Zeal::EqGame::game_wants_input()) //checks if the game wants keyboard input... don't call our binds when the game wants input
@@ -215,8 +215,8 @@ void Binds::on_zone()
 
 Binds::Binds(ZealService* zeal)
 {
-	zeal->main_loop_hook->add_callback([this]() { main_loop(); }, callback_fn::MainLoop);
-	zeal->main_loop_hook->add_callback([this]() { on_zone(); }, callback_fn::Zone);
+	zeal->callbacks->add_callback([this]() { main_loop(); }, callback_fn::MainLoop);
+	zeal->callbacks->add_callback([this]() { on_zone(); }, callback_fn::Zone);
 	for (int i = 0; i < 128; i++)
 		KeyMapNames[i] = *(char**)(0x611220 + (i * 4)); //copy the original short names to the new array
 	mem::write(0x52507A, (int)KeyMapNames);//write ini keymap

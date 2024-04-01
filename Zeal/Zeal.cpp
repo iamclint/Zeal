@@ -8,7 +8,7 @@ ZealService::ZealService()
 	ini = std::shared_ptr<IO_ini>(new IO_ini(".\\eqclient.ini")); //other functions rely on this hook
 	//initialize the hooked function classes
 	commands_hook = std::shared_ptr<ChatCommands>(new ChatCommands(this)); //other classes below rely on this class on initialize
-	main_loop_hook = std::shared_ptr<MainLoop>(new MainLoop(this)); //other functions rely on this hook
+	callbacks = std::shared_ptr<CallBacks>(new CallBacks(this)); //other functions rely on this hook
 	looting_hook = std::shared_ptr<looting>(new looting(this));
 	labels_hook = std::shared_ptr<labels>(new labels(this));
 	binds_hook = std::shared_ptr<Binds>(new Binds(this));

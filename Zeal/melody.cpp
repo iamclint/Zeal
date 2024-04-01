@@ -77,8 +77,8 @@ void Melody::tick()
 
 Melody::Melody(ZealService* zeal, IO_ini* ini)
 {
-    zeal->main_loop_hook->add_callback([this]() { tick();  });
-    zeal->main_loop_hook->add_callback([this]() { end(); }, callback_fn::CharacterSelect);
+    zeal->callbacks->add_callback([this]() { tick();  });
+    zeal->callbacks->add_callback([this]() { end(); }, callback_fn::CharacterSelect);
     zeal->hooks->Add("StopCast", 0x4cb510, StopCast, hook_type_detour); //add extra prints for new loot types
     zeal->commands_hook->add("/melody", { },
         [this](std::vector<std::string>& args) {

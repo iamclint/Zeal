@@ -62,18 +62,97 @@ static int __fastcall LinkAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Z
 	return rval;
 }
 
+static int __fastcall LootAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
+{
+	int rval = reinterpret_cast<int(__fastcall*)(Zeal::EqUI::LootWnd * pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)>(0x0595330)(pWnd, unused, pt, flag);
+	ZealService* zeal = ZealService::get_instance();
+	zeal->looting_hook->loot_all = true;
+	zeal->looting_hook->looted_item();
+	return rval;
+}
+
+void looting::init_ui()
+{
+	Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Loot->GetChildItem("LinkAllButton");
+	if (btn)
+	{
+		btn->SetupCustomVTable();
+		btn->vtbl->HandleLButtonDown = LinkAllButtonDown;
+	}
+
+	btn = Zeal::EqGame::Windows->Loot->GetChildItem("LootAllButton");
+	if (btn)
+	{
+		btn->SetupCustomVTable();
+		btn->vtbl->HandleLButtonDown = LootAllButtonDown;
+	}
+}
+
+struct formatted_msg
+{
+	UINT16 unk;
+	UINT16 string_id;
+	UINT16 type;
+	char message[0];
+};
+
+void looting::looted_item()
+{
+	if (loot_all && Zeal::EqGame::Windows && Zeal::EqGame::Windows->Loot && Zeal::EqGame::Windows->Loot->IsVisible)
+	{
+		bool loot_nodrop = (Zeal::EqGame::get_active_corpse() == Zeal::EqGame::get_controlled()); //my own corpse
+		byte nodrop_confirm_bypass[2] = { 0x74, 0x22 };
+		for (int i = 0; i < 30; i++)
+		{
+			bool loot = false;
+			if (Zeal::EqGame::Windows->Loot->Item[i])
+			{
+				if (loot_nodrop)
+					loot = true;
+				else if (Zeal::EqGame::Windows->Loot->Item[i]->NoDrop != 0)
+					loot = true;
+
+				if (loot)
+				{
+					if (loot_nodrop)
+						mem::set(0x426beb, 0x90, 2);
+					Zeal::EqGame::Windows->Loot->RequestLootSlot(i, true);
+					if (loot_nodrop)
+						mem::copy(0x426beb, nodrop_confirm_bypass, 2);
+					return;
+				}
+			}
+		}
+		loot_all = false;
+	}
+	else
+		loot_all = false;
+}
+
 looting::looting(ZealService* zeal)
 {
 	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
-	zeal->main_loop_hook->add_callback([this]() {
-		Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Loot->GetChildItem("LinkAllButton");
-		mem::unprotect_memory(&btn, 4);
-		if (btn)
+	zeal->callbacks->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
+	zeal->callbacks->add_callback([this]() {
+		if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->Loot || !Zeal::EqGame::Windows->Loot->IsVisible)
 		{
-			btn->SetupCustomVTable();
-			btn->vtbl->HandleLButtonDown = LinkAllButtonDown;
+			loot_all = false;
+			return;
 		}
-	}, callback_fn::InitUI);
+		}, callback_fn::MainLoop);
+	zeal->callbacks->add_worldmessage_callback([this](UINT opcode, char* buffer, UINT len) {
+		/*if (Zeal::EqGame::is_in_game() && opcode!=0x409f && opcode!=0x4107 && opcode!=0x4092 && opcode!=0x40f5)
+		Zeal::EqGame::print_chat("Message: 0x%x  len: %i", opcode, len);*/
+		if (opcode == 0x4236)
+		{
+			//Zeal::EqGame::print_chat("Message type: %i  string id: %i   message: %s", data->type, data->string_id, data->message);
+			formatted_msg* data = (formatted_msg*)buffer;
+			if (data->string_id == 467) //467 --You have looted a %1.--
+				looted_item();
+
+		}
+		return false; 
+		});
 	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" },
 		[this](std::vector<std::string>& args) {
 			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "looted"))
@@ -94,4 +173,6 @@ looting::looting(ZealService* zeal)
 		});
 	
 	zeal->hooks->Add("ReleaseLoot", Zeal::EqGame::EqGameInternal::fn_releaseloot, release_loot, hook_type_detour);
+	if (Zeal::EqGame::is_in_game())
+		init_ui();
 }

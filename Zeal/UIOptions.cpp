@@ -185,11 +185,11 @@ void UIOptions::InitUI()
 void UIOptions::UpdateOptions()
 {
 	SetComboValue("Zeal_HideCorpseCombobox", 2);
-	SetSliderValue("Zeal_PanDelaySlider", ZealService::get_instance()->camera_mods->pan_delay > 0 ? ZealService::get_instance()->camera_mods->pan_delay / 4 : 0);
-	SetSliderValue("Zeal_ThirdPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd > 0 ? ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd * 50 : 0);
-	SetSliderValue("Zeal_ThirdPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd > 0 ? ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd * 50 : 0);
-	SetSliderValue("Zeal_FirstPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y > 0 ? ZealService::get_instance()->camera_mods->user_sensitivity_y * 50 : 0);
-	SetSliderValue("Zeal_FirstPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x > 0 ? ZealService::get_instance()->camera_mods->user_sensitivity_x * 50 : 0);
+	SetSliderValue("Zeal_PanDelaySlider", ZealService::get_instance()->camera_mods->pan_delay > 0.f ? ZealService::get_instance()->camera_mods->pan_delay / 4 : 0.f);
+	SetSliderValue("Zeal_ThirdPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd * 50 : 0.f);
+	SetSliderValue("Zeal_ThirdPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd * 50 : 0.f);
+	SetSliderValue("Zeal_FirstPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_y * 50 : 0.f);
+	SetSliderValue("Zeal_FirstPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_x * 50 : 0.f);
 	SetLabelValue("Zeal_FirstPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x);
 	SetLabelValue("Zeal_FirstPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y);
 	SetLabelValue("Zeal_ThirdPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
@@ -212,7 +212,7 @@ UIOptions::UIOptions(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);
 	
-	zeal->main_loop_hook->add_callback([this]() { InitUI(); }, callback_fn::InitUI);
+	zeal->callbacks->add_callback([this]() { InitUI(); }, callback_fn::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
 }
 UIOptions::~UIOptions()

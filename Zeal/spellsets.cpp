@@ -388,9 +388,9 @@ SpellSets::SpellSets(ZealService* zeal)
     original_stance = Stand;
     spellset_menu = 0;
     ini = std::shared_ptr<IO_ini>(new IO_ini(".\\spellsets.ini"));
-    zeal->main_loop_hook->add_callback([this]() { callback_main();  }, callback_fn::Render);
-    zeal->main_loop_hook->add_callback([this]() { callback_cleanui();  }, callback_fn::CleanUI);
-    zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
+    zeal->callbacks->add_callback([this]() { callback_main();  }, callback_fn::Render);
+    zeal->callbacks->add_callback([this]() { callback_cleanui();  }, callback_fn::CleanUI);
+    zeal->callbacks->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
     zeal->hooks->Add("FinishMemorizing", 0x434b38, FinishMemorizing, hook_type_detour);
     zeal->hooks->Add("FinishScribing", 0x43501f, FinishScribing, hook_type_detour);
     zeal->hooks->Add("SpellGemRbutton", 0x5A67B0, SpellGemWnd_HandleRButtonUp, hook_type_detour);

@@ -549,10 +549,10 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     lastTime = std::chrono::steady_clock::now();
     fps = 0;
     height = 0;
-    zeal->main_loop_hook->add_callback([this]() { callback_main();  });
-    zeal->main_loop_hook->add_callback([this]() { callback_render();  }, callback_fn::Render);
+    zeal->callbacks->add_callback([this]() { callback_main();  });
+    zeal->callbacks->add_callback([this]() { callback_render();  }, callback_fn::Render);
     //zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
-    zeal->main_loop_hook->add_callback([this]() { callback_characterselect(); }, callback_fn::EndMainLoop);
+    zeal->callbacks->add_callback([this]() { callback_characterselect(); }, callback_fn::EndMainLoop);
     zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);

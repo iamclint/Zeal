@@ -37,20 +37,14 @@ Zeal::EqUI::ItemDisplayWnd* ItemDisplay::get_available_window(Zeal::EqStructures
 		for (auto& w : display_windows)
 		{
 			if (w->Item.Id == item->Id)
-			{
-				w->Activate();
 				return w;
-			}
 		}
 	}
 
 	for (auto& w : display_windows)
 	{
 		if (!w->IsVisible)
-		{
-			w->Activate();
 			return w;
-		}
 	}
 	return display_windows.back();
 }
@@ -82,11 +76,12 @@ void ItemDisplay::clean_ui()
 
 ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 {
+	display_windows.clear();
 	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
-	zeal->main_loop_hook->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
-	zeal->main_loop_hook->add_callback([this]() { clean_ui(); }, callback_fn::CleanUI);
+	zeal->callbacks->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
+	zeal->callbacks->add_callback([this]() { clean_ui(); }, callback_fn::CleanUI);
 	zeal->binds_hook->replace_bind(0xC8, [this](int state) { 
 		for (auto rit = display_windows.rbegin(); rit != display_windows.rend(); ++rit) {
 			Zeal::EqUI::ItemDisplayWnd* wnd = *rit;

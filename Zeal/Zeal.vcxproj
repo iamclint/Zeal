@@ -175,7 +175,7 @@
     <ClInclude Include="IO_ini.h" />
     <ClInclude Include="labels.h" />
     <ClInclude Include="looting.h" />
-    <ClInclude Include="main_loop.h" />
+    <ClInclude Include="callbacks.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="camera_mods.h" />
     <ClInclude Include="InstructionLength.h" />
@@ -210,7 +210,7 @@
     <ClCompile Include="hook_wrapper.cpp" />
     <ClCompile Include="labels.cpp" />
     <ClCompile Include="looting.cpp" />
-    <ClCompile Include="main_loop.cpp" />
+    <ClCompile Include="callbacks.cpp" />
     <ClCompile Include="memory.cpp" />
     <ClCompile Include="camera_mods.cpp" />
     <ClCompile Include="netstat.cpp" />

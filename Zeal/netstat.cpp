@@ -51,6 +51,6 @@ Netstat::Netstat(ZealService* zeal, class IO_ini* ini)
 	ini_handle = ini;
 	load_settings();
 
-	zeal->main_loop_hook->add_callback([this]() { callback_main(); }, callback_fn::MainLoop);
+	zeal->callbacks->add_callback([this]() { callback_main(); }, callback_fn::MainLoop);
 	//zeal->main_loop_hook->add_callback([this]() { callback_characterselect(); }, callback_fn::CharacterSelect);
 }

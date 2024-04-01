@@ -50,5 +50,5 @@ void Alarm::callback_main()
 
 Alarm::Alarm(ZealService* zeal)
 {
-	zeal->main_loop_hook->add_callback([this]() { callback_main(); });
+	zeal->callbacks->add_callback([this]() { callback_main(); });
 }
