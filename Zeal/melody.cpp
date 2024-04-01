@@ -95,12 +95,8 @@ Melody::Melody(ZealService* zeal, IO_ini* ini)
                 return true;
             }
 
-            if (args.size() > 6)
-            {
-                Zeal::EqGame::print_chat("A melody can only consist of 5 songs");
-                return true;
-            }
-
+            
+            
             songs.clear();
             for (int i = 1; i < args.size(); i++) //start at argument 1 because 0 is the command itself
             {
