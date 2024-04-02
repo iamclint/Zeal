@@ -49,6 +49,10 @@ ___
   - **Aliases:** `/autoinv`, `/ai`
   - **Description:** Drops whatever is on your cursor into your inventory.
 
+- `/autobank`
+  - **Aliases:** `/autoba`, `/ab`
+  - **Description:** Drops whatever is on your cursor into your bank. [requires you to be at a banker]
+
 - `/sit`
   - **Description:** The /sit command now accepts "on" as an argument. Using "/sit on" will always make you sit, even if you are currently sitting. This matches the game's native "/sit off" which always makes you stand even if you are currently standing. The "/sit" command will continue to toggle sit/stand state if no argument is provided or if the argument provided is not on or off. Additionally, "/sit down" now works as well and will always make you sit, even if already sitting.
 
@@ -108,6 +112,30 @@ ___
   - `81` Exp Per Hour Percentage
   - `124` Current Mana
   - `125` Max Mana
+  - `134` Spell being casted
+  
+### Options UI 
+- **ScreenID Checkboxes**
+  - Zeal_ShowHelm
+  - Zeal_HideCorpse
+  - Zeal_Cam
+  - Zeal_BlueCon
+  - Zeal_Timestamp
+  - Zeal_Input
+    
+- **ScreenID Sliders**
+  - Zeal_PanDelaySlider
+  - Zeal_FirstPersonSlider_X
+  - Zeal_FirstPersonSlider_Y
+  - Zeal_ThirdPersonSlider_X
+  - Zeal_ThirdPersonSlider_Y
+    
+- **ScreenID Labels**
+  - Zeal_ThirdPersonLabel_X
+  - Zeal_ThirdPersonLabel_Y
+  - Zeal_FirstPersonLabel_X
+  - Zeal_FirstPersonLabel_Y
+  - Zeal_PanDelayLabel
 ___
 ### Building and Installation
 <br>
