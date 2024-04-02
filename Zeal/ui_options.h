@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "EqUI.h"
 
-class UIOptions
+class ui_options
 {
 public:
 	void InitUI();
@@ -23,8 +23,8 @@ public:
 	void AddLabel(std::string name);
 	void SetChecked(std::string name, bool checked);
 	void UpdateOptions();
-	UIOptions(class ZealService* pHookWrapper, class IO_ini* ini);
-	~UIOptions();
+	ui_options(class ZealService* pHookWrapper, class IO_ini* ini);
+	~ui_options();
 private:
 	void LoadSettings(class IO_ini* ini);
 };

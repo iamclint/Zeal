@@ -1,34 +1,36 @@
 #include "Zeal.h"
 ZealService* ZealService::ptr_service = nullptr;
+
+
 ZealService::ZealService()
 {
 	//since the hooked functions are called back via a different thread, make sure the service ptr is available immediately
 	ZealService::ptr_service = this; //this setup makes it not unit testable but since the caller functions of the hooks don't know the pointers I had to make a method to retrieve the base atleast
-	hooks = std::shared_ptr<HookWrapper>(new HookWrapper());
-	ini = std::shared_ptr<IO_ini>(new IO_ini(".\\eqclient.ini")); //other functions rely on this hook
+	hooks = std::make_shared<HookWrapper>();
+	ini = std::make_shared<IO_ini>(".\\eqclient.ini"); //other functions rely on this hook
 	//initialize the hooked function classes
-	commands_hook = std::shared_ptr<ChatCommands>(new ChatCommands(this)); //other classes below rely on this class on initialize
-	callbacks = std::shared_ptr<CallBacks>(new CallBacks(this)); //other functions rely on this hook
-	looting_hook = std::shared_ptr<looting>(new looting(this));
-	labels_hook = std::shared_ptr<labels>(new labels(this));
-	binds_hook = std::shared_ptr<Binds>(new Binds(this));
-	raid_hook = std::shared_ptr<raid>(new raid(this));
-	eqstr_hook = std::shared_ptr<eqstr>(new eqstr(this));
-	spell_sets = std::shared_ptr<SpellSets>(new SpellSets(this));
-	item_displays = std::shared_ptr<ItemDisplay>(new ItemDisplay(this, ini.get()));
+	commands_hook = std::make_shared<ChatCommands>(this); //other classes below rely on this class on initialize
+	callbacks = std::make_shared<CallBacks>(this); //other functions rely on this hook
+	looting_hook = std::make_shared<looting>(this);
+	labels_hook = std::make_shared<labels>(this);
+	binds_hook = std::make_shared<Binds>(this);
+	raid_hook = std::make_shared<raid>(this);
+	eqstr_hook = std::make_shared<eqstr>(this);
+	spell_sets = std::make_shared<SpellSets>(this);
+	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
 	this->apply_patches();
 
-	camera_mods = std::shared_ptr<CameraMods>(new CameraMods(this, ini.get()));
-	cycle_target = std::shared_ptr<CycleTarget>(new CycleTarget(this));
-	experience = std::shared_ptr<Experience>(new Experience(this));
-	chat_hook = std::shared_ptr<chat>(new chat(this, ini.get()));
-	outputfile = std::shared_ptr<OutputFile>(new OutputFile(this));
-	buff_timers = std::shared_ptr<BuffTimers>(new BuffTimers(this));
-	movement = std::shared_ptr<PlayerMovement>(new PlayerMovement(this, binds_hook.get(), ini.get()));
-	alarm = std::shared_ptr<Alarm>(new Alarm(this));
-	netstat = std::shared_ptr<Netstat>(new Netstat(this, ini.get()));
-	ui = std::shared_ptr<UIOptions>(new UIOptions(this, ini.get()));
-	melody = std::shared_ptr<Melody>(new Melody(this, ini.get()));
+	camera_mods = std::make_shared<CameraMods>(this, ini.get());
+	cycle_target = std::make_shared<CycleTarget>(this);
+	experience = std::make_shared<Experience>(this);
+	chat_hook = std::make_shared<chat>(this, ini.get());
+	outputfile = std::make_shared<OutputFile>(this);
+	buff_timers = std::make_shared<BuffTimers>(this);
+	movement = std::make_shared<PlayerMovement>(this, binds_hook.get(), ini.get());
+	alarm = std::make_shared<Alarm>(this);
+	netstat = std::make_shared<Netstat>(this, ini.get());
+	ui = std::make_shared<ui_manager>(this, ini.get());
+	melody = std::make_shared<Melody>(this, ini.get());
 	binds_hook->replace_bind(3, [this](int state) {
 		movement->handle_movement_binds(3, state);
 		return false;

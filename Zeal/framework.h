@@ -27,7 +27,7 @@
 #include "spellsets.h"
 #include "alarm.h"
 #include "netstat.h"
-#include "UIOptions.h"
+#include "ui_manager.h"
 
 #include "Zeal.h"
 

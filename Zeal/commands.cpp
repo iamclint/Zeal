@@ -61,46 +61,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		});
 	add("/autobank", { "/autoba", "/ab" },
 		[](std::vector<std::string>& args) {
-			if (Zeal::EqGame::Windows->Bank && Zeal::EqGame::Windows->Bank->IsVisible)
-			{
-				if (Zeal::EqGame::get_char_info()->BankGold > 0)
-				{
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 1, Zeal::EqGame::get_char_info()->BankGold);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 2, -1);
-				}
-				if (Zeal::EqGame::get_char_info()->BankSilver > 0)
-				{
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 2, Zeal::EqGame::get_char_info()->BankSilver);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 3, -1);
-				}
-				if (Zeal::EqGame::get_char_info()->BankCopper > 0)
-				{
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 3, Zeal::EqGame::get_char_info()->BankCopper);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 0, -1);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 1, -1);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 2, -1);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x404aec)(Zeal::EqGame::Windows->Bank, 3, -1);
-				}
-
-				if (Zeal::EqGame::get_char_info()->Gold > 0)
-				{
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 1, Zeal::EqGame::get_char_info()->Gold);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 2, -1);
-				}
-				if (Zeal::EqGame::get_char_info()->Silver > 0)
-				{
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 2, Zeal::EqGame::get_char_info()->Silver);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 3, -1);
-				}
-				if (Zeal::EqGame::get_char_info()->Copper > 0)
-				{
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 3, Zeal::EqGame::get_char_info()->Copper);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 0, -1);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 1, -1);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 2, -1);
-					reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, int, int)>(0x421876)(Zeal::EqGame::Windows->Inventory, 3, -1);
-				}
-			}
+			ZealService::get_instance()->ui->bank->change();
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
 	add("/fov", { },

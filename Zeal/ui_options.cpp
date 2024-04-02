@@ -1,4 +1,4 @@
-#include "UIOptions.h"
+#include "ui_options.h"
 #include "EqStructures.h"
 #include "EqAddresses.h"
 #include "EqFunctions.h"
@@ -7,7 +7,7 @@
 
 static int __fastcall CheckboxClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
-	UIOptions* ui = ZealService::get_instance()->ui.get();
+	ui_options* ui = ZealService::get_instance()->ui->options.get();
 	int rval = ZealService::get_instance()->hooks->hook_map["CheckboxClick"]->original(CheckboxClick_hook)(pWnd, unused, pt, flag);
 	if (ui->checkbox_callbacks.count(pWnd) > 0)
 		ui->checkbox_callbacks[pWnd](pWnd);
@@ -15,7 +15,7 @@ static int __fastcall CheckboxClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused,
 }
 static void __fastcall SetSliderValue_hook(Zeal::EqUI::SliderWnd* pWnd, int unused, int value)
 {
-	UIOptions* ui = ZealService::get_instance()->ui.get();
+	ui_options* ui = ZealService::get_instance()->ui->options.get();
 	ZealService::get_instance()->hooks->hook_map["SetSliderValue"]->original(SetSliderValue_hook)(pWnd, unused, value);
 	
 	if (value < 0)
@@ -27,7 +27,7 @@ static void __fastcall SetSliderValue_hook(Zeal::EqUI::SliderWnd* pWnd, int unus
 }
 static void __fastcall SetComboValue_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, int value)
 {
-	UIOptions* ui = ZealService::get_instance()->ui.get();
+	ui_options* ui = ZealService::get_instance()->ui->options.get();
 	ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(pWnd, unused, value);
 	if (ui->combo_callbacks.count(pWnd) > 0)
 		ui->combo_callbacks[pWnd](pWnd, value);
@@ -35,7 +35,7 @@ static void __fastcall SetComboValue_hook(Zeal::EqUI::BasicWnd* pWnd, int unused
 		ui->combo_callbacks[pWnd->ParentWnd](pWnd->ParentWnd, value);
 }
 
-void UIOptions::AddCheckboxCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
+void ui_options::AddCheckboxCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
 {
 	if (Zeal::EqGame::Windows->Options)
 	{
@@ -52,7 +52,7 @@ void UIOptions::AddCheckboxCallback(std::string name, std::function<void(Zeal::E
 	}
 }
 
-void UIOptions::AddSliderCallback(std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback)
+void ui_options::AddSliderCallback(std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback)
 {
 	if (Zeal::EqGame::Windows->Options)
 	{
@@ -70,7 +70,7 @@ void UIOptions::AddSliderCallback(std::string name, std::function<void(Zeal::EqU
 	}
 }
 
-void UIOptions::AddComboCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback)
+void ui_options::AddComboCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback)
 {
 	if (Zeal::EqGame::Windows->Options)
 	{
@@ -87,7 +87,7 @@ void UIOptions::AddComboCallback(std::string name, std::function<void(Zeal::EqUI
 	}
 }
 
-void UIOptions::AddLabel(std::string name)
+void ui_options::AddLabel(std::string name)
 {
 	if (Zeal::EqGame::Windows->Options)
 	{
@@ -103,20 +103,20 @@ void UIOptions::AddLabel(std::string name)
 	}
 }
 
-void UIOptions::SetSliderValue(std::string name, int value)
+void ui_options::SetSliderValue(std::string name, int value)
 {
 	if (slider_names.count(name) > 0)
 	{
 		ZealService::get_instance()->hooks->hook_map["SetSliderValue"]->original(SetSliderValue_hook)(slider_names[name], 0, value);
 	}
 }
-void UIOptions::SetChecked(std::string name, bool checked)
+void ui_options::SetChecked(std::string name, bool checked)
 {
 	if (checkbox_names.count(name) > 0)
 		checkbox_names[name]->Checked = checked;
 }
 
-void UIOptions::SetLabelValue(std::string name, const char* format, ...)
+void ui_options::SetLabelValue(std::string name, const char* format, ...)
 {
 	va_list argptr;
 	char buffer[512];
@@ -129,7 +129,7 @@ void UIOptions::SetLabelValue(std::string name, const char* format, ...)
 	}
 }
 
-void UIOptions::SetComboValue(std::string name, int value)
+void ui_options::SetComboValue(std::string name, int value)
 {
 	if (combo_names.count(name) > 0)
 	{
@@ -137,7 +137,7 @@ void UIOptions::SetComboValue(std::string name, int value)
 	}
 }
 
-void UIOptions::InitUI()
+void ui_options::InitUI()
 {
 	/*add callbacks when the buttons are pressed in the options window*/
 	AddCheckboxCallback("Zeal_HideCorpse", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->set_hide_looted(wnd->Checked); });
@@ -182,7 +182,7 @@ void UIOptions::InitUI()
 
 
 
-void UIOptions::UpdateOptions()
+void ui_options::UpdateOptions()
 {
 	SetComboValue("Zeal_HideCorpseCombobox", 2);
 	SetSliderValue("Zeal_PanDelaySlider", ZealService::get_instance()->camera_mods->pan_delay > 0.f ? ZealService::get_instance()->camera_mods->pan_delay / 4 : 0.f);
@@ -206,7 +206,7 @@ void UIOptions::UpdateOptions()
 
 
 
-UIOptions::UIOptions(ZealService* zeal, IO_ini* ini)
+ui_options::ui_options(ZealService* zeal, IO_ini* ini)
 {
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour); 
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
@@ -215,7 +215,7 @@ UIOptions::UIOptions(ZealService* zeal, IO_ini* ini)
 	zeal->callbacks->add_callback([this]() { InitUI(); }, callback_fn::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
 }
-UIOptions::~UIOptions()
+ui_options::~ui_options()
 {
 }
 

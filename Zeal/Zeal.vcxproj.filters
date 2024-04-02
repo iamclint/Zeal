@@ -40,6 +40,12 @@
     <Filter Include="Header Files\everquest">
       <UniqueIdentifier>{e5b39775-cb23-4102-bd7f-bbe1b3043de2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{7b003c9c-b705-4895-b5a7-5254e7fe2dcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ui">
+      <UniqueIdentifier>{e6269d11-8017-478b-a57d-95243aa4ca06}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -114,9 +120,6 @@
     <ClInclude Include="buff_timers.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
-    <ClInclude Include="camera_math.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EqAddresses.h">
       <Filter>Header Files\everquest</Filter>
     </ClInclude>
@@ -141,9 +144,6 @@
     <ClInclude Include="netstat.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
-    <ClInclude Include="UIOptions.h">
-      <Filter>Header Files\other</Filter>
-    </ClInclude>
     <ClInclude Include="item_display.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
@@ -152,6 +152,21 @@
     </ClInclude>
     <ClInclude Include="melody.h">
       <Filter>Header Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="camera_math.h">
+      <Filter>Header Files\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_options.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_bank.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_manager.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_loot.h">
+      <Filter>Header Files\ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -230,9 +245,6 @@
     <ClCompile Include="netstat.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
-    <ClCompile Include="UIOptions.cpp">
-      <Filter>Source Files\other</Filter>
-    </ClCompile>
     <ClCompile Include="item_display.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
@@ -241,6 +253,18 @@
     </ClCompile>
     <ClCompile Include="StringUtil.cpp">
       <Filter>Source Files\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_options.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_bank.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_manager.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_loot.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

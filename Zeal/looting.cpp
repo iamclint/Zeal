@@ -17,7 +17,7 @@ void looting::set_hide_looted(bool val)
 {
 	hide_looted = val;
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "HideLooted", hide_looted);
-	ZealService::get_instance()->ui->UpdateOptions();
+	ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
 
@@ -36,56 +36,8 @@ looting::~looting()
 {
 }
 
-static int __fastcall LinkAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
-{
-	int rval = reinterpret_cast<int(__fastcall*)(Zeal::EqUI::LootWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)>(0x0595330)(pWnd, unused, pt, flag);
-	Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->GetActiveChatWindow();
-	if (wnd)
-	{
-		std::stringstream ss;
-		for (int i = 0; i < 30; i++)
-		{
-			if (Zeal::EqGame::Windows->Loot->Item[i])
-				ss << "" << std::setw(7) << std::setfill('0') << Zeal::EqGame::Windows->Loot->Item[i]->Id << Zeal::EqGame::Windows->Loot->Item[i]->Name << "";
-			if (Zeal::EqGame::Windows->Loot->Item[i + 1] && i+1<30)
-				ss << ", ";
-		}
-
-
-		Zeal::EqUI::EditWnd* input_wnd = (Zeal::EqUI::EditWnd*)wnd->edit;
-		input_wnd->ReplaceSelection(ss.str(), false);
-		input_wnd->SetFocus();
-	}
-	else
-		Zeal::EqGame::print_chat("No active chat window found");
-	
-	return rval;
-}
-
-static int __fastcall LootAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
-{
-	int rval = reinterpret_cast<int(__fastcall*)(Zeal::EqUI::LootWnd * pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)>(0x0595330)(pWnd, unused, pt, flag);
-	ZealService* zeal = ZealService::get_instance();
-	zeal->looting_hook->loot_all = true;
-	zeal->looting_hook->looted_item();
-	return rval;
-}
-
 void looting::init_ui()
 {
-	Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Loot->GetChildItem("LinkAllButton");
-	if (btn)
-	{
-		btn->SetupCustomVTable();
-		btn->vtbl->HandleLButtonDown = LinkAllButtonDown;
-	}
-
-	btn = Zeal::EqGame::Windows->Loot->GetChildItem("LootAllButton");
-	if (btn)
-	{
-		btn->SetupCustomVTable();
-		btn->vtbl->HandleLButtonDown = LootAllButtonDown;
-	}
 }
 
 struct formatted_msg
@@ -140,16 +92,12 @@ looting::looting(ZealService* zeal)
 			return;
 		}
 		}, callback_fn::MainLoop);
-	zeal->callbacks->add_worldmessage_callback([this](UINT opcode, char* buffer, UINT len) {
-		/*if (Zeal::EqGame::is_in_game() && opcode!=0x409f && opcode!=0x4107 && opcode!=0x4092 && opcode!=0x40f5)
-		Zeal::EqGame::print_chat("Message: 0x%x  len: %i", opcode, len);*/
+		zeal->callbacks->add_worldmessage_callback([this](UINT opcode, char* buffer, UINT len) {
 		if (opcode == 0x4236)
 		{
-			//Zeal::EqGame::print_chat("Message type: %i  string id: %i   message: %s", data->type, data->string_id, data->message);
 			formatted_msg* data = (formatted_msg*)buffer;
 			if (data->string_id == 467) //467 --You have looted a %1.--
 				looted_item();
-
 		}
 		return false; 
 		});

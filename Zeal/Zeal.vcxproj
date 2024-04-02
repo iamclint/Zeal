@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="alarm.h" />
+    <ClInclude Include="ui_bank.h" />
     <ClInclude Include="item_display.h" />
     <ClInclude Include="melody.h" />
     <ClInclude Include="player_movement.h" />
@@ -187,12 +188,15 @@
     <ClInclude Include="SpellCategories.h" />
     <ClInclude Include="spellsets.h" />
     <ClInclude Include="StringUtil.h" />
-    <ClInclude Include="UIOptions.h" />
+    <ClInclude Include="ui_loot.h" />
+    <ClInclude Include="ui_manager.h" />
+    <ClInclude Include="ui_options.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="Zeal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
+    <ClCompile Include="ui_bank.cpp" />
     <ClCompile Include="item_display.cpp" />
     <ClCompile Include="melody.cpp" />
     <ClCompile Include="player_movement.cpp" />
@@ -218,7 +222,9 @@
     <ClCompile Include="raid.cpp" />
     <ClCompile Include="spellsets.cpp" />
     <ClCompile Include="StringUtil.cpp" />
-    <ClCompile Include="UIOptions.cpp" />
+    <ClCompile Include="ui_loot.cpp" />
+    <ClCompile Include="ui_manager.cpp" />
+    <ClCompile Include="ui_options.cpp" />
     <ClCompile Include="vectors.cpp" />
     <ClCompile Include="Zeal.cpp" />
   </ItemGroup>
