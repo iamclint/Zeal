@@ -108,6 +108,30 @@ ___
   - `81` Exp Per Hour Percentage
   - `124` Current Mana
   - `125` Max Mana
+  - `134` Spell being casted
+  
+### Options UI 
+- **ScreenID Checkboxes**
+  - Zeal_ShowHelm
+  - Zeal_HideCorpse
+  - Zeal_Cam
+  - Zeal_BlueCon
+  - Zeal_Timestamp
+  - Zeal_Input
+    
+- **ScreenID Sliders**
+  - Zeal_PanDelaySlider
+  - Zeal_FirstPersonSlider_X
+  - Zeal_FirstPersonSlider_Y
+  - Zeal_ThirdPersonSlider_X
+  - Zeal_ThirdPersonSlider_Y
+    
+- **ScreenID Labels**
+  - Zeal_ThirdPersonLabel_X
+  - Zeal_ThirdPersonLabel_Y
+  - Zeal_FirstPersonLabel_X
+  - Zeal_FirstPersonLabel_Y
+  - Zeal_PanDelayLabel
 ___
 ### Building and Installation
 <br>
