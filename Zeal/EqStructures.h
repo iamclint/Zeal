@@ -27,6 +27,79 @@
 #define GAMESTATE_PRECHARSELECT 6
 #define GAMESTATE_LOGGINGIN     253
 #define GAMESTATE_UNLOADING     255
+
+
+#define USERCOLOR_SAY                   0xFF +   1 //  1  - Say
+#define USERCOLOR_TELL                  0xFF +   2 //  2  - Tell
+#define USERCOLOR_GROUP                 0xFF +   3 //  3  - Group
+#define USERCOLOR_GUILD                 0xFF +   4 //  4  - Guild
+#define USERCOLOR_OOC                   0xFF +   5 //  5  - OOC
+#define USERCOLOR_AUCTION               0xFF +   6 //  6  - Auction
+#define USERCOLOR_SHOUT                 0xFF +   7 //  7  - Shout
+#define USERCOLOR_EMOTE                 0xFF +   8 //  8  - Emote
+#define USERCOLOR_SPELLS                0xFF +   9 //  9  - Spells (meming, scribing, casting, etc.)
+#define USERCOLOR_YOU_HIT_OTHER         0xFF +  10 //  10 - You hit other
+#define USERCOLOR_OTHER_HIT_YOU         0xFF +  11 //  11 - Other hits you
+#define USERCOLOR_YOU_MISS_OTHER        0xFF +  12 //  12 - You miss other
+#define USERCOLOR_OTHER_MISS_YOU        0xFF +  13 //  13 - Other misses you
+#define USERCOLOR_DUELS                 0xFF +  14 //  14 - Some broadcasts (duels)
+#define USERCOLOR_SKILLS                0xFF +  15 //  15 - Skills (ups, non-combat use, etc.)
+#define USERCOLOR_DISCIPLINES           0xFF +  16 //  16 - Disciplines or special abilities
+#define USERCOLOR_UNUSED001             0xFF +  17 //  17 - Unused at this time
+#define USERCOLOR_DEFAULT               0xFF +  18 //  18 - Default text and stuff you type
+#define USERCOLOR_UNUSED002             0xFF +  19 //  19 - Unused at this time
+#define USERCOLOR_MERCHANT_OFFER        0xFF +  20 //  20 - Merchant Offer Price
+#define USERCOLOR_MERCHANT_EXCHANGE     0xFF +  21 //  21 - Merchant Buy/Sell
+#define USERCOLOR_YOUR_DEATH            0xFF +  22 //  22 - Your death message
+#define USERCOLOR_OTHER_DEATH           0xFF +  23 //  23 - Others death message
+#define USERCOLOR_OTHER_HIT_OTHER       0xFF +  24 //  24 - Other damage other
+#define USERCOLOR_OTHER_MISS_OTHER      0xFF +  25 //  25 - Other miss other
+#define USERCOLOR_WHO                   0xFF +  26 //  26 - /who command
+#define USERCOLOR_YELL                  0xFF +  27 //  27 - yell for help
+#define USERCOLOR_NON_MELEE             0xFF +  28 //  28 - Hit for non-melee
+#define USERCOLOR_SPELL_WORN_OFF        0xFF +  29 //  29 - Spell worn off
+#define USERCOLOR_MONEY_SPLIT           0xFF +  30 //  30 - Money splits
+#define USERCOLOR_LOOT                  0xFF +  31 //  31 - Loot message
+#define USERCOLOR_RANDOM                0xFF +  32 //  32 - Dice Roll (/random)
+#define USERCOLOR_OTHERS_SPELLS         0xFF +  33 //  33 - Others spells
+#define USERCOLOR_SPELL_FAILURE         0xFF +  34 //  34 - Spell Failures (resists, fizzles, missing component, bad target, etc.)
+#define USERCOLOR_CHAT_CHANNEL          0xFF +  35 //  35 - Chat Channel Messages
+#define USERCOLOR_CHAT_1                0xFF +  36 //  36 - Chat Channel 1
+#define USERCOLOR_CHAT_2                0xFF +  37 //  37 - Chat Channel 2
+#define USERCOLOR_CHAT_3                0xFF +  38 //  38 - Chat Channel 3
+#define USERCOLOR_CHAT_4                0xFF +  39 //  39 - Chat Channel 4
+#define USERCOLOR_CHAT_5                0xFF +  40 //  40 - Chat Channel 5
+#define USERCOLOR_CHAT_6                0xFF +  41 //  41 - Chat Channel 6
+#define USERCOLOR_CHAT_7                0xFF +  42 //  42 - Chat Channel 7
+#define USERCOLOR_CHAT_8                0xFF +  43 //  43 - Chat Channel 8
+#define USERCOLOR_CHAT_9                0xFF +  44 //  44 - Chat Channel 9
+#define USERCOLOR_CHAT_10               0xFF +  45 //  45 - Chat Channel 10
+#define USERCOLOR_MELEE_CRIT            0xFF +  46 //  46 - Melee Crits
+#define USERCOLOR_SPELL_CRIT            0xFF +  47 //  47 - Spell Crits
+#define USERCOLOR_TOO_FAR_AWAY          0xFF +  48 //  48 - Too far away (melee)
+#define USERCOLOR_NPC_RAMAGE            0xFF +  49 //  49 - NPC Rampage
+#define USERCOLOR_NPC_FURRY             0xFF +  50 //  50 - NPC Furry
+#define USERCOLOR_NPC_ENRAGE            0xFF +  51 //  51 - NPC Enrage
+#define USERCOLOR_ECHO_SAY              0xFF +  52 //  52 - say echo
+#define USERCOLOR_ECHO_TELL             0xFF +  53 //  53 - tell echo
+#define USERCOLOR_ECHO_GROUP            0xFF +  54 //  54 - group echo
+#define USERCOLOR_ECHO_GUILD            0xFF +  55 //  55 - guild echo
+#define USERCOLOR_ECHO_OOC              0xFF +  56 //  56 - group echo
+#define USERCOLOR_ECHO_AUCTION          0xFF +  57 //  57 - auction echo
+#define USERCOLOR_ECHO_SHOUT            0xFF +  58 //  58 - shout echo
+#define USERCOLOR_ECHO_EMOTE            0xFF +  59 //  59 - emote echo
+#define USERCOLOR_ECHO_CHAT_1           0xFF +  60 //  60 - chat 1 echo
+#define USERCOLOR_ECHO_CHAT_2           0xFF +  61 //  61 - chat 2 echo
+#define USERCOLOR_ECHO_CHAT_3           0xFF +  62 //  62 - chat 3 echo
+#define USERCOLOR_ECHO_CHAT_4           0xFF +  63 //  63 - chat 4 echo
+#define USERCOLOR_ECHO_CHAT_5           0xFF +  64 //  64 - chat 5 echo
+#define USERCOLOR_ECHO_CHAT_6           0xFF +  65 //  65 - chat 6 echo
+#define USERCOLOR_ECHO_CHAT_7           0xFF +  66 //  66 - chat 7 echo
+#define USERCOLOR_ECHO_CHAT_8           0xFF +  67 //  67 - chat 8 echo
+#define USERCOLOR_ECHO_CHAT_9           0xFF +  68 //  68 - chat 9 echo
+#define USERCOLOR_ECHO_CHAT_10          0xFF +  69 //  69 - chat 10 echo
+
+
 namespace Zeal
 {
 	namespace EqEnums
@@ -487,6 +560,10 @@ namespace Zeal
 
 		struct Everquest
 		{
+			BYTE IsOkToTransact()
+			{
+				return reinterpret_cast<BYTE(__thiscall*)(Everquest*)>(0x54825C)(this);
+			}
 			/*0x000*/ BYTE Unknown[0x5AC];
 			/*0x5AC*/ int game_state;
 		};

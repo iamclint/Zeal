@@ -363,6 +363,17 @@ namespace Zeal
 			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 0, false);
 
 		}
+		void print_chat(short color, const char* format, ...)
+		{
+			va_list argptr;
+			char buffer[512];
+			va_start(argptr, format);
+			//printf()
+			vsnprintf(buffer, 511, format, argptr);
+			va_end(argptr);
+			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, color, false);
+
+		}
 		void print_chat_zeal(const char* data, short color, bool un)
 		{
 			std::string msg = "[ZEAL] " + std::string(data);

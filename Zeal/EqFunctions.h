@@ -104,6 +104,7 @@ namespace Zeal
 		bool is_view_actor_me();
 		void print_chat(std::string data);
 		void print_chat(const char* format, ...);
+		void print_chat(short color, const char* format, ...);
 		void print_chat_zeal(const char* data, short color, bool un);
 		void set_target(Zeal::EqStructures::Entity* target);
 		bool can_move();
