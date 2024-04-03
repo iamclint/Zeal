@@ -10,36 +10,19 @@ static int __fastcall LinkAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Z
 	Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->GetActiveChatWindow();
 	if (wnd)
 	{
+		Zeal::EqUI::EditWnd* input_wnd = (Zeal::EqUI::EditWnd*)wnd->edit;
 		std::stringstream ss;
+		bool has_added_link = false;
 		for (int i = 0; i < 30; i++)
 		{
-			if (Zeal::EqGame::Windows->Loot->Item[i])
-				ss << "" << std::setw(7) << std::setfill('0') << Zeal::EqGame::Windows->Loot->Item[i]->Id << Zeal::EqGame::Windows->Loot->Item[i]->Name << "";
-			if (Zeal::EqGame::Windows->Loot->Item[i + 1] && i + 1 < 30)
-				ss << ", ";
-		}
-
-
-		Zeal::EqUI::EditWnd* input_wnd = (Zeal::EqUI::EditWnd*)wnd->edit;
-		std::string links = ss.str();
-		int new_len = input_wnd->InputText.Data->Length + links.length() + 1;
-		if (new_len > 250)
-		{
-			Zeal::EqGame::print_chat("Too many items to link [trimming to fit]");
-			while (new_len>250)
+			if (Zeal::EqGame::Windows->Loot->Item[i] && input_wnd->item_link_count < 0xA)
 			{
-				int p = links.rfind('');
-				if (p != std::string::npos)
-				{
-					links = links.substr(0, p - 1);
-				}
-				else
-					return rval;
-				new_len = input_wnd->InputText.Data->Length + links.length() + 1;
+				if (has_added_link)
+					input_wnd->ReplaceSelection(", ", false);
+				input_wnd->AddItemTag(Zeal::EqGame::Windows->Loot->Item[i]->Id, Zeal::EqGame::Windows->Loot->Item[i]->Name);
+				has_added_link = true;
 			}
 		}
-		input_wnd->InputText.Assure(new_len, 0);
-		input_wnd->ReplaceSelection(ss.str(), false);
 		input_wnd->SetFocus();
 	}
 	else

@@ -369,6 +369,10 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const EditWnd*, CXSTR)>(0x5a3d00)(this, data);
 			}
+			void AddItemTag(int item_id, const char* name)
+			{
+				reinterpret_cast<void(__thiscall*)(const EditWnd*, int, const char*)>(0x5a2920)(this, item_id, name);
+			}
 			/* 0x0114 */ DWORD LinkStartIndex[10]; 
 			/* 0x013C */ DWORD LinkEndIndex[10];
 			/* 0x0164 */ BYTE UnknownBytes[0xA0];
