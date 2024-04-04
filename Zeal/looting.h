@@ -12,6 +12,6 @@ public:
 	void looted_item();
 	looting(class ZealService* zeal);
 	~looting();
-
 private:
+	int last_looted = -1;
 };

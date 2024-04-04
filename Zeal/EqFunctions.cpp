@@ -110,6 +110,14 @@ namespace Zeal
 		{
 			return get_view_actor()->Entity;
 		}
+		char* strip_name(char* name)
+		{
+			return reinterpret_cast<char*(__thiscall*)(int everquest, char* name)>(0x537e4b)(*(int*)0x809478, name);
+		}
+		void send_message(UINT opcode, int* buffer, UINT size, int unknown)
+		{
+			reinterpret_cast<void(__cdecl*)(int* connection, UINT opcode, int* buffer, UINT size, int unknown)>(0x54e51a)((int*)0x7952fc, opcode, buffer, size, unknown);
+		}
 
 		bool is_view_actor_me()
 		{	

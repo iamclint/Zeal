@@ -40,37 +40,62 @@ void looting::init_ui()
 {
 }
 
-struct formatted_msg
-{
-	UINT16 unk;
-	UINT16 string_id;
-	UINT16 type;
-	char message[0];
-};
+//struct formatted_msg
+//{
+//	UINT16 unk;
+//	UINT16 string_id;
+//	UINT16 type;
+//	char message[0];
+//};
+//
+//
+//struct pkt_loot_item
+//{
+//	WORD corpse_id;
+//	WORD player_id;
+//	WORD slot_id;
+//	UINT8 unknown[2];
+//	UINT32 auto_loot;
+//};
+//pkt_loot_item li;
+//li.player_id = Zeal::EqGame::get_self()->SpawnId;
+//li.corpse_id = Zeal::EqGame::get_active_corpse()->SpawnId;
+//li.auto_loot = 1;
+//li.slot_id = Zeal::EqGame::Windows->Loot->ItemSlotIndex[i];
+//Zeal::EqGame::send_message(0x40a0, (int*)&li, sizeof(li), 1);
 
 void looting::looted_item()
 {
 	if (loot_all && Zeal::EqGame::Windows && Zeal::EqGame::Windows->Loot && Zeal::EqGame::Windows->Loot->IsVisible)
 	{
-		bool loot_nodrop = (Zeal::EqGame::get_active_corpse() == Zeal::EqGame::get_controlled()); //my own corpse
+		std::string corpse_name = Zeal::EqGame::strip_name(Zeal::EqGame::get_active_corpse()->Name);
+		std::string self_name = Zeal::EqGame::get_self()->Name;
+		bool is_me = corpse_name == self_name; //my own corpse
 		byte nodrop_confirm_bypass[2] = { 0x74, 0x22 };
+		int item_count = 0;
+		for (int i = 0; i < 30; i++)
+			if (Zeal::EqGame::Windows->Loot->Item[i])
+				item_count++;
+
+		if (is_me && item_count == 1)
+		{
+			Zeal::EqGame::print_chat(USERCOLOR_LOOT, "Loot all but 1 item on your own corpse for safety, you may click the item to loot it yourself.");
+			loot_all = false;
+			return;
+		}
 		for (int i = 0; i < 30; i++)
 		{
 			bool loot = false;
 			if (Zeal::EqGame::Windows->Loot->Item[i])
 			{
-				if (loot_nodrop)
+				if (is_me && item_count>1)
 					loot = true;
 				else if (Zeal::EqGame::Windows->Loot->Item[i]->NoDrop != 0)
 					loot = true;
 
 				if (loot)
 				{
-					if (loot_nodrop)
-						mem::set(0x426beb, 0x90, 2);
 					Zeal::EqGame::Windows->Loot->RequestLootSlot(i, true);
-					if (loot_nodrop)
-						mem::copy(0x426beb, nodrop_confirm_bypass, 2);
 					return;
 				}
 			}
@@ -93,12 +118,14 @@ looting::looting(ZealService* zeal)
 		}
 		}, callback_fn::MainLoop);
 		zeal->callbacks->add_worldmessage_callback([this](UINT opcode, char* buffer, UINT len) {
-		if (opcode == 0x4236)
-		{
-			formatted_msg* data = (formatted_msg*)buffer;
-			if (data->string_id == 467) //467 --You have looted a %1.--
+			if (opcode == 0x4031)
 				looted_item();
-		}
+		//	if (opcode == 0x4236)
+		//{
+		//	formatted_msg* data = (formatted_msg*)buffer;
+		//	if (data->string_id == 467) //467 --You have looted a %1.--
+		//		looted_item();
+		//}
 		return false; 
 		});
 	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" },
