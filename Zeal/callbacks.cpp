@@ -99,8 +99,12 @@ char __fastcall handleworldmessage_hk(int* connection, int unused, UINT unk, UIN
 	//if (!std::count(ignored_opcodes.begin(), ignored_opcodes.end(), opcode))
 	//	Zeal::EqGame::print_chat("opcode: 0x%x len: %i", opcode, len);
 
+	if (!Zeal::EqGame::get_self() && opcode == 0x4107) //a fix for a crash reported by Ecliptor at 0x004E2803
+		return 1;
+
 	if (zeal->callbacks->do_worldmessage_callbacks(opcode, buffer, len))
 		return 1;
+
 	return zeal->hooks->hook_map["HandleWorldMessage"]->original(handleworldmessage_hk)(connection, unused, unk, opcode, buffer, len);
 }
 void send_message_hk(int* connection, UINT opcode, int* buffer, UINT size, int unknown)

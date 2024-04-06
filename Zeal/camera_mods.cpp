@@ -423,8 +423,8 @@ void CameraMods::callback_render()
 {
     if (enabled)
     {
-        if (Zeal::EqGame::is_in_game() && Zeal::EqGame::get_self() && Zeal::EqGame::get_char_info() && !*Zeal::EqGame::is_right_mouse_down && *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
-        {
+        if (Zeal::EqGame::is_in_game() && Zeal::EqGame::get_self() && Zeal::EqGame::get_char_info() /*&& !*Zeal::EqGame::is_right_mouse_down*/ && *Zeal::EqGame::camera_view == Zeal::EqEnums::CameraView::ZealCam)
+        { 
             if (Zeal::EqGame::get_self()->Position.Dist(Zeal::EqGame::get_char_info()->ZoneEnter) != 0)
                 update_cam();
         }
