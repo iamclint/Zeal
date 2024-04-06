@@ -5,7 +5,10 @@ namespace Zeal
 {
 	namespace EqGame
 	{
-
+		char* get_string(UINT id)
+		{
+			return reinterpret_cast<char* (__thiscall*)(int t, UINT id, bool*)>(0x550EFE)(*(int*)0x7f9490, id, nullptr);
+		}
 		float heading_to_yaw(float heading)
 		{
 			float y = 512 - heading;
@@ -358,7 +361,7 @@ namespace Zeal
 		{
 			std::vector<std::string> vd = splitStringByNewLine(data);
 			for (auto& d : vd)
-				EqGameInternal::print_chat(*(int*)0x809478, 0, d.c_str(), 0, false);
+				EqGameInternal::print_chat(*(int*)0x809478, 0, d.c_str(), 0, true);
 		}
 		void print_chat(const char* format, ...)
 		{
@@ -368,7 +371,7 @@ namespace Zeal
 			//printf()
 			vsnprintf(buffer, 511, format, argptr);
 			va_end(argptr);
-			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 0, false);
+			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 0, true);
 
 		}
 		void print_chat(short color, const char* format, ...)
@@ -379,7 +382,7 @@ namespace Zeal
 			//printf()
 			vsnprintf(buffer, 511, format, argptr);
 			va_end(argptr);
-			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, color, false);
+			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, color, true);
 
 		}
 		void print_chat_zeal(const char* data, short color, bool un)

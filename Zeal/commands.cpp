@@ -54,6 +54,16 @@ ChatCommands::ChatCommands(ZealService* zeal)
 {
 
 	//just going to use lambdas for simple commands
+	add("/target", { "/cleartarget" },
+		[](std::vector<std::string>& args) {
+			if (args.size() == 1)
+			{
+				Zeal::EqGame::set_target(0);
+				Zeal::EqGame::print_chat(Zeal::EqGame::get_string(0x3057)); //you no longer have a target
+				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+			}
+			return false;
+		});
 	add("/autoinventory", { "/autoinv", "/ai" },
 		[](std::vector<std::string>& args) {
 			Zeal::EqGame::EqGameInternal::auto_inventory(Zeal::EqGame::get_char_info(), &Zeal::EqGame::get_char_info()->CursorItem, 0);

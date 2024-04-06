@@ -120,6 +120,7 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_entity_by_parent_id(short parent_id);
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown);
 		char* strip_name(char* name);
+		char* get_string(UINT id);
 		//void set_camera_position(Vec3* pos);
 		int* get_display();
 		float heading_to_yaw(float heading);
