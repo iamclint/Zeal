@@ -13,7 +13,7 @@ public:
 	std::shared_ptr<labels> labels_hook = nullptr;
 	std::shared_ptr<Binds> binds_hook = nullptr;
 	std::shared_ptr<ChatCommands> commands_hook = nullptr;
-	std::shared_ptr<CallBacks> callbacks = nullptr;
+	std::shared_ptr<CallbackManager> callbacks = nullptr;
 	std::shared_ptr<CameraMods> camera_mods = nullptr;
 	std::shared_ptr<raid> raid_hook = nullptr;
 	std::shared_ptr<eqstr> eqstr_hook = nullptr;

@@ -68,7 +68,7 @@ void ui_bank::InitUI()
 }
 ui_bank::ui_bank(ZealService* zeal, IO_ini* ini)
 {
-	zeal->callbacks->add_callback([this]() { InitUI(); }, callback_fn::InitUI);
+	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
 }
 ui_bank::~ui_bank()

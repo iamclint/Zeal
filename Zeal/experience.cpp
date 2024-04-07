@@ -98,5 +98,5 @@ Experience::Experience(ZealService* zeal)
 	exp = 0;
 	exp_per_hour_pct_tot = 0;
 	exp_per_hour_tot = 0;
-	zeal->callbacks->add_callback([this]() { callback_main();  });
+	zeal->callbacks->add_generic([this]() { callback_main();  });
 }

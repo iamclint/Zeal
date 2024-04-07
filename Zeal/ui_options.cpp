@@ -110,6 +110,13 @@ void ui_options::SetSliderValue(std::string name, int value)
 		ZealService::get_instance()->hooks->hook_map["SetSliderValue"]->original(SetSliderValue_hook)(slider_names[name], 0, value);
 	}
 }
+void ui_options::SetSliderValue(std::string name, float value)
+{
+	if (slider_names.count(name) > 0)
+	{
+		ZealService::get_instance()->hooks->hook_map["SetSliderValue"]->original(SetSliderValue_hook)(slider_names[name], 0, static_cast<int>(value));
+	}
+}
 void ui_options::SetChecked(std::string name, bool checked)
 {
 	if (checkbox_names.count(name) > 0)
@@ -212,7 +219,7 @@ ui_options::ui_options(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);
 	
-	zeal->callbacks->add_callback([this]() { InitUI(); }, callback_fn::InitUI);
+	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
 }
 ui_options::~ui_options()

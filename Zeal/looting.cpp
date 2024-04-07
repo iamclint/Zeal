@@ -109,15 +109,15 @@ void looting::looted_item()
 looting::looting(ZealService* zeal)
 {
 	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
-	zeal->callbacks->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
-	zeal->callbacks->add_callback([this]() {
+	zeal->callbacks->add_generic([this]() { init_ui(); }, callback_type::InitUI);
+	zeal->callbacks->add_generic([this]() {
 		if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->Loot || !Zeal::EqGame::Windows->Loot->IsVisible)
 		{
 			loot_all = false;
 			return;
 		}
-		}, callback_fn::MainLoop);
-		zeal->callbacks->add_worldmessage_callback([this](UINT opcode, char* buffer, UINT len) {
+		}, callback_type::MainLoop);
+		zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT len) {
 			if (opcode == 0x4031)
 				looted_item();
 		//	if (opcode == 0x4236)

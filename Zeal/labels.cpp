@@ -147,7 +147,7 @@ labels::~labels()
 
 labels::labels(ZealService* zeal)
 {
-	zeal->callbacks->add_callback([this]() { callback_main(); });
+	zeal->callbacks->add_generic([this]() { callback_main(); });
 	//zeal->hooks->Add("FinalizeLoot", Zeal::EqGame::EqGameInternal::fn_finalizeloot, finalize_loot, hook_type_detour);
 	zeal->hooks->Add("GetLabel", Zeal::EqGame::EqGameInternal::fn_GetLabelFromEQ, GetLabelFromEq, hook_type_detour);
 	zeal->hooks->Add("GetGauge", Zeal::EqGame::EqGameInternal::fn_GetGaugeLabelFromEQ, GetGaugeFromEq, hook_type_detour);

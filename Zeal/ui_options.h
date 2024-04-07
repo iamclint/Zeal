@@ -16,6 +16,7 @@ public:
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> label_names;
 	void SetLabelValue(std::string name, const char* format, ...);
 	void SetSliderValue(std::string name, int value);
+	void SetSliderValue(std::string name, float value);
 	void SetComboValue(std::string name, int value);
 	void AddCheckboxCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback);
 	void AddSliderCallback(std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback);

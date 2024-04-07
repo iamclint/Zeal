@@ -3,7 +3,7 @@
 #include "memory.h"
 #include <functional>
 #include <unordered_map>
-enum class callback_fn
+enum class callback_type
 {
 	MainLoop,
 	Zone,
@@ -12,23 +12,25 @@ enum class callback_fn
 	CharacterSelect,
 	InitUI,
 	EndMainLoop,
-	WorldMessage
+	WorldMessage,
+	SendMessage_,
+	ExecuteCmd
 };
-class CallBacks
+class CallbackManager
 {
 public:
-	void do_callbacks(callback_fn fn);
-	void add_callback(std::function<void()> callback_function, callback_fn fn = callback_fn::MainLoop);
-	void add_worldmessage_callback(std::function<bool(UINT, char*, UINT)> callback_function);
-	void add_sendmessage_callback(std::function<bool(UINT, char*, UINT)> callback_function);
-	bool do_worldmessage_callbacks(UINT opcode, char* buffer, UINT len);
-	bool do_sendmessage_callbacks(UINT opcode, char* buffer, UINT len);
-	CallBacks(class ZealService* zeal);
-	~CallBacks();
+	void add_generic(std::function<void()> callback_function, callback_type fn = callback_type::MainLoop);
+	void add_packet(std::function<bool(UINT, char*, UINT)> callback_function, callback_type fn = callback_type::WorldMessage);
+	void add_command(std::function<bool(UINT, BOOL)> callback_function, callback_type fn = callback_type::ExecuteCmd);
+	void invoke_generic(callback_type fn);
+	bool invoke_packet(callback_type fn, UINT opcode, char* buffer, UINT len);
+	bool invoke_command(callback_type fn, UINT opcode, bool state);
+	CallbackManager(class ZealService* zeal);
+	~CallbackManager();
 	void eml();
 private:
-	std::unordered_map<callback_fn, std::vector<std::function<void()>>> callback_functions;
-	std::vector<std::function<bool(UINT, char*, UINT)>> worldmessage_functions;
-	std::vector<std::function<bool(UINT, char*, UINT)>> sendmessage_functions;
+	std::unordered_map<callback_type, std::vector<std::function<void()>>> generic_functions;
+	std::unordered_map<callback_type, std::vector<std::function<bool(UINT, char*, UINT)>>> packet_functions;
+	std::unordered_map<callback_type, std::vector<std::function<bool(UINT, BOOL)>>> cmd_functions;
 };
 

@@ -32,4 +32,5 @@ public:
 	void replace_bind(int cmd, std::function<bool(int state)> callback);
 	void main_loop();
 	void on_zone();
+	bool execute_cmd(UINT opcode, bool state);
 };

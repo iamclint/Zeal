@@ -58,7 +58,7 @@ void ui_loot::InitUI()
 }
 ui_loot::ui_loot(ZealService* zeal, IO_ini* ini)
 {
-	zeal->callbacks->add_callback([this]() { InitUI(); }, callback_fn::InitUI);
+	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
 }
 ui_loot::~ui_loot()

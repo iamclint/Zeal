@@ -7,13 +7,8 @@ Binds::~Binds()
 {
 }
 
-void ExecuteCmd(int cmd, int isdown, int unk2)
+bool Binds::execute_cmd(UINT cmd, bool isdown)
 {
-	if (cmd == 0xd2)
-	{
-		ZealService* zeal = ZealService::get_instance();
-		zeal->callbacks->eml();
-	}
 	ZealService* zeal = ZealService::get_instance();
 	if (!Zeal::EqGame::game_wants_input()) //checks if the game wants keyboard input... don't call our binds when the game wants input
 	{
@@ -23,18 +18,16 @@ void ExecuteCmd(int cmd, int isdown, int unk2)
 		{
 			for (auto& fn : zeal->binds_hook->ReplacementFunctions[cmd])
 			if (fn(isdown)) //if the replacement function returns true, end here otherwise its really just adding more to the command 
-				return;
+				return true;
 		}
 
 		if (zeal->binds_hook->KeyMapFunctions.count(cmd) > 0)
 			zeal->binds_hook->KeyMapFunctions[cmd](isdown);
 		else
-			zeal->hooks->hook_map["executecmd"]->original(ExecuteCmd)(cmd, isdown, unk2);
+			return false;
 	}
-	else
-	{
-		zeal->hooks->hook_map["executecmd"]->original(ExecuteCmd)(cmd, isdown, unk2);
-	}
+
+	return false;
 }
 
 void __fastcall InitKeyboardAssignments(int t, int unused)
@@ -215,8 +208,9 @@ void Binds::on_zone()
 
 Binds::Binds(ZealService* zeal)
 {
-	zeal->callbacks->add_callback([this]() { main_loop(); }, callback_fn::MainLoop);
-	zeal->callbacks->add_callback([this]() { on_zone(); }, callback_fn::Zone);
+	zeal->callbacks->add_generic([this]() { main_loop(); }, callback_type::MainLoop);
+	zeal->callbacks->add_generic([this]() { on_zone(); }, callback_type::Zone);
+	zeal->callbacks->add_command([this](UINT opcode, bool state) { return execute_cmd(opcode, state); }, callback_type::ExecuteCmd);
 	for (int i = 0; i < 128; i++)
 		KeyMapNames[i] = *(char**)(0x611220 + (i * 4)); //copy the original short names to the new array
 	mem::write(0x52507A, (int)KeyMapNames);//write ini keymap
@@ -226,5 +220,5 @@ Binds::Binds(ZealService* zeal)
 	mem::write(0x52485A, (int)256); //increase this for loop to look through all 256
 	mem::write(0x52591C, (int)(Zeal::EqGame::ptr_AlternateKeyMap + (256 * 4))); //fix another for loop to loop through all 256
 	zeal->hooks->Add("initbinds", Zeal::EqGame::EqGameInternal::fn_initkeyboardassignments, InitKeyboardAssignments, hook_type_detour);
-	zeal->hooks->Add("executecmd", Zeal::EqGame::EqGameInternal::fn_executecmd, ExecuteCmd, hook_type_detour);
+	
 }

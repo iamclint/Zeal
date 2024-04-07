@@ -80,8 +80,8 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
-	zeal->callbacks->add_callback([this]() { init_ui(); }, callback_fn::InitUI);
-	zeal->callbacks->add_callback([this]() { clean_ui(); }, callback_fn::CleanUI);
+	zeal->callbacks->add_generic([this]() { init_ui(); }, callback_type::InitUI);
+	zeal->callbacks->add_generic([this]() { clean_ui(); }, callback_type::CleanUI);
 	zeal->binds_hook->replace_bind(0xC8, [this](int state) { 
 		for (auto rit = display_windows.rbegin(); rit != display_windows.rend(); ++rit) {
 			Zeal::EqUI::ItemDisplayWnd* wnd = *rit;
