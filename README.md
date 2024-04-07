@@ -96,9 +96,6 @@ ___
 - `/bluecon`
   - **Description:** Changes the blue con color to usercolor #70 which is otherwise unused, you can edit in the options window.
 
-- `/zealinput`
-  - **Description:** toggles zealinput for input boxes in game (chat windows ect) which gives it a more modern feel with keyboard binds including copy and paste.
-
 - `/alarm`
   - **Arguments:** `oldui`
   - **Description:** Re-opens the alarm window, if oldui is specified it allows for an alarm on it.
