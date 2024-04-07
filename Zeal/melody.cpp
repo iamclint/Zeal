@@ -49,7 +49,7 @@ void Melody::tick()
         end();
         return;
     }
-    if (active && Zeal::EqGame::get_char_info())
+    if (active && Zeal::EqGame::get_char_info() && songs.size()>0)
     {
         Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
         static ULONGLONG casting_timestamp = GetTickCount64();
@@ -65,6 +65,8 @@ void Melody::tick()
             if (current_index >= songs.size() || current_index<0)
                 current_index = 0;
             int current_gem = songs[current_index];
+            if (current_gem < 0 || current_gem>7)
+                end();
             if (Zeal::EqGame::get_char_info()->MemorizedSpell[current_gem] != -1 )
             {
                 if (!Zeal::EqGame::get_eq()->IsOkToTransact())

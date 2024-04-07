@@ -31,42 +31,80 @@ ZealService::ZealService()
 	netstat = std::make_shared<Netstat>(this, ini.get());
 	ui = std::make_shared<ui_manager>(this, ini.get());
 	melody = std::make_shared<Melody>(this, ini.get());
-	binds_hook->replace_bind(3, [this](int state) {
+
+	this->basic_binds();
+}
+
+void ZealService::basic_binds()
+{
+	binds_hook->replace_bind(3, [this](int state) 
+	{
 		movement->handle_movement_binds(3, state);
 		return false;
 	}); //foward
-	binds_hook->replace_bind(4, [this](int state) {
+
+	binds_hook->replace_bind(4, [this](int state) 
+	{
 		movement->handle_movement_binds(4, state);
 		return false;
 	}); //back
-	binds_hook->replace_bind(5, [this](int state) {
+
+	binds_hook->replace_bind(5, [this](int state) 
+	{
 		camera_mods->handle_camera_motion_binds(5, state);
 		movement->handle_movement_binds(5, state);
 		return false;
 	}); //turn right
-	binds_hook->replace_bind(6, [this](int state) {
+
+	binds_hook->replace_bind(6, [this](int state) 
+	{
 		camera_mods->handle_camera_motion_binds(6, state);
 		movement->handle_movement_binds(6, state);
 		return false;
 	}); //turn left
-	binds_hook->replace_bind(30, [this](int state) {
-		netstat->toggle_netstat(state);
-		return false;
+
+	binds_hook->replace_bind(30, [this](int state) 
+	{
+			netstat->toggle_netstat(state);
+			return false;
 	});
-	for (int bind_index = 51; bind_index < 59; ++bind_index) {
+
+	for (int bind_index = 51; bind_index < 59; ++bind_index) 
+	{
 		binds_hook->replace_bind(bind_index, [this, bind_index](int state) {
 			movement->handle_spellcast_binds(bind_index);
 			return false;
 		}); // spellcasting auto-stand
 	}
-	binds_hook->replace_bind(72, [this](int state) {
+
+	binds_hook->replace_bind(72, [this](int state) 
+		{
 		Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 		return false;
 	}); // hotkey camp auto-sit
 
-	
-}
+	binds_hook->replace_bind(0xC8, [this](int state) 
+	{
+		if (Zeal::EqGame::get_target())
+		{
+			Zeal::EqGame::set_target(0);
+			return true;
+		}
 
+		if (ini->getValue<bool>("Zeal", "Escape"))//toggle is set to not close any windows
+			return true;
+
+		for (auto rit = item_displays->windows.rbegin(); rit != item_displays->windows.rend(); ++rit) {
+			Zeal::EqUI::ItemDisplayWnd* wnd = *rit;
+			if (wnd->IsVisible)
+			{
+				wnd->IsVisible = false;
+				return true;
+			}
+		}
+		return false;
+	}); //handle escape
+}
 
 void ZealService::apply_patches()
 {

@@ -159,6 +159,7 @@ void Binds::add_binds()
 			Zeal::EqGame::EqGameInternal::ReplyTarget(Zeal::EqGame::get_self(), "");
 		}
 		});
+
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) 
 	{
 		if (key_down)

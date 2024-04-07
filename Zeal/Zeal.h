@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-#define ZEAL_VERSION "0.1.50"
+#define ZEAL_VERSION "0.1.60"
 
 class ZealService
 {
@@ -33,15 +33,16 @@ public:
 	std::shared_ptr<ui_manager> ui = nullptr;
 	std::shared_ptr<Melody> melody = nullptr;
 	
-	
-
-	bool exit = false;
-	void apply_patches();
 	ZealService();
 	~ZealService();
 
 	//static data/functions to get a base ptr since some hook callbacks don't have the information required
 	static ZealService* ptr_service;
 	static ZealService* get_instance();
+
+	bool exit = false;
+private:
+	void basic_binds();
+	void apply_patches();
 };
 

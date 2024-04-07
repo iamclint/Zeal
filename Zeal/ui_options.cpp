@@ -152,6 +152,8 @@ void ui_options::InitUI()
 	AddCheckboxCallback("Zeal_BlueCon", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_bluecon(wnd->Checked); });
 	AddCheckboxCallback("Zeal_Timestamp", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_timestamp(wnd->Checked); });
 	AddCheckboxCallback("Zeal_Input", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_input(wnd->Checked); }); 
+	AddCheckboxCallback("Zeal_Escape", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ini->setValue<bool>("Zeal", "Escape", wnd->Checked); });
+	
 	AddCheckboxCallback("Zeal_ShowHelm", [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::print_chat("Show helm toggle"); });
 	AddSliderCallback("Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->set_pan_delay(value*4); 
@@ -207,8 +209,7 @@ void ui_options::UpdateOptions()
 	SetChecked("Zeal_BlueCon", ZealService::get_instance()->chat_hook->bluecon);
 	SetChecked("Zeal_Timestamp", ZealService::get_instance()->chat_hook->timestamps);
 	SetChecked("Zeal_Input", ZealService::get_instance()->chat_hook->zealinput);
-
-
+	SetChecked("Zeal_Escape", ZealService::get_instance()->ini->getValue<bool>("Zeal", "Escape"));
 }
 
 

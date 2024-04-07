@@ -59,7 +59,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			if (args.size() == 1)
 			{
 				Zeal::EqGame::set_target(0);
-				Zeal::EqGame::print_chat(Zeal::EqGame::get_string(0x3057)); //you no longer have a target
 				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 			}
 			return false;

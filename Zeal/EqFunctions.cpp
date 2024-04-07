@@ -422,6 +422,8 @@ namespace Zeal
 		}
 		void set_target(Zeal::EqStructures::Entity* target)
 		{
+			if (!target)
+				print_chat(get_string(0x3057)); //you no longer have a target
 			*(Zeal::EqStructures::Entity**)Zeal::EqGame::Target = target;
 		}
 		Zeal::EqStructures::Entity* get_entity_list()
