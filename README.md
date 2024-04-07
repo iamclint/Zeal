@@ -6,6 +6,11 @@
 - Add free for all for raid loot, requires ui change or /setloottype 4
 ### Commands
 ___
+- `/fov`
+  - **Arguments:** `int`
+  - **Example:** `/fov 65`
+  - **Description:** changes your field of view.
+    
 - `/melody`
   - **Arguments:** `song gem #'s (maximum of 5)`
   - **Example:** `/melody 1 4 2 3`
