@@ -11,6 +11,9 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 {
 	ZealService* zeal = ZealService::get_instance();
 	std::string str_cmd = cmd;
+
+	if (str_cmd.length()>0 && str_cmd.at(0) != '/')
+		str_cmd = "/" + str_cmd;
 	std::vector<std::string> args =  StringUtil::split(str_cmd," ");
 
 	if (args.size() > 0)

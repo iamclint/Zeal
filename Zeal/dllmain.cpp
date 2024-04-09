@@ -12,14 +12,16 @@ void init()
     }
 
      zeal.~ZealService(); //destructor
-    
-     Sleep(1000);
+     if (!zeal.exit)
+     {
+         Sleep(1000);
 
-    while (!FreeLibrary(this_module))
-    {
-        Sleep(10);
-    }
-    FreeLibraryAndExitThread(this_module, 0);
+         while (!FreeLibrary(this_module))
+         {
+             Sleep(10);
+         }
+        FreeLibraryAndExitThread(this_module, 0);
+     }
 }
 
 
@@ -29,6 +31,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                        LPVOID lpReserved
                      )
 {
+    static std::thread main;
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
@@ -37,8 +40,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         {
             this_module = hModule;
             DisableThreadLibraryCalls(hModule);
-            std::thread t(init);
-            t.detach();
+            main = std::thread(init);
+            main.detach();
         }
 		break;
 	}
@@ -48,6 +51,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         break;
     case DLL_PROCESS_DETACH:
         ZealService::get_instance()->exit = true;
+        main.join();
         break;
     }
     return TRUE;
