@@ -5,7 +5,6 @@
 class ZealService
 {
 public:
-	HMODULE	this_module = nullptr;
 	//hooks
 	std::shared_ptr<IO_ini> ini = nullptr;
 	std::shared_ptr<HookWrapper> hooks = nullptr;
@@ -35,9 +34,8 @@ public:
 	
 	ZealService();
 	~ZealService();
-
-	//static data/functions to get a base ptr since some hook callbacks don't have the information required
 	static ZealService* ptr_service;
+	//static data/functions to get a base ptr since some hook callbacks don't have the information required
 	static ZealService* get_instance();
 
 	bool exit = false;

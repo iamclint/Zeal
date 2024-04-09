@@ -1,7 +1,5 @@
 #include "Zeal.h"
 ZealService* ZealService::ptr_service = nullptr;
-
-
 ZealService::ZealService()
 {
 	//since the hooked functions are called back via a different thread, make sure the service ptr is available immediately
@@ -123,5 +121,26 @@ ZealService* ZealService::get_instance()
 }
 ZealService::~ZealService()
 {
-	
+	hooks.reset();
+	melody.reset();
+	ui.reset();
+	netstat.reset();
+	alarm.reset();
+	movement.reset();
+	buff_timers.reset();
+	outputfile.reset();
+	chat_hook.reset();
+	experience.reset();
+	cycle_target.reset();
+	camera_mods.reset();
+	item_displays.reset();
+	spell_sets.reset();
+	eqstr_hook.reset();
+	raid_hook.reset();
+	binds_hook.reset();
+	labels_hook.reset();
+	looting_hook.reset();
+	callbacks.reset();
+	commands_hook.reset();
+	ini.reset();
 }
