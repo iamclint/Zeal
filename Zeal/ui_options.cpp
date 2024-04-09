@@ -190,6 +190,17 @@ void ui_options::InitUI()
 }
 
 
+void ui_options::CleanUI()
+{
+	combo_names.clear();
+	combo_callbacks.clear();
+	checkbox_names.clear();
+	checkbox_callbacks.clear();
+	slider_names.clear();
+	slider_callbacks.clear();
+	label_names.clear();
+}
+
 
 void ui_options::UpdateOptions()
 {
@@ -219,7 +230,7 @@ ui_options::ui_options(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour); 
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);
-	
+	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
 }
