@@ -152,6 +152,20 @@ namespace Zeal
 			Banker = 16,
 			Merchant = 32
 		};
+		enum PetCommand
+		{
+			None = 0,
+			Back = 1,
+			GoAway = 2,
+			Health = 4,
+			Guard = 5,
+			GuardMe = 6,
+			Attack = 7,
+			Follow = 8,
+			Sit = 9,
+			Stand = 10,
+			Taunt = 11
+		};
 
 
 	}

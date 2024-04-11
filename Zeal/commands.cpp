@@ -57,6 +57,20 @@ ChatCommands::ChatCommands(ZealService* zeal)
 {
 
 	//just going to use lambdas for simple commands
+	//add("/zpet", { },
+	//	[](std::vector<std::string>& args) {
+	//		if (args.size() > 1)
+	//		{
+	//			int cmd = 0;
+	//			if (StringUtil::tryParse(args[1], &cmd))
+	//			{
+	//				Zeal::EqGame::pet_command(cmd, 0);
+	//			}
+	//			
+	//			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+	//		}
+	//		return false;
+	//	});
 	add("/target", { "/cleartarget" },
 		[](std::vector<std::string>& args) {
 			if (args.size() == 1)

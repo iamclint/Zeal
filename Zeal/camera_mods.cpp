@@ -639,15 +639,15 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
             }
             return true;
         });
-    zeal->binds_hook->replace_bind(15, [this](int state) { handle_camera_motion_binds(15, state); return false; });
-    zeal->binds_hook->replace_bind(115, [this](int state) { handle_camera_motion_binds(15, state); return false; });
-    zeal->binds_hook->replace_bind(111, [this](int state) { handle_camera_motion_binds(15, state); return false; });
-    zeal->binds_hook->replace_bind(16, [this](int state) { handle_camera_motion_binds(16, state); return false; });
-    zeal->binds_hook->replace_bind(116, [this](int state) { handle_camera_motion_binds(16, state); return false; });
-    zeal->binds_hook->replace_bind(112, [this](int state) { handle_camera_motion_binds(16, state); return false; });
-    zeal->binds_hook->replace_bind(18, [this](int state) { handle_camera_motion_binds(18, state); return false; });
-    zeal->binds_hook->replace_bind(19, [this](int state) { handle_camera_motion_binds(19, state); return false; });
-    zeal->binds_hook->replace_bind(20, [this](int state) { handle_cycle_camera_views(20, state); return false; });
+    zeal->binds_hook->replace_cmd(15, [this](int state) { handle_camera_motion_binds(15, state); return false; });
+    zeal->binds_hook->replace_cmd(115, [this](int state) { handle_camera_motion_binds(15, state); return false; });
+    zeal->binds_hook->replace_cmd(111, [this](int state) { handle_camera_motion_binds(15, state); return false; });
+    zeal->binds_hook->replace_cmd(16, [this](int state) { handle_camera_motion_binds(16, state); return false; });
+    zeal->binds_hook->replace_cmd(116, [this](int state) { handle_camera_motion_binds(16, state); return false; });
+    zeal->binds_hook->replace_cmd(112, [this](int state) { handle_camera_motion_binds(16, state); return false; });
+    zeal->binds_hook->replace_cmd(18, [this](int state) { handle_camera_motion_binds(18, state); return false; });
+    zeal->binds_hook->replace_cmd(19, [this](int state) { handle_camera_motion_binds(19, state); return false; });
+    zeal->binds_hook->replace_cmd(20, [this](int state) { handle_cycle_camera_views(20, state); return false; });
 
 }
 

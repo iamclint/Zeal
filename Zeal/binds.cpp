@@ -159,7 +159,26 @@ void Binds::add_binds()
 			Zeal::EqGame::EqGameInternal::ReplyTarget(Zeal::EqGame::get_self(), "");
 		}
 		});
-
+	add_bind(218, "Pet Attack", "PetAttack", key_category::Commands, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
+			if (target)
+				Zeal::EqGame::pet_command(Zeal::EqEnums::PetCommand::Attack, target->SpawnId);
+		}
+		});
+	add_bind(219, "Pet Guard", "PetGuard", key_category::Commands, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqGame::pet_command(Zeal::EqEnums::PetCommand::Guard, 0);
+		}
+		});
+	add_bind(220, "Pet Back", "PetBack", key_category::Commands, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqGame::pet_command(Zeal::EqEnums::PetCommand::Back, 0);
+		}
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) 
 	{
 		if (key_down)
@@ -184,7 +203,7 @@ void Binds::add_bind(int cmd, const char* name, const char* short_name, int cate
 	KeyMapFunctions[cmd] = callback;
 }
 
-void Binds::replace_bind(int cmd, std::function<bool(int state)> callback)
+void Binds::replace_cmd(int cmd, std::function<bool(int state)> callback)
 {
 	ReplacementFunctions[cmd].push_back(callback);
 }

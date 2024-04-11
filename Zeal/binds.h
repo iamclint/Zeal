@@ -29,7 +29,7 @@ public:
 	void read_ini();
 	void add_binds();
 	void add_bind(int index, const char* name, const char* short_name, int category, std::function<void(int state)> callback);
-	void replace_bind(int cmd, std::function<bool(int state)> callback);
+	void replace_cmd(int cmd, std::function<bool(int state)> callback);
 	void main_loop();
 	void on_zone();
 	bool execute_cmd(UINT opcode, bool state);

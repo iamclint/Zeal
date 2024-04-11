@@ -38,7 +38,6 @@ namespace Zeal
 			/*inline int fn_loadoptions = 0x536CE0;*/
 			static int fn_KeyboardPageHandleKeyboardMsg = 0x42c4fb;
 
-
 			static mem::function<void __fastcall(int t, int unused, const char* data, short color, bool un)> print_chat = 0x537f99;
 			//static mem::function<void __stdcall(const char* data)> log = 0x5240dc;
 			static mem::function<char __fastcall(int display, int unused, Zeal::EqStructures::Entity*, Zeal::EqStructures::Entity*)> can_target = 0x4afa90;
@@ -93,6 +92,7 @@ namespace Zeal
 		void CXStr_PrintString(Zeal::EqUI::CXSTR* str, const char* format, ...);
 		Vec3 get_player_head_pos();
 		Vec3 get_view_actor_head_pos();
+		void pet_command(int cmd, short spawn_id);
 		float encum_factor();
 		Zeal::EqStructures::Entity* get_view_actor_entity();
 		inline Zeal::EqStructures::GuildName* guild_names = (Zeal::EqStructures::GuildName*)0x7F9C94;

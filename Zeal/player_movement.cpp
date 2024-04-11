@@ -197,7 +197,7 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 	load_settings();
 
 	// ISSUE: Mapping LEFT/RIGHT arrow keys to strafe on TAKP2.1 client fails to function.
-	binds->replace_bind(211, [this](int state) {
+	binds->replace_cmd(211, [this](int state) {
 		if (!state && current_strafe == strafe_direction::Left)
 		{
 			set_strafe(strafe_direction::None);
@@ -209,7 +209,7 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 		}
 		return false;
 	}); // strafe left
-	binds->replace_bind(212, [this](int state) {
+	binds->replace_cmd(212, [this](int state) {
 		if (!state && current_strafe == strafe_direction::Right)
 		{
 			set_strafe(strafe_direction::None);

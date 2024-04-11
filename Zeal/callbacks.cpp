@@ -119,6 +119,7 @@ void send_message_hk(int* connection, UINT opcode, char* buffer, UINT len, int u
 void executecmd_hk(UINT cmd, bool isdown, int unk2)
 {
 	ZealService* zeal = ZealService::get_instance();
+	//Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Cmd: %i", cmd);
 	if (cmd == 0xd2)
 		zeal->callbacks->invoke_generic(callback_type::EndMainLoop);
 	if (zeal->callbacks->invoke_command(callback_type::ExecuteCmd, cmd, isdown))
@@ -126,7 +127,6 @@ void executecmd_hk(UINT cmd, bool isdown, int unk2)
 
 	zeal->hooks->hook_map["executecmd"]->original(executecmd_hk)(cmd, isdown, unk2);
 }
-
 
 CallbackManager::CallbackManager(ZealService* zeal)
 {
