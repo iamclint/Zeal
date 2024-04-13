@@ -1,4 +1,5 @@
 #include "Zeal.h"
+#include "EqAddresses.h"
 ZealService* ZealService::ptr_service = nullptr;
 ZealService::ZealService()
 {

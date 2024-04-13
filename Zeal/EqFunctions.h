@@ -82,6 +82,7 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+		void execute_cmd(UINT cmd, bool isdown, int unk2);
 		EqStructures::Everquest* get_eq();
 		int get_gamestate();
 		bool is_new_ui();

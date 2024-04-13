@@ -405,6 +405,10 @@ namespace Zeal
 		{
 			reinterpret_cast<void(__thiscall*)(EqStructures::Everquest*, int, short)>(0x547749)(get_eq(), cmd, spawn_id);
 		}
+		void execute_cmd(UINT cmd, bool isdown, int unk2)
+		{
+			reinterpret_cast<void(__cdecl*)(UINT, bool, int)>(0x54050c)(cmd, isdown, unk2);
+		}
 		std::string generateTimestamp() {
 			time_t rawtime;
 			struct tm timeinfo;

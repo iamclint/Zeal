@@ -3,6 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
+#include "StringUtil.h"
 #include <algorithm>
 
 std::string ReadFromClipboard() {
@@ -284,6 +285,28 @@ void chat::set_input_color(Zeal::EqUI::ARGBCOLOR col)
 
 chat::chat(ZealService* zeal, IO_ini* ini)
 {
+    //zeal->commands_hook->add("/context", { "" },
+    //    [this](std::vector<std::string>& args) {
+    //        int index = 0;
+    //        if (args.size() > 1)
+    //        {
+//                if (StringUtil::tryParse(args[1], &index))
+//                {
+//                    if (index < Zeal::EqGame::Windows->ContextMenuManager->MenuCount)
+//                    {
+//                        Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(index, { 100,100 }, (Zeal::EqUI::EQWND*)Zeal::EqGame::Windows->ContextMenuManager->Menus[index]);
+//                    }
+//                }
+    //        }
+    //        else
+    //        {
+    //            Zeal::EqGame::print_chat("Context menus: %i", Zeal::EqGame::Windows->ContextMenuManager->MenuCount);
+    //        }
+
+    //        return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+    //    });
+
+    
     zeal->commands_hook->add("/timestamp", { "/tms" },
         [this](std::vector<std::string>& args) {
             set_timestamp(!timestamps);

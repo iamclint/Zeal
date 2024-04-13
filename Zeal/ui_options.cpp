@@ -185,8 +185,6 @@ void ui_options::InitUI()
 	AddLabel("Zeal_ThirdPersonLabel_X");
 	AddLabel("Zeal_ThirdPersonLabel_Y");
 
-	Zeal::EqUI::BasicWnd* btn = (Zeal::EqUI::SliderWnd*)Zeal::EqGame::Windows->PetInfo->GetChildItem("AttackButton");
-	Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Attack button: 0x%x  buttondown: 0x%x", btn, btn->vtbl->WndNotification);
 	//AddComboCallback("Zeal_HideCorpseCombobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { Zeal::EqGame::print_chat("Combo set to %i", value); });
 	/*set the current states*/
 	UpdateOptions();

@@ -159,7 +159,7 @@ void Binds::add_binds()
 			Zeal::EqGame::EqGameInternal::ReplyTarget(Zeal::EqGame::get_self(), "");
 		}
 		});
-	add_bind(218, "Pet Attack", "PetAttack", key_category::Commands, [this](int key_down) {
+	add_bind(218, "Pet Attack", "PetAttack", key_category::Commands, [this](int key_down) { //probably need to add a check if you have a pet
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
@@ -177,6 +177,51 @@ void Binds::add_binds()
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqGame::pet_command(Zeal::EqEnums::PetCommand::Back, 0);
+		}
+		});
+	add_bind(221, "Pet Follow", "PetFollow", key_category::Commands, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqGame::pet_command(Zeal::EqEnums::PetCommand::Follow, 0);
+		}
+		});
+	add_bind(222, "Slow Turn Right", "SlowMoveRight", key_category::Movement, [this](int key_down) {
+		if (!Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqGame::execute_cmd(5, key_down, 0);
+			if (key_down)
+			{
+				mem::write<BYTE>(0x53fb60, 4);
+				mem::write<BYTE>(0x53fb66, 4);
+			}
+			else
+			{
+				if (*(BYTE*)0x53fb60 != 12)
+				{
+					mem::write<BYTE>(0x53fb60, 12);
+					mem::write<BYTE>(0x53fb66, 12);
+				}
+			}
+			
+		}
+		});
+	add_bind(223, "Slow Turn Left", "SlowMoveLeft", key_category::Movement, [this](int key_down) {
+		if (!Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqGame::execute_cmd(6, key_down, 0);
+			if (key_down)
+			{
+				mem::write<BYTE>(0x53f758, 4);
+				mem::write<BYTE>(0x53f75E, 4);
+			}
+			else
+			{
+				if (*(BYTE*)0x53f758 != 12)
+				{
+					mem::write<BYTE>(0x53f758, 12);
+					mem::write<BYTE>(0x53f75E, 12);
+				}
+			}
 		}
 		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) 
@@ -220,7 +265,6 @@ void Binds::main_loop()
 
 void Binds::on_zone()
 {
-	Zeal::EqGame::print_chat("zoned");
 	last_targets.first = 0;
 	last_targets.second = 0;
 }
