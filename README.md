@@ -6,6 +6,15 @@
 - Add free for all for raid loot, requires ui change or /setloottype 4
 ### Commands
 ___
+- `/inspect target`
+  - **Description:** adds target argument to /inspect, this just inspects your current target.
+
+- `/loc noprint`
+  - **Description:** adds noprint argument to /loc, this just sends loc directly to your log.
+
+- `/reloadskin`
+  - **Description:** reloads your current skin using ini.
+    
 - `/fov`
   - **Arguments:** `int`
   - **Example:** `/fov 65`
@@ -108,6 +117,12 @@ ___
 - Auto Inventory
 - Toggle last 2 targets
 - Reply target
+- Pet Attack
+- Pet Guard
+- Pet Follow
+- Pet Back
+- Slow turn left
+- Slow turn right
 ___
 ### UI
 - **Gauge EqType's**
