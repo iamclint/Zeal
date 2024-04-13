@@ -401,6 +401,10 @@ namespace Zeal
 		{
 			return *(EqStructures::Everquest**)0x809478;
 		}
+		void do_inspect(Zeal::EqStructures::Entity* player)
+		{
+			reinterpret_cast<void(__thiscall*)(EqStructures::Everquest*, Zeal::EqStructures::Entity*)>(0x54390E)(get_eq(), player);
+		}
 		void pet_command(int cmd, short spawn_id)
 		{
 			reinterpret_cast<void(__thiscall*)(EqStructures::Everquest*, int, short)>(0x547749)(get_eq(), cmd, spawn_id);

@@ -111,6 +111,7 @@ char __fastcall handleworldmessage_hk(int* connection, int unused, UINT unk, UIN
 void send_message_hk(int* connection, UINT opcode, char* buffer, UINT len, int unknown)
 {
 	ZealService* zeal = ZealService::get_instance();
+	//Zeal::EqGame::print_chat("Opcode %i   len: %i", opcode, len);
 	if (zeal->callbacks->invoke_packet(callback_type::SendMessage_, opcode, buffer, len))
 		return;
 	zeal->hooks->hook_map["SendMessage"]->original(send_message_hk)(connection, opcode, buffer, len, unknown);

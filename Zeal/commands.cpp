@@ -231,6 +231,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
+	
 	add("/clientmanatick", { "/cmt" },
 		[this](std::vector<std::string>& args) {
 			BYTE orig1[7] = { 0x66, 0x01, 0xBE, 0x9A, 0x0, 0x0, 0x0 }; //0x4C3F93
@@ -247,6 +248,13 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				mem::set(0x4C7642, 0x90, sizeof(orig2));
 				Zeal::EqGame::print_chat("Client sided mana tick disabled");
 			}
+			return true;
+		});
+
+	add("/reloadskin", { },
+		[this](std::vector<std::string>& args) {
+			mem::write<BYTE>(0x8092d9, 1); //reload skin
+			mem::write<BYTE>(0x8092da, 1);  //reload with ui
 			return true;
 		});
 	add("/alarm", {},
@@ -291,10 +299,23 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
-		add("/test", {},
+		add("/inspect", {},
 		[this, zeal](std::vector<std::string>& args) {
-				Zeal::EqGame::print_chat("Default Menu Index: %i", Zeal::EqGame::Windows->ContextMenuManager->GetDefaultMenuIndex());
-			return true;
+				if (args.size() > 1 && args[1] == "target")
+				{
+					Zeal::EqStructures::Entity* t = Zeal::EqGame::get_target();
+					if (!t || t->Type!=0)
+					{
+						Zeal::EqGame::print_chat("That is not a valid target to inspect!");
+						return true;
+					}
+					else
+					{
+						Zeal::EqGame::do_inspect(t);
+						return true;
+					}
+				}
+			return false;
 		});
 	add("/help", { "/hel" },
 		[this](std::vector<std::string>& args) {
