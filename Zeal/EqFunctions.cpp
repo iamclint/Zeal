@@ -697,20 +697,20 @@ namespace Zeal
 			bool spellbook_window_open()
 			{
 				// ISSUE: There is currently a small edge case where chat scrollbar usage can cause the value we're checking to flicker.
+				// ISSUE: Spamming chat while in spellboolk ultimately causes chat to scroll which makes the value flicker like the above issue.
 				HMODULE dx8 = GetModuleHandleA("eqgfx_dx8.dll");
 				// feedback/help window increase offset of pointer by 44, but they also get hit by game_wants_input(), so don't bother check them.
 				if (dx8)
 				{
-					int offset = 0;
-					for (size_t i = 0; i < EQ_NUM_SPELL_GEMS; ++i) {
-						if (Zeal::EqGame::get_self()->CharInfo->MemorizedSpell[i] != USHRT_MAX) {
-							offset += 88;
-						}
-					}
+					int offset = EQ_NUM_SPELL_GEMS * 88;
+					for (size_t i = 0; i < EQ_NUM_SPELL_GEMS; ++i)
+						if (Zeal::EqGame::get_char_info()->MemorizedSpell[i] == -1)
+							offset -= 88;
+
 					if (Zeal::EqGame::get_target()) { offset += 44; }
-					bool view_button_clicked = (*(DWORD*)((DWORD)dx8 + (0x3CD1C4 + offset)) != ULONG_MAX); // weird offset edge case (view hotkey not included)
+					bool view_button_clicked = *(DWORD*)((DWORD)dx8 + (0x3CD1C4 + offset)) != ULONG_MAX; // weird offset edge case (view hotkey not included)
 					if (view_button_clicked) { offset += 44; }
-					return (*(DWORD*)((DWORD)dx8 + (0x3CD1C4 + offset)) == ULONG_MAX);
+					return *(DWORD*)((DWORD)dx8 + (0x3CD1C4 + offset)) == ULONG_MAX;
 				}
 				else
 				{
