@@ -7,6 +7,30 @@
 #include <cctype>
 #include "StringUtil.h"
 
+void ChatCommands::print_commands()
+{
+	std::stringstream ss;
+	ss << "List of commands" << std::endl;
+	ss << "-----------------------------------------------------" << std::endl;
+	for (auto& [name, c] : CommandFunctions)
+	{
+		ss << name;
+		if (c.aliases.size() > 0)
+			ss << "  aliases  [";
+		for (auto it = c.aliases.begin(); it != c.aliases.end(); ++it) {
+			auto& a = *it;
+			ss << a;
+			if (std::next(it) != c.aliases.end()) {
+				ss << ", ";
+			}
+		}
+		if (c.aliases.size() > 0)
+			ss << "]";
+		ss << std::endl;
+	}
+	Zeal::EqGame::print_chat(ss.str());
+}
+
 void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -190,7 +214,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)
 			{
-				Zeal::EqGame::print_chat("Available args: version"); //leave room for more args on this command for later
+				Zeal::EqGame::print_chat("Available args: version, help"); //leave room for more args on this command for later
 				return true;
 			}
 			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "version"))
@@ -198,6 +222,11 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				std::stringstream ss;
 				ss << "Zeal version: " << ZEAL_VERSION << std::endl;
 				Zeal::EqGame::print_chat(ss.str());
+				return true;
+			}
+			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "help"))
+			{
+				print_commands();
 				return true;
 			}
 			return false;
@@ -284,26 +313,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			if (args.size() > 1 && StringUtil::caseInsensitive(args[1],"zeal"))
 			{
-				std::stringstream ss;
-				ss << "List of commands" << std::endl;
-				ss << "-----------------------------------------------------" << std::endl;
-				for (auto& [name, c] : CommandFunctions)
-				{
-					ss << name;
-					if (c.aliases.size() > 0)
-						ss << "  aliases  [";
-					for (auto it = c.aliases.begin(); it != c.aliases.end(); ++it) {
-						auto& a = *it;
-						ss << a;
-						if (std::next(it) != c.aliases.end()) {
-							ss << ", ";
-						}
-					}
-					if (c.aliases.size() > 0)
-						ss << "]";
-					ss << std::endl;
-				}
-				Zeal::EqGame::print_chat(ss.str());
+				print_commands();
 				return true;
 			}
 			return false;
