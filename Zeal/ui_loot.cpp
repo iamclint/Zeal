@@ -19,7 +19,7 @@ static int __fastcall LinkAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Z
 			{
 				if (has_added_link)
 					input_wnd->ReplaceSelection(", ", false);
-				input_wnd->AddItemTag(Zeal::EqGame::Windows->Loot->Item[i]->Id, Zeal::EqGame::Windows->Loot->Item[i]->Name);
+				input_wnd->AddItemTag(Zeal::EqGame::Windows->Loot->Item[i]->ID, Zeal::EqGame::Windows->Loot->Item[i]->Name);
 				has_added_link = true;
 			}
 		}

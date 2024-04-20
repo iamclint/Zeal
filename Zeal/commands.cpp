@@ -114,25 +114,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			ZealService::get_instance()->ui->bank->change();
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
-	add("/fov", { },
-		[](std::vector<std::string>& args) {
-			Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
-			if (ci)
-			{
-				float fov = 0;
-				if (args.size()>1 && StringUtil::tryParse(args[1], &fov))
-				{
-					ci->FieldOfView = fov;
-				}
-				else
-				{
-					Zeal::EqGame::print_chat("Current FOV [%f]", ci->FieldOfView);
-				}
-			
-			}
-			
-			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
-		});
 	add("/aspectratio", { "/ar"},
 		[](std::vector<std::string>& args) {
 			Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();

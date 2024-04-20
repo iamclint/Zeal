@@ -61,5 +61,13 @@ namespace StringUtil
 			return false;
 		}
 	}
+	std::string byteArrayToHexString(const char* byteArray, size_t length) {
+		std::ostringstream oss;
+		oss << std::hex << std::setfill('0');
+		for (size_t i = 0; i < length; ++i) {
+			oss << std::setw(2) << static_cast<unsigned int>(static_cast<unsigned char>(byteArray[i])) << " ";
+		}
+		return oss.str();
+	}
 
 }

@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="alarm.h" />
+    <ClInclude Include="autofire.h" />
     <ClInclude Include="ui_bank.h" />
     <ClInclude Include="item_display.h" />
     <ClInclude Include="melody.h" />
@@ -196,6 +197,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
+    <ClCompile Include="autofire.cpp" />
     <ClCompile Include="ui_bank.cpp" />
     <ClCompile Include="item_display.cpp" />
     <ClCompile Include="melody.cpp" />

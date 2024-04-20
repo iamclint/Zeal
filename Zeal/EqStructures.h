@@ -14,7 +14,7 @@
 #define EQ_NUM_INVENTORY_PACK_SLOTS 8
 #define EQ_NUM_INVENTORY_BANK_SLOTS 8
 #define EQ_NUM_SKILLS 74
-#define EQ_NUM_SPELL_BOOK_SPELLS 512
+#define EQ_NUM_SPELL_BOOK_SPELLS 511
 #define EQ_NUM_SPAWNS 8192
 #define EQ_NUM_GUILDS 512
 #define EQ_NUM_LOOT_WINDOW_ITEMS 30
@@ -254,22 +254,27 @@ namespace Zeal
 		} EQITEMBOOKINFO, * PEQITEMBOOKINFO;
 		typedef struct _EQITEMINFO
 		{
-			/* 0x0000 */ CHAR Name[64]; // [0x40]
-			/* 0x0040 */ CHAR LoreName[80]; // [0x50]
-			/* 0x0090 */ CHAR IdFile[6]; // [0x06]
-			/* 0x0096 */ BYTE Unknown0096[24];
-			/* 0x00AE */ BYTE Weight; // multiply by 0.1 for actual decimal weight
-			/* 0x00AF */ BYTE NoRent; // 0x00 = True, 0xFF = False
-			/* 0x00B0 */ BYTE NoDrop; // 0x00 = True, 0xFF = False
-			/* 0x00B1 */ BYTE Size; // EQ_ITEM_SIZE_x
-			/* 0x00B2 */ BYTE OpenType; //0x1 = bag, 0x2 = letter
-			/* 0x00B3 */ BYTE Unknown00B3;
-			/* 0x00B4 */ WORD Id;
-			/* 0x00B6 */ WORD Icon;
-			/* 0x00B8 */ DWORD EquipSlot;
-			/* 0x00BC */ DWORD EquippableSlots; // flag
-			/* 0x00C0 */ DWORD Cost; // value in copper, sells to merchant for value
-			/* 0x00C4 */ BYTE Unknown00C4[32];
+			/*0x000*/	CHAR Name[0x40];
+			/*0x040*/	CHAR LoreName[0x50];
+			/*0x090*/	CHAR IDFile[0x10];
+			/*0x0a0*/	BYTE Unknown0a0[0xa];
+			/*0x0aa*/	BYTE InstrumentType;//check/***
+			/*0x0ab*/	BYTE Summoned;//check/***
+			/*0x0ac*/	BYTE Lore;//check/***
+			/*0x0ad*/	BYTE Magic;//check/***
+			/*0x0ae*/	BYTE Weight;
+			/*0x0af*/	BYTE NoRent;
+			/*0x0b0*/	BYTE NoDrop;
+			/*0x0b1*/	BYTE Size;
+			/*0x0b2*/	BYTE Type;
+			/*0x0b3*/	BYTE Unknown0x0b3;
+			/*0x0b4*/	WORD ID;//ItemNumber
+			/*0x0b6*/	WORD IconID;//IconNumber
+			/*0x0b8*/	DWORD EquipSlot;
+			/*0x0bc*/	DWORD EquipableSlots;
+			/*0x0c0*/	DWORD Cost;
+			/*0x0c4*/	DWORD Price;//*** needs confirm
+			/*0x0c8*/	BYTE  Unknown0c4[0x1c];
 			union
 			{
 				/* 0x00E4 */ EQITEMCOMMONINFO    Common;
@@ -315,6 +320,10 @@ namespace Zeal
 		};
 		struct ActorInfo
 		{
+			//UINT ModifyAttackSpeed()
+			//{
+			//	return reinterpret_cast<UINT(__thiscall*)(ActorInfo*, UINT, INT)>(0x50A039)(this, );
+			//}
 			/* 0x0000 */ ViewActor* ViewActor_;
 			/* 0x0004 */ struct _EQLIGHTINFO* LightInfo; // PointLight
 			/* 0x0008 */ char ActorDef[64]; // xxx_ACTORDEF string (HUM_ACTORDEF, ELM_ACTORDEF, etc)
@@ -326,7 +335,7 @@ namespace Zeal
 			/* 0x005C */ DWORD UnknownTimer2;
 			/* 0x0060 */ DWORD UnknownTimer3;
 			/* 0x0064 */ DWORD UnknownTimer4;
-			/* 0x0068 */ DWORD Unknown0068;
+			/* 0x0068 */ DWORD AttackTimer;
 			/* 0x006C */ DWORD Unknown006C;
 			/* 0x0070 */ DWORD Unknown0070;
 			/* 0x0074 */ DWORD UnknownTimer5;
@@ -339,7 +348,7 @@ namespace Zeal
 			/* 0x0088 */ FLOAT DrunkMovementModifier; // how far left/right the player moves while drunk
 			/* 0x008C */ FLOAT LevitationMovementModifier; // how far up/down the player moves while levitating
 			/* 0x0090 */ BYTE IsAffectedByGravity; // gravity is enabled for the player (disabled while levitating)
-			/* 0x0091 */ BYTE Unknown0091; // equals 0, 11 or 13
+			/* 0x0091 */ BYTE LastAttack; // equals 0, 11 or 13
 			/* 0x0092 */ BYTE Unknown0092;
 			/* 0x0093 */ BYTE Unknown0093;
 			/* 0x0094 */ PVOID Unknown0094; // pointer, static address 0x006EC6E8 has same value
@@ -496,7 +505,7 @@ namespace Zeal
 			/* 0x0B90 */ DWORD CursorSilver;
 			/* 0x0B94 */ DWORD CursorCopper;
 			/* 0x0B98 */ BYTE Unknown0B98[16];
-			/* 0x0BA8 */ WORD Skill[EQ_NUM_SKILLS];
+			/* 0x0BA8 */ WORD Skills[EQ_NUM_SKILLS];
 			/* 0x0C3C */ BYTE Unknown0C3C[64];
 			/* 0x0C7C */ WORD Vision1;
 			/* 0x0C7E */ BYTE Unknown0C7E[12];
@@ -513,7 +522,7 @@ namespace Zeal
 			/* 0x0D58 */ DWORD Thirst;
 			/* 0x0D5C */ BYTE Unknown0D5C[20];
 			/* 0x0D70 */ DWORD ZoneId;
-			/* 0x0D74 */ struct _EQSPAWNINFO* SpawnInfo;
+			/* 0x0D74 */ Entity* SpawnInfo;
 			/* 0x0D78 */  _EQITEMINFO* CursorItem;
 			union
 			{

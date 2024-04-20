@@ -179,11 +179,19 @@ void ui_options::InitUI()
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		SetLabelValue("Zeal_ThirdPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
 	});
+	AddSliderCallback("Zeal_Fov", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		int val = 45.0f + (static_cast<float>(value) / 100.0f) * 45.0f;
+		ZealService::get_instance()->camera_mods->set_fov(val);
+
+		// Update the label with the remapped value
+		SetLabelValue("Zeal_FovLabel", "%i", val);
+	});
 	AddLabel("Zeal_PanDelayValueLabel");
 	AddLabel("Zeal_FirstPersonLabel_X");
 	AddLabel("Zeal_FirstPersonLabel_Y");
 	AddLabel("Zeal_ThirdPersonLabel_X");
 	AddLabel("Zeal_ThirdPersonLabel_Y");
+	AddLabel("Zeal_FovLabel");
 
 	//AddComboCallback("Zeal_HideCorpseCombobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { Zeal::EqGame::print_chat("Combo set to %i", value); });
 	/*set the current states*/
@@ -211,6 +219,8 @@ void ui_options::UpdateOptions()
 	SetSliderValue("Zeal_ThirdPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd * 50 : 0.f);
 	SetSliderValue("Zeal_FirstPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_y * 50 : 0.f);
 	SetSliderValue("Zeal_FirstPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_x * 50 : 0.f);
+	SetSliderValue("Zeal_Fov", static_cast<int>((ZealService::get_instance()->camera_mods->fov - 45.0f) / 45.0f * 100.0f));
+	SetLabelValue("Zeal_FovLabel", "%i", ZealService::get_instance()->camera_mods->fov);
 	SetLabelValue("Zeal_FirstPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x);
 	SetLabelValue("Zeal_FirstPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y);
 	SetLabelValue("Zeal_ThirdPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
@@ -233,7 +243,7 @@ ui_options::ui_options(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);
 	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
-	if (Zeal::EqGame::is_in_game()) InitUI();
+	//if (Zeal::EqGame::is_in_game()) InitUI();
 }
 ui_options::~ui_options()
 {

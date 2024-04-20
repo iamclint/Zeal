@@ -56,8 +56,8 @@ void CallbackManager::add_command(std::function<bool(UINT, BOOL)> callback_funct
 void __fastcall enterzone_hk(int t, int unused, int hwnd)
 {
 	ZealService* zeal = ZealService::get_instance();
-	zeal->callbacks->invoke_generic(callback_type::Zone);
 	zeal->hooks->hook_map["EnterZone"]->original(enterzone_hk)(t, unused, hwnd);
+	zeal->callbacks->invoke_generic(callback_type::Zone);
 }
 void __fastcall initgameui_hk(int t, int u)
 {
@@ -100,8 +100,8 @@ char __fastcall handleworldmessage_hk(int* connection, int unused, UINT unk, UIN
 	//if (!std::count(ignored_opcodes.begin(), ignored_opcodes.end(), opcode))
 	//	Zeal::EqGame::print_chat("opcode: 0x%x len: %i", opcode, len);
 
-	if (!Zeal::EqGame::get_self() && opcode == 0x4107) //a fix for a crash reported by Ecliptor at 0x004E2803
-		return 1;
+	//if (!Zeal::EqGame::get_self() && opcode == 0x4107) //a fix for a crash reported by Ecliptor at 0x004E2803
+	//	return 1;
 
 	if (zeal->callbacks->invoke_packet(callback_type::WorldMessage,opcode, buffer, len))
 		return 1;

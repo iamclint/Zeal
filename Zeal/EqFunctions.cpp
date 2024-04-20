@@ -108,7 +108,19 @@ namespace Zeal
 			Zeal::EqStructures::ViewActor* v = *(Zeal::EqStructures::ViewActor**)Zeal::EqGame::ViewActor;
 			return v;
 		}
+		UINT get_eq_time()
+		{
+			return reinterpret_cast<UINT(__stdcall*)()>(0x4f35c7)();
+		}
+		bool CanIHitTarget(float dist)
+		{
+			return reinterpret_cast<bool(__thiscall*)(Zeal::EqStructures::Entity*, Zeal::EqStructures::Entity*, float )>(0x509E09)(get_self(), get_target(), dist);
 
+		}
+		bool do_attack(uint8_t type, uint8_t p2)
+		{
+			return reinterpret_cast<bool(__thiscall*)(Zeal::EqStructures::Entity * player, uint8_t type, uint8_t p2, Zeal::EqStructures::Entity * target)>(0x50A0F8)(get_self(), type, p2, get_target());
+		}
 		Zeal::EqStructures::Entity* get_view_actor_entity()
 		{
 			return get_view_actor()->Entity;

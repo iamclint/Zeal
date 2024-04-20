@@ -472,7 +472,10 @@ void CameraMods::load_settings(IO_ini* ini)
         ini->setValue<float>("Zeal", "MouseSensitivityX", user_sensitivity_x);
     if (!ini->exists("Zeal", "MouseSensitivityY"))
         ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
+    if (!ini->exists("Zeal", "Fov"))
+        ini->setValue<float>("Zeal", "Fov", fov);
 
+    fov = ini->getValue<int>("Zeal", "Fov");
     enabled = ini->getValue<bool>("Zeal", "MouseSmoothing");
     user_sensitivity_x = ini->getValue<float>("Zeal", "MouseSensitivityX");
     user_sensitivity_y = ini->getValue<float>("Zeal", "MouseSensitivityY");
@@ -524,6 +527,18 @@ void CameraMods::set_pan_delay(int value_ms)
    ZealService::get_instance()->ini->setValue<int>("Zeal", "PanDelay", pan_delay);
    ZealService::get_instance()->ui->options->UpdateOptions();
 }
+void CameraMods::set_fov(int _fov)
+{
+    fov = _fov;
+    Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
+    if (ci)
+    {
+        ci->FieldOfView = fov;
+    }
+    ZealService::get_instance()->ini->setValue<int>("Zeal", "Fov", fov);
+    ZealService::get_instance()->ui->options->UpdateOptions();
+}
+
 
 void CameraMods::update_sensitivity()
 {
@@ -532,6 +547,22 @@ void CameraMods::update_sensitivity()
     ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityX3rd", user_sensitivity_x_3rd);
     ZealService::get_instance()->ini->setValue<float>("Zeal", "MouseSensitivityY3rd", user_sensitivity_y_3rd);
     ZealService::get_instance()->ui->options->UpdateOptions();
+}
+void CameraMods::callback_zone()
+{
+
+}
+
+int SetCameraLens(int a1, float fov, float aspect_ratio, float a4, float a5)
+{
+    ZealService* zeal = ZealService::get_instance();
+    //   Zeal::EqGame::print_chat("a1: %i a2: %f a3: %f a4: %f a5: %f", a1, fov, aspect_ratio, a5, a5);
+    fov = zeal->camera_mods->fov;
+    int rval = zeal->hooks->hook_map["SetCameraLens"]->original(SetCameraLens)(a1, fov, aspect_ratio, a4, a5);
+    Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
+    if (ci)
+        ci->FieldOfView = zeal->camera_mods->fov;
+    return rval;
 }
 
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
@@ -551,11 +582,37 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     height = 0;
     zeal->callbacks->add_generic([this]() { callback_main();  });
     zeal->callbacks->add_generic([this]() { callback_render();  }, callback_type::Render);
+    zeal->callbacks->add_generic([this]() { callback_zone(); }, callback_type::Zone);
     //zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
     zeal->callbacks->add_generic([this]() { callback_characterselect(); }, callback_type::EndMainLoop);
     zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
+    zeal->hooks->Add("SetCameraLens", (int)GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dSetCameraLens"), SetCameraLens, hook_type_detour);
+    zeal->commands_hook->add("/fov", { },
+        [this](std::vector<std::string>& args) {
+            Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
+            if (ci)
+            {
+                float fov = 0;
+                if (args.size() > 1 && StringUtil::tryParse(args[1], &fov))
+                {
+                    if (fov >= 45 && fov <= 90)
+                    {
+                        Zeal::EqGame::print_chat("Use a fov 45-90");
+                        return true;
+                    }
+                    set_fov(fov);
+                }
+                else
+                {
+                    Zeal::EqGame::print_chat("Current FOV [%f]", ci->FieldOfView);
+                }
+
+            }
+
+            return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+        });
     zeal->commands_hook->add("/pandelay", { "/pd" },
         [this, ini](std::vector<std::string>& args) {
             int delay = 200;

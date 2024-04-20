@@ -66,6 +66,11 @@ void looting::init_ui()
 
 void looting::looted_item()
 {
+	if (Zeal::EqGame::get_char_info()->CursorItem) 
+	{
+		loot_all = false;
+		return;
+	}
 	if (loot_all && Zeal::EqGame::Windows && Zeal::EqGame::Windows->Loot && Zeal::EqGame::Windows->Loot->IsVisible)
 	{
 		std::string corpse_name = Zeal::EqGame::strip_name(Zeal::EqGame::get_active_corpse()->Name);

@@ -168,6 +168,9 @@
     <ClInclude Include="ui_loot.h">
       <Filter>Header Files\ui</Filter>
     </ClInclude>
+    <ClInclude Include="autofire.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -265,6 +268,9 @@
     </ClCompile>
     <ClCompile Include="ui_loot.cpp">
       <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="autofire.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

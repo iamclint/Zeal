@@ -30,6 +30,7 @@ ZealService::ZealService()
 	netstat = std::make_shared<Netstat>(this, ini.get());
 	ui = std::make_shared<ui_manager>(this, ini.get());
 	melody = std::make_shared<Melody>(this, ini.get());
+	autofire = std::make_shared<AutoFire>(this, ini.get());
 
 	this->basic_binds();
 }
@@ -123,6 +124,7 @@ ZealService* ZealService::get_instance()
 ZealService::~ZealService()
 {
 	hooks.reset();
+	autofire.reset();
 	melody.reset();
 	ui.reset();
 	netstat.reset();
@@ -144,4 +146,5 @@ ZealService::~ZealService()
 	callbacks.reset();
 	commands_hook.reset();
 	ini.reset();
+	
 }

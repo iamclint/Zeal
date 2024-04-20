@@ -71,8 +71,8 @@ void Melody::tick()
             {
                 if (!Zeal::EqGame::get_eq()->IsOkToTransact())
                 {
-                    Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "You are too distracted to keep a melody!");
-                    end();
+                    //Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "You are too distracted to keep a melody!");
+                    //end();
                     return;
                 }
                 if (Zeal::EqGame::get_spell_mgr()->Spells[Zeal::EqGame::get_char_info()->MemorizedSpell[current_gem]]->TargetType == 5 && !Zeal::EqGame::get_target())

@@ -36,7 +36,7 @@ Zeal::EqUI::ItemDisplayWnd* ItemDisplay::get_available_window(Zeal::EqStructures
 		/*check if the item is already being displayed*/
 		for (auto& w : windows)
 		{
-			if (w->Item.Id == item->Id)
+			if (w->Item.ID == item->ID)
 				return w;
 		}
 	}

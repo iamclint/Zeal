@@ -31,6 +31,7 @@ public:
 	std::shared_ptr<Netstat> netstat = nullptr;
 	std::shared_ptr<ui_manager> ui = nullptr;
 	std::shared_ptr<Melody> melody = nullptr;
+	std::shared_ptr<AutoFire> autofire = nullptr;
 	
 	ZealService();
 	~ZealService();

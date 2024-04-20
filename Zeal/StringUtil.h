@@ -7,5 +7,6 @@ namespace StringUtil
 	std::vector<std::string> split(const std::string& str, const std::string& delim);
 	bool tryParse(const std::string& str, int* result);
 	bool tryParse(const std::string& str, float* result);
+	std::string byteArrayToHexString(const char* byteArray, size_t length);
 };
 
