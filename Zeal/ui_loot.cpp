@@ -3,7 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
-
+#include "StringUtil.h"
 static int __fastcall LinkAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
 	int rval = reinterpret_cast<int(__fastcall*)(Zeal::EqUI::LootWnd * pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)>(0x0595330)(pWnd, unused, pt, flag);
@@ -60,6 +60,10 @@ ui_loot::ui_loot(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
+	/*zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {
+		Zeal::EqGame::print_chat("Opcode: 0x%x Size: %i Buffer: %s", opcode, size, StringUtil::byteArrayToHexString(buffer, size).c_str());
+		 return false;
+	}, callback_type::SendMessage_);*/
 }
 ui_loot::~ui_loot()
 {

@@ -40,6 +40,7 @@ void AutoFire::Main()
 {
     if (!Zeal::EqGame::get_target() || *(BYTE*)0x7f6ffe)
     {
+        
         SetAutoFire(false);
         return;
     }
@@ -55,13 +56,23 @@ void AutoFire::Main()
                 if (Zeal::EqGame::get_char_info()->Inventory.Ammo)
                     range += Zeal::EqGame::get_char_info()->Inventory.Ammo->Common.Range;
             }
-            else if (!Zeal::EqGame::get_char_info()->Inventory.Ranged && Zeal::EqGame::get_char_info()->Inventory.Ammo->Common.Range)
+            else if (Zeal::EqGame::get_char_info()->Inventory.Ranged && Zeal::EqGame::get_char_info()->Inventory.Ammo && Zeal::EqGame::get_char_info()->Inventory.Ammo->Common.Range)
             {
                 range += Zeal::EqGame::get_char_info()->Inventory.Ammo->Common.Range;
             }
-            if (GetTickCount64() - last_print_time<500)
+            else
+            {
+                SetAutoFire(false);
+            }
+
+            if (GetTickCount64() - last_print_time<1000)
             {
                 ZealService::get_instance()->eqstr_hook->str_noprint[124] = true;
+                ZealService::get_instance()->eqstr_hook->str_noprint[108] = true;
+                ZealService::get_instance()->eqstr_hook->str_noprint[12695] = true;
+                ZealService::get_instance()->eqstr_hook->str_noprint[12696] = true;
+                ZealService::get_instance()->eqstr_hook->str_noprint[12698] = true;
+                ZealService::get_instance()->eqstr_hook->str_noprint[12699] = true;
             }
             else
             {
@@ -75,6 +86,11 @@ void AutoFire::Main()
             }
 
             ZealService::get_instance()->eqstr_hook->str_noprint[124] = false;
+            ZealService::get_instance()->eqstr_hook->str_noprint[108] = false;
+            ZealService::get_instance()->eqstr_hook->str_noprint[12695] = false;
+            ZealService::get_instance()->eqstr_hook->str_noprint[12696] = false;
+            ZealService::get_instance()->eqstr_hook->str_noprint[12698] = false;
+            ZealService::get_instance()->eqstr_hook->str_noprint[12699] = false;
         }
     }
 }
@@ -88,11 +104,15 @@ void AutoFire::Main()
 //}
 void AutoFire::SetAutoFire(bool enabled)
 {
-    if (autofire && !enabled) 
-        Zeal::EqGame::print_chat("Autofire disabled"); 
+    if (autofire && !enabled)
+    {
+        Zeal::EqGame::print_chat("Autofire disabled");
+        Zeal::EqGame::SetMusicSelection(2, false);
+    }
     else if (enabled)
     {
         Zeal::EqGame::print_chat("Autofire enabled.");
+        Zeal::EqGame::SetMusicSelection(2, true);
         *(BYTE*)0x7f6ffe = 0; //disable auto attack
     }
     autofire = enabled;
@@ -105,16 +125,17 @@ AutoFire::AutoFire(ZealService* zeal, IO_ini* ini)
    // zeal->callbacks->add_generic([this]() { SetAutoFire(false);  }, callback_type::Zone);
     zeal->callbacks->add_generic([this]() { SetAutoFire(false); }, callback_type::CharacterSelect);
     zeal->callbacks->add_generic([this]() { SetAutoFire(false);  }, callback_type::EndMainLoop);
+    zeal->callbacks->add_generic([this]() { SetAutoFire(false);  }, callback_type::Zone);
     zeal->callbacks->add_generic([this]() { Main();  }, callback_type::MainLoop);
-    zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {
-        if (opcode == 0x4161 || opcode == 0x4151)
-        {
-         
-        }
-        return false;
-        //Zeal::EqGame::print_chat("Opcode: 0x%x Size: %i Buffer: %s", opcode, size, byteArrayToHexString(buffer, size).c_str());
-        //return false;
-    }, callback_type::SendMessage_);
+    //zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {
+    //    if (opcode == 0x4161 || opcode == 0x4151)
+    //    {
+    //     
+    //    }
+    //    return false;
+    //   //Zeal::EqGame::print_chat("Opcode: 0x%x Size: %i Buffer: %s", opcode, size, byteArrayToHexString(buffer, size).c_str());
+    //    //return false;
+    //}, callback_type::SendMessage_);
     zeal->commands_hook->add("/autofire", { "/af" },
         [this](std::vector<std::string>& args) {
             SetAutoFire(!autofire);

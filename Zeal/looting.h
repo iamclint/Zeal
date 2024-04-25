@@ -9,6 +9,7 @@ public:
 	bool hide_looted;
 	void init_ui();
 	bool loot_all=false;
+	int delay_frames = 10;
 	void looted_item();
 	looting(class ZealService* zeal);
 	~looting();

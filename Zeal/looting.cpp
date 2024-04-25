@@ -118,19 +118,24 @@ looting::looting(ZealService* zeal)
 	zeal->callbacks->add_generic([this]() {
 		if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->Loot || !Zeal::EqGame::Windows->Loot->IsVisible)
 		{
+			delay_frames = -1;
 			loot_all = false;
 			return;
 		}
+		if (delay_frames == 0)
+		{
+			looted_item();
+			delay_frames--;
+		}
+		else if (delay_frames > 0)
+			delay_frames--;
 		}, callback_type::MainLoop);
 		zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT len) {
 			if (opcode == 0x4031)
-				looted_item();
-		//	if (opcode == 0x4236)
-		//{
-		//	formatted_msg* data = (formatted_msg*)buffer;
-		//	if (data->string_id == 467) //467 --You have looted a %1.--
-		//		looted_item();
-		//}
+			{
+				delay_frames = 10;
+				
+			}
 		return false; 
 		});
 	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" },

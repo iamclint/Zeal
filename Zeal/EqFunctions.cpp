@@ -98,7 +98,10 @@ namespace Zeal
 			else
 				return 1.0f;
 		}
-
+		int* get_sound_manager()
+		{
+			return (int*)(*(int*)0x63dea8);
+		}
 		Zeal::EqStructures::EQCHARINFO* get_char_info()
 		{
 			return (Zeal::EqStructures::EQCHARINFO*)(*(int*)0x7F94E8);
@@ -111,6 +114,10 @@ namespace Zeal
 		UINT get_eq_time()
 		{
 			return reinterpret_cast<UINT(__stdcall*)()>(0x4f35c7)();
+		}
+		void SetMusicSelection(int number, bool enabled)
+		{
+			reinterpret_cast<void(__thiscall*)(int*, int, bool)>(0x4d54c1)(get_sound_manager(), number, enabled);
 		}
 		bool CanIHitTarget(float dist)
 		{

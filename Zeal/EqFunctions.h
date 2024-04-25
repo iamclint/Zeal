@@ -89,6 +89,7 @@ namespace Zeal
 		void execute_cmd(UINT cmd, bool isdown, int unk2);
 		EqStructures::Everquest* get_eq();
 		int get_gamestate();
+		void SetMusicSelection(int number, bool enabled);
 		bool is_new_ui();
 		HWND get_game_window();
 		bool is_in_char_select();
