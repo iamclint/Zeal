@@ -1,5 +1,6 @@
 #include "autofire.h"
 #include "Zeal.h"
+#include "EqAddresses.h"
 //
 //bool AutoFire::HandleDoAttack(Zeal::EqStructures::Entity* player, uint8_t type, uint8_t p2, Zeal::EqStructures::Entity* target)
 //{
@@ -40,7 +41,6 @@ void AutoFire::Main()
 {
     if (!Zeal::EqGame::get_target() || *(BYTE*)0x7f6ffe)
     {
-        
         SetAutoFire(false);
         return;
     }
@@ -62,6 +62,7 @@ void AutoFire::Main()
             }
             else
             {
+                Zeal::EqGame::print_chat("You do not have a ranged weapon");
                 SetAutoFire(false);
             }
 
@@ -102,6 +103,7 @@ void AutoFire::Main()
 //        
 //    return ZealService::get_instance()->hooks->hook_map["DoAttack"]->original(DoAttack)(player, unused, type, p2, target);
 //}
+
 void AutoFire::SetAutoFire(bool enabled)
 {
     if (autofire && !enabled)
@@ -111,9 +113,9 @@ void AutoFire::SetAutoFire(bool enabled)
     }
     else if (enabled)
     {
+        Zeal::EqGame::do_autoattack(false);
         Zeal::EqGame::print_chat("Autofire enabled.");
         Zeal::EqGame::SetMusicSelection(2, true);
-        *(BYTE*)0x7f6ffe = 0; //disable auto attack
     }
     autofire = enabled;
     do_autofire = false;

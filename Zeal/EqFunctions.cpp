@@ -106,6 +106,10 @@ namespace Zeal
 		{
 			return (Zeal::EqStructures::EQCHARINFO*)(*(int*)0x7F94E8);
 		}
+		void do_autoattack(bool enabled)
+		{
+			reinterpret_cast<void(__thiscall*)(int, bool)>(0x5493b5)(0x798540, enabled);
+		}
 		Zeal::EqStructures::ViewActor* get_view_actor()
 		{
 			Zeal::EqStructures::ViewActor* v = *(Zeal::EqStructures::ViewActor**)Zeal::EqGame::ViewActor;
@@ -114,6 +118,10 @@ namespace Zeal
 		UINT get_eq_time()
 		{
 			return reinterpret_cast<UINT(__stdcall*)()>(0x4f35c7)();
+		}
+		int get_eq_main()
+		{
+			return *(int*)0x7f9574;
 		}
 		void SetMusicSelection(int number, bool enabled)
 		{

@@ -18,6 +18,10 @@ void looting::set_hide_looted(bool val)
 	hide_looted = val;
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "HideLooted", hide_looted);
 	ZealService::get_instance()->ui->options->UpdateOptions();
+	if (hide_looted)
+		Zeal::EqGame::print_chat("Corpses will be hidden after looting.");
+	else
+		Zeal::EqGame::print_chat("Corpses will no longer be hidden after looting.");
 }
 
 
@@ -143,17 +147,13 @@ looting::looting(ZealService* zeal)
 			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "looted"))
 			{
 				set_hide_looted(!hide_looted);
-				if (hide_looted)
-					Zeal::EqGame::print_chat("Corpses will be hidden after looting.");
-				else
-					Zeal::EqGame::print_chat("Corpses will no longer be hidden after looting.");
-				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+				return true;
 			}
-			if (args.size() > 1 && args[1] == "none")
-			{
-				set_hide_looted(false);
-				return false; 
-			}
+			//if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "none"))
+			//{
+			//	set_hide_looted(false);
+			//	return false; 
+			//}
 			return false;
 		});
 	
