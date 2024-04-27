@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-#define ZEAL_VERSION "0.1.70"
+#define ZEAL_VERSION "0.1.71"
 
 class ZealService
 {
