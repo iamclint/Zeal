@@ -38,10 +38,10 @@ public:
 	void handle_cycle_camera_views(int cmd, bool is_down);
 	void proc_rmousedown(int x, int y);
 	int pan_delay = 200;
-	int fov = 45;
+	float fov = 45;
 
 	void set_pan_delay(int value_ms);
-	void set_fov(int fov);
+	void set_fov(float fov);
 	void update_sensitivity();
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();

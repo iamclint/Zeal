@@ -5,7 +5,7 @@
 #include "Zeal.h"
 #include <algorithm>
 #include <cctype>
-#include "StringUtil.h"
+#include "string_util.h"
 
 void ChatCommands::print_commands()
 {
@@ -38,7 +38,7 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 
 	if (str_cmd.length()>0 && str_cmd.at(0) != '/')
 		str_cmd = "/" + str_cmd;
-	std::vector<std::string> args =  StringUtil::split(str_cmd," ");
+	std::vector<std::string> args = Zeal::String::split(str_cmd," ");
 
 	if (args.size() > 0)
 	{
@@ -86,7 +86,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 	//		if (args.size() > 1)
 	//		{
 	//			int cmd = 0;
-	//			if (StringUtil::tryParse(args[1], &cmd))
+	//			if (Zeal::String::tryParse(args[1], &cmd))
 	//			{
 	//				Zeal::EqGame::pet_command(cmd, 0);
 	//			}
@@ -120,7 +120,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			if (ci)
 			{
 				float ar = 0;
-				if (args.size() > 1 && StringUtil::tryParse(args[1], &ar))
+				if (args.size() > 1 && Zeal::String::tryParse(args[1], &ar))
 				{
 					ci->AspectRatio = ar;
 				}
@@ -153,7 +153,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 	add("/sit", {},
 		[](std::vector<std::string>& args) {
 			if (args.size() > 1 && args.size() < 3) {
-				if (StringUtil::caseInsensitive(args[1], "on") || StringUtil::caseInsensitive(args[1], "down")) {
+				if (Zeal::String::compare_insensitive(args[1], "on") || Zeal::String::compare_insensitive(args[1], "down")) {
 					Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 					return true;
 				}
@@ -173,11 +173,11 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				return true;
 			}
 			if (args.size() > 1 && args.size() < 3) {
-				if (StringUtil::caseInsensitive(args[1], "on")) {
+				if (Zeal::String::compare_insensitive(args[1], "on")) {
 					Zeal::EqGame::do_say(true, "#showhelm on");
 					return true;
 				}
-				else if (StringUtil::caseInsensitive(args[1], "off"))
+				else if (Zeal::String::compare_insensitive(args[1], "off"))
 				{
 					Zeal::EqGame::do_say(true, "#showhelm off");
 					return true;
@@ -198,14 +198,14 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::print_chat("Available args: version, help"); //leave room for more args on this command for later
 				return true;
 			}
-			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "version"))
+			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "version"))
 			{
 				std::stringstream ss;
 				ss << "Zeal version: " << ZEAL_VERSION << std::endl;
 				Zeal::EqGame::print_chat(ss.str());
 				return true;
 			}
-			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "help"))
+			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "help"))
 			{
 				print_commands();
 				return true;
@@ -256,12 +256,12 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					return true;
 				}
 				if (args.size() > 1 && args.size() < 4) {
-					if (StringUtil::caseInsensitive(args[1], "set")) {
+					if (Zeal::String::compare_insensitive(args[1], "set")) {
 						int minutes = 0;
 						int seconds = 0;
 						size_t delim[2] = { args[2].find("m"), args[2].find("s") };
-						if (StringUtil::tryParse(args[2].substr(0, delim[0]), &minutes) &&
-								StringUtil::tryParse(args[2].substr(delim[0]+1, delim[1]), &seconds))
+						if (Zeal::String::tryParse(args[2].substr(0, delim[0]), &minutes) &&
+								Zeal::String::tryParse(args[2].substr(delim[0]+1, delim[1]), &seconds))
 						{
 							zeal->alarm->Set(minutes, seconds);
 							return true;
@@ -272,7 +272,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 							return true;
 						}
 					}
-					else if (StringUtil::caseInsensitive(args[1], "halt")) {
+					else if (Zeal::String::compare_insensitive(args[1], "halt")) {
 						zeal->alarm->Halt();
 						return true;
 					}
@@ -313,7 +313,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::print_chat(ss.str());
 				return true;
 			}
-			if (args.size() > 1 && StringUtil::caseInsensitive(args[1],"zeal"))
+			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1],"zeal"))
 			{
 				print_commands();
 				return true;

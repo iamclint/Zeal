@@ -3,7 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
-#include "StringUtil.h"
+#include "string_util.h"
 //void __fastcall finalize_loot(int uk, int lootwnd_ptr)
 //{
 //	Zeal::EqStructures::Entity* corpse =  Zeal::EqGame::get_active_corpse();
@@ -144,12 +144,12 @@ looting::looting(ZealService* zeal)
 		});
 	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" },
 		[this](std::vector<std::string>& args) {
-			if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "looted"))
+			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "looted"))
 			{
 				set_hide_looted(!hide_looted);
 				return true;
 			}
-			//if (args.size() > 1 && StringUtil::caseInsensitive(args[1], "none"))
+			//if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "none"))
 			//{
 			//	set_hide_looted(false);
 			//	return false; 

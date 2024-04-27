@@ -1,6 +1,6 @@
 #include "spellsets.h"
 #include "Zeal.h"
-#include "StringUtil.h"
+#include "string_util.h"
 #include "EqAddresses.h"
 #include "SpellCategories.h"
 #include <algorithm>
@@ -405,24 +405,24 @@ SpellSets::SpellSets(ZealService* zeal)
                 }
                 else
                 {
-                    if (StringUtil::caseInsensitive(args[1], "test"))
+                    if (Zeal::String::compare_insensitive(args[1], "test"))
                     {
                         destroy_context_menus();
                         create_context_menus(true);
                     }
-                    if (StringUtil::caseInsensitive(args[1], "save"))
+                    if (Zeal::String::compare_insensitive(args[1], "save"))
                     {
                         save(args[2]);
                     }
-                    if (StringUtil::caseInsensitive(args[1], "delete") || StringUtil::caseInsensitive(args[1], "remove"))
+                    if (Zeal::String::compare_insensitive(args[1], "delete") || Zeal::String::compare_insensitive(args[1], "remove"))
                     {
                         remove(args[2]);
                     }
-                    if (StringUtil::caseInsensitive(args[1], "load"))
+                    if (Zeal::String::compare_insensitive(args[1], "load"))
                     {
                         load(args[2]);
                     }
-                    if (StringUtil::caseInsensitive(args[1], "list"))
+                    if (Zeal::String::compare_insensitive(args[1], "list"))
                     {
                         set_ini();
                         std::vector<std::string> sets = ini->getSectionNames();

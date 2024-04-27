@@ -105,6 +105,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <Optimization>MaxSpeed</Optimization>
+      <DisableSpecificWarnings>26495;6387</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -188,7 +189,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="SpellCategories.h" />
     <ClInclude Include="spellsets.h" />
-    <ClInclude Include="StringUtil.h" />
+    <ClInclude Include="string_util.h" />
     <ClInclude Include="ui_loot.h" />
     <ClInclude Include="ui_manager.h" />
     <ClInclude Include="ui_options.h" />
@@ -223,7 +224,7 @@
     <ClCompile Include="outputfile.cpp" />
     <ClCompile Include="raid.cpp" />
     <ClCompile Include="spellsets.cpp" />
-    <ClCompile Include="StringUtil.cpp" />
+    <ClCompile Include="string_util.cpp" />
     <ClCompile Include="ui_loot.cpp" />
     <ClCompile Include="ui_manager.cpp" />
     <ClCompile Include="ui_options.cpp" />

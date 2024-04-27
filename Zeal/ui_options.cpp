@@ -180,7 +180,7 @@ void ui_options::InitUI()
 		SetLabelValue("Zeal_ThirdPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
 	});
 	AddSliderCallback("Zeal_FoVSlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		int val = 45.0f + (static_cast<float>(value) / 100.0f) * 45.0f;
+		float val = 45.0f + (static_cast<float>(value) / 100.0f) * 45.0f;
 		ZealService::get_instance()->camera_mods->set_fov(val);
 
 		// Update the label with the remapped value

@@ -156,7 +156,7 @@ namespace Zeal
 
 		struct BasicWnd
 		{
-			BasicWnd() {};
+			//BasicWnd() {};
 			void SetFocus()
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(0x572290)(this);

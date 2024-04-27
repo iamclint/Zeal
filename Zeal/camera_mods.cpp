@@ -6,7 +6,7 @@
 #include <thread>
 #include <algorithm>
 #include <windowsx.h>
-#include "StringUtil.h"
+#include "string_util.h"
 #include "camera_math.h"
 //#define debug_cam
 bool CameraMods::update_cam()
@@ -475,7 +475,7 @@ void CameraMods::load_settings(IO_ini* ini)
     if (!ini->exists("Zeal", "Fov"))
         ini->setValue<float>("Zeal", "Fov", fov);
 
-    fov = ini->getValue<int>("Zeal", "Fov");
+    fov = ini->getValue<float>("Zeal", "Fov");
     enabled = ini->getValue<bool>("Zeal", "MouseSmoothing");
     user_sensitivity_x = ini->getValue<float>("Zeal", "MouseSensitivityX");
     user_sensitivity_y = ini->getValue<float>("Zeal", "MouseSensitivityY");
@@ -527,7 +527,7 @@ void CameraMods::set_pan_delay(int value_ms)
    ZealService::get_instance()->ini->setValue<int>("Zeal", "PanDelay", pan_delay);
    ZealService::get_instance()->ui->options->UpdateOptions();
 }
-void CameraMods::set_fov(int _fov)
+void CameraMods::set_fov(float _fov)
 {
     fov = _fov;
     Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
@@ -535,7 +535,7 @@ void CameraMods::set_fov(int _fov)
     {
         ci->FieldOfView = fov;
     }
-    ZealService::get_instance()->ini->setValue<int>("Zeal", "Fov", fov);
+    ZealService::get_instance()->ini->setValue<float>("Zeal", "Fov", fov);
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
@@ -588,14 +588,16 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
-    zeal->hooks->Add("SetCameraLens", (int)GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dSetCameraLens"), SetCameraLens, hook_type_detour);
+    FARPROC eqfx = GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dSetCameraLens");
+    if (eqfx != NULL) 
+        zeal->hooks->Add("SetCameraLens", (int)eqfx, SetCameraLens, hook_type_detour);
     zeal->commands_hook->add("/fov", { },
         [this](std::vector<std::string>& args) {
             Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
             if (ci)
             {
                 float fov = 0;
-                if (args.size() > 1 && StringUtil::tryParse(args[1], &fov))
+                if (args.size() > 1 && Zeal::String::tryParse(args[1], &fov))
                 {
                     if (fov >= 45 && fov <= 90)
                     {
@@ -618,7 +620,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
             int delay = 200;
             if (args.size() == 2)
             {
-                if (StringUtil::tryParse(args[1], &delay))
+                if (Zeal::String::tryParse(args[1], &delay))
                 {
                     set_pan_delay(delay);
                     Zeal::EqGame::print_chat("Click to pan delay is now %i", pan_delay);
@@ -630,7 +632,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
         });
     zeal->commands_hook->add("/zealcam", { "/smoothing" },
         [this](std::vector<std::string>& args) {
-            if (args.size() == 2 && StringUtil::caseInsensitive(args[1], "info"))
+            if (args.size() == 2 && Zeal::String::compare_insensitive(args[1], "info"))
             {
                 Zeal::EqGame::print_chat("camera sensitivity FirstPerson : [% f] [% f] ThirdPerson : [% f] [% f] ", user_sensitivity_x, user_sensitivity_y, user_sensitivity_x_3rd, user_sensitivity_y_3rd);
                 return true;
@@ -640,9 +642,9 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 float x_sens = 0;
                 float y_sens = 0;
 
-                if (!StringUtil::tryParse(args[1], &x_sens))
+                if (!Zeal::String::tryParse(args[1], &x_sens))
                     return true;
-                if (!StringUtil::tryParse(args[2], &y_sens))
+                if (!Zeal::String::tryParse(args[2], &y_sens))
                     return true;
 
                 user_sensitivity_x = x_sens;
@@ -660,13 +662,13 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 float x_sens_3rd = 0;
                 float y_sens_3rd = 0;
 
-                if (!StringUtil::tryParse(args[1], &x_sens))
+                if (!Zeal::String::tryParse(args[1], &x_sens))
                     return true;
-                if (!StringUtil::tryParse(args[2], &y_sens))
+                if (!Zeal::String::tryParse(args[2], &y_sens))
                     return true;
-                if (!StringUtil::tryParse(args[3], &x_sens_3rd))
+                if (!Zeal::String::tryParse(args[3], &x_sens_3rd))
                     return true;
-                if (!StringUtil::tryParse(args[4], &y_sens_3rd))
+                if (!Zeal::String::tryParse(args[4], &y_sens_3rd))
                     return true;
 
 

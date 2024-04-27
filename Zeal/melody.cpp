@@ -4,7 +4,7 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
-#include "StringUtil.h"
+#include "string_util.h"
 
 void Melody::start()
 {
@@ -118,7 +118,7 @@ Melody::Melody(ZealService* zeal, IO_ini* ini)
             for (int i = 1; i < args.size(); i++) //start at argument 1 because 0 is the command itself
             {
                 int current_gem = -1;
-                if (StringUtil::tryParse(args[i], &current_gem) && current_gem<9 && current_gem>0)
+                if (Zeal::String::tryParse(args[i], &current_gem) && current_gem<9 && current_gem>0)
                 {
                     current_gem--; //base 0
                     if (Zeal::EqGame::get_char_info()->MemorizedSpell[current_gem] != -1)

@@ -1,7 +1,7 @@
 #include "player_movement.h"
 #include "Zeal.h"
 #include "EqAddresses.h"
-#include "StringUtil.h"
+#include "string_util.h"
 
 static void CloseSpellbook(void)
 {
@@ -231,7 +231,7 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 			}
 			if (args.size() > 1) {
 				std::ostringstream oss;
-				if (StringUtil::caseInsensitive(args[1], "LeftTurn"))
+				if (Zeal::String::compare_insensitive(args[1], "LeftTurn"))
 				{
 					spellbook_left_autostand = !spellbook_left_autostand;
 					ini_handle->setValue<bool>("Zeal", "LeftTurnSpellbookAutostand", spellbook_left_autostand);
@@ -240,7 +240,7 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 					Zeal::EqGame::print_chat(oss.str());
 					return true;
 				}
-				else if (StringUtil::caseInsensitive(args[1], "RightTurn"))
+				else if (Zeal::String::compare_insensitive(args[1], "RightTurn"))
 				{
 					spellbook_right_autostand = !spellbook_right_autostand;
 					ini_handle->setValue<bool>("Zeal", "RightTurnSpellbookAutostand", spellbook_right_autostand);
@@ -249,7 +249,7 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 					Zeal::EqGame::print_chat(oss.str());
 					return true;
 				}
-				else if (StringUtil::caseInsensitive(args[1], "LeftStrafe"))
+				else if (Zeal::String::compare_insensitive(args[1], "LeftStrafe"))
 				{
 					spellbook_left_strafe_autostand = !spellbook_left_strafe_autostand;
 					ini_handle->setValue<bool>("Zeal", "LeftStrafeSpellbookAutostand", spellbook_left_strafe_autostand);
@@ -258,7 +258,7 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 					Zeal::EqGame::print_chat(oss.str());
 					return true;
 				}
-				else if (StringUtil::caseInsensitive(args[1], "RightStrafe"))
+				else if (Zeal::String::compare_insensitive(args[1], "RightStrafe"))
 				{
 					spellbook_right_strafe_autostand = !spellbook_right_strafe_autostand;
 					ini_handle->setValue<bool>("Zeal", "RightStrafeSpellbookAutostand", spellbook_right_strafe_autostand);

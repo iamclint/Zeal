@@ -3,7 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
-#include "StringUtil.h"
+#include "string_util.h"
 #include <algorithm>
 
 std::string ReadFromClipboard() {
