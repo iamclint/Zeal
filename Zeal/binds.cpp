@@ -106,7 +106,7 @@ void Binds::add_binds()
 			for (int i = 0; i < 8; i++) //8 inventory slots for containers
 			{
 				Zeal::EqStructures::_EQITEMINFO* item = self->CharInfo->InventoryPackItem[i];
-				if (item && item->OpenType==1 && item->Container.Capacity>0)
+				if (item && item->Type==1 && item->Container.Capacity>0)
 				{
 					containers.push_back({ item, i });
 					if (item->Container.IsOpen)
@@ -185,7 +185,13 @@ void Binds::add_binds()
 			Zeal::EqGame::pet_command(Zeal::EqEnums::PetCommand::Follow, 0);
 		}
 		});
-	add_bind(222, "Slow Turn Right", "SlowMoveRight", key_category::Movement, [this](int key_down) {
+	add_bind(222, "Pet Sit", "PetSit", key_category::Commands, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqGame::pet_command(Zeal::EqEnums::PetCommand::Sit, 0);
+		}
+		});
+	add_bind(223, "Slow Turn Right", "SlowMoveRight", key_category::Movement, [this](int key_down) {
 		if (!Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqGame::execute_cmd(5, key_down, 0);
@@ -205,7 +211,7 @@ void Binds::add_binds()
 			
 		}
 		});
-	add_bind(223, "Slow Turn Left", "SlowMoveLeft", key_category::Movement, [this](int key_down) {
+	add_bind(224, "Slow Turn Left", "SlowMoveLeft", key_category::Movement, [this](int key_down) {
 		if (!Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			Zeal::EqGame::execute_cmd(6, key_down, 0);
@@ -222,6 +228,12 @@ void Binds::add_binds()
 					mem::write<BYTE>(0x53f75E, 12);
 				}
 			}
+		}
+		});
+	add_bind(225, "Auto Fire", "AutoFire", key_category::Commands, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			ZealService::get_instance()->autofire->SetAutoFire(!ZealService::get_instance()->autofire->autofire);
 		}
 		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) 
