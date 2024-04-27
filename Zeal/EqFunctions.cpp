@@ -125,7 +125,9 @@ namespace Zeal
 		}
 		void SetMusicSelection(int number, bool enabled)
 		{
-			reinterpret_cast<void(__thiscall*)(int*, int, bool)>(0x4d54c1)(get_sound_manager(), number, enabled);
+			int* sound_manager = get_sound_manager();
+			if (sound_manager)
+				reinterpret_cast<void(__thiscall*)(int*, int, bool)>(0x4d54c1)(get_sound_manager(), number, enabled);
 		}
 		bool CanIHitTarget(float dist)
 		{

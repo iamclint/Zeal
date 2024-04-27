@@ -115,7 +115,8 @@ void AutoFire::SetAutoFire(bool enabled)
     {
         Zeal::EqGame::do_autoattack(false);
         Zeal::EqGame::print_chat("Autofire enabled.");
-        Zeal::EqGame::SetMusicSelection(2, true);
+        if (!(*(bool*)0x61d25c)) //combat music disabled flag
+            Zeal::EqGame::SetMusicSelection(2, true);
     }
     autofire = enabled;
     do_autofire = false;
