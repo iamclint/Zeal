@@ -71,6 +71,7 @@ std::string generateTimestampedString(const char* message) {
     return oss.str();
 }
 
+
 void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u)
 {
     if (!data || strlen(data) == 0)
@@ -284,8 +285,23 @@ void chat::set_input_color(Zeal::EqUI::ARGBCOLOR col)
         active_edit->TextColor = col; */
 }
 
+
 chat::chat(ZealService* zeal, IO_ini* ini)
 {
+    //zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {
+
+    //
+    //    if (opcode == 0x4058 || opcode == 0x404A)
+    //    {
+    //        Zeal::EqGame::print_chat("Opcode: 0x%x Size: %i Buffer: %s", opcode, size, Zeal::String::bytes_to_hex(buffer, size).c_str());
+    //    }
+    //if (opcode == 0x4236)
+    //{
+    //    Zeal::EqGame::print_chat("Opcode: 0x%x Size: %i Buffer: %s", opcode, size, Zeal::String::bytes_to_hex(buffer, size).c_str());
+    //}
+    //
+    //return false;
+    //}, callback_type::WorldMessage);
     zeal->commands_hook->add("/timestamp", { "/tms" },
         [this](std::vector<std::string>& args) {
             set_timestamp(!timestamps);

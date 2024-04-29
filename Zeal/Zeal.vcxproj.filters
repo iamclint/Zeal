@@ -272,6 +272,9 @@
     <ClCompile Include="autofire.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
+    <ClCompile Include="EqPackets.h">
+      <Filter>Header Files\everquest</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Zeal.rc">

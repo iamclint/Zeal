@@ -199,6 +199,7 @@
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
     <ClCompile Include="autofire.cpp" />
+    <ClCompile Include="EqPackets.h" />
     <ClCompile Include="ui_bank.cpp" />
     <ClCompile Include="item_display.cpp" />
     <ClCompile Include="melody.cpp" />
