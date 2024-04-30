@@ -8,6 +8,7 @@ public:
 	CycleTarget(class ZealService* zeal);
 	~CycleTarget();
 	Zeal::EqStructures::Entity* get_next_ent(float dist, BYTE type);
+	Zeal::EqStructures::Entity* get_nearest_ent(float dist, BYTE type);
 private:
 	hook* hook;
 };

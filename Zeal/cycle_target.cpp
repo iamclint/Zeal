@@ -62,6 +62,40 @@ Zeal::EqStructures::Entity* CycleTarget::get_next_ent(float dist, byte type)
 
 }
 
+Zeal::EqStructures::Entity* CycleTarget::get_nearest_ent(float dist, byte type)
+{
+	static ULONGLONG last_press = 0;
+	std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(dist, true);
+	if (!visible_ents.size())
+		return 0;
+	near_ents.clear();
+	for (auto& ent : visible_ents)
+	{
+		if (!ent->IsHidden && ent->Type == type && ent->HpCurrent > 0 && ent->Level > 0 && ent->TargetType < 66)
+		{
+			if (ent->PetOwnerSpawnId)
+			{
+				Zeal::EqStructures::Entity* owner = Zeal::EqGame::get_entity_by_id(ent->PetOwnerSpawnId);
+				if (owner && owner->Type == Zeal::EqEnums::EntityTypes::NPC)
+					near_ents.push_back(ent);
+			}
+			else
+				near_ents.push_back(ent);
+		}
+	}
+	if (!near_ents.size())
+		return 0;
+
+	std::sort(near_ents.begin(), near_ents.end(), compareDist);
+	AddIndex();
+
+	if (near_ents.front())
+		return near_ents.front();
+	else
+		return 0;
+
+}
+
 CycleTarget::~CycleTarget()
 {
 	//hook->remove(); //hooks being removed from dllmain

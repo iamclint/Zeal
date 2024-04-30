@@ -37,6 +37,26 @@ ZealService::ZealService()
 
 void ZealService::basic_binds()
 {
+	binds_hook->replace_cmd(28, [this](int state)
+		{
+			if (state && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			{
+				Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_nearest_ent(250, 0);
+				if (ent)
+					Zeal::EqGame::set_target(ent);
+			}
+			return true;
+		}); //nearest pc
+	binds_hook->replace_cmd(29, [this](int state)
+		{
+			if (state && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			{
+				Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_nearest_ent(250, 1);
+				if (ent)
+					Zeal::EqGame::set_target(ent);
+			}
+			return true;
+		}); //nearest npc
 	binds_hook->replace_cmd(3, [this](int state) 
 	{
 		movement->handle_movement_binds(3, state);

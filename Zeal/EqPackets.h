@@ -8,7 +8,21 @@ namespace Zeal
         {
             DeathDamage = 0x404A,
             Damage = 0x4058,
-            PrintNonMeleeDamage = 0x4236
+            PrintNonMeleeDamage = 0x4236,
+            CorpseDrag = 0x4114,
+            RequestTrade = 0x40D1
+        };
+        struct TradeRequest_Struct {
+            /*000*/	UINT16 to_id;
+            /*002*/	UINT16 from_id;
+            /*004*/
+        };
+        struct CorpseDrag_Struct
+        {
+            /*000*/ char CorpseName[64];
+            /*064*/ char DraggerName[64];
+            /*128*/ UINT8 Unknown128[24];
+            /*152*/
         };
         struct Damage_Struct
         {

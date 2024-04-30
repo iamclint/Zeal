@@ -2,10 +2,12 @@
 #include "EqStructures.h"
 #include "EqAddresses.h"
 #include "EqFunctions.h"
+#include "EqPackets.h"
 #include "Zeal.h"
 #include <algorithm>
 #include <cctype>
 #include "string_util.h"
+
 
 void ChatCommands::print_commands()
 {
@@ -100,6 +102,39 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			if (args.size() == 1)
 			{
 				Zeal::EqGame::set_target(0);
+				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+			}
+			return false;
+		});
+	add("/drag", { "/corpsedrag", "/cd"},
+		[](std::vector<std::string>& args) {
+			if (args.size() == 1)
+			{
+				if (Zeal::EqGame::get_target())
+				{
+					Zeal::Packets::CorpseDrag_Struct tmp;
+					memset(&tmp, 0, sizeof(tmp));
+					strcpy_s(tmp.CorpseName, 30, Zeal::EqGame::get_target()->Name);
+					strcpy_s(tmp.DraggerName, 30, Zeal::EqGame::get_self()->Name);
+					Zeal::EqGame::print_chat("corpse %s  me %s  size: 0x%x", tmp.CorpseName, tmp.DraggerName, sizeof(tmp));
+					Zeal::EqGame::send_message(Zeal::Packets::opcodes::CorpseDrag, (int*)&tmp, sizeof(tmp), 0);
+				}
+				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+			}
+			return false;
+		});
+	add("/trade", { "/opentrade", "/ot" },
+		[](std::vector<std::string>& args) {
+			if (args.size() == 1)
+			{
+				if (Zeal::EqGame::get_target())
+				{
+					Zeal::Packets::TradeRequest_Struct tmp;
+					memset(&tmp, 0, sizeof(tmp));
+					tmp.from_id = Zeal::EqGame::get_self()->SpawnId;
+					tmp.to_id = Zeal::EqGame::get_target()->SpawnId;
+					Zeal::EqGame::send_message(Zeal::Packets::opcodes::RequestTrade, (int*)&tmp, sizeof(tmp), 0);
+				}
 				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 			}
 			return false;

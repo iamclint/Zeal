@@ -349,6 +349,7 @@ void SpellSets::create_context_menus(bool force)
         //spellset_menu->fnTable->basic.Deactivate = SpellSetDeactivate;
         spellsets.clear();
         spellsets = ini->getSectionNames();
+        std::sort(spellsets.begin(), spellsets.end());
         int header_index = spellset_menu->AddMenuItem("Spell Sets", 0x30000, false);
         spellset_menu->EnableLine(header_index, false);
         //spellset_menu->SetItemColor(header_index, { 255,255,255,255 });
