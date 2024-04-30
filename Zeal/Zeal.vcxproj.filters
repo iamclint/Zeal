@@ -171,6 +171,9 @@
     <ClInclude Include="string_util.h">
       <Filter>Header Files\helpers</Filter>
     </ClInclude>
+    <ClInclude Include="tooltip.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -274,6 +277,9 @@
     </ClCompile>
     <ClCompile Include="EqPackets.h">
       <Filter>Header Files\everquest</Filter>
+    </ClCompile>
+    <ClCompile Include="tooltip.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

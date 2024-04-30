@@ -29,6 +29,7 @@
 #include "netstat.h"
 #include "ui_manager.h"
 #include "autofire.h"
+#include "tooltip.h"
 #include "Zeal.h"
 
 extern HMODULE this_module;

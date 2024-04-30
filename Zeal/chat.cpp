@@ -302,22 +302,22 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     //
     //return false;
     //}, callback_type::WorldMessage);
-    zeal->commands_hook->add("/timestamp", { "/tms" },
+    zeal->commands_hook->add("/timestamp", { "/tms" }, "Toggles timestamps on chat windows.",
         [this](std::vector<std::string>& args) {
             set_timestamp(!timestamps);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
-    zeal->commands_hook->add("/zealinput", { "/zinput" },
+    zeal->commands_hook->add("/zealinput", { "/zinput" }, "Toggles zeal input which gives you a more modern input feel.",
         [this](std::vector<std::string>& args) {
             set_input(!zealinput);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
-    zeal->commands_hook->add("/bluecon", { },
+    zeal->commands_hook->add("/bluecon", { }, "Toggles the custom color for blue con that you can adjust in options.",
         [this](std::vector<std::string>& args) {
             set_bluecon(!bluecon);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
-    zeal->commands_hook->add("/loc", { },
+    zeal->commands_hook->add("/loc", { }, "Adds noprint arguments to /loc to not log the location to your chat.",
         [this](std::vector<std::string>& args) {
             if (args.size() > 1 && args[1]=="noprint")
             {

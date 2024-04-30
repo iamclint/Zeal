@@ -17,6 +17,7 @@ ZealService::ZealService()
 	eqstr_hook = std::make_shared<eqstr>(this);
 	spell_sets = std::make_shared<SpellSets>(this);
 	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
+	tooltips = std::make_shared<tooltip>(this, ini.get());;
 	this->apply_patches();
 
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());

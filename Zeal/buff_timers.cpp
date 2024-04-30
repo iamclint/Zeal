@@ -45,7 +45,7 @@ void BuffTimers::print_timers(void) {
 BuffTimers::BuffTimers(ZealService* zeal)
 {
   if (!Zeal::EqGame::is_new_ui()) {
-    zeal->commands_hook->add("/buffs", {},
+    zeal->commands_hook->add("/buffs", {}, "Prints your buff timers (mostly useful for oldui).",
       [this](std::vector<std::string>& args) {
         print_timers();
         return true;

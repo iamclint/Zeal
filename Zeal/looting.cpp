@@ -142,7 +142,7 @@ looting::looting(ZealService* zeal)
 			}
 		return false; 
 		});
-	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" },
+	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" }, "Adds looted argument to hidecorpse.",
 		[this](std::vector<std::string>& args) {
 			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "looted"))
 			{

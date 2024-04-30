@@ -139,7 +139,7 @@ AutoFire::AutoFire(ZealService* zeal, IO_ini* ini)
     //   //Zeal::EqGame::print_chat("Opcode: 0x%x Size: %i Buffer: %s", opcode, size, byteArrayToHexString(buffer, size).c_str());
     //    //return false;
     //}, callback_type::SendMessage_);
-    zeal->commands_hook->add("/autofire", { "/af" },
+    zeal->commands_hook->add("/autofire", { "/af" }, "Toggles autofire for your ranged ability.",
         [this](std::vector<std::string>& args) {
             SetAutoFire(!autofire);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd

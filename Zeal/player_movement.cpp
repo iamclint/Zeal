@@ -222,7 +222,7 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 		return false;
 	}); // strafe right
 
-	zeal->commands_hook->add("/autostand", {},
+	zeal->commands_hook->add("/autostand", {}, "Autostands when you cast.",
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1 || args.size() > 2)
 			{
