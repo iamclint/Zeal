@@ -184,7 +184,7 @@ void ui_options::InitUI()
 		ZealService::get_instance()->camera_mods->set_fov(val);
 
 		// Update the label with the remapped value
-		SetLabelValue("Zeal_FoVValueLabel", "%i", val);
+		SetLabelValue("Zeal_FoVValueLabel", "%f", val);
 	});
 	AddLabel("Zeal_PanDelayValueLabel");
 	AddLabel("Zeal_FirstPersonLabel_X");
@@ -220,7 +220,7 @@ void ui_options::UpdateOptions()
 	SetSliderValue("Zeal_FirstPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_y * 50 : 0.f);
 	SetSliderValue("Zeal_FirstPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_x * 50 : 0.f);
 	SetSliderValue("Zeal_FoVSlider", static_cast<int>((ZealService::get_instance()->camera_mods->fov - 45.0f) / 45.0f * 100.0f));
-	SetLabelValue("Zeal_FoVValueLabel", "%i", ZealService::get_instance()->camera_mods->fov);
+	SetLabelValue("Zeal_FoVValueLabel", "%f", ZealService::get_instance()->camera_mods->fov);
 	SetLabelValue("Zeal_FirstPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x);
 	SetLabelValue("Zeal_FirstPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y);
 	SetLabelValue("Zeal_ThirdPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);

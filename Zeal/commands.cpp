@@ -44,6 +44,11 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 		str_cmd = "/" + str_cmd;
 	std::vector<std::string> args = Zeal::String::split(str_cmd," ");
 
+	if (Zeal::String::compare_insensitive(args[0], "o")) //remove the old ui toggle via just o
+	{
+		return;
+	}
+
 	if (args.size() > 0)
 	{
 		bool cmd_handled = false;
@@ -118,7 +123,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					memset(&tmp, 0, sizeof(tmp));
 					strcpy_s(tmp.CorpseName, 30, Zeal::EqGame::get_target()->Name);
 					strcpy_s(tmp.DraggerName, 30, Zeal::EqGame::get_self()->Name);
-					Zeal::EqGame::print_chat("corpse %s  me %s  size: 0x%x", tmp.CorpseName, tmp.DraggerName, sizeof(tmp));
 					Zeal::EqGame::send_message(Zeal::Packets::opcodes::CorpseDrag, (int*)&tmp, sizeof(tmp), 0);
 				}
 				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd

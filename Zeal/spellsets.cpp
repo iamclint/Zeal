@@ -240,7 +240,9 @@ bool compareBySpellLevel(const Zeal::EqStructures::SPELL* a, const Zeal::EqStruc
     Zeal::EqStructures::EQCHARINFO* self_char = Zeal::EqGame::get_self()->CharInfo;
     int aLevel = a->Level[self_char->Class - 1];
     int bLevel = b->Level[self_char->Class - 1];
-    return aLevel > bLevel;
+    if (aLevel != bLevel)
+        return aLevel > bLevel;
+    return a->Name > b->Name;
 }
 
 void SpellSets::destroy_context_menus()

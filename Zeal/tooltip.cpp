@@ -28,7 +28,6 @@ void tooltip::LoadSettings(IO_ini* ini)
 
 tooltip::tooltip(ZealService* zeal, IO_ini* ini)
 {
-	Zeal::EqGame::print_chat("0x%x", &Zeal::EqGame::Windows->BuffWindowNORMAL->MouseHoverTimer);
     mem::write<byte>(0x59e112, 0x82); //change from jbe to jb so if you disable the tooltip timer completely it doesnt flash as you move your cursor (unnoticeable change for normal)
 	LoadSettings(ini);
     set_timer(time);
