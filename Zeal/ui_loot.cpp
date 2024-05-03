@@ -56,8 +56,9 @@ void ui_loot::InitUI()
 		btn->vtbl->HandleLButtonDown = LootAllButtonDown;
 	}
 }
-ui_loot::ui_loot(ZealService* zeal, IO_ini* ini)
+ui_loot::ui_loot(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
+	ui = mgr;
 	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
 	/*zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {

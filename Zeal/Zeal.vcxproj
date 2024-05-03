@@ -191,9 +191,11 @@
     <ClInclude Include="SpellCategories.h" />
     <ClInclude Include="spellsets.h" />
     <ClInclude Include="string_util.h" />
+    <ClInclude Include="ui_guild.h" />
     <ClInclude Include="ui_loot.h" />
     <ClInclude Include="ui_manager.h" />
     <ClInclude Include="ui_options.h" />
+    <ClInclude Include="ui_raid.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="Zeal.h" />
   </ItemGroup>
@@ -228,9 +230,11 @@
     <ClCompile Include="raid.cpp" />
     <ClCompile Include="spellsets.cpp" />
     <ClCompile Include="string_util.cpp" />
+    <ClCompile Include="ui_guild.cpp" />
     <ClCompile Include="ui_loot.cpp" />
     <ClCompile Include="ui_manager.cpp" />
     <ClCompile Include="ui_options.cpp" />
+    <ClCompile Include="ui_raid.cpp" />
     <ClCompile Include="vectors.cpp" />
     <ClCompile Include="Zeal.cpp" />
   </ItemGroup>

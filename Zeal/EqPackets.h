@@ -10,6 +10,7 @@ namespace Zeal
             Damage = 0x4058,
             PrintNonMeleeDamage = 0x4236,
             CorpseDrag = 0x4114,
+            CorpseDrop = 0x1337,
             RequestTrade = 0x40D1
         };
         struct TradeRequest_Struct {

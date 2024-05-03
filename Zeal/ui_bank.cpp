@@ -66,8 +66,9 @@ void ui_bank::InitUI()
 		btn->vtbl->HandleLButtonDown = ChangeButtonDown;
 	}
 }
-ui_bank::ui_bank(ZealService* zeal, IO_ini* ini)
+ui_bank::ui_bank(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
+	ui = mgr;
 	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
 	if (Zeal::EqGame::is_in_game()) InitUI();
 }

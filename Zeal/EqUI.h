@@ -1,5 +1,6 @@
 #pragma once
 #include "EqStructures.h"
+#include "memory.h"
 namespace Zeal
 {
 	namespace EqUI
@@ -175,6 +176,10 @@ namespace Zeal
 			BasicWnd* GetChildItem(CXSTR name)
 			{
 				return reinterpret_cast<BasicWnd*(__thiscall*)(const BasicWnd*, CXSTR)>(0x570320)(this, name);
+			}
+			void CreateChildren()
+			{
+				reinterpret_cast<BasicWnd*(__thiscall*)(const BasicWnd*)>(0x56f4f0)(this);
 			}
 			int WndNotification(int a1, int a2, int a3)
 			{

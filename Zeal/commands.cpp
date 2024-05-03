@@ -44,11 +44,6 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 		str_cmd = "/" + str_cmd;
 	std::vector<std::string> args = Zeal::String::split(str_cmd," ");
 
-	if (Zeal::String::compare_insensitive(args[0], "o")) //remove the old ui toggle via just o
-	{
-		return;
-	}
-
 	if (args.size() > 0)
 	{
 		bool cmd_handled = false;
@@ -88,22 +83,12 @@ ChatCommands::~ChatCommands()
 }
 ChatCommands::ChatCommands(ZealService* zeal)
 {
-
-	//just going to use lambdas for simple commands
-	//add("/zpet", { },
-	//	[](std::vector<std::string>& args) {
-	//		if (args.size() > 1)
-	//		{
-	//			int cmd = 0;
-	//			if (Zeal::String::tryParse(args[1], &cmd))
-	//			{
-	//				Zeal::EqGame::pet_command(cmd, 0);
-	//			}
-	//			
-	//			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
-	//		}
-	//		return false;
-	//	});
+	add("o", { "" }, "Removes the o command that is switching ui from new to old.",
+		[](std::vector<std::string>& args) {
+			if (Zeal::String::compare_insensitive(args[0], "o"))
+				return true;
+			return false;
+		});
 	add("/target", { "/cleartarget" }, "Adds clear target functionality to the /target command if you give it no arguments.",
 		[](std::vector<std::string>& args) {
 			if (args.size() == 1)
@@ -113,7 +98,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
-	add("/drag", { "/corpsedrag", "/cd"}, "Attempts to corpse drag your current target.",
+	add("/corpsedrag", { "/drag"}, "Attempts to corpse drag your current target.",
 		[](std::vector<std::string>& args) {
 			if (args.size() == 1)
 			{
@@ -126,6 +111,26 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					Zeal::EqGame::send_message(Zeal::Packets::opcodes::CorpseDrag, (int*)&tmp, sizeof(tmp), 0);
 				}
 				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+			}
+			return false;
+		});
+	add("/corpsedrop", { "/drop"}, "Attempts to drop a corpse (your current target). To drop all use /corpsedrop all",
+		[](std::vector<std::string>& args) {
+			if (args.size() == 1)
+			{
+				if (Zeal::EqGame::get_target())
+				{
+					Zeal::Packets::CorpseDrag_Struct tmp;
+					memset(&tmp, 0, sizeof(tmp));
+					strcpy_s(tmp.CorpseName, 30, Zeal::EqGame::get_target()->Name);
+					strcpy_s(tmp.DraggerName, 30, Zeal::EqGame::get_self()->Name);
+					Zeal::EqGame::send_message(Zeal::Packets::opcodes::CorpseDrop, (int*)&tmp, sizeof(tmp), 0);
+				}
+				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+			}
+			else if (Zeal::String::compare_insensitive(args[1], "all"))
+			{
+				Zeal::EqGame::send_message(Zeal::Packets::opcodes::CorpseDrop, 0, 0, 0);
 			}
 			return false;
 		});

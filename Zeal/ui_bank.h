@@ -7,8 +7,9 @@ class ui_bank
 {
 public:
 	void change();
-	void InitUI();
-	ui_bank(class ZealService* zeal, class IO_ini* ini);
+	ui_bank(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_bank();
 private:
+	void InitUI();
+	ui_manager* ui;
 };

@@ -2,16 +2,16 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
-
-class ui_options
+class ui_guild
 {
 public:
-	void UpdateOptions();
-	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
-	~ui_options();
+	Zeal::EqUI::BasicWnd* guild;
+	ui_guild(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
+	~ui_guild();
 private:
 	void InitUI();
 	void CleanUI();
 	void LoadSettings(class IO_ini* ini);
 	ui_manager* ui;
 };
+
