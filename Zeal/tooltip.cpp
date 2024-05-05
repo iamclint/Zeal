@@ -23,12 +23,14 @@ void tooltip::LoadSettings(IO_ini* ini)
 {
     if (!ini->exists("Zeal", "TooltipTime"))
         ini->setValue<int>("Zeal", "TooltipTime", 500);
-    time = ini->getValue<bool>("Zeal", "ZealInput");
+    time = ini->getValue<int>("Zeal", "TooltipTime");
 }
 
 tooltip::tooltip(ZealService* zeal, IO_ini* ini)
 {
     mem::write<byte>(0x59e112, 0x82); //change from jbe to jb so if you disable the tooltip timer completely it doesnt flash as you move your cursor (unnoticeable change for normal)
+    mem::set(0x416D1D, 0x90, 2); //remove the hovered check for showing tooltips while holding alt for containers
+    mem::set(0x416D22, 0x90, 2);//remove the hovered check for showing tooltips while holding alt for containers
 	LoadSettings(ini);
     set_timer(time);
     zeal->commands_hook->add("/tooltiptimer", { "/ttimer"}, "Set the time limit before a tooltip appears.",

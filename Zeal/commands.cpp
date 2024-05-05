@@ -131,6 +131,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			else if (Zeal::String::compare_insensitive(args[1], "all"))
 			{
 				Zeal::EqGame::send_message(Zeal::Packets::opcodes::CorpseDrop, 0, 0, 0);
+				return true;
 			}
 			return false;
 		});

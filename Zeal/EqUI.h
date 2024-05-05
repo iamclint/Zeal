@@ -154,7 +154,11 @@ namespace Zeal
 			ARGBCOLOR() : A{}, R{}, G{}, B{} {};
 
 		};
-
+		struct ControlTemplate
+		{
+			char Unknown0x0[0x20];
+			pCXSTR* Item;
+		};
 		struct BasicWnd
 		{
 			//BasicWnd() {};
@@ -244,7 +248,7 @@ namespace Zeal
 			/*0x0f9*/   BYTE    Unused0x0f9[0x3];
 			/*0x0fc*/   union {
 
-				struct _CXSTR* SidlText;
+				struct pCXSTR* SidlText;
 				DWORD Items;
 			};
 			/*0x100*/   union {
@@ -287,6 +291,26 @@ namespace Zeal
 			/*0x132*/	BYTE    Unknown0x132; /* CTextureAnimation */
 			/*0x133*/	BYTE    Unknown0x133; /* CTextureAnimation */
 		};
+
+		struct ListWnd : EQWND
+		{
+			ListWnd() {};
+			int AddString(std::string str)
+			{
+				return reinterpret_cast<int (__thiscall*)(const ListWnd*, CXSTR)>(0x5797A0)(this, CXSTR(str));
+			}
+			void SetItemText(std::string str, int row, int column)
+			{
+				reinterpret_cast<void(__thiscall*)(const ListWnd*, int, int, CXSTR)>(0x579DC0)(this, row, column, CXSTR(str));
+			}
+			void SetItemData(int row) //not sure why this is needed
+			{
+				reinterpret_cast<void(__thiscall*)(const ListWnd*, int, int)>(0x579D70)(this, row, row);
+			}
+
+
+		};
+
 		struct ItemDisplayWnd : EQWND
 		{
 			ItemDisplayWnd() {};

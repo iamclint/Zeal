@@ -34,11 +34,11 @@ static void __fastcall SetComboValue_hook(Zeal::EqUI::BasicWnd* pWnd, int unused
 		ui->combo_callbacks[pWnd->ParentWnd](pWnd->ParentWnd, value);
 }
 
-void ui_manager::AddCheckboxCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
+void ui_manager::AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
 {
-	if (Zeal::EqGame::Windows->Options)
+	if (wnd)
 	{
-		Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Options->GetChildItem(name);
+		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name);
 		if (btn)
 		{
 			checkbox_callbacks[btn] = callback;
@@ -51,11 +51,11 @@ void ui_manager::AddCheckboxCallback(std::string name, std::function<void(Zeal::
 	}
 }
 
-void ui_manager::AddSliderCallback(std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback)
+void ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback)
 {
-	if (Zeal::EqGame::Windows->Options)
+	if (wnd)
 	{
-		Zeal::EqUI::SliderWnd* btn = (Zeal::EqUI::SliderWnd*)Zeal::EqGame::Windows->Options->GetChildItem(name);
+		Zeal::EqUI::SliderWnd* btn = (Zeal::EqUI::SliderWnd*)wnd->GetChildItem(name);
 		if (btn)
 		{
 			slider_callbacks[btn] = callback;
@@ -69,11 +69,11 @@ void ui_manager::AddSliderCallback(std::string name, std::function<void(Zeal::Eq
 	}
 }
 
-void ui_manager::AddComboCallback(std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback)
+void ui_manager::AddComboCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback)
 {
-	if (Zeal::EqGame::Windows->Options)
+	if (wnd)
 	{
-		Zeal::EqUI::BasicWnd* btn = (Zeal::EqUI::BasicWnd*)Zeal::EqGame::Windows->Options->GetChildItem(name);
+		Zeal::EqUI::BasicWnd* btn = (Zeal::EqUI::BasicWnd*)wnd->GetChildItem(name);
 		if (btn)
 		{
 			combo_callbacks[btn] = callback;
@@ -86,11 +86,11 @@ void ui_manager::AddComboCallback(std::string name, std::function<void(Zeal::EqU
 	}
 }
 
-void ui_manager::AddLabel(std::string name)
+void ui_manager::AddLabel(Zeal::EqUI::BasicWnd* wnd, std::string name)
 {
-	if (Zeal::EqGame::Windows->Options)
+	if (wnd)
 	{
-		Zeal::EqUI::SliderWnd* btn = (Zeal::EqUI::SliderWnd*)Zeal::EqGame::Windows->Options->GetChildItem(name);
+		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name);
 		if (btn)
 		{
 			label_names[name] = btn;
@@ -114,6 +114,21 @@ void ui_manager::SetSliderValue(std::string name, float value)
 	if (slider_names.count(name) > 0)
 	{
 		ZealService::get_instance()->hooks->hook_map["SetSliderValue"]->original(SetSliderValue_hook)(slider_names[name], 0, static_cast<int>(value));
+	}
+}
+void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>>&data)
+{
+
+	for (int row = 0; auto& current_row : data)
+	{
+		int x = wnd->AddString("");
+		for (int col = 0; auto& current_col : current_row)
+		{
+			wnd->SetItemText(current_col, row, col);
+			col++;
+		}
+		wnd->SetItemData(row);
+		row++;
 	}
 }
 void ui_manager::SetChecked(std::string name, bool checked)
@@ -159,6 +174,19 @@ void ui_manager::init_ui()
 {
 
 }
+//Zeal::EqUI::BasicWnd* ui_manager::GetChild(Zeal::EqUI::BasicWnd* parent, std::string name) 
+//{
+//	return WindowChildren[parent][name];
+//}
+//
+//static Zeal::EqUI::BasicWnd* __fastcall CreateXWndFromTemplate_hook(int sidlmgr, int unused, Zeal::EqUI::BasicWnd* parent, Zeal::EqUI::ControlTemplate* control_template)
+//{
+//	Zeal::EqUI::BasicWnd* rval = ZealService::get_instance()->hooks->hook_map["CreateXWndFromTemplate"]->original(CreateXWndFromTemplate_hook)(sidlmgr, unused, parent, control_template);
+//	ui_manager* ui = ZealService::get_instance()->ui.get();
+//	if (control_template && control_template->Item)
+//		ui->WindowChildren[parent][control_template->Item->Text] = rval;
+//	return rval;
+//}
 
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 {
@@ -171,6 +199,7 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	guild = std::make_shared<ui_guild>(zeal, ini, this);
 	raid = std::make_shared<ui_raid>(zeal, ini, this);
 
+//	zeal->hooks->Add("CreateXWndFromTemplate", 0x59bc40, CreateXWndFromTemplate_hook, hook_type_detour);
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour);
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);

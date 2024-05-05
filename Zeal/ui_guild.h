@@ -6,6 +6,7 @@ class ui_guild
 {
 public:
 	Zeal::EqUI::BasicWnd* guild;
+	Zeal::EqUI::ListWnd* members;
 	ui_guild(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_guild();
 private:

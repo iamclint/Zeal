@@ -8,51 +8,51 @@
 void ui_options::InitUI()
 {
 	/*add callbacks when the buttons are pressed in the options window*/
-	ui->AddCheckboxCallback("Zeal_HideCorpse", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->set_hide_looted(wnd->Checked); });
-	ui->AddCheckboxCallback("Zeal_Cam", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->set_smoothing(wnd->Checked); });
-	ui->AddCheckboxCallback("Zeal_BlueCon", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_bluecon(wnd->Checked); });
-	ui->AddCheckboxCallback("Zeal_Timestamp", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_timestamp(wnd->Checked); });
-	ui->AddCheckboxCallback("Zeal_Input", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_input(wnd->Checked); });
-	ui->AddCheckboxCallback("Zeal_Escape", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ini->setValue<bool>("Zeal", "Escape", wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_HideCorpse", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->set_hide_looted(wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_Cam", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->set_smoothing(wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_BlueCon", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_bluecon(wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_Timestamp", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_timestamp(wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_Input", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_input(wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_Escape", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ini->setValue<bool>("Zeal", "Escape", wnd->Checked); });
 	
-	ui->AddCheckboxCallback("Zeal_ShowHelm", [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::print_chat("Show helm toggle"); });
-	ui->AddSliderCallback("Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_ShowHelm", [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::print_chat("Show helm toggle"); });
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->set_pan_delay(value*4); 
 		ui->SetLabelValue("Zeal_PanDelayValueLabel", "%d ms", ZealService::get_instance()->camera_mods->pan_delay);
 	});
-	ui->AddSliderCallback("Zeal_FirstPersonSlider_X", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonSlider_X", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->user_sensitivity_x = value / 50.f;
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		ui->SetLabelValue("Zeal_FirstPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x);
 	});
-	ui->AddSliderCallback("Zeal_FirstPersonSlider_Y", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonSlider_Y", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->user_sensitivity_y = value / 50.f;
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		ui->SetLabelValue("Zeal_FirstPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y);
 	});
-	ui->AddSliderCallback("Zeal_ThirdPersonSlider_X", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_ThirdPersonSlider_X", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd = value / 50.f;
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		ui->SetLabelValue("Zeal_ThirdPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
 	});
-	ui->AddSliderCallback("Zeal_ThirdPersonSlider_Y", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_ThirdPersonSlider_Y", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd = value / 50.f;
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		ui->SetLabelValue("Zeal_ThirdPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
 	});
-	ui->AddSliderCallback("Zeal_FoVSlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_FoVSlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		float val = 45.0f + (static_cast<float>(value) / 100.0f) * 45.0f;
 		ZealService::get_instance()->camera_mods->set_fov(val);
 
 		// Update the label with the remapped value
-		ui->SetLabelValue("Zeal_FoVValueLabel", "%f", val);
+		ui->SetLabelValue("Zeal_FoVValueLabel", "%.0f", val);
 	});
-	ui->AddLabel("Zeal_PanDelayValueLabel");
-	ui->AddLabel("Zeal_FirstPersonLabel_X");
-	ui->AddLabel("Zeal_FirstPersonLabel_Y");
-	ui->AddLabel("Zeal_ThirdPersonLabel_X");
-	ui->AddLabel("Zeal_ThirdPersonLabel_Y");
-	ui->AddLabel("Zeal_FoVValueLabel");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_PanDelayValueLabel");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonLabel_X");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonLabel_Y");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_ThirdPersonLabel_X");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_ThirdPersonLabel_Y");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FoVValueLabel");
 
 	//AddComboCallback("Zeal_HideCorpseCombobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { Zeal::EqGame::print_chat("Combo set to %i", value); });
 	/*set the current states*/
@@ -75,7 +75,7 @@ void ui_options::UpdateOptions()
 	ui->SetSliderValue("Zeal_FirstPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_y * 50 : 0.f);
 	ui->SetSliderValue("Zeal_FirstPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_x * 50 : 0.f);
 	ui->SetSliderValue("Zeal_FoVSlider", static_cast<int>((ZealService::get_instance()->camera_mods->fov - 45.0f) / 45.0f * 100.0f));
-	ui->SetLabelValue("Zeal_FoVValueLabel", "%f", ZealService::get_instance()->camera_mods->fov);
+	ui->SetLabelValue("Zeal_FoVValueLabel", "%.0f", ZealService::get_instance()->camera_mods->fov);
 	ui->SetLabelValue("Zeal_FirstPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x);
 	ui->SetLabelValue("Zeal_FirstPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y);
 	ui->SetLabelValue("Zeal_ThirdPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
