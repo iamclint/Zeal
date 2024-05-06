@@ -67,10 +67,13 @@ void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_
 
 void ItemDisplay::clean_ui()
 {
-	for (auto& w : windows)
+	if (Zeal::EqGame::is_in_game())
 	{
-		if (w)
-			w->IsVisible = false;
+		for (auto& w : windows)
+		{
+			if (w)
+				w->IsVisible = false;
+		}
 	}
 }
 

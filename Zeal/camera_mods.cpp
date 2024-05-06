@@ -577,9 +577,12 @@ int SetCameraLens(int a1, float fov, float aspect_ratio, float a4, float a5)
     //   Zeal::EqGame::print_chat("a1: %i a2: %f a3: %f a4: %f a5: %f", a1, fov, aspect_ratio, a5, a5);
     fov = zeal->camera_mods->fov;
     int rval = zeal->hooks->hook_map["SetCameraLens"]->original(SetCameraLens)(a1, fov, aspect_ratio, a4, a5);
-    Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
-    if (ci)
-        ci->FieldOfView = zeal->camera_mods->fov;
+    //if (Zeal::EqGame::is_in_game())
+   // {
+        Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera(); 
+        if (ci)
+            ci->FieldOfView = zeal->camera_mods->fov; //currently crashing when going to server select and back in
+    //}
     return rval;
 }
 

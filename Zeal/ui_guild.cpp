@@ -14,13 +14,13 @@ void ui_guild::CleanUI()
 
 void ui_guild::InitUI()
 {
-	if (guild)
+	/*if (guild)
 		delete guild;
 	guild = new Zeal::EqUI::BasicWnd();
 	guild->vtbl = (Zeal::EqUI::BaseVTable*)0x5e60f0;
 	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(guild, 0, Zeal::EqUI::CXSTR("GuildManagementWnd"), -1, 0);
 	guild->CreateChildren();
-	members = (Zeal::EqUI::ListWnd*)guild->GetChildItem("MemberList");
+	members = (Zeal::EqUI::ListWnd*)guild->GetChildItem("MemberList");*/
 }
 
 ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)

@@ -135,7 +135,7 @@ void msg_new_text(char* msg)
 	ZealService* zeal = ZealService::get_instance();
 	if (!Zeal::EqGame::get_self())
 	{
-		Zeal::EqGame::print_chat("self was null during new text");
+	//	Zeal::EqGame::print_chat("self was null during new text");
 		return;
 	}
 	zeal->hooks->hook_map["msg_new_text"]->original(msg_new_text)(msg);
