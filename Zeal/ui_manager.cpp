@@ -44,10 +44,6 @@ void ui_manager::AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name
 			checkbox_callbacks[btn] = callback;
 			checkbox_names[name] = btn;
 		}
-		else
-		{
-			Zeal::EqGame::print_chat("Checkbox %s not found", name.c_str());
-		}
 	}
 }
 
@@ -62,10 +58,6 @@ void ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, 
 			slider_names[name] = btn;
 			btn->max_val = 100;
 		}
-		else
-		{
-			Zeal::EqGame::print_chat("Slider %s not found", name.c_str());
-		}
 	}
 }
 
@@ -79,10 +71,6 @@ void ui_manager::AddComboCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, s
 			combo_callbacks[btn] = callback;
 			combo_names[name] = btn;
 		}
-		else
-		{
-			Zeal::EqGame::print_chat("Combo %s not found", name.c_str());
-		}
 	}
 }
 
@@ -94,10 +82,6 @@ void ui_manager::AddLabel(Zeal::EqUI::BasicWnd* wnd, std::string name)
 		if (btn)
 		{
 			label_names[name] = btn;
-		}
-		else
-		{
-			Zeal::EqGame::print_chat("Label %s not found", name.c_str());
 		}
 	}
 }

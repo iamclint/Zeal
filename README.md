@@ -1,11 +1,17 @@
 ### Features
-- Huge camera motion improvement in the third person and sensitivity for first person
+- Camera motion improvements
 - Additional binds
 - Additional commands
+- Additional ui support
 - Various bug fixes
-- Add free for all for raid loot, requires ui change or /setloottype 4
+
 ### Commands
 ___
+- `/ttimer`
+  - **Arguments:** `int`
+  - **Example:** `/ttimer 500`
+  - **Description:** change the delay in which a tooltip pops up on mouse hover.
+  
 - `/inspect target`
   - **Description:** adds target argument to /inspect, this just inspects your current target.
 
@@ -18,7 +24,7 @@ ___
 - `/fov`
   - **Arguments:** `int`
   - **Example:** `/fov 65`
-  - **Description:** changes your field of view.
+  - **Description:** changes your field of view with a value between 45 and 90.
     
 - `/melody`
   - **Arguments:** `song gem #'s (maximum of 5)`
@@ -134,7 +140,11 @@ ___
   - `124` Current Mana
   - `125` Max Mana
   - `134` Spell being casted
-  
+
+- **LootAllButton**
+- **LinkAllButton**
+
+
 ### Options UI 
 - **ScreenID Checkboxes**
   - Zeal_ShowHelm
@@ -143,6 +153,7 @@ ___
   - Zeal_BlueCon
   - Zeal_Timestamp
   - Zeal_Input
+  - Zeal_Escape_
     
 - **ScreenID Sliders**
   - Zeal_PanDelaySlider
