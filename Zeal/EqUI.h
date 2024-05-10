@@ -256,6 +256,7 @@ namespace Zeal
 				struct _CXSTR* SidlScreen;
 				DWORD   SlotID;
 				DWORD	Caret_Start;
+				DWORD	ItemCount;
 			};
 			union {
 				/*0x104*/   LPVOID SidlPiece; /* CScreenPieceTemplate (important) */
@@ -297,7 +298,7 @@ namespace Zeal
 			ListWnd() {};
 			int AddString(std::string str)
 			{
-				return reinterpret_cast<int (__thiscall*)(const ListWnd*, CXSTR)>(0x5797A0)(this, CXSTR(str));
+				return reinterpret_cast<int (__thiscall*)(const ListWnd*, CXSTR, UINT, UINT, UINT)>(0x5797A0)(this, CXSTR(str), 0xffffffff, 0, 0);
 			}
 			void SetItemText(std::string str, int row, int column)
 			{
@@ -307,8 +308,22 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const ListWnd*, int, int)>(0x579D70)(this, row, row);
 			}
-
-
+			void Sort(int col) 
+			{
+				reinterpret_cast<void(__thiscall*)(const ListWnd*, int)>(0x57cb00)(this,col);
+			}
+			void DeleteAll()
+			{
+				reinterpret_cast<void(__thiscall*)(const ListWnd*)>(0x579530)(this);
+			}
+			int GetItemData(int row)
+			{
+				reinterpret_cast<void(__thiscall*)(const ListWnd*, int)>(0x578E80)(this, row);
+			}
+			CXSTR GetItemText(CXSTR buffer, int row, int col)
+			{
+				return reinterpret_cast<CXSTR(__thiscall*)(const ListWnd*, CXSTR, int, int)>(0x578ed0)(this, buffer, row, col);
+			}
 		};
 
 		struct ItemDisplayWnd : EQWND

@@ -9,18 +9,21 @@
 
 void ui_guild::CleanUI()
 {
-
+	if (guild)
+	{
+		guild->IsVisible = false;
+		delete guild;
+	}
+	members = nullptr;
 }
 
 void ui_guild::InitUI()
 {
-	/*if (guild)
-		delete guild;
 	guild = new Zeal::EqUI::BasicWnd();
 	guild->vtbl = (Zeal::EqUI::BaseVTable*)0x5e60f0;
 	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(guild, 0, Zeal::EqUI::CXSTR("GuildManagementWnd"), -1, 0);
 	guild->CreateChildren();
-	members = (Zeal::EqUI::ListWnd*)guild->GetChildItem("MemberList");*/
+	members = (Zeal::EqUI::ListWnd*)guild->GetChildItem("MemberList");
 }
 
 ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
@@ -32,12 +35,23 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 		[this, mgr](std::vector<std::string>& args) {
 			if (members)
 			{
-				mgr->AddListItems(members, { 
-					{"Test Name", "65", "Officer", "Ranger", "10/11/1999", "ECommonlands", "What a loser"},
-					{"Test Name2", "65", "Officer", "Ranger", "10/11/1999", "ECommonlands", "What a loser"},
-					{"Test Name3", "65", "Officer", "Enchanter", "10/11/1999", "ECommonlands", "What a loser"},
-					{"Test Name4", "65", "Officer", "Ranger", "10/11/1999", "East Commonlands", "What a loser"} 
-				});
+
+				std::vector<std::vector<std::string>> players;
+				Zeal::EqStructures::Entity* ent=Zeal::EqGame::get_entity_list();
+				while (ent->Next)
+				{
+					if (ent->Type == 0)
+					{
+						players.push_back(
+							{
+								ent->Name, std::to_string(ent->Level),Zeal::EqGame::class_name_short(ent->Class),"Peasant", "5/7/2024", "Commons", ""
+							}
+						);
+					}
+					ent = ent->Next;
+
+				}
+				mgr->AddListItems(members, players);
 			}
 			else
 			{
@@ -45,6 +59,32 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 			}
 			return true;
 		});
+		zeal->commands_hook->add("/read", {}, "",
+			[this](std::vector<std::string>& args) {
+				if (members)
+				{
+					Zeal::EqUI::CXSTR x("");
+					for (int i = 0; i < members->ItemCount; i++)
+					{
+						 members->GetItemText(x, i, 1);
+						Zeal::EqGame::print_chat("%s | %s items: %i", x.Data->Text, members->ItemCount);
+					}
+				}
+				return true;
+			});
+		zeal->commands_hook->add("/sortskill", {}, "",
+			[this](std::vector<std::string>& args) {
+				Zeal::EqUI::ListWnd* wnd = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Skills->GetChildItem("SkillList");
+				if (wnd)
+				{
+					wnd->Sort(0);
+				}
+				else
+				{
+					Zeal::EqGame::print_chat("skillist not found");
+				}
+			return true;
+			});
 		zeal->commands_hook->add("/guildwindow", {}, "Toggle guild management window",
 			[this](std::vector<std::string>& args) {
 					if (guild)
@@ -62,4 +102,6 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 }
 ui_guild::~ui_guild()
 {
+
+
 }

@@ -32,7 +32,7 @@ public:
 	void AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback);
 	void AddComboCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback);
 	void AddLabel(Zeal::EqUI::BasicWnd* wnd, std::string name);
-	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>>& data);
+	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>> data);
 
 	ui_manager(class ZealService* zeal, class IO_ini* ini);
 

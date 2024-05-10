@@ -36,6 +36,7 @@ public:
 	
 	ZealService();
 	~ZealService();
+	void init_crashreporter();
 	static ZealService* ptr_service;
 	//static data/functions to get a base ptr since some hook callbacks don't have the information required
 	static ZealService* get_instance();

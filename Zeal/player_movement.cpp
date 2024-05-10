@@ -29,21 +29,12 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 						case 3:
 							CloseSpellbook();
 							break;
-						case 5: // default should be turn page left (not implemented)
-							if (!spellbook_right_autostand) { return; }
-							CloseSpellbook();
-							break;
-						case 6: // default to turn page right (not implemented)
-							if (!spellbook_left_autostand) { return; }
-							CloseSpellbook();
-							break;
+						case 5: 
+						case 6: 
 						case 211:
-							if (!spellbook_left_strafe_autostand) { return; }
-							CloseSpellbook();
-							break;
 						case 212:
-							if (!spellbook_right_strafe_autostand) { return; }
-							CloseSpellbook();
+							if (!spellbook_autostand) { return; }
+								CloseSpellbook();
 							break;
 						default: { return; }
 					}
@@ -61,8 +52,8 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 					// left and right arrows dont turn pages on oldui by default
 					// so I'm not sure if we'll add support for other keys
 					if (cmd == 4) { return; }
-					else if (cmd == 5 && !spellbook_left_autostand)  { return; }
-					else if (cmd == 6 && !spellbook_right_autostand) { return; }
+					else if (cmd == 5 && !spellbook_autostand)  { return; }
+					else if (cmd == 6 && !spellbook_autostand) { return; }
 				}
 			}
 
@@ -173,22 +164,25 @@ void PlayerMovement::callback_main()
 		}
 	}
 }
+void PlayerMovement::set_spellbook_autostand(bool enabled)
+{
+	spellbook_autostand = true;
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "SpellbookAutostand", enabled);
+}
 
 void PlayerMovement::load_settings()
 {
-	if (!ini_handle->exists("Zeal", "LeftTurnSpellbookAutostand"))
-		ini_handle->setValue<bool>("Zeal", "LeftTurnSpellbookAutostand", false);
-	if (!ini_handle->exists("Zeal", "RightTurnSpellbookAutostand"))
-		ini_handle->setValue<bool>("Zeal", "RightTurnSpellbookAutostand", false);
-	if (!ini_handle->exists("Zeal", "LeftStrafeSpellbookAutostand"))
-		ini_handle->setValue<bool>("Zeal", "LeftStrafeSpellbookAutostand", true);
-	if (!ini_handle->exists("Zeal", "RightStrafeSpellbookAutostand"))
-		ini_handle->setValue<bool>("Zeal", "RightStrafeSpellbookAutostand", true);
+	if (!ini_handle->exists("Zeal", "SpellbookAutostand"))
+		ini_handle->setValue<bool>("Zeal", "SpellbookAutostand", false);
+	//if (!ini_handle->exists("Zeal", "LeftStrafeSpellbookAutostand"))
+	//	ini_handle->setValue<bool>("Zeal", "LeftStrafeSpellbookAutostand", true);
+	//if (!ini_handle->exists("Zeal", "RightStrafeSpellbookAutostand"))
+	//	ini_handle->setValue<bool>("Zeal", "RightStrafeSpellbookAutostand", true);
 
-	spellbook_left_autostand = ini_handle->getValue<bool>("Zeal", "LeftTurnSpellbookAutostand");
-	spellbook_right_autostand = ini_handle->getValue<bool>("Zeal", "RightTurnSpellbookAutostand");
+	spellbook_autostand = ini_handle->getValue<bool>("Zeal", "SpellbookAutostand");
+	/*spellbook_right_autostand = ini_handle->getValue<bool>("Zeal", "RightTurnSpellbookAutostand");
 	spellbook_left_strafe_autostand = ini_handle->getValue<bool>("Zeal", "LeftStrafeSpellbookAutostand");
-	spellbook_right_strafe_autostand = ini_handle->getValue<bool>("Zeal", "RightStrafeSpellbookAutostand");
+	spellbook_right_strafe_autostand = ini_handle->getValue<bool>("Zeal", "RightStrafeSpellbookAutostand");*/
 }
 
 PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_ini* ini)
@@ -226,44 +220,16 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1 || args.size() > 2)
 			{
-				Zeal::EqGame::print_chat("usage: /autostand [LeftTurn | RightTurn | LeftStrafe | RightStrafe]");
+				Zeal::EqGame::print_chat("usage: /autostand spellbook");
 				return true;
 			}
 			if (args.size() > 1) {
 				std::ostringstream oss;
-				if (Zeal::String::compare_insensitive(args[1], "LeftTurn"))
+				if (Zeal::String::compare_insensitive(args[1], "spellbook"))
 				{
-					spellbook_left_autostand = !spellbook_left_autostand;
-					ini_handle->setValue<bool>("Zeal", "LeftTurnSpellbookAutostand", spellbook_left_autostand);
-					std::string is_enabled = spellbook_left_autostand ? "enabled" : "disabled";
-					oss << "[Autostand] Left turn spellbook autostand has been " << is_enabled << "." << std::endl;
-					Zeal::EqGame::print_chat(oss.str());
-					return true;
-				}
-				else if (Zeal::String::compare_insensitive(args[1], "RightTurn"))
-				{
-					spellbook_right_autostand = !spellbook_right_autostand;
-					ini_handle->setValue<bool>("Zeal", "RightTurnSpellbookAutostand", spellbook_right_autostand);
-					std::string is_enabled = spellbook_right_autostand ? "enabled" : "disabled";
-					oss << "[Autostand] Right turn spellbook autostand has been " << is_enabled << "." << std::endl;
-					Zeal::EqGame::print_chat(oss.str());
-					return true;
-				}
-				else if (Zeal::String::compare_insensitive(args[1], "LeftStrafe"))
-				{
-					spellbook_left_strafe_autostand = !spellbook_left_strafe_autostand;
-					ini_handle->setValue<bool>("Zeal", "LeftStrafeSpellbookAutostand", spellbook_left_strafe_autostand);
-					std::string is_enabled = spellbook_left_strafe_autostand ? "enabled" : "disabled";
-					oss << "[Autostand] Left strafe spellbook autostand has been " << is_enabled << "." << std::endl;
-					Zeal::EqGame::print_chat(oss.str());
-					return true;
-				}
-				else if (Zeal::String::compare_insensitive(args[1], "RightStrafe"))
-				{
-					spellbook_right_strafe_autostand = !spellbook_right_strafe_autostand;
-					ini_handle->setValue<bool>("Zeal", "RightStrafeSpellbookAutostand", spellbook_right_strafe_autostand);
-					std::string is_enabled = spellbook_right_strafe_autostand ? "enabled" : "disabled";
-					oss << "[Autostand] Right strafe spellbook autostand has been " << is_enabled << "." << std::endl;
+					set_spellbook_autostand(!spellbook_autostand);
+					std::string is_enabled = spellbook_autostand ? "enabled" : "disabled";
+					oss << "[Autostand] spellbook autostand has been " << is_enabled << "." << std::endl;
 					Zeal::EqGame::print_chat(oss.str());
 					return true;
 				}
