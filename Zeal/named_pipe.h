@@ -2,6 +2,7 @@
 #include "json.hpp"
 #include <Windows.h>
 #include <string>
+#include <thread>
 enum struct pipe_data_type
 {
 	log,
@@ -25,7 +26,9 @@ public:
 	void write(std::string data);
 	void write(const char* format, ...);
 private:
+	bool end_thread = false;
 	const char* name = "\\\\.\\pipe\\zeal";
-	HANDLE pipe_handle=nullptr;
+	std::vector<HANDLE> pipe_handles;
+	std::thread pipe_thread;
 };
 

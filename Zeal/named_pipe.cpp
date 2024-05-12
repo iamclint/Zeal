@@ -6,6 +6,17 @@
 #include <Windows.h>
 #include <thread>
 
+void ConnectCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered, LPOVERLAPPED lpOverlapped) {
+	if (dwErrorCode == 0) {
+		std::cout << "Client connected" << std::endl;
+	}
+	else {
+		std::cerr << "Connect failed with error code: " << dwErrorCode << std::endl;
+	}
+
+	// Free the OVERLAPPED structure if it was allocated dynamically
+	delete lpOverlapped;
+}
 
 void log_hook(char* data)
 {
@@ -20,23 +31,67 @@ void log_hook(char* data)
 	zeal->hooks->hook_map["logtextfile"]->original(log_hook)(data);
 }
 
+bool IsPipeConnected(HANDLE hPipe) {
+	DWORD dwBytesAvailable, dwBytesLeftThisMessage, dwBytesMessage;
+	BOOL bSuccess = PeekNamedPipe(hPipe, NULL, 0, NULL, &dwBytesAvailable, &dwBytesLeftThisMessage);
+	if (!bSuccess) {
+		// Error occurred while checking pipe state
+		return false;
+	}
+	return dwBytesAvailable > 0; // Return true if bytes are available for reading (pipe is connected)
+}
+
 named_pipe::named_pipe(ZealService* zeal)
 {
 	zeal->hooks->Add("logtextfile", 0x5240dc, log_hook, hook_type_detour);
-	pipe_handle = CreateNamedPipeA(name, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES, 1024, 1024, 0, NULL);
-	ConnectNamedPipe(pipe_handle, NULL);
+	pipe_thread = std::thread([this]() {
+		while (!end_thread)
+		{
+			HANDLE pipe_handle = CreateNamedPipeA(name, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES, 1024, 1024, NMPWAIT_USE_DEFAULT_WAIT, NULL);
+			if (pipe_handle != INVALID_HANDLE_VALUE)
+			{
+				ConnectNamedPipe(pipe_handle, NULL);
+				pipe_handles.push_back(pipe_handle);
+			}
+		}
+	});
+	pipe_thread.detach();
 }
 named_pipe::~named_pipe()
 {
-	CloseHandle(pipe_handle);
+	for (auto& h : pipe_handles)
+		CloseHandle(h);
+	end_thread = true;
+	pipe_thread.join();
 
+}
+
+struct PipeData {
+	OVERLAPPED overlapped;
+	HANDLE pipe;
+};
+
+void CALLBACK WriteCompletion(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered, LPOVERLAPPED lpOverlapped) {
+	PipeData* pData = reinterpret_cast<PipeData*>(lpOverlapped);
+	delete pData;
 }
 
 void named_pipe::write(std::string data)
 {
-	if (pipe_handle != INVALID_HANDLE_VALUE) {
-		DWORD written_bytes = 0;
-		WriteFile(pipe_handle, data.c_str(), data.length(), &written_bytes, NULL);
+
+	for (auto& h : pipe_handles)
+	{
+		PipeData* pData = new PipeData;
+		pData->pipe = h;
+		pData->overlapped.hEvent = nullptr;
+		if (h != INVALID_HANDLE_VALUE) {
+			if (!WriteFileEx(h, data.c_str(), data.length(), reinterpret_cast<LPOVERLAPPED>(pData), WriteCompletion))
+			{
+				h = INVALID_HANDLE_VALUE;
+				CloseHandle(h);
+			}
+		}
+		delete pData;
 	}
 }
 void named_pipe::write(const char* format, ...)
