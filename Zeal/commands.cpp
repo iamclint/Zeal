@@ -40,27 +40,32 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 	ZealService* zeal = ZealService::get_instance();
 	std::string str_cmd = cmd;
 
+	if (str_cmd.length() == 0)
+		return;
+
 	if (str_cmd.length()>0 && str_cmd.at(0) != '/')
 		str_cmd = "/" + str_cmd;
 	std::vector<std::string> args = Zeal::String::split(str_cmd," ");
-
-	if (args.size() > 0)
+	const std::string& cmd_name = args.front();
+	if (!args.empty() && !cmd_name.empty())
 	{
 		bool cmd_handled = false;
-		if (zeal->commands_hook->CommandFunctions.count(args[0]) > 0)
+		auto& command_functions = zeal->commands_hook->CommandFunctions;
+		if (command_functions.count(cmd_name))
 		{
-			cmd_handled = zeal->commands_hook->CommandFunctions[args[0]].callback(args);
-		}
+			cmd_handled = command_functions[args[0]].callback(args);
+		} 
 		else
 		{
-			for (auto& m : zeal->commands_hook->CommandFunctions)
-			{
-				for (auto& a : m.second.aliases)
-				{
-					if (a == args[0])
-					{
-						cmd_handled = m.second.callback(args);
-						break;
+			//attempt to find and call the function via an alias
+			for (const auto& command_pair : command_functions) {
+				const auto& command = command_pair.second;
+				if (command.callback && !command.aliases.empty()) {
+					for (const auto alias : command.aliases) {
+						if (!alias.empty() && alias == cmd_name) {
+							cmd_handled = command.callback(args);
+							break;
+						}
 					}
 				}
 			}
@@ -83,7 +88,7 @@ ChatCommands::~ChatCommands()
 }
 ChatCommands::ChatCommands(ZealService* zeal)
 {
-	add("o", { "" }, "Removes the o command that is switching ui from new to old.",
+	add("o", {}, "Removes the o command that is switching ui from new to old.",
 		[](std::vector<std::string>& args) {
 			if (Zeal::String::compare_insensitive(args[0], "o"))
 				return true;
@@ -279,7 +284,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			return true;
 		});
 
-	add("/reloadskin", { }, "Reload your current ui with ini.",
+	add("/reloadskin", {}, "Reload your current ui with ini.",
 		[this](std::vector<std::string>& args) {
 			mem::write<BYTE>(0x8092d9, 1); //reload skin
 			mem::write<BYTE>(0x8092da, 1);  //reload with ui

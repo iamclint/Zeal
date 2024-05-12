@@ -93,13 +93,7 @@
     <ClInclude Include="cycle_target.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
-    <ClInclude Include="IO_ini.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InstructionLength.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="raid.h">
@@ -179,6 +173,15 @@
     </ClInclude>
     <ClInclude Include="ui_guild.h">
       <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="named_pipe.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="InstructionLength.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="IO_ini.h">
+      <Filter>Header Files\other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -292,6 +295,9 @@
     </ClCompile>
     <ClCompile Include="ui_guild.cpp">
       <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="named_pipe.cpp">
+      <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

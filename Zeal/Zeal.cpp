@@ -2,13 +2,21 @@
 #include "EqAddresses.h"
 #include "CrashRpt.h"
 ZealService* ZealService::ptr_service = nullptr;
+
+LPTOP_LEVEL_EXCEPTION_FILTER WINAPI SetUnhandledExceptionFilter_Hook(LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
+{
+	return 0;
+}
+
 ZealService::ZealService()
 {
 	init_crashreporter();
 	//since the hooked functions are called back via a different thread, make sure the service ptr is available immediately
 	ZealService::ptr_service = this; //this setup makes it not unit testable but since the caller functions of the hooks don't know the pointers I had to make a method to retrieve the base atleast
 	hooks = std::make_shared<HookWrapper>();
+	hooks->Add("SetUnhandledExceptionFilter", (int)SetUnhandledExceptionFilter, SetUnhandledExceptionFilter_Hook, hook_type_detour);
 	ini = std::make_shared<IO_ini>(".\\eqclient.ini"); //other functions rely on this hook
+	pipe = std::make_shared<named_pipe>(this); //other classes below rely on this class on initialize
 	//initialize the hooked function classes
 	commands_hook = std::make_shared<ChatCommands>(this); //other classes below rely on this class on initialize
 	callbacks = std::make_shared<CallbackManager>(this); //other functions rely on this hook
@@ -35,7 +43,7 @@ ZealService::ZealService()
 	melody = std::make_shared<Melody>(this, ini.get());
 	autofire = std::make_shared<AutoFire>(this, ini.get());
 
-	callbacks->add_generic([this]() { init_crashreporter(); }, callback_type::InitUI);
+	callbacks->add_generic([this]() { init_crashreporter(); }, callback_type::Zone);
 
 	this->basic_binds();
 }
@@ -131,15 +139,13 @@ void ZealService::basic_binds()
 	}); //handle escape
 }
 
+
 void ZealService::init_crashreporter()
 {
 	CR_INSTALL_INFOA info;
 	char crashrptdllpath[1024];
 	//char dllpath[1024];
 	//char displayMessageBuf[4096];
-
-	SetUnhandledExceptionFilter(EXCEPTION_CONTINUE_SEARCH);
-
 	char errorMessageBuf[4096];
 	int(__stdcall * crInstallAImp)(PCR_INSTALL_INFOA pInfo);
 	int(__stdcall * crGetLastErrorMsgAImp)(LPSTR pszBuffer, UINT uBuffSize);
@@ -161,19 +167,22 @@ void ZealService::init_crashreporter()
 	info.uPriorities[CR_HTTP] = 0;
 	info.dwFlags = CR_INST_ALL_POSSIBLE_HANDLERS;
 	info.pszRestartCmdLine = "";
-
+	
 	if (crInstallAImp == NULL || crInstallAImp(&info) != 0)
 	{
 		if (crGetLastErrorMsgAImp)
 		{
 			char szErrorMsg[512] = "";
 			crGetLastErrorMsgAImp(szErrorMsg, 512);
+			//MessageBoxA(0, szErrorMsg, "CrashRpt", 0);
 		}
 		else {
 			FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 				0, GetLastError(), 0x400, errorMessageBuf, sizeof(errorMessageBuf) / 2, 0);
+			//MessageBoxA(0, errorMessageBuf, "CrashRpt", 0);
 		}
 	}
+	
 }
 
 

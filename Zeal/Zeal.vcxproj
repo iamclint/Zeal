@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClInclude Include="alarm.h" />
     <ClInclude Include="autofire.h" />
+    <ClInclude Include="named_pipe.h" />
     <ClInclude Include="tooltip.h" />
     <ClInclude Include="ui_bank.h" />
     <ClInclude Include="item_display.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="alarm.cpp" />
     <ClCompile Include="autofire.cpp" />
     <ClCompile Include="EqPackets.h" />
+    <ClCompile Include="named_pipe.cpp" />
     <ClCompile Include="tooltip.cpp" />
     <ClCompile Include="ui_bank.cpp" />
     <ClCompile Include="item_display.cpp" />

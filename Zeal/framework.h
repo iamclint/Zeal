@@ -18,6 +18,7 @@
 #include "callbacks.h"
 #include "item_display.h"
 #include "melody.h"
+#include "named_pipe.h"
 // other features
 #include "cycle_target.h"
 #include "outputfile.h"

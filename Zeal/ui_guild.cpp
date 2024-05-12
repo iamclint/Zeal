@@ -31,43 +31,20 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 	ui = mgr;
 	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
-		zeal->commands_hook->add("/additem", {}, "Toggle guild management window",
-		[this, mgr](std::vector<std::string>& args) {
-			if (members)
-			{
-
-				std::vector<std::vector<std::string>> players;
-				Zeal::EqStructures::Entity* ent=Zeal::EqGame::get_entity_list();
-				while (ent->Next)
-				{
-					if (ent->Type == 0)
-					{
-						players.push_back(
-							{
-								ent->Name, std::to_string(ent->Level),Zeal::EqGame::class_name_short(ent->Class),"Peasant", "5/7/2024", "Commons", ""
-							}
-						);
-					}
-					ent = ent->Next;
-
-				}
-				mgr->AddListItems(members, players);
-			}
-			else
-			{
-				Zeal::EqGame::print_chat("Guild window not found!");
-			}
-			return true;
-		});
 		zeal->commands_hook->add("/read", {}, "",
 			[this](std::vector<std::string>& args) {
 				if (members)
 				{
-					Zeal::EqUI::CXSTR x("");
-					for (int i = 0; i < members->ItemCount; i++)
+
+					for (int i = 1; i < members->ItemCount; i++)
 					{
-						 members->GetItemText(x, i, 1);
-						Zeal::EqGame::print_chat("%s | %s items: %i", x.Data->Text, members->ItemCount);
+						Zeal::EqUI::CXSTR name;
+						Zeal::EqUI::CXSTR level;
+						Zeal::EqUI::CXSTR _class;
+						members->GetItemText(&name, i, 0);
+						members->GetItemText(&level, i, 1);
+						members->GetItemText(&_class, i, 2);
+						Zeal::EqGame::print_chat("%s %s %s", name.Data->Text, level.Data->Text, _class.Data->Text);
 					}
 				}
 				return true;
@@ -86,11 +63,28 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 			return true;
 			});
 		zeal->commands_hook->add("/guildwindow", {}, "Toggle guild management window",
-			[this](std::vector<std::string>& args) {
+			[this, mgr](std::vector<std::string>& args) {
 					if (guild)
 					{
 						Zeal::EqGame::print_chat("Attempting to show guild window");
 						guild->IsVisible=true;
+						//some mock data -->
+						std::vector<std::vector<std::string>> players;
+						Zeal::EqStructures::Entity* ent = Zeal::EqGame::get_entity_list();
+						while (ent->Next)
+						{
+							if (ent->Type == 0)
+							{
+								players.push_back(
+									{
+										ent->Name, std::to_string(ent->Level),Zeal::EqGame::class_name_short(ent->Class),"Peasant", "5/7/2024", "Commons", ""
+									}
+								);
+							}
+							ent = ent->Next;
+
+						}
+						mgr->AddListItems(members, players);
 					}
 					else
 					{

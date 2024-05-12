@@ -8,6 +8,7 @@ public:
 	//hooks
 	std::shared_ptr<IO_ini> ini = nullptr;
 	std::shared_ptr<HookWrapper> hooks = nullptr;
+	std::shared_ptr<named_pipe> pipe = nullptr;
 	std::shared_ptr<looting> looting_hook = nullptr;
 	std::shared_ptr<labels> labels_hook = nullptr;
 	std::shared_ptr<Binds> binds_hook = nullptr;

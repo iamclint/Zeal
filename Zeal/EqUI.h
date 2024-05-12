@@ -318,11 +318,11 @@ namespace Zeal
 			}
 			int GetItemData(int row)
 			{
-				reinterpret_cast<void(__thiscall*)(const ListWnd*, int)>(0x578E80)(this, row);
+				return reinterpret_cast<int (__thiscall*)(const ListWnd*, int)>(0x578E80)(this, row);
 			}
-			CXSTR GetItemText(CXSTR buffer, int row, int col)
+			ListWnd* GetItemText(CXSTR* buffer, int row, int col)
 			{
-				return reinterpret_cast<CXSTR(__thiscall*)(const ListWnd*, CXSTR, int, int)>(0x578ed0)(this, buffer, row, col);
+				return reinterpret_cast<ListWnd*(__thiscall*)(const ListWnd*, CXSTR*, int, int)>(0x578ed0)(this, buffer, row, col);
 			}
 		};
 

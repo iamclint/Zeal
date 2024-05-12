@@ -72,9 +72,9 @@ void __stdcall clean_up_ui()
 	zeal->hooks->hook_map["CleanUpUI"]->original(clean_up_ui)();
 }
 
-bool CallbackManager::invoke_packet(callback_type fn, UINT opcode, char* buffer, UINT len)
+bool CallbackManager::invoke_packet(callback_type cb_type, UINT opcode, char* buffer, UINT len)
 {
-	for (auto& fn : packet_functions[fn])
+	for (auto& fn : packet_functions[cb_type])
 	{
 		if (fn(opcode, buffer, len))
 			return true;
@@ -82,9 +82,9 @@ bool CallbackManager::invoke_packet(callback_type fn, UINT opcode, char* buffer,
 	return false;
 }
 
-bool CallbackManager::invoke_command(callback_type fn, UINT opcode, bool state)
+bool CallbackManager::invoke_command(callback_type cb_type, UINT opcode, bool state)
 {
-	for (auto& fn : cmd_functions[fn])
+	for (auto& fn : cmd_functions[cb_type])
 	{
 		if (fn(opcode, state))
 			return true;
