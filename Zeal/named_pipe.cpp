@@ -6,6 +6,17 @@
 #include <Windows.h>
 #include <thread>
 
+pipe_data::pipe_data(pipe_data_type _type, std::string _data)
+{
+	data = _data;
+	data_len = data.length();
+	if (Zeal::EqGame::is_in_game() && Zeal::EqGame::get_self())
+		character = Zeal::EqGame::get_self()->Name;
+	else
+		character = "";
+	type = _type;
+}
+
 void ConnectCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered, LPOVERLAPPED lpOverlapped) {
 	if (dwErrorCode == 0) {
 		std::cout << "Client connected" << std::endl;
@@ -21,11 +32,7 @@ void ConnectCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered
 void log_hook(char* data)
 {
 	ZealService* zeal = ZealService::get_instance();
-	std::string string_data = data;
-	pipe_data pd;
-	pd.data = string_data;
-	pd.data_len = string_data.length();
-	pd.type = pipe_data_type::log;
+	pipe_data pd(pipe_data_type::log, data);
 	if (zeal->pipe.get())
 		zeal->pipe->write(pd.serialize().dump());
 	zeal->hooks->hook_map["logtextfile"]->original(log_hook)(data);
@@ -44,14 +51,57 @@ bool IsPipeConnected(HANDLE hPipe) {
 named_pipe::named_pipe(ZealService* zeal)
 {
 	zeal->hooks->Add("logtextfile", 0x5240dc, log_hook, hook_type_detour);
+	name += std::to_string(GetCurrentProcessId());
 	pipe_thread = std::thread([this]() {
 		while (!end_thread)
 		{
-			HANDLE pipe_handle = CreateNamedPipeA(name, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES, 1024, 1024, NMPWAIT_USE_DEFAULT_WAIT, NULL);
+			HANDLE pipe_handle = CreateNamedPipeA(name.c_str(), PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES, 1024, 1024, NMPWAIT_USE_DEFAULT_WAIT, NULL);
 			if (pipe_handle != INVALID_HANDLE_VALUE)
 			{
-				ConnectNamedPipe(pipe_handle, NULL);
-				pipe_handles.push_back(pipe_handle);
+				OVERLAPPED overlapped;
+				memset(&overlapped, 0, sizeof(overlapped));
+				overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+				// Connect named pipe with overlapped I/O
+				if (ConnectNamedPipe(pipe_handle, &overlapped))
+				{
+					// Connection succeeded immediately
+					pipe_handles.push_back(pipe_handle);
+				}
+				else
+				{
+					// Check if connection is pending
+					DWORD error = GetLastError();
+					if (error == ERROR_IO_PENDING)
+					{
+						// Wait for the connection with a timeout
+						DWORD result = WaitForSingleObject(overlapped.hEvent, 500);
+						if (result == WAIT_OBJECT_0)
+						{
+							// Connection completed successfully
+							pipe_handles.push_back(pipe_handle);
+						}
+						else if (result == WAIT_TIMEOUT)
+						{
+							// Timeout occurred, cancel the pending operation
+							CancelIo(pipe_handle);
+							CloseHandle(pipe_handle);
+						}
+						else
+						{
+							// Handle error
+							CloseHandle(pipe_handle);
+						}
+					}
+					else
+					{
+						// Handle error
+						CloseHandle(pipe_handle);
+					}
+				}
+
+				// Cleanup
+				CloseHandle(overlapped.hEvent);
+			
 			}
 		}
 	});
@@ -59,10 +109,15 @@ named_pipe::named_pipe(ZealService* zeal)
 }
 named_pipe::~named_pipe()
 {
-	for (auto& h : pipe_handles)
-		CloseHandle(h);
 	end_thread = true;
-	pipe_thread.join();
+	if (pipe_thread.joinable())
+		pipe_thread.join();
+
+	for (auto& h : pipe_handles)
+	{
+		DisconnectNamedPipe(h);
+		CloseHandle(h);
+	}
 
 }
 

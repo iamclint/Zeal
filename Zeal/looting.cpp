@@ -73,6 +73,7 @@ void looting::looted_item()
 	if (Zeal::EqGame::get_char_info()->CursorItem) 
 	{
 		loot_all = false;
+		delay_frames = -1;
 		return;
 	}
 	if (loot_all && Zeal::EqGame::Windows && Zeal::EqGame::Windows->Loot && Zeal::EqGame::Windows->Loot->IsVisible)
