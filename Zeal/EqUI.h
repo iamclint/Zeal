@@ -1,6 +1,7 @@
 #pragma once
 #include "EqStructures.h"
 #include "memory.h"
+#include <map>
 namespace Zeal
 {
 	namespace EqUI

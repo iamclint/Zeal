@@ -131,6 +131,11 @@ void CALLBACK WriteCompletion(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered
 	delete pData;
 }
 
+void named_pipe::write(std::string data, pipe_data_type data_type)
+{
+	pipe_data pd(data_type, data);
+	write(pd.serialize().dump());
+}
 void named_pipe::write(std::string data)
 {
 

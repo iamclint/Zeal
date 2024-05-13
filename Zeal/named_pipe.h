@@ -6,7 +6,8 @@
 enum struct pipe_data_type
 {
 	log,
-	label
+	label,
+	gauge
 };
 struct pipe_data
 {
@@ -32,6 +33,7 @@ class named_pipe
 public:
 	named_pipe(class ZealService* zeal);
 	~named_pipe();
+	void write(std::string data, pipe_data_type data_type);
 	void write(std::string data);
 	void write(const char* format, ...);
 private:
