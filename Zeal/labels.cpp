@@ -147,6 +147,19 @@ labels::~labels()
 
 labels::labels(ZealService* zeal)
 {
+	zeal->commands_hook->add("/labels", {}, "prints all labels",
+		[this](std::vector<std::string>& args) {
+			for (int i = 0; i < 200; i++)
+			{
+				Zeal::EqUI::CXSTR tmp("");
+				bool override = false;
+				ULONG color = 0;
+				GetLabelFromEq(i, (Zeal::EqUI::CXSTR*)&tmp, &override, &color);
+				if (tmp.Data)
+					Zeal::EqGame::print_chat("label: %i value: %s", i, tmp.Data->Text);
+			}
+			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+		});
 	zeal->callbacks->add_generic([this]() { callback_main(); });
 	//zeal->hooks->Add("FinalizeLoot", Zeal::EqGame::EqGameInternal::fn_finalizeloot, finalize_loot, hook_type_detour);
 	zeal->hooks->Add("GetLabel", Zeal::EqGame::EqGameInternal::fn_GetLabelFromEQ, GetLabelFromEq, hook_type_detour);

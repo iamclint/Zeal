@@ -55,7 +55,7 @@ named_pipe::named_pipe(ZealService* zeal)
 	pipe_thread = std::thread([this]() {
 		while (!end_thread)
 		{
-			HANDLE pipe_handle = CreateNamedPipeA(name.c_str(), PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES, 1024, 1024, NMPWAIT_USE_DEFAULT_WAIT, NULL);
+			HANDLE pipe_handle = CreateNamedPipeA(name.c_str(), PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES, 5096, 5096, NMPWAIT_USE_DEFAULT_WAIT, NULL);
 			if (pipe_handle != INVALID_HANDLE_VALUE)
 			{
 				OVERLAPPED overlapped;
