@@ -266,10 +266,10 @@ void labels::callback_main()
 			Zeal::EqUI::CXSTR tmp("");
 			bool override = false;
 			ULONG color = 0;
-			GetGaugeFromEq(id, (Zeal::EqUI::CXSTR*)&tmp);
+			int val = GetGaugeFromEq(id, (Zeal::EqUI::CXSTR*)&tmp);
 			if (tmp.Data)
 			{
-				nlohmann::json data = { {"type", id}, {"value", tmp.Data->Text} };
+				nlohmann::json data = { {"type", id}, {"text", tmp.Data->Text}, {"value", val} };
 				ZealService::get_instance()->pipe->write(data.dump(), pipe_data_type::gauge);
 			}
 		}
