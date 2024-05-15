@@ -34,6 +34,7 @@ class named_pipe
 public:
 	named_pipe(class ZealService* zeal);
 	~named_pipe();
+	void chat_msg(const char* data, int color_index);
 	void write(std::string data, pipe_data_type data_type);
 	void write(std::string data);
 	void write(const char* format, ...);

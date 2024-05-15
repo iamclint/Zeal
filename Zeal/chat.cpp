@@ -77,13 +77,14 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
     if (!data || strlen(data) == 0)
         return;
     chat* c = ZealService::get_instance()->chat_hook.get();
+    ZealService::get_instance()->pipe->chat_msg(data, color_index);
     if (color_index == 4 && c->bluecon)
         color_index = 325;
 
     if (c->timestamps && strlen(data) > 0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {
         mem::write<byte>(0x5380C9, 0xEB); // don't log information so we can manipulate data before between chat and logs
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data).c_str(), color_index, false);
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, (std::to_string(color_index) + " " +generateTimestampedString(data)).c_str(), color_index, false);
         mem::write<byte>(0x5380C9, 0x75); //reset the logging
         if (u)
             reinterpret_cast<void(__cdecl*)( const char* data)>(0x5240dc)(data); //add to log

@@ -38,6 +38,12 @@ void log_hook(char* data)
 	zeal->hooks->hook_map["logtextfile"]->original(log_hook)(data);
 }
 
+void named_pipe::chat_msg(const char* data, int color_index)
+{
+	nlohmann::json jd = { {"type", color_index }, {"text", data} };
+	write(jd.dump(), pipe_data_type::log);
+}
+
 bool IsPipeConnected(HANDLE hPipe) {
 	DWORD dwBytesAvailable, dwBytesLeftThisMessage, dwBytesMessage;
 	BOOL bSuccess = PeekNamedPipe(hPipe, NULL, 0, NULL, &dwBytesAvailable, &dwBytesLeftThisMessage);
@@ -50,7 +56,7 @@ bool IsPipeConnected(HANDLE hPipe) {
 
 named_pipe::named_pipe(ZealService* zeal)
 {
-	zeal->hooks->Add("logtextfile", 0x5240dc, log_hook, hook_type_detour);
+	// zeal->hooks->Add("logtextfile", 0x5240dc, log_hook, hook_type_detour); //receiving this via print chat so we can get color indexes
 	name += std::to_string(GetCurrentProcessId());
 	pipe_thread = std::thread([this]() {
 		while (!end_thread)
