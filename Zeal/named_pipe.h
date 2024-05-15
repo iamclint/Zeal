@@ -7,7 +7,8 @@ enum struct pipe_data_type
 {
 	log,
 	label,
-	gauge
+	gauge,
+	player
 };
 struct pipe_data
 {

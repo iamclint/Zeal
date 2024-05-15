@@ -273,6 +273,11 @@ void labels::callback_main()
 				ZealService::get_instance()->pipe->write(data.dump(), pipe_data_type::gauge);
 			}
 		}
+		if (Zeal::EqGame::get_self())
+		{
+			nlohmann::json data = { {"zone", Zeal::EqGame::get_self()->ZoneId} };
+			ZealService::get_instance()->pipe->write(data.dump(), pipe_data_type::player);
+		}
 		last_output = GetTickCount64();
 	}
 	
