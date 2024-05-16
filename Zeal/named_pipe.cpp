@@ -184,12 +184,12 @@ void named_pipe::main_loop()
 			std::string text;
 			int val = ZealService::get_instance()->labels_hook->GetGauge(id, text);
 			nlohmann::json data = { {"type", id}, {"text", text}, {"value", val} };
-			ZealService::get_instance()->pipe->write(data.dump(), pipe_data_type::gauge);
+			write(data.dump(), pipe_data_type::gauge);
 		}
 		if (Zeal::EqGame::get_self())
 		{
 			nlohmann::json data = { {"zone", Zeal::EqGame::get_self()->ZoneId}, {"location", Zeal::EqGame::get_self()->Position.toJson() }, {"heading", Zeal::EqGame::get_self()->Heading} };
-			ZealService::get_instance()->pipe->write(data.dump(), pipe_data_type::player);
+			write(data.dump(), pipe_data_type::player);
 		}
 		last_output = GetTickCount64();
 	}
