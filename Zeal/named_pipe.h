@@ -8,7 +8,8 @@ enum struct pipe_data_type
 	log,
 	label,
 	gauge,
-	player
+	player,
+	custom
 };
 struct pipe_data
 {
@@ -38,6 +39,7 @@ public:
 	void write(std::string data, pipe_data_type data_type);
 	void write(std::string data);
 	void write(const char* format, ...);
+	void main_loop();
 private:
 	bool connect_other();
 	bool end_thread = false;

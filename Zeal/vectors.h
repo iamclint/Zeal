@@ -3,7 +3,7 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
-
+#include "json.hpp"
 typedef float vec_t;
 typedef vec_t vec2_t[2];
 typedef vec_t vec3_t[3];
@@ -58,7 +58,7 @@ struct Vec3
 	inline Vec3& operator -= (const Vec3& v) { this->x -= v.x; this->y -= v.y; this->z -= v.z; return *this; }
 	inline Vec3& operator *= (const Vec3& v) { this->x *= v.x; this->y *= v.y; this->z *= v.z; return *this; }
 	inline Vec3& operator /= (const Vec3& v) { this->x /= v.x; this->y /= v.y; this->z /= v.z; return *this; }
-
+	inline nlohmann::json toJson() { nlohmann::json data = { {"x", x}, {"y", y}, {"z", z} }; }
 	inline std::string toString() { std::stringstream ss; ss << std::fixed << std::setprecision(6) << x << " " << y << " " << z; return ss.str(); }
 	inline double LengthSquared() const { return x * x + y * y + z * z;	}
 	inline double Length() { return sqrt(pow(x,2) + pow(y,2) + pow(z,2)); }
