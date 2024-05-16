@@ -18,8 +18,8 @@ ZealService::ZealService()
 	ini = std::make_shared<IO_ini>(".\\eqclient.ini"); //other functions rely on this hook
 	//initialize the hooked function classes
 	commands_hook = std::make_shared<ChatCommands>(this); //other classes below rely on this class on initialize
-	pipe = std::make_shared<named_pipe>(this); //other classes below rely on this class on initialize
 	callbacks = std::make_shared<CallbackManager>(this); //other functions rely on this hook
+	pipe = std::make_shared<named_pipe>(this); //other classes below rely on this class on initialize
 	looting_hook = std::make_shared<looting>(this);
 	labels_hook = std::make_shared<labels>(this);
 	binds_hook = std::make_shared<Binds>(this);
