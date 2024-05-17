@@ -18,8 +18,8 @@ struct pipe_data
 	std::string data;
 	std::string character;
 	pipe_data(pipe_data_type _type, std::string _data);
-	pipe_data() {};
-	nlohmann::json serialize()
+	pipe_data() : data{ "" }, character{ "" } {};
+	nlohmann::json serialize() const
 	{
 		return nlohmann::json{ {"type", type}, {"data_len", data_len}, {"data", data}, {"character", character} };
 	}

@@ -128,18 +128,6 @@ pipe_data::pipe_data(pipe_data_type _type, std::string _data)
 	type = _type;
 }
 
-void ConnectCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered, LPOVERLAPPED lpOverlapped) {
-	if (dwErrorCode == 0) {
-		std::cout << "Client connected" << std::endl;
-	}
-	else {
-		std::cerr << "Connect failed with error code: " << dwErrorCode << std::endl;
-	}
-
-	// Free the OVERLAPPED structure if it was allocated dynamically
-	delete lpOverlapped;
-}
-
 void log_hook(char* data)
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -212,7 +200,8 @@ named_pipe::named_pipe(ZealService* zeal)
 	zeal->callbacks->add_generic([this]() { main_loop(); });
 	zeal->commands_hook->add("/pipe", {}, "outputs text to a pipe",
 		[this](std::vector<std::string>& args) {
-			write(ArgsToString(args, " "), pipe_data_type::custom);
+			nlohmann::json data = { {"text", ArgsToString(args, " ")} };
+			write(data.dump(), pipe_data_type::custom);
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
 	// zeal->hooks->Add("logtextfile", 0x5240dc, log_hook, hook_type_detour); //receiving this via print chat so we can get color indexes
@@ -259,6 +248,7 @@ named_pipe::named_pipe(ZealService* zeal)
 					}
 					else
 					{
+						MessageBoxA(0, "Unhandled error in named pipe", "Pipe error", 0);
 						// Handle error
 						CloseHandle(pipe_handle);
 					}
@@ -296,11 +286,30 @@ void CALLBACK WriteCompletion(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered
 	delete pData;
 }
 
+bool WriteDataWithRetry(HANDLE h, const std::string& data, OVERLAPPED* pData, LPOVERLAPPED_COMPLETION_ROUTINE WriteCompletion) {
+	const int maxRetries = 3;
+	int attempt = 0;
+
+	while (attempt < maxRetries) {
+		if (WriteFileEx(h, data.c_str(), static_cast<DWORD>(data.length()), pData, WriteCompletion)) {
+			return true;
+		}
+		else {
+			Zeal::EqGame::print_chat("WriteFileEx failed on attempt %i", attempt + 1);
+			attempt++;
+			Sleep(100);  // Wait a bit before retrying
+		}
+	}
+
+	return false;
+}
+
 void named_pipe::write(std::string data, pipe_data_type data_type)
 {
 	pipe_data pd(data_type, data);
 	write(pd.serialize().dump());
 }
+
 void named_pipe::write(std::string data)
 {
 
@@ -310,14 +319,16 @@ void named_pipe::write(std::string data)
 		pData->pipe = h;
 		pData->overlapped.hEvent = nullptr;
 		if (h != INVALID_HANDLE_VALUE) {
-			if (!WriteFileEx(h, data.c_str(), data.length(), reinterpret_cast<LPOVERLAPPED>(pData), WriteCompletion))
+			if (!WriteDataWithRetry(h, data, reinterpret_cast<LPOVERLAPPED>(pData), WriteCompletion))
 			{
 				h = INVALID_HANDLE_VALUE;
 				CloseHandle(h);
+				DisconnectNamedPipe(h);
 			}
 		}
 		delete pData;
 	}
+	pipe_handles.erase(std::remove_if(pipe_handles.begin(), pipe_handles.end(), [](HANDLE x) { return x == INVALID_HANDLE_VALUE; }), pipe_handles.end());
 }
 void named_pipe::write(const char* format, ...)
 {
