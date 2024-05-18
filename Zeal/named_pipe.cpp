@@ -286,18 +286,24 @@ void CALLBACK WriteCompletion(DWORD dwErrorCode, DWORD dwNumberOfBytesTransfered
 	delete pData;
 }
 
+bool IsValidHandle(HANDLE h) {
+	return h != INVALID_HANDLE_VALUE && h != NULL;
+}
+
+
 bool WriteDataWithRetry(HANDLE h, const std::string& data, OVERLAPPED* pData, LPOVERLAPPED_COMPLETION_ROUTINE WriteCompletion) {
 	const int maxRetries = 3;
 	int attempt = 0;
-
-	while (attempt < maxRetries) {
-		if (WriteFileEx(h, data.c_str(), static_cast<DWORD>(data.length()), pData, WriteCompletion)) {
-			return true;
-		}
-		else {
-			Zeal::EqGame::print_chat("WriteFileEx failed on attempt %i", attempt + 1);
-			attempt++;
-			Sleep(100);  // Wait a bit before retrying
+	if (IsValidHandle(h))
+	{
+		while (attempt < maxRetries) {
+			if (WriteFileEx(h, data.c_str(), static_cast<DWORD>(data.length()), pData, WriteCompletion)) {
+				return true;
+			}
+			else {
+				//Zeal::EqGame::print_chat("WriteFileEx failed on attempt %i", attempt + 1);
+				attempt++;
+			}
 		}
 	}
 
@@ -317,16 +323,18 @@ void named_pipe::write(std::string data)
 	{
 		PipeData* pData = new PipeData;
 		pData->pipe = h;
-		pData->overlapped.hEvent = nullptr;
+		pData->overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 		if (h != INVALID_HANDLE_VALUE) {
 			if (!WriteDataWithRetry(h, data, reinterpret_cast<LPOVERLAPPED>(pData), WriteCompletion))
 			{
-				h = INVALID_HANDLE_VALUE;
-				CloseHandle(h);
 				DisconnectNamedPipe(h);
+				CloseHandle(h);
+				CloseHandle(pData->overlapped.hEvent);
+				h = INVALID_HANDLE_VALUE;
+				delete pData;
 			}
 		}
-		delete pData;
+//		delete pData;
 	}
 	pipe_handles.erase(std::remove_if(pipe_handles.begin(), pipe_handles.end(), [](HANDLE x) { return x == INVALID_HANDLE_VALUE; }), pipe_handles.end());
 }

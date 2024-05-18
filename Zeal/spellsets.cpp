@@ -115,7 +115,7 @@ void __fastcall FinishScribing(int t, int u, int a1, int a2)
 
 void SpellSets::callback_main()
 {
-    if (Zeal::EqGame::Windows->SpellBook && !Zeal::EqGame::Windows->SpellBook->IsVisible && mem_buffer.size())
+    if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->SpellBook && !Zeal::EqGame::Windows->SpellBook->IsVisible && mem_buffer.size())
         mem_buffer.clear();
 
     create_context_menus();
