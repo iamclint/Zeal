@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "EqFunctions.h"
 #include "EqAddresses.h"
+#include "Zeal.h"
 namespace Zeal
 {
 	namespace EqGame
@@ -405,8 +406,22 @@ namespace Zeal
 			vsnprintf(buffer, 511, format, argptr);
 			va_end(argptr);
 			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 0, true);
-
 		}
+		void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u) {};
+		void print_chat_hook(const char* format, ...)
+		{
+			if (!is_in_game())
+				return;
+			va_list argptr;
+			char buffer[512];
+			va_start(argptr, format);
+			//printf()
+			vsnprintf(buffer, 511, format, argptr);
+			va_end(argptr);
+
+			ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(*(int*)0x809478, 0, buffer, 0, true);
+		}
+
 		void print_chat(short color, const char* format, ...)
 		{
 			if (!is_in_game())

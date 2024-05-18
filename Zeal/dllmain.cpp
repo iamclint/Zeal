@@ -3,7 +3,7 @@
 #include "Zeal.h"
 static HINSTANCE this_module{};
 static std::thread MainLoop{};
-static std::atomic<bool> exitFlag(false);
+
 
 void init()
 {
@@ -16,6 +16,7 @@ void init()
     }
     if (!exitFlag.load(std::memory_order_acquire))
     {
+        exitFlag.store(true, std::memory_order_release);
         zeal.~ZealService();
         Sleep(1000);
         while (!FreeLibrary(this_module))

@@ -1,7 +1,7 @@
 #pragma once
 #include "framework.h"
 #define ZEAL_VERSION "0.1.76"
-
+static std::atomic<bool> exitFlag(false);
 class ZealService
 {
 public:
@@ -44,7 +44,10 @@ public:
 
 	bool exit = false;
 private:
+	std::thread render_thread;
+	BYTE orig_render_data[11];
 	void basic_binds();
 	void apply_patches();
+	void RenderThread();
 };
 
