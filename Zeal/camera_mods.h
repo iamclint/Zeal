@@ -33,7 +33,7 @@ public:
 	bool update_cam(); //returns true on collision
 	void mouse_wheel(int delta);
 	void update_zoom(float zoom);
-	void toggle_zeal_cam(bool enabled);
+	void toggle_zeal_cam(bool enabled, bool reset_pitch = true);
 	void proc_mouse();
 	void handle_camera_motion_binds(int cmd, bool is_down);
 	void handle_cycle_camera_views(int cmd, bool is_down);

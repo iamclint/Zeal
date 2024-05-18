@@ -138,7 +138,7 @@ looting::looting(ZealService* zeal)
 		zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT len) {
 			if (opcode == 0x4031)
 			{
-				delay_frames = 10;
+				delay_frames = 200;
 				
 			}
 		return false; 
