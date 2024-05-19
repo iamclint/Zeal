@@ -206,7 +206,7 @@ struct PipeData {
 	PipeData(HANDLE h) {
 		pipe = h;
 		ZeroMemory(&overlapped, sizeof(OVERLAPPED));
-		overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+		//overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	}
 };
 
@@ -238,7 +238,6 @@ bool WriteDataWithRetry(HANDLE h, const std::string& data, OVERLAPPED* pData, LP
 		//}
 		while (attempt < maxRetries) {
 			if (WriteFileEx(h, data.c_str(), static_cast<DWORD>(data.length()), pData, WriteCompletion)) {
-				delete pData;
 				return true;
 			}
 			else {
