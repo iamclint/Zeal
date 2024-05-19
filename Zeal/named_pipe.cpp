@@ -3,6 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
+#include "string_util.h"
 #include <Windows.h>
 #include <thread>
 
@@ -156,24 +157,28 @@ bool IsPipeConnected(HANDLE hPipe) {
 void named_pipe::main_loop()
 {
 	static auto last_output = GetTickCount64();
-	if (GetTickCount64() - last_output > 500)
+	if (GetTickCount64() - last_output > pipe_delay)
 	{
+		nlohmann::json label_array = nlohmann::json::array();
 		for (auto& [id, name] : LabelNames)
 		{
 			std::string value;
 			if (ZealService::get_instance()->labels_hook->GetLabel(id, value))
 			{
-				nlohmann::json data = { {"type", id}, {"value", value} };
-				write(data.dump(), pipe_data_type::label);
+				label_array.push_back({ {"type", id}, {"value", value} });
 			}
 		}
+		nlohmann::json gauge_array = nlohmann::json::array();
 		for (auto& [id, name] : GaugeNames)
 		{
 			std::string text;
 			int val = ZealService::get_instance()->labels_hook->GetGauge(id, text);
-			nlohmann::json data = { {"type", id}, {"text", text}, {"value", val} };
-			write(data.dump(), pipe_data_type::gauge);
+			gauge_array.push_back({ {"type", id}, {"text", text}, {"value", val} });
 		}
+
+		write(label_array.dump(), pipe_data_type::label);
+		write(gauge_array.dump(), pipe_data_type::gauge);
+
 		if (Zeal::EqGame::get_self())
 		{
 			nlohmann::json data = { {"zone", Zeal::EqGame::get_self()->ZoneId}, {"location", Zeal::EqGame::get_self()->Position.toJson() }, {"heading", Zeal::EqGame::get_self()->Heading} };
@@ -195,92 +200,13 @@ std::string ArgsToString(const std::vector<std::string>& vec, const std::string&
 	return result;
 }
 
-named_pipe::named_pipe(ZealService* zeal)
-{
-	zeal->callbacks->add_generic([this]() { main_loop(); });
-	zeal->commands_hook->add("/pipe", {}, "outputs text to a pipe",
-		[this](std::vector<std::string>& args) {
-			nlohmann::json data = { {"text", ArgsToString(args, " ")} };
-			write(data.dump(), pipe_data_type::custom);
-			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
-		});
-	// zeal->hooks->Add("logtextfile", 0x5240dc, log_hook, hook_type_detour); //receiving this via print chat so we can get color indexes
-	name += std::to_string(GetCurrentProcessId());
-	pipe_thread = std::thread([this]() {
-		while (!end_thread)
-		{
-			HANDLE pipe_handle = CreateNamedPipeA(name.c_str(), PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES, 5096, 5096, NMPWAIT_USE_DEFAULT_WAIT, NULL);
-			if (pipe_handle != INVALID_HANDLE_VALUE)
-			{
-				OVERLAPPED overlapped;
-				memset(&overlapped, 0, sizeof(overlapped));
-				overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-				// Connect named pipe with overlapped I/O
-				if (ConnectNamedPipe(pipe_handle, &overlapped))
-				{
-					// Connection succeeded immediately
-					pipe_handles.push_back(pipe_handle);
-				}
-				else
-				{
-					// Check if connection is pending
-					DWORD error = GetLastError();
-					if (error == ERROR_IO_PENDING)
-					{
-						// Wait for the connection with a timeout
-						DWORD result = WaitForSingleObject(overlapped.hEvent, 500);
-						if (result == WAIT_OBJECT_0)
-						{
-							// Connection completed successfully
-							pipe_handles.push_back(pipe_handle);
-						}
-						else if (result == WAIT_TIMEOUT)
-						{
-							// Timeout occurred, cancel the pending operation
-							CancelIo(pipe_handle);
-							CloseHandle(pipe_handle);
-						}
-						else
-						{
-							// Handle error
-							CloseHandle(pipe_handle);
-						}
-					}
-					else
-					{
-						MessageBoxA(0, "Unhandled error in named pipe", "Pipe error", 0);
-						// Handle error
-						CloseHandle(pipe_handle);
-					}
-				}
-
-				// Cleanup
-				CloseHandle(overlapped.hEvent);
-			
-			}
-		}
-	});
-	pipe_thread.detach();
-}
-named_pipe::~named_pipe()
-{
-	end_thread = true;
-	if (pipe_thread.joinable())
-		pipe_thread.join();
-
-	for (auto& h : pipe_handles)
-	{
-		DisconnectNamedPipe(h);
-		CloseHandle(h);
-	}
-
-}
-
 struct PipeData {
 	OVERLAPPED overlapped;
 	HANDLE pipe;
-	PipeData() {
+	PipeData(HANDLE h) {
+		pipe = h;
 		ZeroMemory(&overlapped, sizeof(OVERLAPPED));
+		overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	}
 };
 
@@ -300,8 +226,19 @@ bool WriteDataWithRetry(HANDLE h, const std::string& data, OVERLAPPED* pData, LP
 	int attempt = 0;
 	if (IsValidHandle(h))
 	{
+		//DWORD bytesAvailable;
+		//DWORD totalBytes;
+		//DWORD bytesLeftThisMessage;
+		//if (PeekNamedPipe(h, NULL, 0, NULL, &bytesAvailable, &bytesLeftThisMessage)) {
+		//	std::cout << "Bytes available in pipe: " << bytesAvailable << std::endl;
+		//	while (bytesAvailable > 1024*16) {
+		//		PeekNamedPipe(h, NULL, 0, NULL, &bytesAvailable, &bytesLeftThisMessage);
+		//		Sleep(1); // Slow down if pipe is too full
+		//	}
+		//}
 		while (attempt < maxRetries) {
 			if (WriteFileEx(h, data.c_str(), static_cast<DWORD>(data.length()), pData, WriteCompletion)) {
+				delete pData;
 				return true;
 			}
 			else {
@@ -349,9 +286,8 @@ void named_pipe::write(std::string data)
 
 	for (auto& h : pipe_handles)
 	{
-		PipeData* pData = new PipeData;
-		pData->pipe = h;
-		pData->overlapped.hEvent = NULL;
+		PipeData* pData = new PipeData(h);
+
 		if (h != INVALID_HANDLE_VALUE) {
 			if (!WriteDataWithRetry(h, data, reinterpret_cast<LPOVERLAPPED>(pData), WriteCompletion))
 			{
@@ -372,4 +308,110 @@ void named_pipe::write(const char* format, ...)
 	vsnprintf(buffer, 511, format, argptr);
 	va_end(argptr);
 	write(std::string(buffer));
+}
+
+void named_pipe::update_delay(unsigned new_delay)
+{
+	ZealService::get_instance()->ini->setValue("Zeal", "PipeDelay", new_delay);
+	pipe_delay = new_delay;
+	Zeal::EqGame::print_chat("pipe delay is now set to %i", pipe_delay);
+}
+
+named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
+{
+	if (!ini->exists("Zeal", "PipeDelay"))
+		ini->setValue<int>("Zeal", "PipeDelay", 500);
+	pipe_delay = ini->getValue<int>("Zeal", "PipeDelay");
+
+	zeal->callbacks->add_generic([this]() { main_loop(); });
+	zeal->commands_hook->add("/pipedelay", {}, "delay between the pipe loop output in milliseconds",
+		[this](std::vector<std::string>& args) {
+			if (args.size() > 1)
+			{
+				int del = 500;
+				Zeal::String::tryParse(args[1], &del);
+				update_delay(del);
+			}
+			else
+			{
+				Zeal::EqGame::print_chat("an argument is required for ms delay");
+			}
+			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+		});
+	zeal->commands_hook->add("/pipe", {}, "outputs text to a pipe",
+		[this](std::vector<std::string>& args) {
+			nlohmann::json data = { {"text", ArgsToString(args, " ")} };
+			write(data.dump(), pipe_data_type::custom);
+			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+		});
+	// zeal->hooks->Add("logtextfile", 0x5240dc, log_hook, hook_type_detour); //receiving this via print chat so we can get color indexes
+	name += std::to_string(GetCurrentProcessId());
+	pipe_thread = std::thread([this]() {
+		while (!end_thread)
+		{
+			HANDLE pipe_handle = CreateNamedPipeA(name.c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_READMODE_BYTE, PIPE_UNLIMITED_INSTANCES, 32768, 32768, NMPWAIT_USE_DEFAULT_WAIT, NULL);
+			if (pipe_handle != INVALID_HANDLE_VALUE)
+			{
+				OVERLAPPED overlapped;
+				memset(&overlapped, 0, sizeof(overlapped));
+				overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+				// Connect named pipe with overlapped I/O
+				if (ConnectNamedPipe(pipe_handle, &overlapped))
+				{
+					// Connection succeeded immediately
+					pipe_handles.push_back(pipe_handle);
+				}
+				else
+				{
+					// Check if connection is pending
+					DWORD error = GetLastError();
+					if (error == ERROR_IO_PENDING)
+					{
+						// Wait for the connection with a timeout
+						DWORD result = WaitForSingleObject(overlapped.hEvent, 500);
+						if (result == WAIT_OBJECT_0)
+						{
+							// Connection completed successfully
+							pipe_handles.push_back(pipe_handle);
+						}
+						else if (result == WAIT_TIMEOUT)
+						{
+							// Timeout occurred, cancel the pending operation
+							CancelIo(pipe_handle);
+							CloseHandle(pipe_handle);
+						}
+						else
+						{
+							// Handle error
+							CloseHandle(pipe_handle);
+						}
+					}
+					else
+					{
+						MessageBoxA(0, "Unhandled error in named pipe", "Pipe error", 0);
+						// Handle error
+						CloseHandle(pipe_handle);
+					}
+				}
+
+				// Cleanup
+				CloseHandle(overlapped.hEvent);
+
+			}
+		}
+		});
+	pipe_thread.detach();
+}
+named_pipe::~named_pipe()
+{
+	end_thread = true;
+	if (pipe_thread.joinable())
+		pipe_thread.join();
+
+	for (auto& h : pipe_handles)
+	{
+		DisconnectNamedPipe(h);
+		CloseHandle(h);
+	}
+
 }

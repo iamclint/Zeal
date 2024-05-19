@@ -110,6 +110,7 @@ namespace Zeal
 		};
 		struct CXSTR {
 			CXSTR() {};
+
 			CXSTR(const char* data)
 			{
 				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x575F30)(this, data);
@@ -122,6 +123,10 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const CXSTR*, int, int)>(0x575A60)(this, length, encoding);
 				
+			}
+			void FreeRep()
+			{
+				reinterpret_cast<void(__thiscall*)(const CXSTR*, pCXSTR*)>(0x575DC0)(this, Data);
 			}
 			pCXSTR* Data;
 		};

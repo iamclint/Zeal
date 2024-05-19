@@ -19,9 +19,9 @@ ZealService::ZealService()
 	//initialize the hooked function classes
 	commands_hook = std::make_shared<ChatCommands>(this); //other classes below rely on this class on initialize
 	callbacks = std::make_shared<CallbackManager>(this); //other functions rely on this hook
-	pipe = std::make_shared<named_pipe>(this); //other classes below rely on this class on initialize
 	looting_hook = std::make_shared<looting>(this);
 	labels_hook = std::make_shared<labels>(this);
+	pipe = std::make_shared<named_pipe>(this, ini.get()); //other classes below rely on this class on initialize
 	binds_hook = std::make_shared<Binds>(this);
 	raid_hook = std::make_shared<raid>(this);
 	eqstr_hook = std::make_shared<eqstr>(this);
@@ -143,9 +143,6 @@ void ZealService::basic_binds()
 void ZealService::init_crashreporter()
 {
 	CR_INSTALL_INFOA info;
-	char crashrptdllpath[1024];
-	//char dllpath[1024];
-	//char displayMessageBuf[4096];
 	char errorMessageBuf[4096];
 	int(__stdcall * crInstallAImp)(PCR_INSTALL_INFOA pInfo);
 	int(__stdcall * crGetLastErrorMsgAImp)(LPSTR pszBuffer, UINT uBuffSize);

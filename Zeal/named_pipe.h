@@ -33,15 +33,16 @@ struct pipe_data
 class named_pipe
 {
 public:
-	named_pipe(class ZealService* zeal);
+	named_pipe(class ZealService* zeal, class IO_ini* ini);
 	~named_pipe();
 	void chat_msg(const char* data, int color_index);
 	void write(std::string data, pipe_data_type data_type);
 	void write(std::string data);
 	void write(const char* format, ...);
 	void main_loop();
+	void update_delay(unsigned new_delay);
 private:
-	bool connect_other();
+	int pipe_delay=500;
 	bool end_thread = false;
 	std::string name = "\\\\.\\pipe\\zeal_";
 	std::vector<HANDLE> pipe_handles;

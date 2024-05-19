@@ -150,7 +150,10 @@ bool labels::GetLabel(int EqType, std::string& str)
 	ULONG color = 0;
 	bool val = GetLabelFromEq(EqType, (Zeal::EqUI::CXSTR*)&tmp, &override, &color);
 	if (tmp.Data)
+	{
 		str = tmp.Data->Text;
+		tmp.FreeRep();
+	}
 	return val;
 }
 int labels::GetGauge(int EqType, std::string& str)
@@ -158,7 +161,10 @@ int labels::GetGauge(int EqType, std::string& str)
 	Zeal::EqUI::CXSTR tmp("");
 	int value = GetGaugeFromEq(EqType, (Zeal::EqUI::CXSTR*)&tmp);
 	if (tmp.Data)
+	{
 		str = tmp.Data->Text;
+		tmp.FreeRep();
+	}
 	return value;
 }
 
