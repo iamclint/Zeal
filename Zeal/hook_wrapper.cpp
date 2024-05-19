@@ -65,6 +65,7 @@ void hook::detour(int addr, int dest)
 
 void hook::replace_call(int addr, int dest)
 {
+	orig_byte_count = 5;
 	replace(addr, dest);
 	mem::copy((int)&original_bytes, (BYTE*)dest, 5);
 }

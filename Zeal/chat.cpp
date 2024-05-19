@@ -5,6 +5,7 @@
 #include "Zeal.h"
 #include "string_util.h"
 #include <algorithm>
+#include <regex>
 
 std::string ReadFromClipboard() {
     std::string text;
@@ -56,7 +57,7 @@ std::string StripSpecialCharacters(const std::string& input) {
     return result;
 }
 
-std::string generateTimestampedString(const char* message) {
+std::string generateTimestampedString(const std::string& message) {
     time_t rawtime;
     struct tm timeinfo;
     time(&rawtime);
@@ -71,6 +72,14 @@ std::string generateTimestampedString(const char* message) {
     return oss.str();
 }
 
+// Function to replace underscores with spaces in a word
+std::string replaceUnderscores(const std::smatch& match) {
+    std::string word = match[1].str(); // Get the word part
+    std::replace(word.begin(), word.end(), '_', ' '); // Replace underscores with spaces
+    return word + match[2].str(); // Append the three digits
+}
+
+
 
 void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u)
 {
@@ -78,20 +87,41 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
         return;
     chat* c = ZealService::get_instance()->chat_hook.get();
     ZealService::get_instance()->pipe->chat_msg(data, color_index);
+
+
+
+
     if (color_index == 4 && c->bluecon)
         color_index = 325;
 
+    std::string data_str = data;
+    if (data_str.length())
+    {
+        std::regex pattern("\\b(\\w+)(\\d{3})\\b");
+        data_str = std::regex_replace(data_str, pattern, "$1");
+        std::replace(data_str.begin(), data_str.end(), '_', ' ');
+    }
     if (c->timestamps && strlen(data) > 0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {
         mem::write<byte>(0x5380C9, 0xEB); // don't log information so we can manipulate data before between chat and logs
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data).c_str(), color_index, false);
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data_str).c_str(), color_index, false);
         mem::write<byte>(0x5380C9, 0x75); //reset the logging
         if (u)
             reinterpret_cast<void(__cdecl*)( const char* data)>(0x5240dc)(data); //add to log
     }
     else
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data, color_index, u);
+    {
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data_str.c_str(), color_index, false);
+        if (u)
+            reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data); //add to log
+    }
 
+
+}
+
+char* __fastcall StripName(int t, int unused, char* data)
+{
+    return data;
 }
 
 void chat::LoadSettings(IO_ini* ini)
@@ -332,6 +362,11 @@ chat::chat(ZealService* zeal, IO_ini* ini)
         });
     LoadSettings(ini);
 
+    zeal->hooks->Add("StripName", 0x529A8b, StripName, hook_type_replace_call); 
+    zeal->hooks->Add("StripName1", 0x529B1D, StripName, hook_type_replace_call); 
+    zeal->hooks->Add("StripName2", 0x529b6d, StripName, hook_type_replace_call);
+    zeal->hooks->Add("StripName3", 0x529b89, StripName, hook_type_replace_call);
+    zeal->hooks->Add("StripName4", 0x529A55, StripName, hook_type_replace_call);
     zeal->hooks->Add("PrintChat", 0x537f99, PrintChat, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("EditWndHandleKey", 0x5A3010, EditWndHandleKey, hook_type_detour); //this makes more sense than the hook I had previously
   

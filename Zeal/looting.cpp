@@ -4,6 +4,7 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include "string_util.h"
+#include "EqPackets.h"
 //void __fastcall finalize_loot(int uk, int lootwnd_ptr)
 //{
 //	Zeal::EqStructures::Entity* corpse =  Zeal::EqGame::get_active_corpse();
@@ -139,7 +140,6 @@ looting::looting(ZealService* zeal)
 			if (opcode == 0x4031)
 			{
 				delay_frames = 200;
-				
 			}
 		return false; 
 		});
