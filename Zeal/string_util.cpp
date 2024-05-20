@@ -6,6 +6,39 @@ namespace Zeal
 {
 	namespace String
 	{
+		std::string trim_and_reduce_spaces(const std::string& input)
+		{
+			std::string result;
+			bool inSpace = false;
+
+			// First, remove leading spaces
+			auto start = std::find_if_not(input.begin(), input.end(), [](unsigned char ch) { return std::isspace(ch); });
+
+			// If the string is entirely spaces, return an empty string
+			if (start == input.end()) {
+				return "";
+			}
+
+			// Then, remove trailing spaces by finding the last non-space character
+			auto end = std::find_if_not(input.rbegin(), input.rend(), [](unsigned char ch) { return std::isspace(ch); }).base();
+
+			// Process the rest of the string
+			for (auto it = start; it != end; ++it) {
+				if (std::isspace(*it)) {
+					if (!inSpace) {
+						result += ' ';
+						inSpace = true;
+					}
+				}
+				else {
+					result += *it;
+					inSpace = false;
+				}
+			}
+
+			return result;
+		}
+
 		bool compare_insensitive(const std::string& str1, const std::string& str2) {
 			// Check if the strings are of different lengths, if so, they can't match
 			if (str1.length() != str2.length()) {
@@ -23,13 +56,14 @@ namespace Zeal
 		}
 
 		std::vector<std::string> split(const std::string& str, const std::string& delim) {
+			std::string trimmed = trim_and_reduce_spaces(str);
 			std::vector<std::string> tokens;
 			size_t start = 0, end = 0;
-			while ((end = str.find(delim, start)) != std::string::npos) {
-				tokens.push_back(str.substr(start, end - start));
+			while ((end = trimmed.find(delim, start)) != std::string::npos) {
+				tokens.push_back(trimmed.substr(start, end - start));
 				start = end + delim.length();
 			}
-			tokens.push_back(str.substr(start));
+			tokens.push_back(trimmed.substr(start));
 			return tokens;
 		}
 

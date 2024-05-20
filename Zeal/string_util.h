@@ -5,6 +5,7 @@ namespace Zeal
 {
 	namespace String
 	{
+		std::string trim_and_reduce_spaces(const std::string& input);
 		bool compare_insensitive(const std::string& str1, const std::string& str2);
 		std::vector<std::string> split(const std::string& str, const std::string& delim);
 		bool tryParse(const std::string& str, int* result);
