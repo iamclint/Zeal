@@ -183,6 +183,9 @@
     <ClInclude Include="IO_ini.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
+    <ClInclude Include="physics.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -298,6 +301,9 @@
     </ClCompile>
     <ClCompile Include="named_pipe.cpp">
       <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="physics.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

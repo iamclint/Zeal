@@ -21,7 +21,7 @@ public:
 	std::shared_ptr<SpellSets> spell_sets = nullptr;
 	std::shared_ptr<ItemDisplay> item_displays = nullptr;
 	std::shared_ptr<tooltip> tooltips = nullptr;
-
+	std::shared_ptr<Physics> physics = nullptr;
 
 	//other features
 	std::shared_ptr<OutputFile> outputfile = nullptr;

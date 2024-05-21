@@ -29,8 +29,6 @@ bool CameraMods::update_cam()
     if (!self)
         return false;
 
-
-
     Zeal::EqStructures::CameraInfo* cam = Zeal::EqGame::get_camera();
     Vec3 head_pos = Zeal::EqGame::get_view_actor_head_pos();
     Vec3 wanted_pos = camera_math::get_cam_pos_behind(head_pos, current_zoom, zeal_cam_yaw/*self->Heading*/, -zeal_cam_pitch);
@@ -81,7 +79,7 @@ void CameraMods::toggle_zeal_cam(bool enabled, bool reset_pitch)
             zeal_cam_yaw = self->Heading;
         }
         desired_zoom += zoom_speed;
-        mem::set(0x4db8ce, 0x90, 6, original_cam[0] == 0x0 ? original_cam : 0);
+    //    mem::set(0x4db8ce, 0x90, 6, original_cam[0] == 0x0 ? original_cam : 0);
         mem::write<BYTE>(0x4db8d9, 0xEB); //fix the camera bad location print
     }
     else if (original_cam[0] != 0x0)
@@ -91,7 +89,7 @@ void CameraMods::toggle_zeal_cam(bool enabled, bool reset_pitch)
         current_zoom = 0;
         if (get_camera_view() == Zeal::EqEnums::CameraView::ZealCam && Zeal::EqGame::is_in_game())
            set_camera_view(Zeal::EqEnums::CameraView::FirstPerson);
-        mem::copy(0x4db8ce, original_cam, 6);
+       // mem::copy(0x4db8ce, original_cam, 6);
         mem::write<BYTE>(0x4db8d9, 0x74); //fix the camera bad location print
     }
 }
@@ -102,6 +100,13 @@ void CameraMods::update_zoom(float zoom)
         desired_zoom = max_zoom_out;
     if (desired_zoom < 0)
         desired_zoom = 0;
+
+    if (desired_zoom == 0)
+    {
+        Zeal::EqGame::get_self()->Pitch = zeal_cam_pitch;
+        set_camera_view(Zeal::EqEnums::CameraView::FirstPerson);
+    }
+
     if (update_cam()) //there was a collision
     {
         if (zoom > 0)
@@ -374,7 +379,7 @@ void CameraMods::tick_key_move()
                     if (camera_view == Zeal::EqEnums::CameraView::ZealCam && (self->StandingState == Stance::Stand || self->StandingState == Stance::Duck))
                     {
                         //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
-                        if (fabs(camera_math::angle_difference(zeal_cam_yaw, self->Heading)) > 10 && fps > 40)
+                        if (fabs(camera_math::angle_difference(zeal_cam_yaw, self->Heading)) > 20 && fps > 40)
                         {
                             self->Heading = zeal_cam_yaw;
                         }
@@ -435,6 +440,11 @@ void CameraMods::callback_render()
 {
     if (enabled)
     {
+        //if (get_camera_view() == Zeal::EqEnums::CameraView::FirstPerson)
+        //{
+        //    set_camera_view(Zeal::EqEnums::CameraView::ZealCam);
+        //    current_zoom = 0;
+        //}
         if (Zeal::EqGame::is_in_game() && Zeal::EqGame::get_self() && Zeal::EqGame::get_char_info() /*&& !*Zeal::EqGame::is_right_mouse_down*/ && get_camera_view() == Zeal::EqEnums::CameraView::ZealCam)
         { 
             if (Zeal::EqGame::get_self()->Position.Dist(Zeal::EqGame::get_char_info()->ZoneEnter) != 0)
@@ -587,6 +597,14 @@ int SetCameraLens(int a1, float fov, float aspect_ratio, float a4, float a5)
     return rval;
 }
 
+void __fastcall DoCamAI(int display, int u, float p1)
+{
+    ZealService* zeal = ZealService::get_instance();
+    zeal->hooks->hook_map["DoCamAI"]->original(DoCamAI)(display, u, p1);
+    if (Zeal::EqGame::is_in_game() && get_camera_view() == Zeal::EqEnums::CameraView::ZealCam)
+        zeal->camera_mods->update_cam();
+}
+
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {
     load_settings(ini);
@@ -612,6 +630,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
+    zeal->hooks->Add("DoCamAI", 0x4db384, DoCamAI, hook_type_detour);
     FARPROC eqfx = GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dSetCameraLens");
     if (eqfx != NULL) 
         zeal->hooks->Add("SetCameraLens", (int)eqfx, SetCameraLens, hook_type_detour);

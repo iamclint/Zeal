@@ -11,6 +11,7 @@ LPTOP_LEVEL_EXCEPTION_FILTER WINAPI SetUnhandledExceptionFilter_Hook(LPTOP_LEVEL
 ZealService::ZealService()
 {
 	init_crashreporter();
+	
 	//since the hooked functions are called back via a different thread, make sure the service ptr is available immediately
 	ZealService::ptr_service = this; //this setup makes it not unit testable but since the caller functions of the hooks don't know the pointers I had to make a method to retrieve the base atleast
 	hooks = std::make_shared<HookWrapper>();
@@ -42,9 +43,9 @@ ZealService::ZealService()
 	ui = std::make_shared<ui_manager>(this, ini.get());
 	melody = std::make_shared<Melody>(this, ini.get());
 	autofire = std::make_shared<AutoFire>(this, ini.get());
+	physics = std::make_shared<Physics>(this, ini.get());
 
 	callbacks->add_generic([this]() { init_crashreporter(); }, callback_type::Zone);
-
 	this->basic_binds();
 }
 

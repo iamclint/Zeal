@@ -67,7 +67,7 @@ void hook::replace_call(int addr, int dest)
 {
 	orig_byte_count = 5;
 	replace(addr, dest);
-	mem::copy((int)&original_bytes, (BYTE*)dest, 5);
+	//mem::copy((int)&original_bytes, (BYTE*)dest, 5);
 }
 void hook::replace_vtable(int addr, int index, int dest)
 {
