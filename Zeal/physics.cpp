@@ -4,7 +4,7 @@
 
 bool Physics::process()
 {
-	if (GetTickCount64() - last_physic_calc >= 11)
+	if (GetTickCount64() - last_physic_calc >= 16)
 	{
 		last_physic_calc = GetTickCount64();
 		did_physics = true;
@@ -23,11 +23,11 @@ void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 {
 	if (ent == Zeal::EqGame::get_controlled())
 	{
-		if (ZealService::get_instance()->physics->process()) //roughly 30 fps
+		if (ZealService::get_instance()->physics->process())
 			ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
+		return;
 	}
-	else
-		ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
+	ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
 }
 
 int __fastcall MovePlayer(int t, int u, Zeal::EqStructures::Entity* ent)
@@ -36,8 +36,6 @@ int __fastcall MovePlayer(int t, int u, Zeal::EqStructures::Entity* ent)
 	{
 		if (ZealService::get_instance()->physics->movement())
 			return ZealService::get_instance()->hooks->hook_map["MovePlayer"]->original(MovePlayer)(t, u, ent);
-		else
-			reinterpret_cast<void(__thiscall*)(int t, Zeal::EqStructures::Entity * ent)>(0x4db384)(t, ent); //do cam animations so camera movement is smooth still
 		return 1;
 	}
 	return ZealService::get_instance()->hooks->hook_map["MovePlayer"]->original(MovePlayer)(t, u, ent);
@@ -62,6 +60,7 @@ int __fastcall MovePlayer(int t, int u, Zeal::EqStructures::Entity* ent)
 
 Physics::Physics(ZealService* zeal, IO_ini* ini)
 {
+	last_physic_calc = GetTickCount64();
 	zeal->hooks->Add("ProcessPhysics", 0x54D964, ProcessPhysics, hook_type_detour);
 	zeal->hooks->Add("MovePlayer", 0x504765, MovePlayer, hook_type_detour);
 	//zeal->hooks->Add("GetTime", 0x54dbad, GetTime, hook_type_replace_call);

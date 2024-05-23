@@ -69,7 +69,7 @@ std::string generateTimestampedString(const std::string& message) {
         << std::setw(2) << std::setfill('0') << timeinfo.tm_sec << " "
         << ((timeinfo.tm_hour >= 12) ? "PM" : "AM") << "] "
         << message;
-    return oss.str();
+     return oss.str();
 }
 
 // Function to replace underscores with spaces in a word
@@ -97,7 +97,7 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
     std::string data_str = data;
     if (data_str.length())
     {
-        std::regex pattern("\\b(\\w+)(\\d{3})\\b");
+        std::regex pattern("\\b(?=\\w*_)([a-zA-Z_]\\w+)(\\d{3})\\b");
         data_str = std::regex_replace(data_str, pattern, "$1");
         std::replace(data_str.begin(), data_str.end(), '_', ' ');
     }

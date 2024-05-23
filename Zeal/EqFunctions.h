@@ -116,6 +116,7 @@ namespace Zeal
 		void print_chat(short color, const char* format, ...);
 		void set_target(Zeal::EqStructures::Entity* target);
 		bool can_move();
+		bool is_on_ground(Zeal::EqStructures::Entity* ent);
 		Zeal::EqStructures::EQCHARINFO* get_char_info();
 		Zeal::EqStructures::Entity* get_active_corpse();
 		Zeal::EqStructures::Entity* get_target();

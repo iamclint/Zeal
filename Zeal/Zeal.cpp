@@ -112,8 +112,9 @@ void ZealService::basic_binds()
 	}
 
 	binds_hook->replace_cmd(72, [this](int state) 
-		{
-		Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
+	{
+		if (Zeal::EqGame::is_in_game())
+			Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 		return false;
 	}); // hotkey camp auto-sit
 

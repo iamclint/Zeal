@@ -290,9 +290,6 @@
     <ClCompile Include="EqPackets.h">
       <Filter>Header Files\everquest</Filter>
     </ClCompile>
-    <ClCompile Include="tooltip.cpp">
-      <Filter>Source Files\hooks</Filter>
-    </ClCompile>
     <ClCompile Include="ui_raid.cpp">
       <Filter>Source Files\ui</Filter>
     </ClCompile>
@@ -304,6 +301,9 @@
     </ClCompile>
     <ClCompile Include="physics.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="tooltip.cpp">
+      <Filter>Source Files\memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

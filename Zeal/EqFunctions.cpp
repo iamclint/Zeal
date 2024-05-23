@@ -6,6 +6,14 @@ namespace Zeal
 {
 	namespace EqGame
 	{
+		bool is_on_ground(Zeal::EqStructures::Entity* ent)
+		{
+			if (ent->ActorInfo)
+			{
+				return (ent->Position.z - ent->ModelHeightOffset + ent->MovementSpeedZ) <= (ent->ActorInfo->Z + 0.5 + 0.001);
+			}
+			return true;
+		}
 		char* get_string(UINT id)
 		{
 			return reinterpret_cast<char* (__thiscall*)(int t, UINT id, bool*)>(0x550EFE)(*(int*)0x7f9490, id, nullptr);

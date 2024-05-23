@@ -18,7 +18,7 @@ public:
 	int eq_ptr = 0;
 	bool enabled;
 	float height;
-	float fps;
+	float fps=0;
 	float zeal_cam_pitch;
 	float zeal_cam_yaw;
 	float current_zoom = 0.f;

@@ -343,8 +343,8 @@ namespace Zeal
 			/* 0x007C */ DWORD UnknownTimer7;
 			/* 0x0080 */ WORD LevitationMovementCounter; // loops from 0 to 512 while levitating, causes up/down movement, 0xFFFF = Not Levitating
 			/* 0x0082 */ WORD DrunkMovementCounter; // loops from 0 to 512 while drunk, causes left/right movement, 0xFFFF = Not Drunk
-			/* 0x0084 */ WORD Unknown0084;
-			/* 0x0086 */ WORD Unknown0086;
+			/* 0x0084 */ WORD LevitationSize;
+			/* 0x0086 */ WORD DrunkMovementSize;
 			/* 0x0088 */ FLOAT DrunkMovementModifier; // how far left/right the player moves while drunk
 			/* 0x008C */ FLOAT LevitationMovementModifier; // how far up/down the player moves while levitating
 			/* 0x0090 */ BYTE IsAffectedByGravity; // gravity is enabled for the player (disabled while levitating)

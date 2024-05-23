@@ -47,7 +47,7 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 		str_cmd = "/" + str_cmd;
 	std::vector<std::string> args = Zeal::String::split(str_cmd," ");
 	const std::string& cmd_name = args.front();
-	if (!args.empty() && !cmd_name.empty())
+	if (!args.empty() && !cmd_name.empty() && Zeal::EqGame::is_in_game())
 	{
 		bool cmd_handled = false;
 		auto& command_functions = zeal->commands_hook->CommandFunctions;
@@ -214,7 +214,8 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		});
 	add("/camp", {}, "Adds auto sit when attempting to camp.",
 		[](std::vector<std::string>& args) {
-			Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
+			if (Zeal::EqGame::is_in_game())
+				Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 			return false;
 		});
 	add("/showhelm", { "/helm" }, "Sends server command #showhelm with arugments on/off.",

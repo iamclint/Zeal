@@ -458,10 +458,11 @@ void CameraMods::callback_main()
 {
     static int prev_view = get_camera_view();
     DWORD camera_view = get_camera_view();
+    if (Zeal::EqGame::is_in_game())
+        update_fps_sensitivity();
     if (enabled && Zeal::EqGame::is_in_game() && !main_loop_ended)
     {
         interpolate_zoom();
-        update_fps_sensitivity();
         tick_key_move();
 
         if (prev_view != get_camera_view() && Zeal::EqGame::get_self() && Zeal::EqGame::is_in_game()) //this simply checks if your camera view has changed
