@@ -183,6 +183,7 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	loot = std::make_shared<ui_loot>(zeal, ini, this);
 	guild = std::make_shared<ui_guild>(zeal, ini, this);
 	raid = std::make_shared<ui_raid>(zeal, ini, this);
+	hotbutton = std::make_shared<ui_hotbutton>(zeal, ini, this);
 
 //	zeal->hooks->Add("CreateXWndFromTemplate", 0x59bc40, CreateXWndFromTemplate_hook, hook_type_detour);
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour);

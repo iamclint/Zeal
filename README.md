@@ -4,9 +4,20 @@
 - Additional commands
 - Additional ui support
 - Various bug fixes
+- Unique npc naming for better parsing
 
 ### Commands
 ___
+- `/pipedelay`
+  - **Arguments:** `int`
+  - **Example:** `/pipedelay 500`
+  - **Description:** changes the delay between each loop of labels/gauges being sent out over the named pipe.
+
+- `/pipe`
+  - **Arguments:** `string`
+  - **Example:** `/pipe set a respawn timer for 30 seconds`
+  - **Description:** outputs a string through the named pipe.
+  
 - `/ttimer`
   - **Arguments:** `int`
   - **Example:** `/ttimer 500`

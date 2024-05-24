@@ -156,6 +156,8 @@ bool IsPipeConnected(HANDLE hPipe) {
 
 void named_pipe::main_loop()
 {
+	if (!pipe_handles.size()) //nothing is connected don't waste the cpu time getting values
+		return;
 	static auto last_output = GetTickCount64();
 	if (GetTickCount64() - last_output > pipe_delay)
 	{
@@ -319,7 +321,7 @@ void named_pipe::update_delay(unsigned new_delay)
 named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 {
 	if (!ini->exists("Zeal", "PipeDelay"))
-		ini->setValue<int>("Zeal", "PipeDelay", 500);
+		ini->setValue<int>("Zeal", "PipeDelay", 100);
 	pipe_delay = ini->getValue<int>("Zeal", "PipeDelay");
 
 	zeal->callbacks->add_generic([this]() { main_loop(); });
@@ -327,7 +329,7 @@ named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 		[this](std::vector<std::string>& args) {
 			if (args.size() > 1)
 			{
-				int del = 500;
+				int del = 100;
 				Zeal::String::tryParse(args[1], &del);
 				update_delay(del);
 			}

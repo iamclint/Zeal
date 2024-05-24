@@ -376,16 +376,14 @@ void CameraMods::tick_key_move()
             {
                 if (Zeal::EqGame::can_move())
                 {
-                    if (camera_view == Zeal::EqEnums::CameraView::ZealCam && (self->StandingState == Stance::Stand || self->StandingState == Stance::Duck))
-                    {
-                        //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
-                        if (fabs(camera_math::angle_difference(zeal_cam_yaw, self->Heading)) > 20 && fps > 40)
-                        {
-                            self->Heading = zeal_cam_yaw;
-                        }
-                        else
+                    //if (camera_view == Zeal::EqEnums::CameraView::ZealCam && (self->StandingState == Stance::Stand || self->StandingState == Stance::Duck))
+                    //{
+                    //    //if your camera is panned more than 5 degrees different than your players heading then shift the player to match the camera
+                    //    if (fabs(camera_math::angle_difference(zeal_cam_yaw, self->Heading)) > 20 && fps > 40)
+                    //       self->Heading = zeal_cam_yaw;
+                    //    else
                             zeal_cam_yaw = self->Heading;
-                    }
+                   // }
                 }
                 break;
             }

@@ -186,6 +186,9 @@
     <ClInclude Include="physics.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="ui_hotbutton.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -304,6 +307,9 @@
     </ClCompile>
     <ClCompile Include="tooltip.cpp">
       <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_hotbutton.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
