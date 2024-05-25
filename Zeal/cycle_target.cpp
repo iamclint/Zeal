@@ -39,7 +39,7 @@ Zeal::EqStructures::Entity* CycleTarget::get_next_ent(float dist, byte type)
 			if (ent->PetOwnerSpawnId)
 			{
 				Zeal::EqStructures::Entity* owner = Zeal::EqGame::get_entity_by_id(ent->PetOwnerSpawnId);
-				if (owner && owner->Type == Zeal::EqEnums::EntityTypes::NPC)
+				if ((owner && owner->Type == Zeal::EqEnums::EntityTypes::NPC) || !owner)
 					near_ents.push_back(ent);
 			}
 			else
