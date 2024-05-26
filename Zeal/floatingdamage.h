@@ -25,6 +25,8 @@ class FloatingDamage
 public:
 	void add_damage(int* dmg);
 	void callback_render();
+	void set_enabled(bool enable);
+	bool enabled;
 	FloatingDamage(class ZealService* zeal, class IO_ini* ini);
 	~FloatingDamage();
 private:

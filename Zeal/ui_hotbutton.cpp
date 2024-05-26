@@ -47,7 +47,7 @@ void ui_hotbutton::InitUI()
 		if (btn)
 		{
 			buttons[i] = btn;
-			Zeal::EqGame::print_chat("Button checked: 0x%x", &btn->Checked);
+			//Zeal::EqGame::print_chat("Button checked: 0x%x", &btn->Checked);
 		}
 	}
 
@@ -95,7 +95,7 @@ ui_hotbutton::ui_hotbutton(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 			}
 			else
 			{
-				Zeal::EqGame::print_chat("an argument is required for ms duration");
+				Zeal::EqGame::print_chat("an argument is required for duration");
 			}
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});

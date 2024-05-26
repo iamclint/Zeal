@@ -80,7 +80,7 @@ long ModifyAlpha(long rgba, float newAlpha) {
 
 void FloatingDamage::callback_render()
 {
-	if (!Zeal::EqGame::is_in_game())
+	if (!Zeal::EqGame::is_in_game() || !enabled)
 		return;
 	if (Zeal::EqGame::get_wnd_manager())
 	{
@@ -149,6 +149,8 @@ void FloatingDamage::callback_render()
 
 void FloatingDamage::add_damage(int* dmg_ptr)
 {
+	if (!enabled)
+		return;
 	Zeal::Packets::Damage_Struct* dmg = (Zeal::Packets::Damage_Struct*)dmg_ptr;
 	if (dmg && (int)dmg->damage > 0)
 	{
@@ -176,10 +178,20 @@ void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* 
 	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, heal);
 }
 
+void FloatingDamage::set_enabled(bool _enabled)
+{
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "FloatingDamage", _enabled);
+	enabled = _enabled;
+}
+
 FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 {
+	if (!ini->exists("Zeal", "FloatingDamage"))
+		ini->setValue<bool>("Zeal", "FloatingDamage", true);
+	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
+
 	zeal->hooks->Add("ReportSuccessfulHit", 0x5297D2, ReportSuccessfulHit, hook_type_detour);
-	zeal->hooks->Add("DrawWindows", 0x59E000, DrawWindows, hook_type_detour);
+	zeal->hooks->Add("DrawWindows", 0x59E000, DrawWindows, hook_type_detour); //render in this hook so damage is displayed behind ui
 	//zeal->callbacks->add_generic([this]() { callback_render();  }, callback_type::Render);
 }
 
