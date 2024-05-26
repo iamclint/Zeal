@@ -17,6 +17,7 @@ ZealService::ZealService()
 	hooks = std::make_shared<HookWrapper>();
 	hooks->Add("SetUnhandledExceptionFilter", (int)SetUnhandledExceptionFilter, SetUnhandledExceptionFilter_Hook, hook_type_detour);
 	ini = std::make_shared<IO_ini>(".\\eqclient.ini"); //other functions rely on this hook
+	dx = std::make_shared<directx>();
 	//initialize the hooked function classes
 	commands_hook = std::make_shared<ChatCommands>(this); //other classes below rely on this class on initialize
 	callbacks = std::make_shared<CallbackManager>(this); //other functions rely on this hook
@@ -28,7 +29,9 @@ ZealService::ZealService()
 	eqstr_hook = std::make_shared<eqstr>(this);
 	spell_sets = std::make_shared<SpellSets>(this);
 	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
-	tooltips = std::make_shared<tooltip>(this, ini.get());;
+	tooltips = std::make_shared<tooltip>(this, ini.get());
+	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
+	
 	this->apply_patches();
 
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());

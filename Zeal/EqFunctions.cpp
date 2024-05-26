@@ -493,8 +493,18 @@ namespace Zeal
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::EntListPtr;
 		}
+
+		long get_user_color(int index)
+		{
+			index -= 1;
+			long _param_1 = reinterpret_cast<long(__cdecl*)(int)>(0x4AA2C1)(index);
+			return (_param_1 & 0xff00 | _param_1 >> 0x10 & 0xff | (_param_1 | 0xffffff00) << 0x10);
+		}
+
 		Zeal::EqStructures::Entity* get_entity_by_id(short id)
 		{
+			if (id == get_controlled()->SpawnId)
+				return get_controlled();
 			Zeal::EqStructures::Entity* current_ent = get_entity_list();
 			while (current_ent->Next)
 			{

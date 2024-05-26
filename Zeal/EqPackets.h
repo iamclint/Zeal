@@ -1,3 +1,4 @@
+#pragma once
 #include <Windows.h>
 
 namespace Zeal
@@ -30,8 +31,8 @@ namespace Zeal
             /*000*/	UINT16	target;
             /*002*/	UINT16	source;
             /*004*/	UINT16	type;
-            /*006*/	UINT16	spellid;
-            /*008*/	UINT16	damage;
+            /*006*/	INT16	spellid;
+            /*008*/	INT16	damage;
             /*00A*/	float	force;
             /*00E*/	float	sequence; // see above notes in Action_Struct
             /*012*/	float	pushup_angle; // associated with force.  Sine of this angle, multiplied by force, will be z push.

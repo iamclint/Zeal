@@ -22,6 +22,8 @@ public:
 	std::shared_ptr<ItemDisplay> item_displays = nullptr;
 	std::shared_ptr<tooltip> tooltips = nullptr;
 	std::shared_ptr<Physics> physics = nullptr;
+	std::shared_ptr<FloatingDamage> floating_damage = nullptr;
+	std::shared_ptr<directx> dx = nullptr;
 
 	//other features
 	std::shared_ptr<OutputFile> outputfile = nullptr;

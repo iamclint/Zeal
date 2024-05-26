@@ -114,6 +114,7 @@ namespace Zeal
 		void print_chat(std::string data);
 		void print_chat(const char* format, ...);
 		void print_chat(short color, const char* format, ...);
+		long get_user_color(int index);
 		void set_target(Zeal::EqStructures::Entity* target);
 		bool can_move();
 		bool is_on_ground(Zeal::EqStructures::Entity* ent);

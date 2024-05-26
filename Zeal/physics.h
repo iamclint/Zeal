@@ -3,6 +3,7 @@
 #include "memory.h"
 #include <stdint.h>
 #include "EqStructures.h"
+#include "EqUI.h"
 class Physics
 {
 public:

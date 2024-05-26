@@ -109,7 +109,7 @@ namespace Zeal
 			/*0x14*/   CHAR    Text[1]; // Stub, can be anywhere from Length to MaxLength (which is how much is malloc'd to this CXStr)
 		};
 		struct CXSTR {
-			CXSTR() {};
+			CXSTR() { Data = nullptr; };
 
 			CXSTR(const char* data)
 			{
@@ -137,6 +137,8 @@ namespace Zeal
 			int Top;
 			int Right;
 			int Bottom;
+			CXRect() {}
+			CXRect(int l, int t, int r, int b) { Left = l; Top = t; Right = r; Bottom = b; }
 		};
 
 		struct EQFONT
@@ -453,8 +455,19 @@ namespace Zeal
 			/* 0x0010 */ int isDown;
 			/* 0x0014 */ int whoknows;
 		};
+
+		struct CTextureFont
+		{
+			int DrawWrappedText(CXSTR str, CXRect rect1, CXRect rect2, unsigned long color, unsigned short unk1, int unk2) const {
+
+				return reinterpret_cast<int(__thiscall*)(const CTextureFont*, CXSTR, int, int , int, CXRect, unsigned long, unsigned short, int)>(0x5A4970)(this, str, rect1.Top, rect1.Left, rect1.Right, rect2, color, unk1, unk2);
+			}
+			int GetHeight() { return reinterpret_cast<int(__thiscall*)(const CTextureFont*)>(0x5A4930)(this); }
+		};
 		struct CXWndManager
 		{
+			//get font 
+			CTextureFont* GetFont(int index) { return reinterpret_cast<CTextureFont*(__thiscall*)(const CXWndManager*, int)>(0x538EAA)(this, index); }
 			/* 0x0000 */ DWORD Unknown0x0;
 			/* 0x0004 */ DWORD Unknown0x4;
 			/* 0x0008 */ DWORD Unknown0x8;
@@ -468,6 +481,7 @@ namespace Zeal
 			/* 0x0040 */ EQWND* Hovered;
 				
 		};
+
 
 
 		class ContextMenu

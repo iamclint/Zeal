@@ -114,6 +114,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -156,6 +157,8 @@
   <ItemGroup>
     <ClInclude Include="alarm.h" />
     <ClInclude Include="autofire.h" />
+    <ClInclude Include="directx.h" />
+    <ClInclude Include="floatingdamage.h" />
     <ClInclude Include="named_pipe.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="tooltip.h" />
@@ -205,7 +208,9 @@
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
     <ClCompile Include="autofire.cpp" />
+    <ClCompile Include="directx.cpp" />
     <ClCompile Include="EqPackets.h" />
+    <ClCompile Include="floatingdamage.cpp" />
     <ClCompile Include="named_pipe.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="tooltip.cpp" />

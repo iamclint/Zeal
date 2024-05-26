@@ -32,6 +32,8 @@ void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 
 int __fastcall MovePlayer(int t, int u, Zeal::EqStructures::Entity* ent)
 {
+	if (!ent)
+		return 1;
 	if (ent == Zeal::EqGame::get_controlled())
 	{
 		if (ZealService::get_instance()->physics->movement())
