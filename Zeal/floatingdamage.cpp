@@ -35,8 +35,8 @@ DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell)
 	is_my_damage = _is_my_damage_dealt;
 	str_dmg = std::to_string(dmg);
 	opacity = 1.0f;
-	y_offset = 0;
-	x_offset = getRandomIntBetween(-40, 40);
+	y_offset = getRandomIntBetween(-20, 20);
+	x_offset = getRandomIntBetween(-20, 20);
 	needs_removed = false;
 	last_tick = GetTickCount64();
 	start_time = GetTickCount64();
@@ -84,10 +84,10 @@ void FloatingDamage::callback_render()
 		return;
 	if (Zeal::EqGame::get_wnd_manager())
 	{
-		Zeal::EqUI::CTextureFont* fnt = Zeal::EqGame::get_wnd_manager()->GetFont(6);
+		Zeal::EqUI::CTextureFont* fnt = Zeal::EqGame::get_wnd_manager()->GetFont(5);
 		if (fnt)
 		{
-			std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, true);
+			std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, false);
 			Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
 			for (auto& [target, dmg_vec] : damage_numbers)
 			{
