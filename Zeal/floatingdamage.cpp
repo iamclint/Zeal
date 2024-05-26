@@ -126,7 +126,7 @@ void FloatingDamage::callback_render()
 								if (dmg.is_spell)
 									color = Zeal::EqGame::get_user_color(28);
 								else
-									color = Zeal::EqGame::get_user_color(10); //npc being hit
+									color = Zeal::EqGame::get_user_color(24); //npc being hit
 							}
 
 							fnt->DrawWrappedText(dmg.str_dmg.c_str(), Zeal::EqUI::CXRect(screen_pos.x + dmg.y_offset, screen_pos.y + dmg.x_offset, screen_pos.x + 150, screen_pos.y + 150), Zeal::EqUI::CXRect(0, 0, screen_size.x*2, screen_size.y*2), ModifyAlpha(color, dmg.opacity), 1, 0);

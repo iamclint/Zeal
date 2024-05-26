@@ -97,7 +97,7 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
     std::string data_str = data;
     if (data_str.length())
     {
-        std::regex pattern("\\b(?=\\w*_)([a-zA-Z_]\\w+)(\\d{3})\\b");
+        std::regex pattern("\\b(?=\\w*)([a-zA-Z_]\\w+)(\\d{3})\\b");
         data_str = std::regex_replace(data_str, pattern, "$1");
         std::replace(data_str.begin(), data_str.end(), '_', ' ');
     }
