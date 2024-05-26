@@ -8,6 +8,11 @@
 
 ### Commands
 ___
+- `/timer`
+  - **Arguments:** `int`
+  - **Example:** `/timer 10`
+  - **Description:** holds the last hotbutton pressed down for the duration (decisecond like /pause).
+  
 - `/pipedelay`
   - **Arguments:** `int`
   - **Example:** `/pipedelay 500`
