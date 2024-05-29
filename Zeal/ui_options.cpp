@@ -4,6 +4,20 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
+
+
+float GetSensitivityFromSlider(int value)
+{
+	return value / 300.f;
+}
+int GetSensitivityForSlider(float* value)
+{
+	if (*value > 0)
+		return *value * 300.f;
+	else
+		return 0;
+}
+
 //most of the options window xml was put together by nillipus
 void ui_options::InitUI()
 {
@@ -23,22 +37,22 @@ void ui_options::InitUI()
 		ui->SetLabelValue("Zeal_PanDelayValueLabel", "%d ms", ZealService::get_instance()->camera_mods->pan_delay);
 	});
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonSlider_X", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->camera_mods->user_sensitivity_x = value / 50.f;
+		ZealService::get_instance()->camera_mods->user_sensitivity_x = GetSensitivityFromSlider(value);
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		ui->SetLabelValue("Zeal_FirstPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x);
 	});
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonSlider_Y", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->camera_mods->user_sensitivity_y = value / 50.f;
+		ZealService::get_instance()->camera_mods->user_sensitivity_y = GetSensitivityFromSlider(value);
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		ui->SetLabelValue("Zeal_FirstPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y);
 	});
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_ThirdPersonSlider_X", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd = value / 50.f;
+		ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd = GetSensitivityFromSlider(value);
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		ui->SetLabelValue("Zeal_ThirdPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd);
 	});
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_ThirdPersonSlider_Y", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd = value / 50.f;
+		ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd = GetSensitivityFromSlider(value);
 		ZealService::get_instance()->camera_mods->update_sensitivity();
 		ui->SetLabelValue("Zeal_ThirdPersonLabel_Y", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd);
 	});
@@ -77,10 +91,10 @@ void ui_options::UpdateOptions()
 	ui->SetComboValue("Zeal_HideCorpseCombobox", 2);
 	ui->SetSliderValue("Zeal_PanDelaySlider", ZealService::get_instance()->camera_mods->pan_delay > 0.f ? ZealService::get_instance()->camera_mods->pan_delay / 4 : 0.f);
 	ui->SetSliderValue("Zeal_HoverTimeout_Slider", ZealService::get_instance()->tooltips->hover_timeout > 0 ? ZealService::get_instance()->tooltips->hover_timeout / 5 : 0);
-	ui->SetSliderValue("Zeal_ThirdPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd * 50 : 0.f);
-	ui->SetSliderValue("Zeal_ThirdPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd * 50 : 0.f);
-	ui->SetSliderValue("Zeal_FirstPersonSlider_Y", ZealService::get_instance()->camera_mods->user_sensitivity_y > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_y * 50 : 0.f);
-	ui->SetSliderValue("Zeal_FirstPersonSlider_X", ZealService::get_instance()->camera_mods->user_sensitivity_x > 0.f ? ZealService::get_instance()->camera_mods->user_sensitivity_x * 50 : 0.f);
+	ui->SetSliderValue("Zeal_ThirdPersonSlider_Y", GetSensitivityForSlider(&ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd));
+	ui->SetSliderValue("Zeal_ThirdPersonSlider_X", GetSensitivityForSlider(&ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd));
+	ui->SetSliderValue("Zeal_FirstPersonSlider_Y", GetSensitivityForSlider(&ZealService::get_instance()->camera_mods->user_sensitivity_y));
+	ui->SetSliderValue("Zeal_FirstPersonSlider_X", GetSensitivityForSlider(&ZealService::get_instance()->camera_mods->user_sensitivity_x));
 	ui->SetSliderValue("Zeal_FoVSlider", static_cast<int>((ZealService::get_instance()->camera_mods->fov - 45.0f) / 45.0f * 100.0f));
 	ui->SetLabelValue("Zeal_FoVValueLabel", "%.0f", ZealService::get_instance()->camera_mods->fov);
 	ui->SetLabelValue("Zeal_FirstPersonLabel_X", "%.2f", ZealService::get_instance()->camera_mods->user_sensitivity_x);

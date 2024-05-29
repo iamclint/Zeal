@@ -331,8 +331,8 @@ namespace Zeal
 			/* 0x004C */ FLOAT ZCeiling; // Z axis of the ceiling or first collision above player
 			/* 0x0050 */ PVOID Unknown0050; // EqMobileEmitter*
 			/* 0x0054 */ DWORD Unknown0054;
-			/* 0x0058 */ DWORD UnknownTimer1;
-			/* 0x005C */ DWORD UnknownTimer2;
+			/* 0x0058 */ DWORD PhysicsTimer;
+			/* 0x005C */ DWORD LastTick;
 			/* 0x0060 */ DWORD UnknownTimer3;
 			/* 0x0064 */ DWORD UnknownTimer4;
 			/* 0x0068 */ DWORD AttackTimer;

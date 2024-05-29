@@ -158,7 +158,7 @@
     <ClInclude Include="alarm.h" />
     <ClInclude Include="autofire.h" />
     <ClInclude Include="directx.h" />
-    <ClInclude Include="floatingdamage.h" />
+    <ClInclude Include="floating_damage.h" />
     <ClInclude Include="named_pipe.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="tooltip.h" />
@@ -210,7 +210,7 @@
     <ClCompile Include="autofire.cpp" />
     <ClCompile Include="directx.cpp" />
     <ClCompile Include="EqPackets.h" />
-    <ClCompile Include="floatingdamage.cpp" />
+    <ClCompile Include="floating_damage.cpp" />
     <ClCompile Include="named_pipe.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="tooltip.cpp" />

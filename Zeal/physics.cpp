@@ -2,67 +2,56 @@
 #include "Zeal.h"
 #include "EqAddresses.h"
 
-bool Physics::process()
-{
-	if (GetTickCount64() - last_physic_calc >= 16)
-	{
-		last_physic_calc = GetTickCount64();
-		did_physics = true;
-		return true;
-	}
-	did_physics = false;
-	return false;
-}
-
-bool Physics::movement()
-{
-	return did_physics;
-}
-
 void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 {
-	if (ent == Zeal::EqGame::get_controlled())
+	if (ent && ent->ActorInfo)
 	{
-		if (ZealService::get_instance()->physics->process())
+		if (Zeal::EqGame::get_eq_time() - ent->ActorInfo->PhysicsTimer >= 16)
+		{
 			ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
-		return;
+			return;
+		}
 	}
-	ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
+	else
+	{
+		ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
+	}
+}
+
+bool Physics::can_move(short spawn_id)
+{
+	bool move = false;
+	if (move_timers.count(spawn_id) > 0)
+	{
+		move = Zeal::EqGame::get_eq_time() - move_timers[spawn_id] >= 16;
+	}
+	else
+	{
+		move_timers[spawn_id] = Zeal::EqGame::get_eq_time();
+	}
+
+	if (move)
+		move_timers[spawn_id] = Zeal::EqGame::get_eq_time();
+
+	return move;
 }
 
 int __fastcall MovePlayer(int t, int u, Zeal::EqStructures::Entity* ent)
 {
 	if (!ent)
 		return 1;
-	if (ent == Zeal::EqGame::get_controlled())
+	if (ZealService::get_instance()->physics->can_move(ent->SpawnId))
 	{
-		if (ZealService::get_instance()->physics->movement())
-			return ZealService::get_instance()->hooks->hook_map["MovePlayer"]->original(MovePlayer)(t, u, ent);
-		return 1;
+		return ZealService::get_instance()->hooks->hook_map["MovePlayer"]->original(MovePlayer)(t, u, ent);
 	}
-	return ZealService::get_instance()->hooks->hook_map["MovePlayer"]->original(MovePlayer)(t, u, ent);
+	else
+		return 1;
 }
-
-//int GetTime()
-//{
-//	static int prev_time = ZealService::get_instance()->hooks->hook_map["GetTime"]->original(GetTime)();
-//	int cur_time = ZealService::get_instance()->hooks->hook_map["GetTime"]->original(GetTime)();
-//	int rval = cur_time;
-//	if (ZealService::get_instance()->physics->movement())
-//	{
-//		Zeal::EqGame::print_chat("%i", cur_time - prev_time);
-//		if (cur_time - prev_time == 0)
-//			rval = cur_time + 1;
-//		prev_time = cur_time;
-//
-//	}
-//
-//	return rval;
-//}
 
 Physics::Physics(ZealService* zeal, IO_ini* ini)
 {
-	last_physic_calc = GetTickCount64();
+	zeal->callbacks->add_generic([this]() { move_timers.clear(); }, callback_type::Zone);
+
 	zeal->hooks->Add("ProcessPhysics", 0x54D964, ProcessPhysics, hook_type_detour);
 	zeal->hooks->Add("MovePlayer", 0x504765, MovePlayer, hook_type_detour);
 	//zeal->hooks->Add("GetTime", 0x54dbad, GetTime, hook_type_replace_call);

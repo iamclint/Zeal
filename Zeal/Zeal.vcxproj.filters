@@ -189,7 +189,7 @@
     <ClInclude Include="ui_hotbutton.h">
       <Filter>Header Files\ui</Filter>
     </ClInclude>
-    <ClInclude Include="floatingdamage.h">
+    <ClInclude Include="floating_damage.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
     <ClInclude Include="directx.h">
@@ -317,7 +317,7 @@
     <ClCompile Include="ui_hotbutton.cpp">
       <Filter>Source Files\ui</Filter>
     </ClCompile>
-    <ClCompile Include="floatingdamage.cpp">
+    <ClCompile Include="floating_damage.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="directx.cpp">

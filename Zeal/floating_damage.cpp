@@ -1,4 +1,4 @@
-#include "floatingdamage.h"
+#include "floating_damage.h"
 #include "EqPackets.h"
 #include "Zeal.h"
 #include "EqAddresses.h"
@@ -34,6 +34,7 @@ DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell)
 	is_spell = _is_spell;
 	is_my_damage = _is_my_damage_dealt;
 	str_dmg = std::to_string(dmg);
+	damage = dmg;
 	opacity = 1.0f;
 	y_offset = getRandomIntBetween(-20, 20);
 	x_offset = getRandomIntBetween(-20, 20);
@@ -128,7 +129,6 @@ void FloatingDamage::callback_render()
 								else
 									color = Zeal::EqGame::get_user_color(24); //npc being hit
 							}
-
 							fnt->DrawWrappedText(dmg.str_dmg.c_str(), Zeal::EqUI::CXRect(screen_pos.x + dmg.y_offset, screen_pos.y + dmg.x_offset, screen_pos.x + 150, screen_pos.y + 150), Zeal::EqUI::CXRect(0, 0, screen_size.x*2, screen_size.y*2), ModifyAlpha(color, dmg.opacity), 1, 0);
 						}
 					}
@@ -168,7 +168,8 @@ void FloatingDamage::add_damage(int* dmg_ptr)
 
 int __fastcall DrawWindows(int t, int u)
 {
-	ZealService::get_instance()->floating_damage->callback_render();
+	if (ZealService::get_instance() && ZealService::get_instance()->floating_damage)
+		ZealService::get_instance()->floating_damage->callback_render();
 	return ZealService::get_instance()->hooks->hook_map["DrawWindows"]->original(DrawWindows)(t, u);
 }
 

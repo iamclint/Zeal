@@ -17,6 +17,7 @@ struct DamageData
 	bool is_my_damage;
 	bool is_spell;
 	std::string str_dmg;
+	int damage;
 	DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell);
 };
 
