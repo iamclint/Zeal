@@ -4,7 +4,7 @@
 
 void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 {
-	if (ent && ent->ActorInfo)
+	if (ent && ent->ActorInfo && missile==0)
 	{
 		if (Zeal::EqGame::get_eq_time() - ent->ActorInfo->PhysicsTimer >= 16)
 		{

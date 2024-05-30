@@ -419,14 +419,29 @@ void CameraMods::update_fps_sensitivity()
         fps = 1000.0f / elapsedTime;
     }
 
-    sensitivity_x = user_sensitivity_x;// / (fps / 144.f);
-    sensitivity_y = user_sensitivity_y;// / (fps / 144.f);
-
-    if (get_camera_view() == Zeal::EqEnums::CameraView::ZealCam)
+    if (use_old_sens)
     {
-        sensitivity_x = user_sensitivity_x_3rd;// / (fps / 144.f);
-        sensitivity_y = user_sensitivity_y_3rd;// / (fps / 144.f);
+        sensitivity_x = user_sensitivity_x * (fps / 144.f);
+        sensitivity_y = user_sensitivity_y * (fps / 144.f);
+
+        if (get_camera_view() == Zeal::EqEnums::CameraView::ZealCam)
+        {
+            sensitivity_x = user_sensitivity_x_3rd * (fps / 144.f);
+            sensitivity_y = user_sensitivity_y_3rd * (fps / 144.f);
+        }
     }
+    else //this 'should' eliminate the sensitivity going down significantly when going into low fps regions
+    {
+        sensitivity_x = user_sensitivity_x; 
+        sensitivity_y = user_sensitivity_y;
+        if (get_camera_view() == Zeal::EqEnums::CameraView::ZealCam)
+        {
+            sensitivity_x = user_sensitivity_x_3rd;
+            sensitivity_y = user_sensitivity_y_3rd;
+        }
+    }
+    
+
 
     float current_sens = (float)(*(byte*)0x798b0c);
     float multiplier = current_sens / 4.0f;
@@ -499,7 +514,10 @@ void CameraMods::load_settings(IO_ini* ini)
         ini->setValue<float>("Zeal", "MouseSensitivityY", user_sensitivity_y);
     if (!ini->exists("Zeal", "Fov"))
         ini->setValue<float>("Zeal", "Fov", fov);
-
+    if (!ini->exists("Zeal", "OldSens"))
+        ini->setValue<float>("Zeal", "OldSens", use_old_sens);
+    
+    use_old_sens = ini->getValue<float>("Zeal", "OldSens");
     fov = ini->getValue<float>("Zeal", "Fov");
     enabled = ini->getValue<bool>("Zeal", "MouseSmoothing");
     user_sensitivity_x = ini->getValue<float>("Zeal", "MouseSensitivityX");
@@ -544,6 +562,13 @@ void __stdcall procRightMouse(int x, int y)
     ZealService* zeal = ZealService::get_instance();
     zeal->camera_mods->proc_rmousedown(x,y);
     zeal->hooks->hook_map["procRightMouse"]->original(procRightMouse)(x, y);
+}
+
+void CameraMods::set_old_sens(bool enabled)
+{
+    use_old_sens = enabled;
+    ZealService::get_instance()->ini->setValue<int>("Zeal", "OldSens", use_old_sens);
+    ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
 void CameraMods::set_pan_delay(int value_ms)

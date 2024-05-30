@@ -7,6 +7,7 @@ class CameraMods
 {
 public:
 	std::chrono::steady_clock::time_point prevTime;
+	bool use_old_sens = true;
 	const float max_zoom_out = 100;
 	float user_sensitivity_x = 0.1f;
 	float user_sensitivity_y = 0.1f;
@@ -43,6 +44,7 @@ public:
 	void set_pan_delay(int value_ms);
 	void set_fov(float fov);
 	void update_sensitivity();
+	void set_old_sens(bool enabled);
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:

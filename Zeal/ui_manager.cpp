@@ -144,8 +144,9 @@ void ui_manager::SetComboValue(std::string name, int value)
 }
 
 
-void ui_manager::clean_ui()
+void ui_manager::CleanUI()
 {
+	Zeal::EqGame::print_debug("Clean UI UIMANAGER");
 	combo_names.clear();
 	combo_callbacks.clear();
 	checkbox_names.clear();
@@ -175,7 +176,7 @@ void ui_manager::init_ui()
 
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 {
-	zeal->callbacks->add_generic([this]() { clean_ui(); }, callback_type::CleanUI);
+	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->add_generic([this]() { init_ui(); }, callback_type::InitUI);
 
 	bank = std::make_shared<ui_bank>(zeal, ini, this);

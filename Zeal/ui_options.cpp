@@ -8,12 +8,12 @@
 
 float GetSensitivityFromSlider(int value)
 {
-	return value / 300.f;
+	return value / 100.f;
 }
 int GetSensitivityForSlider(float* value)
 {
 	if (*value > 0)
-		return *value * 300.f;
+		return *value * 100.f;
 	else
 		return 0;
 }
@@ -32,6 +32,8 @@ void ui_options::InitUI()
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_AltContainerTooltips", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tooltips->set_alt_all_containers(wnd->Checked); });
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_SpellbookAutoStand", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_UseOldSens", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->camera_mods->set_old_sens(wnd->Checked); });
+	
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->set_pan_delay(value*4); 
 		ui->SetLabelValue("Zeal_PanDelayValueLabel", "%d ms", ZealService::get_instance()->camera_mods->pan_delay);
@@ -66,6 +68,7 @@ void ui_options::InitUI()
 		ZealService::get_instance()->tooltips->set_timer(val);
 		ui->SetLabelValue("Zeal_HoverTimeout_Value", "%i ms", val);
 	});
+
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_PanDelayValueLabel");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonLabel_X");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonLabel_Y");
@@ -82,7 +85,7 @@ void ui_options::InitUI()
 
 void ui_options::CleanUI()
 {
-
+	Zeal::EqGame::print_debug("Clean UI Options");
 }
 
 
@@ -112,6 +115,7 @@ void ui_options::UpdateOptions()
 	ui->SetChecked("Zeal_AltContainerTooltips", ZealService::get_instance()->tooltips->all_containers);
 	ui->SetChecked("Zeal_SpellbookAutoStand", ZealService::get_instance()->movement->spellbook_autostand);
 	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled);
+	ui->SetChecked("Zeal_UseOldSens", ZealService::get_instance()->camera_mods->use_old_sens);
 
 }
 

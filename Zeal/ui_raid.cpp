@@ -7,7 +7,7 @@
 
 void ui_raid::CleanUI()
 {
-
+	Zeal::EqGame::print_debug("Clean UI RAID");
 }
 
 void ui_raid::InitUI()

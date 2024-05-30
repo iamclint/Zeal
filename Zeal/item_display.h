@@ -12,7 +12,7 @@ public:
 	std::vector<Zeal::EqUI::ItemDisplayWnd*> windows;
 private:
 	void init_ui();
-	void clean_ui();
+	void CleanUI();
 	const int max_item_displays = 5;
 };
 

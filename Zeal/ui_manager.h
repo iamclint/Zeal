@@ -44,7 +44,7 @@ public:
 	std::shared_ptr<ui_raid> raid = nullptr;
 	std::shared_ptr<ui_hotbutton> hotbutton = nullptr;
 private:
-	void clean_ui();
+	void CleanUI();
 	void init_ui();
 };
 

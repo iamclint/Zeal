@@ -9,6 +9,7 @@
 
 void ui_guild::CleanUI()
 {
+	Zeal::EqGame::print_debug("Clean UI GUILD");
 	if (guild)
 	{
 		guild->IsVisible = false;
@@ -29,6 +30,7 @@ void ui_guild::InitUI()
 ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
 	ui = mgr;
+	guild = nullptr;
 	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
 		zeal->commands_hook->add("/read", {}, "",

@@ -82,6 +82,7 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+		void print_debug(const char* format, ...);
 		UINT get_eq_time();
 		int get_eq_main();
 		void do_autoattack(bool enabled);

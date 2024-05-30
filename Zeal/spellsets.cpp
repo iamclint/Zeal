@@ -378,7 +378,7 @@ void SpellSets::create_context_menus(bool force)
     }
 }
 
-void SpellSets::callback_cleanui()
+void SpellSets::CleanUI()
 {
     destroy_context_menus();
 }
@@ -392,7 +392,7 @@ SpellSets::SpellSets(ZealService* zeal)
     spellset_menu = 0;
     ini = std::shared_ptr<IO_ini>(new IO_ini(".\\spellsets.ini"));
     zeal->callbacks->add_generic([this]() { callback_main();  }, callback_type::Render);
-    zeal->callbacks->add_generic([this]() { callback_cleanui();  }, callback_type::CleanUI);
+    zeal->callbacks->add_generic([this]() { CleanUI();  }, callback_type::CleanUI);
     zeal->callbacks->add_generic([this]() { callback_characterselect();  }, callback_type::CharacterSelect);
     zeal->hooks->Add("FinishMemorizing", 0x434b38, FinishMemorizing, hook_type_detour);
     zeal->hooks->Add("FinishScribing", 0x43501f, FinishScribing, hook_type_detour);

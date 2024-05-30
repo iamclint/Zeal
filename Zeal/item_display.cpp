@@ -65,10 +65,11 @@ void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_
 	wnd->Activate();
 }
 
-void ItemDisplay::clean_ui()
+void ItemDisplay::CleanUI()
 {
 	if (Zeal::EqGame::is_in_game())
 	{
+		Zeal::EqGame::print_debug("Clean UI ItemDisplay");
 		for (auto& w : windows)
 		{
 			if (w)
@@ -84,7 +85,7 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
 	zeal->callbacks->add_generic([this]() { init_ui(); }, callback_type::InitUI);
-	zeal->callbacks->add_generic([this]() { clean_ui(); }, callback_type::CleanUI);
+	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
 
 	mem::write<BYTE>(0x4090AB, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature
 	mem::write<BYTE>(0x40a4c4, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature

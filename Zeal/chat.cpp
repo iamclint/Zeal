@@ -57,21 +57,29 @@ std::string StripSpecialCharacters(const std::string& input) {
     return result;
 }
 
-std::string generateTimestampedString(const std::string& message) {
+std::string generateTimestampedString(const std::string& message, bool longform = true) {
     time_t rawtime;
     struct tm timeinfo;
     time(&rawtime);
     localtime_s(&timeinfo, &rawtime);
 
     std::ostringstream oss;
-    oss << "[" << std::setw(2) << std::setfill('0') << ((timeinfo.tm_hour % 12 == 0) ? 12 : timeinfo.tm_hour % 12) << ":"
-        << std::setw(2) << std::setfill('0') << timeinfo.tm_min << ":"
-        << std::setw(2) << std::setfill('0') << timeinfo.tm_sec << " "
-        << ((timeinfo.tm_hour >= 12) ? "PM" : "AM") << "] "
-        << message;
-     return oss.str();
+    if (longform)
+    {
+        oss << "[" << std::setw(2) << std::setfill('0') << ((timeinfo.tm_hour % 12 == 0) ? 12 : timeinfo.tm_hour % 12) << ":"
+            << std::setw(2) << std::setfill('0') << timeinfo.tm_min << ":"
+            << std::setw(2) << std::setfill('0') << timeinfo.tm_sec << " "
+            << ((timeinfo.tm_hour >= 12) ? "PM" : "AM") << "] "
+            << message;
+    }
+    else
+    {
+        oss << "[" << std::setw(2) << std::setfill('0') << timeinfo.tm_hour << ":"
+            << std::setw(2) << std::setfill('0') << timeinfo.tm_min << "] "
+            << message;
+    }
+    return oss.str();
 }
-
 // Function to replace underscores with spaces in a word
 std::string replaceUnderscores(const std::smatch& match) {
     std::string word = match[1].str(); // Get the word part

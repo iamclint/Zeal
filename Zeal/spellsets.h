@@ -44,7 +44,7 @@ public:
 	~SpellSets();
 private:
 	Stance original_stance;
-	void callback_cleanui();
+	void CleanUI();
 	void callback_main();
 	void callback_characterselect();
 };
