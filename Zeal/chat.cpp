@@ -112,7 +112,7 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
     if (c->timestamps && strlen(data) > 0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {
         mem::write<byte>(0x5380C9, 0xEB); // don't log information so we can manipulate data before between chat and logs
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data_str).c_str(), color_index, false);
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data_str, c->timestamps==1).c_str(), color_index, false);
         mem::write<byte>(0x5380C9, 0x75); //reset the logging
         if (u)
             reinterpret_cast<void(__cdecl*)( const char* data)>(0x5240dc)(data); //add to log
@@ -135,13 +135,13 @@ char* __fastcall StripName(int t, int unused, char* data)
 void chat::LoadSettings(IO_ini* ini)
 {
     if (!ini->exists("Zeal", "ChatTimestamps"))
-        ini->setValue<bool>("Zeal", "ChatTimestamps", false);
+        ini->setValue<int>("Zeal", "ChatTimestamps", 0);
     if (!ini->exists("Zeal", "Bluecon"))
         ini->setValue<bool>("Zeal", "Bluecon", false);
     if (!ini->exists("Zeal", "ZealInput"))
         ini->setValue<bool>("Zeal", "ZealInput", false);
     bluecon = ini->getValue<bool>("Zeal", "Bluecon");
-    timestamps = ini->getValue<bool>("Zeal", "ChatTimestamps");
+    timestamps = ini->getValue<int>("Zeal", "ChatTimestamps");
     zealinput = ini->getValue<bool>("Zeal", "ZealInput");
 }
 
@@ -343,7 +343,14 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     //}, callback_type::WorldMessage);
     zeal->commands_hook->add("/timestamp", { "/tms" }, "Toggles timestamps on chat windows.",
         [this](std::vector<std::string>& args) {
-            set_timestamp(!timestamps);
+            if (args.size() > 1 && args[1] == "2")
+            {
+                set_timestamp(2);
+            }
+            else
+            {
+                set_timestamp(timestamps > 0 ? 0 : 1);
+            }
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
     zeal->commands_hook->add("/zealinput", { "/zinput" }, "Toggles zeal input which gives you a more modern input feel.",
@@ -389,10 +396,10 @@ void chat::set_input(bool val)
         Zeal::EqGame::print_chat("Zeal special input disabled");
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
-void chat::set_timestamp(bool val)
+void chat::set_timestamp(int val)
 {
     timestamps = val;
-    ZealService::get_instance()->ini->setValue<bool>("Zeal", "ChatTimestamps", timestamps);
+    ZealService::get_instance()->ini->setValue<int>("Zeal", "ChatTimestamps", timestamps);
     if (timestamps)
         Zeal::EqGame::print_chat("Timestamps enabled");
     else
