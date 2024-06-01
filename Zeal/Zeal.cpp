@@ -167,8 +167,9 @@ void ZealService::init_crashreporter()
 	info.pszAppVersion = ZEAL_VERSION;
 	info.pszUrl = "";
 	info.uPriorities[CR_HTTP] = 0;
-	info.dwFlags = CR_INST_ALL_POSSIBLE_HANDLERS;
+	info.dwFlags = CR_INST_ALL_POSSIBLE_HANDLERS | CR_INST_DONT_SEND_REPORT;
 	info.pszRestartCmdLine = "";
+	info.pszErrorReportSaveDir = "/crashrpt/crashes";
 	
 	if (crInstallAImp == NULL || crInstallAImp(&info) != 0)
 	{
