@@ -2,6 +2,7 @@
 #include "EqPackets.h"
 #include "Zeal.h"
 #include "EqAddresses.h"
+#include "string_util.h"
 #include <cstdint>
 #include <random>
 int getRandomIntBetween(int min, int max) {
@@ -85,7 +86,7 @@ void FloatingDamage::callback_render()
 		return;
 	if (Zeal::EqGame::get_wnd_manager())
 	{
-		Zeal::EqUI::CTextureFont* fnt = Zeal::EqGame::get_wnd_manager()->GetFont(5);
+		Zeal::EqUI::CTextureFont* fnt = Zeal::EqGame::get_wnd_manager()->GetFont(font_size);
 		if (fnt)
 		{
 			std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, false);
@@ -187,9 +188,29 @@ void FloatingDamage::set_enabled(bool _enabled)
 
 FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 {
+	//mem::write<BYTE>(0x4A594B, 0x14);
 	if (!ini->exists("Zeal", "FloatingDamage"))
 		ini->setValue<bool>("Zeal", "FloatingDamage", true);
 	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
+
+	zeal->commands_hook->add("/fcd", {}, "Toggles floating combat text or adjusts the font size with argument",
+		[this, ini](std::vector<std::string>& args) {
+			int new_size = 5;
+			if (args.size() == 2)
+			{
+				if (Zeal::String::tryParse(args[1], &new_size))
+				{
+					font_size = new_size;
+					Zeal::EqGame::print_chat("Floating combat font size is now %i", font_size);
+				}
+			}
+			else
+			{
+				set_enabled(!enabled);
+				Zeal::EqGame::print_chat("Floating combat text is %s", enabled ? "Enabled" : "Disabled");
+			}
+			return true;
+		});
 
 	zeal->hooks->Add("ReportSuccessfulHit", 0x5297D2, ReportSuccessfulHit, hook_type_detour);
 	zeal->hooks->Add("DrawWindows", 0x59E000, DrawWindows, hook_type_detour); //render in this hook so damage is displayed behind ui

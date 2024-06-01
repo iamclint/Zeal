@@ -182,7 +182,7 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	bank = std::make_shared<ui_bank>(zeal, ini, this);
 	options = std::make_shared<ui_options>(zeal, ini, this);
 	loot = std::make_shared<ui_loot>(zeal, ini, this);
-	guild = std::make_shared<ui_guild>(zeal, ini, this);
+	//guild = std::make_shared<ui_guild>(zeal, ini, this);
 	raid = std::make_shared<ui_raid>(zeal, ini, this);
 	hotbutton = std::make_shared<ui_hotbutton>(zeal, ini, this);
 

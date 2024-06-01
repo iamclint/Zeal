@@ -31,6 +31,7 @@ public:
 	FloatingDamage(class ZealService* zeal, class IO_ini* ini);
 	~FloatingDamage();
 private:
+	int font_size = 5;
 	std::unordered_map<Zeal::EqStructures::Entity*, std::vector<DamageData>> damage_numbers;
 };
 
