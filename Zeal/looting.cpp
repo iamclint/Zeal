@@ -74,7 +74,7 @@ void looting::looted_item()
 	if (Zeal::EqGame::get_char_info()->CursorItem) 
 	{
 		loot_all = false;
-		delay_frames = -1;
+		loot_next_item_time = 0;
 		return;
 	}
 	if (loot_all && Zeal::EqGame::Windows && Zeal::EqGame::Windows->Loot && Zeal::EqGame::Windows->Loot->IsVisible)
@@ -122,27 +122,27 @@ looting::looting(ZealService* zeal)
 	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
 	zeal->callbacks->add_generic([this]() { init_ui(); }, callback_type::InitUI);
 	zeal->callbacks->add_generic([this]() {
+		if (loot_next_item_time == 0)
+			return;
 		if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->Loot || !Zeal::EqGame::Windows->Loot->IsVisible)
 		{
-			delay_frames = -1;
+			loot_next_item_time = 0;
 			loot_all = false;
 			return;
 		}
-		if (delay_frames == 0)
+		if (GetTickCount64() >= loot_next_item_time)
 		{
 			looted_item();
-			delay_frames--;
+			loot_next_item_time = 0;
 		}
-		else if (delay_frames > 0)
-			delay_frames--;
-		}, callback_type::MainLoop);
-		zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT len) {
+	}, callback_type::MainLoop);
+	zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT len) {
 			if (opcode == 0x4031)
 			{
-				delay_frames = 200;
+				loot_next_item_time = GetTickCount64() + 250;
 			}
 		return false; 
-		});
+	});
 	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" }, "Adds looted argument to hidecorpse.",
 		[this](std::vector<std::string>& args) {
 			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "looted"))
