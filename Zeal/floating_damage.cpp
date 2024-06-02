@@ -99,7 +99,7 @@ void FloatingDamage::callback_render()
 					if (std::find(visible_ents.begin(), visible_ents.end(), target) != visible_ents.end() || target == Zeal::EqGame::get_self())
 					{
 						Vec2 screen_pos = { 0,0 };
-						(ZealService::get_instance()->dx->WorldToScreen({ target->Position.x,target->Position.y,target->Position.z }, screen_pos));
+						if (ZealService::get_instance()->dx->WorldToScreen({ target->Position.x,target->Position.y,target->Position.z }, screen_pos))
 						{
 							long color = FloatRGBAtoLong(1.0f, 1.0f, 1.0f, dmg.opacity);
 							if (dmg.is_my_damage) //if the damage is dealt by me

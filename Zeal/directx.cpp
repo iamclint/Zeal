@@ -12,6 +12,8 @@ void directx::update_device()
 Vec2 directx::GetScreenRect()
 {
     update_device();
+    if (!device)
+        return { 0,0 };
     D3DVIEWPORT8 viewport;
     device->GetViewport(&viewport);
     return { (float)viewport.Width, (float)viewport.Height };
@@ -26,6 +28,8 @@ bool IsOffScreen(Vec2 screenPos, const D3DVIEWPORT8& viewport) {
 bool directx::WorldToScreen(Vec3 worldPos, Vec2& screenPos) 
 {
     update_device();
+    if (!device)
+        return false;
     // Transform the world coordinates by the combined matrix
     D3DXMATRIX matWorld, matView, matProj;
     D3DVIEWPORT8 viewport;
@@ -39,13 +43,13 @@ bool directx::WorldToScreen(Vec3 worldPos, Vec2& screenPos)
     D3DXVec3Project(&screen, &d3dPOS, &viewport, &matProj, &matView, &matWorld);
     screenPos.x = screen.y;
     screenPos.y = screen.x;
-
-    if (IsOffScreen(screenPos, viewport)) {
-        return false;
-    }
-    else {
-        return true;
-    }
+    return true;
+    //if (IsOffScreen(screenPos, viewport)) {
+    //    return false;
+    //}
+    //else {
+    //    return true;
+    //}
 }
 
 directx::directx()
