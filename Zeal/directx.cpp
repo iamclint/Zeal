@@ -6,7 +6,10 @@
 void directx::update_device()
 {
     HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
-    device = *(IDirect3DDevice8**)((DWORD)eqfx + 0xa4f92c);
+    if (eqfx)
+        device = *(IDirect3DDevice8**)((DWORD)eqfx + 0xa4f92c);
+    else
+        device = nullptr;
 }
 
 Vec2 directx::GetScreenRect()
