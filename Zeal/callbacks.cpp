@@ -12,6 +12,7 @@ void __fastcall main_loop_hk(int t, int unused)
 {
 	ZealService* zeal = ZealService::get_instance();
 	zeal->callbacks->invoke_generic(callback_type::MainLoop);
+	zeal->callbacks->invoke_delayed();
 	zeal->hooks->hook_map["main_loop"]->original(main_loop_hk)(t, unused);
 }
 
@@ -38,6 +39,11 @@ void CallbackManager::invoke_generic(callback_type fn)
 {
 	for (auto& f : generic_functions[fn])
 			f();
+}
+
+void CallbackManager::add_delayed(std::function<void()> callback_function, int ms)
+{
+	delayed_functions.push_back({ GetTickCount64() + ms, callback_function });
 }
 
 void CallbackManager::add_generic(std::function<void()> callback_function, callback_type fn)
@@ -70,6 +76,26 @@ void __stdcall clean_up_ui()
 	ZealService* zeal = ZealService::get_instance();
 	zeal->callbacks->invoke_generic(callback_type::CleanUI);
 	zeal->hooks->hook_map["CleanUpUI"]->original(clean_up_ui)();
+}
+
+void CallbackManager::invoke_delayed()
+{
+	ULONGLONG current_time = GetTickCount64();
+	for (auto& [end_time, fn] : delayed_functions)
+	{
+		if (current_time >= end_time)
+			fn();
+	}
+	delayed_functions.erase(
+		std::remove_if(
+			delayed_functions.begin(),
+			delayed_functions.end(),
+			[current_time](const std::pair<ULONGLONG, std::function<void()>>& item) {
+				return current_time>item.first;
+			}
+		),
+		delayed_functions.end()
+	);
 }
 
 bool CallbackManager::invoke_packet(callback_type cb_type, UINT opcode, char* buffer, UINT len)

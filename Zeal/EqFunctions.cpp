@@ -763,7 +763,11 @@ namespace Zeal
 					return;
 				if (!Windows->SpellBook->IsVisible)
 					Zeal::EqGame::Spells::OpenBook();
-				Windows->SpellBook->BeginMemorize(book_index, gem_index, false);
+				ZealService::get_instance()->callbacks->add_delayed([book_index, gem_index]() {
+					if (Windows->SpellBook->IsVisible)
+						Windows->SpellBook->BeginMemorize(book_index, gem_index, false);
+				}, 25);
+				
 			}
 			void Forget(int index) 
 			{
