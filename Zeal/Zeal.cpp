@@ -53,10 +53,16 @@ ZealService::ZealService()
 		static bool init_thd = false;
 		if (!init_thd)
 		{
-			init_crashreporter();
+			int(__stdcall * crInstallThread)(DWORD DWFlags);
+			HMODULE hCrashRpt = LoadLibraryA("crashrpt\\CrashRpt1500.dll");
+			if (hCrashRpt)
+			{
+				crInstallThread = (int(__stdcall*)(DWORD))GetProcAddress(hCrashRpt, "crInstallToCurrentThread2");
+				crInstallThread(0);
+			}
 			init_thd = true;
 		}
-	}, callback_type::Render);
+	}, callback_type::MainLoop);
 	this->basic_binds();
 }
 
@@ -182,7 +188,6 @@ void ZealService::init_crashreporter()
 	info.pszErrorReportSaveDir = "crashrpt\\crashes";
 	//info.uMiniDumpType = MiniDumpWithFullMemory;
 	//info.pfnCrashCallback = CrashCallback; // Set the callback function
-	crInstallThread(0);
 	if (crInstallAImp == NULL || crInstallAImp(&info) != 0)
 	{
 		if (crGetLastErrorMsgAImp)
