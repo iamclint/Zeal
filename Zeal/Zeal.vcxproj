@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)$(ProjectName)\imgui-docking;$(SolutionDir)$(ProjectName);$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)</OutDir>
     <TargetExt>.asi</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -161,6 +161,7 @@
     <ClInclude Include="floating_damage.h" />
     <ClInclude Include="named_pipe.h" />
     <ClInclude Include="physics.h" />
+    <ClInclude Include="target_ring.h" />
     <ClInclude Include="tooltip.h" />
     <ClInclude Include="ui_bank.h" />
     <ClInclude Include="item_display.h" />
@@ -213,6 +214,7 @@
     <ClCompile Include="floating_damage.cpp" />
     <ClCompile Include="named_pipe.cpp" />
     <ClCompile Include="physics.cpp" />
+    <ClCompile Include="target_ring.cpp" />
     <ClCompile Include="tooltip.cpp" />
     <ClCompile Include="ui_bank.cpp" />
     <ClCompile Include="item_display.cpp" />

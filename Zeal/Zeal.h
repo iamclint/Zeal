@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-#define ZEAL_VERSION "0.2.00"
+#define ZEAL_VERSION "0.2.10"
 static std::atomic<bool> exitFlag(false);
 class ZealService
 {
@@ -36,6 +36,7 @@ public:
 	std::shared_ptr<ui_manager> ui = nullptr;
 	std::shared_ptr<Melody> melody = nullptr;
 	std::shared_ptr<AutoFire> autofire = nullptr;
+	std::shared_ptr<TargetRing> target_ring = nullptr;
 	
 	ZealService();
 	~ZealService();

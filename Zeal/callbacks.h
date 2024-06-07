@@ -15,7 +15,8 @@ enum class callback_type
 	WorldMessage,
 	SendMessage_,
 	ExecuteCmd,
-	Delayed
+	Delayed,
+	RenderUI
 };
 class CallbackManager
 {

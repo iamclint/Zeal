@@ -374,7 +374,9 @@ namespace Zeal
 			/* 0x0198 */ int Unsure_Strafe_Calc;
 			/* 0x019C */ BYTE Unknown019c[24];
 			/* 0x01B4 */ DWORD IsInvisible; // NPCs only? used by /hidecorpses command
-			/* 0x01B8 */ BYTE Unknown01B8[168];
+			/* 0x01B8 */ BYTE Unknown01B8[10];
+			/* 0x01C2 */ SHORT PetID;
+			/* 0x01C4 */ BYTE Unknown01C4[156];
 			/* 0x0260 */ DWORD IsHoldingBoth;
 			/* 0x0264 */ DWORD IsHoldingSecondary;
 			/* 0x0268 */ DWORD IsHoldingPrimary;

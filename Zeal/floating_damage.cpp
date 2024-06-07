@@ -167,12 +167,6 @@ void FloatingDamage::add_damage(int* dmg_ptr)
 	}
 }
 
-int __fastcall DrawWindows(int t, int u)
-{
-	if (ZealService::get_instance() && ZealService::get_instance()->floating_damage)
-		ZealService::get_instance()->floating_damage->callback_render();
-	return ZealService::get_instance()->hooks->hook_map["DrawWindows"]->original(DrawWindows)(t, u);
-}
 
 void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int heal)
 {
@@ -192,7 +186,7 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 	if (!ini->exists("Zeal", "FloatingDamage"))
 		ini->setValue<bool>("Zeal", "FloatingDamage", true);
 	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
-
+	zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->commands_hook->add("/fcd", {}, "Toggles floating combat text or adjusts the font size with argument",
 		[this, ini](std::vector<std::string>& args) {
 			int new_size = 5;
@@ -213,7 +207,7 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 		});
 
 	zeal->hooks->Add("ReportSuccessfulHit", 0x5297D2, ReportSuccessfulHit, hook_type_detour);
-	zeal->hooks->Add("DrawWindows", 0x59E000, DrawWindows, hook_type_detour); //render in this hook so damage is displayed behind ui
+	
 	//zeal->callbacks->add_generic([this]() { callback_render();  }, callback_type::Render);
 }
 

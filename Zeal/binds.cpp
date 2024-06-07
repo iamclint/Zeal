@@ -236,6 +236,22 @@ void Binds::add_binds()
 			ZealService::get_instance()->autofire->SetAutoFire(!ZealService::get_instance()->autofire->autofire);
 		}
 		});
+	add_bind(226, "Target Nearest NPC Corpse", "TargetNPCCorpse", key_category::Target, [](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_nearest_ent(250, 2);
+			if (ent)
+				Zeal::EqGame::set_target(ent);
+		}
+		});
+	add_bind(227, "Target Nearest PC Corpse", "TargetPCCorpse", key_category::Target, [](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_nearest_ent(250, 3);
+			if (ent)
+				Zeal::EqGame::set_target(ent);
+		}
+	});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) 
 	{
 		if (key_down)
@@ -243,6 +259,7 @@ void Binds::add_binds()
 			Zeal::EqGame::EqGameInternal::auto_inventory(Zeal::EqGame::get_char_info(), &Zeal::EqGame::get_char_info()->CursorItem, 0);
 		}
 	});
+
 }
 
 void Binds::add_bind(int cmd, const char* name, const char* short_name, int category, std::function<void(int state)> callback)

@@ -22,6 +22,7 @@ namespace Zeal
 		static EqStructures::KeyboardModifiers* KeyMods = (EqStructures::KeyboardModifiers*)0x799738;
 		static EqUI::pInstWindows* Windows = (EqUI::pInstWindows*)0x63D5CC;
 		static EqUI::CXWndManager* WndManager = (EqUI::CXWndManager*)0x809DB4;
+		static EqStructures::Entity* PetArray = (Zeal::EqStructures::Entity*)0x78c47c;
 		//static EqStructures::SPELLMGR* SpellsMgr = (EqStructures::SPELLMGR*)0x805CB0;
 		
 		//static DWORD* ptr_LocalPC = (DWORD*)0x7F94E8;

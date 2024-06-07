@@ -34,6 +34,7 @@
 #include "autofire.h"
 #include "tooltip.h"
 #include "physics.h"
-#include "Zeal.h"
+#include "target_ring.h"
+#include "Zeal.h" 
 
 extern HMODULE this_module;

@@ -105,6 +105,7 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
     std::string data_str = data;
     if (data_str.length())
     {
+        data_str.erase(std::remove(data_str.begin(), data_str.end(), '#'), data_str.end());
         std::regex pattern("\\b(?=\\w*)([a-zA-Z_]\\w+)(\\d{3})\\b");
         data_str = std::regex_replace(data_str, pattern, "$1");
         std::replace(data_str.begin(), data_str.end(), '_', ' ');
@@ -382,6 +383,8 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("StripName2", 0x529b6d, StripName, hook_type_replace_call);
     zeal->hooks->Add("StripName3", 0x529b89, StripName, hook_type_replace_call);
     zeal->hooks->Add("StripName4", 0x529A55, StripName, hook_type_replace_call);
+    zeal->hooks->Add("StripName5", 0x4EDBE5, StripName, hook_type_replace_call); //killed msg
+    zeal->hooks->Add("StripName6", 0x4EDBDA, StripName, hook_type_replace_call);//killed msg
     zeal->hooks->Add("PrintChat", 0x537f99, PrintChat, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("EditWndHandleKey", 0x5A3010, EditWndHandleKey, hook_type_detour); //this makes more sense than the hook I had previously
   

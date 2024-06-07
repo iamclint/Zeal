@@ -195,6 +195,9 @@
     <ClInclude Include="directx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="target_ring.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -322,6 +325,9 @@
     </ClCompile>
     <ClCompile Include="directx.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="target_ring.cpp">
+      <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
