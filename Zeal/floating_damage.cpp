@@ -37,7 +37,7 @@ DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _h
 	if (dmg>0)
 		str_dmg = std::to_string(dmg);
 	else if (_heal>0)
-		str_dmg = "+" + std::to_string(heal);
+		str_dmg = "+" + std::to_string(_heal);
 	damage = dmg;
 	opacity = 1.0f;
 	y_offset = getRandomIntBetween(-20, 20);

@@ -14,7 +14,7 @@ public:
 	TargetRing(class ZealService* zeal, class IO_ini* ini);
 	~TargetRing();
 private:
-	LONG color = 0xFF00FFFF;
+	LONG color = 0xFF00FF55;
 };
 
 

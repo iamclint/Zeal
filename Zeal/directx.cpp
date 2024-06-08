@@ -3,6 +3,20 @@
 #pragma comment(lib, "d3dx8/d3d8.lib")
 #pragma comment(lib, "d3dx8/d3dx8.lib")
 
+HRESULT WINAPI Local_EndScene(LPDIRECT3DDEVICE8 pDevice)
+{
+
+    HRESULT ret = ZealService::get_instance()->hooks->hook_map["EndScene"]->original(Local_EndScene)(pDevice);
+    if (pDevice)
+    {
+        if (ZealService::get_instance()->callbacks)
+            ZealService::get_instance()->callbacks->invoke_generic(callback_type::EndScene);
+    }
+    return ret;
+}
+
+
+
 void directx::update_device()
 {
     HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
@@ -10,6 +24,19 @@ void directx::update_device()
         device = *(IDirect3DDevice8**)((DWORD)eqfx + 0xa4f92c);
     else
         device = nullptr;
+
+    if (device)
+    {
+        uintptr_t* vtable = *(uintptr_t**)device;
+        if (vtable)
+        {
+            DWORD endscene_addr = (DWORD)vtable[35];
+            DWORD reset_addr = (DWORD)vtable[14];
+            if (!ZealService::get_instance()->hooks->hook_map.count("EndScene"))
+                ZealService::get_instance()->hooks->Add("EndScene", endscene_addr, Local_EndScene, hook_type_detour);
+        }
+     //   ZealService::get_instance()->hooks->Add("Reset", reset_addr, Local_Reset, hook_type_detour);
+    }
 }
 
 Vec2 directx::GetScreenRect()
@@ -58,4 +85,5 @@ bool directx::WorldToScreen(Vec3 worldPos, Vec2& screenPos)
 directx::directx()
 {
     update_device();
+
 }
