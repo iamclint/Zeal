@@ -81,9 +81,18 @@ bool directx::WorldToScreen(Vec3 worldPos, Vec2& screenPos)
     //    return true;
     //}
 }
+//int RenderPartialScene(float a, int* b, int c, int d)
+//{
+//    if (ZealService::get_instance()->callbacks)
+//        ZealService::get_instance()->callbacks->invoke_generic(callback_type::EndScene);
+//    ZealService::get_instance()->hooks->hook_map["RenderPartialScene"]->original(RenderPartialScene)(a, b, c, d);
+//}
 
 directx::directx()
 {
+  /*  FARPROC partial_scene = GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dRenderPartialScene");
+    if (partial_scene)
+        ZealService::get_instance()->hooks->Add("RenderPartialScene", (int)partial_scene, RenderPartialScene, hook_type_detour);*/
     update_device();
 
 }

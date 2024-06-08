@@ -9,16 +9,221 @@ struct Vertex {
 	float x, y, z;  // Position coordinates
 	D3DCOLOR color; // Optional color (0 for white)
 };
+#define CON_WHITE D3DCOLOR_ARGB(0x55, 0xf0, 0xf0, 0xf0)
+#define CON_RED D3DCOLOR_ARGB(0x55, 0xf0, 0x0, 0x0)
+#define CON_BLUE D3DCOLOR_ARGB(0x55, 0x0, 0x0, 0xf0)
+#define CON_YELLOW D3DCOLOR_ARGB(0x55, 0xf0, 0xf0, 0x0)
+#define CON_LIGHTBLUE D3DCOLOR_ARGB(0x55, 0x0, 0xf0, 0xf0)
+#define CON_GREEN D3DCOLOR_ARGB(0x55, 0x0, 0xf0, 0x0)
 
-void TargetRing::callback_render()
+DWORD GetLevelCon(Zeal::EqStructures::Entity* ent) {
+    if (!ent || !Zeal::EqGame::get_self())
+        return 0;
+    int mylevel = Zeal::EqGame::get_self()->Level;
+    short diff = ent->Level - mylevel;
+    DWORD conlevel = 0;
+
+    if (diff == 0)
+        return CON_WHITE;
+    else if (diff >= 1 && diff <= 2)
+        return CON_YELLOW;
+    else if (diff >= 3)
+        return CON_RED;
+
+    if (mylevel <= 7)
+    {
+        if (diff <= -4)
+            conlevel = CON_GREEN;
+        else
+            conlevel =  Zeal::EqGame::get_user_color(70);
+    }
+    else if (mylevel <= 8)
+    {
+        if (diff <= -5)
+            conlevel = CON_GREEN;
+        else if (diff <= -4)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 12)
+    {
+        if (diff <= -6)
+            conlevel = CON_GREEN;
+        else if (diff <= -4)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 16)
+    {
+        if (diff <= -7)
+            conlevel = CON_GREEN;
+        else if (diff <= -5)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 20)
+    {
+        if (diff <= -8)
+            conlevel = CON_GREEN;
+        else if (diff <= -6)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 24)
+    {
+        if (diff <= -9)
+            conlevel = CON_GREEN;
+        else if (diff <= -7)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 28)
+    {
+        if (diff <= -10)
+            conlevel = CON_GREEN;
+        else if (diff <= -8)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 30)
+    {
+        if (diff <= -11)
+            conlevel = CON_GREEN;
+        else if (diff <= -9)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 32)
+    {
+        if (diff <= -12)
+            conlevel = CON_GREEN;
+        else if (diff <= -9)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 36)
+    {
+        if (diff <= -13)
+            conlevel = CON_GREEN;
+        else if (diff <= -10)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 40)
+    {
+        if (diff <= -14)
+            conlevel = CON_GREEN;
+        else if (diff <= -11)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 44)
+    {
+        if (diff <= -16)
+            conlevel = CON_GREEN;
+        else if (diff <= -12)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 48)
+    {
+        if (diff <= -17)
+            conlevel = CON_GREEN;
+        else if (diff <= -13)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 52)
+    {
+        if (diff <= -18)
+
+            conlevel = CON_GREEN;
+        else if (diff <= -14)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 54)
+    {
+        if (diff <= -19)
+
+            conlevel = CON_GREEN;
+        else if (diff <= -15)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 56)
+    {
+        if (diff <= -20)
+
+            conlevel = CON_GREEN;
+        else if (diff <= -15)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 60)
+    {
+        if (diff <= -21)
+            conlevel = CON_GREEN;
+        else if (diff <= -16)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 61)
+    {
+        if (diff <= -19)
+            conlevel = CON_GREEN;
+        else if (diff <= -14)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else if (mylevel <= 62)
+    {
+        if (diff <= -17)
+            conlevel = CON_GREEN;
+        else if (diff <= -12)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+    else
+    {
+        if (diff <= -16)
+            conlevel = CON_GREEN;
+        else if (diff <= -11)
+            conlevel = CON_LIGHTBLUE;
+        else
+            conlevel = CON_BLUE;
+    }
+
+    return conlevel;
+}
+
+
+void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 {
-	Zeal::EqStructures::Entity* target =  Zeal::EqGame::get_target();
-	IDirect3DDevice8* device = ZealService::get_instance()->dx->device;
-	if (!target || !device || !target->ActorInfo)
-		return;
-    color = D3DCOLOR_ARGB(0x55, 0, 0xFF, 0x0);
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->device;
+    if (!device)
+        return;
+
     const float innerRadius = 0.0f;  // Adjust these values for ring size
-    const float outerRadius = 5.0f;
+    const float outerRadius = size;
     const int numSegments = 32;     // Adjust for smoothness of the ring
 
 
@@ -56,7 +261,7 @@ void TargetRing::callback_render()
 
     // Create vertex buffer
     IDirect3DVertexBuffer8* vertexBuffer = nullptr;
-    if (FAILED(device->CreateVertexBuffer(sizeof(Vertex) * (numSegments * 2+2),
+    if (FAILED(device->CreateVertexBuffer(sizeof(Vertex) * (numSegments * 2 + 2),
         D3DUSAGE_WRITEONLY,
         D3DFVF_XYZ | D3DFVF_DIFFUSE,
         D3DPOOL_MANAGED,
@@ -73,7 +278,7 @@ void TargetRing::callback_render()
         delete[] vertices;
         return;
     }
-    memcpy(data, vertices, sizeof(Vertex) * (numSegments * 2+2));
+    memcpy(data, vertices, sizeof(Vertex) * (numSegments * 2 + 2));
     vertexBuffer->Unlock();
 
     DWORD origAlphaBlendEnable, origSrcBlend, origDestBlend, origCull;
@@ -89,11 +294,11 @@ void TargetRing::callback_render()
     // Save the original world matrix
     device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
     // Set the world transformation matrix
-    
-        
-    D3DXMatrixTranslation(&worldMatrix, target->Position.x, target->Position.y, target->ActorInfo->Z + 0.3);
+
+
+    D3DXMatrixTranslation(&worldMatrix,pos.x, pos.y, pos.z);
     device->SetTransform(D3DTS_WORLD, &worldMatrix);
-   // device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    // device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
     device->SetStreamSource(0, vertexBuffer, sizeof(Vertex));
     device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
@@ -106,6 +311,16 @@ void TargetRing::callback_render()
     // Release resources
     vertexBuffer->Release();
     delete[] vertices;
+}
+
+void TargetRing::callback_render()
+{
+	Zeal::EqStructures::Entity* target =  Zeal::EqGame::get_target();
+    if (!target || !target->ActorInfo)
+        return;
+
+    render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, 5.0f, GetLevelCon(target));
+
 } 
 
 void TargetRing::set_enabled(bool _enabled)
