@@ -215,6 +215,7 @@ void ZealService::apply_patches()
 	//disable client sided mana ticking
 	mem::set(0x4C3F93, 0x90, 7);
 	mem::set(0x4C7642, 0x90, 7);
+	mem::write<BYTE>(0x4A14CF, 0xEB); //don't print Your XML files are not compatible with current EverQuest files, certain windows may not perform correctly.  Use "/loadskin Default 1" to load the EverQuest default skin.
 }
 
 ZealService* ZealService::get_instance()

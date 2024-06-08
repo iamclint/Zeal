@@ -30,11 +30,14 @@ void DamageData::tick()
 		last_tick = GetTickCount64();
 	}
 }
-DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell)
+DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _heal)
 {
 	is_spell = _is_spell;
 	is_my_damage = _is_my_damage_dealt;
-	str_dmg = std::to_string(dmg);
+	if (dmg>0)
+		str_dmg = std::to_string(dmg);
+	else if (_heal>0)
+		str_dmg = "+" + std::to_string(heal);
 	damage = dmg;
 	opacity = 1.0f;
 	y_offset = getRandomIntBetween(-20, 20);
@@ -42,6 +45,7 @@ DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell)
 	needs_removed = false;
 	last_tick = GetTickCount64();
 	start_time = GetTickCount64();
+	heal = _heal;
 }
 
 long FloatRGBAtoLong(float r, float g, float b, float a) {
@@ -130,6 +134,8 @@ void FloatingDamage::callback_render()
 								else
 									color = Zeal::EqGame::get_user_color(24); //npc being hit
 							}
+							if (dmg.heal > 0)
+								color = 0x00FF00FF;
 							fnt->DrawWrappedText(dmg.str_dmg.c_str(), Zeal::EqUI::CXRect(screen_pos.x + dmg.y_offset, screen_pos.y + dmg.x_offset, screen_pos.x + 150, screen_pos.y + 150), Zeal::EqUI::CXRect(0, 0, screen_size.x*2, screen_size.y*2), ModifyAlpha(color, dmg.opacity), 1, 0);
 						}
 					}
@@ -148,12 +154,12 @@ void FloatingDamage::callback_render()
 	}
 }
 
-void FloatingDamage::add_damage(int* dmg_ptr)
+void FloatingDamage::add_damage(int* dmg_ptr, int heal)
 {
 	if (!enabled)
 		return;
 	Zeal::Packets::Damage_Struct* dmg = (Zeal::Packets::Damage_Struct*)dmg_ptr;
-	if (dmg && (int)dmg->damage > 0)
+	if (dmg && ((int)dmg->damage > 0 || heal>0))
 	{
 		Zeal::EqStructures::Entity* ent = Zeal::EqGame::get_entity_by_id(dmg->target);
 		Zeal::EqStructures::Entity* src = Zeal::EqGame::get_entity_by_id(dmg->source);
@@ -162,7 +168,7 @@ void FloatingDamage::add_damage(int* dmg_ptr)
 			bool is_me = false;
 			if (src && src == Zeal::EqGame::get_controlled())
 				is_me = true;
-			damage_numbers[ent].push_back(DamageData(dmg->damage, is_me, dmg->spellid > 0));
+			damage_numbers[ent].push_back(DamageData(dmg->damage, is_me, dmg->spellid > 0, heal));
 		}
 	}
 }
@@ -170,7 +176,7 @@ void FloatingDamage::add_damage(int* dmg_ptr)
 
 void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int heal)
 {
-	ZealService::get_instance()->floating_damage->add_damage((int*)dmg);
+	ZealService::get_instance()->floating_damage->add_damage((int*)dmg, heal);
 	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, heal);
 }
 

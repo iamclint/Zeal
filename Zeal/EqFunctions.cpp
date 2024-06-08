@@ -323,7 +323,7 @@ namespace Zeal
 								i++;
 							}
 						}
-						if (current_ent != EqGame::get_self() && !current_ent->IsHidden && current_ent->HpCurrent > 0 && add_to_list)
+						if (current_ent != EqGame::get_self() && !current_ent->IsHidden && add_to_list)
 							rEnts.push_back(current_ent);
 					}
 				}

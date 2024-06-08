@@ -65,7 +65,11 @@ Zeal::EqStructures::Entity* CycleTarget::get_next_ent(float dist, byte type)
 Zeal::EqStructures::Entity* CycleTarget::get_nearest_ent(float dist, byte type)
 {
 	static ULONGLONG last_press = 0;
-	std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(dist, true);
+	std::vector<Zeal::EqStructures::Entity*> visible_ents;
+	if (type>1)
+		visible_ents = Zeal::EqGame::get_world_visible_actor_list(dist, true);
+	else
+		visible_ents = Zeal::EqGame::get_world_visible_actor_list(dist, false);
 	if (!visible_ents.size())
 		return 0;
 	near_ents.clear();
