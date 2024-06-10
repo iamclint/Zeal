@@ -16,7 +16,7 @@ void tooltip::set_timer(int _time)
 {
     hover_timeout = _time;
     mem::write<int>(0x59E10D, hover_timeout);
-    ZealService::get_instance()->ini->setValue<float>("Zeal", "TooltipTime", hover_timeout);
+    ZealService::get_instance()->ini->setValue<int>("Zeal", "TooltipTime", hover_timeout);
 //    ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
