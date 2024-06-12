@@ -103,13 +103,13 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
         color_index = 325;
 
     std::string data_str = data;
-    if (data_str.length())
-    {
-        data_str.erase(std::remove(data_str.begin(), data_str.end(), '#'), data_str.end());
-        std::regex pattern("\\b(?=\\w*)([a-zA-Z_]\\w+)(\\d{3})\\b");
-        data_str = std::regex_replace(data_str, pattern, "$1");
-        std::replace(data_str.begin(), data_str.end(), '_', ' ');
-    }
+    //if (data_str.length())
+    //{
+    //    data_str.erase(std::remove(data_str.begin(), data_str.end(), '#'), data_str.end());
+    //    std::regex pattern("\\b(?=\\w*)([a-zA-Z_]\\w+)(\\d{3})\\b");
+    //    data_str = std::regex_replace(data_str, pattern, "$1");
+    //    std::replace(data_str.begin(), data_str.end(), '_', ' ');
+    //}
     if (c->timestamps && strlen(data) > 0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {
         mem::write<byte>(0x5380C9, 0xEB); // don't log information so we can manipulate data before between chat and logs
@@ -130,6 +130,13 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
 
 char* __fastcall StripName(int t, int unused, char* data)
 {
+    if (ZealService::get_instance()->hooks && ZealService::get_instance()->hooks->hook_map.count("StripName"))
+    {
+        if (ZealService::get_instance()->chat_hook->uniquenames)
+            return data;
+        else
+            return ZealService::get_instance()->hooks->hook_map["StripName"]->original(StripName)(t, unused, data);
+    }
     return data;
 }
 
@@ -141,6 +148,9 @@ void chat::LoadSettings(IO_ini* ini)
         ini->setValue<bool>("Zeal", "Bluecon", false);
     if (!ini->exists("Zeal", "ZealInput"))
         ini->setValue<bool>("Zeal", "ZealInput", false);
+    if (!ini->exists("Zeal", "UniqueNames"))
+        ini->setValue<bool>("Zeal", "UniqueNames", false);
+    uniquenames = ini->getValue<bool>("Zeal", "UniqueNames");
     bluecon = ini->getValue<bool>("Zeal", "Bluecon");
     timestamps = ini->getValue<int>("Zeal", "ChatTimestamps");
     zealinput = ini->getValue<bool>("Zeal", "ZealInput");
@@ -378,21 +388,28 @@ chat::chat(ZealService* zeal, IO_ini* ini)
         });
     LoadSettings(ini);
 
-    zeal->hooks->Add("StripName", 0x529A8b, StripName, hook_type_replace_call); 
-    zeal->hooks->Add("StripName1", 0x529B1D, StripName, hook_type_replace_call); 
-    zeal->hooks->Add("StripName2", 0x529b6d, StripName, hook_type_replace_call);
-    zeal->hooks->Add("StripName3", 0x529b89, StripName, hook_type_replace_call);
-    zeal->hooks->Add("StripName4", 0x529A55, StripName, hook_type_replace_call);
-    zeal->hooks->Add("StripName5", 0x4EDBE5, StripName, hook_type_replace_call); //killed msg
-    zeal->hooks->Add("StripName6", 0x4EDBDA, StripName, hook_type_replace_call);//killed msg
-    zeal->hooks->Add("StripName7", 0x529371, StripName, hook_type_replace_call);//killed msg
-    zeal->hooks->Add("StripName8", 0x52933D, StripName, hook_type_replace_call);//killed msg
-    zeal->hooks->Add("StripName9", 0x5293EB, StripName, hook_type_replace_call);//killed msg
-    zeal->hooks->Add("StripName10", 0x529407, StripName, hook_type_replace_call);//killed msg
-    zeal->hooks->Add("StripName11", 0x529423, StripName, hook_type_replace_call);//killed msg
-    zeal->hooks->Add("StripName12", 0x5293CF, StripName, hook_type_replace_call);//killed msg
-    zeal->hooks->Add("StripName13", 0x5293B3, StripName, hook_type_replace_call);//killed msg
-    zeal->hooks->Add("StripName14", 0x5293A6, StripName, hook_type_replace_call);//killed msg
+  /*  zeal->commands_hook->add("/uniquenaming", {}, "Toggles off the stripping of mob id and other identifiers from name of npc's (log only)",
+        [this, ini](std::vector<std::string>& args) {
+            uniquenames = !uniquenames;
+            Zeal::EqGame::print_chat("Unique naming is %s", uniquenames ? "Enabled" : "Disabled");
+            return true;
+        });*/
+
+    //zeal->hooks->Add("StripName", 0x529A8b, StripName, hook_type_replace_call); 
+    //zeal->hooks->Add("StripName1", 0x529B1D, StripName, hook_type_replace_call); 
+    //zeal->hooks->Add("StripName2", 0x529b6d, StripName, hook_type_replace_call);
+    //zeal->hooks->Add("StripName3", 0x529b89, StripName, hook_type_replace_call);
+    //zeal->hooks->Add("StripName4", 0x529A55, StripName, hook_type_replace_call);
+    //zeal->hooks->Add("StripName5", 0x4EDBE5, StripName, hook_type_replace_call); //killed msg
+    //zeal->hooks->Add("StripName6", 0x4EDBDA, StripName, hook_type_replace_call);//killed msg
+    //zeal->hooks->Add("StripName7", 0x529371, StripName, hook_type_replace_call);//killed msg
+    //zeal->hooks->Add("StripName8", 0x52933D, StripName, hook_type_replace_call);//killed msg
+    //zeal->hooks->Add("StripName9", 0x5293EB, StripName, hook_type_replace_call);//killed msg
+    //zeal->hooks->Add("StripName10", 0x529407, StripName, hook_type_replace_call);//killed msg
+    //zeal->hooks->Add("StripName11", 0x529423, StripName, hook_type_replace_call);//killed msg
+    //zeal->hooks->Add("StripName12", 0x5293CF, StripName, hook_type_replace_call);//killed msg
+    //zeal->hooks->Add("StripName13", 0x5293B3, StripName, hook_type_replace_call);//killed msg
+    //zeal->hooks->Add("StripName14", 0x5293A6, StripName, hook_type_replace_call);//killed msg
     zeal->hooks->Add("PrintChat", 0x537f99, PrintChat, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("EditWndHandleKey", 0x5A3010, EditWndHandleKey, hook_type_detour); //this makes more sense than the hook I had previously
   

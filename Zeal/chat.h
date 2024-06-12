@@ -9,6 +9,7 @@ public:
 	int timestamps = 0;
 	bool bluecon = false;
 	bool zealinput = false;
+	bool uniquenames = false;
 	void set_input_color(Zeal::EqUI::ARGBCOLOR col);
 	void set_bluecon(bool val);
 	void set_timestamp(int val);
