@@ -198,6 +198,9 @@
     <ClInclude Include="target_ring.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
+    <ClInclude Include="crash_handler.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -327,6 +330,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="target_ring.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="crash_handler.cpp">
       <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>

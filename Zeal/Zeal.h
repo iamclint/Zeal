@@ -6,6 +6,7 @@ class ZealService
 {
 public:
 	//hooks
+	std::shared_ptr<CrashHandler> crash_handler = nullptr;
 	std::shared_ptr<IO_ini> ini = nullptr;
 	std::shared_ptr<HookWrapper> hooks = nullptr;
 	std::shared_ptr<named_pipe> pipe = nullptr;
@@ -40,7 +41,6 @@ public:
 	
 	ZealService();
 	~ZealService();
-	void init_crashreporter();
 	static ZealService* ptr_service;
 	//static data/functions to get a base ptr since some hook callbacks don't have the information required
 	static ZealService* get_instance();

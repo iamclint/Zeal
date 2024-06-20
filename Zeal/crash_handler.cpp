@@ -1,0 +1,144 @@
+#include "crash_handler.h"
+#include <ctime>
+#include <sstream>
+#include <iomanip>
+#include <map>
+
+
+// Define a map to store exception codes and their descriptions
+std::map<DWORD, std::string> exceptionCodeStrings = {
+    {EXCEPTION_ACCESS_VIOLATION, "EXCEPTION_ACCESS_VIOLATION"},
+    {EXCEPTION_ARRAY_BOUNDS_EXCEEDED, "EXCEPTION_ARRAY_BOUNDS_EXCEEDED"},
+    {EXCEPTION_BREAKPOINT, "EXCEPTION_BREAKPOINT"},
+    {EXCEPTION_DATATYPE_MISALIGNMENT, "EXCEPTION_DATATYPE_MISALIGNMENT"},
+    {EXCEPTION_FLT_DENORMAL_OPERAND, "EXCEPTION_FLT_DENORMAL_OPERAND"},
+    {EXCEPTION_FLT_DIVIDE_BY_ZERO, "EXCEPTION_FLT_DIVIDE_BY_ZERO"},
+    {EXCEPTION_FLT_INEXACT_RESULT, "EXCEPTION_FLT_INEXACT_RESULT"},
+    {EXCEPTION_FLT_INVALID_OPERATION, "EXCEPTION_FLT_INVALID_OPERATION"},
+    {EXCEPTION_FLT_OVERFLOW, "EXCEPTION_FLT_OVERFLOW"},
+    {EXCEPTION_FLT_STACK_CHECK, "EXCEPTION_FLT_STACK_CHECK"},
+    {EXCEPTION_FLT_UNDERFLOW, "EXCEPTION_FLT_UNDERFLOW"},
+    {EXCEPTION_ILLEGAL_INSTRUCTION, "EXCEPTION_ILLEGAL_INSTRUCTION"},
+    {EXCEPTION_IN_PAGE_ERROR, "EXCEPTION_IN_PAGE_ERROR"},
+    {EXCEPTION_INT_DIVIDE_BY_ZERO, "EXCEPTION_INT_DIVIDE_BY_ZERO"},
+    {EXCEPTION_INT_OVERFLOW, "EXCEPTION_INT_OVERFLOW"},
+    {EXCEPTION_INVALID_DISPOSITION, "EXCEPTION_INVALID_DISPOSITION"},
+    {EXCEPTION_NONCONTINUABLE_EXCEPTION, "EXCEPTION_NONCONTINUABLE_EXCEPTION"},
+    {EXCEPTION_PRIV_INSTRUCTION, "EXCEPTION_PRIV_INSTRUCTION"},
+    {EXCEPTION_SINGLE_STEP, "EXCEPTION_SINGLE_STEP"},
+    {EXCEPTION_STACK_OVERFLOW, "EXCEPTION_STACK_OVERFLOW"},
+    // Add more exception codes as needed
+};
+
+void EnsureCrashesFolderExists() {
+    // Check if 'crashes' folder exists
+    DWORD dwAttrib = GetFileAttributes(L"crashes");
+    if (dwAttrib == INVALID_FILE_ATTRIBUTES || !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) {
+        // Create 'crashes' folder if it does not exist
+        if (!CreateDirectory(L"crashes", NULL)) {
+            std::cerr << "Failed to create 'crashes' folder." << std::endl;
+        }
+    }
+}
+
+std::string GetModuleNameFromAddress(LPVOID address) {
+    HMODULE hModule;
+    DWORD_PTR dwOffset;
+    char modulePath[MAX_PATH];
+
+    // Get module handle from address
+    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<LPCWSTR>(address), &hModule) != 0) {
+        // Get module file name
+        if (GetModuleFileNameA(hModule, modulePath, MAX_PATH) != 0) {
+            return modulePath;
+        }
+    }
+
+    return "";
+}
+
+
+void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
+    // Get the current time for a unique folder name
+    EnsureCrashesFolderExists();
+    std::time_t t = std::time(nullptr);
+    std::tm tm;
+    localtime_s(&tm, &t);
+    std::ostringstream folderNameStream;
+    folderNameStream << "crashes\\"
+        << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
+
+    std::string folderName = folderNameStream.str();
+
+    // Create the unique folder
+    if (CreateDirectoryA(folderName.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS) {
+        // Create the mini-dump file path
+        std::string dumpFilePath = folderName + "\\minidump.dmp";
+
+        HANDLE hFile = CreateFileA(dumpFilePath.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+        if (hFile == INVALID_HANDLE_VALUE) {
+            std::cerr << "Could not create dump file." << std::endl;
+            return;
+        }
+
+        // Create the mini-dump
+        MINIDUMP_EXCEPTION_INFORMATION mdei;
+        mdei.ThreadId = GetCurrentThreadId();
+        mdei.ExceptionPointers = pep;
+        mdei.ClientPointers = FALSE;
+
+        MINIDUMP_TYPE mdt = (MINIDUMP_TYPE)(MiniDumpWithPrivateReadWriteMemory | MiniDumpWithDataSegs | MiniDumpWithHandleData | MiniDumpWithProcessThreadData | MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules);
+
+        BOOL result = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, (pep != 0) ? &mdei : 0, 0, 0);
+
+        if (!result) {
+            std::cerr << "Failed to write dump file." << std::endl;
+        }
+        else {
+            // Create the reason file path
+            std::string reasonFilePath = folderName + "\\crash_reason.txt";
+            std::ofstream reasonFile(reasonFilePath);
+            if (reasonFile.is_open()) {
+                reasonFile << "Unhandled exception occurred: " << reason << std::endl << std::endl;
+                if (pep != nullptr && pep->ExceptionRecord != nullptr) {
+                    reasonFile << "Exception Code: 0x" << std::hex << pep->ExceptionRecord->ExceptionCode << std::endl;
+                    if (exceptionCodeStrings.count(pep->ExceptionRecord->ExceptionCode))
+                        reasonFile << "Exception String: " << std::hex << exceptionCodeStrings[pep->ExceptionRecord->ExceptionCode] << std::endl;
+                    reasonFile << "Exception Address: 0x" << std::hex << pep->ExceptionRecord->ExceptionAddress << std::endl;
+                    // Get and write module information
+                    std::string moduleName = GetModuleNameFromAddress(pep->ExceptionRecord->ExceptionAddress);
+                    if (!moduleName.empty()) {
+                        reasonFile << "Exception occurred in module: " << moduleName << std::endl;
+                    }
+                    else {
+                        reasonFile << "Module information not available." << std::endl;
+                    }
+                    // Add more details as needed from pep->ExceptionRecord and pep->ContextRecord
+                }
+                reasonFile.close();
+            }
+        }
+
+        CloseHandle(hFile);
+    }
+    else {
+        std::cerr << "Could not create directory: " << folderName << std::endl;
+    }
+}
+
+
+LONG CALLBACK VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
+    WriteMiniDump(pExceptionInfo, "VEH");
+    return EXCEPTION_CONTINUE_SEARCH; // Continue searching for other handlers
+}
+
+CrashHandler::CrashHandler()
+{
+    exception_handler = AddVectoredExceptionHandler(0, VectoredExceptionHandler);
+}
+CrashHandler::~CrashHandler()
+{
+    RemoveVectoredExceptionHandler(exception_handler);
+}
