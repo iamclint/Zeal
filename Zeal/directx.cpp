@@ -5,13 +5,14 @@
 
 HRESULT WINAPI Local_EndScene(LPDIRECT3DDEVICE8 pDevice)
 {
-
     HRESULT ret = ZealService::get_instance()->hooks->hook_map["EndScene"]->original(Local_EndScene)(pDevice);
+    __asm { pushad };
     if (pDevice)
     {
         if (ZealService::get_instance()->callbacks)
             ZealService::get_instance()->callbacks->invoke_generic(callback_type::EndScene);
     }
+    __asm { popad };
     return ret;
 }
 

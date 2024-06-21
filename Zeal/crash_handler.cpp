@@ -3,7 +3,17 @@
 #include <sstream>
 #include <iomanip>
 #include <map>
+#include <vector>
 
+std::vector<DWORD> nonCrashExceptionCodes =
+{
+    0x40010006, // Application-defined exception used by Visual Studio for debug events
+    0x406D1388, // Exception used to set thread names for debugging
+    EXCEPTION_BREAKPOINT,         // 0x80000003, Used by debuggers to temporarily suspend execution
+    EXCEPTION_SINGLE_STEP,        // 0x80000004, Used by debuggers for single-step tracing
+    DBG_CONTROL_C,                // 0x40010005, Control-C exception for console applications
+    0x80000007  //  Used to wake up the system debugger
+};
 
 // Define a map to store exception codes and their descriptions
 std::map<DWORD, std::string> exceptionCodeStrings = {
@@ -60,6 +70,16 @@ std::string GetModuleNameFromAddress(LPVOID address) {
 
 
 void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
+    // Check for non-crash exceptions and return early if detected
+    if (pep != nullptr && pep->ExceptionRecord != nullptr) {
+        DWORD exceptionCode = pep->ExceptionRecord->ExceptionCode;
+        for (DWORD nonCrashCode : nonCrashExceptionCodes) {
+            if (exceptionCode == nonCrashCode) {
+                std::cerr << "Non-crash exception detected, skipping mini-dump generation." << std::endl;
+                return;
+            }
+        }
+    }
     // Get the current time for a unique folder name
     EnsureCrashesFolderExists();
     std::time_t t = std::time(nullptr);

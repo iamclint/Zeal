@@ -278,7 +278,7 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
         delete[] vertices;
         return;
     }
-    memcpy(data, vertices, sizeof(Vertex) * (numSegments * 2 + 2));
+    memcpy(data, (const void*)vertices, sizeof(Vertex) * (numSegments * 2 + 2));
     vertexBuffer->Unlock();
 
     DWORD origAlphaBlendEnable, origSrcBlend, origDestBlend, origCull;
