@@ -60,7 +60,7 @@ tooltip::tooltip(ZealService* zeal, IO_ini* ini)
         });
     zeal->commands_hook->add("/tooltiptimer", { "/ttimer"}, "Set the time limit before a tooltip appears.",
         [this](std::vector<std::string>& args) {
-            float timeout = 0;
+            int timeout = 0;
             if (args.size() > 1 && Zeal::String::tryParse(args[1], &timeout))
             {
                 set_timer(timeout);

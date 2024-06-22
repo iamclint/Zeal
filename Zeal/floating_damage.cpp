@@ -84,7 +84,7 @@ long ModifyAlpha(long rgba, float newAlpha) {
 	return rgba;
 }
 
-void FloatingDamage::callback_render()
+void FloatingDamage::callback_deferred()
 {
 	if (!Zeal::EqGame::is_in_game() || !enabled)
 		return;
@@ -192,7 +192,7 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 	if (!ini->exists("Zeal", "FloatingDamage"))
 		ini->setValue<bool>("Zeal", "FloatingDamage", true);
 	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
-	zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::RenderUI);
+	zeal->callbacks->add_generic([this]() { callback_deferred(); }, callback_type::AddDeferred);
 	zeal->commands_hook->add("/fcd", {}, "Toggles floating combat text or adjusts the font size with argument",
 		[this, ini](std::vector<std::string>& args) {
 			int new_size = 5;

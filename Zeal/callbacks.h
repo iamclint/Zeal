@@ -17,7 +17,8 @@ enum class callback_type
 	ExecuteCmd,
 	Delayed,
 	RenderUI,
-	EndScene
+	EndScene,
+	AddDeferred
 };
 class CallbackManager
 {

@@ -2,7 +2,7 @@
 #include "EqPackets.h"
 #include "Zeal.h"
 #include "EqAddresses.h"
-#include "directx.h"
+
 #define NUM_VERTICES 4
 
 struct Vertex {
@@ -216,6 +216,51 @@ DWORD GetLevelCon(Zeal::EqStructures::Entity* ent) {
 }
 
 
+RenderState::RenderState(IDirect3DDevice8* device, DWORD state, DxStateType_ type) 
+    : state(state), type(type)
+{
+    if (type == DxStateType_::DxStateType_Render)
+    {
+        device->GetRenderState((D3DRENDERSTATETYPE)state, &value);
+    }
+    else if (type == DxStateType_::DxStateType_Texture)
+    {
+        device->GetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)state, &value);
+    }
+}
+
+
+void TargetRing::store_render_states()
+{
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->device;
+    if (!device)
+        return;
+    render_states.clear();
+    render_states.push_back({ device, (DWORD)D3DRS_ALPHABLENDENABLE, DxStateType_Render });
+    render_states.push_back({ device, (DWORD)D3DRS_SRCBLEND, DxStateType_Render });
+    render_states.push_back({ device, (DWORD)D3DRS_DESTBLEND, DxStateType_Render });
+    render_states.push_back({ device, (DWORD)D3DRS_CULLMODE, DxStateType_Render });
+    render_states.push_back({ device, (DWORD)D3DRS_ZENABLE, DxStateType_Render });
+    render_states.push_back({ device, (DWORD)D3DRS_ZWRITEENABLE, DxStateType_Render });
+    render_states.push_back({ device, (DWORD)D3DRS_LIGHTING, DxStateType_Render });
+    render_states.push_back({ device, (DWORD)D3DTSS_COLOROP, DxStateType_Texture });
+    render_states.push_back({ device, (DWORD)D3DTSS_COLORARG1, DxStateType_Texture });
+    render_states.push_back({ device, (DWORD)D3DTSS_ALPHAOP, DxStateType_Texture });
+    render_states.push_back({ device, (DWORD)D3DTSS_ALPHAARG1, DxStateType_Texture });
+}
+void TargetRing::reset_render_states()
+{
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->device;
+    for (auto& state : render_states)
+    {
+        if (state.type==DxStateType_Render)
+            device->SetRenderState((D3DRENDERSTATETYPE)state.state, state.value);
+        else if (state.type==DxStateType_Texture)
+            device->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)state.state, state.value);
+    }
+}
+
+
 void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 {
     IDirect3DDevice8* device = ZealService::get_instance()->dx->device;
@@ -228,7 +273,7 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 
 
     D3DXMATRIX worldMatrix, originalWorldMatrix;
-    Vertex* vertices = new Vertex[numSegments * 2];
+    Vertex* vertices = new Vertex[numSegments * 2 + 2];
 
     // Calculate angle increment for each segment
     float angleStep = 2.0f * M_PI / numSegments;
@@ -241,14 +286,14 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
         // Outer circle vertices first (ensure consistent winding order)
         vertices[vertexIndex].x = outerRadius * cosf(angle);
         vertices[vertexIndex].y = outerRadius * sinf(angle);
-        vertices[vertexIndex].z = 0.1f;  // Slightly above the XY plane
+        vertices[vertexIndex].z = 0.05f;  // Slightly above the XY plane
         vertices[vertexIndex].color = color;
         vertexIndex++;
 
         // Inner circle vertices
         vertices[vertexIndex].x = innerRadius * cosf(angle);
         vertices[vertexIndex].y = innerRadius * sinf(angle);
-        vertices[vertexIndex].z = 0.1f;  // Slightly above the XY plane
+        vertices[vertexIndex].z = 0.05f;  // Slightly above the XY plane
         vertices[vertexIndex].color = color;
         vertexIndex++;
     }
@@ -281,16 +326,25 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
     memcpy(data, (const void*)vertices, sizeof(Vertex) * (numSegments * 2 + 2));
     vertexBuffer->Unlock();
 
-    DWORD origAlphaBlendEnable, origSrcBlend, origDestBlend, origCull;
-    device->GetRenderState(D3DRS_ALPHABLENDENABLE, &origAlphaBlendEnable);
-    device->GetRenderState(D3DRS_SRCBLEND, &origSrcBlend);
-    device->GetRenderState(D3DRS_DESTBLEND, &origDestBlend);
-    device->GetRenderState(D3DRS_CULLMODE, &origCull);
+    store_render_states();
+
     // Enable alpha blending for the ring
     device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
     device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
     device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    device->SetRenderState(D3DRS_ZENABLE, TRUE);
+    device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);  // Enable depth writing
+    device->SetRenderState(D3DRS_LIGHTING, FALSE);  // Disable lighting
+
+    // Set texture stage states to avoid any unexpected texturing
+    device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+    device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+    device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+    device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+    device->SetTexture(0, NULL);  // Ensure no texture is bound
+
+
     // Save the original world matrix
     device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
     // Set the world transformation matrix
@@ -298,16 +352,12 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 
     D3DXMatrixTranslation(&worldMatrix,pos.x, pos.y, pos.z);
     device->SetTransform(D3DTS_WORLD, &worldMatrix);
-    // device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
     device->SetStreamSource(0, vertexBuffer, sizeof(Vertex));
     device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
     device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
 
-    device->SetRenderState(D3DRS_ALPHABLENDENABLE, origAlphaBlendEnable);
-    device->SetRenderState(D3DRS_SRCBLEND, origSrcBlend);
-    device->SetRenderState(D3DRS_DESTBLEND, origDestBlend);
-    device->SetRenderState(D3DRS_CULLMODE, origCull);
+    reset_render_states();
     // Release resources
     vertexBuffer->Release();
     delete[] vertices;
@@ -335,7 +385,7 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 	if (!ini->exists("Zeal", "TargetRing"))
 		ini->setValue<bool>("Zeal", "TargetRing", false);
 	enabled = ini->getValue<bool>("Zeal", "TargetRing");
-	zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::EndScene);
+	zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->commands_hook->add("/targetring", {}, "Toggles target ring",
 		[this](std::vector<std::string>& args) {
 			set_enabled(!enabled);

@@ -26,7 +26,7 @@ class FloatingDamage
 {
 public:
 	void add_damage(int* dmg, int heal);
-	void callback_render();
+	void callback_deferred();
 	void set_enabled(bool enable);
 	bool enabled;
 	FloatingDamage(class ZealService* zeal, class IO_ini* ini);
