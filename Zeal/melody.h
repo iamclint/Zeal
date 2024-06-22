@@ -5,16 +5,17 @@
 class Melody
 {
 public:
-	void start();
+	bool start(const std::vector<int>& new_songs); //returns true if no errors
 	void end();
-	int current_index = 0;
+	void handle_stop_cast_callback(BYTE reason);
 	Melody(class ZealService* pHookWrapper, class IO_ini* ini);
 	~Melody();
 private:
 	void tick();
-	void stop_cast();
-	bool active = false;
-	
-	std::vector<int> songs;
+	void stop_current_cast();
+	int current_index = 0;  // Active song index. -1 if not started yet.
+	std::vector<int> songs; // Gem indices (base 0) for melody.
+	int retry_count = 0; // Tracks unsuccessful song casts.
+
 };
 

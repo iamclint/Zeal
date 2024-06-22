@@ -53,6 +53,7 @@ ___
     
 - `/melody`
   - **Arguments:** `song gem #'s (maximum of 5)`
+  - **Aliases:** `/mel`
   - **Example:** `/melody 1 4 2 3`
   - **Description:** plays songs in order until interrupted in any fashion.
     
