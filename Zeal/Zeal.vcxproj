@@ -113,7 +113,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;Dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="alarm.h" />
     <ClInclude Include="autofire.h" />
+    <ClInclude Include="crash_handler.h" />
     <ClInclude Include="directx.h" />
     <ClInclude Include="floating_damage.h" />
     <ClInclude Include="named_pipe.h" />
@@ -209,6 +210,7 @@
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
     <ClCompile Include="autofire.cpp" />
+    <ClCompile Include="crash_handler.cpp" />
     <ClCompile Include="directx.cpp" />
     <ClCompile Include="EqPackets.h" />
     <ClCompile Include="floating_damage.cpp" />

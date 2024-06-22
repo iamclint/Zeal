@@ -18,14 +18,15 @@ struct DamageData
 	bool is_spell;
 	std::string str_dmg;
 	int damage;
-	DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell);
+	int heal;
+	DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _heal);
 };
 
 class FloatingDamage
 {
 public:
-	void add_damage(int* dmg);
-	void callback_render();
+	void add_damage(int* dmg, int heal);
+	void callback_deferred();
 	void set_enabled(bool enable);
 	bool enabled;
 	FloatingDamage(class ZealService* zeal, class IO_ini* ini);

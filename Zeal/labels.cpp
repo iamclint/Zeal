@@ -189,7 +189,7 @@ labels::labels(ZealService* zeal)
 			}
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
-	zeal->callbacks->add_generic([this]() { callback_main(); });
+	// zeal->callbacks->add_generic([this]() { callback_main(); }); //causes a crash because callback_main is empty
 	//zeal->hooks->Add("FinalizeLoot", Zeal::EqGame::EqGameInternal::fn_finalizeloot, finalize_loot, hook_type_detour);
 	zeal->hooks->Add("GetLabel", Zeal::EqGame::EqGameInternal::fn_GetLabelFromEQ, GetLabelFromEq, hook_type_detour);
 	zeal->hooks->Add("GetGauge", Zeal::EqGame::EqGameInternal::fn_GetGaugeLabelFromEQ, GetGaugeFromEq, hook_type_detour);

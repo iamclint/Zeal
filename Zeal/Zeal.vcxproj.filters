@@ -198,6 +198,9 @@
     <ClInclude Include="target_ring.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
+    <ClInclude Include="crash_handler.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -323,11 +326,14 @@
     <ClCompile Include="floating_damage.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
-    <ClCompile Include="directx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="target_ring.cpp">
       <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="crash_handler.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="directx.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

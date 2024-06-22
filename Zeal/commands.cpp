@@ -38,12 +38,10 @@ void ChatCommands::print_commands()
 void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 {
 	ZealService* zeal = ZealService::get_instance();
-	std::string str_cmd = cmd;
-
+	std::string str_cmd = Zeal::String::trim_and_reduce_spaces(cmd);
 	if (str_cmd.length() == 0)
 		return;
-
-	if (str_cmd.length()>0 && str_cmd.at(0) != '/')
+	if (str_cmd.length()>0 && str_cmd.front() != '/')
 		str_cmd = "/" + str_cmd;
 	std::vector<std::string> args = Zeal::String::split(str_cmd," ");
 	const std::string& cmd_name = args.front();

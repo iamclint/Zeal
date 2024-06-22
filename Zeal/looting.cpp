@@ -130,7 +130,7 @@ looting::looting(ZealService* zeal)
 			loot_all = false;
 			return;
 		}
-		if (GetTickCount64() >= loot_next_item_time)
+		if (GetTickCount64() >= loot_next_item_time && loot_all)
 		{
 			looted_item();
 			loot_next_item_time = 0;

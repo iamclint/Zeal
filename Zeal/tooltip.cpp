@@ -16,7 +16,7 @@ void tooltip::set_timer(int _time)
 {
     hover_timeout = _time;
     mem::write<int>(0x59E10D, hover_timeout);
-    ZealService::get_instance()->ini->setValue<float>("Zeal", "TooltipTime", hover_timeout);
+    ZealService::get_instance()->ini->setValue<int>("Zeal", "TooltipTime", hover_timeout);
 //    ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
@@ -60,7 +60,7 @@ tooltip::tooltip(ZealService* zeal, IO_ini* ini)
         });
     zeal->commands_hook->add("/tooltiptimer", { "/ttimer"}, "Set the time limit before a tooltip appears.",
         [this](std::vector<std::string>& args) {
-            float timeout = 0;
+            int timeout = 0;
             if (args.size() > 1 && Zeal::String::tryParse(args[1], &timeout))
             {
                 set_timer(timeout);

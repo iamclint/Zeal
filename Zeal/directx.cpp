@@ -3,6 +3,26 @@
 #pragma comment(lib, "d3dx8/d3d8.lib")
 #pragma comment(lib, "d3dx8/d3dx8.lib")
 
+HRESULT WINAPI Local_EndScene(LPDIRECT3DDEVICE8 pDevice)
+{
+    HRESULT ret = ZealService::get_instance()->hooks->hook_map["EndScene"]->original(Local_EndScene)(pDevice);
+    __asm { pushad };
+    if (pDevice)
+    {
+        if (ZealService::get_instance()->callbacks)
+            ZealService::get_instance()->callbacks->invoke_generic(callback_type::EndScene);
+    }
+    __asm { popad };
+    return ret;
+}
+
+HRESULT WINAPI Local_Reset(IDirect3DDevice8* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
+{
+    ZealService::get_instance()->dx->device = nullptr;
+    HRESULT ret = ZealService::get_instance()->hooks->hook_map["Reset"]->original(Local_Reset)(pDevice, pPresentationParameters);
+    return ret;
+}
+
 void directx::update_device()
 {
     HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
@@ -10,6 +30,21 @@ void directx::update_device()
         device = *(IDirect3DDevice8**)((DWORD)eqfx + 0xa4f92c);
     else
         device = nullptr;
+
+    if (device)
+    {
+        uintptr_t* vtable = *(uintptr_t**)device;
+        if (vtable)
+        {
+            DWORD endscene_addr = (DWORD)vtable[35];
+            DWORD reset_addr = (DWORD)vtable[14];
+            if (!ZealService::get_instance()->hooks->hook_map.count("EndScene"))
+                ZealService::get_instance()->hooks->Add("EndScene", endscene_addr, Local_EndScene, hook_type_detour);
+            if (!ZealService::get_instance()->hooks->hook_map.count("Reset"))
+                ZealService::get_instance()->hooks->Add("Reset", reset_addr, Local_Reset, hook_type_detour);
+        }
+     //   ZealService::get_instance()->hooks->Add("Reset", reset_addr, Local_Reset, hook_type_detour);
+    }
 }
 
 Vec2 directx::GetScreenRect()
@@ -54,8 +89,18 @@ bool directx::WorldToScreen(Vec3 worldPos, Vec2& screenPos)
     //    return true;
     //}
 }
+//int RenderPartialScene(float a, int* b, int c, int d)
+//{
+//    if (ZealService::get_instance()->callbacks)
+//        ZealService::get_instance()->callbacks->invoke_generic(callback_type::EndScene);
+//    ZealService::get_instance()->hooks->hook_map["RenderPartialScene"]->original(RenderPartialScene)(a, b, c, d);
+//}
 
 directx::directx()
 {
+  /*  FARPROC partial_scene = GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dRenderPartialScene");
+    if (partial_scene)
+        ZealService::get_instance()->hooks->Add("RenderPartialScene", (int)partial_scene, RenderPartialScene, hook_type_detour);*/
     update_device();
+
 }

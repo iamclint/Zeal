@@ -323,7 +323,7 @@ namespace Zeal
 								i++;
 							}
 						}
-						if (current_ent != EqGame::get_self() && !current_ent->IsHidden && current_ent->HpCurrent > 0 && add_to_list)
+						if (current_ent != EqGame::get_self() && !current_ent->IsHidden && add_to_list)
 							rEnts.push_back(current_ent);
 					}
 				}
@@ -764,7 +764,7 @@ namespace Zeal
 				if (!Windows->SpellBook->IsVisible)
 					Zeal::EqGame::Spells::OpenBook();
 				ZealService::get_instance()->callbacks->add_delayed([book_index, gem_index]() {
-					if (Windows->SpellBook->IsVisible)
+					if (Windows->SpellBook->IsVisible && Zeal::EqGame::get_self()->StandingState==Stance::Sit)
 						Windows->SpellBook->BeginMemorize(book_index, gem_index, false);
 				}, 25);
 				
