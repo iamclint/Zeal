@@ -108,8 +108,8 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
         mdei.ThreadId = GetCurrentThreadId();
         mdei.ExceptionPointers = pep;
         mdei.ClientPointers = FALSE;
-
-        MINIDUMP_TYPE mdt = (MINIDUMP_TYPE)(MiniDumpWithPrivateReadWriteMemory | MiniDumpWithDataSegs | MiniDumpWithHandleData | MiniDumpWithProcessThreadData | MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules);
+        //MiniDumpWithPrivateReadWriteMemory
+        MINIDUMP_TYPE mdt = (MINIDUMP_TYPE)(MiniDumpWithHandleData | MiniDumpWithProcessThreadData | MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules);
 
         BOOL result = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, (pep != 0) ? &mdei : 0, 0, 0);
 

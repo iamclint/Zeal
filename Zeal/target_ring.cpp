@@ -333,7 +333,7 @@ void TargetRing::set_enabled(bool _enabled)
 TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
 	if (!ini->exists("Zeal", "TargetRing"))
-		ini->setValue<bool>("Zeal", "TargetRing", true);
+		ini->setValue<bool>("Zeal", "TargetRing", false);
 	enabled = ini->getValue<bool>("Zeal", "TargetRing");
 	zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::EndScene);
 	zeal->commands_hook->add("/targetring", {}, "Toggles target ring",
