@@ -369,7 +369,7 @@ void TargetRing::callback_render()
     if (!target || !target->ActorInfo)
         return;
 
-    render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, 5.0f, GetLevelCon(target));
+    render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, target->ActorInfo->ViewActor_->BoundingRadius * target->ActorInfo->ViewActor_->ScaleFactor, GetLevelCon(target));
 
 } 
 
