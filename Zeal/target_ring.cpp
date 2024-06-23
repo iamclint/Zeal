@@ -35,7 +35,7 @@ DWORD GetLevelCon(Zeal::EqStructures::Entity* ent) {
         if (diff <= -4)
             conlevel = CON_GREEN;
         else
-            conlevel =  Zeal::EqGame::get_user_color(70);
+            conlevel = CON_BLUE;// Zeal::EqGame::get_user_color(70);
     }
     else if (mylevel <= 8)
     {
