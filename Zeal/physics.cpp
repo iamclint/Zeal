@@ -4,13 +4,18 @@
 
 void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 {
-	if (ent && ent->ActorInfo && missile==0)
+	if (ent && ent->ActorInfo && missile==0 && ent==Zeal::EqGame::get_self())
 	{
+		static int prev_time = Zeal::EqGame::get_eq_time();
+		int time_diff = Zeal::EqGame::get_eq_time() - prev_time;
+		prev_time = Zeal::EqGame::get_eq_time();
 		if (Zeal::EqGame::get_eq_time() - ent->ActorInfo->PhysicsTimer >= 16)
 		{
 			ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
-			return;
 		}
+		//This frametime calculation is done inside process physics but since we are limiting how often its called we need to fix it up
+		*(float*)0x7D01DC = (float)time_diff * 0.02f;
+		return;
 	}
 	else
 	{
