@@ -18,7 +18,6 @@ HRESULT WINAPI Local_EndScene(LPDIRECT3DDEVICE8 pDevice)
 
 HRESULT WINAPI Local_Reset(IDirect3DDevice8* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
-    ZealService::get_instance()->dx->device = nullptr;
     HRESULT ret = ZealService::get_instance()->hooks->hook_map["Reset"]->original(Local_Reset)(pDevice, pPresentationParameters);
     return ret;
 }
@@ -63,9 +62,19 @@ bool IsOffScreen(Vec2 screenPos, const D3DVIEWPORT8& viewport) {
         screenPos.y < viewport.Y || screenPos.y > viewport.Y + viewport.Height;
 }
 
+IDirect3DDevice8* directx::GetDevice()
+{
+    HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
+    if (eqfx)
+        device = *(IDirect3DDevice8**)((DWORD)eqfx + 0xa4f92c);
+    else
+        device = nullptr;
+    return device;
+}
+
 bool directx::WorldToScreen(Vec3 worldPos, Vec2& screenPos) 
 {
-    update_device();
+    GetDevice();
     if (!device)
         return false;
     // Transform the world coordinates by the combined matrix

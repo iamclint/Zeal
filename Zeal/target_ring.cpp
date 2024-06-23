@@ -232,7 +232,7 @@ RenderState::RenderState(IDirect3DDevice8* device, DWORD state, DxStateType_ typ
 
 void TargetRing::store_render_states()
 {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->device;
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
     if (!device)
         return;
     render_states.clear();
@@ -250,7 +250,7 @@ void TargetRing::store_render_states()
 }
 void TargetRing::reset_render_states()
 {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->device;
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
     for (auto& state : render_states)
     {
         if (state.type==DxStateType_Render)
@@ -263,7 +263,7 @@ void TargetRing::reset_render_states()
 
 void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->device;
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
     if (!device)
         return;
 

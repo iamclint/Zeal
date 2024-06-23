@@ -166,7 +166,7 @@ void PlayerMovement::callback_main()
 }
 void PlayerMovement::set_spellbook_autostand(bool enabled)
 {
-	spellbook_autostand = true;
+	spellbook_autostand = enabled;
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "SpellbookAutostand", enabled);
 }
 
