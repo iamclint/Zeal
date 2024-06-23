@@ -324,6 +324,20 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
     return ZealService::get_instance()->hooks->hook_map["EditWndHandleKey"]->original(EditWndHandleKey)(active_edit, u, key, modifier, keydown);
 }
 
+void __fastcall DoPercentConvert(int* t, int u, const char* data, int u2)
+{
+    std::string str_data = data;
+    if (Zeal::EqGame::is_in_game())
+    {
+        std::string mana, hp;
+        ZealService::get_instance()->labels_hook->GetLabel(20, mana);
+        ZealService::get_instance()->labels_hook->GetLabel(19, hp);
+        str_data = Zeal::String::replace(str_data, "%n", mana + "%");
+        str_data = Zeal::String::replace(str_data, "%h", hp + "%");
+    }
+    ZealService::get_instance()->hooks->hook_map["DoPercentConvert"]->original(DoPercentConvert)(t, u, str_data.c_str(), u2);
+    memcpy((void*)data, str_data.c_str(), str_data.length()+1);
+}
 
 void chat::set_input_color(Zeal::EqUI::ARGBCOLOR col)
 {
@@ -410,6 +424,7 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     //zeal->hooks->Add("StripName12", 0x5293CF, StripName, hook_type_replace_call);//killed msg
     //zeal->hooks->Add("StripName13", 0x5293B3, StripName, hook_type_replace_call);//killed msg
     //zeal->hooks->Add("StripName14", 0x5293A6, StripName, hook_type_replace_call);//killed msg
+    zeal->hooks->Add("DoPercentConvert", 0x538110, DoPercentConvert, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("PrintChat", 0x537f99, PrintChat, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("EditWndHandleKey", 0x5A3010, EditWndHandleKey, hook_type_detour); //this makes more sense than the hook I had previously
   

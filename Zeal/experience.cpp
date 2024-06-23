@@ -99,4 +99,9 @@ Experience::Experience(ZealService* zeal)
 	exp_per_hour_pct_tot = 0;
 	exp_per_hour_tot = 0;
 	zeal->callbacks->add_generic([this]() { callback_main();  });
+	zeal->commands_hook->add("/resetexp", {}, "resets exp per hour calculations",
+		[this](std::vector<std::string>& args) {
+			ExpInfo.clear();
+			return true;
+		});
 }
