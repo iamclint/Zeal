@@ -1,4 +1,5 @@
 #include "crash_handler.h"
+#include "Zeal.h"
 #include <ctime>
 #include <sstream>
 #include <iomanip>
@@ -122,6 +123,7 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
             std::ofstream reasonFile(reasonFilePath);
             if (reasonFile.is_open()) {
                 reasonFile << "Unhandled exception occurred: " << reason << std::endl << std::endl;
+                reasonFile << "Zeal Version: " << ZEAL_VERSION << std::endl << std::endl;
                 if (pep != nullptr && pep->ExceptionRecord != nullptr) {
                     reasonFile << "Exception Code: 0x" << std::hex << pep->ExceptionRecord->ExceptionCode << std::endl;
                     if (exceptionCodeStrings.count(pep->ExceptionRecord->ExceptionCode))
