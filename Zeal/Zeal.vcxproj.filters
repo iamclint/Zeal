@@ -201,6 +201,9 @@
     <ClInclude Include="crash_handler.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
+    <ClInclude Include="miniz.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -334,6 +337,9 @@
     </ClCompile>
     <ClCompile Include="directx.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="miniz.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

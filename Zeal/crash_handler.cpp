@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <map>
 #include <vector>
+#include "miniz.h"
 
 std::vector<DWORD> nonCrashExceptionCodes =
 {
@@ -69,6 +70,45 @@ std::string GetModuleNameFromAddress(LPVOID address) {
     return "";
 }
 
+void ZipCrash(const std::string& folderName, const std::string& dumpFilePath, const std::string& reasonFilePath)
+{
+    // Zip the files
+    std::time_t t = std::time(nullptr);
+    std::tm tm;
+    localtime_s(&tm, &t);
+    std::ostringstream CrashFileName;
+    CrashFileName << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
+
+    std::string zipFilePath = "crashes\\" + CrashFileName.str() + ".zip";
+    mz_zip_archive zip_archive;
+    memset(&zip_archive, 0, sizeof(zip_archive));
+
+    if (!mz_zip_writer_init_file(&zip_archive, zipFilePath.c_str(), 0)) {
+        std::cerr << "Failed to initialize zip archive." << std::endl;
+        return;
+    }
+
+    if (!mz_zip_writer_add_file(&zip_archive, "minidump.dmp", dumpFilePath.c_str(), NULL, 0, MZ_BEST_COMPRESSION)) {
+        std::cerr << "Failed to add minidump to zip archive." << std::endl;
+        mz_zip_writer_end(&zip_archive);
+        return;
+    }
+
+    if (!mz_zip_writer_add_file(&zip_archive, "crash_reason.txt", reasonFilePath.c_str(), NULL, 0, MZ_BEST_COMPRESSION)) {
+        std::cerr << "Failed to add crash reason to zip archive." << std::endl;
+        mz_zip_writer_end(&zip_archive);
+        return;
+    }
+
+    mz_zip_writer_finalize_archive(&zip_archive);
+    mz_zip_writer_end(&zip_archive);
+
+    // Clean up the original files
+    DeleteFileA(dumpFilePath.c_str());
+    DeleteFileA(reasonFilePath.c_str());
+    RemoveDirectoryA(folderName.c_str());
+}
+
 
 void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
     // Check for non-crash exceptions and return early if detected
@@ -113,13 +153,12 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
         MINIDUMP_TYPE mdt = (MINIDUMP_TYPE)(MiniDumpWithHandleData | MiniDumpWithProcessThreadData | MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules);
 
         BOOL result = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, (pep != 0) ? &mdei : 0, 0, 0);
-
+        std::string reasonFilePath = folderName + "\\crash_reason.txt";
         if (!result) {
             std::cerr << "Failed to write dump file." << std::endl;
         }
         else {
             // Create the reason file path
-            std::string reasonFilePath = folderName + "\\crash_reason.txt";
             std::ofstream reasonFile(reasonFilePath);
             if (reasonFile.is_open()) {
                 reasonFile << "Unhandled exception occurred: " << reason << std::endl << std::endl;
@@ -142,8 +181,8 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
                 reasonFile.close();
             }
         }
-
         CloseHandle(hFile);
+        ZipCrash(folderName, dumpFilePath, reasonFilePath);
     }
     else {
         std::cerr << "Could not create directory: " << folderName << std::endl;
