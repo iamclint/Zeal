@@ -363,15 +363,11 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 
 void TargetRing::callback_render()
 {
+    if (!enabled)
+        return;
 	Zeal::EqStructures::Entity* target =  Zeal::EqGame::get_target();
     if (!target || !target->ActorInfo)
         return;
-    //static ULONGLONG last_print = GetTickCount64();
-    //if (GetTickCount64() - last_print > 1000)
-    //{
-    //    Zeal::EqGame::print_chat("Bounding radius %f scalefactor %f", target->ActorInfo->ViewActor_->BoundingRadius, target->ActorInfo->ViewActor_->ScaleFactor);
-    //    last_print = GetTickCount64();
-    //}
     float radius = target->ActorInfo->ViewActor_->BoundingRadius;
     if (radius > 30)
         radius = 30;
