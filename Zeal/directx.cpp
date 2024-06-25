@@ -37,8 +37,8 @@ void directx::update_device()
         {
             DWORD endscene_addr = (DWORD)vtable[35];
             DWORD reset_addr = (DWORD)vtable[14];
-            if (!ZealService::get_instance()->hooks->hook_map.count("EndScene"))
-                ZealService::get_instance()->hooks->Add("EndScene", endscene_addr, Local_EndScene, hook_type_detour);
+   /*         if (!ZealService::get_instance()->hooks->hook_map.count("EndScene"))
+                ZealService::get_instance()->hooks->Add("EndScene", endscene_addr, Local_EndScene, hook_type_detour);*/
             if (!ZealService::get_instance()->hooks->hook_map.count("Reset"))
                 ZealService::get_instance()->hooks->Add("Reset", reset_addr, Local_Reset, hook_type_detour);
         }

@@ -348,8 +348,6 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
     // Save the original world matrix
     device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
     // Set the world transformation matrix
-
-
     D3DXMatrixTranslation(&worldMatrix,pos.x, pos.y, pos.z);
     device->SetTransform(D3DTS_WORLD, &worldMatrix);
     device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
@@ -368,8 +366,19 @@ void TargetRing::callback_render()
 	Zeal::EqStructures::Entity* target =  Zeal::EqGame::get_target();
     if (!target || !target->ActorInfo)
         return;
-
-    render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, target->ActorInfo->ViewActor_->BoundingRadius * target->ActorInfo->ViewActor_->ScaleFactor, GetLevelCon(target));
+    //static ULONGLONG last_print = GetTickCount64();
+    //if (GetTickCount64() - last_print > 1000)
+    //{
+    //    Zeal::EqGame::print_chat("Bounding radius %f scalefactor %f", target->ActorInfo->ViewActor_->BoundingRadius, target->ActorInfo->ViewActor_->ScaleFactor);
+    //    last_print = GetTickCount64();
+    //}
+    float radius = target->ActorInfo->ViewActor_->BoundingRadius;
+    if (radius > 30)
+        radius = 30;
+    radius *= target->ActorInfo->ViewActor_->ScaleFactor;
+    if (radius > 60)
+        radius = 60;
+    render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, GetLevelCon(target));
 
 } 
 
