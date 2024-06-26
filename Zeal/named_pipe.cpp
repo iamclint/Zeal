@@ -140,8 +140,12 @@ void log_hook(char* data)
 
 void named_pipe::chat_msg(const char* data, int color_index)
 {
-	nlohmann::json jd = { {"type", color_index }, {"text", data} };
-	write(jd.dump(), pipe_data_type::log);
+	try {
+		nlohmann::json jd = { {"type", color_index }, {"text", data} };
+		write(jd.dump(), pipe_data_type::log);
+	}
+	catch (const std::exception& e) {
+	}
 }
 
 bool IsPipeConnected(HANDLE hPipe) {
