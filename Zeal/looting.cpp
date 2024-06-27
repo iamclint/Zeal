@@ -25,22 +25,22 @@ void looting::set_hide_looted(bool val)
 		Zeal::EqGame::print_chat("Corpses will no longer be hidden after looting.");
 }
 
-void __fastcall CLootWndDeactivate(int uk, int lootwnd_ptr)
+void __fastcall CLootWndDeactivate(int uk, int unused, int lootwnd_ptr)
 {
 	ZealService* zeal = ZealService::get_instance();
 	Zeal::EqStructures::Entity* corpse = Zeal::EqGame::get_active_corpse();
-	if (corpse && zeal->looting_hook->hide_looted && corpse->Type == 2)
+	if (corpse && corpse->ActorInfo && zeal->looting_hook->hide_looted && corpse->Type == 2)
 	{
 		corpse->ActorInfo->IsInvisible = 1; //this is the flag set by /hidecorpse all (so /hidecorpse none will reshow these hidden corpses)
 	}
-	zeal->hooks->hook_map["CLootWndDeactivate"]->original(CLootWndDeactivate)(uk, lootwnd_ptr);
+	zeal->hooks->hook_map["CLootWndDeactivate"]->original(CLootWndDeactivate)(uk, unused, lootwnd_ptr);
 }
 
 void __fastcall release_loot(int uk, int lootwnd_ptr)
 {
 	ZealService* zeal = ZealService::get_instance();
 	Zeal::EqStructures::Entity* corpse = Zeal::EqGame::get_active_corpse();
-	if (corpse && zeal->looting_hook->hide_looted && corpse->Type==2)
+	if (corpse && corpse->ActorInfo && zeal->looting_hook->hide_looted && corpse->Type==2)
 	{
 		corpse->ActorInfo->IsInvisible = 1; //this is the flag set by /hidecorpse all (so /hidecorpse none will reshow these hidden corpses)
 	}

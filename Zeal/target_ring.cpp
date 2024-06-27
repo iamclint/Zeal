@@ -267,7 +267,7 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
     if (!device)
         return;
 
-    float inner =size - (size * .1);
+    float inner =size - (size * .25);
     const float innerRadius = inner>0 ? inner : 0;  // Adjust these values for ring size
     const float outerRadius = size;
     const int numSegments = 32;     // Adjust for smoothness of the ring
