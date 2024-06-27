@@ -17,6 +17,11 @@
 
 ### Commands
 ___
+- `/targetring`
+  - **Arguments:** ``
+  - **Example:** `/targetring`
+  - **Description:** Currently toggles on/off the target ring.
+    
 - `/timer`
   - **Arguments:** `int`
   - **Example:** `/timer 10`
@@ -155,6 +160,8 @@ ___
 - Pet Back
 - Slow turn left
 - Slow turn right
+- Target nearest pc corpse
+- Target nearest npc corpse
 ___
 ### UI
 - **Gauge EqType's**
