@@ -5,7 +5,6 @@
 #include "Zeal.h"
 #include <algorithm>
 #include "target_ring.h"
-#include "Zeal.h"
 
 
 float GetSensitivityFromSlider(int value)
