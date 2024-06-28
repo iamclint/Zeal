@@ -4,8 +4,6 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
-#include "target_ring.h"
-
 
 float GetSensitivityFromSlider(int value)
 {
