@@ -46,6 +46,9 @@
     <Filter Include="Header Files\ui">
       <UniqueIdentifier>{e6269d11-8017-478b-a57d-95243aa4ca06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameXML">
+      <UniqueIdentifier>{d24fb245-acf9-4ec9-95c7-76e359479e45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -349,5 +352,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="GameXML\EQUI_OptionsWindow.xml">
+      <Filter>GameXML</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
