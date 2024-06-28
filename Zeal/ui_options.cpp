@@ -4,6 +4,7 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
+#include "target_ring.h"
 
 
 float GetSensitivityFromSlider(int value)
@@ -33,6 +34,7 @@ void ui_options::InitUI()
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_SpellbookAutoStand", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_UseOldSens", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->camera_mods->set_old_sens(wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_TargetRing", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->set_enabled(wnd->Checked); });
 	ui->AddComboCallback(Zeal::EqGame::Windows->Options, "Zeal_Timestamps_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->set_timestamp(value); });
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->set_pan_delay(value*4); 
@@ -76,6 +78,7 @@ void ui_options::InitUI()
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_ThirdPersonLabel_Y");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FoVValueLabel");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_HoverTimeout_Value");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_VersionValue");
 	
 	/*set the current states*/
 	UpdateOptions();
@@ -116,6 +119,8 @@ void ui_options::UpdateOptions()
 	ui->SetChecked("Zeal_SpellbookAutoStand", ZealService::get_instance()->movement->spellbook_autostand);
 	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled);
 	ui->SetChecked("Zeal_UseOldSens", ZealService::get_instance()->camera_mods->use_old_sens);
+	ui->SetChecked("Zeal_TargetRing", ZealService::get_instance()->target_ring->enabled);
+	ui->SetLabelValue("Zeal_VersionValue", "%s", ZEAL_VERSION);
 
 }
 

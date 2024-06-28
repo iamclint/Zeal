@@ -382,23 +382,23 @@ void TargetRing::callback_render()
 
 void TargetRing::set_enabled(bool _enabled)
 {
-	ZealService::get_instance()->ini->setValue<bool>("Zeal", "TargetRing", _enabled);
-	enabled = _enabled;
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "TargetRing", _enabled);
+    enabled = _enabled;
+    Zeal::EqGame::print_chat("Target ring is %s", enabled ? "Enabled" : "Disabled");
 }
 
 //don't get too excited this isn't functioning
 TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
-	if (!ini->exists("Zeal", "TargetRing"))
-		ini->setValue<bool>("Zeal", "TargetRing", false);
-	enabled = ini->getValue<bool>("Zeal", "TargetRing");
-	zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::RenderUI);
-	zeal->commands_hook->add("/targetring", {}, "Toggles target ring",
-		[this](std::vector<std::string>& args) {
-			set_enabled(!enabled);
-			Zeal::EqGame::print_chat("Target ring is %s", enabled ? "Enabled" : "Disabled");
-			return true;
-		});
+    if (!ini->exists("Zeal", "TargetRing"))
+        ini->setValue<bool>("Zeal", "TargetRing", false);
+    enabled = ini->getValue<bool>("Zeal", "TargetRing");
+    zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::RenderUI);
+    zeal->commands_hook->add("/targetring", {}, "Toggles target ring",
+        [this](std::vector<std::string>& args) {
+            set_enabled(!enabled);
+            return true;
+        });
 }
 
 TargetRing::~TargetRing()
