@@ -17,6 +17,7 @@ void __fastcall GetZoneInfoFromNetwork(int* t, int unused, char* p1)
 		if (retry_count >= 15 && !t)
 		{
 			MessageBoxA(NULL, "Zeal attempted to retry GetZoneInfoFromNetwork but has failed", "Crash", 0);
+			break;
 		}
 	}
 }
