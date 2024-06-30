@@ -195,9 +195,6 @@
     <ClInclude Include="floating_damage.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
-    <ClInclude Include="directx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="target_ring.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
@@ -206,6 +203,12 @@
     </ClInclude>
     <ClInclude Include="miniz.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="patches.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="directx.h">
+      <Filter>Header Files\hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -343,6 +346,9 @@
     </ClCompile>
     <ClCompile Include="miniz.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="patches.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

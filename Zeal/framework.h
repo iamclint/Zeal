@@ -36,6 +36,7 @@
 #include "physics.h"
 #include "target_ring.h"
 #include "crash_handler.h"
+#include "patches.h"
 #include "Zeal.h" 
 
 extern HMODULE this_module;

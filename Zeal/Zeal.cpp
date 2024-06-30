@@ -31,8 +31,7 @@ ZealService::ZealService()
 	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
 	tooltips = std::make_shared<tooltip>(this, ini.get());
 	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
-	
-	this->apply_patches();
+	game_patches = std::make_shared<patches>();
 
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());
 	cycle_target = std::make_shared<CycleTarget>(this);
@@ -143,18 +142,6 @@ void ZealService::basic_binds()
 	}); //handle escape
 }
 
-
-void ZealService::apply_patches()
-{
-	const char sit_stand_patch[] = { (char)0xEB, (char)0x1A };
-	mem::write(0x42d14d, sit_stand_patch); //fix pet sit shortcut crash (makes default return of function the sit/stand button not sure why its passing in 0)
-
-
-	//disable client sided mana ticking
-	mem::set(0x4C3F93, 0x90, 7);
-	mem::set(0x4C7642, 0x90, 7);
-	mem::write<BYTE>(0x4A14CF, 0xEB); //don't print Your XML files are not compatible with current EverQuest files, certain windows may not perform correctly.  Use "/loadskin Default 1" to load the EverQuest default skin.
-}
 
 ZealService* ZealService::get_instance()
 {

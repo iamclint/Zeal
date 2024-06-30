@@ -67,7 +67,6 @@ void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_
 
 void ItemDisplay::CleanUI()
 {
-		Zeal::EqGame::print_debug("Clean UI ItemDisplay");
 		for (auto& w : windows)
 		{
 			if (w)

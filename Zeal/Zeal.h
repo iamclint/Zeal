@@ -38,6 +38,7 @@ public:
 	std::shared_ptr<Melody> melody = nullptr;
 	std::shared_ptr<AutoFire> autofire = nullptr;
 	std::shared_ptr<TargetRing> target_ring = nullptr;
+	std::shared_ptr<patches> game_patches = nullptr;
 	
 	ZealService();
 	~ZealService();
@@ -50,7 +51,5 @@ private:
 	std::thread render_thread;
 	BYTE orig_render_data[11];
 	void basic_binds();
-	void apply_patches();
-	void RenderThread();
 };
 
