@@ -5207,14 +5207,15 @@
       <Y>1</Y>
     </Location>
     <Size>
-      <CX>50</CX>
+      <CX>165</CX>
       <CY>16</CY>
     </Size>
-    <Text>0.0</Text>
+    <Text>Not Installed</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
-      <B>255</B>
+      <B>0</B>
+      <Alpha>255</Alpha>
     </TextColor>
     <NoWrap>true</NoWrap>
     <AlignCenter>false</AlignCenter>
