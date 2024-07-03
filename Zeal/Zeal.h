@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-#define ZEAL_VERSION "0.2.97"
+#define ZEAL_VERSION "0.3.00"
 static std::atomic<bool> exitFlag(false);
 class ZealService
 {

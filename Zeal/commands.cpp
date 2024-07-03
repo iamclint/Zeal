@@ -157,7 +157,13 @@ ChatCommands::ChatCommands(ZealService* zeal)
 	add("/autoinventory", { "/autoinv", "/ai" }, "Puts whatever is on your cursor into your inventory.",
 		[](std::vector<std::string>& args) {
 			if (Zeal::EqGame::can_inventory_item(Zeal::EqGame::get_char_info()->CursorItem))
+			{
 				Zeal::EqGame::EqGameInternal::auto_inventory(Zeal::EqGame::get_char_info(), &Zeal::EqGame::get_char_info()->CursorItem, 0);
+			}
+			else
+			{
+				Zeal::EqGame::print_chat(USERCOLOR_LOOT, "Cannot auto inventory %s not enough bag space.", Zeal::EqGame::get_char_info()->CursorItem->Name);
+			}
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
 	add("/testinventory", { }, "Test cursor item to see if it can be inventoried",

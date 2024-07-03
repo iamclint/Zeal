@@ -257,7 +257,13 @@ void Binds::add_binds()
 		if (key_down)
 		{
 			if (Zeal::EqGame::can_inventory_item(Zeal::EqGame::get_char_info()->CursorItem))
+			{
 				Zeal::EqGame::EqGameInternal::auto_inventory(Zeal::EqGame::get_char_info(), &Zeal::EqGame::get_char_info()->CursorItem, 0);
+			}
+			else
+			{
+				Zeal::EqGame::print_chat(USERCOLOR_LOOT, "Cannot auto inventory %s not enough bag space.", Zeal::EqGame::get_char_info()->CursorItem->Name);
+			}
 		}
 	});
 
