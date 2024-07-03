@@ -18,10 +18,15 @@
 ### Commands
 ___
 - `/targetring`
+  - **Arguments:** `float size`
+  - **Example:** `/targetring 0.25`
+  - **Description:** toggles targetring on/off if float is specified it sets the size.
+
+- `/resetexp`
   - **Arguments:** ``
-  - **Example:** `/targetring`
-  - **Description:** Currently toggles on/off the target ring.
-    
+  - **Example:** `/resetexp`
+  - **Description:** resets the exp per hour calculations.
+  - 
 - `/timer`
   - **Arguments:** `int`
   - **Example:** `/timer 10`
