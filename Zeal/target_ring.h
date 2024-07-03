@@ -26,12 +26,15 @@ class TargetRing
 public:
 	void callback_render();
 	void set_enabled(bool enable);
+	void set_pct(float pct);
 	void render_ring(Vec3 position, float size, DWORD color);
 	bool enabled;
 	TargetRing(class ZealService* zeal, class IO_ini* ini);
 	~TargetRing();
 private:
+	float ring_pct;
 	std::vector<RenderState> render_states;
+	void load_ini(class IO_ini* ini);
 	void store_render_states();
 	void reset_render_states();
 };

@@ -82,6 +82,8 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+		bool can_inventory_item(Zeal::EqStructures::EQITEMINFO* item);
+		bool can_equip_item(Zeal::EqStructures::EQITEMINFO* item);
 		void print_debug(const char* format, ...);
 		UINT get_eq_time();
 		int get_eq_main();

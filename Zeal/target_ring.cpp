@@ -2,7 +2,7 @@
 #include "EqPackets.h"
 #include "Zeal.h"
 #include "EqAddresses.h"
-
+#include "string_util.h"
 #define NUM_VERTICES 4
 
 struct Vertex {
@@ -266,10 +266,12 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
     IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
     if (!device)
         return;
-
-    //float inner =size - (size * .25);
-    //const float innerRadius = inner>0 ? inner : 0;  // Adjust these values for ring size
-    const float innerRadius = 0;
+    float innerRadius = 0;
+    if (ring_pct > 0.01f && ring_pct<1.0f)
+    {
+        float inner = size - (size * ring_pct);
+        innerRadius = inner > 0 ? inner : 0;  // Adjust these values for ring size
+    }
     const float outerRadius = size;
     const int numSegments = 32;     // Adjust for smoothness of the ring
 
@@ -386,16 +388,42 @@ void TargetRing::set_enabled(bool _enabled)
     enabled = _enabled;
     Zeal::EqGame::print_chat("Target ring is %s", enabled ? "Enabled" : "Disabled");
 }
+void TargetRing::set_pct(float pct)
+{
+    ZealService::get_instance()->ini->setValue<float>("Zeal", "RingPCT", pct);
+    ring_pct = pct;
+    if (!enabled)
+        set_enabled(true);
+}
+
+void TargetRing::load_ini(IO_ini* ini)
+{
+    if (!ini->exists("Zeal", "TargetRing"))
+        ini->setValue<bool>("Zeal", "TargetRing", false);
+    if (!ini->exists("Zeal", "RingPCT"))
+        ini->setValue<float>("Zeal", "RingPCT", 0);
+
+    enabled = ini->getValue<bool>("Zeal", "TargetRing");
+    ring_pct = ini->getValue<float>("Zeal", "RingPCT");
+}
 
 //don't get too excited this isn't functioning
 TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
-    if (!ini->exists("Zeal", "TargetRing"))
-        ini->setValue<bool>("Zeal", "TargetRing", false);
-    enabled = ini->getValue<bool>("Zeal", "TargetRing");
+    
+    load_ini(ini);
     zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::RenderUI);
     zeal->commands_hook->add("/targetring", {}, "Toggles target ring",
         [this](std::vector<std::string>& args) {
+      
+            if (args.size() == 2) 
+            {
+                float pct = 0;
+                if (!Zeal::String::tryParse(args[1], &pct))
+                    return true;
+                set_pct(pct);
+                return true;
+            }
             set_enabled(!enabled);
             return true;
         });

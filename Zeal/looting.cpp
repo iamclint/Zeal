@@ -114,6 +114,13 @@ void looting::looted_item()
 				else if (Zeal::EqGame::Windows->Loot->Item[i]->NoDrop != 0)
 					loot = true;
 
+				if (loot && !Zeal::EqGame::can_inventory_item(Zeal::EqGame::Windows->Loot->Item[i]))
+				{
+					Zeal::EqGame::print_chat("Cannot loot %s - not enough inventory space", Zeal::EqGame::Windows->Loot->Item[i]->Name);
+					loot_all = false;
+					loot = false;
+				}
+
 				if (loot)
 				{
 					Zeal::EqGame::Windows->Loot->RequestLootSlot(i, true);

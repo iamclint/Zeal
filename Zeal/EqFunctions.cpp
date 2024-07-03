@@ -26,7 +26,100 @@ namespace Zeal
 				y += 360;
 			return y;
 		}
+		std::string equipSlotToString(int slot) {
+			switch (slot) {
+			case 0: return "LeftEar";
+			case 1: return "Head";
+			case 2: return "Face";
+			case 3: return "RightEar";
+			case 4: return "Neck";
+			case 5: return "Shoulder";
+			case 6: return "Arms";
+			case 7: return "Back";
+			case 8: return "LeftWrist";
+			case 9: return "RightWrist";
+			case 10: return "Range";
+			case 11: return "Hands";
+			case 12: return "Primary";
+			case 13: return "Secondary";
+			case 14: return "LeftFinger";
+			case 15: return "RightFinger";
+			case 16: return "Chest";
+			case 17: return "Legs";
+			case 18: return "Feet";
+			case 19: return "Waist";
+			case 20: return "Ammo";
+			default: return "Unknown";
+			}
+		}
+		bool can_equip_item(Zeal::EqStructures::EQITEMINFO* item)
+		{
+			Zeal::EqStructures::EQCHARINFO* c = Zeal::EqGame::get_char_info();
+			if (!item || !c)
+				return false;
+			
+			using FunctionType2 = bool(__thiscall*)(Zeal::EqStructures::EQCHARINFO* char_info, Zeal::EqStructures::EQITEMINFO* iItem);
+			using FunctionType  = bool(__cdecl*)(Zeal::EqStructures::EQCHARINFO* char_info, UINT equipable_slots, UINT slot, Zeal::EqStructures::EQITEMINFO * iItem);
+			FunctionType check_loc = reinterpret_cast<FunctionType>(0x4F0DB4);
+			FunctionType2 can_use_item = reinterpret_cast<FunctionType2>(0x4BB8E8);
+			if (!can_use_item(c, item))
+				return false;
+			for (int i = 0; i < EQ_NUM_INVENTORY_SLOTS; i++)
+			{
+				if (check_loc(c, item->EquipableSlots, i+1, item) && !c->InventoryItem[i])
+				{
+					//print_chat("equipable? slot: %i  %s   %i", i, equipSlotToString(i).c_str(), c->InventoryItem[i]);
+					return true;
+				}
+					
+			}
+			return false;
+		}
 
+		bool can_stack(Zeal::EqStructures::EQITEMINFO* base_item, Zeal::EqStructures::EQITEMINFO* added_item)
+		{
+			if (!base_item || !added_item)
+				return false;
+			if (base_item->ID == added_item->ID && base_item->Common.IsStackable)
+			{
+				if (base_item->Common.StackCount + added_item->Common.StackCount <= 20)
+					return true;
+			}
+			return false;
+		}
+
+		bool can_inventory_item(Zeal::EqStructures::EQITEMINFO* item)
+		{
+			Zeal::EqStructures::EQCHARINFO* c = Zeal::EqGame::get_char_info();
+			if (!item || !c)
+				return false;
+
+			if (can_equip_item(item))
+				return true;
+
+			for (int i = 0; i < EQ_NUM_INVENTORY_PACK_SLOTS; i++)
+			{
+				Zeal::EqStructures::_EQITEMINFO* inventory_item = c->InventoryPackItem[i];
+				if (!inventory_item)
+					return true;
+
+				if (inventory_item && inventory_item->Type == 1 && inventory_item->Container.Capacity > 0 && inventory_item->Container.SizeCapacity>=item->Size && item->Type!=1)
+				{
+					if (can_stack(inventory_item, item))
+						return true;
+					for (int b = 0; b < inventory_item->Container.Capacity; b++)
+					{
+						Zeal::EqStructures::_EQITEMINFO* bag_item = inventory_item->Container.Item[b];
+						if (!bag_item)
+							return true;
+						if (can_stack(bag_item, item))
+							return true;
+					}
+				}
+			
+			}
+			return false;
+		}
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor)
 		{
 			DWORD addr = *(DWORD*)0x7f99c8; //game pointer to function
