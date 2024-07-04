@@ -162,7 +162,8 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			else
 			{
-				Zeal::EqGame::print_chat(USERCOLOR_LOOT, "Cannot auto inventory %s not enough bag space.", Zeal::EqGame::get_char_info()->CursorItem->Name);
+				if (Zeal::EqGame::get_char_info()->CursorItem)
+					Zeal::EqGame::print_chat(USERCOLOR_LOOT, "Cannot auto inventory %s not enough bag space.", Zeal::EqGame::get_char_info()->CursorItem->Name);
 			}
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
