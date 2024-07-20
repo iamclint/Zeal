@@ -34,7 +34,7 @@ void tooltip::set_alt_all_containers(bool enabled)
         mem::write<byte[2]>(0x416d1d, { 0x74, 0x74 });
         mem::write<byte[2]>(0x416D22, { 0x74, 0x6F });
     }
-    Zeal::EqGame::print_chat("Tooltips for all containers while holding alt: %s", all_containers ? "enabled" : "disabled");
+    //Zeal::EqGame::print_chat("Tooltips for all containers while holding alt: %s", all_containers ? "enabled" : "disabled");
 }
 void tooltip::LoadSettings(IO_ini* ini)
 {

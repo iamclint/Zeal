@@ -141,7 +141,14 @@ void log_hook(char* data)
 void named_pipe::chat_msg(const char* data, int color_index)
 {
 	try {
-		nlohmann::json jd = { {"type", color_index }, {"text", data} };
+		std::string sanitized_data(data);
+
+		//sanitization: Remove non-printable characters
+		sanitized_data.erase(std::remove_if(sanitized_data.begin(), sanitized_data.end(), [](unsigned char c) {
+			return !std::isprint(c);
+			}), sanitized_data.end());
+
+		nlohmann::json jd = { {"type", color_index }, {"text", sanitized_data} };
 		write(jd.dump(), pipe_data_type::log);
 	}
 	catch (const std::exception& e) {

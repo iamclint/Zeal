@@ -453,9 +453,9 @@ namespace Zeal
 			{
 				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*)>(0x4b9450)(this);
 			}
-			int cast(UINT gem, short spell_id, int* item, short un)
+			int cast(UINT gem, short spell_id, int* item, short item_slot)
 			{
-				return reinterpret_cast<int(__thiscall*)(EQCHARINFO*, UINT, short, int*, short)>(0x4c483b)(this, gem, spell_id, item, un);
+				return reinterpret_cast<int(__thiscall*)(EQCHARINFO*, UINT, short, int*, short)>(0x4c483b)(this, gem, spell_id, item, item_slot);
 			}
 			void stop_cast(UINT reason, short spell_id)
 			{

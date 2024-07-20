@@ -486,8 +486,11 @@ void CameraMods::callback_main()
             }
             else
             {
-                toggle_zeal_cam(true);
-                desired_zoom = zoom_speed;
+                if (get_camera_view() != Zeal::EqEnums::CameraView::ZealCam)
+                {
+                    toggle_zeal_cam(true);
+                    desired_zoom = zoom_speed;
+                }
             }
         }
     }

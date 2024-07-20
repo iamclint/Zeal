@@ -154,6 +154,50 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
+	add("/useitem", {}, "Use an item's right click function arugment is 0-29 which indicates the slot",
+		[](std::vector<std::string>& args) {
+			Zeal::EqStructures::EQCHARINFO* chr = Zeal::EqGame::get_char_info();
+			if (!chr)
+			{
+				Zeal::EqGame::print_chat(USERCOLOR_SHOUT,"[Fatal Error] Failed to get charinfo for useitem!");
+				return true;
+			}
+			int item_index = 0;
+			if (args.size() > 1 && Zeal::String::tryParse(args[1], &item_index))
+			{
+				Zeal::EqStructures::EQITEMINFO* item = nullptr;
+				if (item_index > 29) //just early out of it this is beyond your inventory indices
+				{
+					Zeal::EqGame::print_chat("useitem requires an item slot between 0 and 29, you tried to use %i", item_index);
+					return true;
+				}
+				if (item_index < 21)
+					item = chr->InventoryItem[item_index];
+				else
+					item = chr->InventoryPackItem[item_index-22]; //-22 to make it back to 0 index
+
+				if (!item)
+				{
+					Zeal::EqGame::print_chat("There isn't an item at %i", item_index);
+					return true;
+				}
+				if (item->Common.SpellId)
+				{
+					chr->cast(0xA, 0, (int*)&item, item_index);
+				}
+				else
+				{
+					if (item)
+						Zeal::EqGame::print_chat("item %s does not have a spell attached to it.", item->Name);
+				}
+			}
+			else
+			{
+				Zeal::EqGame::print_chat("useitem requires an item slot between 0 and 29");
+			}
+			return true;
+		}
+	);
 	add("/autoinventory", { "/autoinv", "/ai" }, "Puts whatever is on your cursor into your inventory.",
 		[](std::vector<std::string>& args) {
 			if (Zeal::EqGame::can_inventory_item(Zeal::EqGame::get_char_info()->CursorItem))

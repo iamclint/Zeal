@@ -370,7 +370,7 @@ void TargetRing::callback_render()
     if (!enabled)
         return;
 	Zeal::EqStructures::Entity* target =  Zeal::EqGame::get_target();
-    if (!target || !target->ActorInfo)
+    if (!target || !target->ActorInfo || !target->ActorInfo->ViewActor_)
         return;
     float radius = target->ActorInfo->ViewActor_->BoundingRadius;
     if (radius > 30)
