@@ -183,7 +183,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				}
 				if (item->Common.SpellId)
 				{
-					chr->cast(0xA, 0, (int*)&item, item_index);
+					chr->cast(0xA, 0, (int*)&item, item_index < 21 ? item_index+1 : item_index);
 				}
 				else
 				{
