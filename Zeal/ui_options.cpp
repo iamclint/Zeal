@@ -68,6 +68,11 @@ void ui_options::InitUI()
 		ZealService::get_instance()->tooltips->set_timer(val);
 		ui->SetLabelValue("Zeal_HoverTimeout_Value", "%i ms", val);
 	});
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_TargetRingFill_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		float val = static_cast<float>(value) / 100.0f;
+		ZealService::get_instance()->target_ring->set_pct(val);
+		ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", val);
+		});
 
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_PanDelayValueLabel");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonLabel_X");
@@ -77,6 +82,7 @@ void ui_options::InitUI()
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FoVValueLabel");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_HoverTimeout_Value");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_VersionValue");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_TargetRingFill_Value");
 	
 	/*set the current states*/
 	UpdateOptions();
@@ -119,6 +125,8 @@ void ui_options::UpdateOptions()
 	ui->SetChecked("Zeal_UseOldSens", ZealService::get_instance()->camera_mods->use_old_sens);
 	ui->SetChecked("Zeal_TargetRing", ZealService::get_instance()->target_ring->enabled);
 	ui->SetLabelValue("Zeal_VersionValue", "%s", ZEAL_VERSION);
+	ui->SetSliderValue("Zeal_TargetRingFill_Slider", static_cast<int>(ZealService::get_instance()->target_ring->get_ring_pct() * 100.0f));
+	ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", ZealService::get_instance()->target_ring->get_ring_pct());
 
 }
 

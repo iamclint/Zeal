@@ -4681,7 +4681,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>27</Y>
+      <Y>62</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4702,7 +4702,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>47</Y>
+      <Y>82</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4715,7 +4715,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>297</X>
-      <Y>47</Y>
+      <Y>82</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4737,7 +4737,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>200</X>
-      <Y>153</Y>
+      <Y>188</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4759,7 +4759,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>177</Y>
+      <Y>212</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4780,7 +4780,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>197</Y>
+      <Y>232</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4793,7 +4793,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>196</Y>
+      <Y>231</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4815,7 +4815,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>215</Y>
+      <Y>250</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4836,7 +4836,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>235</Y>
+      <Y>270</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4849,7 +4849,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>234</Y>
+      <Y>269</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4871,7 +4871,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>256</Y>
+      <Y>291</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4892,7 +4892,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>276</Y>
+      <Y>311</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4905,7 +4905,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>275</Y>
+      <Y>310</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4927,7 +4927,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>294</Y>
+      <Y>329</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4948,7 +4948,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>314</Y>
+      <Y>349</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4961,7 +4961,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>313</Y>
+      <Y>348</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4982,7 +4982,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>69</Y>
+      <Y>104</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5003,7 +5003,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>89</Y>
+      <Y>124</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -5015,8 +5015,8 @@
     <ScreenID>Zeal_FoVValueLabel</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>287</X>
-      <Y>89</Y>
+      <X>297</X>
+      <Y>124</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -5038,7 +5038,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>111</Y>
+      <Y>146</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5059,7 +5059,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>131</Y>
+      <Y>166</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -5071,8 +5071,8 @@
     <ScreenID>Zeal_HoverTimeout_Value</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>287</X>
-      <Y>131</Y>
+      <X>297</X>
+      <Y>166</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -5221,6 +5221,62 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>false</AlignRight>
   </Label>
+  <!-- Zeal Target Ring Fill slider -->
+  <Label item="Zeal_TargetRingFill_Label">
+    <ScreenID>Zeal_TargetRingFill_Label</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>197</X>
+      <Y>20</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>14</CY>
+    </Size>
+    <Text>Target Ring Fill</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>false</AlignRight>
+  </Label>
+  <Slider item="Zeal_TargetRingFill_Slider">
+    <ScreenID>Zeal_TargetRingFill_Slider</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>197</X>
+      <Y>40</Y>
+    </Location>
+    <Size>
+      <CX>100</CX>
+      <CY>16</CY>
+    </Size>
+    <SliderArt>SDT_DefSlider</SliderArt>
+  </Slider>
+  <Label item="Zeal_TargetRingFill_Value">
+    <ScreenID>Zeal_TargetRingFill_Value</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>297</X>
+      <Y>40</Y>
+    </Location>
+    <Size>
+      <CX>50</CX>
+      <CY>16</CY>
+    </Size>
+    <Text>0.0</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>true</AlignRight>
+  </Label>
   <!-- end -->
   <Page item="OptionsZealPage">
     <ScreenID>OptionsZealPage</ScreenID>
@@ -5280,6 +5336,9 @@
     <Pieces>Zeal_TargetRing</Pieces>
     <Pieces>Zeal_VersionLabel</Pieces>
     <Pieces>Zeal_VersionValue</Pieces>
+    <Pieces>Zeal_TargetRingFill_Label</Pieces>
+    <Pieces>Zeal_TargetRingFill_Slider</Pieces>
+    <Pieces>Zeal_TargetRingFill_Value</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>
