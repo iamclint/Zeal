@@ -31,6 +31,10 @@ public:
 	bool enabled;
 	TargetRing(class ZealService* zeal, class IO_ini* ini);
 	~TargetRing();
+
+	// New getter method for ring_pct
+	float get_ring_pct() const { return ring_pct; }
+
 private:
 	float ring_pct;
 	std::vector<RenderState> render_states;
