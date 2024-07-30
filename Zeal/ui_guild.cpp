@@ -31,9 +31,9 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
 	ui = mgr;
 	guild = nullptr;
-	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
-	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
-		zeal->commands_hook->add("/read", {}, "",
+	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
+		zeal->commands_hook->Add("/read", {}, "",
 			[this](std::vector<std::string>& args) {
 				if (members)
 				{
@@ -51,7 +51,7 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 				}
 				return true;
 			});
-		zeal->commands_hook->add("/sortskill", {}, "",
+		zeal->commands_hook->Add("/sortskill", {}, "",
 			[this](std::vector<std::string>& args) {
 				Zeal::EqUI::ListWnd* wnd = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Skills->GetChildItem("SkillList");
 				if (wnd)
@@ -64,7 +64,7 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 				}
 			return true;
 			});
-		zeal->commands_hook->add("/guildwindow", {}, "Toggle guild management window",
+		zeal->commands_hook->Add("/guildwindow", {}, "Toggle guild management window",
 			[this, mgr](std::vector<std::string>& args) {
 					if (guild)
 					{

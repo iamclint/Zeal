@@ -50,5 +50,5 @@ void Alarm::callback_main()
 
 Alarm::Alarm(ZealService* zeal)
 {
-	zeal->callbacks->add_generic([this]() { callback_main(); });
+	zeal->callbacks->AddGeneric([this]() { callback_main(); });
 }

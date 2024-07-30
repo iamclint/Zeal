@@ -412,8 +412,8 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
     
     load_ini(ini);
-    zeal->callbacks->add_generic([this]() { callback_render(); }, callback_type::RenderUI);
-    zeal->commands_hook->add("/targetring", {}, "Toggles target ring",
+    zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
+    zeal->commands_hook->Add("/targetring", {}, "Toggles target ring",
         [this](std::vector<std::string>& args) {
       
             if (args.size() == 2) 

@@ -335,8 +335,8 @@ named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 		ini->setValue<int>("Zeal", "PipeDelay", 100);
 	pipe_delay = ini->getValue<int>("Zeal", "PipeDelay");
 
-	zeal->callbacks->add_generic([this]() { main_loop(); });
-	zeal->commands_hook->add("/pipedelay", {}, "delay between the pipe loop output in milliseconds",
+	zeal->callbacks->AddGeneric([this]() { main_loop(); });
+	zeal->commands_hook->Add("/pipedelay", {}, "delay between the pipe loop output in milliseconds",
 		[this](std::vector<std::string>& args) {
 			if (args.size() > 1)
 			{
@@ -350,7 +350,7 @@ named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 			}
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
-	zeal->commands_hook->add("/pipe", {}, "outputs text to a pipe",
+	zeal->commands_hook->Add("/pipe", {}, "outputs text to a pipe",
 		[this](std::vector<std::string>& args) {
 			nlohmann::json data = { {"text", ArgsToString(args, " ")} };
 			write(data.dump(), pipe_data_type::custom);

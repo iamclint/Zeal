@@ -309,9 +309,9 @@ void Binds::on_zone()
 
 Binds::Binds(ZealService* zeal)
 {
-	zeal->callbacks->add_generic([this]() { main_loop(); }, callback_type::MainLoop);
-	zeal->callbacks->add_generic([this]() { on_zone(); }, callback_type::Zone);
-	zeal->callbacks->add_command([this](UINT opcode, bool state) { return execute_cmd(opcode, state); }, callback_type::ExecuteCmd);
+	zeal->callbacks->AddGeneric([this]() { main_loop(); }, callback_type::MainLoop);
+	zeal->callbacks->AddGeneric([this]() { on_zone(); }, callback_type::Zone);
+	zeal->callbacks->AddCommand([this](UINT opcode, bool state) { return execute_cmd(opcode, state); }, callback_type::ExecuteCmd);
 	for (int i = 0; i < 128; i++)
 		KeyMapNames[i] = *(char**)(0x611220 + (i * 4)); //copy the original short names to the new array
 	mem::write(0x52507A, (int)KeyMapNames);//write ini keymap

@@ -53,12 +53,12 @@ tooltip::tooltip(ZealService* zeal, IO_ini* ini)
 	LoadSettings(ini);
     set_alt_all_containers(all_containers);
     set_timer(hover_timeout);
-    zeal->commands_hook->add("/tooltipall", {}, "Toggle showing all open containers tooltips when holding alt.",
+    zeal->commands_hook->Add("/tooltipall", {}, "Toggle showing all open containers tooltips when holding alt.",
         [this](std::vector<std::string>& args) {
             set_alt_all_containers(!all_containers);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
-    zeal->commands_hook->add("/tooltiptimer", { "/ttimer"}, "Set the time limit before a tooltip appears.",
+    zeal->commands_hook->Add("/tooltiptimer", { "/ttimer"}, "Set the time limit before a tooltip appears.",
         [this](std::vector<std::string>& args) {
             int timeout = 0;
             if (args.size() > 1 && Zeal::String::tryParse(args[1], &timeout))

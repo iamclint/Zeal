@@ -10,7 +10,7 @@ void init()
     ZealService zeal;
     while (!exitFlag.load(std::memory_order_acquire))
     {
-        if (GetAsyncKeyState(VK_PAUSE) & 0x8000 && GetAsyncKeyState(VK_SHIFT) & 0x8000)
+        if (GetAsyncKeyState(VK_PAUSE) & 0x8000 && GetAsyncKeyState(VK_SHIFT) & 0x8000 && GetAsyncKeyState(VK_CONTROL) & 0x8000)
             break;
         Sleep(5);
     }

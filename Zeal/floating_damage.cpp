@@ -192,8 +192,8 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 	if (!ini->exists("Zeal", "FloatingDamage"))
 		ini->setValue<bool>("Zeal", "FloatingDamage", true);
 	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
-	zeal->callbacks->add_generic([this]() { callback_deferred(); }, callback_type::AddDeferred);
-	zeal->commands_hook->add("/fcd", {}, "Toggles floating combat text or adjusts the font size with argument",
+	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::AddDeferred);
+	zeal->commands_hook->Add("/fcd", {}, "Toggles floating combat text or adjusts the font size with argument",
 		[this, ini](std::vector<std::string>& args) {
 			int new_size = 5;
 			if (args.size() == 2)

@@ -23,10 +23,10 @@ enum class callback_type
 class CallbackManager
 {
 public:
-	void add_generic(std::function<void()> callback_function, callback_type fn = callback_type::MainLoop);
-	void add_packet(std::function<bool(UINT, char*, UINT)> callback_function, callback_type fn = callback_type::WorldMessage);
-	void add_command(std::function<bool(UINT, BOOL)> callback_function, callback_type fn = callback_type::ExecuteCmd);
-	void add_delayed(std::function<void()> callback_function, int ms);
+	void AddGeneric(std::function<void()> callback_function, callback_type fn = callback_type::MainLoop);
+	void AddPacket(std::function<bool(UINT, char*, UINT)> callback_function, callback_type fn = callback_type::WorldMessage);
+	void AddCommand(std::function<bool(UINT, BOOL)> callback_function, callback_type fn = callback_type::ExecuteCmd);
+	void AddDelayed(std::function<void()> callback_function, int ms);
 	void invoke_generic(callback_type fn);
 	bool invoke_packet(callback_type fn, UINT opcode, char* buffer, UINT len);
 	bool invoke_command(callback_type fn, UINT opcode, bool state);

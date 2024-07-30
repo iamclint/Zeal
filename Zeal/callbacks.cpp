@@ -48,20 +48,20 @@ void CallbackManager::invoke_generic(callback_type fn)
 			f();
 }
 
-void CallbackManager::add_delayed(std::function<void()> callback_function, int ms)
+void CallbackManager::AddDelayed(std::function<void()> callback_function, int ms)
 {
 	delayed_functions.push_back({ GetTickCount64() + ms, callback_function });
 }
 
-void CallbackManager::add_generic(std::function<void()> callback_function, callback_type fn)
+void CallbackManager::AddGeneric(std::function<void()> callback_function, callback_type fn)
 {
 	generic_functions[fn].push_back(callback_function);
 }
-void CallbackManager::add_packet(std::function<bool(UINT, char*, UINT)> callback_function, callback_type type)
+void CallbackManager::AddPacket(std::function<bool(UINT, char*, UINT)> callback_function, callback_type type)
 {
 	packet_functions[type].push_back(callback_function);
 }
-void CallbackManager::add_command(std::function<bool(UINT, BOOL)> callback_function, callback_type type)
+void CallbackManager::AddCommand(std::function<bool(UINT, BOOL)> callback_function, callback_type type)
 {
 	cmd_functions[type].push_back(callback_function);
 }

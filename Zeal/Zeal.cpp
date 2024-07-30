@@ -31,6 +31,7 @@ ZealService::ZealService()
 	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
 	tooltips = std::make_shared<tooltip>(this, ini.get());
 	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
+	give = std::make_shared<NPCGive>(this, ini.get());
 	game_patches = std::make_shared<patches>();
 
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());

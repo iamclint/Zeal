@@ -16,6 +16,5 @@ private:
 	int current_index = 0;  // Active song index. -1 if not started yet.
 	std::vector<int> songs; // Gem indices (base 0) for melody.
 	int retry_count = 0; // Tracks unsuccessful song casts.
-
 };
 

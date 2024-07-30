@@ -80,11 +80,11 @@ void ui_hotbutton::Render()
 ui_hotbutton::ui_hotbutton(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
 	ui = mgr;
-	zeal->callbacks->add_generic([this]() { Render();  }, callback_type::Render);
-	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
+	zeal->callbacks->AddGeneric([this]() { Render();  }, callback_type::Render);
+	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	zeal->hooks->Add("DoHotButton", 0x4209bd, DoHotButton, hook_type_detour);
 	zeal->hooks->Add("SetCheck", 0x595790, SetCheck, hook_type_detour);
-	zeal->commands_hook->add("/timer", { }, "Sets a timer for the last pressed hotbutton to keep it visually pressed in duration is in deciseconds (10=1 second).",
+	zeal->commands_hook->Add("/timer", { }, "Sets a timer for the last pressed hotbutton to keep it visually pressed in duration is in deciseconds (10=1 second).",
 		[this](std::vector<std::string>& args) {
 
 			if (args.size() > 1)

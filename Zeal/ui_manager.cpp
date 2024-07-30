@@ -176,8 +176,8 @@ void ui_manager::init_ui()
 
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 {
-	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
-	zeal->callbacks->add_generic([this]() { init_ui(); }, callback_type::InitUI);
+	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
 
 	bank = std::make_shared<ui_bank>(zeal, ini, this);
 	options = std::make_shared<ui_options>(zeal, ini, this);

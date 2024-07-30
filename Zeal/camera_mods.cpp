@@ -647,13 +647,13 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     lastTime = std::chrono::steady_clock::now();
     fps = 0;
     height = 0;
-    zeal->callbacks->add_generic([this]() { callback_main();  });
-    zeal->callbacks->add_generic([this]() { callback_render();  }, callback_type::Render);
-    zeal->callbacks->add_generic([this]() { callback_zone(); }, callback_type::Zone);
-    zeal->callbacks->add_generic([this]() { callback_endmainloop(); }, callback_type::EndMainLoop);
+    zeal->callbacks->AddGeneric([this]() { callback_main();  });
+    zeal->callbacks->AddGeneric([this]() { callback_render();  }, callback_type::Render);
+    zeal->callbacks->AddGeneric([this]() { callback_zone(); }, callback_type::Zone);
+    zeal->callbacks->AddGeneric([this]() { callback_endmainloop(); }, callback_type::EndMainLoop);
 
     //zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
-    zeal->callbacks->add_generic([this]() { callback_characterselect(); }, callback_type::EndMainLoop);
+    zeal->callbacks->AddGeneric([this]() { callback_characterselect(); }, callback_type::EndMainLoop);
     zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
@@ -661,7 +661,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     FARPROC eqfx = GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dSetCameraLens");
     if (eqfx != NULL) 
         zeal->hooks->Add("SetCameraLens", (int)eqfx, SetCameraLens, hook_type_detour);
-    zeal->commands_hook->add("/fov", { }, "Set your field of view requires a value between 45 and 90.",
+    zeal->commands_hook->Add("/fov", { }, "Set your field of view requires a value between 45 and 90.",
         [this](std::vector<std::string>& args) {
             Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();
             if (ci)
@@ -685,7 +685,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
-    zeal->commands_hook->add("/pandelay", { "/pd" }, "Adjust the delay required before left click panning happens in zeal cam.",
+    zeal->commands_hook->Add("/pandelay", { "/pd" }, "Adjust the delay required before left click panning happens in zeal cam.",
         [this, ini](std::vector<std::string>& args) {
             int delay = 200;
             if (args.size() == 2)
@@ -700,7 +700,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 Zeal::EqGame::print_chat("Invalid arguments for pandelay example usage: /pandelay 200");
             return true;
         });
-    zeal->commands_hook->add("/zealcam", { "/smoothing" }, "Toggles the zealcam on/off as well as adjusting the sensitivities.",
+    zeal->commands_hook->Add("/zealcam", { "/smoothing" }, "Toggles the zealcam on/off as well as adjusting the sensitivities.",
         [this](std::vector<std::string>& args) {
             if (args.size() == 2 && Zeal::String::compare_insensitive(args[1], "info"))
             {

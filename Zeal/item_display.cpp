@@ -80,8 +80,8 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
-	zeal->callbacks->add_generic([this]() { init_ui(); }, callback_type::InitUI);
-	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
+	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	//zeal->callbacks->add_generic([this]() { if (!Zeal::EqGame::is_in_game()) CleanUI(); }, callback_type::MainLoop);
 
 	mem::write<BYTE>(0x4090AB, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature

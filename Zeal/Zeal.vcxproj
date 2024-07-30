@@ -162,6 +162,7 @@
     <ClInclude Include="floating_damage.h" />
     <ClInclude Include="miniz.h" />
     <ClInclude Include="named_pipe.h" />
+    <ClInclude Include="NPCGive.h" />
     <ClInclude Include="patches.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="target_ring.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="floating_damage.cpp" />
     <ClCompile Include="miniz.c" />
     <ClCompile Include="named_pipe.cpp" />
+    <ClCompile Include="NPCGive.cpp" />
     <ClCompile Include="patches.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="target_ring.cpp" />

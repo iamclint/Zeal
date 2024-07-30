@@ -137,8 +137,8 @@ void looting::looted_item()
 looting::looting(ZealService* zeal)
 {
 	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
-	zeal->callbacks->add_generic([this]() { init_ui(); }, callback_type::InitUI);
-	zeal->callbacks->add_generic([this]() {
+	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
+	zeal->callbacks->AddGeneric([this]() {
 		if (loot_next_item_time == 0)
 			return;
 		if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->Loot || !Zeal::EqGame::Windows->Loot->IsVisible)
@@ -153,14 +153,14 @@ looting::looting(ZealService* zeal)
 			loot_next_item_time = 0;
 		}
 	}, callback_type::MainLoop);
-	zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT len) {
+	zeal->callbacks->AddPacket([this](UINT opcode, char* buffer, UINT len) {
 			if (opcode == 0x4031)
 			{
 				loot_next_item_time = GetTickCount64() + 250;
 			}
 		return false; 
 	});
-	zeal->commands_hook->add("/hidecorpse", { "/hc", "/hideco", "/hidec" }, "Adds looted argument to hidecorpse.",
+	zeal->commands_hook->Add("/hidecorpse", { "/hc", "/hideco", "/hidec" }, "Adds looted argument to hidecorpse.",
 		[this](std::vector<std::string>& args) {
 			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "looted"))
 			{

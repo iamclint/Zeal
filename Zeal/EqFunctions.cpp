@@ -6,6 +6,10 @@ namespace Zeal
 {
 	namespace EqGame
 	{
+		void move_item(int a1, int slot, int a2, int a3)
+		{
+			reinterpret_cast<bool (__thiscall*)(int t, int a1, int slot, int a2, int a3)>(0x422b1c)(*(int*)0x63d6b4, a1, slot, a2, a3);
+		}
 		bool is_on_ground(Zeal::EqStructures::Entity* ent)
 		{
 			if (ent->ActorInfo)
@@ -856,7 +860,7 @@ namespace Zeal
 					return;
 				if (!Windows->SpellBook->IsVisible)
 					Zeal::EqGame::Spells::OpenBook();
-				ZealService::get_instance()->callbacks->add_delayed([book_index, gem_index]() {
+				ZealService::get_instance()->callbacks->AddDelayed([book_index, gem_index]() {
 					if (Windows->SpellBook->IsVisible && Zeal::EqGame::get_self()->StandingState==Stance::Sit)
 						Windows->SpellBook->BeginMemorize(book_index, gem_index, false);
 				}, 25);

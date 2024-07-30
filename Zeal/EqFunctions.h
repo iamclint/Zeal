@@ -82,6 +82,7 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+		void move_item(int a1, int slot, int a2, int a3);
 		bool can_inventory_item(Zeal::EqStructures::EQITEMINFO* item);
 		bool can_equip_item(Zeal::EqStructures::EQITEMINFO* item);
 		void print_debug(const char* format, ...);

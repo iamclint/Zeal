@@ -395,7 +395,11 @@ namespace Zeal
 			/* 0x0140 */ int val3;
 			/* 0x0144 */ BYTE Unknown0144[0xC]; // the item name is the title text
 		};
-
+		struct TradeWnd : public EQWND
+		{
+			/* 0x0134 */ DWORD Unk1[39];
+			/* 0x01D0 */ Zeal::EqStructures::_EQITEMINFO* Item[8];
+		};
 		struct LootWnd : public EQWND
 		{
 			void RequestLootSlot(UINT slot, BYTE inventory)
@@ -762,7 +766,7 @@ namespace Zeal
 			LootWnd* Loot;  // 0x63D65C
 			EQWND* Actions;  // 0x63D660
 			EQWND* Merchant;  // 0x63D664
-			EQWND* Trade;  // 0x63D668
+			TradeWnd* Trade;  // 0x63D668
 			EQWND* Selector;  // 0x63D66C
 			EQWND* Bazaar;  // 0x63D670
 			EQWND* BazaarSearch;  // 0x63D674

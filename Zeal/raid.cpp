@@ -34,5 +34,5 @@ raid::raid(ZealService* zeal)
 	mem::write<byte>(0x49E182, 4); // allow for 4 types in setloottype
 	mem::write<byte>(0x42FAB3, 4); // allow for 4 types being set from the options window
 	zeal->hooks->Add("SetLootTypeResponse", 0x49dbc1, SetLootTypeResponse, hook_type_detour); //add extra prints for new loot types
-	zeal->callbacks->add_generic([this]() { callback_main(); });
+	zeal->callbacks->AddGeneric([this]() { callback_main(); });
 }

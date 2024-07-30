@@ -135,8 +135,8 @@ void ui_options::UpdateOptions()
 ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
 	ui = mgr;
-	zeal->callbacks->add_generic([this]() { CleanUI(); }, callback_type::CleanUI);
-	zeal->callbacks->add_generic([this]() { InitUI(); }, callback_type::InitUI);
+	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	//if (Zeal::EqGame::is_in_game()) InitUI();
 }
 ui_options::~ui_options()

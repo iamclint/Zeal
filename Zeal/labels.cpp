@@ -176,7 +176,7 @@ labels::~labels()
 
 labels::labels(ZealService* zeal)
 {
-	zeal->commands_hook->add("/labels", {}, "prints all labels",
+	zeal->commands_hook->Add("/labels", {}, "prints all labels",
 		[this](std::vector<std::string>& args) {
 			for (int i = 0; i < 200; i++)
 			{

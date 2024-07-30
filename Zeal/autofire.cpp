@@ -126,10 +126,10 @@ AutoFire::AutoFire(ZealService* zeal, IO_ini* ini)
 {
   //  zeal->hooks->Add("DoAttack", 0x50A0F8, DoAttack, hook_type_detour);
    // zeal->callbacks->add_generic([this]() { SetAutoFire(false);  }, callback_type::Zone);
-    zeal->callbacks->add_generic([this]() { SetAutoFire(false); }, callback_type::CharacterSelect);
-    zeal->callbacks->add_generic([this]() { SetAutoFire(false);  }, callback_type::EndMainLoop);
-    zeal->callbacks->add_generic([this]() { SetAutoFire(false);  }, callback_type::Zone);
-    zeal->callbacks->add_generic([this]() { Main();  }, callback_type::MainLoop);
+    zeal->callbacks->AddGeneric([this]() { SetAutoFire(false); }, callback_type::CharacterSelect);
+    zeal->callbacks->AddGeneric([this]() { SetAutoFire(false);  }, callback_type::EndMainLoop);
+    zeal->callbacks->AddGeneric([this]() { SetAutoFire(false);  }, callback_type::Zone);
+    zeal->callbacks->AddGeneric([this]() { Main();  }, callback_type::MainLoop);
     //zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {
     //    if (opcode == 0x4161 || opcode == 0x4151)
     //    {
@@ -139,7 +139,7 @@ AutoFire::AutoFire(ZealService* zeal, IO_ini* ini)
     //   //Zeal::EqGame::print_chat("Opcode: 0x%x Size: %i Buffer: %s", opcode, size, byteArrayToHexString(buffer, size).c_str());
     //    //return false;
     //}, callback_type::SendMessage_);
-    zeal->commands_hook->add("/autofire", { "/af" }, "Toggles autofire for your ranged ability.",
+    zeal->commands_hook->Add("/autofire", { "/af" }, "Toggles autofire for your ranged ability.",
         [this](std::vector<std::string>& args) {
             SetAutoFire(!autofire);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd

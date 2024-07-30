@@ -24,7 +24,7 @@ public:
 	void print_commands();
 	ChatCommands(class ZealService* zeal);
 	~ChatCommands();
-	void add(std::string cmd, std::vector<std::string> aliases, std::string description, std::function<bool(std::vector<std::string>& args)> callback);
+	void Add(std::string cmd, std::vector<std::string> aliases, std::string description, std::function<bool(std::vector<std::string>& args)> callback);
 	std::unordered_map<std::string, ZealCommand> CommandFunctions;
 };
 

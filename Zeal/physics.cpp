@@ -55,7 +55,7 @@ int __fastcall MovePlayer(int t, int u, Zeal::EqStructures::Entity* ent)
 
 Physics::Physics(ZealService* zeal, IO_ini* ini)
 {
-	zeal->callbacks->add_generic([this]() { move_timers.clear(); }, callback_type::Zone);
+	zeal->callbacks->AddGeneric([this]() { move_timers.clear(); }, callback_type::Zone);
 
 	zeal->hooks->Add("ProcessPhysics", 0x54D964, ProcessPhysics, hook_type_detour);
 	zeal->hooks->Add("MovePlayer", 0x504765, MovePlayer, hook_type_detour);

@@ -391,16 +391,16 @@ SpellSets::SpellSets(ZealService* zeal)
     original_stance = Stand;
     spellset_menu = 0;
     ini = std::shared_ptr<IO_ini>(new IO_ini(".\\spellsets.ini"));
-    zeal->callbacks->add_generic([this]() { callback_main();  }, callback_type::Render);
-    zeal->callbacks->add_generic([this]() { CleanUI();  }, callback_type::CleanUI);
-    zeal->callbacks->add_generic([this]() { callback_characterselect();  }, callback_type::CharacterSelect);
+    zeal->callbacks->AddGeneric([this]() { callback_main();  }, callback_type::Render);
+    zeal->callbacks->AddGeneric([this]() { CleanUI();  }, callback_type::CleanUI);
+    zeal->callbacks->AddGeneric([this]() { callback_characterselect();  }, callback_type::CharacterSelect);
     zeal->hooks->Add("FinishMemorizing", 0x434b38, FinishMemorizing, hook_type_detour);
     zeal->hooks->Add("FinishScribing", 0x43501f, FinishScribing, hook_type_detour);
     zeal->hooks->Add("SpellGemRbutton", 0x5A67B0, SpellGemWnd_HandleRButtonUp, hook_type_detour);
     // wrap it for now to prevent users form crashing themselves on oldui until functionality potentially gets added.
     if (Zeal::EqGame::is_new_ui())
     {
-        zeal->commands_hook->add("/spellset", {}, "Load, save, delete or list your spellsets.",
+        zeal->commands_hook->Add("/spellset", {}, "Load, save, delete or list your spellsets.",
             [this, zeal](std::vector<std::string>& args) {
                 if (args.size() < 3)
                 {

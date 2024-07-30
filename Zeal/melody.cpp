@@ -197,10 +197,10 @@ void Melody::tick()
 
 Melody::Melody(ZealService* zeal, IO_ini* ini)
 {
-    zeal->callbacks->add_generic([this]() { tick();  });
-    zeal->callbacks->add_generic([this]() { end(); }, callback_type::CharacterSelect);
+    zeal->callbacks->AddGeneric([this]() { tick();  });
+    zeal->callbacks->AddGeneric([this]() { end(); }, callback_type::CharacterSelect);
     zeal->hooks->Add("StopCast", 0x4cb510, StopCast, hook_type_detour); //Hook in to end melody as well.
-    zeal->commands_hook->add("/melody", {"/mel"}, "Bard only, auto cycles 5 songs of your choice.",
+    zeal->commands_hook->Add("/melody", {"/mel"}, "Bard only, auto cycles 5 songs of your choice.",
         [this](std::vector<std::string>& args) {
 
             end();  //any active melodies are always terminated

@@ -22,6 +22,7 @@
 #include "floating_damage.h"
 #include "directx.h"
 // other features
+#include "NPCGive.h"
 #include "cycle_target.h"
 #include "outputfile.h"
 #include "experience.h"
