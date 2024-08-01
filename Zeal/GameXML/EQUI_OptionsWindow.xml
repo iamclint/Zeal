@@ -4575,7 +4575,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>156</Y>
+      <Y>178</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4605,7 +4605,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>178</Y>
+      <Y>200</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4636,7 +4636,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>282</Y>
+      <Y>289</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4657,7 +4657,7 @@
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
       <X>10</X>
-      <Y>302</Y>
+      <Y>309</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5093,7 +5093,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>200</Y>
+      <Y>222</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5123,7 +5123,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>222</Y>
+      <Y>244</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5153,7 +5153,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>244</Y>
+      <Y>266</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5277,6 +5277,37 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>true</AlignRight>
   </Label>
+  <!-- Zeal Raid Escape Lock -->
+  <Button item="Zeal_RaidEscapeLock">
+    <ScreenID>Zeal_RaidEscapeLock</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>156</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Pressing Escape will not close the raid window when this option is enabled.</TooltipReference>
+    <Text>Raid Escape Lock</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <!-- end -->
   <Page item="OptionsZealPage">
     <ScreenID>OptionsZealPage</ScreenID>
@@ -5339,6 +5370,7 @@
     <Pieces>Zeal_TargetRingFill_Label</Pieces>
     <Pieces>Zeal_TargetRingFill_Slider</Pieces>
     <Pieces>Zeal_TargetRingFill_Value</Pieces>
+    <Pieces>Zeal_RaidEscapeLock</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>
