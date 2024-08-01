@@ -128,20 +128,25 @@ void ZealService::basic_binds()
 			return true;
 		}
 
+		if (!ini->getValue<bool>("Zeal", "EscapeRaidLock"))
+		{
+
+			if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->RaidOptions && Zeal::EqGame::Windows->RaidOptions->IsVisible)
+			{
+				Zeal::EqGame::Windows->RaidOptions->show(0, false);
+				return true;
+			}
+			if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->Raid && Zeal::EqGame::Windows->Raid->IsVisible)
+			{
+				Zeal::EqGame::Windows->Raid->show(0, false);
+				Zeal::EqGame::Windows->Raid->ToggleState = 0;
+				return true;
+			}
+		}
+
 		if (ini->getValue<bool>("Zeal", "Escape"))//toggle is set to not close any windows
 			return true;
 
-		if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->RaidOptions && Zeal::EqGame::Windows->RaidOptions->IsVisible)
-		{
-			Zeal::EqGame::Windows->RaidOptions->show(0, false);
-			return true;
-		}
-		if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->Raid && Zeal::EqGame::Windows->Raid->IsVisible)
-		{
-			Zeal::EqGame::Windows->Raid->show(0, false);
-			Zeal::EqGame::Windows->Raid->ToggleState = 0;
-			return true;
-		}
 		for (auto rit = item_displays->windows.rbegin(); rit != item_displays->windows.rend(); ++rit) {
 			Zeal::EqUI::ItemDisplayWnd* wnd = *rit;
 			if (wnd->IsVisible)

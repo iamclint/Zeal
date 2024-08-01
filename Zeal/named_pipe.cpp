@@ -194,7 +194,7 @@ void named_pipe::main_loop()
 
 		if (Zeal::EqGame::get_self())
 		{
-			nlohmann::json data = { {"zone", Zeal::EqGame::get_self()->ZoneId}, {"location", Zeal::EqGame::get_self()->Position.toJson() }, {"heading", Zeal::EqGame::get_self()->Heading} };
+			nlohmann::json data = { {"zone", Zeal::EqGame::get_self()->ZoneId}, {"location", Zeal::EqGame::get_self()->Position.toJson() }, {"heading", Zeal::EqGame::get_self()->Heading}, {"autoattack", (bool)(*(BYTE*)0x7f6ffe)} };
 			write(data.dump(), pipe_data_type::player);
 		}
 		last_output = GetTickCount64();
