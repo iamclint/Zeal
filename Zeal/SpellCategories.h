@@ -2,15723 +2,3951 @@
 #include <windows.h>
 #include <string>
 //original credits for this go to mmofry
+struct SpellCat
+{
+	int Category;
+	int SubCategory;
+	std::string NewName;
+	SpellCat(int cat, int subcat, std::string name = "") : Category(cat), SubCategory(subcat), NewName(name) {};
+};
 
-static inline DWORD GetSpellCategory(DWORD spellID)
-{
-	switch (spellID)
-	{
-	case 3: //Summon Corpse
-		return 125;
-	case 4: //Summon Waterstone
-		return 18;
-	case 6: //Ignite Blood
-		return 20;
-	case 7: //Hymn of Restoration
-		return 79;
-	case 9: //Superior Healing
-		return 42;
-	case 10: //Augmentation
-		return 125;
-	case 11: //Holy Armor
-		return 95;
-	case 12: //Healing
-		return 42;
-	case 13: //Complete Healing
-		return 42;
-	case 14: //Strike
-		return 25;
-	case 15: //Greater Healing
-		return 42;
-	case 16: //Smite
-		return 25;
-	case 17: //Light Healing
-		return 42;
-	case 18: //Guard
-		return 95;
-	case 19: //Armor of Faith
-		return 95;
-	case 20: //Shield of Words
-		return 95;
-	case 21: //Berserker Strength
-		return 95;
-	case 22: //Force Snap
-		return 25;
-	case 23: //Force Strike
-		return 25;
-	case 24: //Strip Enchantment
-		return 126;
-	case 25: //Pillage Enchantment
-		return 126;
-	case 26: //Skin like Wood
-		return 45;
-	case 27: //Pogonip
-		return 25;
-	case 28: //Avalanche
-		return 25;
-	case 29: //Ice
-		return 25;
-	case 31: //Scourge
-		return 20;
-	case 32: //Plague
-		return 20;
-	case 33: //Brilliance
-		return 95;
-	case 34: //Superior Camouflage
-		return 125;
-	case 35: //Bind Affinity
-		return 125;
-	case 36: //Gate
-		return 123;
-	case 37: //Hammer of Striking
-		return 18;
-	case 38: //Lightning Bolt
-		return 25;
-	case 39: //Quickness
-		return 125;
-	case 40: //Strengthen
-		return 95;
-	case 41: //Weaken
-		return 126;
-	case 42: //Invisibility
-		return 125;
-	case 43: //Yaulp II
-		return 95;
-	case 44: //Yaulp III
-		return 95;
-	case 45: //Pacify
-		return 126;
-	case 46: //Ultravision
-		return 125;
-	case 47: //Calm
-		return 126;
-	case 48: //Cancel Magic
-		return 126;
-	case 49: //Nullify Magic
-		return 126;
-	case 50: //Summon Food
-		return 18;
-	case 51: //Glimpse
-		return 125;
-	case 52: //Abundant Drink
-		return 18;
-	case 53: //Abundant Food
-		return 18;
-	case 54: //Frost Bolt
-		return 25;
-	case 55: //Cornucopia
-		return 18;
-	case 56: //Everfount
-		return 18;
-	case 57: //Firestrike
-		return 25;
-	case 58: //Elementalkin: Earth
-		return 69;
-	case 59: //Panic the Dead
-		return 126;
-	case 60: //Resist Fire
-		return 95;
-	case 61: //Resist Cold
-		return 95;
-	case 62: //Resist Poison
-		return 95;
-	case 63: //Resist Disease
-		return 95;
-	case 64: //Resist Magic
-		return 95;
-	case 65: //Major Shielding
-		return 45;
-	case 66: //Greater Shielding
-		return 45;
-	case 67: //Arch Shielding
-		return 45;
-	case 68: //Bolt of Flame
-		return 25;
-	case 69: //Cinder Bolt
-		return 25;
-	case 70: //Lava Bolt
-		return 25;
-	case 71: //Anarchy
-		return 25;
-	case 72: //Group Resist Magic
-		return 95;
-	case 73: //Gravity Flux
-		return 25;
-	case 74: //Mana Sieve
-		return 126;
-	case 75: //Sicken
-		return 20;
-	case 76: //Ensnaring Roots
-		return 126;
-	case 77: //Engulfing Roots
-		return 126;
-	case 78: //Immolate
-		return 20;
-	case 79: //Spirit Sight
-		return 125;
-	case 80: //See Invisible
-		return 125;
-	case 81: //Phantom Chain
-		return 79;
-	case 82: //Phantom Plate
-		return 79;
-	case 83: //Rain of Fire
-		return 25;
-	case 84: //Shifting Sight
-		return 125;
-	case 85: //Firestorm
-		return 25;
-	case 86: //Enduring Breath
-		return 125;
-	case 88: //Harm Touch
-		return 25;
-	case 89: //Daring
-		return 45;
-	case 90: //Shadow Sight
-		return 125;
-	case 91: //Ignite
-		return 25;
-	case 92: //Burst of Fire
-		return 25;
-	case 93: //Burst of Flame
-		return 25;
-	case 94: //Burn
-		return 25;
-	case 95: //Counteract Poison
-		return 42;
-	case 96: //Counteract Disease
-		return 42;
-	case 97: //Abolish Poison
-		return 42;
-	case 98: //Abolish Disease
-		return 42;
-	case 99: //Creeping Crud
-		return 20;
-	case 100: //Summon Throwing Dagger
-		return 18;
-	case 101: //Summon Arrows
-		return 18;
-	case 102: //Spear of Warding
-		return 18;
-	case 103: //Summon Coldstone
-		return 18;
-	case 104: //Dagger of Symbols
-		return 18;
-	case 105: //Summon Ring of Flight
-		return 18;
-	case 106: //Burnout II
-		return 69;
-	case 107: //Burnout III
-		return 69;
-	case 108: //Elemental Shield
-		return 95;
-	case 109: //Elemental Armor
-		return 95;
-	case 110: //Malaise
-		return 126;
-	case 111: //Malaisement
-		return 126;
-	case 112: //Malosi
-		return 126;
-	case 113: //Shock of Spikes
-		return 25;
-	case 114: //Shock of Swords
-		return 25;
-	case 115: //Dismiss Summoned
-		return 25;
-	case 116: //Banish Summoned
-		return 25;
-	case 117: //Dismiss Undead
-		return 25;
-	case 118: //Banish Undead
-		return 25;
-	case 120: //Blaze
-		return 25;
-	case 121: //Rain of Lava
-		return 25;
-	case 122: //Flame Arc
-		return 25;
-	case 123: //Holy Might
-		return 25;
-	case 124: //Force
-		return 25;
-	case 125: //Sound of Force
-		return 25;
-	case 126: //Inspire Fear
-		return 126;
-	case 127: //Invoke Fear
-		return 126;
-	case 128: //Wave of Fear
-		return 126;
-	case 129: //Shield of Brambles
-		return 125;
-	case 130: //Divine Barrier
-		return 125;
-	case 131: //Instill
-		return 126;
-	case 132: //Immobilize
-		return 126;
-	case 133: //Paralyzing Earth
-		return 126;
-	case 134: //Blinding Luminance
-		return 126;
-	case 135: //Word of Health
-		return 42;
-	case 136: //Word of Healing
-		return 42;
-	case 137: //Pack Regeneration
-		return 79;
-	case 138: //Pack Chloroplast
-		return 79;
-	case 139: //Feral Spirit
-		return 69;
-	case 140: //Savage Spirit
-		return 69;
-	case 141: //Beguile Animals
-		return 126;
-	case 142: //Allure of the Wild
-		return 126;
-	case 143: //Sunbeam
-		return 126;
-	case 144: //Regeneration
-		return 79;
-	case 145: //Chloroplast
-		return 79;
-	case 146: //Spirit of Monkey
-		return 95;
-	case 147: //Spirit Strength
-		return 95;
-	case 148: //Spirit of Cat
-		return 95;
-	case 149: //Spirit of Ox
-		return 95;
-	case 150: //Alluring Aura
-		return 95;
-	case 151: //Raging Strength
-		return 95;
-	case 152: //Deftness
-		return 95;
-	case 153: //Furious Strength
-		return 95;
-	case 154: //Agility
-		return 95;
-	case 155: //Glamour
-		return 95;
-	case 156: //Charisma
-		return 95;
-	case 157: //Dexterity
-		return 95;
-	case 158: //Stamina
-		return 95;
-	case 159: //Strength
-		return 95;
-	case 160: //Nimble
-		return 95;
-	case 161: //Health
-		return 95;
-	case 162: //Listless Power
-		return 126;
-	case 163: //Incapacitate
-		return 126;
-	case 164: //Companion Spirit
-		return 69;
-	case 165: //Guardian Spirit
-		return 69;
-	case 166: //Frenzied Spirit
-		return 69;
-	case 167: //Talisman of Tnarg
-		return 45;
-	case 168: //Talisman of Altuna
-		return 45;
-	case 169: //Pack Spirit
-		return 125;
-	case 170: //Alacrity
-		return 125;
-	case 171: //Celerity
-		return 125;
-	case 172: //Swift like the Wind
-		return 125;
-	case 173: //Benevolence
-		return 125;
-	case 174: //Clarity
-		return 79;
-	case 175: //Insight
-		return 95;
-	case 176: //Berserker Spirit
-		return 125;
-	case 177: //Color Shift
-		return 25;
-	case 178: //Color Skew
-		return 25;
-	case 179: //Feckless Might
-		return 126;
-	case 180: //Insipid Weakness
-		return 126;
-	case 181: //Weakness
-		return 126;
-	case 182: //Beguile
-		return 126;
-	case 183: //Cajoling Whispers
-		return 126;
-	case 184: //Allure
-		return 126;
-	case 185: //Tepid Deeds
-		return 126;
-	case 186: //Shiftless Deeds
-		return 126;
-	case 187: //Enthrall
-		return 126;
-	case 188: //Entrance
-		return 126;
-	case 189: //Flame Flux
-		return 25;
-	case 190: //Dazzle
-		return 126;
-	case 191: //Feedback
-		return 125;
-	case 192: //Mind Wipe
-		return 126;
-	case 193: //Blanket of Forgetfulness
-		return 126;
-	case 194: //Reoccurring Amnesia
-		return 126;
-	case 195: //Gasping Embrace
-		return 20;
-	case 196: //Dominate Undead
-		return 126;
-	case 197: //Beguile Undead
-		return 126;
-	case 198: //Cajole Undead
-		return 126;
-	case 199: //Harmshield
-		return 125;
-	case 200: //Minor Healing
-		return 42;
-	case 201: //Flash of Light
-		return 126;
-	case 202: //Courage
-		return 45;
-	case 203: //Cure Poison
-		return 42;
-	case 204: //Shock of Poison
-		return 25;
-	case 205: //True North
-		return 125;
-	case 207: //Divine Aura
-		return 125;
-	case 208: //Lull
-		return 126;
-	case 209: //Spook the Dead
-		return 126;
-	case 210: //Yaulp
-		return 95;
-	case 211: //Summon Drink
-		return 18;
-	case 212: //Cure Blindness
-		return 42;
-	case 213: //Cure Disease
-		return 42;
-	case 215: //Reckless Strength
-		return 95;
-	case 216: //Stun
-		return 25;
-	case 217: //Combust
-		return 25;
-	case 218: //Ward Undead
-		return 25;
-	case 219: //Center
-		return 45;
-	case 220: //Spirit of Cheetah
-		return 125;
-	case 221: //Sense the Dead
-		return 125;
-	case 222: //Invigor
-		return 42;
-	case 223: //Hammer of Wrath
-		return 18;
-	case 224: //Endure Fire
-		return 95;
-	case 225: //Endure Cold
-		return 95;
-	case 226: //Endure Disease
-		return 95;
-	case 227: //Endure Poison
-		return 95;
-	case 228: //Endure Magic
-		return 95;
-	case 229: //Fear
-		return 126;
-	case 230: //Root
-		return 126;
-	case 231: //Word of Pain
-		return 25;
-	case 232: //Sense Summoned
-		return 125;
-	case 233: //Expulse Undead
-		return 25;
-	case 234: //Halo of Light
-		return 18;
-	case 235: //Invisibility versus Undead
-		return 125;
-	case 236: //Shieldskin
-		return 125;
-	case 237: //Dance of the Fireflies
-		return 18;
-	case 238: //Sense Animals
-		return 125;
-	case 239: //Flame Lick
-		return 20;
-	case 240: //Lull Animal
-		return 126;
-	case 241: //Panic Animal
-		return 126;
-	case 242: //Snare
-		return 126;
-	case 243: //Illusion: Iksar
-		return 125;
-	case 244: //Bravery
-		return 45;
-	case 245: //Befriend Animal
-		return 126;
-	case 246: //Lesser Shielding
-		return 45;
-	case 247: //Camouflage
-		return 125;
-	case 248: //Ward Summoned
-		return 25;
-	case 249: //Grasping Roots
-		return 126;
-	case 250: //Harmony
-		return 126;
-	case 252: //Invoke Lightning
-		return 25;
-	case 253: //Whirling Wind
-		return 25;
-	case 254: //Firefist
-		return 95;
-	case 255: //Invisibility versus Animals
-		return 125;
-	case 256: //Shield of Thistles
-		return 125;
-	case 257: //Starshine
-		return 18;
-	case 258: //Treeform
-		return 125;
-	case 259: //Drones of Doom
-		return 20;
-	case 260: //Charm Animals
-		return 126;
-	case 261: //Levitate
-		return 125;
-	case 262: //Cascade of Hail
-		return 25;
-	case 263: //Skin like Rock
-		return 45;
-	case 264: //Stinging Swarm
-		return 20;
-	case 265: //Cannibalize
-		return 125;
-	case 266: //Dexterous Aura
-		return 95;
-	case 267: //Inner Fire
-		return 45;
-	case 268: //Strength of Earth
-		return 95;
-	case 269: //Feet like Cat
-		return 95;
-	case 270: //Drowsy
-		return 126;
-	case 271: //Fleeting Fury
-		return 95;
-	case 272: //Spirit Pouch
-		return 18;
-	case 273: //Shield of Barbs
-		return 125;
-	case 274: //Scale Skin
-		return 95;
-	case 275: //Frost Rift
-		return 25;
-	case 276: //Serpent Sight
-		return 125;
-	case 277: //Tainted Breath
-		return 20;
-	case 278: //Spirit of Wolf
-		return 125;
-	case 279: //Spirit of Bear
-		return 95;
-	case 280: //Burst of Strength
-		return 95;
-	case 281: //Disempower
-		return 126;
-	case 282: //Spirit Strike
-		return 25;
-	case 283: //Turtle Skin
-		return 95;
-	case 284: //Spirit of Snake
-		return 95;
-	case 285: //Pendril's Animation
-		return 69;
-	case 286: //Shallow Breath
-		return 20;
-	case 287: //Minor Illusion
-		return 125;
-	case 288: //Minor Shielding
-		return 45;
-	case 289: //Taper Enchantment
-		return 126;
-	case 290: //Color Flux
-		return 25;
-	case 291: //Enfeeblement
-		return 126;
-	case 292: //Mesmerize
-		return 126;
-	case 293: //Haze
-		return 95;
-	case 294: //Suffocating Sphere
-		return 20;
-	case 295: //Mircyl's Animation
-		return 69;
-	case 296: //Chaotic Feedback
-		return 25;
-	case 297: //Eye of Confusion
-		return 126;
-	case 298: //Alliance
-		return 125;
-	case 299: //Sentinel
-		return 125;
-	case 300: //Charm
-		return 126;
-	case 301: //Memory Blur
-		return 126;
-	case 302: //Languid Pace
-		return 126;
-	case 303: //Whirl till you hurl
-		return 25;
-	case 304: //Chase the Moon
-		return 126;
-	case 305: //Identify
-		return 125;
-	case 306: //Sanity Warp
-		return 25;
-	case 307: //Mesmerization
-		return 126;
-	case 308: //Frenzy
-		return 95;
-	case 309: //Shielding
-		return 45;
-	case 310: //Flare
-		return 125;
-	case 311: //Summon Dagger
-		return 18;
-	case 312: //Valor
-		return 45;
-	case 313: //Fire Flux
-		return 25;
-	case 314: //Resolution
-		return 45;
-	case 315: //Elementalkin: Water
-		return 69;
-	case 316: //Elementalkin: Fire
-		return 69;
-	case 317: //Elementalkin: Air
-		return 69;
-	case 318: //Summon Bandages
-		return 18;
-	case 319: //Summon Fang
-		return 18;
-	case 320: //Summon Heatstone
-		return 18;
-	case 321: //Summon Wisp
-		return 18;
-	case 322: //Flame Bolt
-		return 25;
-	case 323: //Eye of Zomm
-		return 125;
-	case 324: //Shock of Blades
-		return 25;
-	case 325: //Dimensional Pocket
-		return 18;
-	case 326: //Fury
-		return 95;
-	case 327: //Burnout
-		return 69;
-	case 328: //Column of Fire
-		return 25;
-	case 329: //Wrath
-		return 25;
-	case 330: //Rain of Blades
-		return 25;
-	case 331: //Reclaim Energy
-		return 69;
-	case 332: //Shield of Fire
-		return 125;
-	case 333: //Phantom Leather
-		return 79;
-	case 334: //Shock of Flame
-		return 25;
-	case 335: //Minor Summoning: Earth
-		return 69;
-	case 336: //Minor Summoning: Water
-		return 69;
-	case 337: //Rage
-		return 95;
-	case 338: //Cavorting Bones
-		return 69;
-	case 339: //Coldlight
-		return 18;
-	case 340: //Disease Cloud
-		return 20;
-	case 341: //Lifetap
-		return 114;
-	case 342: //Locate Corpse
-		return 125;
-	case 343: //Siphon Strength
-		return 114;
-	case 344: //Clinging Darkness
-		return 20;
-	case 345: //Shrink
-		return 125;
-	case 346: //Grim Aura
-		return 95;
-	case 347: //Numb the Dead
-		return 126;
-	case 348: //Poison Bolt
-		return 20;
-	case 349: //Rising Dexterity
-		return 95;
-	case 350: //Chaos Flux
-		return 25;
-	case 351: //Bone Walk
-		return 69;
-	case 352: //Deadeye
-		return 125;
-	case 353: //Mend Bones
-		return 69;
-	case 354: //Shadow Step
-		return 125;
-	case 355: //Engulfing Darkness
-		return 20;
-	case 356: //Shield of Thorns
-		return 125;
-	case 357: //Dark Empathy
-		return 42;
-	case 358: //Impart Strength
-		return 95;
-	case 359: //Vampiric Embrace
-		return 125;
-	case 360: //Heat Blood
-		return 20;
-	case 361: //Sight Graft
-		return 125;
-	case 362: //Convoke Shadow
-		return 69;
-	case 363: //Wave of Enfeeblement
-		return 126;
-	case 364: //Banshee Aura
-		return 125;
-	case 365: //Infectious Cloud
-		return 20;
-	case 366: //Feign Death
-		return 125;
-	case 367: //Heart Flutter
-		return 20;
-	case 368: //Spirit Armor
-		return 95;
-	case 369: //Hungry Earth
-		return 126;
-	case 370: //Shadow Vortex
-		return 126;
-	case 371: //Voice Graft
-		return 125;
-	case 372: //Blast of Cold
-		return 25;
-	case 373: //Sphere of Light
-		return 18;
-	case 374: //Numbing Cold
-		return 25;
-	case 375: //Fade
-		return 125;
-	case 376: //Shock of Fire
-		return 25;
-	case 377: //Icestrike
-		return 25;
-	case 378: //O'Keils Radiation
-		return 125;
-	case 379: //Fingers of Fire
-		return 25;
-	case 380: //Column of Frost
-		return 25;
-	case 381: //Resistant Skin
-		return 95;
-	case 382: //Frost Spiral of Al'Kabor
-		return 25;
-	case 383: //Shock of Lightning
-		return 25;
-	case 384: //Assiduous Vision
-		return 125;
-	case 385: //Project Lightning
-		return 25;
-	case 386: //Pillar of Fire
-		return 25;
-	case 387: //Leatherskin
-		return 125;
-	case 388: //Resuscitate
-		return 42;
-	case 389: //Guardian
-		return 95;
-	case 390: //Thicken Mana
-		return 18;
-	case 391: //Revive
-		return 42;
-	case 392: //Resurrection
-		return 42;
-	case 393: //Steelskin
-		return 125;
-	case 394: //Diamondskin
-		return 125;
-	case 395: //Minor Summoning: Fire
-		return 69;
-	case 396: //Minor Summoning: Air
-		return 69;
-	case 397: //Elementaling: Earth
-		return 69;
-	case 398: //Elementaling: Water
-		return 69;
-	case 399: //Elementaling: Fire
-		return 69;
-	case 400: //Elementaling: Air
-		return 69;
-	case 401: //Elemental: Earth
-		return 69;
-	case 402: //Elemental: Water
-		return 69;
-	case 403: //Elemental: Fire
-		return 69;
-	case 404: //Elemental: Air
-		return 69;
-	case 405: //Tremor
-		return 25;
-	case 406: //Earthquake
-		return 25;
-	case 407: //Cast Sight
-		return 125;
-	case 408: //Curse of the Simple Mind
-		return 126;
-	case 409: //Rain of Spikes
-		return 25;
-	case 410: //Rain of Swords
-		return 25;
-	case 411: //Shield of Flame
-		return 125;
-	case 412: //Shield of Lava
-		return 125;
-	case 413: //Word of Shadow
-		return 25;
-	case 414: //Word of Spirit
-		return 25;
-	case 415: //Word of Souls
-		return 25;
-	case 416: //Word Divine
-		return 25;
-	case 417: //Extinguish Fatigue
-		return 42;
-	case 418: //Lightning Strike
-		return 25;
-	case 419: //Careless Lightning
-		return 25;
-	case 420: //Lightning Blast
-		return 25;
-	case 421: //Skin like Steel
-		return 45;
-	case 422: //Skin like Diamond
-		return 45;
-	case 423: //Skin like Nature
-		return 45;
-	case 424: //Scale of Wolf
-		return 125;
-	case 425: //Wolf Form
-		return 125;
-	case 426: //Greater Wolf Form
-		return 125;
-	case 427: //Form of the Great Wolf
-		return 125;
-	case 428: //Share Wolf Form
-		return 125;
-	case 429: //Strength of Stone
-		return 95;
-	case 430: //Storm Strength
-		return 95;
-	case 431: //Shifting Shield
-		return 95;
-	case 432: //Shield of Spikes
-		return 125;
-	case 433: //Fire
-		return 25;
-	case 434: //Envenomed Breath
-		return 20;
-	case 435: //Venom of the Snake
-		return 20;
-	case 436: //Envenomed Bolt
-		return 20;
-	case 437: //Poison Storm
-		return 25;
-	case 438: //Gale of Poison
-		return 25;
-	case 439: //Crystallize Mana
-		return 18;
-	case 440: //Animate Dead
-		return 69;
-	case 441: //Summon Dead
-		return 69;
-	case 442: //Malignant Dead
-		return 69;
-	case 443: //Invoke Death
-		return 69;
-	case 444: //Renew Bones
-		return 69;
-	case 445: //Lifedraw
-		return 114;
-	case 446: //Siphon Life
-		return 114;
-	case 447: //Drain Soul
-		return 114;
-	case 448: //Rest the Dead
-		return 126;
-	case 449: //Intensify Death
-		return 69;
-	case 450: //Suffocate
-		return 20;
-	case 451: //Boil Blood
-		return 20;
-	case 452: //Dooming Darkness
-		return 20;
-	case 453: //Cascading Darkness
-		return 20;
-	case 454: //Vampiric Curse
-		return 114;
-	case 455: //Surge of Enfeeblement
-		return 126;
-	case 456: //Bond of Death
-		return 114;
-	case 457: //Dead Man Floating
-		return 125;
-	case 458: //Fire Spiral of Al'Kabor
-		return 25;
-	case 459: //Shock Spiral of Al'Kabor
-		return 25;
-	case 460: //Force Spiral of Al'Kabor
-		return 25;
-	case 461: //Cast Force
-		return 25;
-	case 462: //Column of Lightning
-		return 25;
-	case 463: //Circle of Force
-		return 25;
-	case 464: //Frost Shock
-		return 25;
-	case 465: //Inferno Shock
-		return 25;
-	case 466: //Lightning Shock
-		return 25;
-	case 467: //Lightning Storm
-		return 25;
-	case 468: //Energy Storm
-		return 25;
-	case 469: //Lava Storm
-		return 25;
-	case 470: //Thunder Strike
-		return 25;
-	case 471: //Thunderclap
-		return 25;
-	case 472: //Inspire Fear2
-		return 126;
-	case 473: //Invoke Fear II
-		return 126;
-	case 474: //Radius of Fear2
-		return 126;
-	case 475: //Fear2
-		return 126;
-	case 477: //Fire Bolt
-		return 25;
-	case 478: //Breath of the Dead
-		return 125;
-	case 479: //Inferno Shield
-		return 125;
-	case 480: //Atone
-		return 126;
-	case 481: //Rune I
-		return 125;
-	case 482: //Rune II
-		return 125;
-	case 483: //Rune III
-		return 125;
-	case 484: //Rune IV
-		return 125;
-	case 485: //Symbol of Transal
-		return 45;
-	case 486: //Symbol of Ryltan
-		return 45;
-	case 487: //Symbol of Pinzarn
-		return 45;
-	case 488: //Symbol of Naltron
-		return 45;
-	case 489: //Sympathetic Aura
-		return 95;
-	case 490: //Enveloping Roots
-		return 126;
-	case 491: //Leering Corpse
-		return 69;
-	case 492: //Restless Bones
-		return 69;
-	case 493: //Haunting Corpse
-		return 69;
-	case 494: //Invoke Shadow
-		return 69;
-	case 495: //Cackling Bones
-		return 69;
-	case 496: //Lesser Summoning: Earth
-		return 69;
-	case 497: //Lesser Summoning: Water
-		return 69;
-	case 498: //Lesser Summoning: Fire
-		return 69;
-	case 499: //Lesser Summoning: Air
-		return 69;
-	case 500: //Bind Sight
-		return 125;
-	case 501: //Soothe
-		return 126;
-	case 502: //Lifespike
-		return 114;
-	case 503: //Tishan's Clash
-		return 25;
-	case 504: //Frenzied Strength
-		return 95;
-	case 505: //Walking Sleep
-		return 126;
-	case 506: //Tagar's Insects
-		return 126;
-	case 507: //Togor's Insects
-		return 126;
-	case 508: //Frost Strike
-		return 25;
-	case 509: //Winter's Roar
-		return 25;
-	case 510: //Blizzard Blast
-		return 25;
-	case 511: //Affliction
-		return 20;
-	case 512: //Ensnare
-		return 126;
-	case 513: //Calm Animal
-		return 126;
-	case 514: //Terrorize Animal
-		return 126;
-	case 515: //Thistlecoat
-		return 125;
-	case 516: //Barbcoat
-		return 125;
-	case 517: //Bramblecoat
-		return 125;
-	case 518: //Spikecoat
-		return 125;
-	case 519: //Thorncoat
-		return 125;
-	case 520: //Dizzying Wind
-		return 25;
-	case 521: //Choke
-		return 20;
-	case 522: //Gather Shadows
-		return 125;
-	case 524: //Spirit Tap
-		return 114;
-	case 525: //Drain Spirit
-		return 114;
-	case 526: //Insidious Fever
-		return 126;
-	case 527: //Insidious Malady
-		return 126;
-	case 528: //Yonder
-		return 125;
-	case 529: //Gaze
-		return 125;
-	case 530: //Ring of Karana
-		return 123;
-	case 531: //Ring of Commons
-		return 123;
-	case 532: //Ring of Butcher
-		return 123;
-	case 533: //Ring of Toxxulia
-		return 123;
-	case 534: //Ring of Lavastorm
-		return 123;
-	case 535: //Ring of Ro
-		return 123;
-	case 536: //Ring of Feerrott
-		return 123;
-	case 537: //Ring of Steamfont
-		return 123;
-	case 538: //Ring of Misty
-		return 123;
-	case 539: //Chill Sight
-		return 125;
-	case 540: //Clarify Mana
-		return 18;
-	case 541: //Tox Gate
-		return 123;
-	case 542: //North Gate
-		return 123;
-	case 543: //Fay Gate
-		return 123;
-	case 544: //Common Gate
-		return 123;
-	case 545: //Nek Gate
-		return 123;
-	case 546: //Cazic Gate
-		return 123;
-	case 547: //Ro Gate
-		return 123;
-	case 548: //West Gate
-		return 123;
-	case 549: //Screaming Terror
-		return 126;
-	case 550: //Circle of Karana
-		return 123;
-	case 551: //Circle of Commons
-		return 123;
-	case 552: //Circle of Toxxulia
-		return 123;
-	case 553: //Circle of Butcher
-		return 123;
-	case 554: //Circle of Lavastorm
-		return 123;
-	case 555: //Circle of Ro
-		return 123;
-	case 556: //Circle of Feerrott
-		return 123;
-	case 557: //Circle of Steamfont
-		return 123;
-	case 558: //Circle of Misty
-		return 123;
-	case 559: //Ignite Bones
-		return 25;
-	case 560: //Furor
-		return 25;
-	case 561: //Tox Portal
-		return 123;
-	case 562: //North Portal
-		return 123;
-	case 563: //Fay Portal
-		return 123;
-	case 564: //Nek Portal
-		return 123;
-	case 565: //Cazic Portal
-		return 123;
-	case 566: //Common Portal
-		return 123;
-	case 567: //Ro Portal
-		return 123;
-	case 568: //West Portal
-		return 123;
-	case 569: //Summoning: Earth
-		return 69;
-	case 570: //Summoning: Water
-		return 69;
-	case 571: //Summoning: Fire
-		return 69;
-	case 572: //Summoning: Air
-		return 69;
-	case 573: //Greater Summoning: Earth
-		return 69;
-	case 574: //Greater Summoning: Water
-		return 69;
-	case 575: //Greater Summoning: Fire
-		return 69;
-	case 576: //Greater Summoning: Air
-		return 69;
-	case 577: //Vigilant Spirit
-		return 69;
-	case 578: //Sight
-		return 125;
-	case 579: //Magnify
-		return 125;
-	case 580: //Vision
-		return 125;
-	case 581: //Illusion: Skeleton
-		return 125;
-	case 582: //Illusion: Human
-		return 125;
-	case 583: //Illusion: Half-Elf
-		return 125;
-	case 584: //Illusion: Earth Elemental
-		return 125;
-	case 585: //Illusion: Werewolf
-		return 125;
-	case 586: //Illusion: Barbarian
-		return 125;
-	case 587: //Illusion: Erudite
-		return 125;
-	case 588: //Illusion: Wood Elf
-		return 125;
-	case 589: //Illusion: High Elf
-		return 125;
-	case 590: //Illusion: Dark Elf
-		return 125;
-	case 591: //Illusion: Dwarf
-		return 125;
-	case 592: //Illusion: Troll
-		return 125;
-	case 593: //Illusion: Ogre
-		return 125;
-	case 594: //Illusion: Halfling
-		return 125;
-	case 595: //Illusion: Gnome
-		return 125;
-	case 596: //Illusion: Dry Bone
-		return 125;
-	case 597: //Illusion: Air Elemental
-		return 125;
-	case 598: //Illusion: Fire Elemental
-		return 125;
-	case 599: //Illusion: Water Elemental
-		return 125;
-	case 600: //Illusion: Spirit Wolf
-		return 125;
-	case 601: //Illusion: Tree
-		return 125;
-	case 602: //Evacuate: North
-		return 123;
-	case 603: //Evacuate: Fay
-		return 123;
-	case 604: //Evacuate: Ro
-		return 123;
-	case 605: //Evacuate: Nek
-		return 123;
-	case 606: //Evacuate: West
-		return 123;
-	case 607: //Succor: East
-		return 123;
-	case 608: //Succor: Butcher
-		return 123;
-	case 609: //Succor: Ro
-		return 123;
-	case 610: //Succor: Lavastorm
-		return 123;
-	case 611: //Succor: North
-		return 123;
-	case 612: //Markar's Clash
-		return 25;
-	case 613: //Staff of Tracing
-		return 18;
-	case 614: //Staff of Warding
-		return 18;
-	case 615: //Staff of Runes
-		return 18;
-	case 616: //Staff of Symbols
-		return 18;
-	case 617: //Sword of Runes
-		return 18;
-	case 618: //Dimensional Hole
-		return 18;
-	case 619: //Dyn`s Dizzying Draught
-		return 25;
-	case 620: //Minor Conjuration: Earth
-		return 69;
-	case 621: //Minor Conjuration: Water
-		return 69;
-	case 622: //Minor Conjuration: Fire
-		return 69;
-	case 623: //Minor Conjuration: Air
-		return 69;
-	case 624: //Lesser Conjuration: Earth
-		return 69;
-	case 625: //Lesser Conjuration: Water
-		return 69;
-	case 626: //Lesser Conjuration: Fire
-		return 69;
-	case 627: //Lesser Conjuration: Air
-		return 69;
-	case 628: //Conjuration: Earth
-		return 69;
-	case 629: //Conjuration: Water
-		return 69;
-	case 630: //Conjuration: Fire
-		return 69;
-	case 631: //Conjuration: Air
-		return 69;
-	case 632: //Greater Conjuration: Earth
-		return 69;
-	case 633: //Greater Conjuration: Water
-		return 69;
-	case 634: //Greater Conjuration: Fire
-		return 69;
-	case 635: //Greater Conjuration: Air
-		return 69;
-	case 636: //Bonds of Force
-		return 126;
-	case 640: //Creeping Vision
-		return 125;
-	case 641: //Dark Pact
-		return 125;
-	case 642: //Allure of Death
-		return 125;
-	case 643: //Call of Bones
-		return 125;
-	case 644: //Lich
-		return 125;
-	case 645: //Ebbing Strength
-		return 126;
-	case 646: //Radiant Visage
-		return 95;
-	case 647: //Adorning Grace
-		return 95;
-	case 648: //Rampage
-		return 125;
-	case 649: //Protect
-		return 95;
-	case 650: //Mist
-		return 95;
-	case 651: //Cloud
-		return 95;
-	case 652: //Obscure
-		return 95;
-	case 653: //Shade
-		return 95;
-	case 654: //Shadow
-		return 95;
-	case 655: //Eyes of the Cat
-		return 125;
-	case 656: //Shock of Ice
-		return 25;
-	case 657: //Flame Shock
-		return 25;
-	case 658: //Ice Shock
-		return 25;
-	case 659: //Conflagration
-		return 25;
-	case 660: //Frost Storm
-		return 25;
-	case 661: //Augment Death
-		return 69;
-	case 662: //Expel Undead
-		return 25;
-	case 663: //Expulse Summoned
-		return 25;
-	case 664: //Expel Summoned
-		return 25;
-	case 665: //Drifting Death
-		return 20;
-	case 666: //Alter Plane: Hate
-		return 123;
-	case 667: //Enchant Silver
-		return 18;
-	case 668: //Enchant Electrum
-		return 18;
-	case 669: //Enchant Gold
-		return 18;
-	case 670: //Enchant Platinum
-		return 18;
-	case 671: //Starfire
-		return 25;
-	case 672: //Retribution
-		return 25;
-	case 673: //Discordant Mind
-		return 25;
-	case 674: //Alter Plane: Sky
-		return 123;
-	case 675: //Hammer of Requital
-		return 18;
-	case 676: //Tashan
-		return 126;
-	case 677: //Tashani
-		return 126;
-	case 678: //Tashania
-		return 126;
-	case 679: //Heat Sight
-		return 125;
-	case 680: //Barrier of Combustion
-		return 125;
-	case 681: //Juli`s Animation
-		return 69;
-	case 682: //Kilan`s Animation
-		return 69;
-	case 683: //Shalee`s Animation
-		return 69;
-	case 684: //Sisna`s Animation
-		return 69;
-	case 685: //Sagar`s Animation
-		return 69;
-	case 686: //Uleen`s Animation
-		return 69;
-	case 687: //Boltran`s Animation
-		return 69;
-	case 688: //Aanya's Animation
-		return 69;
-	case 689: //Yegoreff`s Animation
-		return 69;
-	case 690: //Kintaz`s Animation
-		return 69;
-	case 691: //Call of Flame
-		return 25;
-	case 692: //Life Leech
-		return 114;
-	case 693: //Divine Might
-		return 125;
-	case 694: //Pact of Shadow
-		return 42;
-	case 695: //Distill Mana
-		return 18;
-	case 696: //Purify Mana
-		return 18;
-	case 697: //Breeze
-		return 79;
-	case 698: //Track Corpse
-		return 125;
-	case 699: //Defoliate
-		return 25;
-	case 700: //Chant of Battle
-		return 125;
-	case 701: //Anthem de Arms
-		return 125;
-	case 702: //McVaxius` Berserker Crescendo
-		return 125;
-	case 703: //Chords of Dissonance
-		return 20;
-	case 704: //Brusco`s Boastful Bellow
-		return 25;
-	case 705: //Largo's Melodic Binding
-		return 126;
-	case 706: //Angstlich`s Appalling Screech
-		return 126;
-	case 707: //Fufil`s Curtailing Chant
-		return 20;
-	case 708: //Cinda`s Charismatic Carillon
-		return 125;
-	case 709: //Guardian Rhythms
-		return 95;
-	case 710: //Elemental Rhythms
-		return 95;
-	case 711: //Purifying Rhythms
-		return 95;
-	case 712: //Psalm of Warmth
-		return 125;
-	case 713: //Psalm of Cooling
-		return 125;
-	case 714: //Psalm of Mystic Shielding
-		return 95;
-	case 715: //Psalm of Vitality
-		return 125;
-	case 716: //Psalm of Purity
-		return 125;
-	case 717: //Selo`s Accelerando
-		return 125;
-	case 718: //Agilmente`s Aria of Eagles
-		return 125;
-	case 719: //Shauri`s Sonorous Clouding
-		return 125;
-	case 720: //Lyssa`s Locating Lyric
-		return 125;
-	case 721: //Lyssa`s Solidarity of Vision
-		return 125;
-	case 722: //Jaxan`s Jig o` Vigor
-		return 42;
-	case 723: //Cassindra's Chorus of Clarity
-		return 79;
-	case 724: //Kelin`s Lucid Lullaby
-		return 126;
-	case 725: //Solon's Song of the Sirens
-		return 126;
-	case 726: //Syvelian`s Anti-Magic Aria
-		return 126;
-	case 727: //Alenia`s Disenchanting Melody
-		return 126;
-	case 728: //Kelin`s Lugubrious Lament
-		return 126;
-	case 729: //Tarew`s Aquatic Ayre
-		return 125;
-	case 730: //Denon`s Disruptive Discord
-		return 20;
-	case 731: //Wrath of Al'Kabor
-		return 25;
-	case 732: //Ice Comet
-		return 25;
-	case 733: //Supernova
-		return 25;
-	case 734: //Jonthan's Whistling Warsong
-		return 125;
-	case 735: //Lyssa`s Veracious Concord
-		return 125;
-	case 736: //Denon`s Dissension
-		return 126;
-	case 737: //Lyssa`s Cataloging Libretto
-		return 125;
-	case 738: //Selo`s Consonant Chain
-		return 126;
-	case 739: //Melanie`s Mellifluous Motion
-		return 125;
-	case 740: //Vilia`s Verses of Celerity
-		return 125;
-	case 741: //Crission`s Pixie Strike
-		return 126;
-	case 742: //Denon`s Desperate Dirge
-		return 25;
-	case 743: //Tuyen`s Chant of Flame
-		return 20;
-	case 744: //Tuyen`s Chant of Frost
-		return 20;
-	case 745: //Cassindra`s Elegy
-		return 95;
-	case 746: //Selo`s Chords of Cessation
-		return 126;
-	case 747: //Verses of Victory
-		return 125;
-	case 748: //Niv`s Melody of Preservation
-		return 125;
-	case 749: //Jonthan's Provocation
-		return 125;
-	case 750: //Solon's Bewitching Bravura
-		return 126;
-	case 752: //Concussion
-		return 126;
-	case 753: //Beguile Plants
-		return 126;
-	case 754: //Cannibalize II
-		return 125;
-	case 755: //Rend
-		return 25;
-	case 761: //Contact Poison I
-		return 25;
-	case 763: //System Shock I
-		return 25;
-	case 767: //Liquid Silver I
-		return 25;
-	case 786: //Wurm Blaze
-		return 25;
-	case 792: //Fist of Fire
-		return 25;
-	case 793: //Fist of Air
-		return 25;
-	case 794: //Fist of Earth
-		return 25;
-	case 804: //Magi Bolt
-		return 25;
-	case 805: //Magi Strike
-		return 25;
-	case 807: //Magi Circle
-		return 25;
-	case 808: //Avatar Power
-		return 25;
-	case 812: //SumMonsterAttack
-		return 25;
-	case 817: //Guide Bolt
-		return 25;
-	case 823: //Divine Might Effect
-		return 25;
-	case 829: //FireHornet
-		return 25;
-	case 831: //Sathir's Gaze
-		return 25;
-	case 832: //WurmBreath
-		return 25;
-	case 834: //Sathir's Mesmerization
-		return 25;
-	case 835: //Chaos Breath
-		return 25;
-	case 837: //Stun Breath
-		return 25;
-	case 839: //Lightning Breath
-		return 25;
-	case 848: //Elemental Mastery Strike
-		return 25;
-	case 849: //ElementalMasteryBlast
-		return 25;
-	case 851: //Shardwurm Breath
-		return 25;
-	case 859: //Lava Breath - Test
-		return 25;
-	case 860: //DrakeBreath
-		return 25;
-	case 861: //Lava Breath
-		return 25;
-	case 862: //Frost Breath
-		return 25;
-	case 863: //Telekinesis
-		return 25;
-	case 868: //Sionachie`s Dreams
-		return 126;
-	case 893: //FireElementalAttack2
-		return 25;
-	case 904: //Knockback
-		return 25;
-	case 907: //DryBoneFireBurst
-		return 25;
-	case 908: //IceBoneFrostBurst
-		return 25;
-	case 910: //SnakeEleFireBurst
-		return 25;
-	case 917: //Smolder
-		return 25;
-	case 922: //Sonic
-		return 25;
-	case 929: //Harm Touch NPC
-		return 25;
-	case 931: //Life Drain
-		return 25;
-	case 945: //Ykesha
-		return 25;
-	case 951: //Fiery Death
-		return 25;
-	case 952: //Frosty Death
-		return 25;
-	case 966: //FireElementalAttack
-		return 25;
-	case 968: //WaterElementalAttack
-		return 25;
-	case 978: //FrostAOE
-		return 25;
-	case 982: //Cazic Touch
-		return 25;
-	case 985: //Efreeti Fire
-		return 25;
-	case 987: //Spiroc Thunder
-		return 25;
-	case 988: //Greater Spiroc Thunder
-		return 25;
-	case 989: //Entomb in Ice
-		return 25;
-	case 995: //Soul Devour
-		return 25;
-	case 1009: //FireBeetleSpit
-		return 25;
-	case 1017: //Fishnova
-		return 25;
-	case 1020: //Air Elemental Strike
-		return 25;
-	case 1021: //Water Elemental Strike
-		return 25;
-	case 1024: //Thunderclap
-		return 25;
-	case 1026: //Thunder Call
-		return 25;
-	case 1027: //Thunder Storm
-		return 25;
-	case 1028: //Static Storm
-		return 25;
-	case 1030: //Sand Storm
-		return 25;
-	case 1031: //Stone Gale
-		return 25;
-	case 1032: //Hail Storm
-		return 25;
-	case 1036: //Storm Flame
-		return 25;
-	case 1043: //Manastorm
-		return 25;
-	case 1045: //Chain Lightning
-		return 25;
-	case 1047: //Deluge
-		return 25;
-	case 1048: //Monsoons
-		return 25;
-	case 1049: //Tempest Wind
-		return 25;
-	case 1050: //Raging Blizzard
-		return 25;
-	case 1071: //Punishing Blow
-		return 25;
-	case 1074: //Steam Blast
-		return 25;
-	case 1075: //Electrical Short
-		return 25;
-	case 1077: //Mana Beam
-		return 25;
-	case 1078: //Gyrosonic Disruption
-		return 25;
-	case 1084: //Barrage of Debris
-		return 25;
-	case 1100: //Dreams of Ayonae
-		return 126;
-	case 1106: //Sear
-		return 20;
-	case 1107: //Tremor of Judgment
-		return 25;
-	case 1142: //Pain Harvest
-		return 25;
-	case 1144: //Jagged Rain
-		return 25;
-	case 1145: //Touch of Pain
-		return 25;
-	case 1151: //Raven Screech
-		return 25;
-	case 1155: //Black Symbol of Agony
-		return 25;
-	case 1167: //Draconic Rage Strike
-		return 25;
-	case 1168: //Draconic Rage Strike
-		return 25;
-	case 1172: //Sting of the Shissar
-		return 25;
-	case 1173: //Bite of the Shissar
-		return 25;
-	case 1180: //Zombie Bane
-		return 25;
-	case 1181: //Mayong's Bane
-		return 25;
-	case 1188: //Bixie Sting
-		return 25;
-	case 1189: //Scoriae Bite
-		return 25;
-	case 1194: //Illusion: Fier`dal
-		return 125;
-	case 1196: //Ancient: Lcea's Lament
-		return 79;
-	case 1197: //Ancient: Lullaby of Shadow
-		return 126;
-	case 1216: //Guide Bolt
-		return 25;
-	case 1221: //Terror of Darkness
-		return 126;
-	case 1222: //Terror of Shadows
-		return 126;
-	case 1223: //Terror of Death
-		return 126;
-	case 1224: //Terror of Terris
-		return 126;
-	case 1225: //Voice of Darkness
-		return 125;
-	case 1226: //Voice of Shadows
-		return 125;
-	case 1227: //Voice of Death
-		return 125;
-	case 1228: //Voice of Terris
-		return 125;
-	case 1244: //Magi Bolt
-		return 25;
-	case 1245: //Magi Strike
-		return 25;
-	case 1247: //Magi Circle
-		return 25;
-	case 1269: //Fangol's Breath
-		return 25;
-	case 1279: //Velium Chill of Al`Kabor
-		return 25;
-	case 1283: //Celestial Cleansing
-		return 42;
-	case 1284: //Valiant Companion
-		return 69;
-	case 1285: //Summon Companion
-		return 69;
-	case 1286: //Expedience
-		return 69;
-	case 1287: //Cassindra`s Chant of Clarity
-		return 79;
-	case 1288: //Divine Glory
-		return 45;
-	case 1289: //Strengthen Death
-		return 69;
-	case 1290: //Chloroblast
-		return 42;
-	case 1291: //Nature's Touch
-		return 42;
-	case 1296: //Cinder Jolt
-		return 126;
-	case 1310: //Porlos' Fury
-		return 25;
-	case 1311: //Hsagra's Wrath
-		return 25;
-	case 1314: //SpectraStun
-		return 25;
-	case 1317: //Repulse
-		return 25;
-	case 1325: //Combine Gate
-		return 123;
-	case 1326: //Ring of the Combines
-		return 123;
-	case 1332: //Cannibalize IV
-		return 125;
-	case 1334: //Translocate: Group
-		return 123;
-	case 1336: //Translocate: Fay
-		return 123;
-	case 1337: //Translocate: Tox
-		return 123;
-	case 1338: //Translocate: North
-		return 123;
-	case 1339: //Translocate: Combine
-		return 123;
-	case 1356: //Frosty Death2
-		return 25;
-	case 1359: //Enchant Clay
-		return 18;
-	case 1366: //Rage of the Sky
-		return 25;
-	case 1369: //Poisonous Chill
-		return 25;
-	case 1371: //Translocate: Nek
-		return 123;
-	case 1372: //Translocate: Common
-		return 123;
-	case 1373: //Translocate: Ro
-		return 123;
-	case 1374: //Translocate: West
-		return 123;
-	case 1375: //Translocate: Cazic
-		return 123;
-	case 1376: //Shroud of Undeath
-		return 125;
-	case 1377: //Primal Avatar
-		return 95;
-	case 1382: //Summon Holy Ale of Brell
-		return 18;
-	case 1391: //Dead Men Floating
-		return 125;
-	case 1392: //Fireburst
-		return 25;
-	case 1393: //Gangrenous Touch of Zum`uul
-		return 114;
-	case 1394: //Maelstrom of Electricity
-		return 25;
-	case 1397: //Strength of Nature
-		return 45;
-	case 1398: //Circle of Wakening Lands
-		return 123;
-	case 1399: //Wakening Lands Portal
-		return 123;
-	case 1400: //Monster Summoning I
-		return 69;
-	case 1401: //Summon Shard of the Core
-		return 18;
-	case 1402: //Monster Summoning II
-		return 69;
-	case 1403: //Elemental Maelstrom
-		return 20;
-	case 1404: //Monster Summoning III
-		return 69;
-	case 1405: //Wrath of the Elements
-		return 20;
-	case 1406: //Improved Invisibility
-		return 125;
-	case 1407: //Wandering Mind
-		return 126;
-	case 1408: //Gift of Magic
-		return 95;
-	case 1409: //Gift of Insight
-		return 95;
-	case 1410: //Gift of Brilliance
-		return 95;
-	case 1411: //Improved Invis to Undead
-		return 125;
-	case 1412: //Chilling Embrace
-		return 20;
-	case 1413: //Corporeal Empathy
-		return 42;
-	case 1414: //Augmentation of Death
-		return 69;
-	case 1415: //Torbas' Acid Blast
-		return 25;
-	case 1416: //Arch Lich
-		return 125;
-	case 1417: //Iceclad Gate
-		return 123;
-	case 1418: //Iceclad Portal
-		return 123;
-	case 1419: //O'Keils Flickering Flame
-		return 125;
-	case 1420: //Invisibility to Undead
-		return 125;
-	case 1421: //Enticement of Flame
-		return 25;
-	case 1422: //Translocate
-		return 123;
-	case 1423: //Great Divide Portal
-		return 123;
-	case 1425: //Cobalt Scar Portal
-		return 123;
-	case 1426: //Ice Spear of Solist
-		return 25;
-	case 1427: //Shock of the Tainted
-		return 25;
-	case 1428: //Tumultuous Strength
-		return 95;
-	case 1429: //Blast of Poison
-		return 25;
-	case 1430: //Spirit Quickening
-		return 69;
-	case 1431: //Form of the Great Bear
-		return 125;
-	case 1432: //Focus of Spirit
-		return 45;
-	case 1433: //Ring of Iceclad
-		return 123;
-	case 1434: //Circle of Iceclad
-		return 123;
-	case 1435: //Improved Superior Camouflage
-		return 125;
-	case 1436: //Fixation of Ro
-		return 126;
-	case 1437: //Ro's Fiery Sundering
-		return 126;
-	case 1438: //Circle of Great Divide
-		return 123;
-	case 1439: //Fury of Air
-		return 25;
-	case 1440: //Circle of Cobalt Scar
-		return 123;
-	case 1442: //Protection of the Glades
-		return 45;
-	case 1443: //Turning of the Unnatural
-		return 20;
-	case 1444: //Celestial Healing
-		return 42;
-	case 1445: //Armor of Protection
-		return 45;
-	case 1446: //Stun Command
-		return 25;
-	case 1447: //Aegolism
-		return 45;
-	case 1448: //Cantata of Soothing
-		return 79;
-	case 1449: //Melody of Ervaj
-		return 125;
-	case 1450: //Shield of Songs
-		return 125;
-	case 1451: //Occlusion of Sound
-		return 126;
-	case 1452: //Composition of Ervaj
-		return 125;
-	case 1453: //Divine Purpose
-		return 125;
-	case 1454: //Flame of Light
-		return 25;
-	case 1455: //Wave of Healing
-		return 42;
-	case 1456: //Divine Strength
-		return 45;
-	case 1457: //Shroud of Hate
-		return 114;
-	case 1458: //Shroud of Pain
-		return 114;
-	case 1459: //Shroud of Death
-		return 125;
-	case 1460: //Death Peace
-		return 125;
-	case 1461: //Call of Sky
-		return 125;
-	case 1462: //Call of Earth
-		return 125;
-	case 1463: //Call of Fire
-		return 125;
-	case 1464: //Call of the Predator
-		return 95;
-	case 1465: //Call of Sky Strike
-		return 25;
-	case 1467: //Call of Fire Strike
-		return 25;
-	case 1472: //Burnout IV
-		return 69;
-	case 1474: //Boon of the Garou
-		return 125;
-	case 1475: //Nature Walkers Behest
-		return 69;
-	case 1479: //Wave of Flame
-		return 25;
-	case 1480: //Silver Breath
-		return 25;
-	case 1481: //Scream of Chaos
-		return 25;
-	case 1482: //Electric Blast
-		return 25;
-	case 1484: //Tsunami
-		return 25;
-	case 1487: //Rain of Cold
-		return 25;
-	case 1488: //Rain of Molten Lava
-		return 25;
-	case 1489: //Wave of Cold
-		return 25;
-	case 1490: //Wave of Heat
-		return 25;
-	case 1494: //Flame Jet
-		return 25;
-	case 1498: //Doljons Rage
-		return 25;
-	case 1503: //Modulating Rod
-		return 18;
-	case 1504: //Renew Elements
-		return 69;
-	case 1505: //Renew Summoning
-		return 69;
-	case 1508: //Asystole
-		return 20;
-	case 1509: //Leach
-		return 114;
-	case 1510: //Shadow Compact
-		return 42;
-	case 1511: //Scent of Dusk
-		return 126;
-	case 1512: //Scent of Shadow
-		return 126;
-	case 1513: //Scent of Darkness
-		return 126;
-	case 1514: //Rapacious Subvention
-		return 42;
-	case 1515: //Covetous Subversion
-		return 42;
-	case 1516: //Combine Portal
-		return 123;
-	case 1517: //Circle of the Combines
-		return 123;
-	case 1518: //Remedy
-		return 42;
-	case 1519: //Divine Light
-		return 42;
-	case 1520: //Word of Vigor
-		return 42;
-	case 1521: //Word of Restoration
-		return 42;
-	case 1522: //Celestial Elixir
-		return 42;
-	case 1523: //Word of Redemption
-		return 42;
-	case 1524: //Reviviscence
-		return 42;
-	case 1525: //Antidote
-		return 42;
-	case 1526: //Annul Magic
-		return 126;
-	case 1527: //Trepidation
-		return 126;
-	case 1528: //Exile Undead
-		return 25;
-	case 1529: //Exile Summoned
-		return 25;
-	case 1530: //Banishment of Shadows
-		return 25;
-	case 1531: //Banishment
-		return 25;
-	case 1532: //Dread of Night
-		return 126;
-	case 1533: //Heroism
-		return 45;
-	case 1534: //Yaulp IV
-		return 95;
-	case 1535: //Symbol of Marzin
-		return 45;
-	case 1536: //Heroic Bond
-		return 45;
-	case 1537: //Bulwark of Faith
-		return 95;
-	case 1538: //Heroic Bond
-		return 45;
-	case 1539: //Fortitude
-		return 45;
-	case 1540: //Aegis
-		return 95;
-	case 1541: //Wake of Tranquility
-		return 126;
-	case 1542: //Upheaval
-		return 25;
-	case 1543: //Reckoning
-		return 25;
-	case 1544: //Enforced Reverence
-		return 25;
-	case 1545: //The Unspoken Word
-		return 25;
-	case 1546: //Divine Intervention
-		return 125;
-	case 1547: //Death Pact
-		return 125;
-	case 1548: //Mark of Karn
-		return 125;
-	case 1550: //Repulse Animal
-		return 126;
-	case 1551: //Circle of Winter
-		return 95;
-	case 1552: //Circle of Summer
-		return 95;
-	case 1553: //Call of Karana
-		return 126;
-	case 1554: //Spirit of Scale
-		return 125;
-	case 1555: //Glamour of Tunare
-		return 126;
-	case 1556: //Tunare's Request
-		return 126;
-	case 1557: //Girdle of Karana
-		return 95;
-	case 1558: //Bladecoat
-		return 125;
-	case 1559: //Natureskin
-		return 45;
-	case 1560: //Shield of Blades
-		return 125;
-	case 1561: //Legacy of Thorn
-		return 125;
-	case 1562: //Form of the Howler
-		return 125;
-	case 1563: //Form of the Hunter
-		return 125;
-	case 1564: //Spirit of Oak
-		return 125;
-	case 1565: //Mask of the Hunter
-		return 79;
-	case 1566: //Egress
-		return 123;
-	case 1567: //Succor
-		return 123;
-	case 1568: //Regrowth
-		return 79;
-	case 1569: //Regrowth of the Grove
-		return 79;
-	case 1570: //Talisman of Jasinth
-		return 95;
-	case 1571: //Talisman of Shadoo
-		return 95;
-	case 1572: //Cannibalize III
-		return 125;
-	case 1573: //Insidious Decay
-		return 126;
-	case 1574: //Spirit of the Howler
-		return 69;
-	case 1575: //Acumen
-		return 125;
-	case 1576: //Torpor
-		return 42;
-	case 1577: //Malosini
-		return 126;
-	case 1578: //Malo
-		return 126;
-	case 1579: //Talisman of the Cat
-		return 95;
-	case 1580: //Talisman of the Brute
-		return 95;
-	case 1581: //Talisman of the Rhino
-		return 95;
-	case 1582: //Talisman of the Serpent
-		return 95;
-	case 1583: //Talisman of the Raptor
-		return 95;
-	case 1584: //Shroud of the Spirits
-		return 95;
-	case 1585: //Talisman of Kragg
-		return 45;
-	case 1586: //Ice Strike
-		return 25;
-	case 1587: //Torrent of Poison
-		return 25;
-	case 1588: //Turgur's Insects
-		return 126;
-	case 1589: //Tigir's Insects
-		return 126;
-	case 1590: //Bane of Nife
-		return 20;
-	case 1591: //Pox of Bertoxxulous
-		return 20;
-	case 1592: //Cripple
-		return 126;
-	case 1593: //Maniacal Strength
-		return 95;
-	case 1594: //Deliriously Nimble
-		return 95;
-	case 1595: //Riotous Health
-		return 95;
-	case 1596: //Mortal Deftness
-		return 95;
-	case 1597: //Unfailing Reverence
-		return 95;
-	case 1598: //Avatar
-		return 95;
-	case 1599: //Voice of the Berserker
-		return 95;
-	case 1600: //Breath of Ro
-		return 20;
-	case 1601: //Winged Death
-		return 20;
-	case 1602: //Blizzard
-		return 25;
-	case 1603: //Scoriae
-		return 25;
-	case 1604: //Breath of Karana
-		return 25;
-	case 1605: //Frost
-		return 25;
-	case 1606: //Fist of Karana
-		return 25;
-	case 1607: //Wildfire
-		return 25;
-	case 1608: //Entrapping Roots
-		return 126;
-	case 1609: //Manaskin
-		return 125;
-	case 1610: //Shield of the Magi
-		return 45;
-	case 1611: //Demi Lich
-		return 125;
-	case 1612: //Quivering Veil of Xarn
-		return 125;
-	case 1613: //Deflux
-		return 114;
-	case 1614: //Chill Bones
-		return 25;
-	case 1615: //Cessation of Cor
-		return 20;
-	case 1616: //Vexing Mordinia
-		return 114;
-	case 1617: //Pyrocruor
-		return 20;
-	case 1618: //Touch of Night
-		return 114;
-	case 1619: //Devouring Darkness
-		return 20;
-	case 1620: //Splurt
-		return 20;
-	case 1621: //Minion of Shadows
-		return 69;
-	case 1622: //Servant of Bones
-		return 69;
-	case 1623: //Emissary of Thule
-		return 69;
-	case 1624: //Thrall of Bones
-		return 126;
-	case 1625: //Skin of the Shadow
-		return 125;
-	case 1626: //Levant
-		return 123;
-	case 1627: //Abscond
-		return 123;
-	case 1628: //Evacuate
-		return 123;
-	case 1629: //Enslave Death
-		return 126;
-	case 1630: //Defoliation
-		return 25;
-	case 1631: //Atol's Spectral Shackles
-		return 126;
-	case 1632: //Plainsight
-		return 125;
-	case 1633: //Fetter
-		return 126;
-	case 1634: //Tishan's Discord
-		return 25;
-	case 1635: //Markar's Discord
-		return 25;
-	case 1636: //Invert Gravity
-		return 25;
-	case 1637: //Draught of Fire
-		return 25;
-	case 1638: //Lure of Flame
-		return 25;
-	case 1639: //Voltaic Draught
-		return 25;
-	case 1640: //Lure of Lightning
-		return 25;
-	case 1641: //Draught of Ice
-		return 25;
-	case 1642: //Lure of Frost
-		return 25;
-	case 1643: //Draught of Jiva
-		return 25;
-	case 1644: //Pillar of Flame
-		return 25;
-	case 1645: //Pillar of Lightning
-		return 25;
-	case 1646: //Pillar of Frost
-		return 25;
-	case 1647: //Tears of Prexus
-		return 25;
-	case 1648: //Tears of Solusek
-		return 25;
-	case 1649: //Tears of Druzzil
-		return 25;
-	case 1650: //Inferno of Al'Kabor
-		return 25;
-	case 1651: //Retribution of Al'Kabor
-		return 25;
-	case 1652: //Vengeance of Al'Kabor
-		return 25;
-	case 1653: //Jyll's Static Pulse
-		return 25;
-	case 1654: //Jyll's Zephyr of Ice
-		return 25;
-	case 1655: //Jyll's Wave of Heat
-		return 25;
-	case 1656: //Thunderbold
-		return 25;
-	case 1657: //Winds of Gelid
-		return 25;
-	case 1658: //Sunstrike
-		return 25;
-	case 1659: //Scintillation
-		return 25;
-	case 1660: //Char
-		return 25;
-	case 1661: //Scars of Sigil
-		return 25;
-	case 1662: //Sirocco
-		return 25;
-	case 1663: //Shock of Steel
-		return 25;
-	case 1664: //Seeking Flame of Seukor
-		return 25;
-	case 1665: //Manastorm
-		return 25;
-	case 1666: //Phantom Armor
-		return 79;
-	case 1667: //Cadeau of Flame
-		return 125;
-	case 1668: //Boon of Immolation
-		return 125;
-	case 1669: //Aegis of Ro
-		return 125;
-	case 1670: //Velocity
-		return 69;
-	case 1671: //Vocarate: Earth
-		return 69;
-	case 1672: //Vocarate: Water
-		return 69;
-	case 1673: //Vocarate: Fire
-		return 69;
-	case 1674: //Vocarate: Air
-		return 69;
-	case 1675: //Greater Vocaration: Earth
-		return 69;
-	case 1676: //Greater Vocaration: Water
-		return 69;
-	case 1677: //Greater Vocaration: Fire
-		return 69;
-	case 1678: //Greater Vocaration: Air
-		return 69;
-	case 1679: //Dyzil's Deafening Decoy
-		return 69;
-	case 1680: //Gift of Xev
-		return 18;
-	case 1681: //Bristlebane's Bundle
-		return 18;
-	case 1682: //Quiver of Marr
-		return 18;
-	case 1683: //Bandoleer of Luclin
-		return 18;
-	case 1684: //Pouch of Quellious
-		return 18;
-	case 1685: //Muzzle of Mardu
-		return 18;
-	case 1686: //Theft of Thought
-		return 126;
-	case 1687: //Collaboration
-		return 125;
-	case 1688: //Enlightenment
-		return 95;
-	case 1689: //Rune V
-		return 125;
-	case 1690: //Fascination
-		return 126;
-	case 1691: //Glamour of Kintaz
-		return 126;
-	case 1692: //Rapture
-		return 126;
-	case 1693: //Clarity II
-		return 79;
-	case 1694: //Boon of the Clear Mind
-		return 79;
-	case 1695: //Gift of Pure Thought
-		return 79;
-	case 1696: //Color Slant
-		return 25;
-	case 1697: //Recant Magic
-		return 126;
-	case 1698: //Dementia
-		return 25;
-	case 1699: //Wind of Tashani
-		return 126;
-	case 1700: //Torment of Argli
-		return 20;
-	case 1701: //Overwhelming Splendor
-		return 95;
-	case 1702: //Tashanian
-		return 126;
-	case 1703: //Asphyxiate
-		return 20;
-	case 1704: //Wind of Tashanian
-		return 126;
-	case 1705: //Boltran`s Agacerie
-		return 126;
-	case 1707: //Dictate
-		return 126;
-	case 1708: //Aanya's Quickening
-		return 125;
-	case 1709: //Wonderous Rapidity
-		return 125;
-	case 1710: //Visions of Grandeur
-		return 125;
-	case 1711: //Umbra
-		return 95;
-	case 1712: //Forlorn Deeds
-		return 126;
-	case 1713: //Bedlam
-		return 125;
-	case 1714: //Memory Flux
-		return 126;
-	case 1715: //Largarn's Lamentation
-		return 126;
-	case 1716: //Scent of Terris
-		return 126;
-	case 1717: //Shadowbond
-		return 42;
-	case 1718: //Sedulous Subversion
-		return 42;
-	case 1719: //Engorging Roots
-		return 126;
-	case 1720: //Eye of Tallon
-		return 125;
-	case 1721: //Unswerving Hammer of Faith
-		return 69;
-	case 1722: //Flaming Sword of Xuzl
-		return 69;
-	case 1723: //Zumaik`s Animation
-		return 69;
-	case 1724: //Disintegrate
-		return 25;
-	case 1725: //Wake of Karana
-		return 125;
-	case 1726: //Sunskin
-		return 125;
-	case 1727: //Legacy of Spike
-		return 125;
-	case 1728: //Manasink
-		return 125;
-	case 1729: //Augment
-		return 125;
-	case 1733: //Convergence
-		return 42;
-	case 1734: //Infusion
-		return 42;
-	case 1735: //Trucidation
-		return 114;
-	case 1736: //Wind of the North
-		return 123;
-	case 1737: //Wind of the South
-		return 123;
-	case 1738: //Tishan's Relocation
-		return 123;
-	case 1739: //Markar's Relocation
-		return 123;
-	case 1740: //Dustdevil
-		return 25;
-	case 1741: //Jolt
-		return 126;
-	case 1742: //Bobbing Corpse
-		return 125;
-	case 1743: //Divine Favor
-		return 45;
-	case 1744: //Harvest
-		return 42;
-	case 1747: //Brusco`s Bombastic Bellow
-		return 25;
-	case 1748: //Angstlich's Assonance
-		return 20;
-	case 1749: //Kazumi's Note of Preservation
-		return 125;
-	case 1750: //Selo`s Song of Travel
-		return 125;
-	case 1751: //Largo`s Absonant Binding
-		return 126;
-	case 1752: //Nillipus` March of the Wee
-		return 125;
-	case 1753: //Song of Twilight
-		return 126;
-	case 1754: //Song of Dawn
-		return 126;
-	case 1755: //Song of Highsun
-		return 125;
-	case 1756: //Song of Midnight
-		return 126;
-	case 1757: //Vilia`s Chorus of Celerity
-		return 125;
-	case 1758: //Selo`s Assonant Strane
-		return 126;
-	case 1759: //Cantata of Replenishment
-		return 79;
-	case 1760: //McVaxius` Rousing Rondo
-		return 125;
-	case 1761: //Cassindra's Insipid Ditty
-		return 126;
-	case 1762: //Jonthan's Inspiration
-		return 125;
-	case 1763: //Niv`s Harmonic
-		return 95;
-	case 1764: //Denon`s Bereavement
-		return 20;
-	case 1765: //Solon's Charismatic Concord
-		return 95;
-	case 1767: //Bonds of Tunare
-		return 126;
-	case 1768: //Sacrifice
-		return 18;
-	case 1769: //Lure of Ice
-		return 25;
-	case 1770: //Rage of Zomm
-		return 69;
-	case 1771: //Call of the Hero
-		return 125;
-	case 1772: //Mala
-		return 126;
-	case 1773: //Conjure Corpse
-		return 125;
-	case 1774: //Naltron's Mark
-		return 45;
-	case 1776: //Spirit of Wolf
-		return 125;
-	case 1784: //Velium Shards
-		return 25;
-	case 1785: //Flamesong
-		return 25;
-	case 1793: //Judgment of Ice
-		return 25;
-	case 1794: //Shards of Sorrow
-		return 25;
-	case 1797: //Enchant Velium
-		return 18;
-	case 1798: //Imbue Opal
-		return 18;
-	case 1799: //Imbue Topaz
-		return 18;
-	case 1800: //Imbue Plains Pebble
-		return 18;
-	case 1802: //Storm Strike
-		return 25;
-	case 1803: //Shrieking Howl
-		return 25;
-	case 1807: //Stunning Blow
-		return 25;
-	case 1812: //Nature's Wrath
-		return 25;
-	case 1815: //Flames of Ro
-		return 25;
-	case 1819: //Primal Essence
-		return 95;
-	case 1820: //Divine Wrath
-		return 25;
-	case 1827: //Frost Shards
-		return 25;
-	case 1831: //Diminution
-		return 125;
-	case 1834: //Poison Animal I
-		return 25;
-	case 1835: //Poison Summoned I
-		return 25;
-	case 1843: //Poison Animal II
-		return 25;
-	case 1844: //Poison Animal III
-		return 25;
-	case 1845: //Poison Summoned II
-		return 25;
-	case 1846: //Poison Summoned III
-		return 25;
-	case 1853: //Contact Poison II
-		return 25;
-	case 1854: //Contact Poison III
-		return 25;
-	case 1855: //Contact Poison IV
-		return 25;
-	case 1860: //System Shock II
-		return 25;
-	case 1861: //System Shock III
-		return 25;
-	case 1862: //System Shock IV
-		return 25;
-	case 1870: //Liquid Silver II
-		return 25;
-	case 1871: //Liquid Silver III
-		return 25;
-	case 1874: //Ant Legs
-		return 125;
-	case 1881: //System Shock V
-		return 25;
-	case 1884: //Imbue Ivory
-		return 18;
-	case 1885: //Imbue Amber
-		return 18;
-	case 1886: //Imbue Sapphire
-		return 18;
-	case 1887: //Imbue Ruby
-		return 18;
-	case 1888: //Imbue Emerald
-		return 18;
-	case 1889: //Enchant Mithril
-		return 18;
-	case 1890: //Enchant Adamantite
-		return 18;
-	case 1891: //Imbue Jade
-		return 18;
-	case 1892: //Enchant Steel
-		return 18;
-	case 1893: //Enchant Brellium
-		return 18;
-	case 1894: //Imbue Black Pearl
-		return 18;
-	case 1895: //Imbue Diamond
-		return 18;
-	case 1896: //Imbue Rose Quartz
-		return 18;
-	case 1897: //Imbue Black Sapphire
-		return 18;
-	case 1898: //Imbue Peridot
-		return 18;
-	case 1899: //Imbue Fire Opal
-		return 18;
-	case 1941: //Lava Breath
-		return 25;
-	case 1942: //Frost Breath
-		return 25;
-	case 1943: //Molten Breath
-		return 25;
-	case 1944: //Summon Orb
-		return 18;
-	case 1947: //Ice Rend
-		return 25;
-	case 1948: //Destroy
-		return 25;
-	case 1953: //Mastodon Stomp
-		return 25;
-	case 1954: //Devour Soul
-		return 25;
-	case 1955: //DrakeBreathBig
-		return 25;
-	case 1957: //Holy Shock
-		return 25;
-	case 1968: //Stunning Strike
-		return 25;
-	case 1969: //Flame of the Efreeti
-		return 25;
-	case 1970: //Verlekarnorm's Disaster
-		return 25;
-	case 1971: //Rocksmash
-		return 25;
-	case 2005: //Nature's Holy Wrath
-		return 25;
-	case 2006: //Static
-		return 25;
-	case 2014: //Incinerate Bones
-		return 25;
-	case 2015: //Conglaciation of Bone
-		return 25;
-	case 2016: //Dementing Visions
-		return 25;
-	case 2019: //Thunder Strike
-		return 25;
-	case 2020: //Circle of Surefall Glade
-		return 123;
-	case 2021: //Ring of Surefall Glade
-		return 123;
-	case 2022: //Translocate: Iceclad
-		return 123;
-	case 2023: //Translocate: Great Divide
-		return 123;
-	case 2024: //Translocate: Wakening Lands
-		return 123;
-	case 2025: //Translocate: Cobalt Scar
-		return 123;
-	case 2026: //Great Divide Gate
-		return 123;
-	case 2027: //Wakening Lands Gate
-		return 123;
-	case 2028: //Cobalt Scar Gate
-		return 123;
-	case 2029: //Ring of Great Divide
-		return 123;
-	case 2030: //Ring of Wakening Lands
-		return 123;
-	case 2031: //Ring of Cobalt Scar
-		return 123;
-	case 2035: //Tentacle Sting
-		return 25;
-	case 2036: //Rain of the Arch Mage
-		return 25;
-	case 2040: //Winds of the Archmage
-		return 25;
-	case 2043: //Kambooz's Touch
-		return 25;
-	case 2047: //Death Shackles
-		return 25;
-	case 2048: //Ssraeshza's Command
-		return 25;
-	case 2054: //Icy Claws
-		return 25;
-	case 2068: //Blast of Frost
-		return 25;
-	case 2070: //Marauder's Wrath
-		return 25;
-	case 2075: //Umbral Rot
-		return 25;
-	case 2076: //Presence of Ssraeshza
-		return 25;
-	case 2085: //Lesser Infusion 
-		return 25;
-	case 2086: //Infusion
-		return 25;
-	case 2087: //Greater Infusion
-		return 25;
-	case 2091: //Lesser Rejuvenation
-		return 25;
-	case 2092: //Rejuvination 
-		return 25;
-	case 2093: //Greater Rejuvenation
-		return 25;
-	case 2094: //Zruk Breath
-		return 25;
-	case 2101: //Pain and Suffering
-		return 25;
-	case 2102: //Drake Breath
-		return 25;
-	case 2103: //Drake Breath
-		return 25;
-	case 2104: //Drake Breath
-		return 25;
-	case 2105: //Drake Breath
-		return 25;
-	case 2106: //Gift of A'err
-		return 25;
-	case 2109: //Ancient: High Priest's Bulwark
-		return 45;
-	case 2110: //Skin like Wood
-		return 45;
-	case 2111: //Burst of Flame
-		return 25;
-	case 2112: //Ancient: Feral Avatar
-		return 95;
-	case 2113: //Ancient: Scourge of Nife
-		return 20;
-	case 2114: //Ancient: Master of Death
-		return 125;
-	case 2115: //Ancient: Lifebane
-		return 25;
-	case 2116: //Ancient: Destruction of Ice
-		return 25;
-	case 2117: //Ancient: Greater Concussion
-		return 126;
-	case 2118: //Ancient: Shock of Sun
-		return 25;
-	case 2119: //Ancient: Burnout Blaze
-		return 69;
-	case 2120: //Ancient: Eternal Rapture
-		return 126;
-	case 2121: //Ancient: Chaotic Visions
-		return 25;
-	case 2122: //Ancient: Gift of Aegolism
-		return 45;
-	case 2125: //Ancient: Legacy of Blades
-		return 125;
-	case 2126: //Ancient: Starfire of Ro
-		return 25;
-	case 2127: //Tragedy at Cazic Thule
-		return 25;
-	case 2130: //Horrific Force
-		return 25;
-	case 2131: //Vortex of Horror
-		return 25;
-	case 2137: //Rain of Terror
-		return 25;
-	case 2139: //Corpse Breath
-		return 125;
-	case 2156: //Deadly Curse of Noqufiel
-		return 25;
-	case 2157: //Word of Command
-		return 25;
-	case 2161: //Shock of Shadows
-		return 25;
-	case 2162: //Black Winds
-		return 25;
-	case 2163: //Lure of Shadows
-		return 25;
-	case 2167: //Fling
-		return 25;
-	case 2168: //Reanimation
-		return 42;
-	case 2169: //Reconstitution
-		return 42;
-	case 2170: //Reparation
-		return 42;
-	case 2171: //Renewal
-		return 42;
-	case 2172: //Restoration
-		return 42;
-	case 2173: //Hand of the Gods
-		return 25;
-	case 2175: //Celestial Health
-		return 42;
-	case 2176: //Spiritual Light
-		return 79;
-	case 2177: //Spiritual Radiance
-		return 79;
-	case 2178: //Spiritual Brawn
-		return 45;
-	case 2179: //Tunare's Renewal
-		return 42;
-	case 2180: //Ethereal Elixir
-		return 42;
-	case 2181: //Hammer of Judgment
-		return 18;
-	case 2182: //Ethereal Light
-		return 42;
-	case 2183: //Lesser Succor
-		return 123;
-	case 2184: //Lesser Evacuate
-		return 123;
-	case 2188: //Protection of the Cabbage
-		return 45;
-	case 2190: //Divine Stun
-		return 25;
-	case 2202: //Mana Shield
-		return 125;
-	case 2203: //Donlo's Dementia
-		return 125;
-	case 2206: //Tortured Memory
-		return 25;
-	case 2213: //Lesser Summon Corpse
-		return 125;
-	case 2230: //Summon Brass Choker
-		return 18;
-	case 2231: //Summon Silver Choker
-		return 18;
-	case 2232: //Summon Golden Choker
-		return 18;
-	case 2233: //Summon Linen Mantle
-		return 18;
-	case 2234: //Summon Leather Mantle
-		return 18;
-	case 2235: //Summon Silken Mantle
-		return 18;
-	case 2236: //Summon Jade Bracelet
-		return 18;
-	case 2237: //Summon Opal Bracelet
-		return 18;
-	case 2238: //Summon Ruby Bracelet
-		return 18;
-	case 2239: //Summon Tiny Ring
-		return 18;
-	case 2240: //Summon Twisted Ring
-		return 18;
-	case 2241: //Summon Studded Ring
-		return 18;
-	case 2242: //Summon Tarnished Bauble
-		return 18;
-	case 2243: //Summon Shiny Bauble
-		return 18;
-	case 2244: //Summon Brilliant Bauble
-		return 18;
-	case 2248: //Acumen
-		return 125;
-	case 2249: //River's Rancor
-		return 25;
-	case 2250: //Fiery Retribution
-		return 25;
-	case 2251: //Furor of the Wild
-		return 25;
-	case 2255: //Wrath of the Wild
-		return 25;
-	case 2258: //Frigid Dominion
-		return 25;
-	case 2261: //Frozen Torrent
-		return 25;
-	case 2264: //Hail of Ice
-		return 25;
-	case 2268: //Touch of the Void
-		return 25;
-	case 2312: //Life Bind
-		return 79;
-	case 2321: //Energy Burst
-		return 25;
-	case 2326: //Yaulp V
-		return 95;
-	case 2375: //Spectral Essence
-		return 25;
-	case 2377: //Screeching Ricochet
-		return 25;
-	case 2378: //Drakeen Breath
-		return 25;
-	case 2379: //Drakeen Monsoon
-		return 25;
-	case 2380: //Drakeen Vortex
-		return 25;
-	case 2381: //Wing Draft
-		return 25;
-	case 2382: //Wing Gust
-		return 25;
-	case 2383: //Wing Squall
-		return 25;
-	case 2384: //Wing Tempest
-		return 25;
-	case 2385: //Frost Pummel
-		return 25;
-	case 2386: //Ice Pummel
-		return 25;
-	case 2387: //Frigid Shard Pummel
-		return 25;
-	case 2392: //Sweltering Carcass
-		return 25;
-	case 2417: //Ring of Grimling
-		return 123;
-	case 2418: //Grimling Gate
-		return 123;
-	case 2419: //Circle of Grimling
-		return 123;
-	case 2420: //Grimling Portal
-		return 123;
-	case 2421: //Translocate: Grimling
-		return 123;
-	case 2422: //Ring of Twilight
-		return 123;
-	case 2423: //Twilight Gate
-		return 123;
-	case 2424: //Circle of Twilight
-		return 123;
-	case 2425: //Twilight Portal
-		return 123;
-	case 2426: //Translocate: Twilight
-		return 123;
-	case 2427: //Ring of Dawnshroud
-		return 123;
-	case 2428: //Dawnshroud Gate
-		return 123;
-	case 2429: //Circle of Dawnshroud
-		return 123;
-	case 2430: //Dawnshroud Portal
-		return 123;
-	case 2431: //Translocate: Dawnshroud
-		return 123;
-	case 2432: //Circle of the Nexus
-		return 123;
-	case 2433: //Ring of the Nexus
-		return 123;
-	case 2434: //Avatar
-		return 95;
-	case 2435: //Kragg's Mending
-		return 42;
-	case 2436: //War Arrows
-		return 25;
-	case 2437: //Hendin Arrow
-		return 25;
-	case 2443: //Blade of Vallon
-		return 25;
-	case 2450: //Barb of Tallon
-		return 25;
-	case 2452: //Barb of Tallon
-		return 25;
-	case 2453: //Thorns of Drunder
-		return 25;
-	case 2462: //Ethereal Remedy
-		return 42;
-	case 2501: //Sanctuary
-		return 125;
-	case 2502: //Celestial Remedy
-		return 42;
-	case 2503: //Sermon of the Righteous
-		return 20;
-	case 2504: //Sacred Word
-		return 25;
-	case 2505: //Armor of the Faithful
-		return 45;
-	case 2506: //Epitaph of Life
-		return 20;
-	case 2507: //Mark of Retribution
-		return 125;
-	case 2508: //Judgment
-		return 25;
-	case 2509: //Blessed Armor of the Risen
-		return 45;
-	case 2510: //Blessing of Aegolism
-		return 45;
-	case 2511: //Protection of Wood
-		return 45;
-	case 2512: //Protection of Rock
-		return 45;
-	case 2513: //Protection of Steel
-		return 45;
-	case 2514: //Protection of Diamond
-		return 45;
-	case 2515: //Protection of Nature
-		return 45;
-	case 2516: //Foliage Shield
-		return 125;
-	case 2517: //Spirit of Eagle
-		return 125;
-	case 2518: //Ro's Smoldering Disjunction
-		return 126;
-	case 2519: //Circle of Seasons
-		return 95;
-	case 2520: //Nature's Recovery
-		return 42;
-	case 2521: //Talisman of the Beast
-		return 95;
-	case 2522: //Grow
-		return 125;
-	case 2523: //Form of the Bear
-		return 125;
-	case 2524: //Spirit of Bih`Li
-		return 125;
-	case 2525: //Harnessing of Spirit
-		return 45;
-	case 2526: //Disinfecting Aura
-		return 42;
-	case 2527: //Plague of Insects
-		return 126;
-	case 2528: //Regrowth of Dar Khura
-		return 79;
-	case 2529: //Talisman of Epuration
-		return 95;
-	case 2530: //Khura's Focusing
-		return 45;
-	case 2531: //Summon Elemental Defender
-		return 18;
-	case 2532: //Summon Phantom Leather
-		return 18;
-	case 2533: //Summon Phantom Chain
-		return 18;
-	case 2534: //Summon Phantom Plate
-		return 18;
-	case 2535: //Summon Elemental Blanket
-		return 18;
-	case 2536: //Transon's Elemental Infusion
-		return 69;
-	case 2537: //Veil of Elements
-		return 125;
-	case 2538: //Mass Mystical Transvergance
-		return 18;
-	case 2539: //Transon's Phantasmal Protection
-		return 45;
-	case 2540: //Shock of Fiery Blades
-		return 25;
-	case 2541: //Focus Death
-		return 69;
-	case 2542: //Shackle of Bone
-		return 126;
-	case 2543: //Eternities Torment
-		return 20;
-	case 2544: //Shackle of Spirit
-		return 126;
-	case 2545: //Insidious Retrogression
-		return 126;
-	case 2546: //Degeneration
-		return 114;
-	case 2547: //Succussion of Shadows
-		return 114;
-	case 2548: //Crippling Claudication
-		return 114;
-	case 2549: //Mind Wrack
-		return 126;
-	case 2550: //Zevfeer's Theft of Vitae
-		return 114;
-	case 2551: //O'Keils Embers
-		return 125;
-	case 2552: //Garrisons Mighty Mana Shock
-		return 25;
-	case 2553: //Minor Familiar
-		return 69;
-	case 2554: //Elnerick's Entombment of Ice
-		return 126;
-	case 2555: //Lesser Familiar
-		return 69;
-	case 2556: //Firetree's Familiar Augment
-		return 69;
-	case 2557: //Familiar
-		return 69;
-	case 2558: //Decession
-		return 123;
-	case 2559: //Spellshield
-		return 125;
-	case 2560: //Greater Familiar
-		return 69;
-	case 2561: //Intellectual Advancement
-		return 95;
-	case 2562: //Intellectual Superiority
-		return 95;
-	case 2563: //Haunting Visage
-		return 125;
-	case 2564: //Calming Visage
-		return 125;
-	case 2565: //Illusion: Imp
-		return 125;
-	case 2566: //Trickster's Augmentation
-		return 125;
-	case 2567: //Beguiling Visage
-		return 125;
-	case 2568: //Horrifying Visage
-		return 125;
-	case 2569: //Glamorous Visage
-		return 125;
-	case 2570: //Koadic's Endless Intellect
-		return 79;
-	case 2571: //Despair
-		return 114;
-	case 2572: //Scream of Hate
-		return 114;
-	case 2573: //Scream of Pain
-		return 114;
-	case 2574: //Scream of Death
-		return 125;
-	case 2575: //Abduction of Strength
-		return 114;
-	case 2576: //Mental Corruption
-		return 125;
-	case 2577: //Torrent of Hate
-		return 114;
-	case 2578: //Torrent of Pain
-		return 114;
-	case 2579: //Torrent of Fatigue
-		return 114;
-	case 2580: //Cloak of the Akheva
-		return 45;
-	case 2581: //Cease
-		return 25;
-	case 2582: //Desist
-		return 25;
-	case 2583: //Instrument of Nife
-		return 125;
-	case 2584: //Divine Vigor
-		return 45;
-	case 2585: //Valor of Marr
-		return 125;
-	case 2586: //Thunder of Karana
-		return 126;
-	case 2587: //Quellious' Word of Tranquility
-		return 25;
-	case 2588: //Breath of Tunare
-		return 125;
-	case 2589: //Healing Wave of Prexus
-		return 42;
-	case 2590: //Brell's Mountainous Barrier
-		return 45;
-	case 2591: //Tangling Weeds
-		return 126;
-	case 2592: //Hawk Eye
-		return 125;
-	case 2593: //Riftwind's Protection
-		return 125;
-	case 2594: //Nature's Precision
-		return 95;
-	case 2595: //Force of Nature
-		return 125;
-	case 2596: //Falcon Eye
-		return 125;
-	case 2597: //Jolting Blades
-		return 126;
-	case 2598: //Mark of the Predator
-		return 95;
-	case 2599: //Eagle Eye
-		return 125;
-	case 2600: //Warder's Protection
-		return 45;
-	case 2601: //Magical Monologue
-		return 125;
-	case 2602: //Song of Sustenance
-		return 125;
-	case 2603: //Amplification
-		return 125;
-	case 2604: //Katta's Song of Sword Dancing
-		return 125;
-	case 2605: //Selo`s Accelerating Chorus
-		return 125;
-	case 2606: //Battlecry of the Vah Shir
-		return 125;
-	case 2607: //Elemental Chorus
-		return 95;
-	case 2608: //Purifying Chorus
-		return 95;
-	case 2609: //Chorus of Replenishment
-		return 79;
-	case 2610: //Warsong of the Vah Shir
-		return 125;
-	case 2611: //Sharik's Replenishing
-		return 69;
-	case 2612: //Spirit of Sharik
-		return 69;
-	case 2613: //Keshuval's Rejuvenation
-		return 69;
-	case 2614: //Spirit of Keshuval
-		return 69;
-	case 2615: //Herikol's Soothing
-		return 69;
-	case 2616: //Spirit of Herikol
-		return 69;
-	case 2617: //Yekan's Recovery
-		return 69;
-	case 2618: //Spirit of Yekan
-		return 69;
-	case 2619: //Yekan's Quickening
-		return 69;
-	case 2620: //Vigor of Zehkes
-		return 69;
-	case 2621: //Spirit of Kashek
-		return 69;
-	case 2622: //Aid of Khurenz
-		return 69;
-	case 2623: //Spirit of Omakin
-		return 69;
-	case 2624: //Sha's Restoration
-		return 69;
-	case 2625: //Omakin's Alacrity
-		return 69;
-	case 2626: //Spirit of Zehkes
-		return 69;
-	case 2627: //Spirit of Khurenz
-		return 69;
-	case 2628: //Sha's Ferocity
-		return 69;
-	case 2629: //Spiritual Purity
-		return 79;
-	case 2630: //Spiritual Strength
-		return 45;
-	case 2631: //Spirit of Khati Sha
-		return 69;
-	case 2632: //Summon Warder
-		return 69;
-	case 2633: //Spirit of Khaliz
-		return 69;
-	case 2634: //Sha's Lethargy
-		return 126;
-	case 2635: //Spirit of Lightning
-		return 69;
-	case 2636: //Spirit of the Blizzard
-		return 69;
-	case 2637: //Spirit of Inferno
-		return 69;
-	case 2638: //Spirit of the Scorpion
-		return 69;
-	case 2639: //Spirit of Vermin
-		return 69;
-	case 2640: //Spirit of Wind
-		return 69;
-	case 2641: //Spirit of the Storm
-		return 69;
-	case 2642: //Claw of Khati Sha
-		return 25;
-	case 2650: //Blazing Heat
-		return 25;
-	case 2651: //Vibrant Might
-		return 25;
-	case 2652: //Descending Might
-		return 25;
-	case 2654: //Fireblast
-		return 25;
-	case 2656: //Wrathful Strike
-		return 25;
-	case 2657: //Terrifying Darkness
-		return 25;
-	case 2658: //Lightning Surge
-		return 25;
-	case 2662: //Storm of Lightning
-		return 25;
-	case 2663: //Clash of Will
-		return 25;
-	case 2664: //Frostcall
-		return 25;
-	case 2665: //Wintercall
-		return 25;
-	case 2669: //Storm of Ice
-		return 25;
-	case 2670: //Rebuke the Dead
-		return 25;
-	case 2678: //Fungal Vengeance
-		return 25;
-	case 2710: //Trickster's Torment
-		return 25;
-	case 2711: //Trickster's TormentSK
-		return 25;
-	case 2717: //Mental Corruption Strike
-		return 25;
-	case 2720: //Spirit of Lightning Strike
-		return 25;
-	case 2721: //Spirit of Blizzard Strike
-		return 25;
-	case 2722: //Spirit of Inferno Strike
-		return 25;
-	case 2723: //Spirit of Scorpion Strike
-		return 25;
-	case 2724: //Spirit of Vermin Strike
-		return 25;
-	case 2725: //Spirit of Wind Strike
-		return 25;
-	case 2726: //Spirit of Storm Strike
-		return 25;
-	case 2729: //Condemnation of Nife
-		return 25;
-	case 2732: //Molten Fist
-		return 25;
-	case 2734: //The Nexus
-		return 123;
-	case 2736: //SpellTheft1
-		return 126;
-	case 2742: //Purify Soul
-		return 42;
-	case 2750: //Rabid Bear
-		return 125;
-	case 2752: //Restore Companion
-		return 69;
-	case 2754: //Frenzied Burnout
-		return 69;
-	case 2757: //Wave of Revulsion
-		return 126;
-	case 2758: //Improved Familiar
-		return 69;
-	case 2759: //Undead Pact
-		return 126;
-	case 2761: //Dominating Gaze
-		return 126;
-	case 2762: //Disease Touch
-		return 25;
-	case 2763: //Poison Touch
-		return 25;
-	case 2764: //Call to Corpse
-		return 125;
-	case 2766: //Life Curse
-		return 114;
-	case 2767: //Dragon Force
-		return 25;
-	case 2768: //Grimling LT 30
-		return 25;
-	case 2770: //Rain of Spores
-		return 25;
-	case 2802: //Flurry of Pebbles
-		return 25;
-	case 2809: //Wave of Death
-		return 25;
-	case 2816: //Storm Tremor
-		return 25;
-	case 2822: //Upheaval
-		return 25;
-	case 2826: //Illusion: Vah Shir
-		return 125;
-	case 2833: //AdvisorNova
-		return 25;
-	case 2836: //Grimling Comet
-		return 25;
-	case 2842: //Shrieker Stun
-		return 25;
-	case 2858: //AcryliaKB
-		return 25;
-	case 2859: //Touch of Vinitras
-		return 25;
-	case 2877: //Moonfire
-		return 25;
-	case 2878: //Fireclaw
-		return 25;
-	case 2879: //Phantasmal Armor
-		return 79;
-	case 2880: //Remove Greater Curse
-		return 42;
-	case 2881: //Everlasting Breath
-		return 125;
-	case 2882: //Firetree's Familiar Enhancement
-		return 69;
-	case 2883: //Elnerick's Electrical Rending
-		return 25;
-	case 2884: //Garrison's Superior Sundering
-		return 25;
-	case 2885: //Funeral Pyre of Kelador
-		return 20;
-	case 2886: //Acumen of Dar Khura
-		return 125;
-	case 2887: //Mask of the Stalker
-		return 79;
-	case 2888: //Spirit of Flame
-		return 69;
-	case 2889: //Spirit of Flame Strike
-		return 25;
-	case 2890: //Spirit of Snow
-		return 69;
-	case 2891: //Spirit of Snow Strike
-		return 25;
-	case 2892: //Deathly Temptation
-		return 125;
-	case 2893: //Marzin's Mark
-		return 45;
-	case 2894: //Levitation
-		return 125;
-	case 2895: //Speed of the Brood
-		return 125;
-	case 2896: //Transon's Elemental Renewal
-		return 69;
-	case 2901: //Illumination
-		return 25;
-	case 2902: //Shissar Broodling Poison
-		return 25;
-	case 2908: //Banshee Wail
-		return 25;
-	case 2927: //Storm Tremor
-		return 25;
-	case 2936: //Ervaj's Lost Composition
-		return 126;
-	case 2941: //Savagery
-		return 95;
-	case 2942: //Sha's Advantage
-		return 126;
-	case 2943: //Translocate: Nexus
-		return 123;
-	case 2944: //Nexus Portal
-		return 123;
-	case 2945: //Nexus Gate
-		return 123;
-	case 2946: //Remove Curse
-		return 42;
-	case 2950: //Grol Baku Strike
-		return 25;
-	case 2951: //Grol Baku Strike
-		return 25;
-	case 2952: //Strike of the Grol Baku
-		return 25;
-	case 2956: //Fire Blast
-		return 25;
-	case 2957: //Water Blast
-		return 25;
-	case 2969: //Shadow Creep
-		return 114;
-	case 2973: //Ember Strike
-		return 25;
-	case 2984: //Lotus Spines
-		return 25;
-	case 2988: //Wave of Toxicity
-		return 25;
-	case 2991: //Deathly Ice
-		return 25;
-	case 2992: //Deathly Fire
-		return 25;
-	case 2993: //Deathly Spores
-		return 25;
-	case 2994: //Deathly Fever
-		return 25;
-	case 2995: //Deep Spores
-		return 25;
-	case 2996: //Claw of the Hunter
-		return 25;
-	case 2997: //Claw of the Beast
-		return 25;
-	case 2999: //Claw of Bestial Fury
-		return 25;
-	case 3000: //Devouring Nightmare
-		return 25;
-	case 3004: //Fist of Lava
-		return 25;
-	case 3005: //Ball of Lava
-		return 25;
-	case 3013: //Fiery Strike
-		return 25;
-	case 3017: //Mighty Bellow of Fire
-		return 25;
-	case 3018: //Nova Inferno
-		return 25;
-	case 3020: //Rain of Burning Fire
-		return 25;
-	case 3030: //Dreams of Thule
-		return 126;
-	case 3031: //Xegony's Phantasmal Guard
-		return 79;
-	case 3032: //Touch of Mujaki
-		return 114;
-	case 3034: //Aeldorb's Animation
-		return 69;
-	case 3035: //Neurotoxin
-		return 25;
-	case 3036: //Wrath of Ice
-		return 25;
-	case 3037: //Wrath of Fire
-		return 25;
-	case 3038: //Wrath of Wind
-		return 25;
-	case 3039: //Protection of the Wild
-		return 125;
-	case 3040: //Belt of Magi'Kot
-		return 18;
-	case 3041: //Blade of Walnan
-		return 18;
-	case 3042: //Fist of Ixiblat
-		return 18;
-	case 3043: //Blade of The Kedge
-		return 18;
-	case 3044: //Girdle of Magi'Kot
-		return 18;
-	case 3045: //Talisman of Return
-		return 18;
-	case 3047: //Kazad`s Mark
-		return 45;
-	case 3051: //Fiery Assault
-		return 25;
-	case 3057: //Tidal Freeze
-		return 25;
-	case 3063: //Illusion: Froglok
-		return 125;
-	case 3066: //Requiem of Time
-		return 126;
-	case 3069: //Seething Hatred
-		return 25;
-	case 3071: //Insipid Dreams
-		return 25;
-	case 3100: //Mark of Retaliation
-		return 125;
-	case 3107: //Cry of Fire
-		return 125;
-	case 3129: //Call of Sky Strike
-		return 25;
-	case 3130: //Call of Sky Strike
-		return 25;
-	case 3131: //Call of Fire Strike
-		return 25;
-	case 3132: //Call of Fire Strike
-		return 25;
-	case 3133: //Cry of Fire Strike
-		return 25;
-	case 3134: //Portal of Knowledge
-		return 123;
-	case 3135: //Hammer of Divinity
-		return 18;
-	case 3136: //Hammer of Souls
-		return 18;
-	case 3156: //Torrent of Brambles
-		return 25;
-	case 3162: //Wind Strike
-		return 25;
-	case 3163: //Storm Avalanche
-		return 25;
-	case 3164: //Froglok Misery
-		return 25;
-	case 3167: //Strike of Marr
-		return 25;
-	case 3172: //Denial
-		return 25;
-	case 3176: //Butchery
-		return 25;
-	case 3177: //Prayer of Pain
-		return 25;
-	case 3178: //Vallon's Quickening
-		return 125;
-	case 3179: //Spirit of Rellic Strike
-		return 25;
-	case 3180: //Knowledge Portal
-		return 123;
-	case 3181: //Translocate: Knowledge
-		return 123;
-	case 3182: //Ring of Knowledge
-		return 123;
-	case 3183: //Knowledge Gate
-		return 123;
-	case 3184: //Circle of Knowledge
-		return 123;
-	case 3185: //Flight of Eagles
-		return 125;
-	case 3186: //Yaulp VI
-		return 95;
-	case 3187: //Sermon of Penitence
-		return 20;
-	case 3188: //Rod of Mystical Transvergance
-		return 18;
-	case 3189: //Tears of Arlyxir
-		return 25;
-	case 3190: //Crusader`s Touch
-		return 42;
-	case 3191: //Shock of Magic
-		return 25;
-	case 3192: //Earthen Roots
-		return 126;
-	case 3194: //Greater Fetter
-		return 126;
-	case 3195: //Greater Immobilize
-		return 126;
-	case 3196: //Petrifying Earth
-		return 126;
-	case 3197: //Pacification
-		return 126;
-	case 3198: //Flameshield of Ro
-		return 125;
-	case 3199: //Arcane Rune
-		return 125;
-	case 3205: //Summon Platinum Choker
-		return 18;
-	case 3206: //Summon Runed Mantle
-		return 18;
-	case 3207: //Summon Sapphire Bracelet
-		return 18;
-	case 3208: //Summon Spiked Ring
-		return 18;
-	case 3209: //Summon Glowing Bauble
-		return 18;
-	case 3210: //Summon Jewelry Bag
-		return 18;
-	case 3221: //Shattering Glass
-		return 25;
-	case 3222: //Web of Glass
-		return 25;
-	case 3223: //Shards of Glass
-		return 25;
-	case 3227: //Shroud of Chaos
-		return 125;
-	case 3229: //Boggle
-		return 126;
-	case 3232: //Karana's Renewal
-		return 42;
-	case 3233: //Tnarg`s Mending
-		return 42;
-	case 3234: //Protection of the Nine
-		return 45;
-	case 3235: //Focus of Soul
-		return 45;
-	case 3236: //no spell
-		return 25;
-	case 3237: //Burnout V
-		return 69;
-	case 3238: //Destroy Summoned
-		return 25;
-	case 3239: //Planar Renewal
-		return 69;
-	case 3240: //Speed of Vallon
-		return 125;
-	case 3241: //Night`s Dark Terror
-		return 125;
-	case 3242: //Guard of Druzzil
-		return 95;
-	case 3243: //Teleport
-		return 123;
-	case 3244: //Greater Decession
-		return 123;
-	case 3245: //Force of Akilae
-		return 25;
-	case 3246: //Shackles of Tunare
-		return 126;
-	case 3247: //Aura of the Crusader
-		return 45;
-	case 3255: //Wrath of the Wild
-		return 125;
-	case 3256: //Wrath of the Wild
-		return 125;
-	case 3257: //Wrath of the Wild
-		return 125;
-	case 3258: //Eldritch Rune
-		return 125;
-	case 3259: //Eldritch Rune
-		return 125;
-	case 3260: //Eldritch Rune
-		return 125;
-	case 3264: //Allegiant Familiar
-		return 69;
-	case 3265: //Servant of Ro
-		return 69;
-	case 3266: //Servant of Ro
-		return 69;
-	case 3267: //Servant of Ro
-		return 69;
-	case 3271: //Guardian of the Forest
-		return 125;
-	case 3272: //Guardian of the Forest
-		return 125;
-	case 3273: //Guardian of the Forest
-		return 125;
-	case 3274: //Virulent Paralysis
-		return 126;
-	case 3275: //Virulent Paralysis
-		return 126;
-	case 3276: //Virulent Paralysis
-		return 126;
-	case 3281: //Servant's Bolt
-		return 25;
-	case 3282: //Boastful Bellow
-		return 25;
-	case 3289: //Frenzy of Spirit
-		return 125;
-	case 3290: //Hobble of Spirits
-		return 69;
-	case 3291: //Paragon of Spirit
-		return 79;
-	case 3295: //Legacy of Bracken
-		return 125;
-	case 3296: //Faith
-		return 45;
-	case 3297: //Radiant Cure1
-		return 42;
-	case 3298: //Radiant Cure2
-		return 42;
-	case 3299: //Radiant Cure3
-		return 42;
-	case 3300: //Shield of the Arcane
-		return 45;
-	case 3301: //Force Shield
-		return 125;
-	case 3302: //Shield of Maelin
-		return 45;
-	case 3303: //Blood of Thule
-		return 20;
-	case 3304: //Legacy of Zek
-		return 69;
-	case 3305: //Rune of Death
-		return 69;
-	case 3306: //Saryrn's Kiss
-		return 114;
-	case 3308: //Death's Silence
-		return 126;
-	case 3309: //Embracing Darkness
-		return 20;
-	case 3310: //Saryrn's Companion
-		return 69;
-	case 3311: //Seduction of Saryrn
-		return 125;
-	case 3312: //Touch of Death
-		return 69;
-	case 3314: //Child of Bertoxxulous
-		return 69;
-	case 3315: //Dark Plague
-		return 20;
-	case 3316: //Word of Terris
-		return 126;
-	case 3317: //Ward of Xegony
-		return 69;
-	case 3318: //Firebolt of Tallon
-		return 25;
-	case 3319: //Sun Storm
-		return 25;
-	case 3320: //Servant of Marr
-		return 69;
-	case 3321: //Black Steel
-		return 25;
-	case 3322: //Child of Ro
-		return 69;
-	case 3323: //Maelstrom of Thunder
-		return 25;
-	case 3324: //Rathe's Son
-		return 69;
-	case 3325: //Sun Vortex
-		return 25;
-	case 3326: //Resistant Armor
-		return 95;
-	case 3327: //Tears of Ro
-		return 25;
-	case 3328: //Lure of Thunder
-		return 25;
-	case 3329: //Elemental Barrier
-		return 95;
-	case 3330: //Draught of Ro
-		return 25;
-	case 3331: //Lure of Ro
-		return 25;
-	case 3332: //Tears of Marr
-		return 25;
-	case 3333: //Telekin
-		return 25;
-	case 3334: //Draught of Thunder
-		return 25;
-	case 3335: //Agnarr's Thunder
-		return 25;
-	case 3336: //Draught of E`ci
-		return 25;
-	case 3337: //Iceflame of E`ci
-		return 125;
-	case 3338: //Harvest of Druzzil
-		return 42;
-	case 3339: //Strike of Solusek
-		return 25;
-	case 3341: //Apathy
-		return 126;
-	case 3342: //Howl of Tashan
-		return 126;
-	case 3343: //Rune of Zebuxoruk
-		return 125;
-	case 3344: //Imbue Nightmare
-		return 18;
-	case 3345: //Strangle
-		return 20;
-	case 3346: //Imbue Storm
-		return 18;
-	case 3347: //Beckon
-		return 126;
-	case 3348: //Torment of Scio
-		return 20;
-	case 3349: //Insanity
-		return 25;
-	case 3350: //Tranquility
-		return 79;
-	case 3351: //Uproar
-		return 125;
-	case 3352: //Imbue Earth
-		return 18;
-	case 3353: //Imbue Air
-		return 18;
-	case 3354: //Sleep
-		return 126;
-	case 3355: //Command of Druzzil
-		return 126;
-	case 3356: //Imbue Fire
-		return 18;
-	case 3357: //Imbue Water
-		return 18;
-	case 3358: //Bliss
-		return 126;
-	case 3359: //Word of Morell
-		return 126;
-	case 3360: //Voice of Quellious
-		return 79;
-	case 3361: //Silent Song of Quellious
-		return 126;
-	case 3362: //Rizlona's Call of Flame
-		return 125;
-	case 3363: //Tuyen`s Chant of the Plague
-		return 20;
-	case 3364: //Druzzil's Disillusionment
-		return 126;
-	case 3365: //Melody of Mischief
-		return 126;
-	case 3366: //Saryrn's Scream of Pain
-		return 25;
-	case 3367: //Tuyen`s Chant of Fire
-		return 20;
-	case 3368: //Psalm of Veeshan
-		return 125;
-	case 3369: //Dreams of Terris
-		return 126;
-	case 3370: //Tuyen`s Chant of Venom
-		return 20;
-	case 3371: //Call of the Banshee
-		return 126;
-	case 3372: //Chorus of Marr
-		return 79;
-	case 3373: //Tuyen`s Chant of Ice
-		return 20;
-	case 3374: //Warsong of Zek
-		return 125;
-	case 3375: //Harmony of Sound
-		return 126;
-	case 3376: //Lullaby of Morell
-		return 126;
-	case 3377: //True Spirit
-		return 69;
-	case 3378: //Agility of the Wrulan
-		return 95;
-	case 3379: //Spear of Torment
-		return 25;
-	case 3380: //Cloud of Grummus
-		return 126;
-	case 3381: //Ancestral Guard
-		return 95;
-	case 3382: //Endurance of the Boar
-		return 95;
-	case 3383: //Talisman of the Wrulan
-		return 95;
-	case 3384: //Talisman of the Tribunal
-		return 95;
-	case 3385: //Tears of Saryrn
-		return 25;
-	case 3386: //Malicious Decay
-		return 126;
-	case 3387: //Malosinia
-		return 126;
-	case 3388: //Strength of the Diaku
-		return 95;
-	case 3389: //Talisman of the Boar
-		return 95;
-	case 3390: //Velium Strike
-		return 25;
-	case 3391: //Talisman of Alacrity
-		return 125;
-	case 3392: //Talisman of the Diaku
-		return 95;
-	case 3393: //Tiny Terror
-		return 125;
-	case 3394: //Breath of Ultor
-		return 20;
-	case 3395: //Malos
-		return 126;
-	case 3396: //Blood of Saryrn
-		return 20;
-	case 3397: //Focus of the Seventh
-		return 45;
-	case 3398: //Quiescence
-		return 42;
-	case 3399: //Ferine Avatar
-		return 95;
-	case 3400: //Festering Darkness
-		return 20;
-	case 3401: //Touch of Volatis
-		return 114;
-	case 3403: //Aura of Pain
-		return 114;
-	case 3405: //Terror of Thule
-		return 126;
-	case 3406: //Aura of Darkness
-		return 114;
-	case 3408: //Zevfeer's Bite
-		return 114;
-	case 3410: //Voice of Thule
-		return 125;
-	case 3411: //Aura of Hate
-		return 114;
-	case 3413: //Touch of Innoruuk
-		return 114;
-	case 3415: //Nature's Rebuke
-		return 125;
-	case 3416: //Nature's Rebuke Strike
-		return 25;
-	case 3417: //Spirit of the Predator
-		return 95;
-	case 3418: //Frozen Wind
-		return 25;
-	case 3419: //Call of the Rathe
-		return 125;
-	case 3420: //Cry of Thunder
-		return 125;
-	case 3421: //Cry of Thunder Strike
-		return 25;
-	case 3422: //Ward of Nife
-		return 125;
-	case 3423: //Ward of Nife Strike
-		return 25;
-	case 3424: //Pious Might
-		return 125;
-	case 3425: //Pious Might Strike
-		return 25;
-	case 3426: //Quellious' Word of Serenity
-		return 25;
-	case 3427: //Wave of Marr
-		return 42;
-	case 3428: //Deny Undead
-		return 25;
-	case 3429: //Touch of Nife
-		return 42;
-	case 3430: //Light of Nife
-		return 42;
-	case 3431: //Brushfire
-		return 25;
-	case 3432: //Brell's Stalwart Shield
-		return 45;
-	case 3433: //Replenishment
-		return 79;
-	case 3434: //Storm's Fury
-		return 25;
-	case 3435: //Hand of Ro
-		return 126;
-	case 3436: //Winter's Storm
-		return 25;
-	case 3437: //Immolation of Ro
-		return 20;
-	case 3438: //Karana's Rage
-		return 25;
-	case 3439: //Nature's Might
-		return 95;
-	case 3440: //Ro's Illumination
-		return 126;
-	case 3441: //Blessing of Replenishment
-		return 79;
-	case 3442: //E'ci's Frosty Breath
-		return 126;
-	case 3443: //Nature's Infusion
-		return 42;
-	case 3444: //Protection of Seasons
-		return 95;
-	case 3445: //Command of Tunare
-		return 126;
-	case 3446: //Swarming Death
-		return 20;
-	case 3447: //Savage Roots
-		return 126;
-	case 3448: //Shield of Bracken
-		return 125;
-	case 3449: //Summer's Flame
-		return 25;
-	case 3450: //Brackencoat
-		return 125;
-	case 3451: //Blessing of the Nine
-		return 45;
-	case 3452: //Winter's Frost
-		return 25;
-	case 3453: //Mask of the Forest
-		return 79;
-	case 3454: //Infusion of Spirit
-		return 45;
-	case 3455: //Healing of Sorsha
-		return 69;
-	case 3456: //Spiritual Vigor
-		return 45;
-	case 3457: //Spirit of Arag
-		return 69;
-	case 3458: //Arag`s Celerity
-		return 69;
-	case 3459: //Spirit of Rellic
-		return 69;
-	case 3460: //Spiritual Dominion
-		return 79;
-	case 3461: //Spirit of Sorsha
-		return 69;
-	case 3462: //Sha's Revenge
-		return 126;
-	case 3463: //Ferocity
-		return 95;
-	case 3464: //The Silent Command
-		return 25;
-	case 3465: //Supernal Remedy
-		return 42;
-	case 3466: //Symbol of Kazad
-		return 45;
-	case 3467: //Virtue
-		return 45;
-	case 3468: //Destroy Undead
-		return 25;
-	case 3469: //Mark of Kings
-		return 125;
-	case 3470: //Ward of Gallantry
-		return 95;
-	case 3471: //Word of Replenishment
-		return 42;
-	case 3472: //Blessing of Reverence
-		return 125;
-	case 3473: //Catastrophe
-		return 25;
-	case 3474: //Armor of the Zealot
-		return 45;
-	case 3475: //Supernal Elixir
-		return 42;
-	case 3476: //Condemnation
-		return 25;
-	case 3477: //Mark of the Righteous
-		return 125;
-	case 3478: //Hammer of Damnation
-		return 18;
-	case 3479: //Hand of Virtue
-		return 45;
-	case 3480: //Supernal Light
-		return 42;
-	case 3481: //Tarnation
-		return 25;
-	case 3482: //Sound of Might
-		return 25;
-	case 3483: //Elemental Silence
-		return 126;
-	case 3484: //Call of the Arch Mage
-		return 126;
-	case 3485: //Supernal Cleansing
-		return 42;
-	case 3486: //Maelstrom of Ro
-		return 125;
-	case 3487: //Strength of Tunare
-		return 45;
-	case 3488: //Pact of Hate
-		return 125;
-	case 3489: //Blood of Hate
-		return 20;
-	case 3490: //Cloak of Luclin
-		return 45;
-	case 3491: //Spear of Decay
-		return 25;
-	case 3492: //Scorpion Venom
-		return 20;
-	case 3493: //Frost Spear
-		return 25;
-	case 3494: //Luggald Blood
-		return 18;
-	case 3498: //Gallenite's Lifetap Test
-		return 25;
-	case 3560: //Spear of Pain
-		return 25;
-	case 3561: //Spear of Disease
-		return 25;
-	case 3562: //Spear of Plague
-		return 25;
-	case 3564: //Burning Arrow
-		return 25;
-	case 3565: //Flaming Arrow
-		return 25;
-	case 3566: //Tuyen`s Chant of Poison
-		return 20;
-	case 3567: //Tuyen`s Chant of Disease
-		return 20;
-	case 3568: //Ice Spear
-		return 25;
-	case 3569: //Frost Shard
-		return 25;
-	case 3570: //Ice Shard
-		return 25;
-	case 3571: //Torbas' Poison Blast
-		return 25;
-	case 3572: //Torbas' Venom Blast
-		return 25;
-	case 3573: //Shock of Venom
-		return 25;
-	case 3574: //Blast of Venom
-		return 25;
-	case 3575: //Blessing of Piety
-		return 125;
-	case 3576: //Blessing of Faith
-		return 125;
-	case 3577: //Wave of Life
-		return 42;
-	case 3578: //Brell's Steadfast Aegis
-		return 45;
-	case 3579: //Share Form of the Great Wolf
-		return 125;
-	case 3580: //Spirit of Ash
-		return 125;
-	case 3581: //O`Keils Levity
-		return 125;
-	case 3582: //Elemental Cloak
-		return 95;
-	case 3583: //Tiny Companion
-		return 69;
-	case 3584: //Refresh Summoning
-		return 69;
-	case 3585: //Entrancing Lights
-		return 126;
-	case 3586: //Illusion: Scaled Wolf
-		return 125;
-	case 3587: //Planar Strike
-		return 25;
-	case 3589: //Ethereal Strike
-		return 25;
-	case 3591: //Imbue Disease
-		return 18;
-	case 3592: //Imbue Valor
-		return 18;
-	case 3593: //Imbue War
-		return 18;
-	case 3594: //Imbue Torment
-		return 18;
-	case 3595: //Imbue Justice
-		return 18;
-	case 3601: //Harmony of Nature
-		return 126;
-	case 3618: //Eclipse Aura Strike
-		return 25;
-	case 3619: //Eclipse Aura Strike
-		return 25;
-	case 3621: //Frost Claw
-		return 25;
-	case 3623: //Burning Barb
-		return 25;
-	case 3624: //Anger
-		return 25;
-	case 3626: //Tendrils of Fire
-		return 25;
-	case 3630: //Time Lapse
-		return 25;
-	case 3645: //Sting of Ayonae
-		return 25;
-	case 3646: //Bite of Bertoxxulous
-		return 25;
-	case 3648: //Time Snap
-		return 25;
-	case 3650: //Dark Empathy Recourse
-		return 25;
-	case 3651: //Wind of Marr
-		return 79;
-	case 3665: //Curtain Call
-		return 25;
-	case 3668: //Pawn's Plight
-		return 20;
-	case 3670: //Queen's Checkmate
-		return 25;
-	case 3681: //Aria of Innocence
-		return 42;
-	case 3682: //Aria of Asceticism
-		return 42;
-	case 3683: //Ethereal Cleansing
-		return 42;
-	case 3684: //Light of Life
-		return 42;
-	case 3685: //Comatose
-		return 125;
-	case 3686: //Blood of Pain
-		return 20;
-	case 3687: //Swarm of Pain
-		return 20;
-	case 3688: //Icewind
-		return 25;
-	case 3689: //Malaria
-		return 20;
-	case 3690: //Bond of the Wild
-		return 69;
-	case 3691: //Bond of the Wild R.
-		return 45;
-	case 3692: //Temperance
-		return 45;
-	case 3693: //Pure Blood
-		return 42;
-	case 3694: //Stoicism
-		return 42;
-	case 3695: //Frost Zephyr
-		return 126;
-	case 3696: //Leviathan Eyes
-		return 125;
-	case 3697: //Scryer's Trespass
-		return 126;
-	case 3699: //Primal Remedy
-		return 69;
-	case 3700: //Elemental Empathy
-		return 69;
-	case 3702: //Auspice
-		return 114;
-	case 3704: //Soul Empathy
-		return 69;
-	case 3706: //Frozen Harpoon
-		return 25;
-	case 3748: //Insipid Decay
-		return 25;
-	case 3753: //Torrent of Agony
-		return 114;
-	case 3764: //Rain of Bile
-		return 25;
-	case 3785: //Hate's Fury
-		return 25;
-	case 3792: //Circle of Stonebrunt
-		return 123;
-	case 3793: //Stonebrunt Portal
-		return 123;
-	case 3794: //Ring of Stonebrunt
-		return 123;
-	case 3795: //Stonebrunt Gate
-		return 123;
-	case 3796: //Mind Tap
-		return 126;
-	case 3799: //Dismal Wind
-		return 25;
-	case 3803: //Pique
-		return 25;
-	case 3806: //Distraction
-		return 126;
-	case 3809: //Reclamation
-		return 79;
-	case 3810: //Eruption
-		return 25;
-	case 3811: //Vision Shift
-		return 125;
-	case 3833: //Translocate: Stonebrunt
-		return 123;
-	case 3834: //Healing Water
-		return 42;
-	case 3842: //Blood of Nadox
-		return 42;
-	case 3847: //Cloak of Khala Dun
-		return 125;
-	case 3848: //Tortured Memory II
-		return 25;
-	case 3849: //Alter Plane: Hate II
-		return 123;
-	case 3854: //Form of Protection
-		return 125;
-	case 3855: //Form of Defense
-		return 125;
-	case 3856: //Form of Endurance
-		return 125;
-	case 3857: //Form of Rejuvenation
-		return 125;
-	case 3861: //Pestilence Shock
-		return 125;
-	case 3864: //Soul Claw
-		return 125;
-	case 3876: //Frozen Shards
-		return 25;
-	case 3877: //Nightmares
-		return 20;
-	case 3878: //Time Rend
-		return 25;
-	case 3881: //Hand of Retribution
-		return 25;
-	case 3909: //Clinging Clay
-		return 126;
-	case 3910: //Flames of Condemnation
-		return 25;
-	case 3921: //Guide Evacuation
-		return 123;
-	case 3975: //Force of Akera
-		return 25;
-	case 3976: //Draught of Lightning
-		return 25;
-	case 3981: //Mass Clarify Mana
-		return 18;
-	case 3982: //Mass Crystallize Mana
-		return 18;
-	case 3983: //Mass Distill Mana
-		return 18;
-	case 3984: //Mass Enchant Adamantite
-		return 18;
-	case 3985: //Mass Enchant Brellium
-		return 18;
-	case 3986: //Mass Enchant Clay
-		return 18;
-	case 3987: //Mass Enchant Electrum
-		return 18;
-	case 3988: //Mass Enchant Gold
-		return 18;
-	case 3989: //Mass Enchant Mithril
-		return 18;
-	case 3990: //Mass Enchant Platinum
-		return 18;
-	case 3991: //Mass Enchant Silver
-		return 18;
-	case 3992: //Mass Enchant Steel
-		return 18;
-	case 3993: //Mass Enchant Velium
-		return 18;
-	case 3994: //Mass Imbue Amber
-		return 18;
-	case 3995: //Mass Imbue Black Pearl
-		return 18;
-	case 3996: //Mass Imbue Black Sapphire
-		return 18;
-	case 3997: //Mass Imbue Diamond
-		return 18;
-	case 3998: //Mass Imbue Emerald
-		return 18;
-	case 3999: //Mass Imbue Fire Opal
-		return 18;
-	case 4000: //Mass Imbue Ivory
-		return 18;
-	case 4001: //Mass Imbue Jade
-		return 18;
-	case 4002: //Mass Imbue Opal
-		return 18;
-	case 4003: //Mass Imbue Peridot
-		return 18;
-	case 4004: //Mass Imbue Plains Pebble
-		return 18;
-	case 4005: //Mass Imbue Rose Quartz
-		return 18;
-	case 4006: //Mass Imbue Ruby
-		return 18;
-	case 4007: //Mass Imbue Sapphire
-		return 18;
-	case 4008: //Mass Imbue Topaz
-		return 18;
-	case 4009: //Mass Purify Mana
-		return 18;
-	case 4010: //Mass Thicken Mana
-		return 18;
-	case 4011: //Kindle
-		return 69;
-	case 4017: //Illusion: Guktan
-		return 125;
-	case 4018: //RytanGuard1
-		return 69;
-	case 4019: //RytanGuard2
-		return 69;
-	case 4020: //RytanGuard3
-		return 69;
-	case 4021: //RytanGuard4
-		return 69;
-	case 4022: //RytanBoltTest
-		return 25;
-	case 4027: //Summon Wooden Bracelet
-		return 18;
-	case 4028: //Summon Stone Bracelet
-		return 18;
-	case 4029: //Summon Iron Bracelet
-		return 18;
-	case 4030: //Summon Steel Bracelet
-		return 18;
-	case 4049: //Circle of Cooling
-		return 95;
-	case 4050: //Circle of Warmth
-		return 95;
-	case 4051: //Talisman of Purity
-		return 95;
-	case 4052: //Talisman of Vitality
-		return 95;
-	case 4053: //Blessing of Temperance
-		return 45;
-	case 4054: //Spirit of the Shrew
-		return 125;
-	case 4055: //Pack Shrew
-		return 125;
-	case 4056: //Remove Minor Curse
-		return 42;
-	case 4057: //Remove Lesser Curse
-		return 42;
-	case 4058: //Feral Pack
-		return 125;
-	case 4059: //Call of Ice
-		return 125;
-	case 4062: //Dark Temptation
-		return 125;
-	case 4063: //Call of Darkness
-		return 125;
-	case 4064: //Austerity
-		return 45;
-	case 4065: //Blessing of Austerity
-		return 45;
-	case 4066: //Ice Meteor
-		return 25;
-	case 4067: //Ward of Calrena
-		return 125;
-	case 4068: //Guard of Calrena
-		return 125;
-	case 4069: //Protection of Calrena
-		return 125;
-	case 4070: //Magi Ward
-		return 125;
-	case 4071: //Mana Ward
-		return 125;
-	case 4072: //Deception
-		return 125;
-	case 4073: //Ward of Alendar
-		return 125;
-	case 4074: //Guard of Alendar
-		return 125;
-	case 4075: //Protection of Alendar
-		return 125;
-	case 4076: //Bulwark of Alendar
-		return 125;
-	case 4077: //Ordinance
-		return 126;
-	case 4078: //Wind of the Desert
-		return 25;
-	case 4079: //Ward of Calliav
-		return 69;
-	case 4080: //Guard of Calliav
-		return 69;
-	case 4081: //Protection of Calliav
-		return 69;
-	case 4082: //Summon: Orb of Exploration
-		return 18;
-	case 4083: //Rizlona's Embers
-		return 125;
-	case 4084: //Rizlona's Fire
-		return 125;
-	case 4085: //Forpar's Aria of Affliction
-		return 125;
-	case 4086: //Forpar's Psalm of Pain
-		return 125;
-	case 4087: //Forpar's Verse of Venom
-		return 125;
-	case 4088: //Ward of Vie
-		return 125;
-	case 4089: //Guard of Vie
-		return 125;
-	case 4090: //Protection of Vie
-		return 125;
-	case 4091: //Bulwark of Vie
-		return 125;
-	case 4092: //Curse
-		return 20;
-	case 4093: //Odium
-		return 20;
-	case 4094: //Anathema
-		return 20;
-	case 4095: //Bane
-		return 20;
-	case 4096: //Dark Soul
-		return 20;
-	case 4097: //Imprecation
-		return 20;
-	case 4098: //Horror
-		return 20;
-	case 4099: //Bounce
-		return 125;
-	case 4100: //Reflect
-		return 125;
-	case 4101: //Scythe of Innoruuk
-		return 25;
-	case 4102: //Scythe of Darkness
-		return 25;
-	case 4103: //Scythe of Death
-		return 25;
-	case 4104: //Vengeance of the Wild
-		return 20;
-	case 4105: //Vengeance of Nature
-		return 20;
-	case 4106: //Vengeance of Tunare
-		return 20;
-	case 4107: //Feral Form
-		return 125;
-	case 4108: //Aura of Reverence
-		return 125;
-	case 4109: //Guidance
-		return 45;
-	case 4110: //Burning Sand
-		return 25;
-	case 4111: //Fire Swarm
-		return 20;
-	case 4112: //Call of the Muse
-		return 125;
-	case 4210: //Fufil`s Diminishing Dirge
-		return 20;
-	case 4239: //Breathless Mist
-		return 125;
-	case 4240: //Essence of Concealment
-		return 125;
-	case 4241: //Weightless Mist
-		return 125;
-	case 4242: //Mist of the Wolf
-		return 125;
-	case 4252: //Xalirilan's Lesser Appraisal
-		return 66;
-	case 4253: //Xalirilan's Appraisal
-		return 66;
-	case 4254: //Xalirilan's Greater Appraisal
-		return 66;
-	case 4255: //Wuggan's Lesser Appraisal
-		return 66;
-	case 4256: //Wuggan's Appraisal
-		return 66;
-	case 4257: //Wuggan's Greater Appraisal
-		return 66;
-	case 4258: //Iony's Lesser Augury
-		return 66;
-	case 4259: //Iony's Augury
-		return 66;
-	case 4260: //Iony's Greater Augury
-		return 66;
-	case 4261: //Reebo's Lesser Augury
-		return 66;
-	case 4262: //Reebo's Augury
-		return 66;
-	case 4263: //Reebo's Greater Augury
-		return 66;
-	case 4264: //Xalirilan's Lesser Discombobulation
-		return 66;
-	case 4265: //Xalirilan's Discombobulation
-		return 66;
-	case 4266: //Xalirilan's Greater Discombobulation
-		return 66;
-	case 4267: //Wuggan's Lesser Discombobulation
-		return 66;
-	case 4268: //Wuggan's Discombobulation
-		return 66;
-	case 4269: //Wuggan's Greater Discombobulation
-		return 66;
-	case 4270: //Iony's Lesser Exorcism
-		return 66;
-	case 4271: //Iony's Exorcism
-		return 66;
-	case 4272: //Iony's Greater Exorcism
-		return 66;
-	case 4273: //Reebo's Lesser Exorcism
-		return 66;
-	case 4274: //Reebo's Exorcism
-		return 66;
-	case 4275: //Reebo's Greater Exorcism
-		return 66;
-	case 4276: //Xalirilan's Lesser Extrication
-		return 66;
-	case 4277: //Xalirilan's Extrication
-		return 66;
-	case 4278: //Xalirilan's Greater Extrication
-		return 66;
-	case 4279: //Wuggan's Lesser Extrication
-		return 66;
-	case 4280: //Wuggan's Extrication
-		return 66;
-	case 4281: //Wuggan's Greater Extrication
-		return 66;
-	case 4282: //Iony's Lesser Cleansing
-		return 66;
-	case 4283: //Iony's Cleansing
-		return 66;
-	case 4284: //Iony's Greater Cleansing
-		return 66;
-	case 4285: //Reebo's Lesser Cleansing
-		return 66;
-	case 4286: //Reebo's Cleansing
-		return 66;
-	case 4287: //Reebo's Greater Cleansing
-		return 66;
-	case 4291: //Aura of Quellious
-		return 79;
-	case 4350: //Transmute Hunter's Dagger
-		return 18;
-	case 4351: //Transmute Hunter's Barbs
-		return 18;
-	case 4352: //Transmute Wayfarer's Bread
-		return 18;
-	case 4353: //Transmute Wayfarer's Tonic
-		return 18;
-	case 4354: //Transmute Traveler's Bandage
-		return 18;
-	case 4355: //Transmute Wayfarer's Wine
-		return 18;
-	case 4356: //Bite of Ykesha
-		return 25;
-	case 4357: //Strike of Ykesha
-		return 25;
-	case 4358: //Force of Ykesha
-		return 25;
-	case 4359: //Wrath of Ykesha
-		return 25;
-	case 4360: //Rujarkian Breath
-		return 25;
-	case 4361: //Rujarkian Mist
-		return 25;
-	case 4362: //Rujarkian Poison
-		return 25;
-	case 4363: //Rujarkian Bile
-		return 25;
-	case 4364: //Rujarkian Venom
-		return 25;
-	case 4365: //Heated Blade
-		return 25;
-	case 4366: //Burning Blade
-		return 25;
-	case 4367: //Blazing Blade
-		return 25;
-	case 4368: //Flaming Blade
-		return 25;
-	case 4369: //Inferno Blade
-		return 25;
-	case 4370: //Vampire Touch
-		return 25;
-	case 4371: //Vampire Claw
-		return 25;
-	case 4372: //Vampire Talon
-		return 25;
-	case 4373: //Vampire Fangs
-		return 25;
-	case 4374: //Vampire Kiss
-		return 25;
-	case 4375: //Chill
-		return 25;
-	case 4376: //Icicle Strike
-		return 25;
-	case 4377: //Icicle Claw
-		return 25;
-	case 4378: //Vox' Bite
-		return 25;
-	case 4379: //Permafrost
-		return 25;
-	case 4380: //Mirror I
-		return 125;
-	case 4381: //Mirror II
-		return 125;
-	case 4382: //Mirror III
-		return 125;
-	case 4383: //Mirror IV
-		return 125;
-	case 4384: //Guard I
-		return 125;
-	case 4385: //Guard II
-		return 125;
-	case 4386: //Guard III
-		return 125;
-	case 4387: //Guard IV
-		return 125;
-	case 4388: //Spell Guard I
-		return 125;
-	case 4389: //Spell Guard II
-		return 125;
-	case 4390: //Spell Guard III
-		return 125;
-	case 4391: //Spell Guard IV
-		return 125;
-	case 4395: //Selo's Rhythm of Speed
-		return 125;
-	case 4408: //Color Cloud
-		return 25;
-	case 4413: //Golem Pulverize
-		return 25;
-	case 4414: //Rimebone Frost Burst
-		return 25;
-	case 4418: //Illusion: Frost Bone
-		return 125;
-	case 4489: //Taelosian Vengeance
-		return 126;
-	case 4492: //Geostrike
-		return 25;
-	case 4493: //Earth Wave
-		return 25;
-	case 4496: //Rock Storm
-		return 25;
-	case 4497: //Earth Shards
-		return 25;
-	case 4498: //Aggressive Discipline
-		return 27;
-	case 4499: //Defensive Discipline
-		return 27;
-	case 4500: //Holyforge Discipline
-		return 27;
-	case 4501: //Precision Discipline
-		return 27;
-	case 4502: //Voiddance Discipline
-		return 27;
-	case 4503: //Evasive Discipline
-		return 27;
-	case 4504: //Leechcurse Discipline
-		return 27;
-	case 4505: //Deadeye Discipline
-		return 27;
-	case 4506: //Trueshot Discipline
-		return 27;
-	case 4507: //Silentfist Discipline
-		return 27;
-	case 4508: //Ashenhand Discipline
-		return 27;
-	case 4509: //Whirlwind Discipline
-		return 27;
-	case 4510: //Stonestance Discipline
-		return 27;
-	case 4511: //Thunderkick Discipline
-		return 27;
-	case 4512: //Innerflame Discipline
-		return 27;
-	case 4513: //Hundred Fists Discipline
-		return 27;
-	case 4514: //Mighty Strike Discipline
-		return 27;
-	case 4515: //Nimble Discipline
-		return 27;
-	case 4516: //Deftdance Discipline
-		return 27;
-	case 4517: //Kinesthetics Discipline
-		return 27;
-	case 4518: //Sanctification Discipline
-		return 27;
-	case 4519: //Weapon Shield Discipline
-		return 27;
-	case 4520: //Unholy Aura Discipline
-		return 27;
-	case 4521: //Bestial Alignment I
-		return 95;
-	case 4522: //Bestial Alignment II
-		return 95;
-	case 4523: //Bestial Alignment III
-		return 95;
-	case 4524: //Bestial Alignment I
-		return 95;
-	case 4525: //Bestial Alignment II
-		return 95;
-	case 4526: //Bestial Alignment III
-		return 95;
-	case 4527: //Bestial Alignment I
-		return 95;
-	case 4528: //Bestial Alignment II
-		return 95;
-	case 4529: //Bestial Alignment III
-		return 95;
-	case 4530: //Bestial Alignment I
-		return 95;
-	case 4531: //Bestial Alignment II
-		return 95;
-	case 4532: //Bestial Alignment III
-		return 95;
-	case 4533: //Bestial Alignment I
-		return 95;
-	case 4534: //Bestial Alignment II
-		return 95;
-	case 4535: //Bestial Alignment III
-		return 95;
-	case 4536: //Frenzied Aura
-		return 125;
-	case 4537: //Icy Grasp
-		return 69;
-	case 4538: //Icy Grasp Strike
-		return 25;
-	case 4549: //Divine Avatar I
-		return 95;
-	case 4550: //Divine Avatar II
-		return 95;
-	case 4551: //Divine Avatar III
-		return 95;
-	case 4555: //Elemental Domination
-		return 126;
-	case 4567: //Aneuk Grasp
-		return 20;
-	case 4574: //Hynid Snap
-		return 20;
-	case 4578: //Turepta Crush
-		return 25;
-	case 4579: //Ukun Chains
-		return 20;
-	case 4585: //Resistant Discipline
-		return 27;
-	case 4586: //Puretone Discipline
-		return 27;
-	case 4587: //Fearless Discipline
-		return 27;
-	case 4588: //Infuriate
-		return 115;
-	case 4589: //Barrier
-		return 115;
-	case 4590: //Cover
-		return 115;
-	case 4591: //Guard
-		return 115;
-	case 4592: //Infallible
-		return 115;
-	case 4593: //Crippling Strike
-		return 115;
-	case 4595: //Muscle Shock
-		return 115;
-	case 4596: //Armor Slice
-		return 115;
-	case 4597: //Gauntlet Strike
-		return 115;
-	case 4598: //Head Bash
-		return 115;
-	case 4599: //Rally Cry
-		return 115;
-	case 4600: //Shin Kick
-		return 115;
-	case 4601: //Rage
-		return 115;
-	case 4602: //Power Slam
-		return 115;
-	case 4603: //Stomp
-		return 115;
-	case 4604: //Back Swing
-		return 115;
-	case 4605: //Slice
-		return 115;
-	case 4607: //Flurry
-		return 115;
-	case 4608: //Provoke
-		return 15;
-	case 4612: //Enrage
-		return 113;
-	case 4614: //Phantom Zephyr
-		return 15;
-	case 4615: //Fortitude
-		return 115;
-	case 4616: //Pain Tolerance
-		return 115;
-	case 4618: //Fortune
-		return 115;
-	case 4619: //Quick Feet
-		return 115;
-	case 4620: //Ton Po's Defense
-		return 115;
-	case 4621: //Focused Aura
-		return 115;
-	case 4622: //Overwhelm
-		return 115;
-	case 4623: //Tranquil Force
-		return 115;
-	case 4624: //Grapple
-		return 115;
-	case 4625: //Armor Crush
-		return 115;
-	case 4626: //Leg Sweep
-		return 115;
-	case 4627: //Nerve Strike
-		return 115;
-	case 4628: //Nerve Spasm
-		return 115;
-	case 4629: //Thunderkick
-		return 115;
-	case 4630: //Master's Fury
-		return 115;
-	case 4631: //Ashenhand
-		return 115;
-	case 4632: //Aura of Speed
-		return 115;
-	case 4633: //Whirlwind Kick
-		return 115;
-	case 4634: //Dragon Strike
-		return 115;
-	case 4635: //Tranquil Focus
-		return 115;
-	case 4636: //Rapid Jab
-		return 115;
-	case 4637: //Wind of Force
-		return 115;
-	case 4638: //Pain Strike
-		return 115;
-	case 4639: //Indirection
-		return 115;
-	case 4640: //Focus
-		return 115;
-	case 4641: //Reflexes
-		return 115;
-	case 4642: //Mental Block
-		return 115;
-	case 4643: //Proficiency
-		return 115;
-	case 4644: //Bind
-		return 115;
-	case 4645: //Armor Pierce
-		return 115;
-	case 4646: //Eye Gouge
-		return 115;
-	case 4647: //Tendon Slice
-		return 115;
-	case 4648: //Wrist Slice
-		return 115;
-	case 4649: //Assassin's Focus
-		return 115;
-	case 4650: //Lunge
-		return 115;
-	case 4651: //Direct Assault
-		return 115;
-	case 4652: //Vital Cut
-		return 115;
-	case 4653: //Blood Feast
-		return 115;
-	case 4654: //Blood Slice
-		return 115;
-	case 4655: //Energy Sap
-		return 115;
-	case 4656: //Mind Snap
-		return 115;
-	case 4657: //Burning Spasm
-		return 115;
-	case 4658: //Double Stab
-		return 115;
-	case 4659: //Sneak Attack
-		return 15;
-	case 4670: //Fortitude Discipline
-		return 27;
-	case 4671: //Protective Spirit Discipline
-		return 27;
-	case 4672: //Charge Discipline
-		return 27;
-	case 4673: //Counterattack Discipline
-		return 27;
-	case 4674: //Furious Discipline
-		return 27;
-	case 4675: //Fellstrike Discipline
-		return 27;
-	case 4676: //Duelist Discipline
-		return 27;
-	case 4677: //Blinding Speed Discipline
-		return 27;
-	case 4678: //Bestial Fury Discipline
-		return 27;
-	case 4679: //Energy Sap Recourse
-		return 115;
-	case 4680: //Cover Recourse
-		return 115;
-	case 4681: //Bellow
-		return 15;
-	case 4682: //Berate
-		return 15;
-	case 4683: //Phantom Wind
-		return 15;
-	case 4684: //Phantom Echo
-		return 15;
-	case 4685: //Thief's Vengeance
-		return 15;
-	case 4686: //Assassin's Strike
-		return 15;
-	case 4687: //Healing Will Discipline
-		return 27;
-	case 4688: //Stonewall Discipline
-		return 27;
-	case 4689: //Spirit of Rage Discipline
-		return 27;
-	case 4690: //Earthwalk Discipline
-		return 27;
-	case 4691: //Speed Focus Discipline
-		return 27;
-	case 4692: //Planeswalk Discipline
-		return 27;
-	case 4693: //Concentration Discipline
-		return 27;
-	case 4694: //Deadly Precision Discipline
-		return 27;
-	case 4695: //Twisted Chance Discipline
-		return 27;
-	case 4696: //Weapon Affinity Discipline
-		return 27;
-	case 4697: //Incite
-		return 15;
-	case 4698: //Phantom Call
-		return 15;
-	case 4699: //Bite of the Hounds
-		return 25;
-	case 4700: //Claw of the Beast
-		return 25;
-	case 4701: //Warhound's Affliction
-		return 25;
-	case 4704: //Blood Scream
-		return 42;
-	case 4706: //Mindless Rage
-		return 115;
-	case 4716: //Call of Rav
-		return 126;
-	case 4717: //Diseased Maw
-		return 126;
-	case 4721: //Focused Will Discipline
-		return 27;
-	case 4724: //Abysmal Replenishment
-		return 79;
-	case 4726: //Bite of Keras
-		return 25;
-	case 4741: //Reflection of Discord I
-		return 125;
-	case 4742: //Reflection of Discord II
-		return 125;
-	case 4743: //Reflection of Discord III
-		return 125;
-	case 4786: //Icy Grasp
-		return 69;
-	case 4788: //Feral Swipe
-		return 115;
-	case 4789: //Touch of the Divine
-		return 125;
-	case 4795: //Aura of Restoration
-		return 79;
-	case 4801: //Doppelganger Recourse
-		return 125;
-	case 4802: //Flames of Kesh`yk I
-		return 69;
-	case 4803: //Flames of Kesh`yk II
-		return 69;
-	case 4804: //Flames of Kesh`yk III
-		return 69;
-	case 4805: //Frost of Kesh`yk I
-		return 69;
-	case 4806: //Frost of Kesh`yk II
-		return 69;
-	case 4807: //Frost of Kesh`yk III
-		return 69;
-	case 4808: //Lightning of Kesh`yk I
-		return 69;
-	case 4809: //Lightning of Kesh`yk II
-		return 69;
-	case 4810: //Lightning of Kesh`yk III
-		return 69;
-	case 4811: //Flames of Kesh`yk Effect I
-		return 69;
-	case 4812: //Flames of Kesh`yk Effect II
-		return 69;
-	case 4813: //Flames of Kesh`yk Effect III
-		return 69;
-	case 4814: //Frost of Kesh`yk Effect I
-		return 69;
-	case 4815: //Frost of Kesh`yk Effect II
-		return 69;
-	case 4816: //Frost of Kesh`yk Effect III
-		return 69;
-	case 4817: //Lightning of Kesh`yk Effect I
-		return 69;
-	case 4818: //Lightning of Kesh`yk Effect II
-		return 69;
-	case 4819: //Lightning of Kesh`yk Effect III
-		return 69;
-	case 4820: //Rabid Companion I
-		return 69;
-	case 4821: //Rabid Companion II
-		return 69;
-	case 4822: //Rabid Companion III
-		return 69;
-	case 4841: //Aura of Fire
-		return 79;
-	case 4842: //Exultant Bellow I
-		return 25;
-	case 4843: //Exultant Bellow II
-		return 25;
-	case 4844: //Exultant Bellow III
-		return 25;
-	case 4845: //Exultant Bellow IV
-		return 25;
-	case 4846: //Exultant Bellow V
-		return 25;
-	case 4849: //Heartstopper
-		return 126;
-	case 4853: //Listless Strength
-		return 126;
-	case 4871: //War March of the Mastruq
-		return 125;
-	case 4872: //Echo of the Trusik
-		return 125;
-	case 4873: //Dark Echo
-		return 125;
-	case 4874: //Turepta Blood
-		return 20;
-	case 4875: //Trushar's Mending
-		return 42;
-	case 4876: //Trushar's Frost
-		return 25;
-	case 4877: //Apathy of the Nihil
-		return 126;
-	case 4878: //Bliss of the Nihil
-		return 126;
-	case 4879: //Madness of Ikkibi
-		return 25;
-	case 4880: //Holy Light
-		return 42;
-	case 4881: //Order
-		return 25;
-	case 4882: //Holy Elixir
-		return 42;
-	case 4883: //Sylvan Infusion
-		return 42;
-	case 4884: //Sylvan Fire
-		return 25;
-	case 4885: //Sylvan Embers
-		return 20;
-	case 4886: //Elemental Siphon
-		return 69;
-	case 4887: //Rock of Taelosia
-		return 25;
-	case 4888: //Monster Summoning IV
-		return 69;
-	case 4889: //Night Stalker
-		return 114;
-	case 4890: //Night Fire
-		return 20;
-	case 4891: //Night's Beckon
-		return 114;
-	case 4893: //Wave of Trushar
-		return 42;
-	case 4894: //Light of Order
-		return 42;
-	case 4895: //Holy Order
-		return 125;
-	case 4896: //Sylvan Light
-		return 42;
-	case 4897: //Sylvan Burn
-		return 25;
-	case 4898: //Sylvan Call
-		return 125;
-	case 4899: //Breath of Trushar
-		return 42;
-	case 4900: //Balance of the Nihil
-		return 126;
-	case 4901: //Daluda's Mending
-		return 42;
-	case 4902: //Mental Horror
-		return 125;
-	case 4903: //Black Shroud
-		return 125;
-	case 4904: //Miasmic spear
-		return 25;
-	case 4905: //Black Ice
-		return 25;
-	case 4906: //White Fire
-		return 25;
-	case 4907: //Telaka
-		return 25;
-	case 4908: //Mental Horror Strike
-		return 25;
-	case 4912: //Sylvan Call Strike
-		return 25;
-	case 4913: //Holy Order Strike
-		return 25;
-	case 4928: //Leg Strike
-		return 126;
-	case 4929: //Leg Cut
-		return 126;
-	case 4930: //Leg Slice
-		return 126;
-	case 4931: //Head Strike
-		return 25;
-	case 4932: //Head Pummel
-		return 25;
-	case 4933: //Head Crush
-		return 25;
-	case 4934: //Diversive Strike
-		return 126;
-	case 4935: //Distracting Strike
-		return 126;
-	case 4936: //Confusing Strike
-		return 126;
-	case 4937: //Corroded Axe
-		return 18;
-	case 4938: //Blunt Axe
-		return 18;
-	case 4939: //Steel Axe
-		return 18;
-	case 4940: //Bearded Axe
-		return 18;
-	case 4941: //Mithril Axe
-		return 18;
-	case 4942: //Balanced War Axe
-		return 18;
-	case 4943: //Bonesplicer Axe
-		return 18;
-	case 4944: //Fleshtear Axe
-		return 18;
-	case 4945: //Cold Steel Cleaving Axe
-		return 18;
-	case 4946: //Mithril Bloodaxe
-		return 18;
-	case 4947: //Rage Axe
-		return 18;
-	case 4948: //Bloodseekers Axe
-		return 18;
-	case 4949: //Battlerage Axe
-		return 18;
-	case 4950: //Deathfury Axe
-		return 18;
-	case 4957: //Shock of Discord
-		return 125;
-	case 4960: //Simmering Rage
-		return 15;
-	case 4961: //Bubbling Rage
-		return 15;
-	case 4962: //Boiling Rage
-		return 15;
-	case 4963: //Natimbi Gate
-		return 123;
-	case 4964: //Translocate: Natimbi
-		return 123;
-	case 4965: //Natimbi Portal
-		return 123;
-	case 4966: //Circle of Natimbi
-		return 123;
-	case 4967: //Ring of Natimbi
-		return 123;
-	case 4968: //Dark Arrow
-		return 25;
-	case 4970: //Prism Strike
-		return 25;
-	case 4971: //Ancient: Chaos Chant
-		return 20;
-	case 4972: //Ancient: Frozen Chaos
-		return 25;
-	case 4973: //Ancient: Chaos Censure
-		return 25;
-	case 4974: //Ancient: Chaos Frost
-		return 25;
-	case 4975: //Ancient: Chaos Madness
-		return 25;
-	case 4976: //Ancient: Chaos Vortex
-		return 25;
-	case 4977: //Ancient: Force of Chaos
-		return 25;
-	case 4978: //Ancient: Seduction of Chaos
-		return 125;
-	case 4979: //Ancient: Chaotic Pain
-		return 125;
-	case 4980: //Ancient: Burning Chaos
-		return 25;
-	case 4981: //Ancient: Strike of Chaos
-		return 25;
-	case 4982: //Ancient: Bite of Chaos
-		return 114;
-	case 4991: //Coordinated Strike
-		return 25;
-	case 4992: //Malevolent Assault
-		return 20;
-	case 4993: //Malevolent Vex
-		return 25;
-	case 4994: //Searing Blood Arrow I
-		return 126;
-	case 4995: //Searing Blood Arrow II
-		return 126;
-	case 4996: //Searing Blood Arrow III
-		return 126;
-	case 4997: //Arrow of Renewal
-		return 42;
-	case 5000: //Righteous Assault
-		return 25;
-	case 5001: //Bury
-		return 25;
-	case 5002: //Mana Blast
-		return 25;
-	case 5003: //Impoverished Lifeblood
-		return 25;
-	case 5004: //Tamuik's Suggestion
-		return 25;
-	case 5005: //Tamuik's Ghastly Presence
-		return 25;
-	case 5006: //Tamuik's Spectral Step
-		return 25;
-	case 5007: //Curse of Tunik Tamuik
-		return 25;
-	case 5008: //Bane of Tunik Tamuik
-		return 25;
-	case 5009: //Unholy Barrage
-		return 25;
-	case 5010: //Strike of Glory
-		return 25;
-	case 5011: //Salve
-		return 42;
-	case 5012: //Spike of Disease
-		return 25;
-	case 5013: //SpellTheft2
-		return 126;
-	case 5014: //SpellTheft3
-		return 126;
-	case 5015: //Bellow of the Mastruq
-		return 15;
-	case 5016: //Ancient: Chaos Cry
-		return 15;
-	case 5017: //Kyv Strike
-		return 15;
-	case 5018: //Ancient: Chaos Strike
-		return 15;
-	case 5019: //Phantom Shadow
-		return 15;
-	case 5020: //Ancient: Phantom Chaos
-		return 15;
-	case 5022: //Dark Balance
-		return 25;
-	case 5023: //Chaos Epidemic
-		return 25;
-	case 5024: //Chaos Epidemic
-		return 25;
-	case 5027: //Battle Cry
-		return 95;
-	case 5028: //War Cry
-		return 95;
-	case 5029: //Battle Cry of Dravel
-		return 95;
-	case 5030: //War Cry of Dravel
-		return 95;
-	case 5031: //Battle Cry of the Mastruq
-		return 95;
-	case 5032: //Ancient: Cry of Chaos
-		return 95;
-	case 5033: //Berserker Rage
-		return 95;
-	case 5034: //Burning Rage Discipline
-		return 27;
-	case 5035: //Focused Fury Discipline
-		return 27;
-	case 5036: //Battle Sense Discipline
-		return 27;
-	case 5037: //Cleaving Rage Discipline
-		return 27;
-	case 5038: //Battle Focus Discipline
-		return 27;
-	case 5039: //Inspired Anger Discipline
-		return 27;
-	case 5040: //Reckless Discipline
-		return 27;
-	case 5041: //Blind Rage Discipline
-		return 27;
-	case 5042: //Indomitable Discipline
-		return 27;
-	case 5043: //Cleaving Anger Discipline
-		return 27;
-	case 5044: //Sprint Discipline
-		return 27;
-	case 5045: //Test1
-		return 27;
-	case 5046: //Test2
-		return 15;
-	case 5047: //Test3
-		return 15;
-	case 5048: //Test4
-		return 15;
-	case 5049: //Test5
-		return 15;
-	case 5050: //Test6
-		return 27;
-	case 5051: //Aura of Destruction
-		return 25;
-	case 5052: //Spirit's Touch
-		return 25;
-	case 5053: //Destructive Crush
-		return 25;
-	case 5054: //Wave of Destruction
-		return 25;
-	case 5055: //Creeping Fury
-		return 25;
-	case 5056: //Rampaging Force
-		return 25;
-	case 5057: //Barxt's Destructive Touch
-		return 25;
-	case 5058: //Barxt's Mental Corruption
-		return 25;
-	case 5059: //Wave of Absolute Power
-		return 25;
-	case 5060: //Discordant Light
-		return 42;
-	case 5063: //Mug
-		return 115;
-	case 5064: //Hastened Thoughts
-		return 125;
-	case 5070: //Armor Shatter
-		return 25;
-	case 5071: //Energy Siphon
-		return 25;
-	case 5073: //Soul Vortex
-		return 25;
-	case 5074: //Black Pox
-		return 25;
-	case 5094: //test ac
-		return 27;
-	case 5095: //Item Pet I
-		return 69;
-	case 5096: //Item Pet II
-		return 69;
-	case 5101: //Fire Shard
-		return 18;
-	case 5102: //Frost Hammer
-		return 18;
-	case 5103: //Flame Strike
-		return 25;
-	case 5104: //Frost Strike
-		return 25;
-	case 5105: //Geomantra
-		return 125;
-	case 5107: //Tainted Axe of Hatred
-		return 18;
-	case 5118: //Intoxicating Fury
-		return 25;
-	case 5119: //Force of Trusik's Rage
-		return 25;
-	case 5120: //Withering Destruction
-		return 25;
-	case 5125: //Venom Claw
-		return 25;
-	case 5127: //Prism Skin
-		return 25;
-	case 5133: //Elemental Draw
-		return 69;
-	case 5135: //SpellTheft4
-		return 69;
-	case 5148: //Massive Explosion
-		return 25;
-	case 5150: //Gloomingdeep Guard
-		return 45;
-	case 5190: //PvPSilTest1
-		return 25;
-	case 5191: //PvPSilTest2
-		return 25;
-	case 5192: //PvPSilTest3
-		return 25;
-	case 5193: //PvPSilTest4
-		return 25;
-	case 5194: //PvPSilTest5
-		return 25;
-	case 5195: //PvPSil2Test1
-		return 25;
-	case 5196: //PvPSil2Test2
-		return 25;
-	case 5197: //PvPSil2Test3
-		return 25;
-	case 5198: //PvPSil2Test4
-		return 25;
-	case 5199: //PvPSil2Test5
-		return 25;
-	case 5200: //PvPStunTest1
-		return 69;
-	case 5201: //PvPStunTest2
-		return 69;
-	case 5202: //PvPStunTest3
-		return 69;
-	case 5203: //PvPStunTest4
-		return 69;
-	case 5204: //PvPStunTest5
-		return 69;
-	case 5205: //5200 Strike
-		return 69;
-	case 5206: //5201 Strike
-		return 69;
-	case 5207: //5202 Strike
-		return 69;
-	case 5208: //5203 Strike
-		return 69;
-	case 5209: //5204 Strike
-		return 69;
-	case 5210: //PvPSnareTest1
-		return 69;
-	case 5211: //PvPSnareTest2
-		return 69;
-	case 5212: //PvPSnareTest3
-		return 69;
-	case 5213: //PvPSnareTest4
-		return 69;
-	case 5214: //PvPSnareTest5
-		return 69;
-	case 5215: //5210 Strike
-		return 69;
-	case 5216: //5211 Strike
-		return 69;
-	case 5217: //5212 Strike
-		return 69;
-	case 5218: //5213 Strike
-		return 69;
-	case 5219: //5214 Strike
-		return 69;
-	case 5220: //Jarsath Frenzy
-		return 95;
-	case 5221: //Rage of Xyzith
-		return 25;
-	case 5222: //Morternum
-		return 114;
-	case 5226: //Arias' Guard
-		return 79;
-	case 5250: //Confidence
-		return 45;
-	case 5251: //Pious Remedy
-		return 42;
-	case 5252: //Symbol of Balikor
-		return 45;
-	case 5253: //Ward of Valiance
-		return 95;
-	case 5254: //Shock of Wonder
-		return 25;
-	case 5255: //Sermon of Reproach
-		return 20;
-	case 5256: //Unswerving Hammer of Retribution
-		return 69;
-	case 5257: //Conviction
-		return 45;
-	case 5258: //Blessing of Devotion
-		return 125;
-	case 5259: //Pious Elixir
-		return 42;
-	case 5260: //Reproach
-		return 25;
-	case 5261: //Panoply of Vie
-		return 125;
-	case 5262: //Omen-Cleric-PH
-		return 125;
-	case 5263: //Omen-Cleric-PH
-		return 125;
-	case 5264: //Hammer of Reproach
-		return 18;
-	case 5265: //Pious Light
-		return 42;
-	case 5266: //Sound of Divinity
-		return 25;
-	case 5267: //Omen-Cleric-PH
-		return 126;
-	case 5268: //Desolate Undead
-		return 25;
-	case 5269: //Mark of the Blameless
-		return 125;
-	case 5270: //Word of Vivification
-		return 42;
-	case 5271: //Calamity
-		return 25;
-	case 5272: //Aura of Devotion
-		return 125;
-	case 5273: //Yaulp VII
-		return 95;
-	case 5274: //Placate
-		return 126;
-	case 5275: //Silent Dictation
-		return 25;
-	case 5276: //Armor of the Pious
-		return 45;
-	case 5277: //Balikor's Mark
-		return 45;
-	case 5278: //Hand of Conviction
-		return 45;
-	case 5279: //Ancient: Pious Conscience
-		return 25;
-	case 5280: //Direction
-		return 45;
-	case 5281: //Omen-Paladin-PH
-		return 126;
-	case 5282: //Touch of Piety
-		return 42;
-	case 5283: //Crusader's Purity
-		return 42;
-	case 5284: //Force of Piety
-		return 25;
-	case 5285: //Silvered Fury
-		return 125;
-	case 5286: //Spurn Undead
-		return 25;
-	case 5287: //Symbol of Jeron
-		return 45;
-	case 5288: //Pious Fury
-		return 125;
-	case 5289: //Light of Piety
-		return 42;
-	case 5290: //Hand of Direction
-		return 45;
-	case 5291: //Armor of the Champion
-		return 45;
-	case 5292: //Serene Command
-		return 25;
-	case 5293: //Pious Cleansing
-		return 42;
-	case 5294: //Bulwark of Piety
-		return 95;
-	case 5295: //Jeron's Mark
-		return 45;
-	case 5296: //Wave of Piety
-		return 42;
-	case 5297: //Brell's Brawny Bulwark
-		return 45;
-	case 5298: //Affirmation
-		return 45;
-	case 5299: //Ancient: Force of Jeron
-		return 25;
-	case 5300: //Nature Veil
-		return 126;
-	case 5301: //Displace Summoned
-		return 25;
-	case 5302: //Shield of Briar
-		return 125;
-	case 5303: //Locust Swarm
-		return 20;
-	case 5304: //Sylvan Water
-		return 42;
-	case 5305: //Guard of the Earth
-		return 125;
-	case 5306: //Strength of the Hunter
-		return 45;
-	case 5307: //Briarcoat
-		return 125;
-	case 5308: //Nature's Veil Parry
-		return 126;
-	case 5309: //Frost Wind
-		return 25;
-	case 5310: //Hunter's Vigor
-		return 79;
-	case 5311: //Nature's Denial
-		return 125;
-	case 5312: //Howl of the Predator
-		return 95;
-	case 5313: //Hearth Embers
-		return 25;
-	case 5314: //Nature's Balance
-		return 126;
-	case 5315: //Onyx Skin
-		return 45;
-	case 5316: //Tranquility of the Glade
-		return 126;
-	case 5317: //Ward of the Hunter
-		return 125;
-	case 5318: //Call of Lightning
-		return 125;
-	case 5319: //Ancient: North Wind
-		return 25;
-	case 5320: //Blood of Discord
-		return 20;
-	case 5321: //Dark Tendrils
-		return 20;
-	case 5322: //Dark Constriction
-		return 20;
-	case 5323: //Bond of Inruku
-		return 114;
-	case 5324: //Touch of Inruku
-		return 114;
-	case 5325: //Inruku's Bite
-		return 114;
-	case 5326: //Omen-SK-PH
-		return 25;
-	case 5327: //Shroud of Discord
-		return 125;
-	case 5328: //Theft of Pain
-		return 114;
-	case 5329: //Terror of Discord
-		return 126;
-	case 5330: //Blood of Inruku
-		return 20;
-	case 5331: //Son of Decay
-		return 69;
-	case 5332: //Rune of Decay
-		return 69;
-	case 5333: //Pact of Decay
-		return 125;
-	case 5334: //Spear of Muram
-		return 25;
-	case 5335: //Scythe of Inruku
-		return 25;
-	case 5336: //Dread Gaze
-		return 126;
-	case 5337: //Theft of Hate
-		return 114;
-	case 5338: //Touch of the Devourer
-		return 114;
-	case 5339: //Cloak of Discord
-		return 45;
-	case 5340: //Ancient: Bite of Muram
-		return 114;
-	case 5341: //Omen-Druid-PH
-		return 126;
-	case 5342: //Oaken Vigor
-		return 79;
-	case 5343: //Stormwatch
-		return 25;
-	case 5344: //Hand of the Sun
-		return 126;
-	case 5345: //Tempest Wind
-		return 25;
-	case 5346: //Earth Shiver
-		return 25;
-	case 5347: //Nature's Serenity
-		return 126;
-	case 5348: //Immolation of the Sun
-		return 20;
-	case 5349: //Hungry Vines
-		return 126;
-	case 5350: //Lion's Strength
-		return 95;
-	case 5351: //Sun's Corona
-		return 126;
-	case 5352: //Steeloak Skin
-		return 45;
-	case 5353: //Blessing of Oak
-		return 79;
-	case 5354: //Glacier Breath
-		return 126;
-	case 5355: //Chlorotrope
-		return 42;
-	case 5356: //Oaken Guard
-		return 125;
-	case 5357: //Wasp Swarm
-		return 20;
-	case 5358: //Nettle Shield
-		return 125;
-	case 5359: //Nature's Beckon
-		return 126;
-	case 5360: //Omen-Druid-PH
-		return 126;
-	case 5361: //Solstice Strike
-		return 25;
-	case 5362: //Nettlecoat
-		return 125;
-	case 5363: //Vengeance of the Sun
-		return 20;
-	case 5364: //Desolate Summoned
-		return 25;
-	case 5365: //Circle of Nettles
-		return 125;
-	case 5366: //Blessing of Steeloak
-		return 45;
-	case 5367: //Glitterfrost
-		return 25;
-	case 5368: //Mask of the Wild
-		return 79;
-	case 5369: //Ancient: Glacier Frost
-		return 25;
-	case 5370: //Luvwen's Aria of Serenity
-		return 126;
-	case 5371: //Vulka's Chant of Disease
-		return 20;
-	case 5372: //Bellow of Chaos
-		return 25;
-	case 5373: //Luvwen's Lullaby
-		return 126;
-	case 5374: //Verse of Vesagran
-		return 95;
-	case 5375: //Zuriki's Song of Shenanigans
-		return 126;
-	case 5376: //War March of Muram
-		return 125;
-	case 5377: //Cantata of Life
-		return 79;
-	case 5378: //Vulka's Chant of Poison
-		return 20;
-	case 5379: //Vulka's Chant of Frost
-		return 20;
-	case 5380: //Yelhun's Mystic Call
-		return 125;
-	case 5381: //Dirge of Metala
-		return 126;
-	case 5382: //Eriki's Psalm of Power
-		return 125;
-	case 5383: //Voice of the Vampire
-		return 126;
-	case 5384: //Chorus of Life
-		return 79;
-	case 5385: //Vulka's Chant of Flame
-		return 20;
-	case 5386: //Omen-Bard-PH
-		return 126;
-	case 5387: //Vulka's Lullaby
-		return 126;
-	case 5388: //Ancient: Call of Power
-		return 125;
-	case 5389: //Farrel's Companion
-		return 69;
-	case 5390: //Spirit of Sense
-		return 95;
-	case 5391: //Yoppa's Spear of Venom
-		return 25;
-	case 5392: //Putrid Decay
-		return 126;
-	case 5393: //Spirit of Perseverance
-		return 79;
-	case 5394: //Crippling Spasm
-		return 126;
-	case 5395: //Yoppa's Mending
-		return 42;
-	case 5396: //Wunshi's Focusing
-		return 45;
-	case 5397: //Ancestral Bulwark
-		return 95;
-	case 5398: //Spirit of Fortitude
-		return 95;
-	case 5399: //Talisman of Sense
-		return 95;
-	case 5400: //Vindictive Spirit
-		return 126;
-	case 5401: //Yoppa's Rain of Venom
-		return 25;
-	case 5402: //Spirit Veil
-		return 125;
-	case 5403: //Pained Memory
-		return 125;
-	case 5404: //Spirit of Might
-		return 95;
-	case 5405: //Talisman of Fortitude
-		return 95;
-	case 5406: //Talisman of Perseverance
-		return 79;
-	case 5407: //Shroud of Erana
-		return 126;
-	case 5408: //Ice Age
-		return 25;
-	case 5409: //Talisman of Might
-		return 95;
-	case 5410: //Pure Spirit
-		return 42;
-	case 5411: //Breath of Wunshi
-		return 20;
-	case 5412: //Curse of Sisslak
-		return 20;
-	case 5413: //Shroud of Erana Parry
-		return 126;
-	case 5414: //Blood of Yoppa
-		return 20;
-	case 5415: //Talisman of Wunshi
-		return 45;
-	case 5416: //Spiritual Serenity
-		return 42;
-	case 5417: //Champion
-		return 95;
-	case 5418: //Ancient: Ancestral Calling
-		return 125;
-	case 5419: //Soulspike
-		return 114;
-	case 5420: //Acikin
-		return 25;
-	case 5421: //Shadow Guard
-		return 45;
-	case 5422: //Omen-Nec-PH
-		return 69;
-	case 5423: //Chaos Plague
-		return 20;
-	case 5424: //Grip of Mori
-		return 20;
-	case 5425: //Glyph of Darkness
-		return 69;
-	case 5426: //Fang of Death
-		return 114;
-	case 5427: //Scent of Midnight
-		return 126;
-	case 5428: //Dull Pain
-		return 125;
-	case 5429: //Dark Hold
-		return 126;
-	case 5430: //Desecrating Darkness
-		return 20;
-	case 5431: //Lost Soul
-		return 69;
-	case 5432: //Dark Nightmare
-		return 20;
-	case 5433: //Chaos Venom
-		return 20;
-	case 5434: //Dark Possession
-		return 125;
-	case 5435: //Dark Salve
-		return 69;
-	case 5436: //Bulwark of Calliav
-		return 69;
-	case 5437: //Pyre of Mori
-		return 20;
-	case 5438: //Dark Assassin
-		return 69;
-	case 5439: //Word of Chaos
-		return 126;
-	case 5440: //Desolate Undead
-		return 25;
-	case 5441: //Ancient: Curse of Mori
-		return 20;
-	case 5442: //Icebane
-		return 25;
-	case 5443: //Ether Shield
-		return 45;
-	case 5444: //Tears of the Sun
-		return 25;
-	case 5445: //Lightningbane
-		return 25;
-	case 5446: //Spark of Fire
-		return 25;
-	case 5447: //Firebane
-		return 25;
-	case 5448: //Ether Skin
-		return 125;
-	case 5449: //Spark of Thunder
-		return 25;
-	case 5450: //Thundaka
-		return 25;
-	case 5451: //Circle of Thunder
-		return 25;
-	case 5452: //Spark of Lightning
-		return 25;
-	case 5453: //Ether Ward
-		return 125;
-	case 5454: //Meteor Storm
-		return 25;
-	case 5455: //Circle of Fire
-		return 25;
-	case 5456: //Telekara
-		return 25;
-	case 5457: //Spark of Ice
-		return 25;
-	case 5458: //Gelidin Comet
-		return 25;
-	case 5459: //Bulwark of Calrena
-		return 125;
-	case 5460: //Solist's Frozen Sword
-		return 69;
-	case 5461: //Gelid Rains
-		return 25;
-	case 5462: //Corona Flare
-		return 25;
-	case 5463: //Ancient: Core Fire
-		return 25;
-	case 5464: //Summon Calliav's Runed Mantle
-		return 18;
-	case 5465: //Summon Staff of the North Wind
-		return 18;
-	case 5466: //Fireskin
-		return 125;
-	case 5467: //Summon Fireblade
-		return 18;
-	case 5468: //Summon Calliav's Jeweled Bracelet
-		return 18;
-	case 5469: //Summon Calliav's Spiked Ring
-		return 18;
-	case 5470: //Summon Calliav's Glowing Bauble
-		return 18;
-	case 5471: //Summon Calliav's Steel Bracelet
-		return 18;
-	case 5472: //Elemental Aura
-		return 45;
-	case 5473: //Child of Wind
-		return 69;
-	case 5474: //Bolt of Jerikor
-		return 25;
-	case 5475: //Summon Calliav's Platinum Choker
-		return 18;
-	case 5476: //Phantom Shield
-		return 79;
-	case 5477: //Summon Dagger of the Deep
-		return 18;
-	case 5478: //Elemental Fury
-		return 69;
-	case 5479: //Rain of Jerikor
-		return 25;
-	case 5480: //Child of Water
-		return 69;
-	case 5481: //Burning Earth
-		return 25;
-	case 5482: //Omen-Mage-PH
-		return 18;
-	case 5483: //Summon Pouch of Jerikor
-		return 18;
-	case 5484: //Blade Strike
-		return 25;
-	case 5485: //Child of Fire
-		return 69;
-	case 5486: //Summon Sphere of Air
-		return 18;
-	case 5487: //Omen-Mage-PH
-		return 126;
-	case 5488: //Circle of Fireskin
-		return 125;
-	case 5489: //Summon Crystal Belt
-		return 18;
-	case 5490: //Desolate Summoned
-		return 25;
-	case 5491: //Renewal of Jerikor
-		return 69;
-	case 5492: //Pyrilen Skin
-		return 125;
-	case 5493: //Star Scream
-		return 25;
-	case 5494: //Bulwark of Calliav
-		return 69;
-	case 5495: //Child of Earth
-		return 69;
-	case 5496: //Star Strike
-		return 25;
-	case 5497: //Elemental Simulcram
-		return 69;
-	case 5498: //Ancient: Nova Strike
-		return 25;
-	case 5499: //Synapsis Spasm
-		return 126;
-	case 5500: //Ethereal Rune
-		return 125;
-	case 5501: //Omen-Enc-PH
-		return 126;
-	case 5502: //Mystic Shield
-		return 45;
-	case 5503: //Felicity
-		return 126;
-	case 5504: //Rune of Salik
-		return 125;
-	case 5505: //Salik's Animation
-		return 69;
-	case 5506: //Placate
-		return 126;
-	case 5507: //Speed of Salik
-		return 125;
-	case 5508: //Omen-Enc-PH
-		return 95;
-	case 5509: //Arcane Noose
-		return 20;
-	case 5510: //Compel
-		return 126;
-	case 5511: //Wake of Felicity
-		return 126;
-	case 5512: //Omen-Enc-PH
-		return 20;
-	case 5513: //Clairvoyance
-		return 79;
-	case 5514: //Mayhem
-		return 125;
-	case 5515: //Wall of Alendar
-		return 125;
-	case 5516: //Color Snap
-		return 25;
-	case 5517: //Circle of Alendar
-		return 125;
-	case 5518: //Psychosis
-		return 25;
-	case 5519: //True Name
-		return 126;
-	case 5520: //Euphoria
-		return 126;
-	case 5521: //Hastening of Salik
-		return 125;
-	case 5522: //Voice of Clairvoyance
-		return 79;
-	case 5523: //Ancient: Neurosis
-		return 25;
-	case 5524: //Omen-Bst-PH
-		return 126;
-	case 5525: //Omen-Bst-PH
-		return 45;
-	case 5526: //Healing of Mikkily
-		return 69;
-	case 5527: //Chimera Blood
-		return 20;
-	case 5528: //Muada's Mending
-		return 42;
-	case 5529: //Focus of Alladnu
-		return 45;
-	case 5530: //Spiritual Vitality
-		return 45;
-	case 5531: //Spirit of Alladnu
-		return 69;
-	case 5532: //Omen-Bst-PH
-		return 125;
-	case 5533: //Growl of the Beast
-		return 69;
-	case 5534: //Spirit of Irionu
-		return 69;
-	case 5535: //Glacier Spear
-		return 25;
-	case 5536: //Feral Vigor
-		return 79;
-	case 5537: //Spiritual Ascendance
-		return 79;
-	case 5538: //Spirit of Rashara
-		return 69;
-	case 5539: //Feral Guard
-		return 69;
-	case 5540: //Festering Malady
-		return 20;
-	case 5541: //Omen-Bst-PH
-		return 126;
-	case 5542: //Ferocity of Irionu
-		return 95;
-	case 5543: //Ancient: Savage Ice
-		return 25;
-	case 5554: //Cloud of Discord
-		return 25;
-	case 5555: //Bellow of Tunat'Muram
-		return 25;
-	case 5556: //Whirling Smash
-		return 25;
-	case 5560: //Blistering Rage
-		return 15;
-	case 5570: //Pillage Magic
-		return 126;
-	case 5571: //Tangle
-		return 126;
-	case 5572: //Entangle
-		return 126;
-	case 5573: //Corporeal Empathy Recourse
-		return 42;
-	case 5605: //test mana
-		return 79;
-	case 5731: //Circle of Barindu
-		return 123;
-	case 5732: //Barindu Portal
-		return 123;
-	case 5733: //Ring of Barindu
-		return 123;
-	case 5734: //Barindu Gate
-		return 123;
-	case 5735: //Translocate: Barindu
-		return 123;
-	case 5741: //Pyrilen Bolt
-		return 25;
-	case 5744: //Kiss of the Pyrilen
-		return 25;
-	case 5745: //Pyrilonis' Vengeance
-		return 25;
-	case 5760: //Gelaqua's Embrace
-		return 25;
-	case 5761: //Heart of Frost
-		return 25;
-	case 5874: //Advanced Dire Charm
-		return 126;
-	case 5875: //Advanced Dire Charm Animal
-		return 126;
-	case 5876: //Advanced Dire Charm Undead
-		return 126;
-	case 5919: //Death Peace
-		return 125;
-	case 5924: //Celestial Stun
-		return 25;
-	case 5931: //Embrace of Shadows
-		return 125;
-	case 5976: //Plagued Filth
-		return 25;
-	case 5979: //Infection of Pain
-		return 25;
-	case 5980: //Orb's Curse
-		return 25;
-	case 5989: //Gloom Toxin
-		return 25;
-	case 5990: //Shade Mantle
-		return 25;
-	case 5992: //Numbing Touch
-		return 25;
-	case 5993: //Girplan Chatter
-		return 25;
-	case 5994: //Body Slam
-		return 25;
-	case 5996: //Bazu Grip
-		return 25;
-	case 5997: //Pyrilen Ember
-		return 25;
-	case 5998: //Pyrilen Charm
-		return 25;
-	case 5999: //Pyronic Lash
-		return 25;
-	case 6000: //Pyrilen Fury
-		return 25;
-	case 6001: //Pyronic Assault
-		return 25;
-	case 6003: //Chimeran Laceration
-		return 25;
-	case 6004: //Chimeran Breath
-		return 25;
-	case 6005: //Infected Bite
-		return 25;
-	case 6006: //Gelidran Sleet
-		return 25;
-	case 6007: //Frostcicle
-		return 25;
-	case 6008: //Gelidran Hail
-		return 25;
-	case 6009: //Gelidran Stalagmite
-		return 25;
-	case 6010: //Freezing Touch
-		return 25;
-	case 6012: //Crushing Ice
-		return 25;
-	case 6013: //Ice Shards
-		return 25;
-	case 6014: //Feranic Grasp
-		return 25;
-	case 6016: //Feran Tentacle
-		return 25;
-	case 6017: //Darkbreath
-		return 25;
-	case 6019: //Clinging Apathy
-		return 25;
-	case 6020: //Wing Strike
-		return 25;
-	case 6021: //Deep Gouge
-		return 25;
-	case 6023: //Dragornian Malady
-		return 25;
-	case 6024: //Dragornian Venom
-		return 25;
-	case 6025: //Discordling Leap
-		return 25;
-	case 6026: //Discordling Ruin
-		return 25;
-	case 6027: //Chaotica
-		return 25;
-	case 6028: //Seething Bite
-		return 25;
-	case 6029: //Sinking Fangs
-		return 25;
-	case 6049: //Lightning Strike
-		return 25;
-	case 6050: //Static Pulse
-		return 25;
-	case 6051: //Fire Strike
-		return 25;
-	case 6052: //Ice Strike
-		return 25;
-	case 6053: //Bane of Dranik
-		return 25;
-	case 6054: //Bane of Dranik
-		return 25;
-	case 6055: //Bane of Dranik
-		return 25;
-	case 6065: //Murk Acid
-		return 25;
-	case 6066: //Murk Acid
-		return 25;
-	case 6103: //Nature's Denial Strike
-		return 25;
-	case 6105: //Silvered Fury Strike
-		return 25;
-	case 6120: //Phase Walk
-		return 125;
-	case 6121: //Shroud of Air
-		return 125;
-	case 6122: //Cloud of Indifference
-		return 125;
-	case 6123: //Cloak of Nature
-		return 125;
-	case 6124: //Shadow of Death
-		return 125;
-	case 6125: //Sun Cloak
-		return 125;
-	case 6126: //Hand of Order
-		return 25;
-	case 6128: //Gelidran Aura
-		return 125;
-	case 6140: //Ancient: Hallowed Light
-		return 42;
-	case 6141: //Ancient: Chlorobon
-		return 42;
-	case 6142: //Ancient: Wilslik's Mending
-		return 42;
-	case 6143: //Ancient: Touch of Orshilak
-		return 114;
-	case 6144: //Ancient: Voice of Muram
-		return 126;
-	case 6145: //Ancient: Veil of Pyrilonus
-		return 125;
-	case 6146: //Ancient: Spear of Gelaqua
-		return 25;
-	case 6152: //Vindictive Spirit Recourse
-		return 125;
-	case 6153: //Elemental Simulcram Recourse
-		return 45;
-	case 6154: //Hungry Vines Recourse
-		return 125;
-	case 6156: //Oaken Guard Parry
-		return 126;
-	case 6169: //Crippling Strike
-		return 126;
-	case 6170: //Mind Strike
-		return 25;
-	case 6171: //Baffling Strike
-		return 126;
-	case 6172: //Axe of the Destroyer
-		return 18;
-	case 6173: //Bazu Bellow
-		return 15;
-	case 6174: //Daggerfall
-		return 15;
-	case 6175: //Phantom Cry
-		return 15;
-	case 6176: //Slaughter Gate
-		return 123;
-	case 6177: //Translocate: Slaughter
-		return 123;
-	case 6178: //Slaughter Portal
-		return 123;
-	case 6179: //Circle of Slaughter
-		return 123;
-	case 6180: //Ring of Slaughter
-		return 123;
-	case 6181: //Bloodfields Gate
-		return 123;
-	case 6182: //Translocate: Bloodfields
-		return 123;
-	case 6183: //Bloodfields Portal
-		return 123;
-	case 6184: //Circle of Bloodfields
-		return 123;
-	case 6185: //Ring of Bloodfields
-		return 123;
-	case 6187: //Limit Test Hit
-		return 114;
-	case 6190: //Shocking Defense Discipline
-		return 27;
-	case 6191: //Aura of Runes Discipline
-		return 27;
-	case 6192: //Savage Onslaught Discipline
-		return 27;
-	case 6193: //Dreamwalk Discipline
-		return 27;
-	case 6194: //Rapid Kick Discipline
-		return 27;
-	case 6195: //Counterforce Discipline
-		return 27;
-	case 6196: //Deadly Aim Discipline
-		return 27;
-	case 6197: //Frenzied Stabbing Discipline
-		return 27;
-	case 6198: //Imperceptible Discipline
-		return 27;
-	case 6199: //Vengeful Flurry Discipline
-		return 27;
-	case 6200: //Unpredictable Rage Discipline
-		return 27;
-	case 6201: //Unflinching Will Discipline
-		return 27;
-	case 6202: //Stun Effect
-		return 27;
-	case 6203: //Rune Effect
-		return 27;
-	case 6204: //Slow Effect
-		return 27;
-	case 6205: //Poison DD Effect
-		return 27;
-	case 6206: //Lower Hate Effect
-		return 27;
-	case 6207: //Increase Damage Effect
-		return 27;
-	case 6209: //Test Doom Rune
-		return 125;
-	case 6233: //Harmonic Balance
-		return 95;
-	case 6265: //Divine Balance
-		return 95;
-	case 6330: //Chaotic Strike I
-		return 25;
-	case 6331: //Chaotic Strike II
-		return 25;
-	case 6332: //Chaotic Strike III
-		return 25;
-	case 6333: //Chaotic Strike IV
-		return 25;
-	case 6334: //Chaotic Strike V
-		return 25;
-	case 6335: //Chaotic Strike VI
-		return 25;
-	case 6336: //Chaotic Strike VII
-		return 25;
-	case 6337: //Life Sap I
-		return 25;
-	case 6338: //Life Sap II
-		return 25;
-	case 6339: //Life Sap III
-		return 25;
-	case 6340: //Life Sap IV
-		return 25;
-	case 6341: //Freezing Strike I
-		return 25;
-	case 6342: //Freezing Strike II
-		return 25;
-	case 6343: //Freezing Strike III
-		return 25;
-	case 6344: //Freezing Strike IV
-		return 25;
-	case 6345: //Freezing Strike V
-		return 25;
-	case 6346: //Freezing Strike VI
-		return 25;
-	case 6347: //Freezing Strike VII
-		return 25;
-	case 6348: //Freezing Strike VIII
-		return 25;
-	case 6349: //Freezing Strike IX
-		return 25;
-	case 6350: //Fiery Strike I
-		return 25;
-	case 6351: //Fiery Strike II
-		return 25;
-	case 6352: //Fiery Strike III
-		return 25;
-	case 6353: //Fiery Strike IV
-		return 25;
-	case 6354: //Fiery Strike V
-		return 25;
-	case 6355: //Fiery Strike VI
-		return 25;
-	case 6356: //Fiery Strike VII
-		return 25;
-	case 6357: //Fiery Strike VIII
-		return 25;
-	case 6358: //Fiery Strike IX
-		return 25;
-	case 6359: //Form of Defense I
-		return 125;
-	case 6360: //Form of Defense III
-		return 125;
-	case 6361: //Form of Protection I
-		return 125;
-	case 6362: //Form of Protection III
-		return 125;
-	case 6363: //Form of Endurance I
-		return 125;
-	case 6364: //Form of Endurance III
-		return 125;
-	case 6365: //Form of Rejuvenation I
-		return 125;
-	case 6366: //Form of Rejuvenation III
-		return 125;
-	case 6499: //Gelid Claw
-		return 25;
-	case 6500: //Stunning Strike
-		return 25;
-	case 6502: //Unpack Brewer's Still
-		return 18;
-	case 6505: //Blood Dream
-		return 25;
-	case 6512: //Lupine Rage
-		return 25;
-	case 6513: //Devour Enchantment
-		return 126;
-	case 6514: //Blessing of Rallos Zek
-		return 18;
-	case 6515: //Blessing of The Tribunal
-		return 18;
-	case 6516: //Blessing of Cazic Thule
-		return 18;
-	case 6517: //Blessing of Brell Serilis
-		return 18;
-	case 6518: //Blessing of Tunare
-		return 18;
-	case 6519: //Blessing of Innoruuk
-		return 18;
-	case 6520: //Blessing of Prexus
-		return 18;
-	case 6521: //Blessing of Mithaniel Marr
-		return 18;
-	case 6522: //Blessing of Erollisi Marr
-		return 18;
-	case 6523: //Blessing of Bertoxxulous
-		return 18;
-	case 6524: //Blessing of Solusek Ro
-		return 18;
-	case 6525: //Blessing of Karana
-		return 18;
-	case 6526: //Blessing of Bristlebane
-		return 18;
-	case 6527: //Blessing of Quellious
-		return 18;
-	case 6528: //Blessing of Rodcet Nife
-		return 18;
-	case 6529: //Blessing of Veeshan
-		return 18;
-	case 6530: //Words of the Sceptic
-		return 18;
-	case 6532: //Makural's Curse
-		return 125;
-	case 6533: //RB_reflect_test
-		return 125;
-	case 6534: //Makural's Torment
-		return 25;
-	case 6535: //Makural's TormentSK
-		return 25;
-	case 6563: //Mass Illusion: Human
-		return 125;
-	case 6564: //Mass Illusion: Barbarian
-		return 125;
-	case 6565: //Mass Illusion: Erudite
-		return 125;
-	case 6566: //Mass Illusion: Wood Elf
-		return 125;
-	case 6567: //Mass Illusion: Fier`dal
-		return 125;
-	case 6568: //Mass Illusion: High Elf
-		return 125;
-	case 6569: //Mass Illusion: Dark Elf
-		return 125;
-	case 6570: //Mass Illusion: Half-Elf
-		return 125;
-	case 6571: //Mass Illusion: Dwarf
-		return 125;
-	case 6572: //Mass Illusion: Troll
-		return 125;
-	case 6573: //Mass Illusion: Ogre
-		return 125;
-	case 6574: //Mass Illusion: Halfling
-		return 125;
-	case 6575: //Mass Illusion: Gnome
-		return 125;
-	case 6576: //Mass Illusion: Werewolf
-		return 125;
-	case 6577: //Mass Illusion: Froglok
-		return 125;
-	case 6578: //Mass Illusion: Imp
-		return 125;
-	case 6579: //Mass Illusion: Earth Elemental
-		return 125;
-	case 6580: //Mass Illusion: Air Elemental
-		return 125;
-	case 6581: //Mass Illusion: Fire Elemental
-		return 125;
-	case 6582: //Mass Illusion: Water Elemental
-		return 125;
-	case 6583: //Mass Illusion: Scarecrow
-		return 125;
-	case 6584: //Mass Illusion: Spirit Wolf
-		return 125;
-	case 6585: //Mass Illusion: Iksar
-		return 125;
-	case 6586: //Mass Illusion: Vah Shir
-		return 125;
-	case 6587: //Mass Illusion: Guktan
-		return 125;
-	case 6588: //Mass Illusion: Scaled Wolf
-		return 125;
-	case 6589: //Mass Illusion: Skeleton
-		return 125;
-	case 6590: //Mass Illusion: Dry Bone
-		return 125;
-	case 6591: //Mass Illusion: Frost Bone
-		return 125;
-	case 6592: //GM Bind Sight
-		return 125;
-	case 6656: //Spray of Venom
-		return 25;
-	case 6662: //Ward of Retribution
-		return 125;
-	case 6663: //Guard of Righteousness
-		return 27;
-	case 6664: //Earthen Shackles
-		return 126;
-	case 6665: //Serpent Vines
-		return 126;
-	case 6666: //Storm Blade
-		return 125;
-	case 6667: //Spirit of the Panther
-		return 125;
-	case 6668: //Shadow Orb
-		return 114;
-	case 6669: //Claw of Vox
-		return 25;
-	case 6670: //Summon: Molten Orb
-		return 18;
-	case 6671: //Rune of Rikkukin
-		return 125;
-	case 6672: //Growl of the Panther
-		return 69;
-	case 6673: //Soul Shield
-		return 27;
-	case 6674: //Storm Blade Strike
-		return 25;
-	case 6675: //Storm Blade Strike SK
-		return 25;
-	case 6676: //Magma Jet
-		return 25;
-	case 6677: //Shadow Orb Recourse
-		return 18;
-	case 6717: //Growl of the Panther
-		return 95;
-	case 6719: //Ward of Retribution Parry
-		return 126;
-	case 6724: //Panther Maw
-		return 25;
-	case 6725: //Cyclone Blade
-		return 126;
-	case 6726: //Assassin's Feint
-		return 15;
-	case 6727: //Dragon Fang
-		return 15;
-	case 6728: //Dragon Fang Strike
-		return 15;
-	case 6729: //Destroyer's Volley
-		return 15;
-	case 6730: //Ward of Vengeance
-		return 125;
-	case 6731: //Guard of Humility
-		return 27;
-	case 6732: //Earthen Embrace
-		return 126;
-	case 6733: //Mire Thorns
-		return 126;
-	case 6734: //Song of the Storm
-		return 125;
-	case 6735: //Spirit of the Leopard
-		return 95;
-	case 6736: //Soul Orb
-		return 114;
-	case 6737: //Claw of Frost
-		return 25;
-	case 6738: //Summon: Lava Orb
-		return 18;
-	case 6739: //Rune of the Scale
-		return 125;
-	case 6740: //Growl of the Leopard
-		return 69;
-	case 6741: //Soul Guard
-		return 27;
-	case 6742: //Song of the Storm Strike
-		return 25;
-	case 6743: //Song of the Storm Strike SK
-		return 25;
-	case 6744: //Lava Jet
-		return 25;
-	case 6745: //Soul Orb Recourse
-		return 18;
-	case 6747: //Growl of the Leopard
-		return 95;
-	case 6748: //Ward of Vengeance Parry
-		return 126;
-	case 6749: //Leopard Maw
-		return 25;
-	case 6750: //Whirlwind Blade
-		return 126;
-	case 6751: //Rogue's Ploy
-		return 15;
-	case 6752: //Leopard Claw
-		return 15;
-	case 6753: //Leopard Claw Strike
-		return 15;
-	case 6754: //Rage Volley
-		return 15;
-	case 6771: //Geomantra II
-		return 125;
-	case 6777: //Leopard Maw
-		return 25;
-	case 6778: //Leopard Maw SK
-		return 25;
-	case 6779: //Panther Maw
-		return 25;
-	case 6780: //Panther Maw SK
-		return 25;
-	case 6782: //Magma Blast
-		return 25;
-	case 6826: //Desolate Deeds
-		return 126;
-	case 6827: //Balance of Discord
-		return 126;
-	case 6828: //Sha's Legacy
-		return 126;
-	case 6839: //Static Strike
-		return 25;
-	case 6840: //Firestrike
-		return 25;
-	case 6841: //Bolt of Flame
-		return 25;
-	case 6842: //Cinder Bolt
-		return 25;
-	case 6843: //Anarchy
-		return 25;
-	case 6844: //Shock of Spikes
-		return 25;
-	case 6845: //Dismiss Summoned
-		return 25;
-	case 6846: //Dismiss Undead
-		return 25;
-	case 6847: //Blaze
-		return 25;
-	case 6848: //Shock of Poison
-		return 25;
-	case 6849: //Shock of Flame
-		return 25;
-	case 6850: //Chaos Flux
-		return 25;
-	case 6851: //Icestrike
-		return 25;
-	case 6852: //Icicle Shock
-		return 25;
-	case 6853: //Lifedraw
-		return 114;
-	case 6854: //Drain Soul
-		return 114;
-	case 6855: //Frost Shock
-		return 25;
-	case 6856: //Inferno Shock
-		return 25;
-	case 6857: //Lightning Shock
-		return 25;
-	case 6858: //Winter's Roar
-		return 25;
-	case 6859: //Spirit Tap
-		return 114;
-	case 6860: //Drain Spirit
-		return 114;
-	case 6861: //Shock of Ice
-		return 25;
-	case 6862: //Flame Shock
-		return 25;
-	case 6863: //Ice Shock
-		return 25;
-	case 6864: //Conflagration
-		return 25;
-	case 6865: //Expel Undead
-		return 25;
-	case 6866: //Rend
-		return 25;
-	case 6867: //Torbas' Acid Blast
-		return 25;
-	case 6868: //Frost
-		return 25;
-	case 6869: //Sunstrike
-		return 25;
-	case 6870: //Blast of Frost
-		return 25;
-	case 6871: //Shock of Fiery Blades
-		return 25;
-	case 6872: //Burning Arrow
-		return 25;
-	case 6873: //Nature's Renewal
-		return 42;
-	case 6874: //Spirit Salve
-		return 42;
-	case 6875: //Healing Light
-		return 42;
-	case 6876: //Forest's Renewal
-		return 42;
-	case 6877: //Kragg's Salve
-		return 42;
-	case 6878: //Greater Healing Light
-		return 42;
-	case 6899: //Flash Powder Explosion
-		return 25;
-	case 6902: //Ward of the Divine
-		return 125;
-	case 6903: //Ward of Rebuke
-		return 125;
-	case 6904: //Ward of the Divine Parry
-		return 126;
-	case 6905: //Ward of Rebuke Parry
-		return 126;
-	case 6906: //Spirit of the Puma
-		return 125;
-	case 6907: //Spirit of the Jaguar
-		return 125;
-	case 6908: //Puma Maw
-		return 25;
-	case 6909: //Puma Maw SK
-		return 25;
-	case 6910: //Elixir of Healing I
-		return 42;
-	case 6911: //Elixir of Healing II
-		return 42;
-	case 6912: //Elixir of Healing III
-		return 42;
-	case 6913: //Elixir of Healing IV
-		return 42;
-	case 6914: //Elixir of Healing V
-		return 42;
-	case 6915: //Elixir of Healing VI
-		return 42;
-	case 6916: //Elixir of Healing VII
-		return 42;
-	case 6917: //Elixir of Healing VIII
-		return 42;
-	case 6918: //Elixir of Healing IX
-		return 42;
-	case 6919: //Elixir of Healing X
-		return 42;
-	case 6920: //Healing Potion I
-		return 42;
-	case 6921: //Healing Potion II
-		return 42;
-	case 6922: //Healing Potion III
-		return 42;
-	case 6923: //Healing Potion IV
-		return 42;
-	case 6924: //Healing Potion V
-		return 42;
-	case 6925: //Healing Potion VI
-		return 42;
-	case 6926: //Healing Potion VII
-		return 42;
-	case 6927: //Healing Potion VIII
-		return 42;
-	case 6928: //Healing Potion IX
-		return 42;
-	case 6929: //Healing Potion X
-		return 42;
-	case 6930: //Elixir of Health I
-		return 45;
-	case 6931: //Elixir of Health II
-		return 45;
-	case 6932: //Elixir of Health III
-		return 45;
-	case 6933: //Elixir of Health IV
-		return 45;
-	case 6934: //Elixir of Health V
-		return 45;
-	case 6935: //Elixir of Health VI
-		return 45;
-	case 6936: //Elixir of Health VII
-		return 45;
-	case 6937: //Elixir of Health VIII
-		return 45;
-	case 6938: //Elixir of Health IX
-		return 45;
-	case 6939: //Elixir of Health X
-		return 45;
-	case 6940: //Elixir of Speed I
-		return 125;
-	case 6941: //Elixir of Speed II
-		return 125;
-	case 6942: //Elixir of Speed III
-		return 125;
-	case 6943: //Elixir of Speed IV
-		return 125;
-	case 6944: //Elixir of Speed V
-		return 125;
-	case 6945: //Elixir of Speed VI
-		return 125;
-	case 6946: //Elixir of Speed VII
-		return 125;
-	case 6947: //Elixir of Speed VIII
-		return 125;
-	case 6948: //Elixir of Speed IX
-		return 125;
-	case 6949: //Elixir of Speed X
-		return 125;
-	case 6950: //Elixir of Clarity I
-		return 79;
-	case 6951: //Elixir of Clarity II
-		return 79;
-	case 6952: //Elixir of Clarity III
-		return 79;
-	case 6953: //Elixir of Clarity IV
-		return 79;
-	case 6954: //Elixir of Clarity V
-		return 79;
-	case 6955: //Elixir of Clarity VI
-		return 79;
-	case 6956: //Elixir of Clarity VII
-		return 79;
-	case 6957: //Elixir of Clarity VIII
-		return 79;
-	case 6958: //Elixir of Clarity IX
-		return 79;
-	case 6959: //Elixir of Clarity X
-		return 79;
-	case 6960: //Grip of Zanivar
-		return 20;
-	case 6961: //Zanivar's Lifedraw
-		return 114;
-	case 6962: //Zanivar's Poison Bolt
-		return 20;
-	case 6963: //Minion of Zanivar
-		return 69;
-	case 6965: //Rampage of Rathkan
-		return 25;
-	case 6966: //Hurl of Rathkan
-		return 25;
-	case 6967: //Shock of Rathkan
-		return 25;
-	case 6968: //Lantern Bomb
-		return 25;
-	case 6969: //Flashpowder Bomb
-		return 25;
-	case 6973: //Intangibility
-		return 125;
-	case 6976: //Retch Weed
-		return 20;
-	case 6977: //Deistic Voice
-		return 126;
-	case 6978: //Deistic Bellow
-		return 126;
-	case 6979: //Deistic Howl
-		return 126;
-	case 6980: //Unholy Voice
-		return 126;
-	case 6981: //Unholy Bellow
-		return 126;
-	case 6982: //Unholy Howl
-		return 126;
-	case 6983: //Phobia
-		return 126;
-	case 6984: //Jitterskin
-		return 126;
-	case 6985: //Anxiety Attack
-		return 126;
-	case 6986: //Shadow Voice
-		return 126;
-	case 6987: //Shadow Bellow
-		return 126;
-	case 6988: //Shadow Howl
-		return 126;
-	case 6989: //Cower the Dead
-		return 126;
-	case 6990: //Death's Despair
-		return 126;
-	case 6991: //Revulsion of Death
-		return 126;
-	case 6992: //Eidolon Voice
-		return 126;
-	case 6993: //Eidolon Bellow
-		return 126;
-	case 6994: //Eidolon Howl
-		return 126;
-	case 6995: //Soulless Fear
-		return 126;
-	case 6996: //Soulless Panic
-		return 126;
-	case 6997: //Soulless Terror
-		return 126;
-	case 6998: //Instinctual Fear
-		return 126;
-	case 6999: //Instinctual Panic
-		return 126;
-	case 7000: //Instinctual Terror
-		return 126;
-	case 7001: //Angstlich's Echo of Terror
-		return 126;
-	case 7002: //Angstlich's Wail of Panic
-		return 126;
-	case 7003: //Circle of Dreams
-		return 126;
-	case 7004: //Guard of Piety
-		return 27;
-	case 7005: //Ichor Guard
-		return 27;
-	case 7168: //Obscuring Sporecloud
-		return 125;
-	case 7169: //Root of Weakness
-		return 126;
-	case 7170: //Rage of the Root
-		return 125;
-	case 7171: //Fungal Refreshment
-		return 42;
-	case 7172: //Spore Snooze
-		return 126;
-	case 7173: //Fungal Sheen
-		return 95;
-	case 7177: //Blind Fury I
-		return 125;
-	case 7178: //Blind Fury II
-		return 125;
-	case 7179: //Blind Fury III
-		return 125;
-	case 7180: //Orc Smash I
-		return 25;
-	case 7181: //Orc Smash II
-		return 25;
-	case 7182: //Orc Smash III
-		return 25;
-	case 7183: //Blood Rage I
-		return 125;
-	case 7184: //Blood Rage II
-		return 125;
-	case 7185: //Blood Rage III
-		return 125;
-	case 7186: //Dark Bellow I
-		return 126;
-	case 7187: //Dark Bellow II
-		return 126;
-	case 7188: //Dark Bellow III
-		return 126;
-	case 7189: //Wave of Fire
-		return 25;
-	case 7190: //Tide of Sloth I
-		return 126;
-	case 7191: //Tide of Sloth II
-		return 126;
-	case 7192: //Tide of Sloth III
-		return 126;
-	case 7193: //Fiery Surge I
-		return 25;
-	case 7194: //Fiery Surge II
-		return 25;
-	case 7195: //Fiery Surge III
-		return 25;
-	case 7199: //Soothing Remedy
-		return 42;
-	case 7200: //Orcish Regeneration I
-		return 125;
-	case 7201: //Orcish Regeneration II
-		return 125;
-	case 7202: //Orcish Regeneration III
-		return 125;
-	case 7203: //Weak Knees
-		return 126;
-	case 7204: //Complete Refreshment
-		return 42;
-	case 7205: //Hand of Darkness
-		return 125;
-	case 7206: //Shadowmend
-		return 42;
-	case 7207: //Soulmend
-		return 82;
-	case 7208: //Arachnae Scream
-		return 126;
-	case 7209: //Voice of Vule
-		return 95;
-	case 7210: //Speed of the Spider
-		return 125;
-	case 7211: //Skinwalker's Mindwave
-		return 126;
-	case 7212: //Dire Musings
-		return 126;
-	case 7213: //Thoughtraze
-		return 25;
-	case 7214: //Dark Messenger
-		return 69;
-	case 7215: //Bite of Night
-		return 20;
-	case 7216: //Chanted Doom
-		return 20;
-	case 7217: //Vile Spirit
-		return 114;
-	case 7218: //Spiteful Hex
-		return 20;
-	case 7219: //Eboncall
-		return 25;
-	case 7220: //Stormreaver
-		return 25;
-	case 7221: //Ethereal Carapace
-		return 125;
-	case 7222: //Master's Shadow
-		return 125;
-	case 7223: //Ice Spray
-		return 25;
-	case 7224: //Needling Annoyance
-		return 125;
-	case 7232: //Jaguar Maw
-		return 25;
-	case 7233: //Jaguar Maw SK
-		return 25;
-	case 7400: //Heal Wounds I
-		return 42;
-	case 7401: //Heal Wounds II
-		return 42;
-	case 7402: //Heal Wounds III
-		return 42;
-	case 7403: //Heal Wounds IV
-		return 42;
-	case 7404: //Heal Wounds V
-		return 42;
-	case 7405: //Heal Wounds VI
-		return 42;
-	case 7406: //Heal Wounds VII
-		return 42;
-	case 7407: //Heal Wounds VIII
-		return 42;
-	case 7408: //Heal Wounds IX
-		return 42;
-	case 7409: //Heal Wounds X
-		return 42;
-	case 7410: //Heal Wounds XI
-		return 42;
-	case 7411: //Heal Wounds XII
-		return 42;
-	case 7412: //Heal Wounds XIII
-		return 42;
-	case 7413: //Heal Wounds XIV
-		return 42;
-	case 7414: //Fire I
-		return 25;
-	case 7415: //Fire II
-		return 25;
-	case 7416: //Fire III
-		return 25;
-	case 7417: //Fire IV
-		return 25;
-	case 7418: //Fire V
-		return 25;
-	case 7419: //Fire VI
-		return 25;
-	case 7420: //Fire VII
-		return 25;
-	case 7421: //Fire VIII
-		return 25;
-	case 7422: //Fire IX
-		return 25;
-	case 7423: //Fire X
-		return 25;
-	case 7424: //Fire XI
-		return 25;
-	case 7425: //Fire XII
-		return 25;
-	case 7426: //Fire XIII
-		return 25;
-	case 7427: //Fire XIV
-		return 25;
-	case 7428: //Frost I
-		return 25;
-	case 7429: //Frost II
-		return 25;
-	case 7430: //Frost III
-		return 25;
-	case 7431: //Frost IV
-		return 25;
-	case 7432: //Frost V
-		return 25;
-	case 7433: //Frost VI
-		return 25;
-	case 7434: //Frost VII
-		return 25;
-	case 7435: //Frost VIII
-		return 25;
-	case 7436: //Frost IX
-		return 25;
-	case 7437: //Frost X
-		return 25;
-	case 7438: //Frost XI
-		return 25;
-	case 7439: //Frost XII
-		return 25;
-	case 7440: //Frost XIII
-		return 25;
-	case 7441: //Frost XIV
-		return 25;
-	case 7442: //Thunder I
-		return 25;
-	case 7443: //Thunder II
-		return 25;
-	case 7444: //Thunder III
-		return 25;
-	case 7445: //Thunder IV
-		return 25;
-	case 7446: //Thunder V
-		return 25;
-	case 7447: //Thunder VI
-		return 25;
-	case 7448: //Thunder VII
-		return 25;
-	case 7449: //Thunder VIII
-		return 25;
-	case 7450: //Thunder IX
-		return 25;
-	case 7451: //Thunder X
-		return 25;
-	case 7452: //Thunder XI
-		return 25;
-	case 7453: //Thunder XII
-		return 25;
-	case 7454: //Thunder XIII
-		return 25;
-	case 7455: //Thunder XIV
-		return 25;
-	case 7465: //Smoke Bomb I
-		return 15;
-	case 7466: //Smoke Bomb II
-		return 15;
-	case 7467: //Smoke Bomb III
-		return 15;
-	case 7468: //Smoke Bomb IV
-		return 15;
-	case 7469: //Smoke Bomb V
-		return 15;
-	case 7470: //Smoke Bomb VI
-		return 15;
-	case 7471: //Smoke Bomb VII
-		return 15;
-	case 7472: //Smoke Bomb VIII
-		return 15;
-	case 7473: //Smoke Bomb IX
-		return 15;
-	case 7474: //Smoke Bomb X
-		return 15;
-	case 7475: //Smoke Screen
-		return 15;
-	case 7476: //Pain Tolerance
-		return 27;
-	case 7477: //Cazic Touch II
-		return 25;
-	case 7478: //Destroy II
-		return 25;
-	case 7481: //Hamstring I
-		return 126;
-	case 7482: //Hamstring II
-		return 126;
-	case 7483: //Lesion I
-		return 20;
-	case 7484: //Lesion II
-		return 20;
-	case 7485: //Lesion III
-		return 20;
-	case 7486: //Lesion IV
-		return 20;
-	case 7487: //Lesion V
-		return 20;
-	case 7488: //Lesion VI
-		return 20;
-	case 7489: //Lesion VII
-		return 20;
-	case 7490: //Lesion VIII
-		return 20;
-	case 7491: //Lesion IX
-		return 20;
-	case 7492: //Lesion X
-		return 20;
-	case 7496: //Frost of the Ancients I
-		return 20;
-	case 7497: //Frost of the Ancients II
-		return 20;
-	case 7498: //Frost of the Ancients III
-		return 20;
-	case 7499: //Frost of the Ancients IV
-		return 20;
-	case 7500: //Frost of the Ancients V
-		return 20;
-	case 7501: //Frost of the Ancients VI
-		return 20;
-	case 7502: //Frost of the Ancients VII
-		return 20;
-	case 7503: //Frost of the Ancients VIII
-		return 20;
-	case 7504: //Frost of the Ancients IX
-		return 20;
-	case 7505: //Frost of the Ancients X
-		return 20;
-	case 7506: //Cure Poison I
-		return 42;
-	case 7507: //Cure Poison II
-		return 42;
-	case 7508: //Cure Poison III
-		return 42;
-	case 7509: //Cure Poison IV
-		return 42;
-	case 7510: //Cure Disease I
-		return 42;
-	case 7511: //Cure Disease II
-		return 42;
-	case 7512: //Cure Disease III
-		return 42;
-	case 7513: //Cure Disease IV
-		return 42;
-	case 7514: //Remove Curse I
-		return 42;
-	case 7515: //Remove Curse II
-		return 42;
-	case 7516: //Remove Curse III
-		return 42;
-	case 7517: //Remove Curse IV
-		return 42;
-	case 7518: //Play Dead I
-		return 125;
-	case 7519: //Play Dead II
-		return 125;
-	case 7520: //Play Dead III
-		return 125;
-	case 7521: //Play Dead IV
-		return 125;
-	case 7522: //Gore I
-		return 25;
-	case 7523: //Gore II
-		return 25;
-	case 7524: //Gore III
-		return 25;
-	case 7525: //Gore IV
-		return 25;
-	case 7526: //Gore V
-		return 25;
-	case 7527: //Gore VI
-		return 25;
-	case 7528: //War Bellow
-		return 126;
-	case 7529: //War Bellow Recourse
-		return 95;
-	case 7531: //Sleep I
-		return 126;
-	case 7532: //Sleep II
-		return 126;
-	case 7533: //Sleep III
-		return 126;
-	case 7534: //Sleep IV
-		return 126;
-	case 7535: //Sleep V
-		return 126;
-	case 7536: //Lethargy I
-		return 126;
-	case 7537: //Lethargy II
-		return 126;
-	case 7538: //Lethargy III
-		return 126;
-	case 7539: //Lethargy IV
-		return 126;
-	case 7540: //Lethargy V
-		return 126;
-	case 7541: //Plane Shift: Ethereal
-		return 27;
-	case 7542: //Plane Shift: Material
-		return 27;
-	case 7543: //Blink
-		return 27;
-	case 7545: //Swarm of Pain I
-		return 20;
-	case 7546: //Swarm of Pain II
-		return 20;
-	case 7547: //Swarm of Pain III
-		return 20;
-	case 7548: //Swarm of Pain IV
-		return 20;
-	case 7549: //Swarm of Pain V
-		return 20;
-	case 7550: //Swarm of Pain VI
-		return 20;
-	case 7551: //Swarm of Pain VII
-		return 20;
-	case 7552: //Swarm of Pain VIII
-		return 20;
-	case 7553: //Swarm of Pain IX
-		return 20;
-	case 7554: //Swarm of Pain X
-		return 20;
-	case 7555: //Fungal Malady I
-		return 20;
-	case 7556: //Fungal Malady II
-		return 20;
-	case 7557: //Fungal Malady III
-		return 20;
-	case 7558: //Fungal Malady IV
-		return 20;
-	case 7559: //Fungal Malady V
-		return 20;
-	case 7560: //Fungal Malady VI
-		return 20;
-	case 7561: //Fungal Malady VII
-		return 20;
-	case 7562: //Fungal Malady VIII
-		return 20;
-	case 7563: //Fungal Malady IX
-		return 20;
-	case 7564: //Fungal Malady X
-		return 20;
-	case 7565: //Ward of the Bear I
-		return 45;
-	case 7566: //Ward of the Bear II
-		return 45;
-	case 7567: //Ward of the Bear III
-		return 45;
-	case 7568: //Ward of the Wolf I
-		return 125;
-	case 7569: //Ward of the Wolf II
-		return 95;
-	case 7570: //Ward of the Wolf III
-		return 95;
-	case 7571: //Ward of the Tiger I
-		return 39008;
-	case 7572: //Ward of the Tiger II
-		return 39008;
-	case 7573: //Ward of the Tiger III
-		return 95;
-	case 7574: //Ward of the Crocodile I
-		return 125;
-	case 7575: //Ward of the Crocodile II
-		return 125;
-	case 7576: //Ward of the Crocodile III
-		return 125;
-	case 7577: //Ward of the Scaled Wolf I
-		return 95;
-	case 7578: //Ward of the Scaled Wolf II
-		return 95;
-	case 7579: //Ward of the Scaled Wolf III
-		return 95;
-	case 7580: //Ward of the Raptor I
-		return 125;
-	case 7581: //Ward of the Raptor II
-		return 95;
-	case 7582: //Ward of the Raptor III
-		return 95;
-	case 7583: //Ward of the Garou I
-		return 95;
-	case 7584: //Ward of the Garou II
-		return 95;
-	case 7585: //Ward of the Garou III
-		return 95;
-	case 7589: //Fire Skin I
-		return 125;
-	case 7590: //Fire Skin II
-		return 125;
-	case 7591: //Fire Skin III
-		return 125;
-	case 7592: //Fire Skin IV
-		return 125;
-	case 7593: //Fire Skin V
-		return 125;
-	case 7594: //Fire Skin VI
-		return 125;
-	case 7595: //Fire Skin VII
-		return 125;
-	case 7596: //Fire Skin VIII
-		return 125;
-	case 7597: //Fire Skin IX
-		return 125;
-	case 7598: //Fire Skin X
-		return 125;
-	case 7599: //Gargoyle Glance
-		return 25;
-	case 7701: //Weakening Roots
-		return 126;
-	case 7729: //Stealth
-		return 125;
-	case 7745: //Stunning Roar
-		return 25;
-	case 7746: //Whirlwind
-		return 27;
-	case 7762: //Maul I
-		return 15;
-	case 7763: //Maul II
-		return 15;
-	case 7764: //Maul III
-		return 15;
-	case 7765: //Maul IV
-		return 15;
-	case 7766: //Maul V
-		return 15;
-	case 7767: //Maul VI
-		return 15;
-	case 7768: //Maul VII
-		return 15;
-	case 7769: //Maul VIII
-		return 15;
-	case 7770: //Maul IX
-		return 15;
-	case 7771: //Maul X
-		return 15;
-	case 7772: //Maul XI
-		return 15;
-	case 7773: //Maul XII
-		return 15;
-	case 7774: //Maul XIII
-		return 15;
-	case 7775: //Maul XIV
-		return 15;
-	case 7776: //Mana Bolt I
-		return 25;
-	case 7777: //Mana Bolt II
-		return 25;
-	case 7778: //Mana Bolt III
-		return 25;
-	case 7779: //Mana Bolt IV
-		return 25;
-	case 7780: //Mana Bolt V
-		return 25;
-	case 7781: //Mana Bolt VI
-		return 25;
-	case 7782: //Mana Bolt VII
-		return 25;
-	case 7783: //Mana Bolt VIII
-		return 25;
-	case 7784: //Mana Bolt IX
-		return 25;
-	case 7785: //Mana Bolt X
-		return 25;
-	case 7786: //Mana Bolt XI
-		return 25;
-	case 7787: //Mana Bolt XII
-		return 25;
-	case 7788: //Mana Bolt XIII
-		return 25;
-	case 7789: //Mana Bolt XIV
-		return 25;
-	case 7790: //Spirit Sending
-		return 123;
-	case 7800: //Draygun's Touch
-		return 20;
-	case 7801: //Draygun's Touch
-		return 20;
-	case 7802: //Draygun's Touch
-		return 20;
-	case 7803: //Draygun's Touch
-		return 20;
-	case 7804: //Draygun's Touch
-		return 20;
-	case 7805: //Curse of the Nine
-		return 20;
-	case 7806: //Curse of the Nine
-		return 20;
-	case 7807: //Curse of the Nine
-		return 20;
-	case 7808: //Curse of the Nine
-		return 20;
-	case 7809: //Curse of the Nine
-		return 20;
-	case 7810: //Blood of the Shadowmane
-		return 20;
-	case 7811: //Blood of the Shadowmane
-		return 20;
-	case 7812: //Blood of the Shadowmane
-		return 20;
-	case 7813: //Blood of the Shadowmane
-		return 20;
-	case 7814: //Blood of the Shadowmane
-		return 20;
-	case 7815: //Theft of Rage
-		return 20;
-	case 7816: //Theft of Rage
-		return 20;
-	case 7817: //Theft of Rage
-		return 20;
-	case 7818: //Theft of Rage
-		return 20;
-	case 7819: //Theft of Rage
-		return 20;
-	case 7820: //Curse of the Hivequeen
-		return 20;
-	case 7821: //Curse of the Hivequeen
-		return 20;
-	case 7822: //Curse of the Hivequeen
-		return 20;
-	case 7823: //Curse of the Hivequeen
-		return 20;
-	case 7824: //Curse of the Hivequeen
-		return 20;
-	case 7838: //Form of Defense IV
-		return 125;
-	case 7839: //Form of Protection IV
-		return 125;
-	case 7840: //Form of Endurance IV
-		return 125;
-	case 7841: //Form of Rejuvenation IV
-		return 125;
-	case 7994: //Dread Pyre
-		return 20;
-	case 7995: //Call for Blood
-		return 25;
-	case 7996: //Call for Blood Recourse
-		return 25;
-	case 7999: //Corath Venom
-		return 20;
-	case 8000: //Commanding Voice
-		return 95;
-	case 8001: //Thief's eyes
-		return 95;
-	case 8002: //Fists of Wu
-		return 95;
-	case 8003: //Cry Havoc
-		return 95;
-	case 8004: //Death's Regret
-		return 25;
-	case 8005: //Bind Death
-		return 25;
-	case 8006: //Chromastrike
-		return 25;
-	case 8007: //Desperate Renewal
-		return 42;
-	case 8008: //Skin of the Reptile
-		return 125;
-	case 8009: //Skin of the Rep. Trigger
-		return 42;
-	case 8010: //Spore Spiral
-		return 126;
-	case 8011: //Dawnstrike
-		return 25;
-	case 8012: //Blessing of the Dawn
-		return 20;
-	case 8015: //Lingering Sloth
-		return 125;
-	case 8016: //Lingering Sloth Trigger
-		return 125;
-	case 8017: //Hungry Plague
-		return 126;
-	case 8018: //Breath of Antraygus
-		return 25;
-	case 8019: //Warder's Wrath
-		return 27;
-	case 8020: //Hail of Arrows
-		return 25;
-	case 8021: //Bestial Empathy
-		return 69;
-	case 8022: //Fickle Shadows
-		return 25;
-	case 8023: //Fickle Shadows Recourse
-		return 20;
-	case 8025: //Touch of Draygun
-		return 114;
-	case 8026: //Gift of Draygun
-		return 45;
-	case 8027: //Last Rites
-		return 25;
-	case 8028: //Last Rites Trigger
-		return 25;
-	case 8029: //Silent Piety
-		return 95;
-	case 8030: //Thousand Blades
-		return 27;
-	case 8031: //Creeping Dreams
-		return 126;
-	case 8032: //Mana Flare
-		return 125;
-	case 8033: //Mana Flare Strike
-		return 69;
-	case 8034: //Colored Chaos
-		return 25;
-	case 8035: //Echoing Madness
-		return 126;
-	case 8036: //Illusion: Orc
-		return 125;
-	case 8037: //Raging Servant
-		return 69;
-	case 8038: //Burning Aura
-		return 125;
-	case 8039: //Burning Vengeance
-		return 125;
-	case 8040: //Fickle Fire
-		return 25;
-	case 8041: //Clinging Frost
-		return 25;
-	case 8042: //Clinging Frost Trigger
-		return 25;
-	case 8043: //Ether Flame
-		return 25;
-	case 8044: //Mana Weave
-		return 25;
-	case 8045: //Mana Weave Recourse
-		return 25;
-	case 8075: //Fickle Fire Recourse
-		return 25;
-	case 8090: //Armor Cleave I
-		return 126;
-	case 8091: //Armor Cleave II
-		return 126;
-	case 8092: //Armor Cleave III
-		return 126;
-	case 8093: //Armor Cleave IV
-		return 126;
-	case 8094: //Armor Cleave V
-		return 126;
-	case 8095: //Armor Cleave VI
-		return 126;
-	case 8096: //Armor Cleave VII
-		return 126;
-	case 8097: //Armor Cleave VIII
-		return 126;
-	case 8098: //Armor Cleave IX
-		return 126;
-	case 8099: //Armor Cleave X
-		return 126;
-	case 8106: //Perfected Heal
-		return 42;
-	case 8114: //Shrieker Sonic Wave
-		return 25;
-	case 8115: //Shrieker Sonic Wave
-		return 25;
-	case 8116: //Shrieker Sonic Wave
-		return 25;
-	case 8117: //Nimbus Shrieker Wave
-		return 25;
-	case 8118: //Nimbus Shrieker Wave
-		return 25;
-	case 8119: //Nimbus Shrieker Wave
-		return 25;
-	case 8120: //Retch Spore
-		return 25;
-	case 8121: //Retch Spore
-		return 25;
-	case 8122: //Retch Spore
-		return 25;
-	case 8123: //Hammer Time
-		return 25;
-	case 8144: //Net
-		return 126;
-	case 8145: //Clinging Net
-		return 126;
-	case 8149: //Stealthy Getaway
-		return 123;
-	case 8153: //Eternal Thought
-		return 79;
-	case 8171: //Pure Thought I
-		return 79;
-	case 8172: //Pure Thought II
-		return 79;
-	case 8173: //Pure Thought III
-		return 79;
-	case 8174: //Pure Thought IV
-		return 79;
-	case 8175: //Pure Thought V
-		return 79;
-	case 8176: //Pure Thought VI
-		return 79;
-	case 8177: //Pure Thought VII
-		return 79;
-	case 8178: //Pure Thought VIII
-		return 79;
-	case 8179: //Pure Thought IX
-		return 79;
-	case 8180: //Pure Thought X
-		return 79;
-	case 8200: //Gift of Illsalin
-		return 79;
-	case 8201: //Guardian of Ro
-		return 69;
-	case 8202: //Guardian of Ro
-		return 69;
-	case 8203: //Guardian of Ro
-		return 69;
-	case 8204: //Guardian's Bolt I
-		return 25;
-	case 8210: //Feral Roar I
-		return 15;
-	case 8211: //Feral Roar II
-		return 15;
-	case 8212: //Feral Roar III
-		return 15;
-	case 8213: //Feral Roar IV
-		return 15;
-	case 8214: //Greater Rabid Bear
-		return 125;
-	case 8215: //Greater Rabid Bear
-		return 125;
-	case 8216: //Greater Rabid Bear
-		return 125;
-	case 8218: //Ancestral Guard
-		return 125;
-	case 8219: //Ancestral Guard
-		return 125;
-	case 8220: //Ancestral Guard
-		return 125;
-	case 8233: //Empathic Fury
-		return 27;
-	case 8234: //Empathic Fury
-		return 27;
-	case 8235: //Circle of Undershore
-		return 123;
-	case 8236: //Undershore Portal
-		return 123;
-	case 8237: //Ring of Undershore
-		return 123;
-	case 8238: //Undershore Gate
-		return 123;
-	case 8239: //Translocate: Undershore
-		return 123;
-	case 8267: //Feral Roar V
-		return 15;
-	case 8268: //Feral Roar VI
-		return 15;
-	case 8275: //Infection Test 1
-		return 126;
-	case 8276: //Infection Test 2
-		return 126;
-	case 8277: //Fling
-		return 25;
-	case 8278: //Fetter of Spirits
-		return 69;
-	case 8280: //Boon of Vitality I
-		return 45;
-	case 8281: //Boon of Vitality II
-		return 45;
-	case 8282: //Boon of Vitality III
-		return 45;
-	case 8283: //Boon of Vitality IV
-		return 45;
-	case 8284: //Boon of Vitality V
-		return 45;
-	case 8285: //Boon of Vitality VI
-		return 45;
-	case 8286: //Boon of Vitality VII
-		return 45;
-	case 8287: //Boon of Vitality VIII
-		return 45;
-	case 8288: //Boon of Vitality IX
-		return 45;
-	case 8289: //Boon of Vitality X
-		return 45;
-	case 8290: //Gift of Speed I
-		return 125;
-	case 8291: //Gift of Speed II
-		return 125;
-	case 8292: //Gift of Speed III
-		return 125;
-	case 8293: //Gift of Speed IV
-		return 125;
-	case 8294: //Gift of Speed V
-		return 125;
-	case 8295: //Gift of Speed VI
-		return 125;
-	case 8296: //Gift of Speed VII
-		return 125;
-	case 8297: //Gift of Speed VIII
-		return 125;
-	case 8298: //Gift of Speed IX
-		return 125;
-	case 8299: //Gift of Speed X
-		return 125;
-	case 8300: //Malaise I
-		return 126;
-	case 8301: //Malaise II
-		return 126;
-	case 8302: //Malaise III
-		return 126;
-	case 8303: //Malaise IV
-		return 126;
-	case 8304: //Malaise V
-		return 126;
-	case 8305: //Stun I
-		return 25;
-	case 8306: //Stun II
-		return 25;
-	case 8307: //Stun III
-		return 25;
-	case 8308: //Stun IV
-		return 25;
-	case 8309: //Stun V
-		return 25;
-	case 8310: //Gaze of the Beholder I
-		return 126;
-	case 8311: //Gaze of the Beholder II
-		return 126;
-	case 8312: //Gaze of the Beholder III
-		return 126;
-	case 8313: //Gaze of the Beholder IV
-		return 126;
-	case 8314: //Gaze of the Beholder V
-		return 126;
-	case 8315: //Gaze of the Beholder VI
-		return 126;
-	case 8316: //Gaze of the Beholder VII
-		return 126;
-	case 8317: //Gaze of the Beholder VIII
-		return 126;
-	case 8318: //Gaze of the Beholder IX
-		return 126;
-	case 8319: //Gaze of the Beholder X
-		return 126;
-	case 8320: //Gaze of the Beholder XI
-		return 126;
-	case 8321: //Gaze of the Beholder XII
-		return 126;
-	case 8322: //Gaze of the Beholder XIII
-		return 126;
-	case 8323: //Gaze of the Beholder XIV
-		return 126;
-	case 8324: //Pure Water I
-		return 42;
-	case 8325: //Pure Water II
-		return 42;
-	case 8326: //Pure Water III
-		return 42;
-	case 8327: //Pure Water IV
-		return 42;
-	case 8328: //Gale Force
-		return 25;
-	case 8329: //Fungal Regrowth I
-		return 42;
-	case 8330: //Fungal Regrowth II
-		return 42;
-	case 8331: //Fungal Regrowth III
-		return 42;
-	case 8332: //Fungal Regrowth IV
-		return 42;
-	case 8333: //Fungal Regrowth V
-		return 42;
-	case 8334: //Creeping Plague
-		return 125;
-	case 8335: //Creeping Plague Trigger
-		return 125;
-	case 8336: //Stunning Blow I
-		return 25;
-	case 8337: //Stunning Blow II
-		return 25;
-	case 8338: //Stunning Blow III
-		return 25;
-	case 8339: //Stunning Blow IV
-		return 25;
-	case 8340: //Stunning Blow V
-		return 25;
-	case 8341: //Dark Gift I
-		return 125;
-	case 8342: //Dark Gift II
-		return 125;
-	case 8343: //Dark Gift III
-		return 125;
-	case 8344: //Dark Gift IV
-		return 125;
-	case 8345: //Dark Gift V
-		return 125;
-	case 8346: //Dark Gift VI
-		return 125;
-	case 8347: //Dark Gift VII
-		return 125;
-	case 8348: //Dark Siphon I
-		return 114;
-	case 8349: //Dark Siphon II
-		return 114;
-	case 8350: //Dark Siphon III
-		return 114;
-	case 8351: //Dark Siphon IV
-		return 114;
-	case 8352: //Dark Siphon V
-		return 114;
-	case 8353: //Dark Siphon VI
-		return 114;
-	case 8354: //Dark Siphon VII
-		return 114;
-	case 8372: //Stone Skin I
-		return 125;
-	case 8373: //Stone Skin II
-		return 125;
-	case 8374: //Stone Skin III
-		return 125;
-	case 8375: //Stone Skin IV
-		return 125;
-	case 8376: //Stone Skin V
-		return 125;
-	case 8377: //Stone Skin VI
-		return 125;
-	case 8378: //Shadowed Dark Hold
-		return 126;
-	case 8379: //Shadowed Word of Chaos
-		return 126;
-	case 8380: //Shadowed Curse of Mori
-		return 20;
-	case 8381: //Shadowed Meteor Storm
-		return 25;
-	case 8382: //Shadowed Corona Flare
-		return 25;
-	case 8383: //Shadowed Core Fire
-		return 25;
-	case 8400: //Guardian's Bolt II
-		return 25;
-	case 8401: //Guardian's Bolt III
-		return 25;
-	case 8410: //Hand of Holy Vengeance I
-		return 25;
-	case 8411: //Hand of Holy Vengeance II
-		return 25;
-	case 8412: //Hand of Holy Vengeance III
-		return 25;
-	case 8413: //Hand of Holy Vengeance IV
-		return 25;
-	case 8414: //Hand of Holy Vengeance V
-		return 25;
-	case 8421: //Jailor's Fury
-		return 25;
-	case 8444: //Blinding Dust
-		return 15;
-	default:
-		return 0;
+SpellCat getSpellCategoryAndSubcategory(int spellID) {
+    static const std::unordered_map<int, SpellCat> combinedMap = {
+    {3, { 125, 64 } }, // Summon Corpse,
+    { 4, { 18, 109 } }, // Summon Waterstone,
+    { 6, { 20, 38 } }, // Ignite Blood,
+    { 7, { 79, 43 } }, // Hymn of Restoration,
+    { 9, { 42, 42 } }, // Superior Healing,
+    { 10, { 125, 41 } }, // Augmentation,
+    { 11, { 95, 6 } }, // Holy Armor,
+    { 12, { 42, 42 } }, // Healing,
+    { 13, { 42, 42 } }, // Complete Healing,
+    { 14, { 25, 58 } }, // Strike,
+    { 15, { 42, 42 } }, // Greater Healing,
+    { 16, { 25, 58 } }, // Smite,
+    { 17, { 42, 42 } }, // Light Healing,
+    { 18, { 95, 6 } }, // Guard,
+    { 19, { 95, 6 } }, // Armor of Faith,
+    { 20, { 95, 6 } }, // Shield of Words,
+    { 21, { 95, 96 } }, // Berserker Strength,
+    { 22, { 25, 58 } }, // Force Snap,
+    { 23, { 25, 58 } }, // Force Strike,
+    { 24, { 126, 31 } }, // Strip Enchantment,
+    { 25, { 126, 31 } }, // Pillage Enchantment,
+    { 26, { 45, 46 } }, // Skin like Wood,
+    { 27, { 25, 14 } }, // Pogonip,
+    { 28, { 25, 14 } }, // Avalanche,
+    { 29, { 25, 14 } }, // Ice,
+    { 31, { 20, 29 } }, // Scourge,
+    { 32, { 20, 29 } }, // Plague,
+    { 33, { 95, 130 } }, // Brilliance,
+    { 34, { 125, 51 } }, // Superior Camouflage,
+    { 35, { 125, 64 } }, // Bind Affinity,
+    { 36, { 123, 64 } }, // Gate,
+    { 37, { 18, 110 } }, // Hammer of Striking,
+    { 38, { 25, 58 } }, // Lightning Bolt,
+    { 39, { 125, 41 } }, // Quickness,
+    { 40, { 95, 96 } }, // Strengthen,
+    { 41, { 126, 30 } }, // Weaken,
+    { 42, { 125, 51 } }, // Invisibility,
+    { 43, { 95, 7 } }, // Yaulp II,
+    { 44, { 95, 7 } }, // Yaulp III,
+    { 45, { 126, 11 } }, // Pacify,
+    { 46, { 125, 129 } }, // Ultravision,
+    { 47, { 126, 11 } }, // Calm,
+    { 48, { 126, 31 } }, // Cancel Magic,
+    { 49, { 126, 31 } }, // Nullify Magic,
+    { 50, { 18, 108 } }, // Summon Food,
+    { 51, { 125, 129 } }, // Glimpse,
+    { 52, { 18, 108 } }, // Abundant Drink,
+    { 53, { 18, 108 } }, // Abundant Food,
+    { 54, { 25, 14 } }, // Frost Bolt,
+    { 55, { 18, 108 } }, // Cornucopia,
+    { 56, { 18, 108 } }, // Everfount,
+    { 57, { 25, 38 } }, // Firestrike,
+    { 58, { 69, 100 } }, // Elementalkin: Earth,
+    { 59, { 126, 37 } }, // Panic the Dead,
+    { 60, { 95, 80 } }, // Resist Fire,
+    { 61, { 95, 80 } }, // Resist Cold,
+    { 62, { 95, 80 } }, // Resist Poison,
+    { 63, { 95, 80 } }, // Resist Disease,
+    { 64, { 95, 80 } }, // Resist Magic,
+    { 65, { 45, 87 } }, // Major Shielding,
+    { 66, { 45, 87 } }, // Greater Shielding,
+    { 67, { 45, 87 } }, // Arch Shielding,
+    { 68, { 25, 38 } }, // Bolt of Flame,
+    { 69, { 25, 38 } }, // Cinder Bolt,
+    { 70, { 25, 38 } }, // Lava Bolt,
+    { 71, { 25, 58 } }, // Anarchy,
+    { 72, { 95, 80 } }, // Group Resist Magic,
+    { 73, { 25, 58 } }, // Gravity Flux,
+    { 74, { 126, 60 } }, // Mana Sieve,
+    { 75, { 20, 29 } }, // Sicken,
+    { 76, { 126, 83 } }, // Ensnaring Roots,
+    { 77, { 126, 83 } }, // Engulfing Roots,
+    { 78, { 20, 38 } }, // Immolate,
+    { 79, { 125, 129 } }, // Spirit Sight,
+    { 80, { 125, 129 } }, // See Invisible,
+    { 81, { 79, 43 } }, // Phantom Chain,
+    { 82, { 79, 43 } }, // Phantom Plate,
+    { 83, { 25, 38 } }, // Rain of Fire,
+    { 84, { 125, 129 } }, // Shifting Sight,
+    { 85, { 25, 38 } }, // Firestorm,
+    { 86, { 125, 64 } }, // Enduring Breath,
+    { 88, { 25, 58 } }, // Harm Touch,
+    { 89, { 45, 46 } }, // Daring,
+    { 90, { 125, 129 } }, // Shadow Sight,
+    { 91, { 25, 38 } }, // Ignite,
+    { 92, { 25, 38 } }, // Burst of Fire,
+    { 93, { 25, 38 } }, // Burst of Flame,
+    { 94, { 25, 38 } }, // Burn,
+    { 95, { 42, 19 } }, // Counteract Poison,
+    { 96, { 42, 19 } }, // Counteract Disease,
+    { 97, { 42, 19 } }, // Abolish Poison,
+    { 98, { 42, 19 } }, // Abolish Disease,
+    { 99, { 20, 58 } }, // Creeping Crud,
+    { 100, { 18, 110 } }, // Summon Throwing Dagger,
+    { 101, { 18, 110 } }, // Summon Arrows,
+    { 102, { 18, 110 } }, // Spear of Warding,
+    { 103, { 18, 109 } }, // Summon Coldstone,
+    { 104, { 18, 110 } }, // Dagger of Symbols,
+    { 105, { 18, 109 } }, // Summon Ring of Flight,
+    { 106, { 69, 70 } }, // Burnout II,
+    { 107, { 69, 70 } }, // Burnout III,
+    { 108, { 95, 80 } }, // Elemental Shield,
+    { 109, { 95, 80 } }, // Elemental Armor,
+    { 110, { 126, 81 } }, // Malaise,
+    { 111, { 126, 81 } }, // Malaisement,
+    { 112, { 126, 81 } }, // Malosi,
+    { 113, { 25, 58 } }, // Shock of Spikes,
+    { 114, { 25, 58 } }, // Shock of Swords,
+    { 115, { 25, 111 } }, // Dismiss Summoned,
+    { 116, { 25, 111 } }, // Banish Summoned,
+    { 117, { 25, 124 } }, // Dismiss Undead,
+    { 118, { 25, 124 } }, // Banish Undead,
+    { 120, { 25, 38 } }, // Blaze,
+    { 121, { 25, 38 } }, // Rain of Lava,
+    { 122, { 25, 38 } }, // Flame Arc,
+    { 123, { 25, 97 } }, // Holy Might,
+    { 124, { 25, 97 } }, // Force,
+    { 125, { 25, 97 } }, // Sound of Force,
+    { 126, { 126, 37 } }, // Inspire Fear,
+    { 127, { 126, 37 } }, // Invoke Fear,
+    { 128, { 126, 37 } }, // Wave of Fear,
+    { 129, { 125, 21 } }, // Shield of Brambles,
+    { 130, { 125, 52 } }, // Divine Barrier,
+    { 131, { 126, 83 } }, // Instill,
+    { 132, { 126, 83 } }, // Immobilize,
+    { 133, { 126, 83 } }, // Paralyzing Earth,
+    { 134, { 126, 9 } }, // Blinding Luminance,
+    { 135, { 42, 42 } }, // Word of Health,
+    { 136, { 42, 42 } }, // Word of Healing,
+    { 137, { 79, 43 } }, // Pack Regeneration,
+    { 138, { 79, 43 } }, // Pack Chloroplast,
+    { 139, { 69, 70 } }, // Feral Spirit,
+    { 140, { 69, 70 } }, // Savage Spirit,
+    { 141, { 126, 13 } }, // Beguile Animals,
+    { 142, { 126, 13 } }, // Allure of the Wild,
+    { 143, { 126, 9 } }, // Sunbeam,
+    { 144, { 79, 43 } }, // Regeneration,
+    { 145, { 79, 43 } }, // Chloroplast,
+    { 146, { 95, 24 } }, // Spirit of Monkey,
+    { 147, { 95, 96 } }, // Spirit Strength,
+    { 148, { 95, 2 } }, // Spirit of Cat,
+    { 149, { 95, 94 } }, // Spirit of Ox,
+    { 150, { 95, 12 } }, // Alluring Aura,
+    { 151, { 95, 96 } }, // Raging Strength,
+    { 152, { 95, 24 } }, // Deftness,
+    { 153, { 95, 96 } }, // Furious Strength,
+    { 154, { 95, 2 } }, // Agility,
+    { 155, { 95, 12 } }, // Glamour,
+    { 156, { 95, 12 } }, // Charisma,
+    { 157, { 95, 24 } }, // Dexterity,
+    { 158, { 95, 94 } }, // Stamina,
+    { 159, { 95, 96 } }, // Strength,
+    { 160, { 95, 2 } }, // Nimble,
+    { 161, { 95, 94 } }, // Health,
+    { 162, { 126, 30 } }, // Listless Power,
+    { 163, { 126, 30 } }, // Incapacitate,
+    { 164, { 69, 104 } }, // Companion Spirit,
+    { 165, { 69, 104 } }, // Guardian Spirit,
+    { 166, { 69, 104 } }, // Frenzied Spirit,
+    { 167, { 45, 87 } }, // Talisman of Tnarg,
+    { 168, { 45, 87 } }, // Talisman of Altuna,
+    { 169, { 125, 65 } }, // Pack Spirit,
+    { 170, { 125, 41 } }, // Alacrity,
+    { 171, { 125, 41 } }, // Celerity,
+    { 172, { 125, 41 } }, // Swift like the Wind,
+    { 173, { 125, 3 } }, // Benevolence,
+    { 174, { 79, 59 } }, // Clarity,
+    { 175, { 95, 130 } }, // Insight,
+    { 176, { 125, 84 } }, // Berserker Spirit,
+    { 177, { 25, 97 } }, // Color Shift,
+    { 178, { 25, 97 } }, // Color Skew,
+    { 179, { 126, 30 } }, // Feckless Might,
+    { 180, { 126, 30 } }, // Insipid Weakness,
+    { 181, { 126, 30 } }, // Weakness,
+    { 182, { 126, 13 } }, // Beguile,
+    { 183, { 126, 13 } }, // Cajoling Whispers,
+    { 184, { 126, 13 } }, // Allure,
+    { 185, { 126, 88 } }, // Tepid Deeds,
+    { 186, { 126, 88 } }, // Shiftless Deeds,
+    { 187, { 126, 35 } }, // Enthrall,
+    { 188, { 126, 35 } }, // Entrance,
+    { 189, { 25, 38 } }, // Flame Flux,
+    { 190, { 126, 35 } }, // Dazzle,
+    { 191, { 125, 21 } }, // Feedback,
+    { 192, { 126, 63 } }, // Mind Wipe,
+    { 193, { 126, 63 } }, // Blanket of Forgetfulness,
+    { 194, { 126, 63 } }, // Reoccurring Amnesia,
+    { 195, { 20, 58 } }, // Gasping Embrace,
+    { 196, { 126, 13 } }, // Dominate Undead,
+    { 197, { 126, 13 } }, // Beguile Undead,
+    { 198, { 126, 13 } }, // Cajole Undead,
+    { 199, { 125, 52 } }, // Harmshield,
+    { 200, { 42, 42 } }, // Minor Healing,
+    { 201, { 126, 9 } }, // Flash of Light,
+    { 202, { 45, 46 } }, // Courage,
+    { 203, { 42, 19 } }, // Cure Poison,
+    { 204, { 25, 75 } }, // Shock of Poison,
+    { 205, { 125, 64 } }, // True North,
+    { 207, { 125, 52 } }, // Divine Aura,
+    { 208, { 126, 11 } }, // Lull,
+    { 209, { 126, 37 } }, // Spook the Dead,
+    { 210, { 95, 7 } }, // Yaulp,
+    { 211, { 18, 108 } }, // Summon Drink,
+    { 212, { 42, 19 } }, // Cure Blindness,
+    { 213, { 42, 19 } }, // Cure Disease,
+    { 215, { 95, 96 } }, // Reckless Strength,
+    { 216, { 25, 97 } }, // Stun,
+    { 217, { 25, 38 } }, // Combust,
+    { 218, { 25, 124 } }, // Ward Undead,
+    { 219, { 45, 46 } }, // Center,
+    { 220, { 125, 65 } }, // Spirit of Cheetah,
+    { 221, { 125, 64 } }, // Sense the Dead,
+    { 222, { 42, 94 } }, // Invigor,
+    { 223, { 18, 110 } }, // Hammer of Wrath,
+    { 224, { 95, 80 } }, // Endure Fire,
+    { 225, { 95, 80 } }, // Endure Cold,
+    { 226, { 95, 80 } }, // Endure Disease,
+    { 227, { 95, 80 } }, // Endure Poison,
+    { 228, { 95, 80 } }, // Endure Magic,
+    { 229, { 126, 37 } }, // Fear,
+    { 230, { 126, 83 } }, // Root,
+    { 231, { 25, 58 } }, // Word of Pain,
+    { 232, { 125, 111 } }, // Sense Summoned,
+    { 233, { 25, 124 } }, // Expulse Undead,
+    { 234, { 18, 109 } }, // Halo of Light,
+    { 235, { 125, 51 } }, // Invisibility versus Undead,
+    { 236, { 125, 84 } }, // Shieldskin,
+    { 237, { 18, 109 } }, // Dance of the Fireflies,
+    { 238, { 125, 4 } }, // Sense Animals,
+    { 239, { 20, 38 } }, // Flame Lick,
+    { 240, { 126, 11 } }, // Lull Animal,
+    { 241, { 126, 37 } }, // Panic Animal,
+    { 242, { 126, 89 } }, // Snare,
+    { 243, { 125, 49 } }, // Illusion: Iksar,
+    { 244, { 45, 46 } }, // Bravery,
+    { 245, { 126, 13 } }, // Befriend Animal,
+    { 246, { 45, 87 } }, // Lesser Shielding,
+    { 247, { 125, 51 } }, // Camouflage,
+    { 248, { 25, 111 } }, // Ward Summoned,
+    { 249, { 126, 83 } }, // Grasping Roots,
+    { 250, { 126, 11 } }, // Harmony,
+    { 252, { 25, 58 } }, // Invoke Lightning,
+    { 253, { 25, 58 } }, // Whirling Wind,
+    { 254, { 95, 7 } }, // Firefist,
+    { 255, { 125, 51 } }, // Invisibility versus Animals,
+    { 256, { 125, 21 } }, // Shield of Thistles,
+    { 257, { 18, 109 } }, // Starshine,
+    { 258, { 125, 48 } }, // Treeform,
+    { 259, { 20, 58 } }, // Drones of Doom,
+    { 260, { 126, 13 } }, // Charm Animals,
+    { 261, { 125, 55 } }, // Levitate,
+    { 262, { 25, 14 } }, // Cascade of Hail,
+    { 263, { 45, 46 } }, // Skin like Rock,
+    { 264, { 20, 58 } }, // Stinging Swarm,
+    { 265, { 125, 17 } }, // Cannibalize,
+    { 266, { 95, 24 } }, // Dexterous Aura,
+    { 267, { 45, 46 } }, // Inner Fire,
+    { 268, { 95, 96 } }, // Strength of Earth,
+    { 269, { 95, 2 } }, // Feet like Cat,
+    { 270, { 126, 88 } }, // Drowsy,
+    { 271, { 95, 96 } }, // Fleeting Fury,
+    { 272, { 18, 109 } }, // Spirit Pouch,
+    { 273, { 125, 21 } }, // Shield of Barbs,
+    { 274, { 95, 6 } }, // Scale Skin,
+    { 275, { 25, 14 } }, // Frost Rift,
+    { 276, { 125, 129 } }, // Serpent Sight,
+    { 277, { 20, 75 } }, // Tainted Breath,
+    { 278, { 125, 65 } }, // Spirit of Wolf,
+    { 279, { 95, 94 } }, // Spirit of Bear,
+    { 280, { 95, 96 } }, // Burst of Strength,
+    { 281, { 126, 30 } }, // Disempower,
+    { 282, { 25, 14 } }, // Spirit Strike,
+    { 283, { 95, 6 } }, // Turtle Skin,
+    { 284, { 95, 12 } }, // Spirit of Snake,
+    { 285, { 69, 99 } }, // Pendril's Animation,
+    { 286, { 20, 58 } }, // Shallow Breath,
+    { 287, { 125, 48 } }, // Minor Illusion,
+    { 288, { 45, 87 } }, // Minor Shielding,
+    { 289, { 126, 31 } }, // Taper Enchantment,
+    { 290, { 25, 97 } }, // Color Flux,
+    { 291, { 126, 30 } }, // Enfeeblement,
+    { 292, { 126, 35 } }, // Mesmerize,
+    { 293, { 95, 6 } }, // Haze,
+    { 294, { 20, 58 } }, // Suffocating Sphere,
+    { 295, { 69, 99 } }, // Mircyl's Animation,
+    { 296, { 25, 58 } }, // Chaotic Feedback,
+    { 297, { 126, 9 } }, // Eye of Confusion,
+    { 298, { 125, 3 } }, // Alliance,
+    { 299, { 125, 64 } }, // Sentinel,
+    { 300, { 126, 13 } }, // Charm,
+    { 301, { 126, 63 } }, // Memory Blur,
+    { 302, { 126, 88 } }, // Languid Pace,
+    { 303, { 25, 97 } }, // Whirl till you hurl,
+    { 304, { 126, 37 } }, // Chase the Moon,
+    { 305, { 125, 64 } }, // Identify,
+    { 306, { 25, 58 } }, // Sanity Warp,
+    { 307, { 126, 35 } }, // Mesmerization,
+    { 308, { 95, 96 } }, // Frenzy,
+    { 309, { 45, 87 } }, // Shielding,
+    { 310, { 125, 64 } }, // Flare,
+    { 311, { 18, 110 } }, // Summon Dagger,
+    { 312, { 45, 46 } }, // Valor,
+    { 313, { 25, 38 } }, // Fire Flux,
+    { 314, { 45, 46 } }, // Resolution,
+    { 315, { 69, 105 } }, // Elementalkin: Water,
+    { 316, { 69, 102 } }, // Elementalkin: Fire,
+    { 317, { 69, 98 } }, // Elementalkin: Air,
+    { 318, { 18, 109 } }, // Summon Bandages,
+    { 319, { 18, 110 } }, // Summon Fang,
+    { 320, { 18, 109 } }, // Summon Heatstone,
+    { 321, { 18, 109 } }, // Summon Wisp,
+    { 322, { 25, 38 } }, // Flame Bolt,
+    { 323, { 125, 129 } }, // Eye of Zomm,
+    { 324, { 25, 58 } }, // Shock of Blades,
+    { 325, { 18, 109 } }, // Dimensional Pocket,
+    { 326, { 95, 96 } }, // Fury,
+    { 327, { 69, 70 } }, // Burnout,
+    { 328, { 25, 38 } }, // Column of Fire,
+    { 329, { 25, 58 } }, // Wrath,
+    { 330, { 25, 58 } }, // Rain of Blades,
+    { 331, { 69, 64 } }, // Reclaim Energy,
+    { 332, { 125, 21 } }, // Shield of Fire,
+    { 333, { 79, 43 } }, // Phantom Leather,
+    { 334, { 25, 38 } }, // Shock of Flame,
+    { 335, { 69, 100 } }, // Minor Summoning: Earth,
+    { 336, { 69, 105 } }, // Minor Summoning: Water,
+    { 337, { 95, 96 } }, // Rage,
+    { 338, { 69, 103 } }, // Cavorting Bones,
+    { 339, { 18, 109 } }, // Coldlight,
+    { 340, { 20, 29 } }, // Disease Cloud,
+    { 341, { 114, 43 } }, // Lifetap,
+    { 342, { 125, 64 } }, // Locate Corpse,
+    { 343, { 114, 76 } }, // Siphon Strength,
+    { 344, { 20, 58 } }, // Clinging Darkness,
+    { 345, { 125, 64 } }, // Shrink,
+    { 346, { 95, 7 } }, // Grim Aura,
+    { 347, { 126, 11 } }, // Numb the Dead,
+    { 348, { 20, 75 } }, // Poison Bolt,
+    { 349, { 95, 24 } }, // Rising Dexterity,
+    { 350, { 25, 58 } }, // Chaos Flux,
+    { 351, { 69, 103 } }, // Bone Walk,
+    { 352, { 125, 129 } }, // Deadeye,
+    { 353, { 69, 42 } }, // Mend Bones,
+    { 354, { 125, 86 } }, // Shadow Step,
+    { 355, { 20, 58 } }, // Engulfing Darkness,
+    { 356, { 125, 21 } }, // Shield of Thorns,
+    { 357, { 42, 56 } }, // Dark Empathy,
+    { 358, { 95, 96 } }, // Impart Strength,
+    { 359, { 125, 16 } }, // Vampiric Embrace,
+    { 360, { 20, 38 } }, // Heat Blood,
+    { 361, { 125, 129 } }, // Sight Graft,
+    { 362, { 69, 103 } }, // Convoke Shadow,
+    { 363, { 126, 30 } }, // Wave of Enfeeblement,
+    { 364, { 125, 21 } }, // Banshee Aura,
+    { 365, { 20, 29 } }, // Infectious Cloud,
+    { 366, { 125, 64 } }, // Feign Death,
+    { 367, { 20, 29 } }, // Heart Flutter,
+    { 368, { 95, 6 } }, // Spirit Armor,
+    { 369, { 126, 83 } }, // Hungry Earth,
+    { 370, { 126, 30 } }, // Shadow Vortex,
+    { 371, { 125, 64 } }, // Voice Graft,
+    { 372, { 25, 14 } }, // Blast of Cold,
+    { 373, { 18, 109 } }, // Sphere of Light,
+    { 374, { 25, 14 } }, // Numbing Cold,
+    { 375, { 125, 86 } }, // Fade,
+    { 376, { 25, 38 } }, // Shock of Fire,
+    { 377, { 25, 14 } }, // Icestrike,
+    { 378, { 125, 21 } }, // O'Keils Radiation,
+    { 379, { 25, 38 } }, // Fingers of Fire,
+    { 380, { 25, 14 } }, // Column of Frost,
+    { 381, { 95, 80 } }, // Resistant Skin,
+    { 382, { 25, 14 } }, // Frost Spiral of Al'Kabor,
+    { 383, { 25, 58 } }, // Shock of Lightning,
+    { 384, { 125, 129 } }, // Assiduous Vision,
+    { 385, { 25, 58 } }, // Project Lightning,
+    { 386, { 25, 38 } }, // Pillar of Fire,
+    { 387, { 125, 84 } }, // Leatherskin,
+    { 388, { 42, 82 } }, // Resuscitate,
+    { 389, { 95, 6 } }, // Guardian,
+    { 390, { 18, 64 } }, // Thicken Mana,
+    { 391, { 42, 82 } }, // Revive,
+    { 392, { 42, 82 } }, // Resurrection,
+    { 393, { 125, 84 } }, // Steelskin,
+    { 394, { 125, 84 } }, // Diamondskin,
+    { 395, { 69, 102 } }, // Minor Summoning: Fire,
+    { 396, { 69, 98 } }, // Minor Summoning: Air,
+    { 397, { 69, 100 } }, // Elementaling: Earth,
+    { 398, { 69, 105 } }, // Elementaling: Water,
+    { 399, { 69, 102 } }, // Elementaling: Fire,
+    { 400, { 69, 98 } }, // Elementaling: Air,
+    { 401, { 69, 100 } }, // Elemental: Earth,
+    { 402, { 69, 105 } }, // Elemental: Water,
+    { 403, { 69, 102 } }, // Elemental: Fire,
+    { 404, { 69, 98 } }, // Elemental: Air,
+    { 405, { 25, 58 } }, // Tremor,
+    { 406, { 25, 58 } }, // Earthquake,
+    { 407, { 125, 129 } }, // Cast Sight,
+    { 408, { 126, 30 } }, // Curse of the Simple Mind,
+    { 409, { 25, 58 } }, // Rain of Spikes,
+    { 410, { 25, 58 } }, // Rain of Swords,
+    { 411, { 125, 21 } }, // Shield of Flame,
+    { 412, { 125, 21 } }, // Shield of Lava,
+    { 413, { 25, 58 } }, // Word of Shadow,
+    { 414, { 25, 58 } }, // Word of Spirit,
+    { 415, { 25, 58 } }, // Word of Souls,
+    { 416, { 25, 58 } }, // Word Divine,
+    { 417, { 42, 94 } }, // Extinguish Fatigue,
+    { 418, { 25, 58 } }, // Lightning Strike,
+    { 419, { 25, 58 } }, // Careless Lightning,
+    { 420, { 25, 58 } }, // Lightning Blast,
+    { 421, { 45, 46 } }, // Skin like Steel,
+    { 422, { 45, 46 } }, // Skin like Diamond,
+    { 423, { 45, 46 } }, // Skin like Nature,
+    { 424, { 125, 65 } }, // Scale of Wolf,
+    { 425, { 125, 65 } }, // Wolf Form,
+    { 426, { 125, 65 } }, // Greater Wolf Form,
+    { 427, { 125, 65 } }, // Form of the Great Wolf,
+    { 428, { 125, 65 } }, // Share Wolf Form,
+    { 429, { 95, 96 } }, // Strength of Stone,
+    { 430, { 95, 96 } }, // Storm Strength,
+    { 431, { 95, 6 } }, // Shifting Shield,
+    { 432, { 125, 21 } }, // Shield of Spikes,
+    { 433, { 25, 38 } }, // Fire,
+    { 434, { 20, 75 } }, // Envenomed Breath,
+    { 435, { 20, 75 } }, // Venom of the Snake,
+    { 436, { 20, 75 } }, // Envenomed Bolt,
+    { 437, { 25, 75 } }, // Poison Storm,
+    { 438, { 25, 75 } }, // Gale of Poison,
+    { 439, { 18, 64 } }, // Crystallize Mana,
+    { 440, { 69, 103 } }, // Animate Dead,
+    { 441, { 69, 103 } }, // Summon Dead,
+    { 442, { 69, 103 } }, // Malignant Dead,
+    { 443, { 69, 103 } }, // Invoke Death,
+    { 444, { 69, 42 } }, // Renew Bones,
+    { 445, { 114, 43 } }, // Lifedraw,
+    { 446, { 114, 43 } }, // Siphon Life,
+    { 447, { 114, 43 } }, // Drain Soul,
+    { 448, { 126, 11 } }, // Rest the Dead,
+    { 449, { 69, 70 } }, // Intensify Death,
+    { 450, { 20, 58 } }, // Suffocate,
+    { 451, { 20, 38 } }, // Boil Blood,
+    { 452, { 20, 58 } }, // Dooming Darkness,
+    { 453, { 20, 58 } }, // Cascading Darkness,
+    { 454, { 114, 33 } }, // Vampiric Curse,
+    { 455, { 126, 30 } }, // Surge of Enfeeblement,
+    { 456, { 114, 33 } }, // Bond of Death,
+    { 457, { 125, 55 } }, // Dead Man Floating,
+    { 458, { 25, 38 } }, // Fire Spiral of Al'Kabor,
+    { 459, { 25, 58 } }, // Shock Spiral of Al'Kabor,
+    { 460, { 25, 58 } }, // Force Spiral of Al'Kabor,
+    { 461, { 25, 58 } }, // Cast Force,
+    { 462, { 25, 38 } }, // Column of Lightning,
+    { 463, { 25, 38 } }, // Circle of Force,
+    { 464, { 25, 14 } }, // Frost Shock,
+    { 465, { 25, 38 } }, // Inferno Shock,
+    { 466, { 25, 58 } }, // Lightning Shock,
+    { 467, { 25, 58 } }, // Lightning Storm,
+    { 468, { 25, 58 } }, // Energy Storm,
+    { 469, { 25, 38 } }, // Lava Storm,
+    { 470, { 25, 58 } }, // Thunder Strike,
+    { 471, { 25, 58 } }, // Thunderclap,
+    { 472, { 126, 37 } }, // Inspire Fear2,
+    { 473, { 126, 37 } }, // Invoke Fear II,
+    { 474, { 126, 37 } }, // Radius of Fear2,
+    { 475, { 126, 37 } }, // Fear2,
+    { 477, { 25, 38 } }, // Fire Bolt,
+    { 478, { 125, 64 } }, // Breath of the Dead,
+    { 479, { 125, 21 } }, // Inferno Shield,
+    { 480, { 126, 63 } }, // Atone,
+    { 481, { 125, 84 } }, // Rune I,
+    { 482, { 125, 84 } }, // Rune II,
+    { 483, { 125, 84 } }, // Rune III,
+    { 484, { 125, 84 } }, // Rune IV,
+    { 485, { 45, 112 } }, // Symbol of Transal,
+    { 486, { 45, 112 } }, // Symbol of Ryltan,
+    { 487, { 45, 112 } }, // Symbol of Pinzarn,
+    { 488, { 45, 112 } }, // Symbol of Naltron,
+    { 489, { 95, 12 } }, // Sympathetic Aura,
+    { 490, { 126, 83 } }, // Enveloping Roots,
+    { 491, { 69, 103 } }, // Leering Corpse,
+    { 492, { 69, 103 } }, // Restless Bones,
+    { 493, { 69, 103 } }, // Haunting Corpse,
+    { 494, { 69, 103 } }, // Invoke Shadow,
+    { 495, { 69, 103 } }, // Cackling Bones,
+    { 496, { 69, 100 } }, // Lesser Summoning: Earth,
+    { 497, { 69, 105 } }, // Lesser Summoning: Water,
+    { 498, { 69, 102 } }, // Lesser Summoning: Fire,
+    { 499, { 69, 98 } }, // Lesser Summoning: Air,
+    { 500, { 125, 129 } }, // Bind Sight,
+    { 501, { 126, 11 } }, // Soothe,
+    { 502, { 114, 43 } }, // Lifespike,
+    { 503, { 25, 97 } }, // Tishan's Clash,
+    { 504, { 95, 96 } }, // Frenzied Strength,
+    { 505, { 126, 88 } }, // Walking Sleep,
+    { 506, { 126, 88 } }, // Tagar's Insects,
+    { 507, { 126, 88 } }, // Togor's Insects,
+    { 508, { 25, 14 } }, // Frost Strike,
+    { 509, { 25, 14 } }, // Winter's Roar,
+    { 510, { 25, 14 } }, // Blizzard Blast,
+    { 511, { 20, 29 } }, // Affliction,
+    { 512, { 126, 89 } }, // Ensnare,
+    { 513, { 126, 11 } }, // Calm Animal,
+    { 514, { 126, 37 } }, // Terrorize Animal,
+    { 515, { 125, 21 } }, // Thistlecoat,
+    { 516, { 125, 21 } }, // Barbcoat,
+    { 517, { 125, 21 } }, // Bramblecoat,
+    { 518, { 125, 21 } }, // Spikecoat,
+    { 519, { 125, 21 } }, // Thorncoat,
+    { 520, { 25, 58 } }, // Dizzying Wind,
+    { 521, { 20, 58 } }, // Choke,
+    { 522, { 125, 51 } }, // Gather Shadows,
+    { 524, { 114, 43 } }, // Spirit Tap,
+    { 525, { 114, 43 } }, // Drain Spirit,
+    { 526, { 126, 81 } }, // Insidious Fever,
+    { 527, { 126, 81 } }, // Insidious Malady,
+    { 528, { 125, 86 } }, // Yonder,
+    { 529, { 125, 129 } }, // Gaze,
+    { 530, { 123, 5 } }, // Ring of Karana,
+    { 531, { 123, 5 } }, // Ring of Commons,
+    { 532, { 123, 36 } }, // Ring of Butcher,
+    { 533, { 123, 67 } }, // Ring of Toxxulia,
+    { 534, { 123, 5 } }, // Ring of Lavastorm,
+    { 535, { 123, 5 } }, // Ring of Ro,
+    { 536, { 123, 5 } }, // Ring of Feerrott,
+    { 537, { 123, 36 } }, // Ring of Steamfont,
+    { 538, { 123, 5 } }, // Ring of Misty,
+    { 539, { 125, 129 } }, // Chill Sight,
+    { 540, { 18, 64 } }, // Clarify Mana,
+    { 541, { 123, 67 } }, // Tox Gate,
+    { 542, { 123, 5 } }, // North Gate,
+    { 543, { 123, 36 } }, // Fay Gate,
+    { 544, { 123, 5 } }, // Common Gate,
+    { 545, { 123, 5 } }, // Nek Gate,
+    { 546, { 123, 5 } }, // Cazic Gate,
+    { 547, { 123, 5 } }, // Ro Gate,
+    { 548, { 123, 5 } }, // West Gate,
+    { 549, { 126, 35 } }, // Screaming Terror,
+    { 550, { 123, 5 } }, // Circle of Karana,
+    { 551, { 123, 5 } }, // Circle of Commons,
+    { 552, { 123, 67 } }, // Circle of Toxxulia,
+    { 553, { 123, 36 } }, // Circle of Butcher,
+    { 554, { 123, 5 } }, // Circle of Lavastorm,
+    { 555, { 123, 5 } }, // Circle of Ro,
+    { 556, { 123, 5 } }, // Circle of Feerrott,
+    { 557, { 123, 36 } }, // Circle of Steamfont,
+    { 558, { 123, 5 } }, // Circle of Misty,
+    { 559, { 25, 38 } }, // Ignite Bones,
+    { 560, { 25, 58 } }, // Furor,
+    { 561, { 123, 67 } }, // Tox Portal,
+    { 562, { 123, 5 } }, // North Portal,
+    { 563, { 123, 36 } }, // Fay Portal,
+    { 564, { 123, 5 } }, // Nek Portal,
+    { 565, { 123, 5 } }, // Cazic Portal,
+    { 566, { 123, 5 } }, // Common Portal,
+    { 567, { 123, 5 } }, // Ro Portal,
+    { 568, { 123, 5 } }, // West Portal,
+    { 569, { 69, 100 } }, // Summoning: Earth,
+    { 570, { 69, 105 } }, // Summoning: Water,
+    { 571, { 69, 102 } }, // Summoning: Fire,
+    { 572, { 69, 98 } }, // Summoning: Air,
+    { 573, { 69, 100 } }, // Greater Summoning: Earth,
+    { 574, { 69, 105 } }, // Greater Summoning: Water,
+    { 575, { 69, 102 } }, // Greater Summoning: Fire,
+    { 576, { 69, 98 } }, // Greater Summoning: Air,
+    { 577, { 69, 104 } }, // Vigilant Spirit,
+    { 578, { 125, 129 } }, // Sight,
+    { 579, { 125, 129 } }, // Magnify,
+    { 580, { 125, 129 } }, // Vision,
+    { 581, { 125, 48 } }, // Illusion: Skeleton,
+    { 582, { 125, 49 } }, // Illusion: Human,
+    { 583, { 125, 49 } }, // Illusion: Half-Elf,
+    { 584, { 125, 48 } }, // Illusion: Earth Elemental,
+    { 585, { 125, 48 } }, // Illusion: Werewolf,
+    { 586, { 125, 49 } }, // Illusion: Barbarian,
+    { 587, { 125, 49 } }, // Illusion: Erudite,
+    { 588, { 125, 49 } }, // Illusion: Wood Elf,
+    { 589, { 125, 49 } }, // Illusion: High Elf,
+    { 590, { 125, 49 } }, // Illusion: Dark Elf,
+    { 591, { 125, 49 } }, // Illusion: Dwarf,
+    { 592, { 125, 49 } }, // Illusion: Troll,
+    { 593, { 125, 49 } }, // Illusion: Ogre,
+    { 594, { 125, 49 } }, // Illusion: Halfling,
+    { 595, { 125, 49 } }, // Illusion: Gnome,
+    { 596, { 125, 48 } }, // Illusion: Dry Bone,
+    { 597, { 125, 48 } }, // Illusion: Air Elemental,
+    { 598, { 125, 48 } }, // Illusion: Fire Elemental,
+    { 599, { 125, 48 } }, // Illusion: Water Elemental,
+    { 600, { 125, 48 } }, // Illusion: Spirit Wolf,
+    { 601, { 125, 48 } }, // Illusion: Tree,
+    { 602, { 123, 5 } }, // Evacuate: North,
+    { 603, { 123, 36 } }, // Evacuate: Fay,
+    { 604, { 123, 5 } }, // Evacuate: Ro,
+    { 605, { 123, 5 } }, // Evacuate: Nek,
+    { 606, { 123, 5 } }, // Evacuate: West,
+    { 607, { 123, 5 } }, // Succor: East,
+    { 608, { 123, 36 } }, // Succor: Butcher,
+    { 609, { 123, 5 } }, // Succor: Ro,
+    { 610, { 123, 5 } }, // Succor: Lavastorm,
+    { 611, { 123, 5 } }, // Succor: North,
+    { 612, { 25, 97 } }, // Markar's Clash,
+    { 613, { 18, 110 } }, // Staff of Tracing,
+    { 614, { 18, 110 } }, // Staff of Warding,
+    { 615, { 18, 110 } }, // Staff of Runes,
+    { 616, { 18, 110 } }, // Staff of Symbols,
+    { 617, { 18, 110 } }, // Sword of Runes,
+    { 618, { 18, 109 } }, // Dimensional Hole,
+    { 619, { 25, 97 } }, // Dyn`s Dizzying Draught,
+    { 620, { 69, 100 } }, // Minor Conjuration: Earth,
+    { 621, { 69, 105 } }, // Minor Conjuration: Water,
+    { 622, { 69, 102 } }, // Minor Conjuration: Fire,
+    { 623, { 69, 98 } }, // Minor Conjuration: Air,
+    { 624, { 69, 100 } }, // Lesser Conjuration: Earth,
+    { 625, { 69, 105 } }, // Lesser Conjuration: Water,
+    { 626, { 69, 102 } }, // Lesser Conjuration: Fire,
+    { 627, { 69, 98 } }, // Lesser Conjuration: Air,
+    { 628, { 69, 100 } }, // Conjuration: Earth,
+    { 629, { 69, 105 } }, // Conjuration: Water,
+    { 630, { 69, 102 } }, // Conjuration: Fire,
+    { 631, { 69, 98 } }, // Conjuration: Air,
+    { 632, { 69, 100 } }, // Greater Conjuration: Earth,
+    { 633, { 69, 105 } }, // Greater Conjuration: Water,
+    { 634, { 69, 102 } }, // Greater Conjuration: Fire,
+    { 635, { 69, 98 } }, // Greater Conjuration: Air,
+    { 636, { 126, 89 } }, // Bonds of Force,
+    { 640, { 125, 129 } }, // Creeping Vision,
+    { 641, { 125, 17 } }, // Dark Pact,
+    { 642, { 125, 17 } }, // Allure of Death,
+    { 643, { 125, 17 } }, // Call of Bones,
+    { 644, { 125, 17 } }, // Lich,
+    { 645, { 126, 30 } }, // Ebbing Strength,
+    { 646, { 95, 12 } }, // Radiant Visage,
+    { 647, { 95, 12 } }, // Adorning Grace,
+    { 648, { 125, 84 } }, // Rampage,
+    { 649, { 95, 6 } }, // Protect,
+    { 650, { 95, 6 } }, // Mist,
+    { 651, { 95, 6 } }, // Cloud,
+    { 652, { 95, 6 } }, // Obscure,
+    { 653, { 95, 6 } }, // Shade,
+    { 654, { 95, 6 } }, // Shadow,
+    { 655, { 125, 129 } }, // Eyes of the Cat,
+    { 656, { 25, 14 } }, // Shock of Ice,
+    { 657, { 25, 38 } }, // Flame Shock,
+    { 658, { 25, 14 } }, // Ice Shock,
+    { 659, { 25, 38 } }, // Conflagration,
+    { 660, { 25, 14 } }, // Frost Storm,
+    { 661, { 69, 70 } }, // Augment Death,
+    { 662, { 25, 124 } }, // Expel Undead,
+    { 663, { 25, 111 } }, // Expulse Summoned,
+    { 664, { 25, 111 } }, // Expel Summoned,
+    { 665, { 20, 58 } }, // Drifting Death,
+    { 666, { 123, 116 } }, // Alter Plane: Hate,
+    { 667, { 18, 34 } }, // Enchant Silver,
+    { 668, { 18, 34 } }, // Enchant Electrum,
+    { 669, { 18, 34 } }, // Enchant Gold,
+    { 670, { 18, 34 } }, // Enchant Platinum,
+    { 671, { 25, 38 } }, // Starfire,
+    { 672, { 25, 58 } }, // Retribution,
+    { 673, { 25, 58 } }, // Discordant Mind,
+    { 674, { 123, 116 } }, // Alter Plane: Sky,
+    { 675, { 18, 110 } }, // Hammer of Requital,
+    { 676, { 126, 81 } }, // Tashan,
+    { 677, { 126, 81 } }, // Tashani,
+    { 678, { 126, 81 } }, // Tashania,
+    { 679, { 125, 129 } }, // Heat Sight,
+    { 680, { 125, 21 } }, // Barrier of Combustion,
+    { 681, { 69, 99 } }, // Juli`s Animation,
+    { 682, { 69, 99 } }, // Kilan`s Animation,
+    { 683, { 69, 99 } }, // Shalee`s Animation,
+    { 684, { 69, 99 } }, // Sisna`s Animation,
+    { 685, { 69, 99 } }, // Sagar`s Animation,
+    { 686, { 69, 99 } }, // Uleen`s Animation,
+    { 687, { 69, 99 } }, // Boltran`s Animation,
+    { 688, { 69, 99 } }, // Aanya's Animation,
+    { 689, { 69, 99 } }, // Yegoreff`s Animation,
+    { 690, { 69, 99 } }, // Kintaz`s Animation,
+    { 691, { 25, 38 } }, // Call of Flame,
+    { 692, { 114, 43 } }, // Life Leech,
+    { 693, { 125, 16 } }, // Divine Might,
+    { 694, { 42, 56 } }, // Pact of Shadow,
+    { 695, { 18, 64 } }, // Distill Mana,
+    { 696, { 18, 64 } }, // Purify Mana,
+    { 697, { 79, 59 } }, // Breeze,
+    { 698, { 125, 64 } }, // Track Corpse,
+    { 699, { 25, 74 } }, // Defoliate,
+    { 700, { 125, 41 } }, // Chant of Battle,
+    { 701, { 125, 41 } }, // Anthem de Arms,
+    { 702, { 125, 41 } }, // McVaxius` Berserker Crescendo,
+    { 703, { 20, 58 } }, // Chords of Dissonance,
+    { 704, { 25, 58 } }, // Brusco`s Boastful Bellow,
+    { 705, { 126, 88 } }, // Largo's Melodic Binding,
+    { 706, { 126, 37 } }, // Angstlich`s Appalling Screech,
+    { 707, { 20, 58 } }, // Fufil`s Curtailing Chant,
+    { 708, { 125, 3 } }, // Cinda`s Charismatic Carillon,
+    { 709, { 95, 80 } }, // Guardian Rhythms,
+    { 710, { 95, 80 } }, // Elemental Rhythms,
+    { 711, { 95, 80 } }, // Purifying Rhythms,
+    { 712, { 125, 21 } }, // Psalm of Warmth,
+    { 713, { 125, 21 } }, // Psalm of Cooling,
+    { 714, { 95, 80 } }, // Psalm of Mystic Shielding,
+    { 715, { 125, 21 } }, // Psalm of Vitality,
+    { 716, { 125, 21 } }, // Psalm of Purity,
+    { 717, { 125, 65 } }, // Selo`s Accelerando,
+    { 718, { 125, 55 } }, // Agilmente`s Aria of Eagles,
+    { 719, { 125, 51 } }, // Shauri`s Sonorous Clouding,
+    { 720, { 125, 64 } }, // Lyssa`s Locating Lyric,
+    { 721, { 125, 129 } }, // Lyssa`s Solidarity of Vision,
+    { 722, { 42, 94 } }, // Jaxan`s Jig o` Vigor,
+    { 723, { 79, 59 } }, // Cassindra's Chorus of Clarity,
+    { 724, { 126, 35 } }, // Kelin`s Lucid Lullaby,
+    { 725, { 126, 13 } }, // Solon's Song of the Sirens,
+    { 726, { 126, 31 } }, // Syvelian`s Anti-Magic Aria,
+    { 727, { 126, 31 } }, // Alenia`s Disenchanting Melody,
+    { 728, { 126, 11 } }, // Kelin`s Lugubrious Lament,
+    { 729, { 125, 64 } }, // Tarew`s Aquatic Ayre,
+    { 730, { 20, 58 } }, // Denon`s Disruptive Discord,
+    { 731, { 25, 14 } }, // Wrath of Al'Kabor,
+    { 732, { 25, 14 } }, // Ice Comet,
+    { 733, { 25, 38 } }, // Supernova,
+    { 734, { 125, 41 } }, // Jonthan's Whistling Warsong,
+    { 735, { 125, 129 } }, // Lyssa`s Veracious Concord,
+    { 736, { 126, 60 } }, // Denon`s Dissension,
+    { 737, { 125, 64 } }, // Lyssa`s Cataloging Libretto,
+    { 738, { 126, 88 } }, // Selo`s Consonant Chain,
+    { 739, { 125, 86 } }, // Melanie`s Mellifluous Motion,
+    { 740, { 125, 41 } }, // Vilia`s Verses of Celerity,
+    { 741, { 126, 35 } }, // Crission`s Pixie Strike,
+    { 742, { 25, 58 } }, // Denon`s Desperate Dirge,
+    { 743, { 20, 38 } }, // Tuyen`s Chant of Flame,
+    { 744, { 20, 14 } }, // Tuyen`s Chant of Frost,
+    { 745, { 95, 130 } }, // Cassindra`s Elegy,
+    { 746, { 126, 88 } }, // Selo`s Chords of Cessation,
+    { 747, { 125, 41 } }, // Verses of Victory,
+    { 748, { 125, 64 } }, // Niv`s Melody of Preservation,
+    { 749, { 125, 41 } }, // Jonthan's Provocation,
+    { 750, { 126, 13 } }, // Solon's Bewitching Bravura,
+    { 752, { 126, 53 } }, // Concussion,
+    { 753, { 126, 13 } }, // Beguile Plants,
+    { 754, { 125, 17 } }, // Cannibalize II,
+    { 755, { 25, 58 } }, // Rend,
+    { 761, { 25, 75 } }, // Contact Poison I,
+    { 763, { 25, 75 } }, // System Shock I,
+    { 767, { 25, 124 } }, // Liquid Silver I,
+    { 786, { 25, 38 } }, // Wurm Blaze,
+    { 792, { 25, 38 } }, // Fist of Fire,
+    { 793, { 25, 58 } }, // Fist of Air,
+    { 794, { 25, 58 } }, // Fist of Earth,
+    { 804, { 25, 0 } }, // Magi Bolt,
+    { 805, { 25, 38 } }, // Magi Strike,
+    { 807, { 25, 58 } }, // Magi Circle,
+    { 808, { 25, 0 } }, // Avatar Power,
+    { 812, { 25, 58 } }, // SumMonsterAttack,
+    { 817, { 25, 0 } }, // Guide Bolt,
+    { 823, { 25, 58 } }, // Divine Might Effect,
+    { 829, { 25, 38 } }, // FireHornet,
+    { 831, { 25, 0 } }, // Sathir's Gaze,
+    { 832, { 25, 38 } }, // WurmBreath,
+    { 834, { 25, 0 } }, // Sathir's Mesmerization,
+    { 835, { 25, 58 } }, // Chaos Breath,
+    { 837, { 25, 58 } }, // Stun Breath,
+    { 839, { 25, 58 } }, // Lightning Breath,
+    { 848, { 25, 58 } }, // Elemental Mastery Strike,
+    { 849, { 25, 14 } }, // ElementalMasteryBlast,
+    { 851, { 25, 14 } }, // Shardwurm Breath,
+    { 859, { 25, 38 } }, // Lava Breath - Test,
+    { 860, { 25, 38 } }, // DrakeBreath,
+    { 861, { 25, 38 } }, // Lava Breath,
+    { 862, { 25, 14 } }, // Frost Breath,
+    { 863, { 25, 58 } }, // Telekinesis,
+    { 868, { 126, 35 } }, // Sionachie`s Dreams,
+    { 893, { 25, 58 } }, // FireElementalAttack2,
+    { 904, { 25, 58 } }, // Knockback,
+    { 907, { 25, 38 } }, // DryBoneFireBurst,
+    { 908, { 25, 14 } }, // IceBoneFrostBurst,
+    { 910, { 25, 38 } }, // SnakeEleFireBurst,
+    { 917, { 25, 38 } }, // Smolder,
+    { 922, { 25, 58 } }, // Sonic,
+    { 929, { 25, 58 } }, // Harm Touch NPC,
+    { 931, { 25, 58 } }, // Life Drain,
+    { 945, { 25, 58 } }, // Ykesha,
+    { 951, { 25, 38 } }, // Fiery Death,
+    { 952, { 25, 14 } }, // Frosty Death,
+    { 966, { 25, 38 } }, // FireElementalAttack,
+    { 968, { 25, 14 } }, // WaterElementalAttack,
+    { 978, { 25, 14 } }, // FrostAOE,
+    { 982, { 25, 0 } }, // Cazic Touch,
+    { 985, { 25, 0 } }, // Efreeti Fire,
+    { 987, { 25, 58 } }, // Spiroc Thunder,
+    { 988, { 25, 0 } }, // Greater Spiroc Thunder,
+    { 989, { 25, 0 } }, // Entomb in Ice,
+    { 995, { 25, 0 } }, // Soul Devour,
+    { 1009, { 25, 38 } }, // FireBeetleSpit,
+    { 1017, { 25, 38 } }, // Fishnova,
+    { 1020, { 25, 58 } }, // Air Elemental Strike,
+    { 1021, { 25, 14 } }, // Water Elemental Strike,
+    { 1024, { 25, 58 } }, // Thunderclap,
+    { 1026, { 25, 58 } }, // Thunder Call,
+    { 1027, { 25, 58 } }, // Thunder Storm,
+    { 1028, { 25, 58 } }, // Static Storm,
+    { 1030, { 25, 0 } }, // Sand Storm,
+    { 1031, { 25, 0 } }, // Stone Gale,
+    { 1032, { 25, 58 } }, // Hail Storm,
+    { 1036, { 25, 0 } }, // Storm Flame,
+    { 1043, { 25, 58 } }, // Manastorm,
+    { 1045, { 25, 58 } }, // Chain Lightning,
+    { 1047, { 25, 14 } }, // Deluge,
+    { 1048, { 25, 14 } }, // Monsoons,
+    { 1049, { 25, 58 } }, // Tempest Wind,
+    { 1050, { 25, 14 } }, // Raging Blizzard,
+    { 1071, { 25, 58 } }, // Punishing Blow,
+    { 1074, { 25, 38 } }, // Steam Blast,
+    { 1075, { 25, 58 } }, // Electrical Short,
+    { 1077, { 25, 0 } }, // Mana Beam,
+    { 1078, { 25, 58 } }, // Gyrosonic Disruption,
+    { 1084, { 25, 0 } }, // Barrage of Debris,
+    { 1100, { 126, 35 } }, // Dreams of Ayonae,
+    { 1106, { 20, 38 } }, // Sear,
+    { 1107, { 25, 58 } }, // Tremor of Judgment,
+    { 1142, { 25, 58 } }, // Pain Harvest,
+    { 1144, { 25, 58 } }, // Jagged Rain,
+    { 1145, { 25, 14 } }, // Touch of Pain,
+    { 1151, { 25, 0 } }, // Raven Screech,
+    { 1155, { 25, 58 } }, // Black Symbol of Agony,
+    { 1167, { 25, 38 } }, // Draconic Rage Strike,
+    { 1168, { 25, 38 } }, // Draconic Rage Strike,
+    { 1172, { 25, 75 } }, // Sting of the Shissar,
+    { 1173, { 25, 75 } }, // Bite of the Shissar,
+    { 1180, { 25, 124 } }, // Zombie Bane,
+    { 1181, { 25, 124 } }, // Mayong's Bane,
+    { 1188, { 25, 75 } }, // Bixie Sting,
+    { 1189, { 25, 75 } }, // Scoriae Bite,
+    { 1194, { 125, 49 } }, // Illusion: Fier`dal,
+    { 1196, { 79, 44 } }, // Ancient: Lcea's Lament,
+    { 1197, { 126, 35 } }, // Ancient: Lullaby of Shadow,
+    { 1216, { 25, 0 } }, // Guide Bolt,
+    { 1221, { 126, 53 } }, // Terror of Darkness,
+    { 1222, { 126, 53 } }, // Terror of Shadows,
+    { 1223, { 126, 53 } }, // Terror of Death,
+    { 1224, { 126, 53 } }, // Terror of Terris,
+    { 1225, { 125, 128 } }, // Voice of Darkness,
+    { 1226, { 125, 128 } }, // Voice of Shadows,
+    { 1227, { 125, 128 } }, // Voice of Death,
+    { 1228, { 125, 128 } }, // Voice of Terris,
+    { 1244, { 25, 0 } }, // Magi Bolt,
+    { 1245, { 25, 38 } }, // Magi Strike,
+    { 1247, { 25, 58 } }, // Magi Circle,
+    { 1269, { 25, 75 } }, // Fangol's Breath,
+    { 1279, { 25, 14 } }, // Velium Chill of Al`Kabor,
+    { 1283, { 42, 32 } }, // Celestial Cleansing,
+    { 1284, { 69, 71 } }, // Valiant Companion,
+    { 1285, { 69, 64 } }, // Summon Companion,
+    { 1286, { 69, 71 } }, // Expedience,
+    { 1287, { 79, 59 } }, // Cassindra`s Chant of Clarity,
+    { 1288, { 45, 47 } }, // Divine Glory,
+    { 1289, { 69, 70 } }, // Strengthen Death,
+    { 1290, { 42, 42 } }, // Chloroblast,
+    { 1291, { 42, 42 } }, // Nature's Touch,
+    { 1296, { 126, 53 } }, // Cinder Jolt,
+    { 1310, { 25, 8 } }, // Porlos' Fury,
+    { 1311, { 25, 8 } }, // Hsagra's Wrath,
+    { 1314, { 25, 58 } }, // SpectraStun,
+    { 1317, { 25, 58 } }, // Repulse,
+    { 1325, { 123, 54 } }, // Combine Gate,
+    { 1326, { 123, 54 } }, // Ring of the Combines,
+    { 1332, { 125, 17 } }, // Cannibalize IV,
+    { 1334, { 123, 64 } }, // Translocate: Group,
+    { 1336, { 123, 36 } }, // Translocate: Fay,
+    { 1337, { 123, 67 } }, // Translocate: Tox,
+    { 1338, { 123, 5 } }, // Translocate: North,
+    { 1339, { 123, 54 } }, // Translocate: Combine,
+    { 1356, { 25, 14 } }, // Frosty Death2,
+    { 1359, { 18, 34 } }, // Enchant Clay,
+    { 1366, { 25, 0 } }, // Rage of the Sky,
+    { 1369, { 25, 75 } }, // Poisonous Chill,
+    { 1371, { 123, 5 } }, // Translocate: Nek,
+    { 1372, { 123, 5 } }, // Translocate: Common,
+    { 1373, { 123, 5 } }, // Translocate: Ro,
+    { 1374, { 123, 5 } }, // Translocate: West,
+    { 1375, { 123, 5 } }, // Translocate: Cazic,
+    { 1376, { 125, 64 } }, // Shroud of Undeath,
+    { 1377, { 95, 7 } }, // Primal Avatar,
+    { 1382, { 18, 109 } }, // Summon Holy Ale of Brell,
+    { 1391, { 125, 55 } }, // Dead Men Floating,
+    { 1392, { 25, 58 } }, // Fireburst,
+    { 1393, { 114, 43 } }, // Gangrenous Touch of Zum`uul,
+    { 1394, { 25, 58 } }, // Maelstrom of Electricity,
+    { 1397, { 45, 47 } }, // Strength of Nature,
+    { 1398, { 123, 127 } }, // Circle of Wakening Lands,
+    { 1399, { 123, 127 } }, // Wakening Lands Portal,
+    { 1400, { 69, 64 } }, // Monster Summoning I,
+    { 1401, { 18, 109 } }, // Summon Shard of the Core,
+    { 1402, { 69, 64 } }, // Monster Summoning II,
+    { 1403, { 20, 58 } }, // Elemental Maelstrom,
+    { 1404, { 69, 64 } }, // Monster Summoning III,
+    { 1405, { 20, 58 } }, // Wrath of the Elements,
+    { 1406, { 125, 51 } }, // Improved Invisibility,
+    { 1407, { 126, 60 } }, // Wandering Mind,
+    { 1408, { 95, 59 } }, // Gift of Magic,
+    { 1409, { 95, 59 } }, // Gift of Insight,
+    { 1410, { 95, 59 } }, // Gift of Brilliance,
+    { 1411, { 125, 51 } }, // Improved Invis to Undead,
+    { 1412, { 20, 75 } }, // Chilling Embrace,
+    { 1413, { 42, 56 } }, // Corporeal Empathy,
+    { 1414, { 69, 70 } }, // Augmentation of Death,
+    { 1415, { 25, 75 } }, // Torbas' Acid Blast,
+    { 1416, { 125, 17 } }, // Arch Lich,
+    { 1417, { 123, 127 } }, // Iceclad Gate,
+    { 1418, { 123, 127 } }, // Iceclad Portal,
+    { 1419, { 125, 21 } }, // O'Keils Flickering Flame,
+    { 1420, { 125, 51 } }, // Invisibility to Undead,
+    { 1421, { 25, 38 } }, // Enticement of Flame,
+    { 1422, { 123, 64 } }, // Translocate,
+    { 1423, { 123, 127 } }, // Great Divide Portal,
+    { 1425, { 123, 127 } }, // Cobalt Scar Portal,
+    { 1426, { 25, 14 } }, // Ice Spear of Solist,
+    { 1427, { 25, 75 } }, // Shock of the Tainted,
+    { 1428, { 95, 96 } }, // Tumultuous Strength,
+    { 1429, { 25, 75 } }, // Blast of Poison,
+    { 1430, { 69, 70 } }, // Spirit Quickening,
+    { 1431, { 125, 48 } }, // Form of the Great Bear,
+    { 1432, { 45, 87 } }, // Focus of Spirit,
+    { 1433, { 123, 127 } }, // Ring of Iceclad,
+    { 1434, { 123, 127 } }, // Circle of Iceclad,
+    { 1435, { 125, 51 } }, // Improved Superior Camouflage,
+    { 1436, { 126, 81 } }, // Fixation of Ro,
+    { 1437, { 126, 81 } }, // Ro's Fiery Sundering,
+    { 1438, { 123, 127 } }, // Circle of Great Divide,
+    { 1439, { 25, 58 } }, // Fury of Air,
+    { 1440, { 123, 127 } }, // Circle of Cobalt Scar,
+    { 1442, { 45, 46 } }, // Protection of the Glades,
+    { 1443, { 20, 124 } }, // Turning of the Unnatural,
+    { 1444, { 42, 32 } }, // Celestial Healing,
+    { 1445, { 45, 87 } }, // Armor of Protection,
+    { 1446, { 25, 97 } }, // Stun Command,
+    { 1447, { 45, 1 } }, // Aegolism,
+    { 1448, { 79, 44 } }, // Cantata of Soothing,
+    { 1449, { 125, 41 } }, // Melody of Ervaj,
+    { 1450, { 125, 84 } }, // Shield of Songs,
+    { 1451, { 126, 81 } }, // Occlusion of Sound,
+    { 1452, { 125, 41 } }, // Composition of Ervaj,
+    { 1453, { 125, 17 } }, // Divine Purpose,
+    { 1454, { 25, 58 } }, // Flame of Light,
+    { 1455, { 42, 42 } }, // Wave of Healing,
+    { 1456, { 45, 47 } }, // Divine Strength,
+    { 1457, { 114, 76 } }, // Shroud of Hate,
+    { 1458, { 114, 76 } }, // Shroud of Pain,
+    { 1459, { 125, 16 } }, // Shroud of Death,
+    { 1460, { 125, 64 } }, // Death Peace,
+    { 1461, { 125, 16 } }, // Call of Sky,
+    { 1462, { 125, 21 } }, // Call of Earth,
+    { 1463, { 125, 16 } }, // Call of Fire,
+    { 1464, { 95, 7 } }, // Call of the Predator,
+    { 1465, { 25, 58 } }, // Call of Sky Strike,
+    { 1467, { 25, 38 } }, // Call of Fire Strike,
+    { 1472, { 69, 70 } }, // Burnout IV,
+    { 1474, { 125, 16 } }, // Boon of the Garou,
+    { 1475, { 69, 104 } }, // Nature Walkers Behest,
+    { 1479, { 25, 14 } }, // Wave of Flame,
+    { 1480, { 25, 0 } }, // Silver Breath,
+    { 1481, { 25, 58 } }, // Scream of Chaos,
+    { 1482, { 25, 58 } }, // Electric Blast,
+    { 1484, { 25, 14 } }, // Tsunami,
+    { 1487, { 25, 14 } }, // Rain of Cold,
+    { 1488, { 25, 38 } }, // Rain of Molten Lava,
+    { 1489, { 25, 14 } }, // Wave of Cold,
+    { 1490, { 25, 38 } }, // Wave of Heat,
+    { 1494, { 25, 38 } }, // Flame Jet,
+    { 1498, { 25, 14 } }, // Doljons Rage,
+    { 1503, { 18, 109 } }, // Modulating Rod,
+    { 1504, { 69, 42 } }, // Renew Elements,
+    { 1505, { 69, 42 } }, // Renew Summoning,
+    { 1508, { 20, 29 } }, // Asystole,
+    { 1509, { 114, 33 } }, // Leach,
+    { 1510, { 42, 56 } }, // Shadow Compact,
+    { 1511, { 126, 81 } }, // Scent of Dusk,
+    { 1512, { 126, 81 } }, // Scent of Shadow,
+    { 1513, { 126, 81 } }, // Scent of Darkness,
+    { 1514, { 42, 61 } }, // Rapacious Subvention,
+    { 1515, { 42, 61 } }, // Covetous Subversion,
+    { 1516, { 123, 54 } }, // Combine Portal,
+    { 1517, { 123, 54 } }, // Circle of the Combines,
+    { 1518, { 42, 42 } }, // Remedy,
+    { 1519, { 42, 42 } }, // Divine Light,
+    { 1520, { 42, 42 } }, // Word of Vigor,
+    { 1521, { 42, 42 } }, // Word of Restoration,
+    { 1522, { 42, 32 } }, // Celestial Elixir,
+    { 1523, { 42, 42 } }, // Word of Redemption,
+    { 1524, { 42, 82 } }, // Reviviscence,
+    { 1525, { 42, 19 } }, // Antidote,
+    { 1526, { 126, 31 } }, // Annul Magic,
+    { 1527, { 126, 37 } }, // Trepidation,
+    { 1528, { 25, 124 } }, // Exile Undead,
+    { 1529, { 25, 111 } }, // Exile Summoned,
+    { 1530, { 25, 23 } }, // Banishment of Shadows,
+    { 1531, { 25, 23 } }, // Banishment,
+    { 1532, { 126, 37 } }, // Dread of Night,
+    { 1533, { 45, 46 } }, // Heroism,
+    { 1534, { 95, 7 } }, // Yaulp IV,
+    { 1535, { 45, 112 } }, // Symbol of Marzin,
+    { 1536, { 45, 46 } }, // Heroic Bond,
+    { 1537, { 95, 6 } }, // Bulwark of Faith,
+    { 1538, { 45, 46 } }, // Heroic Bond,
+    { 1539, { 45, 46 } }, // Fortitude,
+    { 1540, { 95, 6 } }, // Aegis,
+    { 1541, { 126, 11 } }, // Wake of Tranquility,
+    { 1542, { 25, 58 } }, // Upheaval,
+    { 1543, { 25, 58 } }, // Reckoning,
+    { 1544, { 25, 97 } }, // Enforced Reverence,
+    { 1545, { 25, 97 } }, // The Unspoken Word,
+    { 1546, { 125, 64 } }, // Divine Intervention,
+    { 1547, { 125, 64 } }, // Death Pact,
+    { 1548, { 125, 64 } }, // Mark of Karn,
+    { 1550, { 126, 37 } }, // Repulse Animal,
+    { 1551, { 95, 80 } }, // Circle of Winter,
+    { 1552, { 95, 80 } }, // Circle of Summer,
+    { 1553, { 126, 13 } }, // Call of Karana,
+    { 1554, { 125, 65 } }, // Spirit of Scale,
+    { 1555, { 126, 81 } }, // Glamour of Tunare,
+    { 1556, { 126, 13 } }, // Tunare's Request,
+    { 1557, { 95, 96 } }, // Girdle of Karana,
+    { 1558, { 125, 21 } }, // Bladecoat,
+    { 1559, { 45, 46 } }, // Natureskin,
+    { 1560, { 125, 21 } }, // Shield of Blades,
+    { 1561, { 125, 21 } }, // Legacy of Thorn,
+    { 1562, { 125, 65 } }, // Form of the Howler,
+    { 1563, { 125, 65 } }, // Form of the Hunter,
+    { 1564, { 125, 48 } }, // Spirit of Oak,
+    { 1565, { 79, 59 } }, // Mask of the Hunter,
+    { 1566, { 123, 64 } }, // Egress,
+    { 1567, { 123, 64 } }, // Succor,
+    { 1568, { 79, 43 } }, // Regrowth,
+    { 1569, { 79, 43 } }, // Regrowth of the Grove,
+    { 1570, { 95, 80 } }, // Talisman of Jasinth,
+    { 1571, { 95, 80 } }, // Talisman of Shadoo,
+    { 1572, { 125, 17 } }, // Cannibalize III,
+    { 1573, { 126, 81 } }, // Insidious Decay,
+    { 1574, { 69, 104 } }, // Spirit of the Howler,
+    { 1575, { 125, 129 } }, // Acumen,
+    { 1576, { 42, 32 } }, // Torpor,
+    { 1577, { 126, 81 } }, // Malosini,
+    { 1578, { 126, 81 } }, // Malo,
+    { 1579, { 95, 2 } }, // Talisman of the Cat,
+    { 1580, { 95, 94 } }, // Talisman of the Brute,
+    { 1581, { 95, 96 } }, // Talisman of the Rhino,
+    { 1582, { 95, 12 } }, // Talisman of the Serpent,
+    { 1583, { 95, 24 } }, // Talisman of the Raptor,
+    { 1584, { 95, 6 } }, // Shroud of the Spirits,
+    { 1585, { 45, 87 } }, // Talisman of Kragg,
+    { 1586, { 25, 14 } }, // Ice Strike,
+    { 1587, { 25, 75 } }, // Torrent of Poison,
+    { 1588, { 126, 88 } }, // Turgur's Insects,
+    { 1589, { 126, 88 } }, // Tigir's Insects,
+    { 1590, { 20, 75 } }, // Bane of Nife,
+    { 1591, { 20, 29 } }, // Pox of Bertoxxulous,
+    { 1592, { 126, 30 } }, // Cripple,
+    { 1593, { 95, 96 } }, // Maniacal Strength,
+    { 1594, { 95, 2 } }, // Deliriously Nimble,
+    { 1595, { 95, 94 } }, // Riotous Health,
+    { 1596, { 95, 24 } }, // Mortal Deftness,
+    { 1597, { 95, 12 } }, // Unfailing Reverence,
+    { 1598, { 95, 7 } }, // Avatar,
+    { 1599, { 95, 96 } }, // Voice of the Berserker,
+    { 1600, { 20, 38 } }, // Breath of Ro,
+    { 1601, { 20, 58 } }, // Winged Death,
+    { 1602, { 25, 14 } }, // Blizzard,
+    { 1603, { 25, 38 } }, // Scoriae,
+    { 1604, { 25, 58 } }, // Breath of Karana,
+    { 1605, { 25, 14 } }, // Frost,
+    { 1606, { 25, 58 } }, // Fist of Karana,
+    { 1607, { 25, 38 } }, // Wildfire,
+    { 1608, { 126, 83 } }, // Entrapping Roots,
+    { 1609, { 125, 84 } }, // Manaskin,
+    { 1610, { 45, 87 } }, // Shield of the Magi,
+    { 1611, { 125, 17 } }, // Demi Lich,
+    { 1612, { 125, 52 } }, // Quivering Veil of Xarn,
+    { 1613, { 114, 43 } }, // Deflux,
+    { 1614, { 25, 14 } }, // Chill Bones,
+    { 1615, { 20, 29 } }, // Cessation of Cor,
+    { 1616, { 114, 33 } }, // Vexing Mordinia,
+    { 1617, { 20, 38 } }, // Pyrocruor,
+    { 1618, { 114, 43 } }, // Touch of Night,
+    { 1619, { 20, 58 } }, // Devouring Darkness,
+    { 1620, { 20, 58 } }, // Splurt,
+    { 1621, { 69, 103 } }, // Minion of Shadows,
+    { 1622, { 69, 103 } }, // Servant of Bones,
+    { 1623, { 69, 103 } }, // Emissary of Thule,
+    { 1624, { 126, 13 } }, // Thrall of Bones,
+    { 1625, { 125, 51 } }, // Skin of the Shadow,
+    { 1626, { 123, 64 } }, // Levant,
+    { 1627, { 123, 64 } }, // Abscond,
+    { 1628, { 123, 64 } }, // Evacuate,
+    { 1629, { 126, 13 } }, // Enslave Death,
+    { 1630, { 25, 74 } }, // Defoliation,
+    { 1631, { 126, 89 } }, // Atol's Spectral Shackles,
+    { 1632, { 125, 129 } }, // Plainsight,
+    { 1633, { 126, 83 } }, // Fetter,
+    { 1634, { 25, 97 } }, // Tishan's Discord,
+    { 1635, { 25, 97 } }, // Markar's Discord,
+    { 1636, { 25, 58 } }, // Invert Gravity,
+    { 1637, { 25, 38 } }, // Draught of Fire,
+    { 1638, { 25, 38 } }, // Lure of Flame,
+    { 1639, { 25, 58 } }, // Voltaic Draught,
+    { 1640, { 25, 58 } }, // Lure of Lightning,
+    { 1641, { 25, 14 } }, // Draught of Ice,
+    { 1642, { 25, 14 } }, // Lure of Frost,
+    { 1643, { 25, 58 } }, // Draught of Jiva,
+    { 1644, { 25, 38 } }, // Pillar of Flame,
+    { 1645, { 25, 58 } }, // Pillar of Lightning,
+    { 1646, { 25, 14 } }, // Pillar of Frost,
+    { 1647, { 25, 14 } }, // Tears of Prexus,
+    { 1648, { 25, 38 } }, // Tears of Solusek,
+    { 1649, { 25, 58 } }, // Tears of Druzzil,
+    { 1650, { 25, 38 } }, // Inferno of Al'Kabor,
+    { 1651, { 25, 14 } }, // Retribution of Al'Kabor,
+    { 1652, { 25, 58 } }, // Vengeance of Al'Kabor,
+    { 1653, { 25, 58 } }, // Jyll's Static Pulse,
+    { 1654, { 25, 14 } }, // Jyll's Zephyr of Ice,
+    { 1655, { 25, 38 } }, // Jyll's Wave of Heat,
+    { 1656, { 25, 58 } }, // Thunderbold,
+    { 1657, { 25, 14 } }, // Winds of Gelid,
+    { 1658, { 25, 38 } }, // Sunstrike,
+    { 1659, { 25, 38 } }, // Scintillation,
+    { 1660, { 25, 38 } }, // Char,
+    { 1661, { 25, 38 } }, // Scars of Sigil,
+    { 1662, { 25, 38 } }, // Sirocco,
+    { 1663, { 25, 58 } }, // Shock of Steel,
+    { 1664, { 25, 38 } }, // Seeking Flame of Seukor,
+    { 1665, { 25, 58 } }, // Manastorm,
+    { 1666, { 79, 43 } }, // Phantom Armor,
+    { 1667, { 125, 21 } }, // Cadeau of Flame,
+    { 1668, { 125, 21 } }, // Boon of Immolation,
+    { 1669, { 125, 21 } }, // Aegis of Ro,
+    { 1670, { 69, 71 } }, // Velocity,
+    { 1671, { 69, 100 } }, // Vocarate: Earth,
+    { 1672, { 69, 105 } }, // Vocarate: Water,
+    { 1673, { 69, 102 } }, // Vocarate: Fire,
+    { 1674, { 69, 98 } }, // Vocarate: Air,
+    { 1675, { 69, 100 } }, // Greater Vocaration: Earth,
+    { 1676, { 69, 105 } }, // Greater Vocaration: Water,
+    { 1677, { 69, 102 } }, // Greater Vocaration: Fire,
+    { 1678, { 69, 98 } }, // Greater Vocaration: Air,
+    { 1679, { 69, 64 } }, // Dyzil's Deafening Decoy,
+    { 1680, { 18, 108 } }, // Gift of Xev,
+    { 1681, { 18, 109 } }, // Bristlebane's Bundle,
+    { 1682, { 18, 110 } }, // Quiver of Marr,
+    { 1683, { 18, 110 } }, // Bandoleer of Luclin,
+    { 1684, { 18, 110 } }, // Pouch of Quellious,
+    { 1685, { 18, 109 } }, // Muzzle of Mardu,
+    { 1686, { 126, 60 } }, // Theft of Thought,
+    { 1687, { 125, 3 } }, // Collaboration,
+    { 1688, { 95, 130 } }, // Enlightenment,
+    { 1689, { 125, 84 } }, // Rune V,
+    { 1690, { 126, 35 } }, // Fascination,
+    { 1691, { 126, 35 } }, // Glamour of Kintaz,
+    { 1692, { 126, 35 } }, // Rapture,
+    { 1693, { 79, 59 } }, // Clarity II,
+    { 1694, { 79, 59 } }, // Boon of the Clear Mind,
+    { 1695, { 79, 59 } }, // Gift of Pure Thought,
+    { 1696, { 25, 97 } }, // Color Slant,
+    { 1697, { 126, 31 } }, // Recant Magic,
+    { 1698, { 25, 58 } }, // Dementia,
+    { 1699, { 126, 81 } }, // Wind of Tashani,
+    { 1700, { 20, 58 } }, // Torment of Argli,
+    { 1701, { 95, 12 } }, // Overwhelming Splendor,
+    { 1702, { 126, 81 } }, // Tashanian,
+    { 1703, { 20, 58 } }, // Asphyxiate,
+    { 1704, { 126, 81 } }, // Wind of Tashanian,
+    { 1705, { 126, 13 } }, // Boltran`s Agacerie,
+    { 1707, { 126, 13 } }, // Dictate,
+    { 1708, { 125, 41 } }, // Aanya's Quickening,
+    { 1709, { 125, 41 } }, // Wonderous Rapidity,
+    { 1710, { 125, 41 } }, // Visions of Grandeur,
+    { 1711, { 95, 6 } }, // Umbra,
+    { 1712, { 126, 88 } }, // Forlorn Deeds,
+    { 1713, { 125, 84 } }, // Bedlam,
+    { 1714, { 126, 63 } }, // Memory Flux,
+    { 1715, { 126, 60 } }, // Largarn's Lamentation,
+    { 1716, { 126, 81 } }, // Scent of Terris,
+    { 1717, { 42, 56 } }, // Shadowbond,
+    { 1718, { 42, 61 } }, // Sedulous Subversion,
+    { 1719, { 126, 83 } }, // Engorging Roots,
+    { 1720, { 125, 129 } }, // Eye of Tallon,
+    { 1721, { 69, 99 } }, // Unswerving Hammer of Faith,
+    { 1722, { 69, 99 } }, // Flaming Sword of Xuzl,
+    { 1723, { 69, 99 } }, // Zumaik`s Animation,
+    { 1724, { 25, 23 } }, // Disintegrate,
+    { 1725, { 125, 64 } }, // Wake of Karana,
+    { 1726, { 125, 51 } }, // Sunskin,
+    { 1727, { 125, 21 } }, // Legacy of Spike,
+    { 1728, { 125, 93 } }, // Manasink,
+    { 1729, { 125, 41 } }, // Augment,
+    { 1733, { 42, 82 } }, // Convergence,
+    { 1734, { 42, 61 } }, // Infusion,
+    { 1735, { 114, 43 } }, // Trucidation,
+    { 1736, { 123, 54, "Wind of the North (SF)"}}, // Wind of the North,
+    { 1737, { 123, 54, "Wind of the South (EJ)" } }, // Wind of the South,
+    { 1738, { 123, 54 } }, // Tishan's Relocation,
+    { 1739, { 123, 54 } }, // Markar's Relocation,
+    { 1740, { 25, 58 } }, // Dustdevil,
+    { 1741, { 126, 53 } }, // Jolt,
+    { 1742, { 125, 55 } }, // Bobbing Corpse,
+    { 1743, { 45, 47 } }, // Divine Favor,
+    { 1744, { 42, 61 } }, // Harvest,
+    { 1747, { 25, 58 } }, // Brusco`s Bombastic Bellow,
+    { 1748, { 20, 58 } }, // Angstlich's Assonance,
+    { 1749, { 125, 52 } }, // Kazumi's Note of Preservation,
+    { 1750, { 125, 65 } }, // Selo`s Song of Travel,
+    { 1751, { 126, 88 } }, // Largo`s Absonant Binding,
+    { 1752, { 125, 84 } }, // Nillipus` March of the Wee,
+    { 1753, { 126, 35 } }, // Song of Twilight,
+    { 1754, { 126, 35 } }, // Song of Dawn,
+    { 1755, { 125, 86 } }, // Song of Highsun,
+    { 1756, { 126, 37 } }, // Song of Midnight,
+    { 1757, { 125, 41 } }, // Vilia`s Chorus of Celerity,
+    { 1758, { 126, 88 } }, // Selo`s Assonant Strane,
+    { 1759, { 79, 44 } }, // Cantata of Replenishment,
+    { 1760, { 125, 21 } }, // McVaxius` Rousing Rondo,
+    { 1761, { 126, 60 } }, // Cassindra's Insipid Ditty,
+    { 1762, { 125, 41 } }, // Jonthan's Inspiration,
+    { 1763, { 95, 6 } }, // Niv`s Harmonic,
+    { 1764, { 20, 75 } }, // Denon`s Bereavement,
+    { 1765, { 95, 12 } }, // Solon's Charismatic Concord,
+    { 1767, { 126, 89 } }, // Bonds of Tunare,
+    { 1768, { 18, 50 } }, // Sacrifice,
+    { 1769, { 25, 14 } }, // Lure of Ice,
+    { 1770, { 69, 64 } }, // Rage of Zomm,
+    { 1771, { 123, 64 } }, // Call of the Hero,
+    { 1772, { 126, 81 } }, // Mala,
+    { 1773, { 125, 64 } }, // Conjure Corpse,
+    { 1774, { 45, 112 } }, // Naltron's Mark,
+    { 1776, { 125, 65 } }, // Spirit of Wolf,
+    { 1784, { 25, 14 } }, // Velium Shards,
+    { 1785, { 25, 38 } }, // Flamesong,
+    { 1793, { 25, 14 } }, // Judgment of Ice,
+    { 1794, { 25, 14 } }, // Shards of Sorrow,
+    { 1797, { 18, 34 } }, // Enchant Velium,
+    { 1798, { 18, 50 } }, // Imbue Opal,
+    { 1799, { 18, 50 } }, // Imbue Topaz,
+    { 1800, { 18, 50 } }, // Imbue Plains Pebble,
+    { 1802, { 25, 0 } }, // Storm Strike,
+    { 1803, { 25, 58 } }, // Shrieking Howl,
+    { 1807, { 25, 58 } }, // Stunning Blow,
+    { 1812, { 25, 0 } }, // Nature's Wrath,
+    { 1815, { 25, 38 } }, // Flames of Ro,
+    { 1819, { 95, 96 } }, // Primal Essence,
+    { 1820, { 25, 58 } }, // Divine Wrath,
+    { 1827, { 25, 14 } }, // Frost Shards,
+    { 1831, { 125, 64 } }, // Diminution,
+    { 1834, { 25, 75 } }, // Poison Animal I,
+    { 1835, { 25, 75 } }, // Poison Summoned I,
+    { 1843, { 25, 75 } }, // Poison Animal II,
+    { 1844, { 25, 75 } }, // Poison Animal III,
+    { 1845, { 25, 75 } }, // Poison Summoned II,
+    { 1846, { 25, 75 } }, // Poison Summoned III,
+    { 1853, { 25, 75 } }, // Contact Poison II,
+    { 1854, { 25, 75 } }, // Contact Poison III,
+    { 1855, { 25, 75 } }, // Contact Poison IV,
+    { 1860, { 25, 75 } }, // System Shock II,
+    { 1861, { 25, 75 } }, // System Shock III,
+    { 1862, { 25, 75 } }, // System Shock IV,
+    { 1870, { 25, 124 } }, // Liquid Silver II,
+    { 1871, { 25, 124 } }, // Liquid Silver III,
+    { 1874, { 125, 64 } }, // Ant Legs,
+    { 1881, { 25, 75 } }, // System Shock V,
+    { 1884, { 18, 50 } }, // Imbue Ivory,
+    { 1885, { 18, 50 } }, // Imbue Amber,
+    { 1886, { 18, 50 } }, // Imbue Sapphire,
+    { 1887, { 18, 50 } }, // Imbue Ruby,
+    { 1888, { 18, 50 } }, // Imbue Emerald,
+    { 1889, { 18, 34 } }, // Enchant Mithril,
+    { 1890, { 18, 34 } }, // Enchant Adamantite,
+    { 1891, { 18, 50 } }, // Imbue Jade,
+    { 1892, { 18, 34 } }, // Enchant Steel,
+    { 1893, { 18, 34 } }, // Enchant Brellium,
+    { 1894, { 18, 50 } }, // Imbue Black Pearl,
+    { 1895, { 18, 50 } }, // Imbue Diamond,
+    { 1896, { 18, 50 } }, // Imbue Rose Quartz,
+    { 1897, { 18, 50 } }, // Imbue Black Sapphire,
+    { 1898, { 18, 50 } }, // Imbue Peridot,
+    { 1899, { 18, 50 } }, // Imbue Fire Opal,
+    { 1941, { 25, 38 } }, // Lava Breath,
+    { 1942, { 25, 14 } }, // Frost Breath,
+    { 1943, { 25, 38 } }, // Molten Breath,
+    { 1944, { 18, 110 } }, // Summon Orb,
+    { 1947, { 25, 14 } }, // Ice Rend,
+    { 1948, { 25, 0 } }, // Destroy,
+    { 1953, { 25, 58 } }, // Mastodon Stomp,
+    { 1954, { 25, 0 } }, // Devour Soul,
+    { 1955, { 25, 38 } }, // DrakeBreathBig,
+    { 1957, { 25, 58 } }, // Holy Shock,
+    { 1968, { 25, 58 } }, // Stunning Strike,
+    { 1969, { 25, 38 } }, // Flame of the Efreeti,
+    { 1970, { 25, 58 } }, // Verlekarnorm's Disaster,
+    { 1971, { 25, 58 } }, // Rocksmash,
+    { 2005, { 25, 58 } }, // Nature's Holy Wrath,
+    { 2006, { 25, 58 } }, // Static,
+    { 2014, { 25, 38 } }, // Incinerate Bones,
+    { 2015, { 25, 14 } }, // Conglaciation of Bone,
+    { 2016, { 25, 58 } }, // Dementing Visions,
+    { 2019, { 25, 58 } }, // Thunder Strike,
+    { 2020, { 123, 5 } }, // Circle of Surefall Glade,
+    { 2021, { 123, 5 } }, // Ring of Surefall Glade,
+    { 2022, { 123, 127 } }, // Translocate: Iceclad,
+    { 2023, { 123, 127 } }, // Translocate: Great Divide,
+    { 2024, { 123, 127 } }, // Translocate: Wakening Lands,
+    { 2025, { 123, 127 } }, // Translocate: Cobalt Scar,
+    { 2026, { 123, 127 } }, // Great Divide Gate,
+    { 2027, { 123, 127 } }, // Wakening Lands Gate,
+    { 2028, { 123, 127 } }, // Cobalt Scar Gate,
+    { 2029, { 123, 127 } }, // Ring of Great Divide,
+    { 2030, { 123, 127 } }, // Ring of Wakening Lands,
+    { 2031, { 123, 127 } }, // Ring of Cobalt Scar,
+    { 2035, { 25, 75 } }, // Tentacle Sting,
+    { 2036, { 25, 0 } }, // Rain of the Arch Mage,
+    { 2040, { 25, 58 } }, // Winds of the Archmage,
+    { 2043, { 25, 75 } }, // Kambooz's Touch,
+    { 2047, { 25, 0 } }, // Death Shackles,
+    { 2048, { 25, 58 } }, // Ssraeshza's Command,
+    { 2054, { 25, 14 } }, // Icy Claws,
+    { 2068, { 25, 14 } }, // Blast of Frost,
+    { 2070, { 25, 38 } }, // Marauder's Wrath,
+    { 2075, { 25, 29 } }, // Umbral Rot,
+    { 2076, { 25, 0 } }, // Presence of Ssraeshza,
+    { 2085, { 25, 0 } }, // Lesser Infusion,
+    { 2086, { 25, 0 } }, // Infusion,
+    { 2087, { 25, 0 } }, // Greater Infusion,
+    { 2091, { 25, 0 } }, // Lesser Rejuvenation,
+    { 2092, { 25, 0 } }, // Rejuvination,
+    { 2093, { 25, 0 } }, // Greater Rejuvenation,
+    { 2094, { 25, 0 } }, // Zruk Breath,
+    { 2101, { 25, 0 } }, // Pain and Suffering,
+    { 2102, { 25, 75 } }, // Drake Breath,
+    { 2103, { 25, 38 } }, // Drake Breath,
+    { 2104, { 25, 14 } }, // Drake Breath,
+    { 2105, { 25, 29 } }, // Drake Breath,
+    { 2106, { 25, 0 } }, // Gift of A'err,
+    { 2109, { 45, 87 } }, // Ancient: High Priest's Bulwark,
+    { 2110, { 45, 46 } }, // Skin like Wood,
+    { 2111, { 25, 38 } }, // Burst of Flame,
+    { 2112, { 95, 7 } }, // Ancient: Feral Avatar,
+    { 2113, { 20, 75 } }, // Ancient: Scourge of Nife,
+    { 2114, { 125, 17 } }, // Ancient: Master of Death,
+    { 2115, { 25, 75 } }, // Ancient: Lifebane,
+    { 2116, { 25, 14 } }, // Ancient: Destruction of Ice,
+    { 2117, { 126, 53 } }, // Ancient: Greater Concussion,
+    { 2118, { 25, 38 } }, // Ancient: Shock of Sun,
+    { 2119, { 69, 70 } }, // Ancient: Burnout Blaze,
+    { 2120, { 126, 35 } }, // Ancient: Eternal Rapture,
+    { 2121, { 25, 58 } }, // Ancient: Chaotic Visions,
+    { 2122, { 45, 1 } }, // Ancient: Gift of Aegolism,
+    { 2125, { 125, 21 } }, // Ancient: Legacy of Blades,
+    { 2126, { 25, 38 } }, // Ancient: Starfire of Ro,
+    { 2127, { 25, 0 } }, // Tragedy at Cazic Thule,
+    { 2130, { 25, 58 } }, // Horrific Force,
+    { 2131, { 25, 58 } }, // Vortex of Horror,
+    { 2137, { 25, 75 } }, // Rain of Terror,
+    { 2139, { 125, 64 } }, // Corpse Breath,
+    { 2156, { 25, 0 } }, // Deadly Curse of Noqufiel,
+    { 2157, { 25, 58 } }, // Word of Command,
+    { 2161, { 25, 58 } }, // Shock of Shadows,
+    { 2162, { 25, 58 } }, // Black Winds,
+    { 2163, { 25, 58 } }, // Lure of Shadows,
+    { 2167, { 25, 0 } }, // Fling,
+    { 2168, { 42, 82 } }, // Reanimation,
+    { 2169, { 42, 82 } }, // Reconstitution,
+    { 2170, { 42, 82 } }, // Reparation,
+    { 2171, { 42, 82 } }, // Renewal,
+    { 2172, { 42, 82 } }, // Restoration,
+    { 2173, { 25, 0 } }, // Hand of the Gods,
+    { 2175, { 42, 32 } }, // Celestial Health,
+    { 2176, { 79, 44 } }, // Spiritual Light,
+    { 2177, { 79, 44 } }, // Spiritual Radiance,
+    { 2178, { 45, 47 } }, // Spiritual Brawn,
+    { 2179, { 42, 42 } }, // Tunare's Renewal,
+    { 2180, { 42, 32 } }, // Ethereal Elixir,
+    { 2181, { 18, 110 } }, // Hammer of Judgment,
+    { 2182, { 42, 42 } }, // Ethereal Light,
+    { 2183, { 123, 64 } }, // Lesser Succor,
+    { 2184, { 123, 64 } }, // Lesser Evacuate,
+    { 2188, { 45, 46 } }, // Protection of the Cabbage,
+    { 2190, { 25, 97 } }, // Divine Stun,
+    { 2202, { 125, 93 } }, // Mana Shield,
+    { 2203, { 125, 64 } }, // Donlo's Dementia,
+    { 2206, { 25, 38 } }, // Tortured Memory,
+    { 2213, { 125, 64 } }, // Lesser Summon Corpse,
+    { 2230, { 18, 107 } }, // Summon Brass Choker,
+    { 2231, { 18, 107 } }, // Summon Silver Choker,
+    { 2232, { 18, 107 } }, // Summon Golden Choker,
+    { 2233, { 18, 107 } }, // Summon Linen Mantle,
+    { 2234, { 18, 107 } }, // Summon Leather Mantle,
+    { 2235, { 18, 107 } }, // Summon Silken Mantle,
+    { 2236, { 18, 107 } }, // Summon Jade Bracelet,
+    { 2237, { 18, 107 } }, // Summon Opal Bracelet,
+    { 2238, { 18, 107 } }, // Summon Ruby Bracelet,
+    { 2239, { 18, 107 } }, // Summon Tiny Ring,
+    { 2240, { 18, 107 } }, // Summon Twisted Ring,
+    { 2241, { 18, 107 } }, // Summon Studded Ring,
+    { 2242, { 18, 107 } }, // Summon Tarnished Bauble,
+    { 2243, { 18, 107 } }, // Summon Shiny Bauble,
+    { 2244, { 18, 107 } }, // Summon Brilliant Bauble,
+    { 2248, { 125, 129 } }, // Acumen,
+    { 2249, { 25, 58 } }, // River's Rancor,
+    { 2250, { 25, 38 } }, // Fiery Retribution,
+    { 2251, { 25, 14 } }, // Furor of the Wild,
+    { 2255, { 25, 14 } }, // Wrath of the Wild,
+    { 2258, { 25, 14 } }, // Frigid Dominion,
+    { 2261, { 25, 14 } }, // Frozen Torrent,
+    { 2264, { 25, 14 } }, // Hail of Ice,
+    { 2268, { 25, 0 } }, // Touch of the Void,
+    { 2312, { 79, 43 } }, // Life Bind,
+    { 2321, { 25, 0 } }, // Energy Burst,
+    { 2326, { 95, 7 } }, // Yaulp V,
+    { 2375, { 25, 0 } }, // Spectral Essence,
+    { 2377, { 25, 58 } }, // Screeching Ricochet,
+    { 2378, { 25, 14 } }, // Drakeen Breath,
+    { 2379, { 25, 14 } }, // Drakeen Monsoon,
+    { 2380, { 25, 14 } }, // Drakeen Vortex,
+    { 2381, { 25, 58 } }, // Wing Draft,
+    { 2382, { 25, 58 } }, // Wing Gust,
+    { 2383, { 25, 58 } }, // Wing Squall,
+    { 2384, { 25, 58 } }, // Wing Tempest,
+    { 2385, { 25, 14 } }, // Frost Pummel,
+    { 2386, { 25, 14 } }, // Ice Pummel,
+    { 2387, { 25, 14 } }, // Frigid Shard Pummel,
+    { 2392, { 25, 0 } }, // Sweltering Carcass,
+    { 2417, { 123, 57 } }, // Ring of Grimling,
+    { 2418, { 123, 57 } }, // Grimling Gate,
+    { 2419, { 123, 57 } }, // Circle of Grimling,
+    { 2420, { 123, 57 } }, // Grimling Portal,
+    { 2421, { 123, 57 } }, // Translocate: Grimling,
+    { 2422, { 123, 57 } }, // Ring of Twilight,
+    { 2423, { 123, 57 } }, // Twilight Gate,
+    { 2424, { 123, 57 } }, // Circle of Twilight,
+    { 2425, { 123, 57 } }, // Twilight Portal,
+    { 2426, { 123, 57 } }, // Translocate: Twilight,
+    { 2427, { 123, 57 } }, // Ring of Dawnshroud,
+    { 2428, { 123, 57 } }, // Dawnshroud Gate,
+    { 2429, { 123, 57 } }, // Circle of Dawnshroud,
+    { 2430, { 123, 57 } }, // Dawnshroud Portal,
+    { 2431, { 123, 57 } }, // Translocate: Dawnshroud,
+    { 2432, { 123, 57 } }, // Circle of the Nexus,
+    { 2433, { 123, 57 } }, // Ring of the Nexus,
+    { 2434, { 95, 7 } }, // Avatar,
+    { 2435, { 42, 42 } }, // Kragg's Mending,
+    { 2436, { 25, 58 } }, // War Arrows,
+    { 2437, { 25, 0 } }, // Hendin Arrow,
+    { 2443, { 25, 58 } }, // Blade of Vallon,
+    { 2450, { 25, 38 } }, // Barb of Tallon,
+    { 2452, { 25, 75 } }, // Barb of Tallon,
+    { 2453, { 25, 0 } }, // Thorns of Drunder,
+    { 2462, { 42, 77 } }, // Ethereal Remedy,
+    { 2501, { 125, 64 } }, // Sanctuary,
+    { 2502, { 42, 32 } }, // Celestial Remedy,
+    { 2503, { 20, 124 } }, // Sermon of the Righteous,
+    { 2504, { 25, 58 } }, // Sacred Word,
+    { 2505, { 45, 87 } }, // Armor of the Faithful,
+    { 2506, { 20, 124 } }, // Epitaph of Life,
+    { 2507, { 125, 21 } }, // Mark of Retribution,
+    { 2508, { 25, 58 } }, // Judgment,
+    { 2509, { 45, 87 } }, // Blessed Armor of the Risen,
+    { 2510, { 45, 1 } }, // Blessing of Aegolism,
+    { 2511, { 45, 46 } }, // Protection of Wood,
+    { 2512, { 45, 46 } }, // Protection of Rock,
+    { 2513, { 45, 46 } }, // Protection of Steel,
+    { 2514, { 45, 46 } }, // Protection of Diamond,
+    { 2515, { 45, 46 } }, // Protection of Nature,
+    { 2516, { 125, 51 } }, // Foliage Shield,
+    { 2517, { 125, 65 } }, // Spirit of Eagle,
+    { 2518, { 126, 81 } }, // Ro's Smoldering Disjunction,
+    { 2519, { 95, 80 } }, // Circle of Seasons,
+    { 2520, { 42, 32 } }, // Nature's Recovery,
+    { 2521, { 95, 96 } }, // Talisman of the Beast,
+    { 2522, { 125, 64 } }, // Grow,
+    { 2523, { 125, 48 } }, // Form of the Bear,
+    { 2524, { 125, 65 } }, // Spirit of Bih`Li,
+    { 2525, { 45, 87 } }, // Harnessing of Spirit,
+    { 2526, { 42, 19 } }, // Disinfecting Aura,
+    { 2527, { 126, 88 } }, // Plague of Insects,
+    { 2528, { 79, 43 } }, // Regrowth of Dar Khura,
+    { 2529, { 95, 80 } }, // Talisman of Epuration,
+    { 2530, { 45, 87 } }, // Khura's Focusing,
+    { 2531, { 18, 106 } }, // Summon Elemental Defender,
+    { 2532, { 18, 106 } }, // Summon Phantom Leather,
+    { 2533, { 18, 106 } }, // Summon Phantom Chain,
+    { 2534, { 18, 106 } }, // Summon Phantom Plate,
+    { 2535, { 18, 106 } }, // Summon Elemental Blanket,
+    { 2536, { 69, 42 } }, // Transon's Elemental Infusion,
+    { 2537, { 125, 51 } }, // Veil of Elements,
+    { 2538, { 18, 109 } }, // Mass Mystical Transvergance,
+    { 2539, { 45, 44 } }, // Transon's Phantasmal Protection,
+    { 2540, { 25, 38 } }, // Shock of Fiery Blades,
+    { 2541, { 69, 70 } }, // Focus Death,
+    { 2542, { 126, 124 } }, // Shackle of Bone,
+    { 2543, { 20, 124 } }, // Eternities Torment,
+    { 2544, { 126, 124 } }, // Shackle of Spirit,
+    { 2545, { 126, 89 } }, // Insidious Retrogression,
+    { 2546, { 114, 76 } }, // Degeneration,
+    { 2547, { 114, 76 } }, // Succussion of Shadows,
+    { 2548, { 114, 76 } }, // Crippling Claudication,
+    { 2549, { 126, 60 } }, // Mind Wrack,
+    { 2550, { 114, 33 } }, // Zevfeer's Theft of Vitae,
+    { 2551, { 125, 21 } }, // O'Keils Embers,
+    { 2552, { 25, 58 } }, // Garrisons Mighty Mana Shock,
+    { 2553, { 69, 101 } }, // Minor Familiar,
+    { 2554, { 126, 83 } }, // Elnerick's Entombment of Ice,
+    { 2555, { 69, 101 } }, // Lesser Familiar,
+    { 2556, { 69, 71 } }, // Firetree's Familiar Augment,
+    { 2557, { 69, 101 } }, // Familiar,
+    { 2558, { 123, 64 } }, // Decession,
+    { 2559, { 125, 93 } }, // Spellshield,
+    { 2560, { 69, 101 } }, // Greater Familiar,
+    { 2561, { 95, 39 } }, // Intellectual Advancement,
+    { 2562, { 95, 39 } }, // Intellectual Superiority,
+    { 2563, { 125, 128 } }, // Haunting Visage,
+    { 2564, { 125, 128 } }, // Calming Visage,
+    { 2565, { 125, 48 } }, // Illusion: Imp,
+    { 2566, { 125, 16 } }, // Trickster's Augmentation,
+    { 2567, { 125, 128 } }, // Beguiling Visage,
+    { 2568, { 125, 128 } }, // Horrifying Visage,
+    { 2569, { 125, 128 } }, // Glamorous Visage,
+    { 2570, { 79, 59 } }, // Koadic's Endless Intellect,
+    { 2571, { 114, 76 } }, // Despair,
+    { 2572, { 114, 76 } }, // Scream of Hate,
+    { 2573, { 114, 76 } }, // Scream of Pain,
+    { 2574, { 125, 16 } }, // Scream of Death,
+    { 2575, { 114, 76 } }, // Abduction of Strength,
+    { 2576, { 125, 16 } }, // Mental Corruption,
+    { 2577, { 114, 76 } }, // Torrent of Hate,
+    { 2578, { 114, 76 } }, // Torrent of Pain,
+    { 2579, { 114, 76 } }, // Torrent of Fatigue,
+    { 2580, { 45, 87 } }, // Cloak of the Akheva,
+    { 2581, { 25, 97 } }, // Cease,
+    { 2582, { 25, 97 } }, // Desist,
+    { 2583, { 125, 16 } }, // Instrument of Nife,
+    { 2584, { 45, 47 } }, // Divine Vigor,
+    { 2585, { 125, 41 } }, // Valor of Marr,
+    { 2586, { 126, 60 } }, // Thunder of Karana,
+    { 2587, { 25, 97 } }, // Quellious' Word of Tranquility,
+    { 2588, { 125, 17 } }, // Breath of Tunare,
+    { 2589, { 42, 42 } }, // Healing Wave of Prexus,
+    { 2590, { 45, 47 } }, // Brell's Mountainous Barrier,
+    { 2591, { 126, 89 } }, // Tangling Weeds,
+    { 2592, { 125, 129 } }, // Hawk Eye,
+    { 2593, { 125, 21 } }, // Riftwind's Protection,
+    { 2594, { 95, 7 } }, // Nature's Precision,
+    { 2595, { 125, 21 } }, // Force of Nature,
+    { 2596, { 125, 129 } }, // Falcon Eye,
+    { 2597, { 126, 53 } }, // Jolting Blades,
+    { 2598, { 95, 7 } }, // Mark of the Predator,
+    { 2599, { 125, 129 } }, // Eagle Eye,
+    { 2600, { 45, 47 } }, // Warder's Protection,
+    { 2601, { 125, 64 } }, // Magical Monologue,
+    { 2602, { 125, 64 } }, // Song of Sustenance,
+    { 2603, { 125, 64 } }, // Amplification,
+    { 2604, { 125, 16 } }, // Katta's Song of Sword Dancing,
+    { 2605, { 125, 65 } }, // Selo`s Accelerating Chorus,
+    { 2606, { 125, 41 } }, // Battlecry of the Vah Shir,
+    { 2607, { 95, 80 } }, // Elemental Chorus,
+    { 2608, { 95, 80 } }, // Purifying Chorus,
+    { 2609, { 79, 44 } }, // Chorus of Replenishment,
+    { 2610, { 125, 41 } }, // Warsong of the Vah Shir,
+    { 2611, { 69, 42 } }, // Sharik's Replenishing,
+    { 2612, { 69, 104 } }, // Spirit of Sharik,
+    { 2613, { 69, 42 } }, // Keshuval's Rejuvenation,
+    { 2614, { 69, 104 } }, // Spirit of Keshuval,
+    { 2615, { 69, 42 } }, // Herikol's Soothing,
+    { 2616, { 69, 104 } }, // Spirit of Herikol,
+    { 2617, { 69, 42 } }, // Yekan's Recovery,
+    { 2618, { 69, 104 } }, // Spirit of Yekan,
+    { 2619, { 69, 70 } }, // Yekan's Quickening,
+    { 2620, { 69, 42 } }, // Vigor of Zehkes,
+    { 2621, { 69, 104 } }, // Spirit of Kashek,
+    { 2622, { 69, 42 } }, // Aid of Khurenz,
+    { 2623, { 69, 104 } }, // Spirit of Omakin,
+    { 2624, { 69, 42 } }, // Sha's Restoration,
+    { 2625, { 69, 70 } }, // Omakin's Alacrity,
+    { 2626, { 69, 104 } }, // Spirit of Zehkes,
+    { 2627, { 69, 104 } }, // Spirit of Khurenz,
+    { 2628, { 69, 70 } }, // Sha's Ferocity,
+    { 2629, { 79, 44 } }, // Spiritual Purity,
+    { 2630, { 45, 47 } }, // Spiritual Strength,
+    { 2631, { 69, 104 } }, // Spirit of Khati Sha,
+    { 2632, { 69, 104 } }, // Summon Warder,
+    { 2633, { 69, 104 } }, // Spirit of Khaliz,
+    { 2634, { 126, 88 } }, // Sha's Lethargy,
+    { 2635, { 69, 71 } }, // Spirit of Lightning,
+    { 2636, { 69, 71 } }, // Spirit of the Blizzard,
+    { 2637, { 69, 71 } }, // Spirit of Inferno,
+    { 2638, { 69, 71 } }, // Spirit of the Scorpion,
+    { 2639, { 69, 71 } }, // Spirit of Vermin,
+    { 2640, { 69, 71 } }, // Spirit of Wind,
+    { 2641, { 69, 71 } }, // Spirit of the Storm,
+    { 2642, { 25, 38 } }, // Claw of Khati Sha,
+    { 2650, { 25, 38 } }, // Blazing Heat,
+    { 2651, { 25, 58 } }, // Vibrant Might,
+    { 2652, { 25, 58 } }, // Descending Might,
+    { 2654, { 25, 38 } }, // Fireblast,
+    { 2656, { 25, 58 } }, // Wrathful Strike,
+    { 2657, { 25, 58 } }, // Terrifying Darkness,
+    { 2658, { 25, 58 } }, // Lightning Surge,
+    { 2662, { 25, 58 } }, // Storm of Lightning,
+    { 2663, { 25, 58 } }, // Clash of Will,
+    { 2664, { 25, 14 } }, // Frostcall,
+    { 2665, { 25, 14 } }, // Wintercall,
+    { 2669, { 25, 14 } }, // Storm of Ice,
+    { 2670, { 25, 124 } }, // Rebuke the Dead,
+    { 2678, { 25, 75 } }, // Fungal Vengeance,
+    { 2710, { 25, 38 } }, // Trickster's Torment,
+    { 2711, { 25, 38 } }, // Trickster's TormentSK,
+    { 2717, { 25, 29 } }, // Mental Corruption Strike,
+    { 2720, { 25, 58 } }, // Spirit of Lightning Strike,
+    { 2721, { 25, 14 } }, // Spirit of Blizzard Strike,
+    { 2722, { 25, 38 } }, // Spirit of Inferno Strike,
+    { 2723, { 25, 75 } }, // Spirit of Scorpion Strike,
+    { 2724, { 25, 29 } }, // Spirit of Vermin Strike,
+    { 2725, { 25, 58 } }, // Spirit of Wind Strike,
+    { 2726, { 25, 38 } }, // Spirit of Storm Strike,
+    { 2729, { 25, 124 } }, // Condemnation of Nife,
+    { 2732, { 25, 38 } }, // Molten Fist,
+    { 2734, { 123, 57 } }, // The Nexus,
+    { 2736, { 126, 31 } }, // SpellTheft1,
+    { 2742, { 42, 19 } }, // Purify Soul,
+    { 2750, { 125, 48 } }, // Rabid Bear,
+    { 2752, { 69, 42 } }, // Restore Companion,
+    { 2754, { 69, 70 } }, // Frenzied Burnout,
+    { 2757, { 126, 37 } }, // Wave of Revulsion,
+    { 2758, { 69, 101 } }, // Improved Familiar,
+    { 2759, { 126, 13 } }, // Undead Pact,
+    { 2761, { 126, 13 } }, // Dominating Gaze,
+    { 2762, { 25, 29 } }, // Disease Touch,
+    { 2763, { 25, 75 } }, // Poison Touch,
+    { 2764, { 125, 64 } }, // Call to Corpse,
+    { 2766, { 114, 43 } }, // Life Curse,
+    { 2767, { 25, 58 } }, // Dragon Force,
+    { 2768, { 25, 58 } }, // Grimling LT 30,
+    { 2770, { 25, 75 } }, // Rain of Spores,
+    { 2802, { 25, 0 } }, // Flurry of Pebbles,
+    { 2809, { 25, 14 } }, // Wave of Death,
+    { 2816, { 25, 58 } }, // Storm Tremor,
+    { 2822, { 25, 58 } }, // Upheaval,
+    { 2826, { 125, 49 } }, // Illusion: Vah Shir,
+    { 2833, { 25, 38 } }, // AdvisorNova,
+    { 2836, { 25, 14 } }, // Grimling Comet,
+    { 2842, { 25, 29 } }, // Shrieker Stun,
+    { 2858, { 25, 0 } }, // AcryliaKB,
+    { 2859, { 25, 0 } }, // Touch of Vinitras,
+    { 2877, { 25, 14 } }, // Moonfire,
+    { 2878, { 25, 38 } }, // Fireclaw,
+    { 2879, { 79, 43 } }, // Phantasmal Armor,
+    { 2880, { 42, 19 } }, // Remove Greater Curse,
+    { 2881, { 125, 64 } }, // Everlasting Breath,
+    { 2882, { 69, 71 } }, // Firetree's Familiar Enhancement,
+    { 2883, { 25, 58 } }, // Elnerick's Electrical Rending,
+    { 2884, { 25, 38 } }, // Garrison's Superior Sundering,
+    { 2885, { 20, 38 } }, // Funeral Pyre of Kelador,
+    { 2886, { 125, 129 } }, // Acumen of Dar Khura,
+    { 2887, { 79, 59 } }, // Mask of the Stalker,
+    { 2888, { 69, 71 } }, // Spirit of Flame,
+    { 2889, { 25, 38 } }, // Spirit of Flame Strike,
+    { 2890, { 69, 71 } }, // Spirit of Snow,
+    { 2891, { 25, 14 } }, // Spirit of Snow Strike,
+    { 2892, { 125, 17 } }, // Deathly Temptation,
+    { 2893, { 45, 112 } }, // Marzin's Mark,
+    { 2894, { 125, 55 } }, // Levitation,
+    { 2895, { 125, 41 } }, // Speed of the Brood,
+    { 2896, { 69, 42 } }, // Transon's Elemental Renewal,
+    { 2901, { 25, 0 } }, // Illumination,
+    { 2902, { 25, 75 } }, // Shissar Broodling Poison,
+    { 2908, { 25, 58 } }, // Banshee Wail,
+    { 2927, { 25, 58 } }, // Storm Tremor,
+    { 2936, { 126, 60 } }, // Ervaj's Lost Composition,
+    { 2941, { 95, 7 } }, // Savagery,
+    { 2942, { 126, 88 } }, // Sha's Advantage,
+    { 2943, { 123, 57 } }, // Translocate: Nexus,
+    { 2944, { 123, 57 } }, // Nexus Portal,
+    { 2945, { 123, 57 } }, // Nexus Gate,
+    { 2946, { 42, 19 } }, // Remove Curse,
+    { 2950, { 25, 58 } }, // Grol Baku Strike,
+    { 2951, { 25, 58 } }, // Grol Baku Strike,
+    { 2952, { 25, 58 } }, // Strike of the Grol Baku,
+    { 2956, { 25, 38 } }, // Fire Blast,
+    { 2957, { 25, 14 } }, // Water Blast,
+    { 2969, { 114, 76 } }, // Shadow Creep,
+    { 2973, { 25, 38 } }, // Ember Strike,
+    { 2984, { 25, 29 } }, // Lotus Spines,
+    { 2988, { 25, 75 } }, // Wave of Toxicity,
+    { 2991, { 25, 14 } }, // Deathly Ice,
+    { 2992, { 25, 38 } }, // Deathly Fire,
+    { 2993, { 25, 75 } }, // Deathly Spores,
+    { 2994, { 25, 29 } }, // Deathly Fever,
+    { 2995, { 25, 75 } }, // Deep Spores,
+    { 2996, { 25, 58 } }, // Claw of the Hunter,
+    { 2997, { 25, 38 } }, // Claw of the Beast,
+    { 2999, { 25, 58 } }, // Claw of Bestial Fury,
+    { 3000, { 25, 0 } }, // Devouring Nightmare,
+    { 3004, { 25, 38 } }, // Fist of Lava,
+    { 3005, { 25, 38 } }, // Ball of Lava,
+    { 3013, { 25, 38 } }, // Fiery Strike,
+    { 3017, { 25, 38 } }, // Mighty Bellow of Fire,
+    { 3018, { 25, 38 } }, // Nova Inferno,
+    { 3020, { 25, 38 } }, // Rain of Burning Fire,
+    { 3030, { 126, 35 } }, // Dreams of Thule,
+    { 3031, { 79, 44 } }, // Xegony's Phantasmal Guard,
+    { 3032, { 114, 43 } }, // Touch of Mujaki,
+    { 3034, { 69, 99 } }, // Aeldorb's Animation,
+    { 3035, { 25, 75 } }, // Neurotoxin,
+    { 3036, { 25, 14 } }, // Wrath of Ice,
+    { 3037, { 25, 38 } }, // Wrath of Fire,
+    { 3038, { 25, 58 } }, // Wrath of Wind,
+    { 3039, { 125, 21 } }, // Protection of the Wild,
+    { 3040, { 18, 64 } }, // Belt of Magi'Kot,
+    { 3041, { 18, 64 } }, // Blade of Walnan,
+    { 3042, { 18, 64 } }, // Fist of Ixiblat,
+    { 3043, { 18, 64 } }, // Blade of The Kedge,
+    { 3044, { 18, 64 } }, // Girdle of Magi'Kot,
+    { 3045, { 18, 109 } }, // Talisman of Return,
+    { 3047, { 45, 112 } }, // Kazad`s Mark,
+    { 3051, { 25, 38 } }, // Fiery Assault,
+    { 3057, { 25, 14 } }, // Tidal Freeze,
+    { 3063, { 125, 49 } }, // Illusion: Froglok,
+    { 3066, { 126, 88 } }, // Requiem of Time,
+    { 3069, { 25, 58 } }, // Seething Hatred,
+    { 3071, { 25, 38 } }, // Insipid Dreams,
+    { 3100, { 125, 64 } }, // Mark of Retaliation,
+    { 3107, { 125, 16 } }, // Cry of Fire,
+    { 3129, { 25, 58 } }, // Call of Sky Strike,
+    { 3130, { 25, 58 } }, // Call of Sky Strike,
+    { 3131, { 25, 38 } }, // Call of Fire Strike,
+    { 3132, { 25, 38 } }, // Call of Fire Strike,
+    { 3133, { 25, 38 } }, // Cry of Fire Strike,
+    { 3134, { 123, 116 } }, // Portal of Knowledge,
+    { 3135, { 18, 110 } }, // Hammer of Divinity,
+    { 3136, { 18, 110 } }, // Hammer of Souls,
+    { 3156, { 25, 58 } }, // Torrent of Brambles,
+    { 3162, { 25, 58 } }, // Wind Strike,
+    { 3163, { 25, 58 } }, // Storm Avalanche,
+    { 3164, { 25, 29 } }, // Froglok Misery,
+    { 3167, { 25, 58 } }, // Strike of Marr,
+    { 3172, { 25, 58 } }, // Denial,
+    { 3176, { 25, 0 } }, // Butchery,
+    { 3177, { 25, 58 } }, // Prayer of Pain,
+    { 3178, { 125, 41 } }, // Vallon's Quickening,
+    { 3179, { 25, 58 } }, // Spirit of Rellic Strike,
+    { 3180, { 123, 116 } }, // Knowledge Portal,
+    { 3181, { 123, 116 } }, // Translocate: Knowledge,
+    { 3182, { 123, 116 } }, // Ring of Knowledge,
+    { 3183, { 123, 116 } }, // Knowledge Gate,
+    { 3184, { 123, 116 } }, // Circle of Knowledge,
+    { 3185, { 125, 65 } }, // Flight of Eagles,
+    { 3186, { 95, 7 } }, // Yaulp VI,
+    { 3187, { 20, 124 } }, // Sermon of Penitence,
+    { 3188, { 18, 109 } }, // Rod of Mystical Transvergance,
+    { 3189, { 25, 38 } }, // Tears of Arlyxir,
+    { 3190, { 42, 19 } }, // Crusader`s Touch,
+    { 3191, { 25, 58 } }, // Shock of Magic,
+    { 3192, { 126, 83 } }, // Earthen Roots,
+    { 3194, { 126, 83 } }, // Greater Fetter,
+    { 3195, { 126, 83 } }, // Greater Immobilize,
+    { 3196, { 126, 83 } }, // Petrifying Earth,
+    { 3197, { 126, 11 } }, // Pacification,
+    { 3198, { 125, 21 } }, // Flameshield of Ro,
+    { 3199, { 125, 84 } }, // Arcane Rune,
+    { 3205, { 18, 107 } }, // Summon Platinum Choker,
+    { 3206, { 18, 107 } }, // Summon Runed Mantle,
+    { 3207, { 18, 107 } }, // Summon Sapphire Bracelet,
+    { 3208, { 18, 107 } }, // Summon Spiked Ring,
+    { 3209, { 18, 107 } }, // Summon Glowing Bauble,
+    { 3210, { 18, 107 } }, // Summon Jewelry Bag,
+    { 3221, { 25, 58 } }, // Shattering Glass,
+    { 3222, { 25, 58 } }, // Web of Glass,
+    { 3223, { 25, 58 } }, // Shards of Glass,
+    { 3227, { 125, 16 } }, // Shroud of Chaos,
+    { 3229, { 126, 53 } }, // Boggle,
+    { 3232, { 42, 42 } }, // Karana's Renewal,
+    { 3233, { 42, 42 } }, // Tnarg`s Mending,
+    { 3234, { 45, 46 } }, // Protection of the Nine,
+    { 3235, { 45, 87 } }, // Focus of Soul,
+    { 3236, { 25, 75 } }, // no spell,
+    { 3237, { 69, 70 } }, // Burnout V,
+    { 3238, { 25, 111 } }, // Destroy Summoned,
+    { 3239, { 69, 42 } }, // Planar Renewal,
+    { 3240, { 125, 41 } }, // Speed of Vallon,
+    { 3241, { 125, 16 } }, // Night`s Dark Terror,
+    { 3242, { 95, 80 } }, // Guard of Druzzil,
+    { 3243, { 123, 64 } }, // Teleport,
+    { 3244, { 123, 64 } }, // Greater Decession,
+    { 3245, { 25, 97 } }, // Force of Akilae,
+    { 3246, { 126, 83 } }, // Shackles of Tunare,
+    { 3247, { 45, 87 } }, // Aura of the Crusader,
+    { 3255, { 125, 21 } }, // Wrath of the Wild,
+    { 3256, { 125, 21 } }, // Wrath of the Wild,
+    { 3257, { 125, 21 } }, // Wrath of the Wild,
+    { 3258, { 125, 84 } }, // Eldritch Rune,
+    { 3259, { 125, 84 } }, // Eldritch Rune,
+    { 3260, { 125, 84 } }, // Eldritch Rune,
+    { 3264, { 69, 101 } }, // Allegiant Familiar,
+    { 3265, { 69, 102 } }, // Servant of Ro,
+    { 3266, { 69, 102 } }, // Servant of Ro,
+    { 3267, { 69, 102 } }, // Servant of Ro,
+    { 3271, { 125, 48 } }, // Guardian of the Forest,
+    { 3272, { 125, 48 } }, // Guardian of the Forest,
+    { 3273, { 125, 48 } }, // Guardian of the Forest,
+    { 3274, { 126, 83 } }, // Virulent Paralysis,
+    { 3275, { 126, 83 } }, // Virulent Paralysis,
+    { 3276, { 126, 83 } }, // Virulent Paralysis,
+    { 3281, { 25, 38 } }, // Servant's Bolt,
+    { 3282, { 25, 58 } }, // Boastful Bellow,
+    { 3289, { 125, 48 } }, // Frenzy of Spirit,
+    { 3290, { 69, 71 } }, // Hobble of Spirits,
+    { 3291, { 79, 59 } }, // Paragon of Spirit,
+    { 3295, { 125, 21 } }, // Legacy of Bracken,
+    { 3296, { 45, 46 } }, // Faith,
+    { 3297, { 42, 19 } }, // Radiant Cure1,
+    { 3298, { 42, 19 } }, // Radiant Cure2,
+    { 3299, { 42, 19 } }, // Radiant Cure3,
+    { 3300, { 45, 87 } }, // Shield of the Arcane,
+    { 3301, { 125, 84 } }, // Force Shield,
+    { 3302, { 45, 87 } }, // Shield of Maelin,
+    { 3303, { 20, 75 } }, // Blood of Thule,
+    { 3304, { 69, 103 } }, // Legacy of Zek,
+    { 3305, { 69, 70 } }, // Rune of Death,
+    { 3306, { 114, 33 } }, // Saryrn's Kiss,
+    { 3308, { 126, 35 } }, // Death's Silence,
+    { 3309, { 20, 58 } }, // Embracing Darkness,
+    { 3310, { 69, 103 } }, // Saryrn's Companion,
+    { 3311, { 125, 17 } }, // Seduction of Saryrn,
+    { 3312, { 69, 42 } }, // Touch of Death,
+    { 3314, { 69, 103 } }, // Child of Bertoxxulous,
+    { 3315, { 20, 29 } }, // Dark Plague,
+    { 3316, { 126, 13 } }, // Word of Terris,
+    { 3317, { 69, 98 } }, // Ward of Xegony,
+    { 3318, { 25, 38 } }, // Firebolt of Tallon,
+    { 3319, { 25, 38 } }, // Sun Storm,
+    { 3320, { 69, 105 } }, // Servant of Marr,
+    { 3321, { 25, 58 } }, // Black Steel,
+    { 3322, { 69, 102 } }, // Child of Ro,
+    { 3323, { 25, 58 } }, // Maelstrom of Thunder,
+    { 3324, { 69, 100 } }, // Rathe's Son,
+    { 3325, { 25, 38 } }, // Sun Vortex,
+    { 3326, { 95, 80 } }, // Resistant Armor,
+    { 3327, { 25, 38 } }, // Tears of Ro,
+    { 3328, { 25, 58 } }, // Lure of Thunder,
+    { 3329, { 95, 80 } }, // Elemental Barrier,
+    { 3330, { 25, 38 } }, // Draught of Ro,
+    { 3331, { 25, 38 } }, // Lure of Ro,
+    { 3332, { 25, 14 } }, // Tears of Marr,
+    { 3333, { 25, 97 } }, // Telekin,
+    { 3334, { 25, 58 } }, // Draught of Thunder,
+    { 3335, { 25, 58 } }, // Agnarr's Thunder,
+    { 3336, { 25, 14 } }, // Draught of E`ci,
+    { 3337, { 125, 64 } }, // Iceflame of E`ci,
+    { 3338, { 42, 61 } }, // Harvest of Druzzil,
+    { 3339, { 25, 38 } }, // Strike of Solusek,
+    { 3341, { 126, 35 } }, // Apathy,
+    { 3342, { 126, 81 } }, // Howl of Tashan,
+    { 3343, { 125, 84 } }, // Rune of Zebuxoruk,
+    { 3344, { 18, 50 } }, // Imbue Nightmare,
+    { 3345, { 20, 58 } }, // Strangle,
+    { 3346, { 18, 50 } }, // Imbue Storm,
+    { 3347, { 126, 13 } }, // Beckon,
+    { 3348, { 20, 58 } }, // Torment of Scio,
+    { 3349, { 25, 58 } }, // Insanity,
+    { 3350, { 79, 59 } }, // Tranquility,
+    { 3351, { 125, 84 } }, // Uproar,
+    { 3352, { 18, 50 } }, // Imbue Earth,
+    { 3353, { 18, 50 } }, // Imbue Air,
+    { 3354, { 126, 35 } }, // Sleep,
+    { 3355, { 126, 13 } }, // Command of Druzzil,
+    { 3356, { 18, 50 } }, // Imbue Fire,
+    { 3357, { 18, 50 } }, // Imbue Water,
+    { 3358, { 126, 35 } }, // Bliss,
+    { 3359, { 126, 35 } }, // Word of Morell,
+    { 3360, { 79, 59 } }, // Voice of Quellious,
+    { 3361, { 126, 11 } }, // Silent Song of Quellious,
+    { 3362, { 125, 41 } }, // Rizlona's Call of Flame,
+    { 3363, { 20, 29 } }, // Tuyen`s Chant of the Plague,
+    { 3364, { 126, 31 } }, // Druzzil's Disillusionment,
+    { 3365, { 126, 88 } }, // Melody of Mischief,
+    { 3366, { 25, 58 } }, // Saryrn's Scream of Pain,
+    { 3367, { 20, 38 } }, // Tuyen`s Chant of Fire,
+    { 3368, { 125, 21 } }, // Psalm of Veeshan,
+    { 3369, { 126, 35 } }, // Dreams of Terris,
+    { 3370, { 20, 75 } }, // Tuyen`s Chant of Venom,
+    { 3371, { 126, 13 } }, // Call of the Banshee,
+    { 3372, { 79, 44 } }, // Chorus of Marr,
+    { 3373, { 20, 14 } }, // Tuyen`s Chant of Ice,
+    { 3374, { 125, 41 } }, // Warsong of Zek,
+    { 3375, { 126, 81 } }, // Harmony of Sound,
+    { 3376, { 126, 35 } }, // Lullaby of Morell,
+    { 3377, { 69, 104 } }, // True Spirit,
+    { 3378, { 95, 2 } }, // Agility of the Wrulan,
+    { 3379, { 25, 75 } }, // Spear of Torment,
+    { 3380, { 126, 88 } }, // Cloud of Grummus,
+    { 3381, { 95, 6 } }, // Ancestral Guard,
+    { 3382, { 95, 94 } }, // Endurance of the Boar,
+    { 3383, { 95, 2 } }, // Talisman of the Wrulan,
+    { 3384, { 95, 80 } }, // Talisman of the Tribunal,
+    { 3385, { 25, 75 } }, // Tears of Saryrn,
+    { 3386, { 126, 81 } }, // Malicious Decay,
+    { 3387, { 126, 81 } }, // Malosinia,
+    { 3388, { 95, 96 } }, // Strength of the Diaku,
+    { 3389, { 95, 94 } }, // Talisman of the Boar,
+    { 3390, { 25, 14 } }, // Velium Strike,
+    { 3391, { 125, 41 } }, // Talisman of Alacrity,
+    { 3392, { 95, 96 } }, // Talisman of the Diaku,
+    { 3393, { 125, 64 } }, // Tiny Terror,
+    { 3394, { 20, 29 } }, // Breath of Ultor,
+    { 3395, { 126, 81 } }, // Malos,
+    { 3396, { 20, 75 } }, // Blood of Saryrn,
+    { 3397, { 45, 87 } }, // Focus of the Seventh,
+    { 3398, { 42, 32 } }, // Quiescence,
+    { 3399, { 95, 7 } }, // Ferine Avatar,
+    { 3400, { 20, 58 } }, // Festering Darkness,
+    { 3401, { 114, 43 } }, // Touch of Volatis,
+    { 3403, { 114, 76 } }, // Aura of Pain,
+    { 3405, { 126, 53 } }, // Terror of Thule,
+    { 3406, { 114, 76 } }, // Aura of Darkness,
+    { 3408, { 114, 33 } }, // Zevfeer's Bite,
+    { 3410, { 125, 128 } }, // Voice of Thule,
+    { 3411, { 114, 76 } }, // Aura of Hate,
+    { 3413, { 114, 43 } }, // Touch of Innoruuk,
+    { 3415, { 125, 16 } }, // Nature's Rebuke,
+    { 3416, { 25, 111 } }, // Nature's Rebuke Strike,
+    { 3417, { 95, 7 } }, // Spirit of the Predator,
+    { 3418, { 25, 14 } }, // Frozen Wind,
+    { 3419, { 125, 21 } }, // Call of the Rathe,
+    { 3420, { 125, 16 } }, // Cry of Thunder,
+    { 3421, { 25, 58 } }, // Cry of Thunder Strike,
+    { 3422, { 125, 16 } }, // Ward of Nife,
+    { 3423, { 25, 124 } }, // Ward of Nife Strike,
+    { 3424, { 125, 16 } }, // Pious Might,
+    { 3425, { 25, 58 } }, // Pious Might Strike,
+    { 3426, { 25, 97 } }, // Quellious' Word of Serenity,
+    { 3427, { 42, 42 } }, // Wave of Marr,
+    { 3428, { 25, 124 } }, // Deny Undead,
+    { 3429, { 42, 42 } }, // Touch of Nife,
+    { 3430, { 42, 77 } }, // Light of Nife,
+    { 3431, { 25, 38 } }, // Brushfire,
+    { 3432, { 45, 47 } }, // Brell's Stalwart Shield,
+    { 3433, { 79, 43 } }, // Replenishment,
+    { 3434, { 25, 58 } }, // Storm's Fury,
+    { 3435, { 126, 81 } }, // Hand of Ro,
+    { 3436, { 25, 14 } }, // Winter's Storm,
+    { 3437, { 20, 38 } }, // Immolation of Ro,
+    { 3438, { 25, 58 } }, // Karana's Rage,
+    { 3439, { 95, 96 } }, // Nature's Might,
+    { 3440, { 126, 81 } }, // Ro's Illumination,
+    { 3441, { 79, 43 } }, // Blessing of Replenishment,
+    { 3442, { 126, 81 } }, // E'ci's Frosty Breath,
+    { 3443, { 42, 42 } }, // Nature's Infusion,
+    { 3444, { 95, 80 } }, // Protection of Seasons,
+    { 3445, { 126, 13 } }, // Command of Tunare,
+    { 3446, { 20, 58 } }, // Swarming Death,
+    { 3447, { 126, 83 } }, // Savage Roots,
+    { 3448, { 125, 21 } }, // Shield of Bracken,
+    { 3449, { 25, 38 } }, // Summer's Flame,
+    { 3450, { 125, 21 } }, // Brackencoat,
+    { 3451, { 45, 46 } }, // Blessing of the Nine,
+    { 3452, { 25, 14 } }, // Winter's Frost,
+    { 3453, { 79, 59 } }, // Mask of the Forest,
+    { 3454, { 45, 96 } }, // Infusion of Spirit,
+    { 3455, { 69, 42 } }, // Healing of Sorsha,
+    { 3456, { 45, 47 } }, // Spiritual Vigor,
+    { 3457, { 69, 104 } }, // Spirit of Arag,
+    { 3458, { 69, 70 } }, // Arag`s Celerity,
+    { 3459, { 69, 71 } }, // Spirit of Rellic,
+    { 3460, { 79, 44 } }, // Spiritual Dominion,
+    { 3461, { 69, 104 } }, // Spirit of Sorsha,
+    { 3462, { 126, 88 } }, // Sha's Revenge,
+    { 3463, { 95, 7 } }, // Ferocity,
+    { 3464, { 25, 97 } }, // The Silent Command,
+    { 3465, { 42, 77 } }, // Supernal Remedy,
+    { 3466, { 45, 112 } }, // Symbol of Kazad,
+    { 3467, { 45, 1 } }, // Virtue,
+    { 3468, { 25, 124 } }, // Destroy Undead,
+    { 3469, { 125, 64 } }, // Mark of Kings,
+    { 3470, { 95, 6 } }, // Ward of Gallantry,
+    { 3471, { 42, 42 } }, // Word of Replenishment,
+    { 3472, { 125, 91 } }, // Blessing of Reverence,
+    { 3473, { 25, 58 } }, // Catastrophe,
+    { 3474, { 45, 87 } }, // Armor of the Zealot,
+    { 3475, { 42, 32 } }, // Supernal Elixir,
+    { 3476, { 25, 58 } }, // Condemnation,
+    { 3477, { 125, 21 } }, // Mark of the Righteous,
+    { 3478, { 18, 110 } }, // Hammer of Damnation,
+    { 3479, { 45, 1 } }, // Hand of Virtue,
+    { 3480, { 42, 42 } }, // Supernal Light,
+    { 3481, { 25, 97 } }, // Tarnation,
+    { 3482, { 25, 97 } }, // Sound of Might,
+    { 3483, { 126, 35 } }, // Elemental Silence,
+    { 3484, { 126, 13 } }, // Call of the Arch Mage,
+    { 3485, { 42, 32 } }, // Supernal Cleansing,
+    { 3486, { 125, 21 } }, // Maelstrom of Ro,
+    { 3487, { 45, 47 } }, // Strength of Tunare,
+    { 3488, { 125, 17 } }, // Pact of Hate,
+    { 3489, { 20, 75 } }, // Blood of Hate,
+    { 3490, { 45, 87 } }, // Cloak of Luclin,
+    { 3491, { 25, 29 } }, // Spear of Decay,
+    { 3492, { 20, 75 } }, // Scorpion Venom,
+    { 3493, { 25, 14 } }, // Frost Spear,
+    { 3494, { 18, 109 } }, // Luggald Blood,
+    { 3498, { 25, 58 } }, // Gallenite's Lifetap Test,
+    { 3560, { 25, 29 } }, // Spear of Pain,
+    { 3561, { 25, 29 } }, // Spear of Disease,
+    { 3562, { 25, 29 } }, // Spear of Plague,
+    { 3564, { 25, 38 } }, // Burning Arrow,
+    { 3565, { 25, 38 } }, // Flaming Arrow,
+    { 3566, { 20, 75 } }, // Tuyen`s Chant of Poison,
+    { 3567, { 20, 29 } }, // Tuyen`s Chant of Disease,
+    { 3568, { 25, 14 } }, // Ice Spear,
+    { 3569, { 25, 14 } }, // Frost Shard,
+    { 3570, { 25, 14 } }, // Ice Shard,
+    { 3571, { 25, 75 } }, // Torbas' Poison Blast,
+    { 3572, { 25, 75 } }, // Torbas' Venom Blast,
+    { 3573, { 25, 75 } }, // Shock of Venom,
+    { 3574, { 25, 75 } }, // Blast of Venom,
+    { 3575, { 125, 91 } }, // Blessing of Piety,
+    { 3576, { 125, 91 } }, // Blessing of Faith,
+    { 3577, { 42, 42 } }, // Wave of Life,
+    { 3578, { 45, 47 } }, // Brell's Steadfast Aegis,
+    { 3579, { 125, 65 } }, // Share Form of the Great Wolf,
+    { 3580, { 125, 48 } }, // Spirit of Ash,
+    { 3581, { 125, 55 } }, // O`Keils Levity,
+    { 3582, { 95, 80 } }, // Elemental Cloak,
+    { 3583, { 69, 64 } }, // Tiny Companion,
+    { 3584, { 69, 42 } }, // Refresh Summoning,
+    { 3585, { 126, 35 } }, // Entrancing Lights,
+    { 3586, { 125, 65 } }, // Illusion: Scaled Wolf,
+    { 3587, { 25, 58 } }, // Planar Strike,
+    { 3589, { 25, 58 } }, // Ethereal Strike,
+    { 3591, { 18, 50 } }, // Imbue Disease,
+    { 3592, { 18, 50 } }, // Imbue Valor,
+    { 3593, { 18, 50 } }, // Imbue War,
+    { 3594, { 18, 50 } }, // Imbue Torment,
+    { 3595, { 18, 50 } }, // Imbue Justice,
+    { 3601, { 126, 11 } }, // Harmony of Nature,
+    { 3618, { 25, 58 } }, // Eclipse Aura Strike,
+    { 3619, { 25, 58 } }, // Eclipse Aura Strike,
+    { 3621, { 25, 14 } }, // Frost Claw,
+    { 3623, { 25, 38 } }, // Burning Barb,
+    { 3624, { 25, 0 } }, // Anger,
+    { 3626, { 25, 38 } }, // Tendrils of Fire,
+    { 3630, { 25, 58 } }, // Time Lapse,
+    { 3645, { 25, 58 } }, // Sting of Ayonae,
+    { 3646, { 25, 29 } }, // Bite of Bertoxxulous,
+    { 3648, { 25, 58 } }, // Time Snap,
+    { 3650, { 25, 0 } }, // Dark Empathy Recourse,
+    { 3651, { 79, 44 } }, // Wind of Marr,
+    { 3665, { 25, 38 } }, // Curtain Call,
+    { 3668, { 20, 29 } }, // Pawn's Plight,
+    { 3670, { 25, 14 } }, // Queen's Checkmate,
+    { 3681, { 42, 19 } }, // Aria of Innocence,
+    { 3682, { 42, 19 } }, // Aria of Asceticism,
+    { 3683, { 42, 32 } }, // Ethereal Cleansing,
+    { 3684, { 42, 77 } }, // Light of Life,
+    { 3685, { 125, 64 } }, // Comatose,
+    { 3686, { 20, 75 } }, // Blood of Pain,
+    { 3687, { 20, 58 } }, // Swarm of Pain,
+    { 3688, { 25, 14 } }, // Icewind,
+    { 3689, { 20, 29 } }, // Malaria,
+    { 3690, { 69, 70 } }, // Bond of the Wild,
+    { 3691, { 45, 0 } }, // Bond of the Wild R.,
+    { 3692, { 45, 1 } }, // Temperance,
+    { 3693, { 42, 19 } }, // Pure Blood,
+    { 3694, { 42, 32 } }, // Stoicism,
+    { 3695, { 126, 81 } }, // Frost Zephyr,
+    { 3696, { 125, 129 } }, // Leviathan Eyes,
+    { 3697, { 126, 60 } }, // Scryer's Trespass,
+    { 3699, { 69, 42 } }, // Primal Remedy,
+    { 3700, { 69, 70 } }, // Elemental Empathy,
+    { 3702, { 114, 33 } }, // Auspice,
+    { 3704, { 69, 0 } }, // Soul Empathy,
+    { 3706, { 25, 14 } }, // Frozen Harpoon,
+    { 3748, { 25, 29 } }, // Insipid Decay,
+    { 3753, { 114, 76 } }, // Torrent of Agony,
+    { 3764, { 25, 75 } }, // Rain of Bile,
+    { 3785, { 25, 58 } }, // Hate's Fury,
+    { 3792, { 123, 67 } }, // Circle of Stonebrunt,
+    { 3793, { 123, 67 } }, // Stonebrunt Portal,
+    { 3794, { 123, 67 } }, // Ring of Stonebrunt,
+    { 3795, { 123, 67 } }, // Stonebrunt Gate,
+    { 3796, { 126, 60 } }, // Mind Tap,
+    { 3799, { 25, 97 } }, // Dismal Wind,
+    { 3803, { 25, 58 } }, // Pique,
+    { 3806, { 126, 53 } }, // Distraction,
+    { 3809, { 79, 43 } }, // Reclamation,
+    { 3810, { 25, 38 } }, // Eruption,
+    { 3811, { 125, 129 } }, // Vision Shift,
+    { 3833, { 123, 67 } }, // Translocate: Stonebrunt,
+    { 3834, { 42, 42 } }, // Healing Water,
+    { 3842, { 42, 19 } }, // Blood of Nadox,
+    { 3847, { 125, 48 } }, // Cloak of Khala Dun,
+    { 3848, { 25, 38 } }, // Tortured Memory II,
+    { 3849, { 123, 116 } }, // Alter Plane: Hate II,
+    { 3854, { 125, 48 } }, // Form of Protection,
+    { 3855, { 125, 48 } }, // Form of Defense,
+    { 3856, { 125, 48 } }, // Form of Endurance,
+    { 3857, { 125, 48 } }, // Form of Rejuvenation,
+    { 3861, { 125, 16 } }, // Pestilence Shock,
+    { 3864, { 125, 16 } }, // Soul Claw,
+    { 3876, { 25, 14 } }, // Frozen Shards,
+    { 3877, { 20, 58 } }, // Nightmares,
+    { 3878, { 25, 58 } }, // Time Rend,
+    { 3881, { 25, 0 } }, // Hand of Retribution,
+    { 3909, { 126, 88 } }, // Clinging Clay,
+    { 3910, { 25, 38 } }, // Flames of Condemnation,
+    { 3921, { 123, 64 } }, // Guide Evacuation,
+    { 3975, { 25, 97 } }, // Force of Akera,
+    { 3976, { 25, 58 } }, // Draught of Lightning,
+    { 3981, { 18, 64 } }, // Mass Clarify Mana,
+    { 3982, { 18, 64 } }, // Mass Crystallize Mana,
+    { 3983, { 18, 64 } }, // Mass Distill Mana,
+    { 3984, { 18, 34 } }, // Mass Enchant Adamantite,
+    { 3985, { 18, 34 } }, // Mass Enchant Brellium,
+    { 3986, { 18, 34 } }, // Mass Enchant Clay,
+    { 3987, { 18, 34 } }, // Mass Enchant Electrum,
+    { 3988, { 18, 34 } }, // Mass Enchant Gold,
+    { 3989, { 18, 34 } }, // Mass Enchant Mithril,
+    { 3990, { 18, 34 } }, // Mass Enchant Platinum,
+    { 3991, { 18, 34 } }, // Mass Enchant Silver,
+    { 3992, { 18, 34 } }, // Mass Enchant Steel,
+    { 3993, { 18, 34 } }, // Mass Enchant Velium,
+    { 3994, { 18, 50 } }, // Mass Imbue Amber,
+    { 3995, { 18, 50 } }, // Mass Imbue Black Pearl,
+    { 3996, { 18, 50 } }, // Mass Imbue Black Sapphire,
+    { 3997, { 18, 50 } }, // Mass Imbue Diamond,
+    { 3998, { 18, 50 } }, // Mass Imbue Emerald,
+    { 3999, { 18, 50 } }, // Mass Imbue Fire Opal,
+    { 4000, { 18, 50 } }, // Mass Imbue Ivory,
+    { 4001, { 18, 50 } }, // Mass Imbue Jade,
+    { 4002, { 18, 50 } }, // Mass Imbue Opal,
+    { 4003, { 18, 50 } }, // Mass Imbue Peridot,
+    { 4004, { 18, 50 } }, // Mass Imbue Plains Pebble,
+    { 4005, { 18, 50 } }, // Mass Imbue Rose Quartz,
+    { 4006, { 18, 50 } }, // Mass Imbue Ruby,
+    { 4007, { 18, 50 } }, // Mass Imbue Sapphire,
+    { 4008, { 18, 50 } }, // Mass Imbue Topaz,
+    { 4009, { 18, 64 } }, // Mass Purify Mana,
+    { 4010, { 18, 64 } }, // Mass Thicken Mana,
+    { 4011, { 69, 70 } }, // Kindle,
+    { 4017, { 125, 49 } }, // Illusion: Guktan,
+    { 4018, { 69, 10 } }, // RytanGuard1,
+    { 4019, { 69, 10 } }, // RytanGuard2,
+    { 4020, { 69, 10 } }, // RytanGuard3,
+    { 4021, { 69, 10 } }, // RytanGuard4,
+    { 4022, { 25, 38 } }, // RytanBoltTest,
+    { 4027, { 18, 107 } }, // Summon Wooden Bracelet,
+    { 4028, { 18, 107 } }, // Summon Stone Bracelet,
+    { 4029, { 18, 107 } }, // Summon Iron Bracelet,
+    { 4030, { 18, 107 } }, // Summon Steel Bracelet,
+    { 4049, { 95, 80 } }, // Circle of Cooling,
+    { 4050, { 95, 80 } }, // Circle of Warmth,
+    { 4051, { 95, 80 } }, // Talisman of Purity,
+    { 4052, { 95, 80 } }, // Talisman of Vitality,
+    { 4053, { 45, 1 } }, // Blessing of Temperance,
+    { 4054, { 125, 65 } }, // Spirit of the Shrew,
+    { 4055, { 125, 65 } }, // Pack Shrew,
+    { 4056, { 42, 19 } }, // Remove Minor Curse,
+    { 4057, { 42, 19 } }, // Remove Lesser Curse,
+    { 4058, { 125, 65 } }, // Feral Pack,
+    { 4059, { 125, 16 } }, // Call of Ice,
+    { 4062, { 125, 17 } }, // Dark Temptation,
+    { 4063, { 125, 17 } }, // Call of Darkness,
+    { 4064, { 45, 1 } }, // Austerity,
+    { 4065, { 45, 1 } }, // Blessing of Austerity,
+    { 4066, { 25, 14 } }, // Ice Meteor,
+    { 4067, { 125, 92 } }, // Ward of Calrena,
+    { 4068, { 125, 92 } }, // Guard of Calrena,
+    { 4069, { 125, 92 } }, // Protection of Calrena,
+    { 4070, { 125, 92 } }, // Magi Ward,
+    { 4071, { 125, 92 } }, // Mana Ward,
+    { 4072, { 125, 49 } }, // Deception,
+    { 4073, { 125, 92 } }, // Ward of Alendar,
+    { 4074, { 125, 92 } }, // Guard of Alendar,
+    { 4075, { 125, 92 } }, // Protection of Alendar,
+    { 4076, { 125, 92 } }, // Bulwark of Alendar,
+    { 4077, { 126, 13 } }, // Ordinance,
+    { 4078, { 25, 38 } }, // Wind of the Desert,
+    { 4079, { 69, 10 } }, // Ward of Calliav,
+    { 4080, { 69, 10 } }, // Guard of Calliav,
+    { 4081, { 69, 10 } }, // Protection of Calliav,
+    { 4082, { 18, 109 } }, // Summon: Orb of Exploration,
+    { 4083, { 125, 91 } }, // Rizlona's Embers,
+    { 4084, { 125, 91 } }, // Rizlona's Fire,
+    { 4085, { 125, 91 } }, // Forpar's Aria of Affliction,
+    { 4086, { 125, 91 } }, // Forpar's Psalm of Pain,
+    { 4087, { 125, 91 } }, // Forpar's Verse of Venom,
+    { 4088, { 125, 62 } }, // Ward of Vie,
+    { 4089, { 125, 62 } }, // Guard of Vie,
+    { 4090, { 125, 62 } }, // Protection of Vie,
+    { 4091, { 125, 62 } }, // Bulwark of Vie,
+    { 4092, { 20, 58 } }, // Curse,
+    { 4093, { 20, 58 } }, // Odium,
+    { 4094, { 20, 58 } }, // Anathema,
+    { 4095, { 20, 58 } }, // Bane,
+    { 4096, { 20, 58 } }, // Dark Soul,
+    { 4097, { 20, 58 } }, // Imprecation,
+    { 4098, { 20, 58 } }, // Horror,
+    { 4099, { 125, 78 } }, // Bounce,
+    { 4100, { 125, 78 } }, // Reflect,
+    { 4101, { 25, 124 } }, // Scythe of Innoruuk,
+    { 4102, { 25, 124 } }, // Scythe of Darkness,
+    { 4103, { 25, 124 } }, // Scythe of Death,
+    { 4104, { 20, 38 } }, // Vengeance of the Wild,
+    { 4105, { 20, 38 } }, // Vengeance of Nature,
+    { 4106, { 20, 38 } }, // Vengeance of Tunare,
+    { 4107, { 125, 65 } }, // Feral Form,
+    { 4108, { 125, 91 } }, // Aura of Reverence,
+    { 4109, { 45, 1 } }, // Guidance,
+    { 4110, { 25, 38 } }, // Burning Sand,
+    { 4111, { 20, 58 } }, // Fire Swarm,
+    { 4112, { 125, 91 } }, // Call of the Muse,
+    { 4210, { 20, 58 } }, // Fufil`s Diminishing Dirge,
+    { 4239, { 125, 64 } }, // Breathless Mist,
+    { 4240, { 125, 51 } }, // Essence of Concealment,
+    { 4241, { 125, 55 } }, // Weightless Mist,
+    { 4242, { 125, 65 } }, // Mist of the Wolf,
+    { 4252, { 66, 85 } }, // Xalirilan's Lesser Appraisal,
+    { 4253, { 66, 85 } }, // Xalirilan's Appraisal,
+    { 4254, { 66, 85 } }, // Xalirilan's Greater Appraisal,
+    { 4255, { 66, 85 } }, // Wuggan's Lesser Appraisal,
+    { 4256, { 66, 85 } }, // Wuggan's Appraisal,
+    { 4257, { 66, 85 } }, // Wuggan's Greater Appraisal,
+    { 4258, { 66, 85 } }, // Iony's Lesser Augury,
+    { 4259, { 66, 85 } }, // Iony's Augury,
+    { 4260, { 66, 85 } }, // Iony's Greater Augury,
+    { 4261, { 66, 85 } }, // Reebo's Lesser Augury,
+    { 4262, { 66, 85 } }, // Reebo's Augury,
+    { 4263, { 66, 85 } }, // Reebo's Greater Augury,
+    { 4264, { 66, 26 } }, // Xalirilan's Lesser Discombobulation,
+    { 4265, { 66, 26 } }, // Xalirilan's Discombobulation,
+    { 4266, { 66, 26 } }, // Xalirilan's Greater Discombobulation,
+    { 4267, { 66, 26 } }, // Wuggan's Lesser Discombobulation,
+    { 4268, { 66, 26 } }, // Wuggan's Discombobulation,
+    { 4269, { 66, 26 } }, // Wuggan's Greater Discombobulation,
+    { 4270, { 66, 26 } }, // Iony's Lesser Exorcism,
+    { 4271, { 66, 26 } }, // Iony's Exorcism,
+    { 4272, { 66, 26 } }, // Iony's Greater Exorcism,
+    { 4273, { 66, 26 } }, // Reebo's Lesser Exorcism,
+    { 4274, { 66, 26 } }, // Reebo's Exorcism,
+    { 4275, { 66, 26 } }, // Reebo's Greater Exorcism,
+    { 4276, { 66, 73 } }, // Xalirilan's Lesser Extrication,
+    { 4277, { 66, 73 } }, // Xalirilan's Extrication,
+    { 4278, { 66, 73 } }, // Xalirilan's Greater Extrication,
+    { 4279, { 66, 73 } }, // Wuggan's Lesser Extrication,
+    { 4280, { 66, 73 } }, // Wuggan's Extrication,
+    { 4281, { 66, 73 } }, // Wuggan's Greater Extrication,
+    { 4282, { 66, 73 } }, // Iony's Lesser Cleansing,
+    { 4283, { 66, 73 } }, // Iony's Cleansing,
+    { 4284, { 66, 73 } }, // Iony's Greater Cleansing,
+    { 4285, { 66, 73 } }, // Reebo's Lesser Cleansing,
+    { 4286, { 66, 73 } }, // Reebo's Cleansing,
+    { 4287, { 66, 73 } }, // Reebo's Greater Cleansing,
+    { 4291, { 79, 59 } }, // Aura of Quellious,
+    { 4350, { 18, 110 } }, // Transmute Hunter's Dagger,
+    { 4351, { 18, 110 } }, // Transmute Hunter's Barbs,
+    { 4352, { 18, 110 } }, // Transmute Wayfarer's Bread,
+    { 4353, { 18, 110 } }, // Transmute Wayfarer's Tonic,
+    { 4354, { 18, 110 } }, // Transmute Traveler's Bandage,
+    { 4355, { 18, 110 } }, // Transmute Wayfarer's Wine,
+    { 4356, { 25, 58 } }, // Bite of Ykesha,
+    { 4357, { 25, 58 } }, // Strike of Ykesha,
+    { 4358, { 25, 58 } }, // Force of Ykesha,
+    { 4359, { 25, 58 } }, // Wrath of Ykesha,
+    { 4360, { 25, 58 } }, // Rujarkian Breath,
+    { 4361, { 25, 58 } }, // Rujarkian Mist,
+    { 4362, { 25, 58 } }, // Rujarkian Poison,
+    { 4363, { 25, 58 } }, // Rujarkian Bile,
+    { 4364, { 25, 58 } }, // Rujarkian Venom,
+    { 4365, { 25, 58 } }, // Heated Blade,
+    { 4366, { 25, 58 } }, // Burning Blade,
+    { 4367, { 25, 58 } }, // Blazing Blade,
+    { 4368, { 25, 58 } }, // Flaming Blade,
+    { 4369, { 25, 58 } }, // Inferno Blade,
+    { 4370, { 25, 58 } }, // Vampire Touch,
+    { 4371, { 25, 58 } }, // Vampire Claw,
+    { 4372, { 25, 58 } }, // Vampire Talon,
+    { 4373, { 25, 58 } }, // Vampire Fangs,
+    { 4374, { 25, 58 } }, // Vampire Kiss,
+    { 4375, { 25, 58 } }, // Chill,
+    { 4376, { 25, 58 } }, // Icicle Strike,
+    { 4377, { 25, 58 } }, // Icicle Claw,
+    { 4378, { 25, 58 } }, // Vox' Bite,
+    { 4379, { 25, 58 } }, // Permafrost,
+    { 4380, { 125, 78 } }, // Mirror I,
+    { 4381, { 125, 78 } }, // Mirror II,
+    { 4382, { 125, 78 } }, // Mirror III,
+    { 4383, { 125, 78 } }, // Mirror IV,
+    { 4384, { 125, 62 } }, // Guard I,
+    { 4385, { 125, 62 } }, // Guard II,
+    { 4386, { 125, 62 } }, // Guard III,
+    { 4387, { 125, 62 } }, // Guard IV,
+    { 4388, { 125, 62 } }, // Spell Guard I,
+    { 4389, { 125, 62 } }, // Spell Guard II,
+    { 4390, { 125, 62 } }, // Spell Guard III,
+    { 4391, { 125, 62 } }, // Spell Guard IV,
+    { 4395, { 125, 65 } }, // Selo's Rhythm of Speed,
+    { 4408, { 25, 97 } }, // Color Cloud,
+    { 4413, { 25, 58 } }, // Golem Pulverize,
+    { 4414, { 25, 14 } }, // Rimebone Frost Burst,
+    { 4418, { 125, 48 } }, // Illusion: Frost Bone,
+    { 4489, { 126, 88 } }, // Taelosian Vengeance,
+    { 4492, { 25, 14 } }, // Geostrike,
+    { 4493, { 25, 38 } }, // Earth Wave,
+    { 4496, { 25, 38 } }, // Rock Storm,
+    { 4497, { 25, 14 } }, // Earth Shards,
+    { 4498, { 27, 119 } }, // Aggressive Discipline,
+    { 4499, { 27, 117 } }, // Defensive Discipline,
+    { 4500, { 27, 117 } }, // Holyforge Discipline,
+    { 4501, { 27, 119 } }, // Precision Discipline,
+    { 4502, { 27, 117 } }, // Voiddance Discipline,
+    { 4503, { 27, 117 } }, // Evasive Discipline,
+    { 4504, { 27, 118 } }, // Leechcurse Discipline,
+    { 4505, { 27, 119 } }, // Deadeye Discipline,
+    { 4506, { 27, 117 } }, // Trueshot Discipline,
+    { 4507, { 27, 119 } }, // Silentfist Discipline,
+    { 4508, { 27, 119 } }, // Ashenhand Discipline,
+    { 4509, { 27, 117 } }, // Whirlwind Discipline,
+    { 4510, { 27, 117 } }, // Stonestance Discipline,
+    { 4511, { 27, 119 } }, // Thunderkick Discipline,
+    { 4512, { 27, 118 } }, // Innerflame Discipline,
+    { 4513, { 27, 118 } }, // Hundred Fists Discipline,
+    { 4514, { 27, 119 } }, // Mighty Strike Discipline,
+    { 4515, { 27, 117 } }, // Nimble Discipline,
+    { 4516, { 27, 117 } }, // Deftdance Discipline,
+    { 4517, { 27, 118 } }, // Kinesthetics Discipline,
+    { 4518, { 27, 118 } }, // Sanctification Discipline,
+    { 4519, { 27, 118 } }, // Weapon Shield Discipline,
+    { 4520, { 27, 117 } }, // Unholy Aura Discipline,
+    { 4521, { 95, 7 } }, // Bestial Alignment I,
+    { 4522, { 95, 7 } }, // Bestial Alignment II,
+    { 4523, { 95, 7 } }, // Bestial Alignment III,
+    { 4524, { 95, 7 } }, // Bestial Alignment I,
+    { 4525, { 95, 7 } }, // Bestial Alignment II,
+    { 4526, { 95, 7 } }, // Bestial Alignment III,
+    { 4527, { 95, 7 } }, // Bestial Alignment I,
+    { 4528, { 95, 7 } }, // Bestial Alignment II,
+    { 4529, { 95, 7 } }, // Bestial Alignment III,
+    { 4530, { 95, 7 } }, // Bestial Alignment I,
+    { 4531, { 95, 7 } }, // Bestial Alignment II,
+    { 4532, { 95, 7 } }, // Bestial Alignment III,
+    { 4533, { 95, 7 } }, // Bestial Alignment I,
+    { 4534, { 95, 7 } }, // Bestial Alignment II,
+    { 4535, { 95, 7 } }, // Bestial Alignment III,
+    { 4536, { 125, 48 } }, // Frenzied Aura,
+    { 4537, { 69, 71 } }, // Icy Grasp,
+    { 4538, { 25, 58 } }, // Icy Grasp Strike,
+    { 4549, { 95, 7 } }, // Divine Avatar I,
+    { 4550, { 95, 7 } }, // Divine Avatar II,
+    { 4551, { 95, 7 } }, // Divine Avatar III,
+    { 4555, { 126, 13 } }, // Elemental Domination,
+    { 4567, { 20, 58 } }, // Aneuk Grasp,
+    { 4574, { 20, 58 } }, // Hynid Snap,
+    { 4578, { 25, 58 } }, // Turepta Crush,
+    { 4579, { 20, 58 } }, // Ukun Chains,
+    { 4585, { 27, 120 } }, // Resistant Discipline,
+    { 4586, { 27, 118 } }, // Puretone Discipline,
+    { 4587, { 27, 120 } }, // Fearless Discipline,
+    { 4588, { 115, 68 } }, // Infuriate,
+    { 4589, { 115, 22 } }, // Barrier,
+    { 4590, { 115, 22 } }, // Cover,
+    { 4591, { 115, 22 } }, // Guard,
+    { 4592, { 115, 22 } }, // Infallible,
+    { 4593, { 115, 90 } }, // Crippling Strike,
+    { 4595, { 115, 68 } }, // Muscle Shock,
+    { 4596, { 115, 90 } }, // Armor Slice,
+    { 4597, { 115, 68 } }, // Gauntlet Strike,
+    { 4598, { 115, 68 } }, // Head Bash,
+    { 4599, { 115, 40 } }, // Rally Cry,
+    { 4600, { 115, 68 } }, // Shin Kick,
+    { 4601, { 115, 40 } }, // Rage,
+    { 4602, { 115, 90 } }, // Power Slam,
+    { 4603, { 115, 68 } }, // Stomp,
+    { 4604, { 115, 68 } }, // Back Swing,
+    { 4605, { 115, 68 } }, // Slice,
+    { 4607, { 115, 68 } }, // Flurry,
+    { 4608, { 15, 115 } }, // Provoke,
+    { 4612, { 113, 118 } }, // Enrage,
+    { 4614, { 15, 115 } }, // Phantom Zephyr,
+    { 4615, { 115, 22 } }, // Fortitude,
+    { 4616, { 115, 22 } }, // Pain Tolerance,
+    { 4618, { 115, 90 } }, // Fortune,
+    { 4619, { 115, 22 } }, // Quick Feet,
+    { 4620, { 115, 22 } }, // Ton Po's Defense,
+    { 4621, { 115, 22 } }, // Focused Aura,
+    { 4622, { 115, 68 } }, // Overwhelm,
+    { 4623, { 115, 22 } }, // Tranquil Force,
+    { 4624, { 115, 90 } }, // Grapple,
+    { 4625, { 115, 90 } }, // Armor Crush,
+    { 4626, { 115, 68 } }, // Leg Sweep,
+    { 4627, { 115, 90 } }, // Nerve Strike,
+    { 4628, { 115, 90 } }, // Nerve Spasm,
+    { 4629, { 115, 68 } }, // Thunderkick,
+    { 4630, { 115, 40 } }, // Master's Fury,
+    { 4631, { 115, 68 } }, // Ashenhand,
+    { 4632, { 115, 40 } }, // Aura of Speed,
+    { 4633, { 115, 68 } }, // Whirlwind Kick,
+    { 4634, { 115, 68 } }, // Dragon Strike,
+    { 4635, { 115, 90 } }, // Tranquil Focus,
+    { 4636, { 115, 68 } }, // Rapid Jab,
+    { 4637, { 115, 68 } }, // Wind of Force,
+    { 4638, { 115, 90 } }, // Pain Strike,
+    { 4639, { 115, 90 } }, // Indirection,
+    { 4640, { 115, 90 } }, // Focus,
+    { 4641, { 115, 22 } }, // Reflexes,
+    { 4642, { 115, 22 } }, // Mental Block,
+    { 4643, { 115, 68 } }, // Proficiency,
+    { 4644, { 115, 90 } }, // Bind,
+    { 4645, { 115, 90 } }, // Armor Pierce,
+    { 4646, { 115, 90 } }, // Eye Gouge,
+    { 4647, { 115, 68 } }, // Tendon Slice,
+    { 4648, { 115, 90 } }, // Wrist Slice,
+    { 4649, { 115, 40 } }, // Assassin's Focus,
+    { 4650, { 115, 68 } }, // Lunge,
+    { 4651, { 115, 40 } }, // Direct Assault,
+    { 4652, { 115, 68 } }, // Vital Cut,
+    { 4653, { 115, 40 } }, // Blood Feast,
+    { 4654, { 115, 68 } }, // Blood Slice,
+    { 4655, { 115, 68 } }, // Energy Sap,
+    { 4656, { 115, 90 } }, // Mind Snap,
+    { 4657, { 115, 90 } }, // Burning Spasm,
+    { 4658, { 115, 68 } }, // Double Stab,
+    { 4659, { 15, 115 } }, // Sneak Attack,
+    { 4670, { 27, 118 } }, // Fortitude Discipline,
+    { 4671, { 27, 117 } }, // Protective Spirit Discipline,
+    { 4672, { 27, 119 } }, // Charge Discipline,
+    { 4673, { 27, 117 } }, // Counterattack Discipline,
+    { 4674, { 27, 118 } }, // Furious Discipline,
+    { 4675, { 27, 119 } }, // Fellstrike Discipline,
+    { 4676, { 27, 118 } }, // Duelist Discipline,
+    { 4677, { 27, 119 } }, // Blinding Speed Discipline,
+    { 4678, { 27, 118 } }, // Bestial Fury Discipline,
+    { 4679, { 115, 68 } }, // Energy Sap Recourse,
+    { 4680, { 115, 22 } }, // Cover Recourse,
+    { 4681, { 15, 115 } }, // Bellow,
+    { 4682, { 15, 115 } }, // Berate,
+    { 4683, { 15, 115 } }, // Phantom Wind,
+    { 4684, { 15, 115 } }, // Phantom Echo,
+    { 4685, { 15, 115 } }, // Thief's Vengeance,
+    { 4686, { 15, 115 } }, // Assassin's Strike,
+    { 4687, { 27, 120 } }, // Healing Will Discipline,
+    { 4688, { 27, 117 } }, // Stonewall Discipline,
+    { 4689, { 27, 120 } }, // Spirit of Rage Discipline,
+    { 4690, { 27, 117 } }, // Earthwalk Discipline,
+    { 4691, { 27, 118 } }, // Speed Focus Discipline,
+    { 4692, { 27, 120 } }, // Planeswalk Discipline,
+    { 4693, { 27, 117 } }, // Concentration Discipline,
+    { 4694, { 27, 119 } }, // Deadly Precision Discipline,
+    { 4695, { 27, 118 } }, // Twisted Chance Discipline,
+    { 4696, { 27, 120 } }, // Weapon Affinity Discipline,
+    { 4697, { 15, 115 } }, // Incite,
+    { 4698, { 15, 115 } }, // Phantom Call,
+    { 4699, { 25, 58 } }, // Bite of the Hounds,
+    { 4700, { 25, 58 } }, // Claw of the Beast,
+    { 4701, { 25, 58 } }, // Warhound's Affliction,
+    { 4704, { 42, 19 } }, // Blood Scream,
+    { 4706, { 115, 40 } }, // Mindless Rage,
+    { 4716, { 126, 13 } }, // Call of Rav,
+    { 4717, { 126, 88 } }, // Diseased Maw,
+    { 4721, { 27, 120 } }, // Focused Will Discipline,
+    { 4724, { 79, 44 } }, // Abysmal Replenishment,
+    { 4726, { 25, 58 } }, // Bite of Keras,
+    { 4741, { 125, 78 } }, // Reflection of Discord I,
+    { 4742, { 125, 78 } }, // Reflection of Discord II,
+    { 4743, { 125, 78 } }, // Reflection of Discord III,
+    { 4786, { 69, 71 } }, // Icy Grasp,
+    { 4788, { 115, 68 } }, // Feral Swipe,
+    { 4789, { 125, 52 } }, // Touch of the Divine,
+    { 4795, { 79, 43 } }, // Aura of Restoration,
+    { 4801, { 125, 86 } }, // Doppelganger Recourse,
+    { 4802, { 69, 71 } }, // Flames of Kesh`yk I,
+    { 4803, { 69, 71 } }, // Flames of Kesh`yk II,
+    { 4804, { 69, 71 } }, // Flames of Kesh`yk III,
+    { 4805, { 69, 71 } }, // Frost of Kesh`yk I,
+    { 4806, { 69, 71 } }, // Frost of Kesh`yk II,
+    { 4807, { 69, 71 } }, // Frost of Kesh`yk III,
+    { 4808, { 69, 71 } }, // Lightning of Kesh`yk I,
+    { 4809, { 69, 71 } }, // Lightning of Kesh`yk II,
+    { 4810, { 69, 71 } }, // Lightning of Kesh`yk III,
+    { 4811, { 69, 71 } }, // Flames of Kesh`yk Effect I,
+    { 4812, { 69, 71 } }, // Flames of Kesh`yk Effect II,
+    { 4813, { 69, 71 } }, // Flames of Kesh`yk Effect III,
+    { 4814, { 69, 71 } }, // Frost of Kesh`yk Effect I,
+    { 4815, { 69, 71 } }, // Frost of Kesh`yk Effect II,
+    { 4816, { 69, 71 } }, // Frost of Kesh`yk Effect III,
+    { 4817, { 69, 71 } }, // Lightning of Kesh`yk Effect I,
+    { 4818, { 69, 71 } }, // Lightning of Kesh`yk Effect II,
+    { 4819, { 69, 71 } }, // Lightning of Kesh`yk Effect III,
+    { 4820, { 69, 71 } }, // Rabid Companion I,
+    { 4821, { 69, 71 } }, // Rabid Companion II,
+    { 4822, { 69, 71 } }, // Rabid Companion III,
+    { 4841, { 79, 43 } }, // Aura of Fire,
+    { 4842, { 25, 58 } }, // Exultant Bellow I,
+    { 4843, { 25, 58 } }, // Exultant Bellow II,
+    { 4844, { 25, 58 } }, // Exultant Bellow III,
+    { 4845, { 25, 58 } }, // Exultant Bellow IV,
+    { 4846, { 25, 58 } }, // Exultant Bellow V,
+    { 4849, { 126, 88 } }, // Heartstopper,
+    { 4853, { 126, 30 } }, // Listless Strength,
+    { 4871, { 125, 41 } }, // War March of the Mastruq,
+    { 4872, { 125, 91 } }, // Echo of the Trusik,
+    { 4873, { 125, 78 } }, // Dark Echo,
+    { 4874, { 20, 75 } }, // Turepta Blood,
+    { 4875, { 42, 42 } }, // Trushar's Mending,
+    { 4876, { 25, 14 } }, // Trushar's Frost,
+    { 4877, { 126, 35 } }, // Apathy of the Nihil,
+    { 4878, { 126, 35 } }, // Bliss of the Nihil,
+    { 4879, { 25, 58 } }, // Madness of Ikkibi,
+    { 4880, { 42, 42 } }, // Holy Light,
+    { 4881, { 25, 58 } }, // Order,
+    { 4882, { 42, 32 } }, // Holy Elixir,
+    { 4883, { 42, 42 } }, // Sylvan Infusion,
+    { 4884, { 25, 38 } }, // Sylvan Fire,
+    { 4885, { 20, 38 } }, // Sylvan Embers,
+    { 4886, { 69, 17 } }, // Elemental Siphon,
+    { 4887, { 25, 58 } }, // Rock of Taelosia,
+    { 4888, { 69, 64 } }, // Monster Summoning IV,
+    { 4889, { 114, 33 } }, // Night Stalker,
+    { 4890, { 20, 38 } }, // Night Fire,
+    { 4891, { 114, 33 } }, // Night's Beckon,
+    { 4893, { 42, 42 } }, // Wave of Trushar,
+    { 4894, { 42, 77 } }, // Light of Order,
+    { 4895, { 125, 16 } }, // Holy Order,
+    { 4896, { 42, 42 } }, // Sylvan Light,
+    { 4897, { 25, 38 } }, // Sylvan Burn,
+    { 4898, { 125, 16 } }, // Sylvan Call,
+    { 4899, { 42, 32 } }, // Breath of Trushar,
+    { 4900, { 126, 88 } }, // Balance of the Nihil,
+    { 4901, { 42, 42 } }, // Daluda's Mending,
+    { 4902, { 125, 16 } }, // Mental Horror,
+    { 4903, { 125, 16 } }, // Black Shroud,
+    { 4904, { 25, 29 } }, // Miasmic spear,
+    { 4905, { 25, 14 } }, // Black Ice,
+    { 4906, { 25, 38 } }, // White Fire,
+    { 4907, { 25, 97 } }, // Telaka,
+    { 4908, { 25, 29 } }, // Mental Horror Strike,
+    { 4912, { 25, 38 } }, // Sylvan Call Strike,
+    { 4913, { 25, 58 } }, // Holy Order Strike,
+    { 4928, { 126, 89 } }, // Leg Strike,
+    { 4929, { 126, 89 } }, // Leg Cut,
+    { 4930, { 126, 89 } }, // Leg Slice,
+    { 4931, { 25, 97 } }, // Head Strike,
+    { 4932, { 25, 97 } }, // Head Pummel,
+    { 4933, { 25, 97 } }, // Head Crush,
+    { 4934, { 126, 53 } }, // Diversive Strike,
+    { 4935, { 126, 53 } }, // Distracting Strike,
+    { 4936, { 126, 53 } }, // Confusing Strike,
+    { 4937, { 18, 110 } }, // Corroded Axe,
+    { 4938, { 18, 110 } }, // Blunt Axe,
+    { 4939, { 18, 110 } }, // Steel Axe,
+    { 4940, { 18, 110 } }, // Bearded Axe,
+    { 4941, { 18, 110 } }, // Mithril Axe,
+    { 4942, { 18, 110 } }, // Balanced War Axe,
+    { 4943, { 18, 110 } }, // Bonesplicer Axe,
+    { 4944, { 18, 110 } }, // Fleshtear Axe,
+    { 4945, { 18, 110 } }, // Cold Steel Cleaving Axe,
+    { 4946, { 18, 110 } }, // Mithril Bloodaxe,
+    { 4947, { 18, 110 } }, // Rage Axe,
+    { 4948, { 18, 110 } }, // Bloodseekers Axe,
+    { 4949, { 18, 110 } }, // Battlerage Axe,
+    { 4950, { 18, 110 } }, // Deathfury Axe,
+    { 4957, { 125, 16 } }, // Shock of Discord,
+    { 4960, { 15, 115 } }, // Simmering Rage,
+    { 4961, { 15, 115 } }, // Bubbling Rage,
+    { 4962, { 15, 115 } }, // Boiling Rage,
+    { 4963, { 123, 113 } }, // Natimbi Gate,
+    { 4964, { 123, 113 } }, // Translocate: Natimbi,
+    { 4965, { 123, 113 } }, // Natimbi Portal,
+    { 4966, { 123, 113 } }, // Circle of Natimbi,
+    { 4967, { 123, 113 } }, // Ring of Natimbi,
+    { 4968, { 25, 38 } }, // Dark Arrow,
+    { 4970, { 25, 14 } }, // Prism Strike,
+    { 4971, { 20, 29 } }, // Ancient: Chaos Chant,
+    { 4972, { 25, 14 } }, // Ancient: Frozen Chaos,
+    { 4973, { 25, 58 } }, // Ancient: Chaos Censure,
+    { 4974, { 25, 14 } }, // Ancient: Chaos Frost,
+    { 4975, { 25, 58 } }, // Ancient: Chaos Madness,
+    { 4976, { 25, 38 } }, // Ancient: Chaos Vortex,
+    { 4977, { 25, 97 } }, // Ancient: Force of Chaos,
+    { 4978, { 125, 17 } }, // Ancient: Seduction of Chaos,
+    { 4979, { 125, 17 } }, // Ancient: Chaotic Pain,
+    { 4980, { 25, 38 } }, // Ancient: Burning Chaos,
+    { 4981, { 25, 38 } }, // Ancient: Strike of Chaos,
+    { 4982, { 114, 33 } }, // Ancient: Bite of Chaos,
+    { 4991, { 25, 0 } }, // Coordinated Strike,
+    { 4992, { 20, 58 } }, // Malevolent Assault,
+    { 4993, { 25, 0 } }, // Malevolent Vex,
+    { 4994, { 126, 88 } }, // Searing Blood Arrow I,
+    { 4995, { 126, 88 } }, // Searing Blood Arrow II,
+    { 4996, { 126, 88 } }, // Searing Blood Arrow III,
+    { 4997, { 42, 42 } }, // Arrow of Renewal,
+    { 5000, { 25, 0 } }, // Righteous Assault,
+    { 5001, { 25, 0 } }, // Bury,
+    { 5002, { 25, 0 } }, // Mana Blast,
+    { 5003, { 25, 0 } }, // Impoverished Lifeblood,
+    { 5004, { 25, 0 } }, // Tamuik's Suggestion,
+    { 5005, { 25, 0 } }, // Tamuik's Ghastly Presence,
+    { 5006, { 25, 0 } }, // Tamuik's Spectral Step,
+    { 5007, { 25, 0 } }, // Curse of Tunik Tamuik,
+    { 5008, { 25, 0 } }, // Bane of Tunik Tamuik,
+    { 5009, { 25, 0 } }, // Unholy Barrage,
+    { 5010, { 25, 0 } }, // Strike of Glory,
+    { 5011, { 42, 42 } }, // Salve,
+    { 5012, { 25, 29 } }, // Spike of Disease,
+    { 5013, { 126, 31 } }, // SpellTheft2,
+    { 5014, { 126, 31 } }, // SpellTheft3,
+    { 5015, { 15, 115 } }, // Bellow of the Mastruq,
+    { 5016, { 15, 115 } }, // Ancient: Chaos Cry,
+    { 5017, { 15, 115 } }, // Kyv Strike,
+    { 5018, { 15, 115 } }, // Ancient: Chaos Strike,
+    { 5019, { 15, 115 } }, // Phantom Shadow,
+    { 5020, { 15, 115 } }, // Ancient: Phantom Chaos,
+    { 5022, { 25, 0 } }, // Dark Balance,
+    { 5023, { 25, 0 } }, // Chaos Epidemic,
+    { 5024, { 25, 0 } }, // Chaos Epidemic,
+    { 5027, { 95, 7 } }, // Battle Cry,
+    { 5028, { 95, 7 } }, // War Cry,
+    { 5029, { 95, 7 } }, // Battle Cry of Dravel,
+    { 5030, { 95, 7 } }, // War Cry of Dravel,
+    { 5031, { 95, 7 } }, // Battle Cry of the Mastruq,
+    { 5032, { 95, 7 } }, // Ancient: Cry of Chaos,
+    { 5033, { 95, 7 } }, // Berserker Rage,
+    { 5034, { 27, 119 } }, // Burning Rage Discipline,
+    { 5035, { 27, 119 } }, // Focused Fury Discipline,
+    { 5036, { 27, 117 } }, // Battle Sense Discipline,
+    { 5037, { 27, 119 } }, // Cleaving Rage Discipline,
+    { 5038, { 27, 118 } }, // Battle Focus Discipline,
+    { 5039, { 27, 119 } }, // Inspired Anger Discipline,
+    { 5040, { 27, 118 } }, // Reckless Discipline,
+    { 5041, { 27, 119 } }, // Blind Rage Discipline,
+    { 5042, { 27, 118 } }, // Indomitable Discipline,
+    { 5043, { 27, 118 } }, // Cleaving Anger Discipline,
+    { 5044, { 27, 120 } }, // Sprint Discipline,
+    { 5045, { 27, 118 } }, // Test1,
+    { 5046, { 15, 115 } }, // Test2,
+    { 5047, { 15, 115 } }, // Test3,
+    { 5048, { 15, 115 } }, // Test4,
+    { 5049, { 15, 115 } }, // Test5,
+    { 5050, { 27, 118 } }, // Test6,
+    { 5051, { 25, 0 } }, // Aura of Destruction,
+    { 5052, { 25, 0 } }, // Spirit's Touch,
+    { 5053, { 25, 0 } }, // Destructive Crush,
+    { 5054, { 25, 0 } }, // Wave of Destruction,
+    { 5055, { 25, 0 } }, // Creeping Fury,
+    { 5056, { 25, 0 } }, // Rampaging Force,
+    { 5057, { 25, 0 } }, // Barxt's Destructive Touch,
+    { 5058, { 25, 0 } }, // Barxt's Mental Corruption,
+    { 5059, { 25, 0 } }, // Wave of Absolute Power,
+    { 5060, { 42, 42 } }, // Discordant Light,
+    { 5063, { 115, 68 } }, // Mug,
+    { 5064, { 125, 64 } }, // Hastened Thoughts,
+    { 5070, { 25, 0 } }, // Armor Shatter,
+    { 5071, { 25, 0 } }, // Energy Siphon,
+    { 5073, { 25, 0 } }, // Soul Vortex,
+    { 5074, { 25, 0 } }, // Black Pox,
+    { 5094, { 27, 118 } }, // test ac,
+    { 5095, { 69, 99 } }, // Item Pet I,
+    { 5096, { 69, 99 } }, // Item Pet II,
+    { 5101, { 18, 64 } }, // Fire Shard,
+    { 5102, { 18, 64 } }, // Frost Hammer,
+    { 5103, { 25, 58 } }, // Flame Strike,
+    { 5104, { 25, 58 } }, // Frost Strike,
+    { 5105, { 125, 92 } }, // Geomantra,
+    { 5107, { 18, 110 } }, // Tainted Axe of Hatred,
+    { 5118, { 25, 0 } }, // Intoxicating Fury,
+    { 5119, { 25, 0 } }, // Force of Trusik's Rage,
+    { 5120, { 25, 0 } }, // Withering Destruction,
+    { 5125, { 25, 38 } }, // Venom Claw,
+    { 5127, { 25, 14 } }, // Prism Skin,
+    { 5133, { 69, 17 } }, // Elemental Draw,
+    { 5135, { 69, 10 } }, // SpellTheft4,
+    { 5148, { 25, 0 } }, // Massive Explosion,
+    { 5150, { 45, 46 } }, // Gloomingdeep Guard,
+    { 5190, { 25, 97 } }, // PvPSilTest1,
+    { 5191, { 25, 97 } }, // PvPSilTest2,
+    { 5192, { 25, 97 } }, // PvPSilTest3,
+    { 5193, { 25, 97 } }, // PvPSilTest4,
+    { 5194, { 25, 97 } }, // PvPSilTest5,
+    { 5195, { 25, 97 } }, // PvPSil2Test1,
+    { 5196, { 25, 97 } }, // PvPSil2Test2,
+    { 5197, { 25, 97 } }, // PvPSil2Test3,
+    { 5198, { 25, 97 } }, // PvPSil2Test4,
+    { 5199, { 25, 97 } }, // PvPSil2Test5,
+    { 5200, { 69, 71 } }, // PvPStunTest1,
+    { 5201, { 69, 71 } }, // PvPStunTest2,
+    { 5202, { 69, 71 } }, // PvPStunTest3,
+    { 5203, { 69, 71 } }, // PvPStunTest4,
+    { 5204, { 69, 71 } }, // PvPStunTest5,
+    { 5205, { 69, 71 } }, // 5200 Strike,
+    { 5206, { 69, 71 } }, // 5201 Strike,
+    { 5207, { 69, 71 } }, // 5202 Strike,
+    { 5208, { 69, 71 } }, // 5203 Strike,
+    { 5209, { 69, 71 } }, // 5204 Strike,
+    { 5210, { 69, 71 } }, // PvPSnareTest1,
+    { 5211, { 69, 71 } }, // PvPSnareTest2,
+    { 5212, { 69, 71 } }, // PvPSnareTest3,
+    { 5213, { 69, 71 } }, // PvPSnareTest4,
+    { 5214, { 69, 71 } }, // PvPSnareTest5,
+    { 5215, { 69, 71 } }, // 5210 Strike,
+    { 5216, { 69, 71 } }, // 5211 Strike,
+    { 5217, { 69, 71 } }, // 5212 Strike,
+    { 5218, { 69, 71 } }, // 5213 Strike,
+    { 5219, { 69, 71 } }, // 5214 Strike,
+    { 5220, { 95, 96 } }, // Jarsath Frenzy,
+    { 5221, { 25, 58 } }, // Rage of Xyzith,
+    { 5222, { 114, 33 } }, // Morternum,
+    { 5226, { 79, 43 } }, // Arias' Guard,
+    { 5250, { 45, 46 } }, // Confidence,
+    { 5251, { 42, 77 } }, // Pious Remedy,
+    { 5252, { 45, 112 } }, // Symbol of Balikor,
+    { 5253, { 95, 6 } }, // Ward of Valiance,
+    { 5254, { 25, 97 } }, // Shock of Wonder,
+    { 5255, { 20, 124 } }, // Sermon of Reproach,
+    { 5256, { 69, 99 } }, // Unswerving Hammer of Retribution,
+    { 5257, { 45, 1 } }, // Conviction,
+    { 5258, { 125, 91 } }, // Blessing of Devotion,
+    { 5259, { 42, 32 } }, // Pious Elixir,
+    { 5260, { 25, 58 } }, // Reproach,
+    { 5261, { 125, 62 } }, // Panoply of Vie,
+    { 5262, { 125, 91 } }, // Omen-Cleric-PH,
+    { 5263, { 125, 64 } }, // Omen-Cleric-PH,
+    { 5264, { 18, 110 } }, // Hammer of Reproach,
+    { 5265, { 42, 42 } }, // Pious Light,
+    { 5266, { 25, 97 } }, // Sound of Divinity,
+    { 5267, { 126, 83 } }, // Omen-Cleric-PH,
+    { 5268, { 25, 124 } }, // Desolate Undead,
+    { 5269, { 125, 21 } }, // Mark of the Blameless,
+    { 5270, { 42, 42 } }, // Word of Vivification,
+    { 5271, { 25, 58 } }, // Calamity,
+    { 5272, { 125, 91 } }, // Aura of Devotion,
+    { 5273, { 95, 7 } }, // Yaulp VII,
+    { 5274, { 126, 11 } }, // Placate,
+    { 5275, { 25, 97 } }, // Silent Dictation,
+    { 5276, { 45, 87 } }, // Armor of the Pious,
+    { 5277, { 45, 112 } }, // Balikor's Mark,
+    { 5278, { 45, 1 } }, // Hand of Conviction,
+    { 5279, { 25, 58 } }, // Ancient: Pious Conscience,
+    { 5280, { 45, 46 } }, // Direction,
+    { 5281, { 126, 83 } }, // Omen-Paladin-PH,
+    { 5282, { 42, 42 } }, // Touch of Piety,
+    { 5283, { 42, 19 } }, // Crusader's Purity,
+    { 5284, { 25, 97 } }, // Force of Piety,
+    { 5285, { 125, 16 } }, // Silvered Fury,
+    { 5286, { 25, 124 } }, // Spurn Undead,
+    { 5287, { 45, 112 } }, // Symbol of Jeron,
+    { 5288, { 125, 16 } }, // Pious Fury,
+    { 5289, { 42, 77 } }, // Light of Piety,
+    { 5290, { 45, 46 } }, // Hand of Direction,
+    { 5291, { 45, 87 } }, // Armor of the Champion,
+    { 5292, { 25, 97 } }, // Serene Command,
+    { 5293, { 42, 32 } }, // Pious Cleansing,
+    { 5294, { 95, 6 } }, // Bulwark of Piety,
+    { 5295, { 45, 112 } }, // Jeron's Mark,
+    { 5296, { 42, 42 } }, // Wave of Piety,
+    { 5297, { 45, 47 } }, // Brell's Brawny Bulwark,
+    { 5298, { 45, 1 } }, // Affirmation,
+    { 5299, { 25, 97 } }, // Ancient: Force of Jeron,
+    { 5300, { 126, 16 } }, // Nature Veil,
+    { 5301, { 25, 111 } }, // Displace Summoned,
+    { 5302, { 125, 21 } }, // Shield of Briar,
+    { 5303, { 20, 58 } }, // Locust Swarm,
+    { 5304, { 42, 42 } }, // Sylvan Water,
+    { 5305, { 125, 21 } }, // Guard of the Earth,
+    { 5306, { 45, 47 } }, // Strength of the Hunter,
+    { 5307, { 125, 21 } }, // Briarcoat,
+    { 5308, { 126, 83 } }, // Nature's Veil Parry,
+    { 5309, { 25, 14 } }, // Frost Wind,
+    { 5310, { 79, 43 } }, // Hunter's Vigor,
+    { 5311, { 125, 16 } }, // Nature's Denial,
+    { 5312, { 95, 7 } }, // Howl of the Predator,
+    { 5313, { 25, 38 } }, // Hearth Embers,
+    { 5314, { 126, 31 } }, // Nature's Balance,
+    { 5315, { 45, 46 } }, // Onyx Skin,
+    { 5316, { 126, 11 } }, // Tranquility of the Glade,
+    { 5317, { 125, 21 } }, // Ward of the Hunter,
+    { 5318, { 125, 16 } }, // Call of Lightning,
+    { 5319, { 25, 14 } }, // Ancient: North Wind,
+    { 5320, { 20, 38 } }, // Blood of Discord,
+    { 5321, { 20, 58 } }, // Dark Tendrils,
+    { 5322, { 20, 29 } }, // Dark Constriction,
+    { 5323, { 114, 33 } }, // Bond of Inruku,
+    { 5324, { 114, 43 } }, // Touch of Inruku,
+    { 5325, { 114, 33 } }, // Inruku's Bite,
+    { 5326, { 25, 124 } }, // Omen-SK-PH,
+    { 5327, { 125, 16 } }, // Shroud of Discord,
+    { 5328, { 114, 76 } }, // Theft of Pain,
+    { 5329, { 126, 53 } }, // Terror of Discord,
+    { 5330, { 20, 75 } }, // Blood of Inruku,
+    { 5331, { 69, 103 } }, // Son of Decay,
+    { 5332, { 69, 70 } }, // Rune of Decay,
+    { 5333, { 125, 17 } }, // Pact of Decay,
+    { 5334, { 25, 29 } }, // Spear of Muram,
+    { 5335, { 25, 124 } }, // Scythe of Inruku,
+    { 5336, { 126, 53 } }, // Dread Gaze,
+    { 5337, { 114, 76 } }, // Theft of Hate,
+    { 5338, { 114, 43 } }, // Touch of the Devourer,
+    { 5339, { 45, 87 } }, // Cloak of Discord,
+    { 5340, { 114, 33 } }, // Ancient: Bite of Muram,
+    { 5341, { 126, 83 } }, // Omen-Druid-PH,
+    { 5342, { 79, 43 } }, // Oaken Vigor,
+    { 5343, { 25, 58 } }, // Stormwatch,
+    { 5344, { 126, 81 } }, // Hand of the Sun,
+    { 5345, { 25, 14 } }, // Tempest Wind,
+    { 5346, { 25, 58 } }, // Earth Shiver,
+    { 5347, { 126, 11 } }, // Nature's Serenity,
+    { 5348, { 20, 38 } }, // Immolation of the Sun,
+    { 5349, { 126, 89 } }, // Hungry Vines,
+    { 5350, { 95, 96 } }, // Lion's Strength,
+    { 5351, { 126, 81 } }, // Sun's Corona,
+    { 5352, { 45, 46 } }, // Steeloak Skin,
+    { 5353, { 79, 43 } }, // Blessing of Oak,
+    { 5354, { 126, 81 } }, // Glacier Breath,
+    { 5355, { 42, 42 } }, // Chlorotrope,
+    { 5356, { 125, 62 } }, // Oaken Guard,
+    { 5357, { 20, 58 } }, // Wasp Swarm,
+    { 5358, { 125, 21 } }, // Nettle Shield,
+    { 5359, { 126, 13 } }, // Nature's Beckon,
+    { 5360, { 126, 83 } }, // Omen-Druid-PH,
+    { 5361, { 25, 38 } }, // Solstice Strike,
+    { 5362, { 125, 21 } }, // Nettlecoat,
+    { 5363, { 20, 38 } }, // Vengeance of the Sun,
+    { 5364, { 25, 111 } }, // Desolate Summoned,
+    { 5365, { 125, 21 } }, // Circle of Nettles,
+    { 5366, { 45, 46 } }, // Blessing of Steeloak,
+    { 5367, { 25, 14 } }, // Glitterfrost,
+    { 5368, { 79, 59 } }, // Mask of the Wild,
+    { 5369, { 25, 14 } }, // Ancient: Glacier Frost,
+    { 5370, { 126, 11 } }, // Luvwen's Aria of Serenity,
+    { 5371, { 20, 29 } }, // Vulka's Chant of Disease,
+    { 5372, { 25, 58 } }, // Bellow of Chaos,
+    { 5373, { 126, 35 } }, // Luvwen's Lullaby,
+    { 5374, { 95, 6 } }, // Verse of Vesagran,
+    { 5375, { 126, 88 } }, // Zuriki's Song of Shenanigans,
+    { 5376, { 125, 41 } }, // War March of Muram,
+    { 5377, { 79, 44 } }, // Cantata of Life,
+    { 5378, { 20, 75 } }, // Vulka's Chant of Poison,
+    { 5379, { 20, 14 } }, // Vulka's Chant of Frost,
+    { 5380, { 125, 91 } }, // Yelhun's Mystic Call,
+    { 5381, { 126, 89 } }, // Dirge of Metala,
+    { 5382, { 125, 41 } }, // Eriki's Psalm of Power,
+    { 5383, { 126, 13 } }, // Voice of the Vampire,
+    { 5384, { 79, 44 } }, // Chorus of Life,
+    { 5385, { 20, 38 } }, // Vulka's Chant of Flame,
+    { 5386, { 126, 81 } }, // Omen-Bard-PH,
+    { 5387, { 126, 35 } }, // Vulka's Lullaby,
+    { 5388, { 125, 41 } }, // Ancient: Call of Power,
+    { 5389, { 69, 104 } }, // Farrel's Companion,
+    { 5390, { 95, 2 } }, // Spirit of Sense,
+    { 5391, { 25, 75 } }, // Yoppa's Spear of Venom,
+    { 5392, { 126, 81 } }, // Putrid Decay,
+    { 5393, { 79, 43 } }, // Spirit of Perseverance,
+    { 5394, { 126, 30 } }, // Crippling Spasm,
+    { 5395, { 42, 42 } }, // Yoppa's Mending,
+    { 5396, { 45, 87 } }, // Wunshi's Focusing,
+    { 5397, { 95, 6 } }, // Ancestral Bulwark,
+    { 5398, { 95, 94 } }, // Spirit of Fortitude,
+    { 5399, { 95, 2 } }, // Talisman of Sense,
+    { 5400, { 126, 88 } }, // Vindictive Spirit,
+    { 5401, { 25, 75 } }, // Yoppa's Rain of Venom,
+    { 5402, { 125, 51 } }, // Spirit Veil,
+    { 5403, { 125, 17 } }, // Pained Memory,
+    { 5404, { 95, 96 } }, // Spirit of Might,
+    { 5405, { 95, 94 } }, // Talisman of Fortitude,
+    { 5406, { 79, 43 } }, // Talisman of Perseverance,
+    { 5407, { 126, 0 } }, // Shroud of Erana,
+    { 5408, { 25, 14 } }, // Ice Age,
+    { 5409, { 95, 96 } }, // Talisman of Might,
+    { 5410, { 42, 19 } }, // Pure Spirit,
+    { 5411, { 20, 29 } }, // Breath of Wunshi,
+    { 5412, { 20, 58 } }, // Curse of Sisslak,
+    { 5413, { 126, 81 } }, // Shroud of Erana Parry,
+    { 5414, { 20, 75 } }, // Blood of Yoppa,
+    { 5415, { 45, 87 } }, // Talisman of Wunshi,
+    { 5416, { 42, 32 } }, // Spiritual Serenity,
+    { 5417, { 95, 7 } }, // Champion,
+    { 5418, { 125, 17 } }, // Ancient: Ancestral Calling,
+    { 5419, { 114, 43 } }, // Soulspike,
+    { 5420, { 25, 75 } }, // Acikin,
+    { 5421, { 45, 87 } }, // Shadow Guard,
+    { 5422, { 69, 103 } }, // Omen-Nec-PH,
+    { 5423, { 20, 29 } }, // Chaos Plague,
+    { 5424, { 20, 29 } }, // Grip of Mori,
+    { 5425, { 69, 70 } }, // Glyph of Darkness,
+    { 5426, { 114, 33 } }, // Fang of Death,
+    { 5427, { 126, 81 } }, // Scent of Midnight,
+    { 5428, { 125, 84 } }, // Dull Pain,
+    { 5429, { 126, 35 } }, // Dark Hold,
+    { 5430, { 20, 58 } }, // Desecrating Darkness,
+    { 5431, { 69, 103 } }, // Lost Soul,
+    { 5432, { 20, 58 } }, // Dark Nightmare,
+    { 5433, { 20, 75 } }, // Chaos Venom,
+    { 5434, { 125, 17 } }, // Dark Possession,
+    { 5435, { 69, 42 } }, // Dark Salve,
+    { 5436, { 69, 10 } }, // Bulwark of Calliav,
+    { 5437, { 20, 38 } }, // Pyre of Mori,
+    { 5438, { 69, 103 } }, // Dark Assassin,
+    { 5439, { 126, 13 } }, // Word of Chaos,
+    { 5440, { 25, 124 } }, // Desolate Undead,
+    { 5441, { 20, 58 } }, // Ancient: Curse of Mori,
+    { 5442, { 25, 14 } }, // Icebane,
+    { 5443, { 45, 87 } }, // Ether Shield,
+    { 5444, { 25, 38 } }, // Tears of the Sun,
+    { 5445, { 25, 58 } }, // Lightningbane,
+    { 5446, { 25, 38 } }, // Spark of Fire,
+    { 5447, { 25, 38 } }, // Firebane,
+    { 5448, { 125, 84 } }, // Ether Skin,
+    { 5449, { 25, 58 } }, // Spark of Thunder,
+    { 5450, { 25, 58 } }, // Thundaka,
+    { 5451, { 25, 58 } }, // Circle of Thunder,
+    { 5452, { 25, 58 } }, // Spark of Lightning,
+    { 5453, { 125, 92 } }, // Ether Ward,
+    { 5454, { 25, 38 } }, // Meteor Storm,
+    { 5455, { 25, 38 } }, // Circle of Fire,
+    { 5456, { 25, 97 } }, // Telekara,
+    { 5457, { 25, 14 } }, // Spark of Ice,
+    { 5458, { 25, 14 } }, // Gelidin Comet,
+    { 5459, { 125, 92 } }, // Bulwark of Calrena,
+    { 5460, { 69, 99 } }, // Solist's Frozen Sword,
+    { 5461, { 25, 14 } }, // Gelid Rains,
+    { 5462, { 25, 38 } }, // Corona Flare,
+    { 5463, { 25, 38 } }, // Ancient: Core Fire,
+    { 5464, { 18, 107 } }, // Summon Calliav's Runed Mantle,
+    { 5465, { 18, 64 } }, // Summon Staff of the North Wind,
+    { 5466, { 125, 21 } }, // Fireskin,
+    { 5467, { 18, 64 } }, // Summon Fireblade,
+    { 5468, { 18, 107 } }, // Summon Calliav's Jeweled Bracelet,
+    { 5469, { 18, 107 } }, // Summon Calliav's Spiked Ring,
+    { 5470, { 18, 107 } }, // Summon Calliav's Glowing Bauble,
+    { 5471, { 18, 107 } }, // Summon Calliav's Steel Bracelet,
+    { 5472, { 45, 87 } }, // Elemental Aura,
+    { 5473, { 69, 98 } }, // Child of Wind,
+    { 5474, { 25, 38 } }, // Bolt of Jerikor,
+    { 5475, { 18, 107 } }, // Summon Calliav's Platinum Choker,
+    { 5476, { 79, 44 } }, // Phantom Shield,
+    { 5477, { 18, 64 } }, // Summon Dagger of the Deep,
+    { 5478, { 69, 70 } }, // Elemental Fury,
+    { 5479, { 25, 38 } }, // Rain of Jerikor,
+    { 5480, { 69, 105 } }, // Child of Water,
+    { 5481, { 25, 38 } }, // Burning Earth,
+    { 5482, { 18, 64 } }, // Omen-Mage-PH,
+    { 5483, { 18, 107 } }, // Summon Pouch of Jerikor,
+    { 5484, { 25, 58 } }, // Blade Strike,
+    { 5485, { 69, 102 } }, // Child of Fire,
+    { 5486, { 18, 109 } }, // Summon Sphere of Air,
+    { 5487, { 126, 35 } }, // Omen-Mage-PH,
+    { 5488, { 125, 21 } }, // Circle of Fireskin,
+    { 5489, { 18, 64 } }, // Summon Crystal Belt,
+    { 5490, { 25, 111 } }, // Desolate Summoned,
+    { 5491, { 69, 42 } }, // Renewal of Jerikor,
+    { 5492, { 125, 21 } }, // Pyrilen Skin,
+    { 5493, { 25, 58 } }, // Star Scream,
+    { 5494, { 69, 10 } }, // Bulwark of Calliav,
+    { 5495, { 69, 100 } }, // Child of Earth,
+    { 5496, { 25, 38 } }, // Star Strike,
+    { 5497, { 69, 17 } }, // Elemental Simulcram,
+    { 5498, { 25, 38 } }, // Ancient: Nova Strike,
+    { 5499, { 126, 30 } }, // Synapsis Spasm,
+    { 5500, { 125, 84 } }, // Ethereal Rune,
+    { 5501, { 126, 53 } }, // Omen-Enc-PH,
+    { 5502, { 45, 87 } }, // Mystic Shield,
+    { 5503, { 126, 35 } }, // Felicity,
+    { 5504, { 125, 84 } }, // Rune of Salik,
+    { 5505, { 69, 99 } }, // Salik's Animation,
+    { 5506, { 126, 11 } }, // Placate,
+    { 5507, { 125, 41 } }, // Speed of Salik,
+    { 5508, { 95, 80 } }, // Omen-Enc-PH,
+    { 5509, { 20, 58 } }, // Arcane Noose,
+    { 5510, { 126, 13 } }, // Compel,
+    { 5511, { 126, 35 } }, // Wake of Felicity,
+    { 5512, { 20, 58 } }, // Omen-Enc-PH,
+    { 5513, { 79, 59 } }, // Clairvoyance,
+    { 5514, { 125, 84 } }, // Mayhem,
+    { 5515, { 125, 92 } }, // Wall of Alendar,
+    { 5516, { 25, 97 } }, // Color Snap,
+    { 5517, { 125, 92 } }, // Circle of Alendar,
+    { 5518, { 25, 58 } }, // Psychosis,
+    { 5519, { 126, 13 } }, // True Name,
+    { 5520, { 126, 35 } }, // Euphoria,
+    { 5521, { 125, 41 } }, // Hastening of Salik,
+    { 5522, { 79, 59 } }, // Voice of Clairvoyance,
+    { 5523, { 25, 58 } }, // Ancient: Neurosis,
+    { 5524, { 126, 31 } }, // Omen-Bst-PH,
+    { 5525, { 45, 96 } }, // Omen-Bst-PH,
+    { 5526, { 69, 42 } }, // Healing of Mikkily,
+    { 5527, { 20, 75 } }, // Chimera Blood,
+    { 5528, { 42, 42 } }, // Muada's Mending,
+    { 5529, { 45, 87 } }, // Focus of Alladnu,
+    { 5530, { 45, 47 } }, // Spiritual Vitality,
+    { 5531, { 69, 104 } }, // Spirit of Alladnu,
+    { 5532, { 125, 41 } }, // Omen-Bst-PH,
+    { 5533, { 69, 70 } }, // Growl of the Beast,
+    { 5534, { 69, 71 } }, // Spirit of Irionu,
+    { 5535, { 25, 14 } }, // Glacier Spear,
+    { 5536, { 79, 43 } }, // Feral Vigor,
+    { 5537, { 79, 44 } }, // Spiritual Ascendance,
+    { 5538, { 69, 104 } }, // Spirit of Rashara,
+    { 5539, { 69, 10 } }, // Feral Guard,
+    { 5540, { 20, 29 } }, // Festering Malady,
+    { 5541, { 126, 88 } }, // Omen-Bst-PH,
+    { 5542, { 95, 7 } }, // Ferocity of Irionu,
+    { 5543, { 25, 14 } }, // Ancient: Savage Ice,
+    { 5554, { 25, 0 } }, // Cloud of Discord,
+    { 5555, { 25, 0 } }, // Bellow of Tunat'Muram,
+    { 5556, { 25, 0 } }, // Whirling Smash,
+    { 5560, { 15, 115 } }, // Blistering Rage,
+    { 5570, { 126, 31 } }, // Pillage Magic,
+    { 5571, { 126, 89 } }, // Tangle,
+    { 5572, { 126, 89 } }, // Entangle,
+    { 5573, { 42, 56 } }, // Corporeal Empathy Recourse,
+    { 5605, { 79, 59 } }, // test mana,
+    { 5731, { 123, 113 } }, // Circle of Barindu,
+    { 5732, { 123, 113 } }, // Barindu Portal,
+    { 5733, { 123, 113 } }, // Ring of Barindu,
+    { 5734, { 123, 113 } }, // Barindu Gate,
+    { 5735, { 123, 113 } }, // Translocate: Barindu,
+    { 5741, { 25, 0 } }, // Pyrilen Bolt,
+    { 5744, { 25, 0 } }, // Kiss of the Pyrilen,
+    { 5745, { 25, 0 } }, // Pyrilonis' Vengeance,
+    { 5760, { 25, 0 } }, // Gelaqua's Embrace,
+    { 5761, { 25, 0 } }, // Heart of Frost,
+    { 5874, { 126, 13 } }, // Advanced Dire Charm,
+    { 5875, { 126, 13 } }, // Advanced Dire Charm Animal,
+    { 5876, { 126, 13 } }, // Advanced Dire Charm Undead,
+    { 5919, { 125, 64 } }, // Death Peace,
+    { 5924, { 25, 97 } }, // Celestial Stun,
+    { 5931, { 125, 51 } }, // Embrace of Shadows,
+    { 5976, { 25, 0 } }, // Plagued Filth,
+    { 5979, { 25, 0 } }, // Infection of Pain,
+    { 5980, { 25, 0 } }, // Orb's Curse,
+    { 5989, { 25, 0 } }, // Gloom Toxin,
+    { 5990, { 25, 0 } }, // Shade Mantle,
+    { 5992, { 25, 0 } }, // Numbing Touch,
+    { 5993, { 25, 0 } }, // Girplan Chatter,
+    { 5994, { 25, 0 } }, // Body Slam,
+    { 5996, { 25, 0 } }, // Bazu Grip,
+    { 5997, { 25, 0 } }, // Pyrilen Ember,
+    { 5998, { 25, 0 } }, // Pyrilen Charm,
+    { 5999, { 25, 0 } }, // Pyronic Lash,
+    { 6000, { 25, 0 } }, // Pyrilen Fury,
+    { 6001, { 25, 0 } }, // Pyronic Assault,
+    { 6003, { 25, 0 } }, // Chimeran Laceration,
+    { 6004, { 25, 0 } }, // Chimeran Breath,
+    { 6005, { 25, 0 } }, // Infected Bite,
+    { 6006, { 25, 0 } }, // Gelidran Sleet,
+    { 6007, { 25, 0 } }, // Frostcicle,
+    { 6008, { 25, 0 } }, // Gelidran Hail,
+    { 6009, { 25, 0 } }, // Gelidran Stalagmite,
+    { 6010, { 25, 0 } }, // Freezing Touch,
+    { 6012, { 25, 0 } }, // Crushing Ice,
+    { 6013, { 25, 0 } }, // Ice Shards,
+    { 6014, { 25, 0 } }, // Feranic Grasp,
+    { 6016, { 25, 0 } }, // Feran Tentacle,
+    { 6017, { 25, 0 } }, // Darkbreath,
+    { 6019, { 25, 0 } }, // Clinging Apathy,
+    { 6020, { 25, 0 } }, // Wing Strike,
+    { 6021, { 25, 0 } }, // Deep Gouge,
+    { 6023, { 25, 0 } }, // Dragornian Malady,
+    { 6024, { 25, 0 } }, // Dragornian Venom,
+    { 6025, { 25, 0 } }, // Discordling Leap,
+    { 6026, { 25, 0 } }, // Discordling Ruin,
+    { 6027, { 25, 0 } }, // Chaotica,
+    { 6028, { 25, 0 } }, // Seething Bite,
+    { 6029, { 25, 0 } }, // Sinking Fangs,
+    { 6049, { 25, 0 } }, // Lightning Strike,
+    { 6050, { 25, 0 } }, // Static Pulse,
+    { 6051, { 25, 0 } }, // Fire Strike,
+    { 6052, { 25, 0 } }, // Ice Strike,
+    { 6053, { 25, 0 } }, // Bane of Dranik,
+    { 6054, { 25, 0 } }, // Bane of Dranik,
+    { 6055, { 25, 0 } }, // Bane of Dranik,
+    { 6065, { 25, 0 } }, // Murk Acid,
+    { 6066, { 25, 0 } }, // Murk Acid,
+    { 6103, { 25, 111 } }, // Nature's Denial Strike,
+    { 6105, { 25, 124 } }, // Silvered Fury Strike,
+    { 6120, { 125, 51 } }, // Phase Walk,
+    { 6121, { 125, 51 } }, // Shroud of Air,
+    { 6122, { 125, 51 } }, // Cloud of Indifference,
+    { 6123, { 125, 51 } }, // Cloak of Nature,
+    { 6124, { 125, 51 } }, // Shadow of Death,
+    { 6125, { 125, 51 } }, // Sun Cloak,
+    { 6126, { 25, 0 } }, // Hand of Order,
+    { 6128, { 125, 51 } }, // Gelidran Aura,
+    { 6140, { 42, 42 } }, // Ancient: Hallowed Light,
+    { 6141, { 42, 42 } }, // Ancient: Chlorobon,
+    { 6142, { 42, 42 } }, // Ancient: Wilslik's Mending,
+    { 6143, { 114, 43 } }, // Ancient: Touch of Orshilak,
+    { 6144, { 126, 13 } }, // Ancient: Voice of Muram,
+    { 6145, { 125, 21 } }, // Ancient: Veil of Pyrilonus,
+    { 6146, { 25, 14 } }, // Ancient: Spear of Gelaqua,
+    { 6152, { 125, 62 } }, // Vindictive Spirit Recourse,
+    { 6153, { 45, 87 } }, // Elemental Simulcram Recourse,
+    { 6154, { 125, 62 } }, // Hungry Vines Recourse,
+    { 6156, { 126, 53 } }, // Oaken Guard Parry,
+    { 6169, { 126, 89 } }, // Crippling Strike,
+    { 6170, { 25, 97 } }, // Mind Strike,
+    { 6171, { 126, 53 } }, // Baffling Strike,
+    { 6172, { 18, 110 } }, // Axe of the Destroyer,
+    { 6173, { 15, 115 } }, // Bazu Bellow,
+    { 6174, { 15, 115 } }, // Daggerfall,
+    { 6175, { 15, 115 } }, // Phantom Cry,
+    { 6176, { 123, 28 } }, // Slaughter Gate,
+    { 6177, { 123, 28 } }, // Translocate: Slaughter,
+    { 6178, { 123, 28 } }, // Slaughter Portal,
+    { 6179, { 123, 28 } }, // Circle of Slaughter,
+    { 6180, { 123, 28 } }, // Ring of Slaughter,
+    { 6181, { 123, 28 } }, // Bloodfields Gate,
+    { 6182, { 123, 28 } }, // Translocate: Bloodfields,
+    { 6183, { 123, 28 } }, // Bloodfields Portal,
+    { 6184, { 123, 28 } }, // Circle of Bloodfields,
+    { 6185, { 123, 28 } }, // Ring of Bloodfields,
+    { 6187, { 114, 43 } }, // Limit Test Hit,
+    { 6190, { 27, 122 } }, // Shocking Defense Discipline,
+    { 6191, { 27, 120 } }, // Aura of Runes Discipline,
+    { 6192, { 27, 121 } }, // Savage Onslaught Discipline,
+    { 6193, { 27, 120 } }, // Dreamwalk Discipline,
+    { 6194, { 27, 121 } }, // Rapid Kick Discipline,
+    { 6195, { 27, 122 } }, // Counterforce Discipline,
+    { 6196, { 27, 122 } }, // Deadly Aim Discipline,
+    { 6197, { 27, 121 } }, // Frenzied Stabbing Discipline,
+    { 6198, { 27, 120 } }, // Imperceptible Discipline,
+    { 6199, { 27, 121 } }, // Vengeful Flurry Discipline,
+    { 6200, { 27, 122 } }, // Unpredictable Rage Discipline,
+    { 6201, { 27, 120 } }, // Unflinching Will Discipline,
+    { 6202, { 27, 118 } }, // Stun Effect,
+    { 6203, { 27, 118 } }, // Rune Effect,
+    { 6204, { 27, 118 } }, // Slow Effect,
+    { 6205, { 27, 118 } }, // Poison DD Effect,
+    { 6206, { 27, 118 } }, // Lower Hate Effect,
+    { 6207, { 27, 118 } }, // Increase Damage Effect,
+    { 6209, { 125, 84 } }, // Test Doom Rune,
+    { 6233, { 95, 7 } }, // Harmonic Balance,
+    { 6265, { 95, 7 } }, // Divine Balance,
+    { 6330, { 25, 58 } }, // Chaotic Strike I,
+    { 6331, { 25, 58 } }, // Chaotic Strike II,
+    { 6332, { 25, 58 } }, // Chaotic Strike III,
+    { 6333, { 25, 58 } }, // Chaotic Strike IV,
+    { 6334, { 25, 58 } }, // Chaotic Strike V,
+    { 6335, { 25, 58 } }, // Chaotic Strike VI,
+    { 6336, { 25, 58 } }, // Chaotic Strike VII,
+    { 6337, { 25, 58 } }, // Life Sap I,
+    { 6338, { 25, 58 } }, // Life Sap II,
+    { 6339, { 25, 58 } }, // Life Sap III,
+    { 6340, { 25, 58 } }, // Life Sap IV,
+    { 6341, { 25, 58 } }, // Freezing Strike I,
+    { 6342, { 25, 58 } }, // Freezing Strike II,
+    { 6343, { 25, 58 } }, // Freezing Strike III,
+    { 6344, { 25, 58 } }, // Freezing Strike IV,
+    { 6345, { 25, 58 } }, // Freezing Strike V,
+    { 6346, { 25, 58 } }, // Freezing Strike VI,
+    { 6347, { 25, 58 } }, // Freezing Strike VII,
+    { 6348, { 25, 58 } }, // Freezing Strike VIII,
+    { 6349, { 25, 58 } }, // Freezing Strike IX,
+    { 6350, { 25, 58 } }, // Fiery Strike I,
+    { 6351, { 25, 58 } }, // Fiery Strike II,
+    { 6352, { 25, 58 } }, // Fiery Strike III,
+    { 6353, { 25, 58 } }, // Fiery Strike IV,
+    { 6354, { 25, 58 } }, // Fiery Strike V,
+    { 6355, { 25, 58 } }, // Fiery Strike VI,
+    { 6356, { 25, 58 } }, // Fiery Strike VII,
+    { 6357, { 25, 58 } }, // Fiery Strike VIII,
+    { 6358, { 25, 58 } }, // Fiery Strike IX,
+    { 6359, { 125, 48 } }, // Form of Defense I,
+    { 6360, { 125, 48 } }, // Form of Defense III,
+    { 6361, { 125, 48 } }, // Form of Protection I,
+    { 6362, { 125, 48 } }, // Form of Protection III,
+    { 6363, { 125, 48 } }, // Form of Endurance I,
+    { 6364, { 125, 48 } }, // Form of Endurance III,
+    { 6365, { 125, 48 } }, // Form of Rejuvenation I,
+    { 6366, { 125, 48 } }, // Form of Rejuvenation III,
+    { 6499, { 25, 14 } }, // Gelid Claw,
+    { 6500, { 25, 97 } }, // Stunning Strike,
+    { 6502, { 18, 108 } }, // Unpack Brewer's Still,
+    { 6505, { 25, 38 } }, // Blood Dream,
+    { 6512, { 25, 58 } }, // Lupine Rage,
+    { 6513, { 126, 31 } }, // Devour Enchantment,
+    { 6514, { 18, 34 } }, // Blessing of Rallos Zek,
+    { 6515, { 18, 34 } }, // Blessing of The Tribunal,
+    { 6516, { 18, 34 } }, // Blessing of Cazic Thule,
+    { 6517, { 18, 34 } }, // Blessing of Brell Serilis,
+    { 6518, { 18, 34 } }, // Blessing of Tunare,
+    { 6519, { 18, 34 } }, // Blessing of Innoruuk,
+    { 6520, { 18, 34 } }, // Blessing of Prexus,
+    { 6521, { 18, 34 } }, // Blessing of Mithaniel Marr,
+    { 6522, { 18, 34 } }, // Blessing of Erollisi Marr,
+    { 6523, { 18, 34 } }, // Blessing of Bertoxxulous,
+    { 6524, { 18, 34 } }, // Blessing of Solusek Ro,
+    { 6525, { 18, 34 } }, // Blessing of Karana,
+    { 6526, { 18, 34 } }, // Blessing of Bristlebane,
+    { 6527, { 18, 34 } }, // Blessing of Quellious,
+    { 6528, { 18, 34 } }, // Blessing of Rodcet Nife,
+    { 6529, { 18, 34 } }, // Blessing of Veeshan,
+    { 6530, { 18, 34 } }, // Words of the Sceptic,
+    { 6532, { 125, 16 } }, // Makural's Curse,
+    { 6533, { 125, 78 } }, // RB_reflect_test,
+    { 6534, { 25, 38 } }, // Makural's Torment,
+    { 6535, { 25, 38 } }, // Makural's TormentSK,
+    { 6563, { 125, 49 } }, // Mass Illusion: Human,
+    { 6564, { 125, 49 } }, // Mass Illusion: Barbarian,
+    { 6565, { 125, 49 } }, // Mass Illusion: Erudite,
+    { 6566, { 125, 49 } }, // Mass Illusion: Wood Elf,
+    { 6567, { 125, 49 } }, // Mass Illusion: Fier`dal,
+    { 6568, { 125, 49 } }, // Mass Illusion: High Elf,
+    { 6569, { 125, 49 } }, // Mass Illusion: Dark Elf,
+    { 6570, { 125, 49 } }, // Mass Illusion: Half-Elf,
+    { 6571, { 125, 49 } }, // Mass Illusion: Dwarf,
+    { 6572, { 125, 49 } }, // Mass Illusion: Troll,
+    { 6573, { 125, 49 } }, // Mass Illusion: Ogre,
+    { 6574, { 125, 49 } }, // Mass Illusion: Halfling,
+    { 6575, { 125, 49 } }, // Mass Illusion: Gnome,
+    { 6576, { 125, 49 } }, // Mass Illusion: Werewolf,
+    { 6577, { 125, 49 } }, // Mass Illusion: Froglok,
+    { 6578, { 125, 49 } }, // Mass Illusion: Imp,
+    { 6579, { 125, 49 } }, // Mass Illusion: Earth Elemental,
+    { 6580, { 125, 49 } }, // Mass Illusion: Air Elemental,
+    { 6581, { 125, 49 } }, // Mass Illusion: Fire Elemental,
+    { 6582, { 125, 49 } }, // Mass Illusion: Water Elemental,
+    { 6583, { 125, 49 } }, // Mass Illusion: Scarecrow,
+    { 6584, { 125, 49 } }, // Mass Illusion: Spirit Wolf,
+    { 6585, { 125, 49 } }, // Mass Illusion: Iksar,
+    { 6586, { 125, 49 } }, // Mass Illusion: Vah Shir,
+    { 6587, { 125, 49 } }, // Mass Illusion: Guktan,
+    { 6588, { 125, 49 } }, // Mass Illusion: Scaled Wolf,
+    { 6589, { 125, 49 } }, // Mass Illusion: Skeleton,
+    { 6590, { 125, 49 } }, // Mass Illusion: Dry Bone,
+    { 6591, { 125, 49 } }, // Mass Illusion: Frost Bone,
+    { 6592, { 125, 129 } }, // GM Bind Sight,
+    { 6656, { 25, 75 } }, // Spray of Venom,
+    { 6662, { 125, 16 } }, // Ward of Retribution,
+    { 6663, { 27, 120 } }, // Guard of Righteousness,
+    { 6664, { 126, 89 } }, // Earthen Shackles,
+    { 6665, { 126, 89 } }, // Serpent Vines,
+    { 6666, { 125, 16 } }, // Storm Blade,
+    { 6667, { 125, 16 } }, // Spirit of the Panther,
+    { 6668, { 114, 18 } }, // Shadow Orb,
+    { 6669, { 25, 14 } }, // Claw of Vox,
+    { 6670, { 18, 109 } }, // Summon: Molten Orb,
+    { 6671, { 125, 84 } }, // Rune of Rikkukin,
+    { 6672, { 69, 71 } }, // Growl of the Panther,
+    { 6673, { 27, 120 } }, // Soul Shield,
+    { 6674, { 25, 38 } }, // Storm Blade Strike,
+    { 6675, { 25, 38 } }, // Storm Blade Strike SK,
+    { 6676, { 25, 38 } }, // Magma Jet,
+    { 6677, { 18, 109 } }, // Shadow Orb Recourse,
+    { 6717, { 95, 7 } }, // Growl of the Panther,
+    { 6719, { 126, 88 } }, // Ward of Retribution Parry,
+    { 6724, { 25, 38 } }, // Panther Maw,
+    { 6725, { 126, 53 } }, // Cyclone Blade,
+    { 6726, { 15, 35 } }, // Assassin's Feint,
+    { 6727, { 15, 25 } }, // Dragon Fang,
+    { 6728, { 15, 72 } }, // Dragon Fang Strike,
+    { 6729, { 15, 72 } }, // Destroyer's Volley,
+    { 6730, { 125, 16 } }, // Ward of Vengeance,
+    { 6731, { 27, 120 } }, // Guard of Humility,
+    { 6732, { 126, 89 } }, // Earthen Embrace,
+    { 6733, { 126, 89 } }, // Mire Thorns,
+    { 6734, { 125, 16 } }, // Song of the Storm,
+    { 6735, { 95, 7 } }, // Spirit of the Leopard,
+    { 6736, { 114, 18 } }, // Soul Orb,
+    { 6737, { 25, 14 } }, // Claw of Frost,
+    { 6738, { 18, 109 } }, // Summon: Lava Orb,
+    { 6739, { 125, 84 } }, // Rune of the Scale,
+    { 6740, { 69, 71 } }, // Growl of the Leopard,
+    { 6741, { 27, 120 } }, // Soul Guard,
+    { 6742, { 25, 38 } }, // Song of the Storm Strike,
+    { 6743, { 25, 38 } }, // Song of the Storm Strike SK,
+    { 6744, { 25, 38 } }, // Lava Jet,
+    { 6745, { 18, 109 } }, // Soul Orb Recourse,
+    { 6747, { 95, 7 } }, // Growl of the Leopard,
+    { 6748, { 126, 35 } }, // Ward of Vengeance Parry,
+    { 6749, { 25, 38 } }, // Leopard Maw,
+    { 6750, { 126, 53 } }, // Whirlwind Blade,
+    { 6751, { 15, 35 } }, // Rogue's Ploy,
+    { 6752, { 15, 25 } }, // Leopard Claw,
+    { 6753, { 15, 72 } }, // Leopard Claw Strike,
+    { 6754, { 15, 72 } }, // Rage Volley,
+    { 6771, { 125, 92 } }, // Geomantra II,
+    { 6777, { 25, 38 } }, // Leopard Maw,
+    { 6778, { 25, 38 } }, // Leopard Maw SK,
+    { 6779, { 25, 38 } }, // Panther Maw,
+    { 6780, { 25, 38 } }, // Panther Maw SK,
+    { 6782, { 25, 0 } }, // Magma Blast,
+    { 6826, { 126, 88 } }, // Desolate Deeds,
+    { 6827, { 126, 88 } }, // Balance of Discord,
+    { 6828, { 126, 88 } }, // Sha's Legacy,
+    { 6839, { 25, 58 } }, // Static Strike,
+    { 6840, { 25, 38 } }, // Firestrike,
+    { 6841, { 25, 38 } }, // Bolt of Flame,
+    { 6842, { 25, 38 } }, // Cinder Bolt,
+    { 6843, { 25, 58 } }, // Anarchy,
+    { 6844, { 25, 58 } }, // Shock of Spikes,
+    { 6845, { 25, 111 } }, // Dismiss Summoned,
+    { 6846, { 25, 124 } }, // Dismiss Undead,
+    { 6847, { 25, 38 } }, // Blaze,
+    { 6848, { 25, 75 } }, // Shock of Poison,
+    { 6849, { 25, 38 } }, // Shock of Flame,
+    { 6850, { 25, 58 } }, // Chaos Flux,
+    { 6851, { 25, 14 } }, // Icestrike,
+    { 6852, { 25, 14 } }, // Icicle Shock,
+    { 6853, { 114, 43 } }, // Lifedraw,
+    { 6854, { 114, 43 } }, // Drain Soul,
+    { 6855, { 25, 14 } }, // Frost Shock,
+    { 6856, { 25, 38 } }, // Inferno Shock,
+    { 6857, { 25, 58 } }, // Lightning Shock,
+    { 6858, { 25, 14 } }, // Winter's Roar,
+    { 6859, { 114, 43 } }, // Spirit Tap,
+    { 6860, { 114, 43 } }, // Drain Spirit,
+    { 6861, { 25, 14 } }, // Shock of Ice,
+    { 6862, { 25, 38 } }, // Flame Shock,
+    { 6863, { 25, 14 } }, // Ice Shock,
+    { 6864, { 25, 38 } }, // Conflagration,
+    { 6865, { 25, 124 } }, // Expel Undead,
+    { 6866, { 25, 58 } }, // Rend,
+    { 6867, { 25, 75 } }, // Torbas' Acid Blast,
+    { 6868, { 25, 14 } }, // Frost,
+    { 6869, { 25, 38 } }, // Sunstrike,
+    { 6870, { 25, 14 } }, // Blast of Frost,
+    { 6871, { 25, 38 } }, // Shock of Fiery Blades,
+    { 6872, { 25, 38 } }, // Burning Arrow,
+    { 6873, { 42, 42 } }, // Nature's Renewal,
+    { 6874, { 42, 42 } }, // Spirit Salve,
+    { 6875, { 42, 42 } }, // Healing Light,
+    { 6876, { 42, 42 } }, // Forest's Renewal,
+    { 6877, { 42, 42 } }, // Kragg's Salve,
+    { 6878, { 42, 42 } }, // Greater Healing Light,
+    { 6899, { 25, 38 } }, // Flash Powder Explosion,
+    { 6902, { 125, 16 } }, // Ward of the Divine,
+    { 6903, { 125, 16 } }, // Ward of Rebuke,
+    { 6904, { 126, 88 } }, // Ward of the Divine Parry,
+    { 6905, { 126, 88 } }, // Ward of Rebuke Parry,
+    { 6906, { 125, 16 } }, // Spirit of the Puma,
+    { 6907, { 125, 16 } }, // Spirit of the Jaguar,
+    { 6908, { 25, 38 } }, // Puma Maw,
+    { 6909, { 25, 38 } }, // Puma Maw SK,
+    { 6910, { 42, 32 } }, // Elixir of Healing I,
+    { 6911, { 42, 32 } }, // Elixir of Healing II,
+    { 6912, { 42, 32 } }, // Elixir of Healing III,
+    { 6913, { 42, 32 } }, // Elixir of Healing IV,
+    { 6914, { 42, 32 } }, // Elixir of Healing V,
+    { 6915, { 42, 32 } }, // Elixir of Healing VI,
+    { 6916, { 42, 32 } }, // Elixir of Healing VII,
+    { 6917, { 42, 32 } }, // Elixir of Healing VIII,
+    { 6918, { 42, 32 } }, // Elixir of Healing IX,
+    { 6919, { 42, 32 } }, // Elixir of Healing X,
+    { 6920, { 42, 32 } }, // Healing Potion I,
+    { 6921, { 42, 32 } }, // Healing Potion II,
+    { 6922, { 42, 32 } }, // Healing Potion III,
+    { 6923, { 42, 32 } }, // Healing Potion IV,
+    { 6924, { 42, 32 } }, // Healing Potion V,
+    { 6925, { 42, 32 } }, // Healing Potion VI,
+    { 6926, { 42, 32 } }, // Healing Potion VII,
+    { 6927, { 42, 32 } }, // Healing Potion VIII,
+    { 6928, { 42, 32 } }, // Healing Potion IX,
+    { 6929, { 42, 32 } }, // Healing Potion X,
+    { 6930, { 45, 46 } }, // Elixir of Health I,
+    { 6931, { 45, 46 } }, // Elixir of Health II,
+    { 6932, { 45, 46 } }, // Elixir of Health III,
+    { 6933, { 45, 46 } }, // Elixir of Health IV,
+    { 6934, { 45, 46 } }, // Elixir of Health V,
+    { 6935, { 45, 46 } }, // Elixir of Health VI,
+    { 6936, { 45, 46 } }, // Elixir of Health VII,
+    { 6937, { 45, 46 } }, // Elixir of Health VIII,
+    { 6938, { 45, 46 } }, // Elixir of Health IX,
+    { 6939, { 45, 46 } }, // Elixir of Health X,
+    { 6940, { 125, 41 } }, // Elixir of Speed I,
+    { 6941, { 125, 41 } }, // Elixir of Speed II,
+    { 6942, { 125, 41 } }, // Elixir of Speed III,
+    { 6943, { 125, 41 } }, // Elixir of Speed IV,
+    { 6944, { 125, 41 } }, // Elixir of Speed V,
+    { 6945, { 125, 41 } }, // Elixir of Speed VI,
+    { 6946, { 125, 41 } }, // Elixir of Speed VII,
+    { 6947, { 125, 41 } }, // Elixir of Speed VIII,
+    { 6948, { 125, 41 } }, // Elixir of Speed IX,
+    { 6949, { 125, 41 } }, // Elixir of Speed X,
+    { 6950, { 79, 59 } }, // Elixir of Clarity I,
+    { 6951, { 79, 59 } }, // Elixir of Clarity II,
+    { 6952, { 79, 59 } }, // Elixir of Clarity III,
+    { 6953, { 79, 59 } }, // Elixir of Clarity IV,
+    { 6954, { 79, 59 } }, // Elixir of Clarity V,
+    { 6955, { 79, 59 } }, // Elixir of Clarity VI,
+    { 6956, { 79, 59 } }, // Elixir of Clarity VII,
+    { 6957, { 79, 59 } }, // Elixir of Clarity VIII,
+    { 6958, { 79, 59 } }, // Elixir of Clarity IX,
+    { 6959, { 79, 59 } }, // Elixir of Clarity X,
+    { 6960, { 20, 29 } }, // Grip of Zanivar,
+    { 6961, { 114, 43 } }, // Zanivar's Lifedraw,
+    { 6962, { 20, 75 } }, // Zanivar's Poison Bolt,
+    { 6963, { 69, 103 } }, // Minion of Zanivar,
+    { 6965, { 25, 0 } }, // Rampage of Rathkan,
+    { 6966, { 25, 58 } }, // Hurl of Rathkan,
+    { 6967, { 25, 97 } }, // Shock of Rathkan,
+    { 6968, { 25, 38 } }, // Lantern Bomb,
+    { 6969, { 25, 58 } }, // Flashpowder Bomb,
+    { 6973, { 125, 52 } }, // Intangibility,
+    { 6976, { 20, 58 } }, // Retch Weed,
+    { 6977, { 126, 37 } }, // Deistic Voice,
+    { 6978, { 126, 37 } }, // Deistic Bellow,
+    { 6979, { 126, 37 } }, // Deistic Howl,
+    { 6980, { 126, 37 } }, // Unholy Voice,
+    { 6981, { 126, 37 } }, // Unholy Bellow,
+    { 6982, { 126, 37 } }, // Unholy Howl,
+    { 6983, { 126, 37 } }, // Phobia,
+    { 6984, { 126, 37 } }, // Jitterskin,
+    { 6985, { 126, 37 } }, // Anxiety Attack,
+    { 6986, { 126, 37 } }, // Shadow Voice,
+    { 6987, { 126, 37 } }, // Shadow Bellow,
+    { 6988, { 126, 37 } }, // Shadow Howl,
+    { 6989, { 126, 37 } }, // Cower the Dead,
+    { 6990, { 126, 37 } }, // Death's Despair,
+    { 6991, { 126, 37 } }, // Revulsion of Death,
+    { 6992, { 126, 37 } }, // Eidolon Voice,
+    { 6993, { 126, 37 } }, // Eidolon Bellow,
+    { 6994, { 126, 37 } }, // Eidolon Howl,
+    { 6995, { 126, 37 } }, // Soulless Fear,
+    { 6996, { 126, 37 } }, // Soulless Panic,
+    { 6997, { 126, 37 } }, // Soulless Terror,
+    { 6998, { 126, 37 } }, // Instinctual Fear,
+    { 6999, { 126, 37 } }, // Instinctual Panic,
+    { 7000, { 126, 37 } }, // Instinctual Terror,
+    { 7001, { 126, 37 } }, // Angstlich's Echo of Terror,
+    { 7002, { 126, 37 } }, // Angstlich's Wail of Panic,
+    { 7003, { 126, 35 } }, // Circle of Dreams,
+    { 7004, { 27, 120 } }, // Guard of Piety,
+    { 7005, { 27, 120 } }, // Ichor Guard,
+    { 7168, { 125, 51 } }, // Obscuring Sporecloud,
+    { 7169, { 126, 83 } }, // Root of Weakness,
+    { 7170, { 125, 95 } }, // Rage of the Root,
+    { 7171, { 42, 42 } }, // Fungal Refreshment,
+    { 7172, { 126, 35 } }, // Spore Snooze,
+    { 7173, { 95, 0 } }, // Fungal Sheen,
+    { 7177, { 125, 95 } }, // Blind Fury I,
+    { 7178, { 125, 95 } }, // Blind Fury II,
+    { 7179, { 125, 95 } }, // Blind Fury III,
+    { 7180, { 25, 97 } }, // Orc Smash I,
+    { 7181, { 25, 97 } }, // Orc Smash II,
+    { 7182, { 25, 97 } }, // Orc Smash III,
+    { 7183, { 125, 95 } }, // Blood Rage I,
+    { 7184, { 125, 95 } }, // Blood Rage II,
+    { 7185, { 125, 95 } }, // Blood Rage III,
+    { 7186, { 126, 30 } }, // Dark Bellow I,
+    { 7187, { 126, 30 } }, // Dark Bellow II,
+    { 7188, { 126, 30 } }, // Dark Bellow III,
+    { 7189, { 25, 38 } }, // Wave of Fire,
+    { 7190, { 126, 88 } }, // Tide of Sloth I,
+    { 7191, { 126, 88 } }, // Tide of Sloth II,
+    { 7192, { 126, 88 } }, // Tide of Sloth III,
+    { 7193, { 25, 38 } }, // Fiery Surge I,
+    { 7194, { 25, 38 } }, // Fiery Surge II,
+    { 7195, { 25, 38 } }, // Fiery Surge III,
+    { 7199, { 42, 32 } }, // Soothing Remedy,
+    { 7200, { 125, 79 } }, // Orcish Regeneration I,
+    { 7201, { 125, 79 } }, // Orcish Regeneration II,
+    { 7202, { 125, 79 } }, // Orcish Regeneration III,
+    { 7203, { 126, 89 } }, // Weak Knees,
+    { 7204, { 42, 42 } }, // Complete Refreshment,
+    { 7205, { 125, 95 } }, // Hand of Darkness,
+    { 7206, { 42, 42 } }, // Shadowmend,
+    { 7207, { 82, 0 } }, // Soulmend,
+    { 7208, { 126, 97 } }, // Arachnae Scream,
+    { 7209, { 95, 61 } }, // Voice of Vule,
+    { 7210, { 125, 95 } }, // Speed of the Spider,
+    { 7211, { 126, 35 } }, // Skinwalker's Mindwave,
+    { 7212, { 126, 88 } }, // Dire Musings,
+    { 7213, { 25, 58 } }, // Thoughtraze,
+    { 7214, { 69, 103 } }, // Dark Messenger,
+    { 7215, { 20, 75 } }, // Bite of Night,
+    { 7216, { 20, 58 } }, // Chanted Doom,
+    { 7217, { 114, 43 } }, // Vile Spirit,
+    { 7218, { 20, 58 } }, // Spiteful Hex,
+    { 7219, { 25, 58 } }, // Eboncall,
+    { 7220, { 25, 58 } }, // Stormreaver,
+    { 7221, { 125, 84 } }, // Ethereal Carapace,
+    { 7222, { 125, 92 } }, // Master's Shadow,
+    { 7223, { 25, 14 } }, // Ice Spray,
+    { 7224, { 125, 53 } }, // Needling Annoyance,
+    { 7232, { 25, 38 } }, // Jaguar Maw,
+    { 7233, { 25, 38 } }, // Jaguar Maw SK,
+    { 7400, { 42, 42 } }, // Heal Wounds I,
+    { 7401, { 42, 42 } }, // Heal Wounds II,
+    { 7402, { 42, 42 } }, // Heal Wounds III,
+    { 7403, { 42, 42 } }, // Heal Wounds IV,
+    { 7404, { 42, 42 } }, // Heal Wounds V,
+    { 7405, { 42, 42 } }, // Heal Wounds VI,
+    { 7406, { 42, 42 } }, // Heal Wounds VII,
+    { 7407, { 42, 42 } }, // Heal Wounds VIII,
+    { 7408, { 42, 42 } }, // Heal Wounds IX,
+    { 7409, { 42, 42 } }, // Heal Wounds X,
+    { 7410, { 42, 42 } }, // Heal Wounds XI,
+    { 7411, { 42, 42 } }, // Heal Wounds XII,
+    { 7412, { 42, 42 } }, // Heal Wounds XIII,
+    { 7413, { 42, 42 } }, // Heal Wounds XIV,
+    { 7414, { 25, 38 } }, // Fire I,
+    { 7415, { 25, 38 } }, // Fire II,
+    { 7416, { 25, 38 } }, // Fire III,
+    { 7417, { 25, 38 } }, // Fire IV,
+    { 7418, { 25, 38 } }, // Fire V,
+    { 7419, { 25, 38 } }, // Fire VI,
+    { 7420, { 25, 38 } }, // Fire VII,
+    { 7421, { 25, 38 } }, // Fire VIII,
+    { 7422, { 25, 38 } }, // Fire IX,
+    { 7423, { 25, 38 } }, // Fire X,
+    { 7424, { 25, 38 } }, // Fire XI,
+    { 7425, { 25, 38 } }, // Fire XII,
+    { 7426, { 25, 38 } }, // Fire XIII,
+    { 7427, { 25, 38 } }, // Fire XIV,
+    { 7428, { 25, 38 } }, // Frost I,
+    { 7429, { 25, 38 } }, // Frost II,
+    { 7430, { 25, 38 } }, // Frost III,
+    { 7431, { 25, 38 } }, // Frost IV,
+    { 7432, { 25, 38 } }, // Frost V,
+    { 7433, { 25, 38 } }, // Frost VI,
+    { 7434, { 25, 38 } }, // Frost VII,
+    { 7435, { 25, 38 } }, // Frost VIII,
+    { 7436, { 25, 38 } }, // Frost IX,
+    { 7437, { 25, 38 } }, // Frost X,
+    { 7438, { 25, 38 } }, // Frost XI,
+    { 7439, { 25, 38 } }, // Frost XII,
+    { 7440, { 25, 38 } }, // Frost XIII,
+    { 7441, { 25, 38 } }, // Frost XIV,
+    { 7442, { 25, 38 } }, // Thunder I,
+    { 7443, { 25, 38 } }, // Thunder II,
+    { 7444, { 25, 38 } }, // Thunder III,
+    { 7445, { 25, 38 } }, // Thunder IV,
+    { 7446, { 25, 38 } }, // Thunder V,
+    { 7447, { 25, 38 } }, // Thunder VI,
+    { 7448, { 25, 38 } }, // Thunder VII,
+    { 7449, { 25, 38 } }, // Thunder VIII,
+    { 7450, { 25, 38 } }, // Thunder IX,
+    { 7451, { 25, 38 } }, // Thunder X,
+    { 7452, { 25, 38 } }, // Thunder XI,
+    { 7453, { 25, 38 } }, // Thunder XII,
+    { 7454, { 25, 38 } }, // Thunder XIII,
+    { 7455, { 25, 38 } }, // Thunder XIV,
+    { 7465, { 15, 115 } }, // Smoke Bomb I,
+    { 7466, { 15, 115 } }, // Smoke Bomb II,
+    { 7467, { 15, 115 } }, // Smoke Bomb III,
+    { 7468, { 15, 115 } }, // Smoke Bomb IV,
+    { 7469, { 15, 115 } }, // Smoke Bomb V,
+    { 7470, { 15, 115 } }, // Smoke Bomb VI,
+    { 7471, { 15, 115 } }, // Smoke Bomb VII,
+    { 7472, { 15, 115 } }, // Smoke Bomb VIII,
+    { 7473, { 15, 115 } }, // Smoke Bomb IX,
+    { 7474, { 15, 115 } }, // Smoke Bomb X,
+    { 7475, { 15, 115 } }, // Smoke Screen,
+    { 7476, { 27, 117 } }, // Pain Tolerance,
+    { 7477, { 25, 0 } }, // Cazic Touch II,
+    { 7478, { 25, 0 } }, // Destroy II,
+    { 7481, { 126, 89 } }, // Hamstring I,
+    { 7482, { 126, 89 } }, // Hamstring II,
+    { 7483, { 20, 75 } }, // Lesion I,
+    { 7484, { 20, 75 } }, // Lesion II,
+    { 7485, { 20, 75 } }, // Lesion III,
+    { 7486, { 20, 75 } }, // Lesion IV,
+    { 7487, { 20, 75 } }, // Lesion V,
+    { 7488, { 20, 75 } }, // Lesion VI,
+    { 7489, { 20, 75 } }, // Lesion VII,
+    { 7490, { 20, 75 } }, // Lesion VIII,
+    { 7491, { 20, 75 } }, // Lesion IX,
+    { 7492, { 20, 75 } }, // Lesion X,
+    { 7496, { 20, 75 } }, // Frost of the Ancients I,
+    { 7497, { 20, 75 } }, // Frost of the Ancients II,
+    { 7498, { 20, 75 } }, // Frost of the Ancients III,
+    { 7499, { 20, 75 } }, // Frost of the Ancients IV,
+    { 7500, { 20, 75 } }, // Frost of the Ancients V,
+    { 7501, { 20, 75 } }, // Frost of the Ancients VI,
+    { 7502, { 20, 75 } }, // Frost of the Ancients VII,
+    { 7503, { 20, 75 } }, // Frost of the Ancients VIII,
+    { 7504, { 20, 75 } }, // Frost of the Ancients IX,
+    { 7505, { 20, 75 } }, // Frost of the Ancients X,
+    { 7506, { 42, 19 } }, // Cure Poison I,
+    { 7507, { 42, 19 } }, // Cure Poison II,
+    { 7508, { 42, 19 } }, // Cure Poison III,
+    { 7509, { 42, 19 } }, // Cure Poison IV,
+    { 7510, { 42, 19 } }, // Cure Disease I,
+    { 7511, { 42, 19 } }, // Cure Disease II,
+    { 7512, { 42, 19 } }, // Cure Disease III,
+    { 7513, { 42, 19 } }, // Cure Disease IV,
+    { 7514, { 42, 19 } }, // Remove Curse I,
+    { 7515, { 42, 19 } }, // Remove Curse II,
+    { 7516, { 42, 19 } }, // Remove Curse III,
+    { 7517, { 42, 19 } }, // Remove Curse IV,
+    { 7518, { 125, 64 } }, // Play Dead I,
+    { 7519, { 125, 64 } }, // Play Dead II,
+    { 7520, { 125, 64 } }, // Play Dead III,
+    { 7521, { 125, 64 } }, // Play Dead IV,
+    { 7522, { 25, 97 } }, // Gore I,
+    { 7523, { 25, 97 } }, // Gore II,
+    { 7524, { 25, 97 } }, // Gore III,
+    { 7525, { 25, 97 } }, // Gore IV,
+    { 7526, { 25, 97 } }, // Gore V,
+    { 7527, { 25, 97 } }, // Gore VI,
+    { 7528, { 126, 88 } }, // War Bellow,
+    { 7529, { 95, 7 } }, // War Bellow Recourse,
+    { 7531, { 126, 35 } }, // Sleep I,
+    { 7532, { 126, 35 } }, // Sleep II,
+    { 7533, { 126, 35 } }, // Sleep III,
+    { 7534, { 126, 35 } }, // Sleep IV,
+    { 7535, { 126, 35 } }, // Sleep V,
+    { 7536, { 126, 88 } }, // Lethargy I,
+    { 7537, { 126, 88 } }, // Lethargy II,
+    { 7538, { 126, 88 } }, // Lethargy III,
+    { 7539, { 126, 88 } }, // Lethargy IV,
+    { 7540, { 126, 88 } }, // Lethargy V,
+    { 7541, { 27, 117 } }, // Plane Shift: Ethereal,
+    { 7542, { 27, 118 } }, // Plane Shift: Material,
+    { 7543, { 27, 118 } }, // Blink,
+    { 7545, { 20, 75 } }, // Swarm of Pain I,
+    { 7546, { 20, 75 } }, // Swarm of Pain II,
+    { 7547, { 20, 75 } }, // Swarm of Pain III,
+    { 7548, { 20, 75 } }, // Swarm of Pain IV,
+    { 7549, { 20, 75 } }, // Swarm of Pain V,
+    { 7550, { 20, 75 } }, // Swarm of Pain VI,
+    { 7551, { 20, 75 } }, // Swarm of Pain VII,
+    { 7552, { 20, 75 } }, // Swarm of Pain VIII,
+    { 7553, { 20, 75 } }, // Swarm of Pain IX,
+    { 7554, { 20, 75 } }, // Swarm of Pain X,
+    { 7555, { 20, 75 } }, // Fungal Malady I,
+    { 7556, { 20, 75 } }, // Fungal Malady II,
+    { 7557, { 20, 75 } }, // Fungal Malady III,
+    { 7558, { 20, 75 } }, // Fungal Malady IV,
+    { 7559, { 20, 75 } }, // Fungal Malady V,
+    { 7560, { 20, 75 } }, // Fungal Malady VI,
+    { 7561, { 20, 75 } }, // Fungal Malady VII,
+    { 7562, { 20, 75 } }, // Fungal Malady VIII,
+    { 7563, { 20, 75 } }, // Fungal Malady IX,
+    { 7564, { 20, 75 } }, // Fungal Malady X,
+    { 7565, { 45, 47 } }, // Ward of the Bear I,
+    { 7566, { 45, 47 } }, // Ward of the Bear II,
+    { 7567, { 45, 47 } }, // Ward of the Bear III,
+    { 7568, { 125, 65 } }, // Ward of the Wolf I,
+    { 7569, { 95, 2 } }, // Ward of the Wolf II,
+    { 7570, { 95, 2 } }, // Ward of the Wolf III,
+    { 7571, { 39008, 39079 } }, // Ward of the Tiger I,
+    { 7572, { 39008, 39079 } }, // Ward of the Tiger II,
+    { 7573, { 95, 64 } }, // Ward of the Tiger III,
+    { 7574, { 125, 79 } }, // Ward of the Crocodile I,
+    { 7575, { 125, 79 } }, // Ward of the Crocodile II,
+    { 7576, { 125, 79 } }, // Ward of the Crocodile III,
+    { 7577, { 95, 2 } }, // Ward of the Scaled Wolf I,
+    { 7578, { 95, 2 } }, // Ward of the Scaled Wolf II,
+    { 7579, { 95, 2 } }, // Ward of the Scaled Wolf III,
+    { 7580, { 125, 41 } }, // Ward of the Raptor I,
+    { 7581, { 95, 2 } }, // Ward of the Raptor II,
+    { 7582, { 95, 2 } }, // Ward of the Raptor III,
+    { 7583, { 95, 2 } }, // Ward of the Garou I,
+    { 7584, { 95, 2 } }, // Ward of the Garou II,
+    { 7585, { 95, 2 } }, // Ward of the Garou III,
+    { 7589, { 125, 21 } }, // Fire Skin I,
+    { 7590, { 125, 21 } }, // Fire Skin II,
+    { 7591, { 125, 21 } }, // Fire Skin III,
+    { 7592, { 125, 21 } }, // Fire Skin IV,
+    { 7593, { 125, 21 } }, // Fire Skin V,
+    { 7594, { 125, 21 } }, // Fire Skin VI,
+    { 7595, { 125, 21 } }, // Fire Skin VII,
+    { 7596, { 125, 21 } }, // Fire Skin VIII,
+    { 7597, { 125, 21 } }, // Fire Skin IX,
+    { 7598, { 125, 21 } }, // Fire Skin X,
+    { 7599, { 25, 0 } }, // Gargoyle Glance,
+    { 7701, { 126, 83 } }, // Weakening Roots,
+    { 7729, { 125, 51 } }, // Stealth,
+    { 7745, { 25, 97 } }, // Stunning Roar,
+    { 7746, { 27, 117 } }, // Whirlwind,
+    { 7762, { 15, 72 } }, // Maul I,
+    { 7763, { 15, 72 } }, // Maul II,
+    { 7764, { 15, 72 } }, // Maul III,
+    { 7765, { 15, 72 } }, // Maul IV,
+    { 7766, { 15, 72 } }, // Maul V,
+    { 7767, { 15, 72 } }, // Maul VI,
+    { 7768, { 15, 72 } }, // Maul VII,
+    { 7769, { 15, 72 } }, // Maul VIII,
+    { 7770, { 15, 72 } }, // Maul IX,
+    { 7771, { 15, 72 } }, // Maul X,
+    { 7772, { 15, 72 } }, // Maul XI,
+    { 7773, { 15, 72 } }, // Maul XII,
+    { 7774, { 15, 72 } }, // Maul XIII,
+    { 7775, { 15, 72 } }, // Maul XIV,
+    { 7776, { 25, 38 } }, // Mana Bolt I,
+    { 7777, { 25, 38 } }, // Mana Bolt II,
+    { 7778, { 25, 38 } }, // Mana Bolt III,
+    { 7779, { 25, 38 } }, // Mana Bolt IV,
+    { 7780, { 25, 38 } }, // Mana Bolt V,
+    { 7781, { 25, 38 } }, // Mana Bolt VI,
+    { 7782, { 25, 38 } }, // Mana Bolt VII,
+    { 7783, { 25, 38 } }, // Mana Bolt VIII,
+    { 7784, { 25, 38 } }, // Mana Bolt IX,
+    { 7785, { 25, 38 } }, // Mana Bolt X,
+    { 7786, { 25, 38 } }, // Mana Bolt XI,
+    { 7787, { 25, 38 } }, // Mana Bolt XII,
+    { 7788, { 25, 38 } }, // Mana Bolt XIII,
+    { 7789, { 25, 38 } }, // Mana Bolt XIV,
+    { 7790, { 123, 64 } }, // Spirit Sending,
+    { 7800, { 20, 75 } }, // Draygun's Touch,
+    { 7801, { 20, 75 } }, // Draygun's Touch,
+    { 7802, { 20, 75 } }, // Draygun's Touch,
+    { 7803, { 20, 75 } }, // Draygun's Touch,
+    { 7804, { 20, 75 } }, // Draygun's Touch,
+    { 7805, { 20, 75 } }, // Curse of the Nine,
+    { 7806, { 20, 75 } }, // Curse of the Nine,
+    { 7807, { 20, 75 } }, // Curse of the Nine,
+    { 7808, { 20, 75 } }, // Curse of the Nine,
+    { 7809, { 20, 75 } }, // Curse of the Nine,
+    { 7810, { 20, 75 } }, // Blood of the Shadowmane,
+    { 7811, { 20, 75 } }, // Blood of the Shadowmane,
+    { 7812, { 20, 75 } }, // Blood of the Shadowmane,
+    { 7813, { 20, 75 } }, // Blood of the Shadowmane,
+    { 7814, { 20, 75 } }, // Blood of the Shadowmane,
+    { 7815, { 20, 75 } }, // Theft of Rage,
+    { 7816, { 20, 75 } }, // Theft of Rage,
+    { 7817, { 20, 75 } }, // Theft of Rage,
+    { 7818, { 20, 75 } }, // Theft of Rage,
+    { 7819, { 20, 75 } }, // Theft of Rage,
+    { 7820, { 20, 75 } }, // Curse of the Hivequeen,
+    { 7821, { 20, 75 } }, // Curse of the Hivequeen,
+    { 7822, { 20, 75 } }, // Curse of the Hivequeen,
+    { 7823, { 20, 75 } }, // Curse of the Hivequeen,
+    { 7824, { 20, 75 } }, // Curse of the Hivequeen,
+    { 7838, { 125, 48 } }, // Form of Defense IV,
+    { 7839, { 125, 48 } }, // Form of Protection IV,
+    { 7840, { 125, 48 } }, // Form of Endurance IV,
+    { 7841, { 125, 48 } }, // Form of Rejuvenation IV,
+    { 7994, { 20, 38 } }, // Dread Pyre,
+    { 7995, { 25, 75 } }, // Call for Blood,
+    { 7996, { 25, 38 } }, // Call for Blood Recourse,
+    { 7999, { 20, 75 } }, // Corath Venom,
+    { 8000, { 95, 64 } }, // Commanding Voice,
+    { 8001, { 95, 64 } }, // Thief's eyes,
+    { 8002, { 95, 64 } }, // Fists of Wu,
+    { 8003, { 95, 64 } }, // Cry Havoc,
+    { 8004, { 25, 124 } }, // Death's Regret,
+    { 8005, { 25, 124 } }, // Bind Death,
+    { 8006, { 25, 72 } }, // Chromastrike,
+    { 8007, { 42, 42 } }, // Desperate Renewal,
+    { 8008, { 125, 16 } }, // Skin of the Reptile,
+    { 8009, { 42, 42 } }, // Skin of the Rep. Trigger,
+    { 8010, { 126, 83 } }, // Spore Spiral,
+    { 8011, { 25, 38 } }, // Dawnstrike,
+    { 8012, { 20, 38 } }, // Blessing of the Dawn,
+    { 8015, { 125, 16 } }, // Lingering Sloth,
+    { 8016, { 125, 16 } }, // Lingering Sloth Trigger,
+    { 8017, { 126, 88 } }, // Hungry Plague,
+    { 8018, { 25, 75 } }, // Breath of Antraygus,
+    { 8019, { 27, 117 } }, // Warder's Wrath,
+    { 8020, { 25, 72 } }, // Hail of Arrows,
+    { 8021, { 69, 104 } }, // Bestial Empathy,
+    { 8022, { 25, 124 } }, // Fickle Shadows,
+    { 8023, { 20, 38 } }, // Fickle Shadows Recourse,
+    { 8025, { 114, 43 } }, // Touch of Draygun,
+    { 8026, { 45, 47 } }, // Gift of Draygun,
+    { 8027, { 25, 124 } }, // Last Rites,
+    { 8028, { 25, 124 } }, // Last Rites Trigger,
+    { 8029, { 95, 64 } }, // Silent Piety,
+    { 8030, { 27, 118 } }, // Thousand Blades,
+    { 8031, { 126, 35 } }, // Creeping Dreams,
+    { 8032, { 125, 16 } }, // Mana Flare,
+    { 8033, { 69, 71 } }, // Mana Flare Strike,
+    { 8034, { 25, 58 } }, // Colored Chaos,
+    { 8035, { 126, 35 } }, // Echoing Madness,
+    { 8036, { 125, 48 } }, // Illusion: Orc,
+    { 8037, { 69, 102 } }, // Raging Servant,
+    { 8038, { 125, 16 } }, // Burning Aura,
+    { 8039, { 125, 16 } }, // Burning Vengeance,
+    { 8040, { 25, 38 } }, // Fickle Fire,
+    { 8041, { 25, 14 } }, // Clinging Frost,
+    { 8042, { 25, 14 } }, // Clinging Frost Trigger,
+    { 8043, { 25, 38 } }, // Ether Flame,
+    { 8044, { 25, 58 } }, // Mana Weave,
+    { 8045, { 25, 38 } }, // Mana Weave Recourse,
+    { 8075, { 25, 38 } }, // Fickle Fire Recourse,
+    { 8090, { 126, 81 } }, // Armor Cleave I,
+    { 8091, { 126, 81 } }, // Armor Cleave II,
+    { 8092, { 126, 81 } }, // Armor Cleave III,
+    { 8093, { 126, 81 } }, // Armor Cleave IV,
+    { 8094, { 126, 81 } }, // Armor Cleave V,
+    { 8095, { 126, 81 } }, // Armor Cleave VI,
+    { 8096, { 126, 81 } }, // Armor Cleave VII,
+    { 8097, { 126, 81 } }, // Armor Cleave VIII,
+    { 8098, { 126, 81 } }, // Armor Cleave IX,
+    { 8099, { 126, 81 } }, // Armor Cleave X,
+    { 8106, { 42, 42 } }, // Perfected Heal,
+    { 8114, { 25, 38 } }, // Shrieker Sonic Wave,
+    { 8115, { 25, 38 } }, // Shrieker Sonic Wave,
+    { 8116, { 25, 38 } }, // Shrieker Sonic Wave,
+    { 8117, { 25, 38 } }, // Nimbus Shrieker Wave,
+    { 8118, { 25, 38 } }, // Nimbus Shrieker Wave,
+    { 8119, { 25, 38 } }, // Nimbus Shrieker Wave,
+    { 8120, { 25, 58 } }, // Retch Spore,
+    { 8121, { 25, 58 } }, // Retch Spore,
+    { 8122, { 25, 58 } }, // Retch Spore,
+    { 8123, { 25, 58 } }, // Hammer Time,
+    { 8144, { 126, 89 } }, // Net,
+    { 8145, { 126, 89 } }, // Clinging Net,
+    { 8149, { 123, 64 } }, // Stealthy Getaway,
+    { 8153, { 79, 59 } }, // Eternal Thought,
+    { 8171, { 79, 59 } }, // Pure Thought I,
+    { 8172, { 79, 59 } }, // Pure Thought II,
+    { 8173, { 79, 59 } }, // Pure Thought III,
+    { 8174, { 79, 59 } }, // Pure Thought IV,
+    { 8175, { 79, 59 } }, // Pure Thought V,
+    { 8176, { 79, 59 } }, // Pure Thought VI,
+    { 8177, { 79, 59 } }, // Pure Thought VII,
+    { 8178, { 79, 59 } }, // Pure Thought VIII,
+    { 8179, { 79, 59 } }, // Pure Thought IX,
+    { 8180, { 79, 59 } }, // Pure Thought X,
+    { 8200, { 79, 59 } }, // Gift of Illsalin,
+    { 8201, { 69, 102 } }, // Guardian of Ro,
+    { 8202, { 69, 102 } }, // Guardian of Ro,
+    { 8203, { 69, 102 } }, // Guardian of Ro,
+    { 8204, { 25, 38 } }, // Guardian's Bolt I,
+    { 8210, { 15, 115 } }, // Feral Roar I,
+    { 8211, { 15, 115 } }, // Feral Roar II,
+    { 8212, { 15, 115 } }, // Feral Roar III,
+    { 8213, { 15, 115 } }, // Feral Roar IV,
+    { 8214, { 125, 48 } }, // Greater Rabid Bear,
+    { 8215, { 125, 48 } }, // Greater Rabid Bear,
+    { 8216, { 125, 48 } }, // Greater Rabid Bear,
+    { 8218, { 125, 62 } }, // Ancestral Guard,
+    { 8219, { 125, 62 } }, // Ancestral Guard,
+    { 8220, { 125, 62 } }, // Ancestral Guard,
+    { 8233, { 27, 118 } }, // Empathic Fury,
+    { 8234, { 27, 118 } }, // Empathic Fury,
+    { 8235, { 123, 5 } }, // Circle of Undershore,
+    { 8236, { 123, 5 } }, // Undershore Portal,
+    { 8237, { 123, 5 } }, // Ring of Undershore,
+    { 8238, { 123, 5 } }, // Undershore Gate,
+    { 8239, { 123, 5 } }, // Translocate: Undershore,
+    { 8267, { 15, 115 } }, // Feral Roar V,
+    { 8268, { 15, 115 } }, // Feral Roar VI,
+    { 8275, { 126, 35 } }, // Infection Test 1,
+    { 8276, { 126, 35 } }, // Infection Test 2,
+    { 8277, { 25, 58 } }, // Fling,
+    { 8278, { 69, 71 } }, // Fetter of Spirits,
+    { 8280, { 45, 46 } }, // Boon of Vitality I,
+    { 8281, { 45, 46 } }, // Boon of Vitality II,
+    { 8282, { 45, 46 } }, // Boon of Vitality III,
+    { 8283, { 45, 46 } }, // Boon of Vitality IV,
+    { 8284, { 45, 46 } }, // Boon of Vitality V,
+    { 8285, { 45, 46 } }, // Boon of Vitality VI,
+    { 8286, { 45, 46 } }, // Boon of Vitality VII,
+    { 8287, { 45, 46 } }, // Boon of Vitality VIII,
+    { 8288, { 45, 46 } }, // Boon of Vitality IX,
+    { 8289, { 45, 46 } }, // Boon of Vitality X,
+    { 8290, { 125, 41 } }, // Gift of Speed I,
+    { 8291, { 125, 41 } }, // Gift of Speed II,
+    { 8292, { 125, 41 } }, // Gift of Speed III,
+    { 8293, { 125, 41 } }, // Gift of Speed IV,
+    { 8294, { 125, 41 } }, // Gift of Speed V,
+    { 8295, { 125, 41 } }, // Gift of Speed VI,
+    { 8296, { 125, 41 } }, // Gift of Speed VII,
+    { 8297, { 125, 41 } }, // Gift of Speed VIII,
+    { 8298, { 125, 41 } }, // Gift of Speed IX,
+    { 8299, { 125, 41 } }, // Gift of Speed X,
+    { 8300, { 126, 81 } }, // Malaise I,
+    { 8301, { 126, 81 } }, // Malaise II,
+    { 8302, { 126, 81 } }, // Malaise III,
+    { 8303, { 126, 81 } }, // Malaise IV,
+    { 8304, { 126, 81 } }, // Malaise V,
+    { 8305, { 25, 97 } }, // Stun I,
+    { 8306, { 25, 97 } }, // Stun II,
+    { 8307, { 25, 97 } }, // Stun III,
+    { 8308, { 25, 97 } }, // Stun IV,
+    { 8309, { 25, 97 } }, // Stun V,
+    { 8310, { 126, 13 } }, // Gaze of the Beholder I,
+    { 8311, { 126, 13 } }, // Gaze of the Beholder II,
+    { 8312, { 126, 13 } }, // Gaze of the Beholder III,
+    { 8313, { 126, 13 } }, // Gaze of the Beholder IV,
+    { 8314, { 126, 13 } }, // Gaze of the Beholder V,
+    { 8315, { 126, 13 } }, // Gaze of the Beholder VI,
+    { 8316, { 126, 13 } }, // Gaze of the Beholder VII,
+    { 8317, { 126, 13 } }, // Gaze of the Beholder VIII,
+    { 8318, { 126, 13 } }, // Gaze of the Beholder IX,
+    { 8319, { 126, 13 } }, // Gaze of the Beholder X,
+    { 8320, { 126, 13 } }, // Gaze of the Beholder XI,
+    { 8321, { 126, 13 } }, // Gaze of the Beholder XII,
+    { 8322, { 126, 13 } }, // Gaze of the Beholder XIII,
+    { 8323, { 126, 13 } }, // Gaze of the Beholder XIV,
+    { 8324, { 42, 19 } }, // Pure Water I,
+    { 8325, { 42, 19 } }, // Pure Water II,
+    { 8326, { 42, 19 } }, // Pure Water III,
+    { 8327, { 42, 19 } }, // Pure Water IV,
+    { 8328, { 25, 97 } }, // Gale Force,
+    { 8329, { 42, 32 } }, // Fungal Regrowth I,
+    { 8330, { 42, 32 } }, // Fungal Regrowth II,
+    { 8331, { 42, 32 } }, // Fungal Regrowth III,
+    { 8332, { 42, 32 } }, // Fungal Regrowth IV,
+    { 8333, { 42, 32 } }, // Fungal Regrowth V,
+    { 8334, { 125, 16 } }, // Creeping Plague,
+    { 8335, { 125, 16 } }, // Creeping Plague Trigger,
+    { 8336, { 25, 97 } }, // Stunning Blow I,
+    { 8337, { 25, 97 } }, // Stunning Blow II,
+    { 8338, { 25, 97 } }, // Stunning Blow III,
+    { 8339, { 25, 97 } }, // Stunning Blow IV,
+    { 8340, { 25, 97 } }, // Stunning Blow V,
+    { 8341, { 125, 17 } }, // Dark Gift I,
+    { 8342, { 125, 17 } }, // Dark Gift II,
+    { 8343, { 125, 17 } }, // Dark Gift III,
+    { 8344, { 125, 17 } }, // Dark Gift IV,
+    { 8345, { 125, 17 } }, // Dark Gift V,
+    { 8346, { 125, 17 } }, // Dark Gift VI,
+    { 8347, { 125, 17 } }, // Dark Gift VII,
+    { 8348, { 114, 43 } }, // Dark Siphon I,
+    { 8349, { 114, 43 } }, // Dark Siphon II,
+    { 8350, { 114, 43 } }, // Dark Siphon III,
+    { 8351, { 114, 43 } }, // Dark Siphon IV,
+    { 8352, { 114, 43 } }, // Dark Siphon V,
+    { 8353, { 114, 43 } }, // Dark Siphon VI,
+    { 8354, { 114, 43 } }, // Dark Siphon VII,
+    { 8372, { 125, 84 } }, // Stone Skin I,
+    { 8373, { 125, 84 } }, // Stone Skin II,
+    { 8374, { 125, 84 } }, // Stone Skin III,
+    { 8375, { 125, 84 } }, // Stone Skin IV,
+    { 8376, { 125, 84 } }, // Stone Skin V,
+    { 8377, { 125, 84 } }, // Stone Skin VI,
+    { 8378, { 126, 35 } }, // Shadowed Dark Hold,
+    { 8379, { 126, 13 } }, // Shadowed Word of Chaos,
+    { 8380, { 20, 58 } }, // Shadowed Curse of Mori,
+    { 8381, { 25, 38 } }, // Shadowed Meteor Storm,
+    { 8382, { 25, 38 } }, // Shadowed Corona Flare,
+    { 8383, { 25, 38 } }, // Shadowed Core Fire,
+    { 8400, { 25, 38 } }, // Guardian's Bolt II,
+    { 8401, { 25, 38 } }, // Guardian's Bolt III,
+    { 8410, { 25, 0 } }, // Hand of Holy Vengeance I,
+    { 8411, { 25, 0 } }, // Hand of Holy Vengeance II,
+    { 8412, { 25, 0 } }, // Hand of Holy Vengeance III,
+    { 8413, { 25, 0 } }, // Hand of Holy Vengeance IV,
+    { 8414, { 25, 0 } }, // Hand of Holy Vengeance V,
+    { 8421, { 25, 58 } }, // Jailor's Fury,
+    { 8444, { 15, 72 } }, // Blinding Dust
+    };
+	auto it = combinedMap.find(spellID);
+	if (it != combinedMap.end()) {
+		return it->second;
+	}
+	else {
+		return SpellCat(0,0); // or throw std::out_of_range("Spell ID not found");
 	}
 }
-static inline DWORD GetSpellSubCategory(DWORD spellID)
-{
-	switch (spellID)
-	{
-	case 3: //Summon Corpse
-		return 64;
-	case 4: //Summon Waterstone
-		return 109;
-	case 6: //Ignite Blood
-		return 38;
-	case 7: //Hymn of Restoration
-		return 43;
-	case 9: //Superior Healing
-		return 42;
-	case 10: //Augmentation
-		return 41;
-	case 11: //Holy Armor
-		return 6;
-	case 12: //Healing
-		return 42;
-	case 13: //Complete Healing
-		return 42;
-	case 14: //Strike
-		return 58;
-	case 15: //Greater Healing
-		return 42;
-	case 16: //Smite
-		return 58;
-	case 17: //Light Healing
-		return 42;
-	case 18: //Guard
-		return 6;
-	case 19: //Armor of Faith
-		return 6;
-	case 20: //Shield of Words
-		return 6;
-	case 21: //Berserker Strength
-		return 96;
-	case 22: //Force Snap
-		return 58;
-	case 23: //Force Strike
-		return 58;
-	case 24: //Strip Enchantment
-		return 31;
-	case 25: //Pillage Enchantment
-		return 31;
-	case 26: //Skin like Wood
-		return 46;
-	case 27: //Pogonip
-		return 14;
-	case 28: //Avalanche
-		return 14;
-	case 29: //Ice
-		return 14;
-	case 31: //Scourge
-		return 29;
-	case 32: //Plague
-		return 29;
-	case 33: //Brilliance
-		return 130;
-	case 34: //Superior Camouflage
-		return 51;
-	case 35: //Bind Affinity
-		return 64;
-	case 36: //Gate
-		return 64;
-	case 37: //Hammer of Striking
-		return 110;
-	case 38: //Lightning Bolt
-		return 58;
-	case 39: //Quickness
-		return 41;
-	case 40: //Strengthen
-		return 96;
-	case 41: //Weaken
-		return 30;
-	case 42: //Invisibility
-		return 51;
-	case 43: //Yaulp II
-		return 7;
-	case 44: //Yaulp III
-		return 7;
-	case 45: //Pacify
-		return 11;
-	case 46: //Ultravision
-		return 129;
-	case 47: //Calm
-		return 11;
-	case 48: //Cancel Magic
-		return 31;
-	case 49: //Nullify Magic
-		return 31;
-	case 50: //Summon Food
-		return 108;
-	case 51: //Glimpse
-		return 129;
-	case 52: //Abundant Drink
-		return 108;
-	case 53: //Abundant Food
-		return 108;
-	case 54: //Frost Bolt
-		return 14;
-	case 55: //Cornucopia
-		return 108;
-	case 56: //Everfount
-		return 108;
-	case 57: //Firestrike
-		return 38;
-	case 58: //Elementalkin: Earth
-		return 100;
-	case 59: //Panic the Dead
-		return 37;
-	case 60: //Resist Fire
-		return 80;
-	case 61: //Resist Cold
-		return 80;
-	case 62: //Resist Poison
-		return 80;
-	case 63: //Resist Disease
-		return 80;
-	case 64: //Resist Magic
-		return 80;
-	case 65: //Major Shielding
-		return 87;
-	case 66: //Greater Shielding
-		return 87;
-	case 67: //Arch Shielding
-		return 87;
-	case 68: //Bolt of Flame
-		return 38;
-	case 69: //Cinder Bolt
-		return 38;
-	case 70: //Lava Bolt
-		return 38;
-	case 71: //Anarchy
-		return 58;
-	case 72: //Group Resist Magic
-		return 80;
-	case 73: //Gravity Flux
-		return 58;
-	case 74: //Mana Sieve
-		return 60;
-	case 75: //Sicken
-		return 29;
-	case 76: //Ensnaring Roots
-		return 83;
-	case 77: //Engulfing Roots
-		return 83;
-	case 78: //Immolate
-		return 38;
-	case 79: //Spirit Sight
-		return 129;
-	case 80: //See Invisible
-		return 129;
-	case 81: //Phantom Chain
-		return 43;
-	case 82: //Phantom Plate
-		return 43;
-	case 83: //Rain of Fire
-		return 38;
-	case 84: //Shifting Sight
-		return 129;
-	case 85: //Firestorm
-		return 38;
-	case 86: //Enduring Breath
-		return 64;
-	case 88: //Harm Touch
-		return 58;
-	case 89: //Daring
-		return 46;
-	case 90: //Shadow Sight
-		return 129;
-	case 91: //Ignite
-		return 38;
-	case 92: //Burst of Fire
-		return 38;
-	case 93: //Burst of Flame
-		return 38;
-	case 94: //Burn
-		return 38;
-	case 95: //Counteract Poison
-		return 19;
-	case 96: //Counteract Disease
-		return 19;
-	case 97: //Abolish Poison
-		return 19;
-	case 98: //Abolish Disease
-		return 19;
-	case 99: //Creeping Crud
-		return 58;
-	case 100: //Summon Throwing Dagger
-		return 110;
-	case 101: //Summon Arrows
-		return 110;
-	case 102: //Spear of Warding
-		return 110;
-	case 103: //Summon Coldstone
-		return 109;
-	case 104: //Dagger of Symbols
-		return 110;
-	case 105: //Summon Ring of Flight
-		return 109;
-	case 106: //Burnout II
-		return 70;
-	case 107: //Burnout III
-		return 70;
-	case 108: //Elemental Shield
-		return 80;
-	case 109: //Elemental Armor
-		return 80;
-	case 110: //Malaise
-		return 81;
-	case 111: //Malaisement
-		return 81;
-	case 112: //Malosi
-		return 81;
-	case 113: //Shock of Spikes
-		return 58;
-	case 114: //Shock of Swords
-		return 58;
-	case 115: //Dismiss Summoned
-		return 111;
-	case 116: //Banish Summoned
-		return 111;
-	case 117: //Dismiss Undead
-		return 124;
-	case 118: //Banish Undead
-		return 124;
-	case 120: //Blaze
-		return 38;
-	case 121: //Rain of Lava
-		return 38;
-	case 122: //Flame Arc
-		return 38;
-	case 123: //Holy Might
-		return 97;
-	case 124: //Force
-		return 97;
-	case 125: //Sound of Force
-		return 97;
-	case 126: //Inspire Fear
-		return 37;
-	case 127: //Invoke Fear
-		return 37;
-	case 128: //Wave of Fear
-		return 37;
-	case 129: //Shield of Brambles
-		return 21;
-	case 130: //Divine Barrier
-		return 52;
-	case 131: //Instill
-		return 83;
-	case 132: //Immobilize
-		return 83;
-	case 133: //Paralyzing Earth
-		return 83;
-	case 134: //Blinding Luminance
-		return 9;
-	case 135: //Word of Health
-		return 42;
-	case 136: //Word of Healing
-		return 42;
-	case 137: //Pack Regeneration
-		return 43;
-	case 138: //Pack Chloroplast
-		return 43;
-	case 139: //Feral Spirit
-		return 70;
-	case 140: //Savage Spirit
-		return 70;
-	case 141: //Beguile Animals
-		return 13;
-	case 142: //Allure of the Wild
-		return 13;
-	case 143: //Sunbeam
-		return 9;
-	case 144: //Regeneration
-		return 43;
-	case 145: //Chloroplast
-		return 43;
-	case 146: //Spirit of Monkey
-		return 24;
-	case 147: //Spirit Strength
-		return 96;
-	case 148: //Spirit of Cat
-		return 2;
-	case 149: //Spirit of Ox
-		return 94;
-	case 150: //Alluring Aura
-		return 12;
-	case 151: //Raging Strength
-		return 96;
-	case 152: //Deftness
-		return 24;
-	case 153: //Furious Strength
-		return 96;
-	case 154: //Agility
-		return 2;
-	case 155: //Glamour
-		return 12;
-	case 156: //Charisma
-		return 12;
-	case 157: //Dexterity
-		return 24;
-	case 158: //Stamina
-		return 94;
-	case 159: //Strength
-		return 96;
-	case 160: //Nimble
-		return 2;
-	case 161: //Health
-		return 94;
-	case 162: //Listless Power
-		return 30;
-	case 163: //Incapacitate
-		return 30;
-	case 164: //Companion Spirit
-		return 104;
-	case 165: //Guardian Spirit
-		return 104;
-	case 166: //Frenzied Spirit
-		return 104;
-	case 167: //Talisman of Tnarg
-		return 87;
-	case 168: //Talisman of Altuna
-		return 87;
-	case 169: //Pack Spirit
-		return 65;
-	case 170: //Alacrity
-		return 41;
-	case 171: //Celerity
-		return 41;
-	case 172: //Swift like the Wind
-		return 41;
-	case 173: //Benevolence
-		return 3;
-	case 174: //Clarity
-		return 59;
-	case 175: //Insight
-		return 130;
-	case 176: //Berserker Spirit
-		return 84;
-	case 177: //Color Shift
-		return 97;
-	case 178: //Color Skew
-		return 97;
-	case 179: //Feckless Might
-		return 30;
-	case 180: //Insipid Weakness
-		return 30;
-	case 181: //Weakness
-		return 30;
-	case 182: //Beguile
-		return 13;
-	case 183: //Cajoling Whispers
-		return 13;
-	case 184: //Allure
-		return 13;
-	case 185: //Tepid Deeds
-		return 88;
-	case 186: //Shiftless Deeds
-		return 88;
-	case 187: //Enthrall
-		return 35;
-	case 188: //Entrance
-		return 35;
-	case 189: //Flame Flux
-		return 38;
-	case 190: //Dazzle
-		return 35;
-	case 191: //Feedback
-		return 21;
-	case 192: //Mind Wipe
-		return 63;
-	case 193: //Blanket of Forgetfulness
-		return 63;
-	case 194: //Reoccurring Amnesia
-		return 63;
-	case 195: //Gasping Embrace
-		return 58;
-	case 196: //Dominate Undead
-		return 13;
-	case 197: //Beguile Undead
-		return 13;
-	case 198: //Cajole Undead
-		return 13;
-	case 199: //Harmshield
-		return 52;
-	case 200: //Minor Healing
-		return 42;
-	case 201: //Flash of Light
-		return 9;
-	case 202: //Courage
-		return 46;
-	case 203: //Cure Poison
-		return 19;
-	case 204: //Shock of Poison
-		return 75;
-	case 205: //True North
-		return 64;
-	case 207: //Divine Aura
-		return 52;
-	case 208: //Lull
-		return 11;
-	case 209: //Spook the Dead
-		return 37;
-	case 210: //Yaulp
-		return 7;
-	case 211: //Summon Drink
-		return 108;
-	case 212: //Cure Blindness
-		return 19;
-	case 213: //Cure Disease
-		return 19;
-	case 215: //Reckless Strength
-		return 96;
-	case 216: //Stun
-		return 97;
-	case 217: //Combust
-		return 38;
-	case 218: //Ward Undead
-		return 124;
-	case 219: //Center
-		return 46;
-	case 220: //Spirit of Cheetah
-		return 65;
-	case 221: //Sense the Dead
-		return 64;
-	case 222: //Invigor
-		return 94;
-	case 223: //Hammer of Wrath
-		return 110;
-	case 224: //Endure Fire
-		return 80;
-	case 225: //Endure Cold
-		return 80;
-	case 226: //Endure Disease
-		return 80;
-	case 227: //Endure Poison
-		return 80;
-	case 228: //Endure Magic
-		return 80;
-	case 229: //Fear
-		return 37;
-	case 230: //Root
-		return 83;
-	case 231: //Word of Pain
-		return 58;
-	case 232: //Sense Summoned
-		return 111;
-	case 233: //Expulse Undead
-		return 124;
-	case 234: //Halo of Light
-		return 109;
-	case 235: //Invisibility versus Undead
-		return 51;
-	case 236: //Shieldskin
-		return 84;
-	case 237: //Dance of the Fireflies
-		return 109;
-	case 238: //Sense Animals
-		return 4;
-	case 239: //Flame Lick
-		return 38;
-	case 240: //Lull Animal
-		return 11;
-	case 241: //Panic Animal
-		return 37;
-	case 242: //Snare
-		return 89;
-	case 243: //Illusion: Iksar
-		return 49;
-	case 244: //Bravery
-		return 46;
-	case 245: //Befriend Animal
-		return 13;
-	case 246: //Lesser Shielding
-		return 87;
-	case 247: //Camouflage
-		return 51;
-	case 248: //Ward Summoned
-		return 111;
-	case 249: //Grasping Roots
-		return 83;
-	case 250: //Harmony
-		return 11;
-	case 252: //Invoke Lightning
-		return 58;
-	case 253: //Whirling Wind
-		return 58;
-	case 254: //Firefist
-		return 7;
-	case 255: //Invisibility versus Animals
-		return 51;
-	case 256: //Shield of Thistles
-		return 21;
-	case 257: //Starshine
-		return 109;
-	case 258: //Treeform
-		return 48;
-	case 259: //Drones of Doom
-		return 58;
-	case 260: //Charm Animals
-		return 13;
-	case 261: //Levitate
-		return 55;
-	case 262: //Cascade of Hail
-		return 14;
-	case 263: //Skin like Rock
-		return 46;
-	case 264: //Stinging Swarm
-		return 58;
-	case 265: //Cannibalize
-		return 17;
-	case 266: //Dexterous Aura
-		return 24;
-	case 267: //Inner Fire
-		return 46;
-	case 268: //Strength of Earth
-		return 96;
-	case 269: //Feet like Cat
-		return 2;
-	case 270: //Drowsy
-		return 88;
-	case 271: //Fleeting Fury
-		return 96;
-	case 272: //Spirit Pouch
-		return 109;
-	case 273: //Shield of Barbs
-		return 21;
-	case 274: //Scale Skin
-		return 6;
-	case 275: //Frost Rift
-		return 14;
-	case 276: //Serpent Sight
-		return 129;
-	case 277: //Tainted Breath
-		return 75;
-	case 278: //Spirit of Wolf
-		return 65;
-	case 279: //Spirit of Bear
-		return 94;
-	case 280: //Burst of Strength
-		return 96;
-	case 281: //Disempower
-		return 30;
-	case 282: //Spirit Strike
-		return 14;
-	case 283: //Turtle Skin
-		return 6;
-	case 284: //Spirit of Snake
-		return 12;
-	case 285: //Pendril's Animation
-		return 99;
-	case 286: //Shallow Breath
-		return 58;
-	case 287: //Minor Illusion
-		return 48;
-	case 288: //Minor Shielding
-		return 87;
-	case 289: //Taper Enchantment
-		return 31;
-	case 290: //Color Flux
-		return 97;
-	case 291: //Enfeeblement
-		return 30;
-	case 292: //Mesmerize
-		return 35;
-	case 293: //Haze
-		return 6;
-	case 294: //Suffocating Sphere
-		return 58;
-	case 295: //Mircyl's Animation
-		return 99;
-	case 296: //Chaotic Feedback
-		return 58;
-	case 297: //Eye of Confusion
-		return 9;
-	case 298: //Alliance
-		return 3;
-	case 299: //Sentinel
-		return 64;
-	case 300: //Charm
-		return 13;
-	case 301: //Memory Blur
-		return 63;
-	case 302: //Languid Pace
-		return 88;
-	case 303: //Whirl till you hurl
-		return 97;
-	case 304: //Chase the Moon
-		return 37;
-	case 305: //Identify
-		return 64;
-	case 306: //Sanity Warp
-		return 58;
-	case 307: //Mesmerization
-		return 35;
-	case 308: //Frenzy
-		return 96;
-	case 309: //Shielding
-		return 87;
-	case 310: //Flare
-		return 64;
-	case 311: //Summon Dagger
-		return 110;
-	case 312: //Valor
-		return 46;
-	case 313: //Fire Flux
-		return 38;
-	case 314: //Resolution
-		return 46;
-	case 315: //Elementalkin: Water
-		return 105;
-	case 316: //Elementalkin: Fire
-		return 102;
-	case 317: //Elementalkin: Air
-		return 98;
-	case 318: //Summon Bandages
-		return 109;
-	case 319: //Summon Fang
-		return 110;
-	case 320: //Summon Heatstone
-		return 109;
-	case 321: //Summon Wisp
-		return 109;
-	case 322: //Flame Bolt
-		return 38;
-	case 323: //Eye of Zomm
-		return 129;
-	case 324: //Shock of Blades
-		return 58;
-	case 325: //Dimensional Pocket
-		return 109;
-	case 326: //Fury
-		return 96;
-	case 327: //Burnout
-		return 70;
-	case 328: //Column of Fire
-		return 38;
-	case 329: //Wrath
-		return 58;
-	case 330: //Rain of Blades
-		return 58;
-	case 331: //Reclaim Energy
-		return 64;
-	case 332: //Shield of Fire
-		return 21;
-	case 333: //Phantom Leather
-		return 43;
-	case 334: //Shock of Flame
-		return 38;
-	case 335: //Minor Summoning: Earth
-		return 100;
-	case 336: //Minor Summoning: Water
-		return 105;
-	case 337: //Rage
-		return 96;
-	case 338: //Cavorting Bones
-		return 103;
-	case 339: //Coldlight
-		return 109;
-	case 340: //Disease Cloud
-		return 29;
-	case 341: //Lifetap
-		return 43;
-	case 342: //Locate Corpse
-		return 64;
-	case 343: //Siphon Strength
-		return 76;
-	case 344: //Clinging Darkness
-		return 58;
-	case 345: //Shrink
-		return 64;
-	case 346: //Grim Aura
-		return 7;
-	case 347: //Numb the Dead
-		return 11;
-	case 348: //Poison Bolt
-		return 75;
-	case 349: //Rising Dexterity
-		return 24;
-	case 350: //Chaos Flux
-		return 58;
-	case 351: //Bone Walk
-		return 103;
-	case 352: //Deadeye
-		return 129;
-	case 353: //Mend Bones
-		return 42;
-	case 354: //Shadow Step
-		return 86;
-	case 355: //Engulfing Darkness
-		return 58;
-	case 356: //Shield of Thorns
-		return 21;
-	case 357: //Dark Empathy
-		return 56;
-	case 358: //Impart Strength
-		return 96;
-	case 359: //Vampiric Embrace
-		return 16;
-	case 360: //Heat Blood
-		return 38;
-	case 361: //Sight Graft
-		return 129;
-	case 362: //Convoke Shadow
-		return 103;
-	case 363: //Wave of Enfeeblement
-		return 30;
-	case 364: //Banshee Aura
-		return 21;
-	case 365: //Infectious Cloud
-		return 29;
-	case 366: //Feign Death
-		return 64;
-	case 367: //Heart Flutter
-		return 29;
-	case 368: //Spirit Armor
-		return 6;
-	case 369: //Hungry Earth
-		return 83;
-	case 370: //Shadow Vortex
-		return 30;
-	case 371: //Voice Graft
-		return 64;
-	case 372: //Blast of Cold
-		return 14;
-	case 373: //Sphere of Light
-		return 109;
-	case 374: //Numbing Cold
-		return 14;
-	case 375: //Fade
-		return 86;
-	case 376: //Shock of Fire
-		return 38;
-	case 377: //Icestrike
-		return 14;
-	case 378: //O'Keils Radiation
-		return 21;
-	case 379: //Fingers of Fire
-		return 38;
-	case 380: //Column of Frost
-		return 14;
-	case 381: //Resistant Skin
-		return 80;
-	case 382: //Frost Spiral of Al'Kabor
-		return 14;
-	case 383: //Shock of Lightning
-		return 58;
-	case 384: //Assiduous Vision
-		return 129;
-	case 385: //Project Lightning
-		return 58;
-	case 386: //Pillar of Fire
-		return 38;
-	case 387: //Leatherskin
-		return 84;
-	case 388: //Resuscitate
-		return 82;
-	case 389: //Guardian
-		return 6;
-	case 390: //Thicken Mana
-		return 64;
-	case 391: //Revive
-		return 82;
-	case 392: //Resurrection
-		return 82;
-	case 393: //Steelskin
-		return 84;
-	case 394: //Diamondskin
-		return 84;
-	case 395: //Minor Summoning: Fire
-		return 102;
-	case 396: //Minor Summoning: Air
-		return 98;
-	case 397: //Elementaling: Earth
-		return 100;
-	case 398: //Elementaling: Water
-		return 105;
-	case 399: //Elementaling: Fire
-		return 102;
-	case 400: //Elementaling: Air
-		return 98;
-	case 401: //Elemental: Earth
-		return 100;
-	case 402: //Elemental: Water
-		return 105;
-	case 403: //Elemental: Fire
-		return 102;
-	case 404: //Elemental: Air
-		return 98;
-	case 405: //Tremor
-		return 58;
-	case 406: //Earthquake
-		return 58;
-	case 407: //Cast Sight
-		return 129;
-	case 408: //Curse of the Simple Mind
-		return 30;
-	case 409: //Rain of Spikes
-		return 58;
-	case 410: //Rain of Swords
-		return 58;
-	case 411: //Shield of Flame
-		return 21;
-	case 412: //Shield of Lava
-		return 21;
-	case 413: //Word of Shadow
-		return 58;
-	case 414: //Word of Spirit
-		return 58;
-	case 415: //Word of Souls
-		return 58;
-	case 416: //Word Divine
-		return 58;
-	case 417: //Extinguish Fatigue
-		return 94;
-	case 418: //Lightning Strike
-		return 58;
-	case 419: //Careless Lightning
-		return 58;
-	case 420: //Lightning Blast
-		return 58;
-	case 421: //Skin like Steel
-		return 46;
-	case 422: //Skin like Diamond
-		return 46;
-	case 423: //Skin like Nature
-		return 46;
-	case 424: //Scale of Wolf
-		return 65;
-	case 425: //Wolf Form
-		return 65;
-	case 426: //Greater Wolf Form
-		return 65;
-	case 427: //Form of the Great Wolf
-		return 65;
-	case 428: //Share Wolf Form
-		return 65;
-	case 429: //Strength of Stone
-		return 96;
-	case 430: //Storm Strength
-		return 96;
-	case 431: //Shifting Shield
-		return 6;
-	case 432: //Shield of Spikes
-		return 21;
-	case 433: //Fire
-		return 38;
-	case 434: //Envenomed Breath
-		return 75;
-	case 435: //Venom of the Snake
-		return 75;
-	case 436: //Envenomed Bolt
-		return 75;
-	case 437: //Poison Storm
-		return 75;
-	case 438: //Gale of Poison
-		return 75;
-	case 439: //Crystallize Mana
-		return 64;
-	case 440: //Animate Dead
-		return 103;
-	case 441: //Summon Dead
-		return 103;
-	case 442: //Malignant Dead
-		return 103;
-	case 443: //Invoke Death
-		return 103;
-	case 444: //Renew Bones
-		return 42;
-	case 445: //Lifedraw
-		return 43;
-	case 446: //Siphon Life
-		return 43;
-	case 447: //Drain Soul
-		return 43;
-	case 448: //Rest the Dead
-		return 11;
-	case 449: //Intensify Death
-		return 70;
-	case 450: //Suffocate
-		return 58;
-	case 451: //Boil Blood
-		return 38;
-	case 452: //Dooming Darkness
-		return 58;
-	case 453: //Cascading Darkness
-		return 58;
-	case 454: //Vampiric Curse
-		return 33;
-	case 455: //Surge of Enfeeblement
-		return 30;
-	case 456: //Bond of Death
-		return 33;
-	case 457: //Dead Man Floating
-		return 55;
-	case 458: //Fire Spiral of Al'Kabor
-		return 38;
-	case 459: //Shock Spiral of Al'Kabor
-		return 58;
-	case 460: //Force Spiral of Al'Kabor
-		return 58;
-	case 461: //Cast Force
-		return 58;
-	case 462: //Column of Lightning
-		return 38;
-	case 463: //Circle of Force
-		return 38;
-	case 464: //Frost Shock
-		return 14;
-	case 465: //Inferno Shock
-		return 38;
-	case 466: //Lightning Shock
-		return 58;
-	case 467: //Lightning Storm
-		return 58;
-	case 468: //Energy Storm
-		return 58;
-	case 469: //Lava Storm
-		return 38;
-	case 470: //Thunder Strike
-		return 58;
-	case 471: //Thunderclap
-		return 58;
-	case 472: //Inspire Fear2
-		return 37;
-	case 473: //Invoke Fear II
-		return 37;
-	case 474: //Radius of Fear2
-		return 37;
-	case 475: //Fear2
-		return 37;
-	case 477: //Fire Bolt
-		return 38;
-	case 478: //Breath of the Dead
-		return 64;
-	case 479: //Inferno Shield
-		return 21;
-	case 480: //Atone
-		return 63;
-	case 481: //Rune I
-		return 84;
-	case 482: //Rune II
-		return 84;
-	case 483: //Rune III
-		return 84;
-	case 484: //Rune IV
-		return 84;
-	case 485: //Symbol of Transal
-		return 112;
-	case 486: //Symbol of Ryltan
-		return 112;
-	case 487: //Symbol of Pinzarn
-		return 112;
-	case 488: //Symbol of Naltron
-		return 112;
-	case 489: //Sympathetic Aura
-		return 12;
-	case 490: //Enveloping Roots
-		return 83;
-	case 491: //Leering Corpse
-		return 103;
-	case 492: //Restless Bones
-		return 103;
-	case 493: //Haunting Corpse
-		return 103;
-	case 494: //Invoke Shadow
-		return 103;
-	case 495: //Cackling Bones
-		return 103;
-	case 496: //Lesser Summoning: Earth
-		return 100;
-	case 497: //Lesser Summoning: Water
-		return 105;
-	case 498: //Lesser Summoning: Fire
-		return 102;
-	case 499: //Lesser Summoning: Air
-		return 98;
-	case 500: //Bind Sight
-		return 129;
-	case 501: //Soothe
-		return 11;
-	case 502: //Lifespike
-		return 43;
-	case 503: //Tishan's Clash
-		return 97;
-	case 504: //Frenzied Strength
-		return 96;
-	case 505: //Walking Sleep
-		return 88;
-	case 506: //Tagar's Insects
-		return 88;
-	case 507: //Togor's Insects
-		return 88;
-	case 508: //Frost Strike
-		return 14;
-	case 509: //Winter's Roar
-		return 14;
-	case 510: //Blizzard Blast
-		return 14;
-	case 511: //Affliction
-		return 29;
-	case 512: //Ensnare
-		return 89;
-	case 513: //Calm Animal
-		return 11;
-	case 514: //Terrorize Animal
-		return 37;
-	case 515: //Thistlecoat
-		return 21;
-	case 516: //Barbcoat
-		return 21;
-	case 517: //Bramblecoat
-		return 21;
-	case 518: //Spikecoat
-		return 21;
-	case 519: //Thorncoat
-		return 21;
-	case 520: //Dizzying Wind
-		return 58;
-	case 521: //Choke
-		return 58;
-	case 522: //Gather Shadows
-		return 51;
-	case 524: //Spirit Tap
-		return 43;
-	case 525: //Drain Spirit
-		return 43;
-	case 526: //Insidious Fever
-		return 81;
-	case 527: //Insidious Malady
-		return 81;
-	case 528: //Yonder
-		return 86;
-	case 529: //Gaze
-		return 129;
-	case 530: //Ring of Karana
-		return 5;
-	case 531: //Ring of Commons
-		return 5;
-	case 532: //Ring of Butcher
-		return 36;
-	case 533: //Ring of Toxxulia
-		return 67;
-	case 534: //Ring of Lavastorm
-		return 5;
-	case 535: //Ring of Ro
-		return 5;
-	case 536: //Ring of Feerrott
-		return 5;
-	case 537: //Ring of Steamfont
-		return 36;
-	case 538: //Ring of Misty
-		return 5;
-	case 539: //Chill Sight
-		return 129;
-	case 540: //Clarify Mana
-		return 64;
-	case 541: //Tox Gate
-		return 67;
-	case 542: //North Gate
-		return 5;
-	case 543: //Fay Gate
-		return 36;
-	case 544: //Common Gate
-		return 5;
-	case 545: //Nek Gate
-		return 5;
-	case 546: //Cazic Gate
-		return 5;
-	case 547: //Ro Gate
-		return 5;
-	case 548: //West Gate
-		return 5;
-	case 549: //Screaming Terror
-		return 35;
-	case 550: //Circle of Karana
-		return 5;
-	case 551: //Circle of Commons
-		return 5;
-	case 552: //Circle of Toxxulia
-		return 67;
-	case 553: //Circle of Butcher
-		return 36;
-	case 554: //Circle of Lavastorm
-		return 5;
-	case 555: //Circle of Ro
-		return 5;
-	case 556: //Circle of Feerrott
-		return 5;
-	case 557: //Circle of Steamfont
-		return 36;
-	case 558: //Circle of Misty
-		return 5;
-	case 559: //Ignite Bones
-		return 38;
-	case 560: //Furor
-		return 58;
-	case 561: //Tox Portal
-		return 67;
-	case 562: //North Portal
-		return 5;
-	case 563: //Fay Portal
-		return 36;
-	case 564: //Nek Portal
-		return 5;
-	case 565: //Cazic Portal
-		return 5;
-	case 566: //Common Portal
-		return 5;
-	case 567: //Ro Portal
-		return 5;
-	case 568: //West Portal
-		return 5;
-	case 569: //Summoning: Earth
-		return 100;
-	case 570: //Summoning: Water
-		return 105;
-	case 571: //Summoning: Fire
-		return 102;
-	case 572: //Summoning: Air
-		return 98;
-	case 573: //Greater Summoning: Earth
-		return 100;
-	case 574: //Greater Summoning: Water
-		return 105;
-	case 575: //Greater Summoning: Fire
-		return 102;
-	case 576: //Greater Summoning: Air
-		return 98;
-	case 577: //Vigilant Spirit
-		return 104;
-	case 578: //Sight
-		return 129;
-	case 579: //Magnify
-		return 129;
-	case 580: //Vision
-		return 129;
-	case 581: //Illusion: Skeleton
-		return 48;
-	case 582: //Illusion: Human
-		return 49;
-	case 583: //Illusion: Half-Elf
-		return 49;
-	case 584: //Illusion: Earth Elemental
-		return 48;
-	case 585: //Illusion: Werewolf
-		return 48;
-	case 586: //Illusion: Barbarian
-		return 49;
-	case 587: //Illusion: Erudite
-		return 49;
-	case 588: //Illusion: Wood Elf
-		return 49;
-	case 589: //Illusion: High Elf
-		return 49;
-	case 590: //Illusion: Dark Elf
-		return 49;
-	case 591: //Illusion: Dwarf
-		return 49;
-	case 592: //Illusion: Troll
-		return 49;
-	case 593: //Illusion: Ogre
-		return 49;
-	case 594: //Illusion: Halfling
-		return 49;
-	case 595: //Illusion: Gnome
-		return 49;
-	case 596: //Illusion: Dry Bone
-		return 48;
-	case 597: //Illusion: Air Elemental
-		return 48;
-	case 598: //Illusion: Fire Elemental
-		return 48;
-	case 599: //Illusion: Water Elemental
-		return 48;
-	case 600: //Illusion: Spirit Wolf
-		return 48;
-	case 601: //Illusion: Tree
-		return 48;
-	case 602: //Evacuate: North
-		return 5;
-	case 603: //Evacuate: Fay
-		return 36;
-	case 604: //Evacuate: Ro
-		return 5;
-	case 605: //Evacuate: Nek
-		return 5;
-	case 606: //Evacuate: West
-		return 5;
-	case 607: //Succor: East
-		return 5;
-	case 608: //Succor: Butcher
-		return 36;
-	case 609: //Succor: Ro
-		return 5;
-	case 610: //Succor: Lavastorm
-		return 5;
-	case 611: //Succor: North
-		return 5;
-	case 612: //Markar's Clash
-		return 97;
-	case 613: //Staff of Tracing
-		return 110;
-	case 614: //Staff of Warding
-		return 110;
-	case 615: //Staff of Runes
-		return 110;
-	case 616: //Staff of Symbols
-		return 110;
-	case 617: //Sword of Runes
-		return 110;
-	case 618: //Dimensional Hole
-		return 109;
-	case 619: //Dyn`s Dizzying Draught
-		return 97;
-	case 620: //Minor Conjuration: Earth
-		return 100;
-	case 621: //Minor Conjuration: Water
-		return 105;
-	case 622: //Minor Conjuration: Fire
-		return 102;
-	case 623: //Minor Conjuration: Air
-		return 98;
-	case 624: //Lesser Conjuration: Earth
-		return 100;
-	case 625: //Lesser Conjuration: Water
-		return 105;
-	case 626: //Lesser Conjuration: Fire
-		return 102;
-	case 627: //Lesser Conjuration: Air
-		return 98;
-	case 628: //Conjuration: Earth
-		return 100;
-	case 629: //Conjuration: Water
-		return 105;
-	case 630: //Conjuration: Fire
-		return 102;
-	case 631: //Conjuration: Air
-		return 98;
-	case 632: //Greater Conjuration: Earth
-		return 100;
-	case 633: //Greater Conjuration: Water
-		return 105;
-	case 634: //Greater Conjuration: Fire
-		return 102;
-	case 635: //Greater Conjuration: Air
-		return 98;
-	case 636: //Bonds of Force
-		return 89;
-	case 640: //Creeping Vision
-		return 129;
-	case 641: //Dark Pact
-		return 17;
-	case 642: //Allure of Death
-		return 17;
-	case 643: //Call of Bones
-		return 17;
-	case 644: //Lich
-		return 17;
-	case 645: //Ebbing Strength
-		return 30;
-	case 646: //Radiant Visage
-		return 12;
-	case 647: //Adorning Grace
-		return 12;
-	case 648: //Rampage
-		return 84;
-	case 649: //Protect
-		return 6;
-	case 650: //Mist
-		return 6;
-	case 651: //Cloud
-		return 6;
-	case 652: //Obscure
-		return 6;
-	case 653: //Shade
-		return 6;
-	case 654: //Shadow
-		return 6;
-	case 655: //Eyes of the Cat
-		return 129;
-	case 656: //Shock of Ice
-		return 14;
-	case 657: //Flame Shock
-		return 38;
-	case 658: //Ice Shock
-		return 14;
-	case 659: //Conflagration
-		return 38;
-	case 660: //Frost Storm
-		return 14;
-	case 661: //Augment Death
-		return 70;
-	case 662: //Expel Undead
-		return 124;
-	case 663: //Expulse Summoned
-		return 111;
-	case 664: //Expel Summoned
-		return 111;
-	case 665: //Drifting Death
-		return 58;
-	case 666: //Alter Plane: Hate
-		return 116;
-	case 667: //Enchant Silver
-		return 34;
-	case 668: //Enchant Electrum
-		return 34;
-	case 669: //Enchant Gold
-		return 34;
-	case 670: //Enchant Platinum
-		return 34;
-	case 671: //Starfire
-		return 38;
-	case 672: //Retribution
-		return 58;
-	case 673: //Discordant Mind
-		return 58;
-	case 674: //Alter Plane: Sky
-		return 116;
-	case 675: //Hammer of Requital
-		return 110;
-	case 676: //Tashan
-		return 81;
-	case 677: //Tashani
-		return 81;
-	case 678: //Tashania
-		return 81;
-	case 679: //Heat Sight
-		return 129;
-	case 680: //Barrier of Combustion
-		return 21;
-	case 681: //Juli`s Animation
-		return 99;
-	case 682: //Kilan`s Animation
-		return 99;
-	case 683: //Shalee`s Animation
-		return 99;
-	case 684: //Sisna`s Animation
-		return 99;
-	case 685: //Sagar`s Animation
-		return 99;
-	case 686: //Uleen`s Animation
-		return 99;
-	case 687: //Boltran`s Animation
-		return 99;
-	case 688: //Aanya's Animation
-		return 99;
-	case 689: //Yegoreff`s Animation
-		return 99;
-	case 690: //Kintaz`s Animation
-		return 99;
-	case 691: //Call of Flame
-		return 38;
-	case 692: //Life Leech
-		return 43;
-	case 693: //Divine Might
-		return 16;
-	case 694: //Pact of Shadow
-		return 56;
-	case 695: //Distill Mana
-		return 64;
-	case 696: //Purify Mana
-		return 64;
-	case 697: //Breeze
-		return 59;
-	case 698: //Track Corpse
-		return 64;
-	case 699: //Defoliate
-		return 74;
-	case 700: //Chant of Battle
-		return 41;
-	case 701: //Anthem de Arms
-		return 41;
-	case 702: //McVaxius` Berserker Crescendo
-		return 41;
-	case 703: //Chords of Dissonance
-		return 58;
-	case 704: //Brusco`s Boastful Bellow
-		return 58;
-	case 705: //Largo's Melodic Binding
-		return 88;
-	case 706: //Angstlich`s Appalling Screech
-		return 37;
-	case 707: //Fufil`s Curtailing Chant
-		return 58;
-	case 708: //Cinda`s Charismatic Carillon
-		return 3;
-	case 709: //Guardian Rhythms
-		return 80;
-	case 710: //Elemental Rhythms
-		return 80;
-	case 711: //Purifying Rhythms
-		return 80;
-	case 712: //Psalm of Warmth
-		return 21;
-	case 713: //Psalm of Cooling
-		return 21;
-	case 714: //Psalm of Mystic Shielding
-		return 80;
-	case 715: //Psalm of Vitality
-		return 21;
-	case 716: //Psalm of Purity
-		return 21;
-	case 717: //Selo`s Accelerando
-		return 65;
-	case 718: //Agilmente`s Aria of Eagles
-		return 55;
-	case 719: //Shauri`s Sonorous Clouding
-		return 51;
-	case 720: //Lyssa`s Locating Lyric
-		return 64;
-	case 721: //Lyssa`s Solidarity of Vision
-		return 129;
-	case 722: //Jaxan`s Jig o` Vigor
-		return 94;
-	case 723: //Cassindra's Chorus of Clarity
-		return 59;
-	case 724: //Kelin`s Lucid Lullaby
-		return 35;
-	case 725: //Solon's Song of the Sirens
-		return 13;
-	case 726: //Syvelian`s Anti-Magic Aria
-		return 31;
-	case 727: //Alenia`s Disenchanting Melody
-		return 31;
-	case 728: //Kelin`s Lugubrious Lament
-		return 11;
-	case 729: //Tarew`s Aquatic Ayre
-		return 64;
-	case 730: //Denon`s Disruptive Discord
-		return 58;
-	case 731: //Wrath of Al'Kabor
-		return 14;
-	case 732: //Ice Comet
-		return 14;
-	case 733: //Supernova
-		return 38;
-	case 734: //Jonthan's Whistling Warsong
-		return 41;
-	case 735: //Lyssa`s Veracious Concord
-		return 129;
-	case 736: //Denon`s Dissension
-		return 60;
-	case 737: //Lyssa`s Cataloging Libretto
-		return 64;
-	case 738: //Selo`s Consonant Chain
-		return 88;
-	case 739: //Melanie`s Mellifluous Motion
-		return 86;
-	case 740: //Vilia`s Verses of Celerity
-		return 41;
-	case 741: //Crission`s Pixie Strike
-		return 35;
-	case 742: //Denon`s Desperate Dirge
-		return 58;
-	case 743: //Tuyen`s Chant of Flame
-		return 38;
-	case 744: //Tuyen`s Chant of Frost
-		return 14;
-	case 745: //Cassindra`s Elegy
-		return 130;
-	case 746: //Selo`s Chords of Cessation
-		return 88;
-	case 747: //Verses of Victory
-		return 41;
-	case 748: //Niv`s Melody of Preservation
-		return 64;
-	case 749: //Jonthan's Provocation
-		return 41;
-	case 750: //Solon's Bewitching Bravura
-		return 13;
-	case 752: //Concussion
-		return 53;
-	case 753: //Beguile Plants
-		return 13;
-	case 754: //Cannibalize II
-		return 17;
-	case 755: //Rend
-		return 58;
-	case 761: //Contact Poison I
-		return 75;
-	case 763: //System Shock I
-		return 75;
-	case 767: //Liquid Silver I
-		return 124;
-	case 786: //Wurm Blaze
-		return 38;
-	case 792: //Fist of Fire
-		return 38;
-	case 793: //Fist of Air
-		return 58;
-	case 794: //Fist of Earth
-		return 58;
-	case 804: //Magi Bolt
-		return 0;
-	case 805: //Magi Strike
-		return 38;
-	case 807: //Magi Circle
-		return 58;
-	case 808: //Avatar Power
-		return 0;
-	case 812: //SumMonsterAttack
-		return 58;
-	case 817: //Guide Bolt
-		return 0;
-	case 823: //Divine Might Effect
-		return 58;
-	case 829: //FireHornet
-		return 38;
-	case 831: //Sathir's Gaze
-		return 0;
-	case 832: //WurmBreath
-		return 38;
-	case 834: //Sathir's Mesmerization
-		return 0;
-	case 835: //Chaos Breath
-		return 58;
-	case 837: //Stun Breath
-		return 58;
-	case 839: //Lightning Breath
-		return 58;
-	case 848: //Elemental Mastery Strike
-		return 58;
-	case 849: //ElementalMasteryBlast
-		return 14;
-	case 851: //Shardwurm Breath
-		return 14;
-	case 859: //Lava Breath - Test
-		return 38;
-	case 860: //DrakeBreath
-		return 38;
-	case 861: //Lava Breath
-		return 38;
-	case 862: //Frost Breath
-		return 14;
-	case 863: //Telekinesis
-		return 58;
-	case 868: //Sionachie`s Dreams
-		return 35;
-	case 893: //FireElementalAttack2
-		return 58;
-	case 904: //Knockback
-		return 58;
-	case 907: //DryBoneFireBurst
-		return 38;
-	case 908: //IceBoneFrostBurst
-		return 14;
-	case 910: //SnakeEleFireBurst
-		return 38;
-	case 917: //Smolder
-		return 38;
-	case 922: //Sonic
-		return 58;
-	case 929: //Harm Touch NPC
-		return 58;
-	case 931: //Life Drain
-		return 58;
-	case 945: //Ykesha
-		return 58;
-	case 951: //Fiery Death
-		return 38;
-	case 952: //Frosty Death
-		return 14;
-	case 966: //FireElementalAttack
-		return 38;
-	case 968: //WaterElementalAttack
-		return 14;
-	case 978: //FrostAOE
-		return 14;
-	case 982: //Cazic Touch
-		return 0;
-	case 985: //Efreeti Fire
-		return 0;
-	case 987: //Spiroc Thunder
-		return 58;
-	case 988: //Greater Spiroc Thunder
-		return 0;
-	case 989: //Entomb in Ice
-		return 0;
-	case 995: //Soul Devour
-		return 0;
-	case 1009: //FireBeetleSpit
-		return 38;
-	case 1017: //Fishnova
-		return 38;
-	case 1020: //Air Elemental Strike
-		return 58;
-	case 1021: //Water Elemental Strike
-		return 14;
-	case 1024: //Thunderclap
-		return 58;
-	case 1026: //Thunder Call
-		return 58;
-	case 1027: //Thunder Storm
-		return 58;
-	case 1028: //Static Storm
-		return 58;
-	case 1030: //Sand Storm
-		return 0;
-	case 1031: //Stone Gale
-		return 0;
-	case 1032: //Hail Storm
-		return 58;
-	case 1036: //Storm Flame
-		return 0;
-	case 1043: //Manastorm
-		return 58;
-	case 1045: //Chain Lightning
-		return 58;
-	case 1047: //Deluge
-		return 14;
-	case 1048: //Monsoons
-		return 14;
-	case 1049: //Tempest Wind
-		return 58;
-	case 1050: //Raging Blizzard
-		return 14;
-	case 1071: //Punishing Blow
-		return 58;
-	case 1074: //Steam Blast
-		return 38;
-	case 1075: //Electrical Short
-		return 58;
-	case 1077: //Mana Beam
-		return 0;
-	case 1078: //Gyrosonic Disruption
-		return 58;
-	case 1084: //Barrage of Debris
-		return 0;
-	case 1100: //Dreams of Ayonae
-		return 35;
-	case 1106: //Sear
-		return 38;
-	case 1107: //Tremor of Judgment
-		return 58;
-	case 1142: //Pain Harvest
-		return 58;
-	case 1144: //Jagged Rain
-		return 58;
-	case 1145: //Touch of Pain
-		return 14;
-	case 1151: //Raven Screech
-		return 0;
-	case 1155: //Black Symbol of Agony
-		return 58;
-	case 1167: //Draconic Rage Strike
-		return 38;
-	case 1168: //Draconic Rage Strike
-		return 38;
-	case 1172: //Sting of the Shissar
-		return 75;
-	case 1173: //Bite of the Shissar
-		return 75;
-	case 1180: //Zombie Bane
-		return 124;
-	case 1181: //Mayong's Bane
-		return 124;
-	case 1188: //Bixie Sting
-		return 75;
-	case 1189: //Scoriae Bite
-		return 75;
-	case 1194: //Illusion: Fier`dal
-		return 49;
-	case 1196: //Ancient: Lcea's Lament
-		return 44;
-	case 1197: //Ancient: Lullaby of Shadow
-		return 35;
-	case 1216: //Guide Bolt
-		return 0;
-	case 1221: //Terror of Darkness
-		return 53;
-	case 1222: //Terror of Shadows
-		return 53;
-	case 1223: //Terror of Death
-		return 53;
-	case 1224: //Terror of Terris
-		return 53;
-	case 1225: //Voice of Darkness
-		return 128;
-	case 1226: //Voice of Shadows
-		return 128;
-	case 1227: //Voice of Death
-		return 128;
-	case 1228: //Voice of Terris
-		return 128;
-	case 1244: //Magi Bolt
-		return 0;
-	case 1245: //Magi Strike
-		return 38;
-	case 1247: //Magi Circle
-		return 58;
-	case 1269: //Fangol's Breath
-		return 75;
-	case 1279: //Velium Chill of Al`Kabor
-		return 14;
-	case 1283: //Celestial Cleansing
-		return 32;
-	case 1284: //Valiant Companion
-		return 71;
-	case 1285: //Summon Companion
-		return 64;
-	case 1286: //Expedience
-		return 71;
-	case 1287: //Cassindra`s Chant of Clarity
-		return 59;
-	case 1288: //Divine Glory
-		return 47;
-	case 1289: //Strengthen Death
-		return 70;
-	case 1290: //Chloroblast
-		return 42;
-	case 1291: //Nature's Touch
-		return 42;
-	case 1296: //Cinder Jolt
-		return 53;
-	case 1310: //Porlos' Fury
-		return 8;
-	case 1311: //Hsagra's Wrath
-		return 8;
-	case 1314: //SpectraStun
-		return 58;
-	case 1317: //Repulse
-		return 58;
-	case 1325: //Combine Gate
-		return 54;
-	case 1326: //Ring of the Combines
-		return 54;
-	case 1332: //Cannibalize IV
-		return 17;
-	case 1334: //Translocate: Group
-		return 64;
-	case 1336: //Translocate: Fay
-		return 36;
-	case 1337: //Translocate: Tox
-		return 67;
-	case 1338: //Translocate: North
-		return 5;
-	case 1339: //Translocate: Combine
-		return 54;
-	case 1356: //Frosty Death2
-		return 14;
-	case 1359: //Enchant Clay
-		return 34;
-	case 1366: //Rage of the Sky
-		return 0;
-	case 1369: //Poisonous Chill
-		return 75;
-	case 1371: //Translocate: Nek
-		return 5;
-	case 1372: //Translocate: Common
-		return 5;
-	case 1373: //Translocate: Ro
-		return 5;
-	case 1374: //Translocate: West
-		return 5;
-	case 1375: //Translocate: Cazic
-		return 5;
-	case 1376: //Shroud of Undeath
-		return 64;
-	case 1377: //Primal Avatar
-		return 7;
-	case 1382: //Summon Holy Ale of Brell
-		return 109;
-	case 1391: //Dead Men Floating
-		return 55;
-	case 1392: //Fireburst
-		return 58;
-	case 1393: //Gangrenous Touch of Zum`uul
-		return 43;
-	case 1394: //Maelstrom of Electricity
-		return 58;
-	case 1397: //Strength of Nature
-		return 47;
-	case 1398: //Circle of Wakening Lands
-		return 127;
-	case 1399: //Wakening Lands Portal
-		return 127;
-	case 1400: //Monster Summoning I
-		return 64;
-	case 1401: //Summon Shard of the Core
-		return 109;
-	case 1402: //Monster Summoning II
-		return 64;
-	case 1403: //Elemental Maelstrom
-		return 58;
-	case 1404: //Monster Summoning III
-		return 64;
-	case 1405: //Wrath of the Elements
-		return 58;
-	case 1406: //Improved Invisibility
-		return 51;
-	case 1407: //Wandering Mind
-		return 60;
-	case 1408: //Gift of Magic
-		return 59;
-	case 1409: //Gift of Insight
-		return 59;
-	case 1410: //Gift of Brilliance
-		return 59;
-	case 1411: //Improved Invis to Undead
-		return 51;
-	case 1412: //Chilling Embrace
-		return 75;
-	case 1413: //Corporeal Empathy
-		return 56;
-	case 1414: //Augmentation of Death
-		return 70;
-	case 1415: //Torbas' Acid Blast
-		return 75;
-	case 1416: //Arch Lich
-		return 17;
-	case 1417: //Iceclad Gate
-		return 127;
-	case 1418: //Iceclad Portal
-		return 127;
-	case 1419: //O'Keils Flickering Flame
-		return 21;
-	case 1420: //Invisibility to Undead
-		return 51;
-	case 1421: //Enticement of Flame
-		return 38;
-	case 1422: //Translocate
-		return 64;
-	case 1423: //Great Divide Portal
-		return 127;
-	case 1425: //Cobalt Scar Portal
-		return 127;
-	case 1426: //Ice Spear of Solist
-		return 14;
-	case 1427: //Shock of the Tainted
-		return 75;
-	case 1428: //Tumultuous Strength
-		return 96;
-	case 1429: //Blast of Poison
-		return 75;
-	case 1430: //Spirit Quickening
-		return 70;
-	case 1431: //Form of the Great Bear
-		return 48;
-	case 1432: //Focus of Spirit
-		return 87;
-	case 1433: //Ring of Iceclad
-		return 127;
-	case 1434: //Circle of Iceclad
-		return 127;
-	case 1435: //Improved Superior Camouflage
-		return 51;
-	case 1436: //Fixation of Ro
-		return 81;
-	case 1437: //Ro's Fiery Sundering
-		return 81;
-	case 1438: //Circle of Great Divide
-		return 127;
-	case 1439: //Fury of Air
-		return 58;
-	case 1440: //Circle of Cobalt Scar
-		return 127;
-	case 1442: //Protection of the Glades
-		return 46;
-	case 1443: //Turning of the Unnatural
-		return 124;
-	case 1444: //Celestial Healing
-		return 32;
-	case 1445: //Armor of Protection
-		return 87;
-	case 1446: //Stun Command
-		return 97;
-	case 1447: //Aegolism
-		return 1;
-	case 1448: //Cantata of Soothing
-		return 44;
-	case 1449: //Melody of Ervaj
-		return 41;
-	case 1450: //Shield of Songs
-		return 84;
-	case 1451: //Occlusion of Sound
-		return 81;
-	case 1452: //Composition of Ervaj
-		return 41;
-	case 1453: //Divine Purpose
-		return 17;
-	case 1454: //Flame of Light
-		return 58;
-	case 1455: //Wave of Healing
-		return 42;
-	case 1456: //Divine Strength
-		return 47;
-	case 1457: //Shroud of Hate
-		return 76;
-	case 1458: //Shroud of Pain
-		return 76;
-	case 1459: //Shroud of Death
-		return 16;
-	case 1460: //Death Peace
-		return 64;
-	case 1461: //Call of Sky
-		return 16;
-	case 1462: //Call of Earth
-		return 21;
-	case 1463: //Call of Fire
-		return 16;
-	case 1464: //Call of the Predator
-		return 7;
-	case 1465: //Call of Sky Strike
-		return 58;
-	case 1467: //Call of Fire Strike
-		return 38;
-	case 1472: //Burnout IV
-		return 70;
-	case 1474: //Boon of the Garou
-		return 16;
-	case 1475: //Nature Walkers Behest
-		return 104;
-	case 1479: //Wave of Flame
-		return 14;
-	case 1480: //Silver Breath
-		return 0;
-	case 1481: //Scream of Chaos
-		return 58;
-	case 1482: //Electric Blast
-		return 58;
-	case 1484: //Tsunami
-		return 14;
-	case 1487: //Rain of Cold
-		return 14;
-	case 1488: //Rain of Molten Lava
-		return 38;
-	case 1489: //Wave of Cold
-		return 14;
-	case 1490: //Wave of Heat
-		return 38;
-	case 1494: //Flame Jet
-		return 38;
-	case 1498: //Doljons Rage
-		return 14;
-	case 1503: //Modulating Rod
-		return 109;
-	case 1504: //Renew Elements
-		return 42;
-	case 1505: //Renew Summoning
-		return 42;
-	case 1508: //Asystole
-		return 29;
-	case 1509: //Leach
-		return 33;
-	case 1510: //Shadow Compact
-		return 56;
-	case 1511: //Scent of Dusk
-		return 81;
-	case 1512: //Scent of Shadow
-		return 81;
-	case 1513: //Scent of Darkness
-		return 81;
-	case 1514: //Rapacious Subvention
-		return 61;
-	case 1515: //Covetous Subversion
-		return 61;
-	case 1516: //Combine Portal
-		return 54;
-	case 1517: //Circle of the Combines
-		return 54;
-	case 1518: //Remedy
-		return 42;
-	case 1519: //Divine Light
-		return 42;
-	case 1520: //Word of Vigor
-		return 42;
-	case 1521: //Word of Restoration
-		return 42;
-	case 1522: //Celestial Elixir
-		return 32;
-	case 1523: //Word of Redemption
-		return 42;
-	case 1524: //Reviviscence
-		return 82;
-	case 1525: //Antidote
-		return 19;
-	case 1526: //Annul Magic
-		return 31;
-	case 1527: //Trepidation
-		return 37;
-	case 1528: //Exile Undead
-		return 124;
-	case 1529: //Exile Summoned
-		return 111;
-	case 1530: //Banishment of Shadows
-		return 23;
-	case 1531: //Banishment
-		return 23;
-	case 1532: //Dread of Night
-		return 37;
-	case 1533: //Heroism
-		return 46;
-	case 1534: //Yaulp IV
-		return 7;
-	case 1535: //Symbol of Marzin
-		return 112;
-	case 1536: //Heroic Bond
-		return 46;
-	case 1537: //Bulwark of Faith
-		return 6;
-	case 1538: //Heroic Bond
-		return 46;
-	case 1539: //Fortitude
-		return 46;
-	case 1540: //Aegis
-		return 6;
-	case 1541: //Wake of Tranquility
-		return 11;
-	case 1542: //Upheaval
-		return 58;
-	case 1543: //Reckoning
-		return 58;
-	case 1544: //Enforced Reverence
-		return 97;
-	case 1545: //The Unspoken Word
-		return 97;
-	case 1546: //Divine Intervention
-		return 64;
-	case 1547: //Death Pact
-		return 64;
-	case 1548: //Mark of Karn
-		return 64;
-	case 1550: //Repulse Animal
-		return 37;
-	case 1551: //Circle of Winter
-		return 80;
-	case 1552: //Circle of Summer
-		return 80;
-	case 1553: //Call of Karana
-		return 13;
-	case 1554: //Spirit of Scale
-		return 65;
-	case 1555: //Glamour of Tunare
-		return 81;
-	case 1556: //Tunare's Request
-		return 13;
-	case 1557: //Girdle of Karana
-		return 96;
-	case 1558: //Bladecoat
-		return 21;
-	case 1559: //Natureskin
-		return 46;
-	case 1560: //Shield of Blades
-		return 21;
-	case 1561: //Legacy of Thorn
-		return 21;
-	case 1562: //Form of the Howler
-		return 65;
-	case 1563: //Form of the Hunter
-		return 65;
-	case 1564: //Spirit of Oak
-		return 48;
-	case 1565: //Mask of the Hunter
-		return 59;
-	case 1566: //Egress
-		return 64;
-	case 1567: //Succor
-		return 64;
-	case 1568: //Regrowth
-		return 43;
-	case 1569: //Regrowth of the Grove
-		return 43;
-	case 1570: //Talisman of Jasinth
-		return 80;
-	case 1571: //Talisman of Shadoo
-		return 80;
-	case 1572: //Cannibalize III
-		return 17;
-	case 1573: //Insidious Decay
-		return 81;
-	case 1574: //Spirit of the Howler
-		return 104;
-	case 1575: //Acumen
-		return 129;
-	case 1576: //Torpor
-		return 32;
-	case 1577: //Malosini
-		return 81;
-	case 1578: //Malo
-		return 81;
-	case 1579: //Talisman of the Cat
-		return 2;
-	case 1580: //Talisman of the Brute
-		return 94;
-	case 1581: //Talisman of the Rhino
-		return 96;
-	case 1582: //Talisman of the Serpent
-		return 12;
-	case 1583: //Talisman of the Raptor
-		return 24;
-	case 1584: //Shroud of the Spirits
-		return 6;
-	case 1585: //Talisman of Kragg
-		return 87;
-	case 1586: //Ice Strike
-		return 14;
-	case 1587: //Torrent of Poison
-		return 75;
-	case 1588: //Turgur's Insects
-		return 88;
-	case 1589: //Tigir's Insects
-		return 88;
-	case 1590: //Bane of Nife
-		return 75;
-	case 1591: //Pox of Bertoxxulous
-		return 29;
-	case 1592: //Cripple
-		return 30;
-	case 1593: //Maniacal Strength
-		return 96;
-	case 1594: //Deliriously Nimble
-		return 2;
-	case 1595: //Riotous Health
-		return 94;
-	case 1596: //Mortal Deftness
-		return 24;
-	case 1597: //Unfailing Reverence
-		return 12;
-	case 1598: //Avatar
-		return 7;
-	case 1599: //Voice of the Berserker
-		return 96;
-	case 1600: //Breath of Ro
-		return 38;
-	case 1601: //Winged Death
-		return 58;
-	case 1602: //Blizzard
-		return 14;
-	case 1603: //Scoriae
-		return 38;
-	case 1604: //Breath of Karana
-		return 58;
-	case 1605: //Frost
-		return 14;
-	case 1606: //Fist of Karana
-		return 58;
-	case 1607: //Wildfire
-		return 38;
-	case 1608: //Entrapping Roots
-		return 83;
-	case 1609: //Manaskin
-		return 84;
-	case 1610: //Shield of the Magi
-		return 87;
-	case 1611: //Demi Lich
-		return 17;
-	case 1612: //Quivering Veil of Xarn
-		return 52;
-	case 1613: //Deflux
-		return 43;
-	case 1614: //Chill Bones
-		return 14;
-	case 1615: //Cessation of Cor
-		return 29;
-	case 1616: //Vexing Mordinia
-		return 33;
-	case 1617: //Pyrocruor
-		return 38;
-	case 1618: //Touch of Night
-		return 43;
-	case 1619: //Devouring Darkness
-		return 58;
-	case 1620: //Splurt
-		return 58;
-	case 1621: //Minion of Shadows
-		return 103;
-	case 1622: //Servant of Bones
-		return 103;
-	case 1623: //Emissary of Thule
-		return 103;
-	case 1624: //Thrall of Bones
-		return 13;
-	case 1625: //Skin of the Shadow
-		return 51;
-	case 1626: //Levant
-		return 64;
-	case 1627: //Abscond
-		return 64;
-	case 1628: //Evacuate
-		return 64;
-	case 1629: //Enslave Death
-		return 13;
-	case 1630: //Defoliation
-		return 74;
-	case 1631: //Atol's Spectral Shackles
-		return 89;
-	case 1632: //Plainsight
-		return 129;
-	case 1633: //Fetter
-		return 83;
-	case 1634: //Tishan's Discord
-		return 97;
-	case 1635: //Markar's Discord
-		return 97;
-	case 1636: //Invert Gravity
-		return 58;
-	case 1637: //Draught of Fire
-		return 38;
-	case 1638: //Lure of Flame
-		return 38;
-	case 1639: //Voltaic Draught
-		return 58;
-	case 1640: //Lure of Lightning
-		return 58;
-	case 1641: //Draught of Ice
-		return 14;
-	case 1642: //Lure of Frost
-		return 14;
-	case 1643: //Draught of Jiva
-		return 58;
-	case 1644: //Pillar of Flame
-		return 38;
-	case 1645: //Pillar of Lightning
-		return 58;
-	case 1646: //Pillar of Frost
-		return 14;
-	case 1647: //Tears of Prexus
-		return 14;
-	case 1648: //Tears of Solusek
-		return 38;
-	case 1649: //Tears of Druzzil
-		return 58;
-	case 1650: //Inferno of Al'Kabor
-		return 38;
-	case 1651: //Retribution of Al'Kabor
-		return 14;
-	case 1652: //Vengeance of Al'Kabor
-		return 58;
-	case 1653: //Jyll's Static Pulse
-		return 58;
-	case 1654: //Jyll's Zephyr of Ice
-		return 14;
-	case 1655: //Jyll's Wave of Heat
-		return 38;
-	case 1656: //Thunderbold
-		return 58;
-	case 1657: //Winds of Gelid
-		return 14;
-	case 1658: //Sunstrike
-		return 38;
-	case 1659: //Scintillation
-		return 38;
-	case 1660: //Char
-		return 38;
-	case 1661: //Scars of Sigil
-		return 38;
-	case 1662: //Sirocco
-		return 38;
-	case 1663: //Shock of Steel
-		return 58;
-	case 1664: //Seeking Flame of Seukor
-		return 38;
-	case 1665: //Manastorm
-		return 58;
-	case 1666: //Phantom Armor
-		return 43;
-	case 1667: //Cadeau of Flame
-		return 21;
-	case 1668: //Boon of Immolation
-		return 21;
-	case 1669: //Aegis of Ro
-		return 21;
-	case 1670: //Velocity
-		return 71;
-	case 1671: //Vocarate: Earth
-		return 100;
-	case 1672: //Vocarate: Water
-		return 105;
-	case 1673: //Vocarate: Fire
-		return 102;
-	case 1674: //Vocarate: Air
-		return 98;
-	case 1675: //Greater Vocaration: Earth
-		return 100;
-	case 1676: //Greater Vocaration: Water
-		return 105;
-	case 1677: //Greater Vocaration: Fire
-		return 102;
-	case 1678: //Greater Vocaration: Air
-		return 98;
-	case 1679: //Dyzil's Deafening Decoy
-		return 64;
-	case 1680: //Gift of Xev
-		return 108;
-	case 1681: //Bristlebane's Bundle
-		return 109;
-	case 1682: //Quiver of Marr
-		return 110;
-	case 1683: //Bandoleer of Luclin
-		return 110;
-	case 1684: //Pouch of Quellious
-		return 110;
-	case 1685: //Muzzle of Mardu
-		return 64;
-	case 1686: //Theft of Thought
-		return 60;
-	case 1687: //Collaboration
-		return 3;
-	case 1688: //Enlightenment
-		return 130;
-	case 1689: //Rune V
-		return 84;
-	case 1690: //Fascination
-		return 35;
-	case 1691: //Glamour of Kintaz
-		return 35;
-	case 1692: //Rapture
-		return 35;
-	case 1693: //Clarity II
-		return 59;
-	case 1694: //Boon of the Clear Mind
-		return 59;
-	case 1695: //Gift of Pure Thought
-		return 59;
-	case 1696: //Color Slant
-		return 97;
-	case 1697: //Recant Magic
-		return 31;
-	case 1698: //Dementia
-		return 58;
-	case 1699: //Wind of Tashani
-		return 81;
-	case 1700: //Torment of Argli
-		return 58;
-	case 1701: //Overwhelming Splendor
-		return 12;
-	case 1702: //Tashanian
-		return 81;
-	case 1703: //Asphyxiate
-		return 58;
-	case 1704: //Wind of Tashanian
-		return 81;
-	case 1705: //Boltran`s Agacerie
-		return 13;
-	case 1707: //Dictate
-		return 13;
-	case 1708: //Aanya's Quickening
-		return 41;
-	case 1709: //Wonderous Rapidity
-		return 41;
-	case 1710: //Visions of Grandeur
-		return 41;
-	case 1711: //Umbra
-		return 6;
-	case 1712: //Forlorn Deeds
-		return 88;
-	case 1713: //Bedlam
-		return 84;
-	case 1714: //Memory Flux
-		return 63;
-	case 1715: //Largarn's Lamentation
-		return 60;
-	case 1716: //Scent of Terris
-		return 81;
-	case 1717: //Shadowbond
-		return 56;
-	case 1718: //Sedulous Subversion
-		return 61;
-	case 1719: //Engorging Roots
-		return 83;
-	case 1720: //Eye of Tallon
-		return 129;
-	case 1721: //Unswerving Hammer of Faith
-		return 99;
-	case 1722: //Flaming Sword of Xuzl
-		return 99;
-	case 1723: //Zumaik`s Animation
-		return 99;
-	case 1724: //Disintegrate
-		return 23;
-	case 1725: //Wake of Karana
-		return 64;
-	case 1726: //Sunskin
-		return 51;
-	case 1727: //Legacy of Spike
-		return 21;
-	case 1728: //Manasink
-		return 93;
-	case 1729: //Augment
-		return 41;
-	case 1733: //Convergence
-		return 82;
-	case 1734: //Infusion
-		return 61;
-	case 1735: //Trucidation
-		return 43;
-	case 1736: //Wind of the North
-		return 54;
-	case 1737: //Wind of the South
-		return 54;
-	case 1738: //Tishan's Relocation
-		return 54;
-	case 1739: //Markar's Relocation
-		return 54;
-	case 1740: //Dustdevil
-		return 58;
-	case 1741: //Jolt
-		return 53;
-	case 1742: //Bobbing Corpse
-		return 55;
-	case 1743: //Divine Favor
-		return 47;
-	case 1744: //Harvest
-		return 61;
-	case 1747: //Brusco`s Bombastic Bellow
-		return 58;
-	case 1748: //Angstlich's Assonance
-		return 58;
-	case 1749: //Kazumi's Note of Preservation
-		return 52;
-	case 1750: //Selo`s Song of Travel
-		return 65;
-	case 1751: //Largo`s Absonant Binding
-		return 88;
-	case 1752: //Nillipus` March of the Wee
-		return 84;
-	case 1753: //Song of Twilight
-		return 35;
-	case 1754: //Song of Dawn
-		return 35;
-	case 1755: //Song of Highsun
-		return 86;
-	case 1756: //Song of Midnight
-		return 37;
-	case 1757: //Vilia`s Chorus of Celerity
-		return 41;
-	case 1758: //Selo`s Assonant Strane
-		return 88;
-	case 1759: //Cantata of Replenishment
-		return 44;
-	case 1760: //McVaxius` Rousing Rondo
-		return 21;
-	case 1761: //Cassindra's Insipid Ditty
-		return 60;
-	case 1762: //Jonthan's Inspiration
-		return 41;
-	case 1763: //Niv`s Harmonic
-		return 6;
-	case 1764: //Denon`s Bereavement
-		return 75;
-	case 1765: //Solon's Charismatic Concord
-		return 12;
-	case 1767: //Bonds of Tunare
-		return 89;
-	case 1768: //Sacrifice
-		return 50;
-	case 1769: //Lure of Ice
-		return 14;
-	case 1770: //Rage of Zomm
-		return 64;
-	case 1771: //Call of the Hero
-		return 64;
-	case 1772: //Mala
-		return 81;
-	case 1773: //Conjure Corpse
-		return 64;
-	case 1774: //Naltron's Mark
-		return 112;
-	case 1776: //Spirit of Wolf
-		return 65;
-	case 1784: //Velium Shards
-		return 14;
-	case 1785: //Flamesong
-		return 38;
-	case 1793: //Judgment of Ice
-		return 14;
-	case 1794: //Shards of Sorrow
-		return 14;
-	case 1797: //Enchant Velium
-		return 34;
-	case 1798: //Imbue Opal
-		return 50;
-	case 1799: //Imbue Topaz
-		return 50;
-	case 1800: //Imbue Plains Pebble
-		return 50;
-	case 1802: //Storm Strike
-		return 0;
-	case 1803: //Shrieking Howl
-		return 58;
-	case 1807: //Stunning Blow
-		return 58;
-	case 1812: //Nature's Wrath
-		return 0;
-	case 1815: //Flames of Ro
-		return 38;
-	case 1819: //Primal Essence
-		return 96;
-	case 1820: //Divine Wrath
-		return 58;
-	case 1827: //Frost Shards
-		return 14;
-	case 1831: //Diminution
-		return 64;
-	case 1834: //Poison Animal I
-		return 75;
-	case 1835: //Poison Summoned I
-		return 75;
-	case 1843: //Poison Animal II
-		return 75;
-	case 1844: //Poison Animal III
-		return 75;
-	case 1845: //Poison Summoned II
-		return 75;
-	case 1846: //Poison Summoned III
-		return 75;
-	case 1853: //Contact Poison II
-		return 75;
-	case 1854: //Contact Poison III
-		return 75;
-	case 1855: //Contact Poison IV
-		return 75;
-	case 1860: //System Shock II
-		return 75;
-	case 1861: //System Shock III
-		return 75;
-	case 1862: //System Shock IV
-		return 75;
-	case 1870: //Liquid Silver II
-		return 124;
-	case 1871: //Liquid Silver III
-		return 124;
-	case 1874: //Ant Legs
-		return 64;
-	case 1881: //System Shock V
-		return 75;
-	case 1884: //Imbue Ivory
-		return 50;
-	case 1885: //Imbue Amber
-		return 50;
-	case 1886: //Imbue Sapphire
-		return 50;
-	case 1887: //Imbue Ruby
-		return 50;
-	case 1888: //Imbue Emerald
-		return 50;
-	case 1889: //Enchant Mithril
-		return 34;
-	case 1890: //Enchant Adamantite
-		return 34;
-	case 1891: //Imbue Jade
-		return 50;
-	case 1892: //Enchant Steel
-		return 34;
-	case 1893: //Enchant Brellium
-		return 34;
-	case 1894: //Imbue Black Pearl
-		return 50;
-	case 1895: //Imbue Diamond
-		return 50;
-	case 1896: //Imbue Rose Quartz
-		return 50;
-	case 1897: //Imbue Black Sapphire
-		return 50;
-	case 1898: //Imbue Peridot
-		return 50;
-	case 1899: //Imbue Fire Opal
-		return 50;
-	case 1941: //Lava Breath
-		return 38;
-	case 1942: //Frost Breath
-		return 14;
-	case 1943: //Molten Breath
-		return 38;
-	case 1944: //Summon Orb
-		return 110;
-	case 1947: //Ice Rend
-		return 14;
-	case 1948: //Destroy
-		return 0;
-	case 1953: //Mastodon Stomp
-		return 58;
-	case 1954: //Devour Soul
-		return 0;
-	case 1955: //DrakeBreathBig
-		return 38;
-	case 1957: //Holy Shock
-		return 58;
-	case 1968: //Stunning Strike
-		return 58;
-	case 1969: //Flame of the Efreeti
-		return 38;
-	case 1970: //Verlekarnorm's Disaster
-		return 58;
-	case 1971: //Rocksmash
-		return 58;
-	case 2005: //Nature's Holy Wrath
-		return 58;
-	case 2006: //Static
-		return 58;
-	case 2014: //Incinerate Bones
-		return 38;
-	case 2015: //Conglaciation of Bone
-		return 14;
-	case 2016: //Dementing Visions
-		return 58;
-	case 2019: //Thunder Strike
-		return 58;
-	case 2020: //Circle of Surefall Glade
-		return 5;
-	case 2021: //Ring of Surefall Glade
-		return 5;
-	case 2022: //Translocate: Iceclad
-		return 127;
-	case 2023: //Translocate: Great Divide
-		return 127;
-	case 2024: //Translocate: Wakening Lands
-		return 127;
-	case 2025: //Translocate: Cobalt Scar
-		return 127;
-	case 2026: //Great Divide Gate
-		return 127;
-	case 2027: //Wakening Lands Gate
-		return 127;
-	case 2028: //Cobalt Scar Gate
-		return 127;
-	case 2029: //Ring of Great Divide
-		return 127;
-	case 2030: //Ring of Wakening Lands
-		return 127;
-	case 2031: //Ring of Cobalt Scar
-		return 127;
-	case 2035: //Tentacle Sting
-		return 75;
-	case 2036: //Rain of the Arch Mage
-		return 0;
-	case 2040: //Winds of the Archmage
-		return 58;
-	case 2043: //Kambooz's Touch
-		return 75;
-	case 2047: //Death Shackles
-		return 0;
-	case 2048: //Ssraeshza's Command
-		return 58;
-	case 2054: //Icy Claws
-		return 14;
-	case 2068: //Blast of Frost
-		return 14;
-	case 2070: //Marauder's Wrath
-		return 38;
-	case 2075: //Umbral Rot
-		return 29;
-	case 2076: //Presence of Ssraeshza
-		return 0;
-	case 2085: //Lesser Infusion 
-		return 0;
-	case 2086: //Infusion
-		return 0;
-	case 2087: //Greater Infusion
-		return 0;
-	case 2091: //Lesser Rejuvenation
-		return 0;
-	case 2092: //Rejuvination 
-		return 0;
-	case 2093: //Greater Rejuvenation
-		return 0;
-	case 2094: //Zruk Breath
-		return 0;
-	case 2101: //Pain and Suffering
-		return 0;
-	case 2102: //Drake Breath
-		return 75;
-	case 2103: //Drake Breath
-		return 38;
-	case 2104: //Drake Breath
-		return 14;
-	case 2105: //Drake Breath
-		return 29;
-	case 2106: //Gift of A'err
-		return 0;
-	case 2109: //Ancient: High Priest's Bulwark
-		return 87;
-	case 2110: //Skin like Wood
-		return 46;
-	case 2111: //Burst of Flame
-		return 38;
-	case 2112: //Ancient: Feral Avatar
-		return 7;
-	case 2113: //Ancient: Scourge of Nife
-		return 75;
-	case 2114: //Ancient: Master of Death
-		return 17;
-	case 2115: //Ancient: Lifebane
-		return 75;
-	case 2116: //Ancient: Destruction of Ice
-		return 14;
-	case 2117: //Ancient: Greater Concussion
-		return 53;
-	case 2118: //Ancient: Shock of Sun
-		return 38;
-	case 2119: //Ancient: Burnout Blaze
-		return 70;
-	case 2120: //Ancient: Eternal Rapture
-		return 35;
-	case 2121: //Ancient: Chaotic Visions
-		return 58;
-	case 2122: //Ancient: Gift of Aegolism
-		return 1;
-	case 2125: //Ancient: Legacy of Blades
-		return 21;
-	case 2126: //Ancient: Starfire of Ro
-		return 38;
-	case 2127: //Tragedy at Cazic Thule
-		return 0;
-	case 2130: //Horrific Force
-		return 58;
-	case 2131: //Vortex of Horror
-		return 58;
-	case 2137: //Rain of Terror
-		return 75;
-	case 2139: //Corpse Breath
-		return 64;
-	case 2156: //Deadly Curse of Noqufiel
-		return 0;
-	case 2157: //Word of Command
-		return 58;
-	case 2161: //Shock of Shadows
-		return 58;
-	case 2162: //Black Winds
-		return 58;
-	case 2163: //Lure of Shadows
-		return 58;
-	case 2167: //Fling
-		return 0;
-	case 2168: //Reanimation
-		return 82;
-	case 2169: //Reconstitution
-		return 82;
-	case 2170: //Reparation
-		return 82;
-	case 2171: //Renewal
-		return 82;
-	case 2172: //Restoration
-		return 82;
-	case 2173: //Hand of the Gods
-		return 0;
-	case 2175: //Celestial Health
-		return 32;
-	case 2176: //Spiritual Light
-		return 44;
-	case 2177: //Spiritual Radiance
-		return 44;
-	case 2178: //Spiritual Brawn
-		return 47;
-	case 2179: //Tunare's Renewal
-		return 42;
-	case 2180: //Ethereal Elixir
-		return 32;
-	case 2181: //Hammer of Judgment
-		return 110;
-	case 2182: //Ethereal Light
-		return 42;
-	case 2183: //Lesser Succor
-		return 64;
-	case 2184: //Lesser Evacuate
-		return 64;
-	case 2188: //Protection of the Cabbage
-		return 46;
-	case 2190: //Divine Stun
-		return 97;
-	case 2202: //Mana Shield
-		return 93;
-	case 2203: //Donlo's Dementia
-		return 64;
-	case 2206: //Tortured Memory
-		return 38;
-	case 2213: //Lesser Summon Corpse
-		return 64;
-	case 2230: //Summon Brass Choker
-		return 107;
-	case 2231: //Summon Silver Choker
-		return 107;
-	case 2232: //Summon Golden Choker
-		return 107;
-	case 2233: //Summon Linen Mantle
-		return 107;
-	case 2234: //Summon Leather Mantle
-		return 107;
-	case 2235: //Summon Silken Mantle
-		return 107;
-	case 2236: //Summon Jade Bracelet
-		return 107;
-	case 2237: //Summon Opal Bracelet
-		return 107;
-	case 2238: //Summon Ruby Bracelet
-		return 107;
-	case 2239: //Summon Tiny Ring
-		return 107;
-	case 2240: //Summon Twisted Ring
-		return 107;
-	case 2241: //Summon Studded Ring
-		return 107;
-	case 2242: //Summon Tarnished Bauble
-		return 107;
-	case 2243: //Summon Shiny Bauble
-		return 107;
-	case 2244: //Summon Brilliant Bauble
-		return 107;
-	case 2248: //Acumen
-		return 129;
-	case 2249: //River's Rancor
-		return 58;
-	case 2250: //Fiery Retribution
-		return 38;
-	case 2251: //Furor of the Wild
-		return 14;
-	case 2255: //Wrath of the Wild
-		return 14;
-	case 2258: //Frigid Dominion
-		return 14;
-	case 2261: //Frozen Torrent
-		return 14;
-	case 2264: //Hail of Ice
-		return 14;
-	case 2268: //Touch of the Void
-		return 0;
-	case 2312: //Life Bind
-		return 43;
-	case 2321: //Energy Burst
-		return 0;
-	case 2326: //Yaulp V
-		return 7;
-	case 2375: //Spectral Essence
-		return 0;
-	case 2377: //Screeching Ricochet
-		return 58;
-	case 2378: //Drakeen Breath
-		return 14;
-	case 2379: //Drakeen Monsoon
-		return 14;
-	case 2380: //Drakeen Vortex
-		return 14;
-	case 2381: //Wing Draft
-		return 58;
-	case 2382: //Wing Gust
-		return 58;
-	case 2383: //Wing Squall
-		return 58;
-	case 2384: //Wing Tempest
-		return 58;
-	case 2385: //Frost Pummel
-		return 14;
-	case 2386: //Ice Pummel
-		return 14;
-	case 2387: //Frigid Shard Pummel
-		return 14;
-	case 2392: //Sweltering Carcass
-		return 0;
-	case 2417: //Ring of Grimling
-		return 57;
-	case 2418: //Grimling Gate
-		return 57;
-	case 2419: //Circle of Grimling
-		return 57;
-	case 2420: //Grimling Portal
-		return 57;
-	case 2421: //Translocate: Grimling
-		return 57;
-	case 2422: //Ring of Twilight
-		return 57;
-	case 2423: //Twilight Gate
-		return 57;
-	case 2424: //Circle of Twilight
-		return 57;
-	case 2425: //Twilight Portal
-		return 57;
-	case 2426: //Translocate: Twilight
-		return 57;
-	case 2427: //Ring of Dawnshroud
-		return 57;
-	case 2428: //Dawnshroud Gate
-		return 57;
-	case 2429: //Circle of Dawnshroud
-		return 57;
-	case 2430: //Dawnshroud Portal
-		return 57;
-	case 2431: //Translocate: Dawnshroud
-		return 57;
-	case 2432: //Circle of the Nexus
-		return 57;
-	case 2433: //Ring of the Nexus
-		return 57;
-	case 2434: //Avatar
-		return 7;
-	case 2435: //Kragg's Mending
-		return 42;
-	case 2436: //War Arrows
-		return 58;
-	case 2437: //Hendin Arrow
-		return 0;
-	case 2443: //Blade of Vallon
-		return 58;
-	case 2450: //Barb of Tallon
-		return 38;
-	case 2452: //Barb of Tallon
-		return 75;
-	case 2453: //Thorns of Drunder
-		return 0;
-	case 2462: //Ethereal Remedy
-		return 77;
-	case 2501: //Sanctuary
-		return 64;
-	case 2502: //Celestial Remedy
-		return 32;
-	case 2503: //Sermon of the Righteous
-		return 124;
-	case 2504: //Sacred Word
-		return 58;
-	case 2505: //Armor of the Faithful
-		return 87;
-	case 2506: //Epitaph of Life
-		return 124;
-	case 2507: //Mark of Retribution
-		return 21;
-	case 2508: //Judgment
-		return 58;
-	case 2509: //Blessed Armor of the Risen
-		return 87;
-	case 2510: //Blessing of Aegolism
-		return 1;
-	case 2511: //Protection of Wood
-		return 46;
-	case 2512: //Protection of Rock
-		return 46;
-	case 2513: //Protection of Steel
-		return 46;
-	case 2514: //Protection of Diamond
-		return 46;
-	case 2515: //Protection of Nature
-		return 46;
-	case 2516: //Foliage Shield
-		return 51;
-	case 2517: //Spirit of Eagle
-		return 65;
-	case 2518: //Ro's Smoldering Disjunction
-		return 81;
-	case 2519: //Circle of Seasons
-		return 80;
-	case 2520: //Nature's Recovery
-		return 32;
-	case 2521: //Talisman of the Beast
-		return 96;
-	case 2522: //Grow
-		return 64;
-	case 2523: //Form of the Bear
-		return 48;
-	case 2524: //Spirit of Bih`Li
-		return 65;
-	case 2525: //Harnessing of Spirit
-		return 87;
-	case 2526: //Disinfecting Aura
-		return 19;
-	case 2527: //Plague of Insects
-		return 88;
-	case 2528: //Regrowth of Dar Khura
-		return 43;
-	case 2529: //Talisman of Epuration
-		return 80;
-	case 2530: //Khura's Focusing
-		return 87;
-	case 2531: //Summon Elemental Defender
-		return 106;
-	case 2532: //Summon Phantom Leather
-		return 106;
-	case 2533: //Summon Phantom Chain
-		return 106;
-	case 2534: //Summon Phantom Plate
-		return 106;
-	case 2535: //Summon Elemental Blanket
-		return 106;
-	case 2536: //Transon's Elemental Infusion
-		return 42;
-	case 2537: //Veil of Elements
-		return 51;
-	case 2538: //Mass Mystical Transvergance
-		return 109;
-	case 2539: //Transon's Phantasmal Protection
-		return 44;
-	case 2540: //Shock of Fiery Blades
-		return 38;
-	case 2541: //Focus Death
-		return 70;
-	case 2542: //Shackle of Bone
-		return 124;
-	case 2543: //Eternities Torment
-		return 124;
-	case 2544: //Shackle of Spirit
-		return 124;
-	case 2545: //Insidious Retrogression
-		return 89;
-	case 2546: //Degeneration
-		return 76;
-	case 2547: //Succussion of Shadows
-		return 76;
-	case 2548: //Crippling Claudication
-		return 76;
-	case 2549: //Mind Wrack
-		return 60;
-	case 2550: //Zevfeer's Theft of Vitae
-		return 33;
-	case 2551: //O'Keils Embers
-		return 21;
-	case 2552: //Garrisons Mighty Mana Shock
-		return 58;
-	case 2553: //Minor Familiar
-		return 101;
-	case 2554: //Elnerick's Entombment of Ice
-		return 83;
-	case 2555: //Lesser Familiar
-		return 101;
-	case 2556: //Firetree's Familiar Augment
-		return 71;
-	case 2557: //Familiar
-		return 101;
-	case 2558: //Decession
-		return 64;
-	case 2559: //Spellshield
-		return 93;
-	case 2560: //Greater Familiar
-		return 101;
-	case 2561: //Intellectual Advancement
-		return 39;
-	case 2562: //Intellectual Superiority
-		return 39;
-	case 2563: //Haunting Visage
-		return 128;
-	case 2564: //Calming Visage
-		return 128;
-	case 2565: //Illusion: Imp
-		return 48;
-	case 2566: //Trickster's Augmentation
-		return 16;
-	case 2567: //Beguiling Visage
-		return 128;
-	case 2568: //Horrifying Visage
-		return 128;
-	case 2569: //Glamorous Visage
-		return 128;
-	case 2570: //Koadic's Endless Intellect
-		return 59;
-	case 2571: //Despair
-		return 76;
-	case 2572: //Scream of Hate
-		return 76;
-	case 2573: //Scream of Pain
-		return 76;
-	case 2574: //Scream of Death
-		return 16;
-	case 2575: //Abduction of Strength
-		return 76;
-	case 2576: //Mental Corruption
-		return 16;
-	case 2577: //Torrent of Hate
-		return 76;
-	case 2578: //Torrent of Pain
-		return 76;
-	case 2579: //Torrent of Fatigue
-		return 76;
-	case 2580: //Cloak of the Akheva
-		return 87;
-	case 2581: //Cease
-		return 97;
-	case 2582: //Desist
-		return 97;
-	case 2583: //Instrument of Nife
-		return 16;
-	case 2584: //Divine Vigor
-		return 47;
-	case 2585: //Valor of Marr
-		return 41;
-	case 2586: //Thunder of Karana
-		return 60;
-	case 2587: //Quellious' Word of Tranquility
-		return 97;
-	case 2588: //Breath of Tunare
-		return 17;
-	case 2589: //Healing Wave of Prexus
-		return 42;
-	case 2590: //Brell's Mountainous Barrier
-		return 47;
-	case 2591: //Tangling Weeds
-		return 89;
-	case 2592: //Hawk Eye
-		return 129;
-	case 2593: //Riftwind's Protection
-		return 21;
-	case 2594: //Nature's Precision
-		return 7;
-	case 2595: //Force of Nature
-		return 21;
-	case 2596: //Falcon Eye
-		return 129;
-	case 2597: //Jolting Blades
-		return 53;
-	case 2598: //Mark of the Predator
-		return 7;
-	case 2599: //Eagle Eye
-		return 129;
-	case 2600: //Warder's Protection
-		return 47;
-	case 2601: //Magical Monologue
-		return 64;
-	case 2602: //Song of Sustenance
-		return 64;
-	case 2603: //Amplification
-		return 64;
-	case 2604: //Katta's Song of Sword Dancing
-		return 16;
-	case 2605: //Selo`s Accelerating Chorus
-		return 65;
-	case 2606: //Battlecry of the Vah Shir
-		return 41;
-	case 2607: //Elemental Chorus
-		return 80;
-	case 2608: //Purifying Chorus
-		return 80;
-	case 2609: //Chorus of Replenishment
-		return 44;
-	case 2610: //Warsong of the Vah Shir
-		return 41;
-	case 2611: //Sharik's Replenishing
-		return 42;
-	case 2612: //Spirit of Sharik
-		return 104;
-	case 2613: //Keshuval's Rejuvenation
-		return 42;
-	case 2614: //Spirit of Keshuval
-		return 104;
-	case 2615: //Herikol's Soothing
-		return 42;
-	case 2616: //Spirit of Herikol
-		return 104;
-	case 2617: //Yekan's Recovery
-		return 42;
-	case 2618: //Spirit of Yekan
-		return 104;
-	case 2619: //Yekan's Quickening
-		return 70;
-	case 2620: //Vigor of Zehkes
-		return 42;
-	case 2621: //Spirit of Kashek
-		return 104;
-	case 2622: //Aid of Khurenz
-		return 42;
-	case 2623: //Spirit of Omakin
-		return 104;
-	case 2624: //Sha's Restoration
-		return 42;
-	case 2625: //Omakin's Alacrity
-		return 70;
-	case 2626: //Spirit of Zehkes
-		return 104;
-	case 2627: //Spirit of Khurenz
-		return 104;
-	case 2628: //Sha's Ferocity
-		return 70;
-	case 2629: //Spiritual Purity
-		return 44;
-	case 2630: //Spiritual Strength
-		return 47;
-	case 2631: //Spirit of Khati Sha
-		return 104;
-	case 2632: //Summon Warder
-		return 104;
-	case 2633: //Spirit of Khaliz
-		return 104;
-	case 2634: //Sha's Lethargy
-		return 88;
-	case 2635: //Spirit of Lightning
-		return 71;
-	case 2636: //Spirit of the Blizzard
-		return 71;
-	case 2637: //Spirit of Inferno
-		return 71;
-	case 2638: //Spirit of the Scorpion
-		return 71;
-	case 2639: //Spirit of Vermin
-		return 71;
-	case 2640: //Spirit of Wind
-		return 71;
-	case 2641: //Spirit of the Storm
-		return 71;
-	case 2642: //Claw of Khati Sha
-		return 38;
-	case 2650: //Blazing Heat
-		return 38;
-	case 2651: //Vibrant Might
-		return 58;
-	case 2652: //Descending Might
-		return 58;
-	case 2654: //Fireblast
-		return 38;
-	case 2656: //Wrathful Strike
-		return 58;
-	case 2657: //Terrifying Darkness
-		return 58;
-	case 2658: //Lightning Surge
-		return 58;
-	case 2662: //Storm of Lightning
-		return 58;
-	case 2663: //Clash of Will
-		return 58;
-	case 2664: //Frostcall
-		return 14;
-	case 2665: //Wintercall
-		return 14;
-	case 2669: //Storm of Ice
-		return 14;
-	case 2670: //Rebuke the Dead
-		return 124;
-	case 2678: //Fungal Vengeance
-		return 75;
-	case 2710: //Trickster's Torment
-		return 38;
-	case 2711: //Trickster's TormentSK
-		return 38;
-	case 2717: //Mental Corruption Strike
-		return 29;
-	case 2720: //Spirit of Lightning Strike
-		return 58;
-	case 2721: //Spirit of Blizzard Strike
-		return 14;
-	case 2722: //Spirit of Inferno Strike
-		return 38;
-	case 2723: //Spirit of Scorpion Strike
-		return 75;
-	case 2724: //Spirit of Vermin Strike
-		return 29;
-	case 2725: //Spirit of Wind Strike
-		return 58;
-	case 2726: //Spirit of Storm Strike
-		return 38;
-	case 2729: //Condemnation of Nife
-		return 124;
-	case 2732: //Molten Fist
-		return 38;
-	case 2734: //The Nexus
-		return 57;
-	case 2736: //SpellTheft1
-		return 31;
-	case 2742: //Purify Soul
-		return 19;
-	case 2750: //Rabid Bear
-		return 48;
-	case 2752: //Restore Companion
-		return 42;
-	case 2754: //Frenzied Burnout
-		return 70;
-	case 2757: //Wave of Revulsion
-		return 37;
-	case 2758: //Improved Familiar
-		return 101;
-	case 2759: //Undead Pact
-		return 13;
-	case 2761: //Dominating Gaze
-		return 13;
-	case 2762: //Disease Touch
-		return 29;
-	case 2763: //Poison Touch
-		return 75;
-	case 2764: //Call to Corpse
-		return 64;
-	case 2766: //Life Curse
-		return 43;
-	case 2767: //Dragon Force
-		return 58;
-	case 2768: //Grimling LT 30
-		return 58;
-	case 2770: //Rain of Spores
-		return 75;
-	case 2802: //Flurry of Pebbles
-		return 0;
-	case 2809: //Wave of Death
-		return 14;
-	case 2816: //Storm Tremor
-		return 58;
-	case 2822: //Upheaval
-		return 58;
-	case 2826: //Illusion: Vah Shir
-		return 49;
-	case 2833: //AdvisorNova
-		return 38;
-	case 2836: //Grimling Comet
-		return 14;
-	case 2842: //Shrieker Stun
-		return 29;
-	case 2858: //AcryliaKB
-		return 0;
-	case 2859: //Touch of Vinitras
-		return 0;
-	case 2877: //Moonfire
-		return 14;
-	case 2878: //Fireclaw
-		return 38;
-	case 2879: //Phantasmal Armor
-		return 43;
-	case 2880: //Remove Greater Curse
-		return 19;
-	case 2881: //Everlasting Breath
-		return 64;
-	case 2882: //Firetree's Familiar Enhancement
-		return 71;
-	case 2883: //Elnerick's Electrical Rending
-		return 58;
-	case 2884: //Garrison's Superior Sundering
-		return 38;
-	case 2885: //Funeral Pyre of Kelador
-		return 38;
-	case 2886: //Acumen of Dar Khura
-		return 129;
-	case 2887: //Mask of the Stalker
-		return 59;
-	case 2888: //Spirit of Flame
-		return 71;
-	case 2889: //Spirit of Flame Strike
-		return 38;
-	case 2890: //Spirit of Snow
-		return 71;
-	case 2891: //Spirit of Snow Strike
-		return 14;
-	case 2892: //Deathly Temptation
-		return 17;
-	case 2893: //Marzin's Mark
-		return 112;
-	case 2894: //Levitation
-		return 55;
-	case 2895: //Speed of the Brood
-		return 41;
-	case 2896: //Transon's Elemental Renewal
-		return 42;
-	case 2901: //Illumination
-		return 0;
-	case 2902: //Shissar Broodling Poison
-		return 75;
-	case 2908: //Banshee Wail
-		return 58;
-	case 2927: //Storm Tremor
-		return 58;
-	case 2936: //Ervaj's Lost Composition
-		return 60;
-	case 2941: //Savagery
-		return 7;
-	case 2942: //Sha's Advantage
-		return 88;
-	case 2943: //Translocate: Nexus
-		return 57;
-	case 2944: //Nexus Portal
-		return 57;
-	case 2945: //Nexus Gate
-		return 57;
-	case 2946: //Remove Curse
-		return 19;
-	case 2950: //Grol Baku Strike
-		return 58;
-	case 2951: //Grol Baku Strike
-		return 58;
-	case 2952: //Strike of the Grol Baku
-		return 58;
-	case 2956: //Fire Blast
-		return 38;
-	case 2957: //Water Blast
-		return 14;
-	case 2969: //Shadow Creep
-		return 76;
-	case 2973: //Ember Strike
-		return 38;
-	case 2984: //Lotus Spines
-		return 29;
-	case 2988: //Wave of Toxicity
-		return 75;
-	case 2991: //Deathly Ice
-		return 14;
-	case 2992: //Deathly Fire
-		return 38;
-	case 2993: //Deathly Spores
-		return 75;
-	case 2994: //Deathly Fever
-		return 29;
-	case 2995: //Deep Spores
-		return 75;
-	case 2996: //Claw of the Hunter
-		return 58;
-	case 2997: //Claw of the Beast
-		return 38;
-	case 2999: //Claw of Bestial Fury
-		return 58;
-	case 3000: //Devouring Nightmare
-		return 0;
-	case 3004: //Fist of Lava
-		return 38;
-	case 3005: //Ball of Lava
-		return 38;
-	case 3013: //Fiery Strike
-		return 38;
-	case 3017: //Mighty Bellow of Fire
-		return 38;
-	case 3018: //Nova Inferno
-		return 38;
-	case 3020: //Rain of Burning Fire
-		return 38;
-	case 3030: //Dreams of Thule
-		return 35;
-	case 3031: //Xegony's Phantasmal Guard
-		return 44;
-	case 3032: //Touch of Mujaki
-		return 43;
-	case 3034: //Aeldorb's Animation
-		return 99;
-	case 3035: //Neurotoxin
-		return 75;
-	case 3036: //Wrath of Ice
-		return 14;
-	case 3037: //Wrath of Fire
-		return 38;
-	case 3038: //Wrath of Wind
-		return 58;
-	case 3039: //Protection of the Wild
-		return 21;
-	case 3040: //Belt of Magi'Kot
-		return 64;
-	case 3041: //Blade of Walnan
-		return 64;
-	case 3042: //Fist of Ixiblat
-		return 64;
-	case 3043: //Blade of The Kedge
-		return 64;
-	case 3044: //Girdle of Magi'Kot
-		return 64;
-	case 3045: //Talisman of Return
-		return 109;
-	case 3047: //Kazad`s Mark
-		return 112;
-	case 3051: //Fiery Assault
-		return 38;
-	case 3057: //Tidal Freeze
-		return 14;
-	case 3063: //Illusion: Froglok
-		return 49;
-	case 3066: //Requiem of Time
-		return 88;
-	case 3069: //Seething Hatred
-		return 58;
-	case 3071: //Insipid Dreams
-		return 38;
-	case 3100: //Mark of Retaliation
-		return 64;
-	case 3107: //Cry of Fire
-		return 16;
-	case 3129: //Call of Sky Strike
-		return 58;
-	case 3130: //Call of Sky Strike
-		return 58;
-	case 3131: //Call of Fire Strike
-		return 38;
-	case 3132: //Call of Fire Strike
-		return 38;
-	case 3133: //Cry of Fire Strike
-		return 38;
-	case 3134: //Portal of Knowledge
-		return 116;
-	case 3135: //Hammer of Divinity
-		return 110;
-	case 3136: //Hammer of Souls
-		return 110;
-	case 3156: //Torrent of Brambles
-		return 58;
-	case 3162: //Wind Strike
-		return 58;
-	case 3163: //Storm Avalanche
-		return 58;
-	case 3164: //Froglok Misery
-		return 29;
-	case 3167: //Strike of Marr
-		return 58;
-	case 3172: //Denial
-		return 58;
-	case 3176: //Butchery
-		return 0;
-	case 3177: //Prayer of Pain
-		return 58;
-	case 3178: //Vallon's Quickening
-		return 41;
-	case 3179: //Spirit of Rellic Strike
-		return 58;
-	case 3180: //Knowledge Portal
-		return 116;
-	case 3181: //Translocate: Knowledge
-		return 116;
-	case 3182: //Ring of Knowledge
-		return 116;
-	case 3183: //Knowledge Gate
-		return 116;
-	case 3184: //Circle of Knowledge
-		return 116;
-	case 3185: //Flight of Eagles
-		return 65;
-	case 3186: //Yaulp VI
-		return 7;
-	case 3187: //Sermon of Penitence
-		return 124;
-	case 3188: //Rod of Mystical Transvergance
-		return 109;
-	case 3189: //Tears of Arlyxir
-		return 38;
-	case 3190: //Crusader`s Touch
-		return 19;
-	case 3191: //Shock of Magic
-		return 58;
-	case 3192: //Earthen Roots
-		return 83;
-	case 3194: //Greater Fetter
-		return 83;
-	case 3195: //Greater Immobilize
-		return 83;
-	case 3196: //Petrifying Earth
-		return 83;
-	case 3197: //Pacification
-		return 11;
-	case 3198: //Flameshield of Ro
-		return 21;
-	case 3199: //Arcane Rune
-		return 84;
-	case 3205: //Summon Platinum Choker
-		return 107;
-	case 3206: //Summon Runed Mantle
-		return 107;
-	case 3207: //Summon Sapphire Bracelet
-		return 107;
-	case 3208: //Summon Spiked Ring
-		return 107;
-	case 3209: //Summon Glowing Bauble
-		return 107;
-	case 3210: //Summon Jewelry Bag
-		return 107;
-	case 3221: //Shattering Glass
-		return 58;
-	case 3222: //Web of Glass
-		return 58;
-	case 3223: //Shards of Glass
-		return 58;
-	case 3227: //Shroud of Chaos
-		return 16;
-	case 3229: //Boggle
-		return 53;
-	case 3232: //Karana's Renewal
-		return 42;
-	case 3233: //Tnarg`s Mending
-		return 42;
-	case 3234: //Protection of the Nine
-		return 46;
-	case 3235: //Focus of Soul
-		return 87;
-	case 3236: //no spell
-		return 75;
-	case 3237: //Burnout V
-		return 70;
-	case 3238: //Destroy Summoned
-		return 111;
-	case 3239: //Planar Renewal
-		return 42;
-	case 3240: //Speed of Vallon
-		return 41;
-	case 3241: //Night`s Dark Terror
-		return 16;
-	case 3242: //Guard of Druzzil
-		return 80;
-	case 3243: //Teleport
-		return 64;
-	case 3244: //Greater Decession
-		return 64;
-	case 3245: //Force of Akilae
-		return 97;
-	case 3246: //Shackles of Tunare
-		return 83;
-	case 3247: //Aura of the Crusader
-		return 87;
-	case 3255: //Wrath of the Wild
-		return 21;
-	case 3256: //Wrath of the Wild
-		return 21;
-	case 3257: //Wrath of the Wild
-		return 21;
-	case 3258: //Eldritch Rune
-		return 84;
-	case 3259: //Eldritch Rune
-		return 84;
-	case 3260: //Eldritch Rune
-		return 84;
-	case 3264: //Allegiant Familiar
-		return 101;
-	case 3265: //Servant of Ro
-		return 102;
-	case 3266: //Servant of Ro
-		return 102;
-	case 3267: //Servant of Ro
-		return 102;
-	case 3271: //Guardian of the Forest
-		return 48;
-	case 3272: //Guardian of the Forest
-		return 48;
-	case 3273: //Guardian of the Forest
-		return 48;
-	case 3274: //Virulent Paralysis
-		return 83;
-	case 3275: //Virulent Paralysis
-		return 83;
-	case 3276: //Virulent Paralysis
-		return 83;
-	case 3281: //Servant's Bolt
-		return 38;
-	case 3282: //Boastful Bellow
-		return 58;
-	case 3289: //Frenzy of Spirit
-		return 48;
-	case 3290: //Hobble of Spirits
-		return 71;
-	case 3291: //Paragon of Spirit
-		return 59;
-	case 3295: //Legacy of Bracken
-		return 21;
-	case 3296: //Faith
-		return 46;
-	case 3297: //Radiant Cure1
-		return 19;
-	case 3298: //Radiant Cure2
-		return 19;
-	case 3299: //Radiant Cure3
-		return 19;
-	case 3300: //Shield of the Arcane
-		return 87;
-	case 3301: //Force Shield
-		return 84;
-	case 3302: //Shield of Maelin
-		return 87;
-	case 3303: //Blood of Thule
-		return 75;
-	case 3304: //Legacy of Zek
-		return 103;
-	case 3305: //Rune of Death
-		return 70;
-	case 3306: //Saryrn's Kiss
-		return 33;
-	case 3308: //Death's Silence
-		return 35;
-	case 3309: //Embracing Darkness
-		return 58;
-	case 3310: //Saryrn's Companion
-		return 103;
-	case 3311: //Seduction of Saryrn
-		return 17;
-	case 3312: //Touch of Death
-		return 42;
-	case 3314: //Child of Bertoxxulous
-		return 103;
-	case 3315: //Dark Plague
-		return 29;
-	case 3316: //Word of Terris
-		return 13;
-	case 3317: //Ward of Xegony
-		return 98;
-	case 3318: //Firebolt of Tallon
-		return 38;
-	case 3319: //Sun Storm
-		return 38;
-	case 3320: //Servant of Marr
-		return 105;
-	case 3321: //Black Steel
-		return 58;
-	case 3322: //Child of Ro
-		return 102;
-	case 3323: //Maelstrom of Thunder
-		return 58;
-	case 3324: //Rathe's Son
-		return 100;
-	case 3325: //Sun Vortex
-		return 38;
-	case 3326: //Resistant Armor
-		return 80;
-	case 3327: //Tears of Ro
-		return 38;
-	case 3328: //Lure of Thunder
-		return 58;
-	case 3329: //Elemental Barrier
-		return 80;
-	case 3330: //Draught of Ro
-		return 38;
-	case 3331: //Lure of Ro
-		return 38;
-	case 3332: //Tears of Marr
-		return 14;
-	case 3333: //Telekin
-		return 97;
-	case 3334: //Draught of Thunder
-		return 58;
-	case 3335: //Agnarr's Thunder
-		return 58;
-	case 3336: //Draught of E`ci
-		return 14;
-	case 3337: //Iceflame of E`ci
-		return 64;
-	case 3338: //Harvest of Druzzil
-		return 61;
-	case 3339: //Strike of Solusek
-		return 38;
-	case 3341: //Apathy
-		return 35;
-	case 3342: //Howl of Tashan
-		return 81;
-	case 3343: //Rune of Zebuxoruk
-		return 84;
-	case 3344: //Imbue Nightmare
-		return 50;
-	case 3345: //Strangle
-		return 58;
-	case 3346: //Imbue Storm
-		return 50;
-	case 3347: //Beckon
-		return 13;
-	case 3348: //Torment of Scio
-		return 58;
-	case 3349: //Insanity
-		return 58;
-	case 3350: //Tranquility
-		return 59;
-	case 3351: //Uproar
-		return 84;
-	case 3352: //Imbue Earth
-		return 50;
-	case 3353: //Imbue Air
-		return 50;
-	case 3354: //Sleep
-		return 35;
-	case 3355: //Command of Druzzil
-		return 13;
-	case 3356: //Imbue Fire
-		return 50;
-	case 3357: //Imbue Water
-		return 50;
-	case 3358: //Bliss
-		return 35;
-	case 3359: //Word of Morell
-		return 35;
-	case 3360: //Voice of Quellious
-		return 59;
-	case 3361: //Silent Song of Quellious
-		return 11;
-	case 3362: //Rizlona's Call of Flame
-		return 41;
-	case 3363: //Tuyen`s Chant of the Plague
-		return 29;
-	case 3364: //Druzzil's Disillusionment
-		return 31;
-	case 3365: //Melody of Mischief
-		return 88;
-	case 3366: //Saryrn's Scream of Pain
-		return 58;
-	case 3367: //Tuyen`s Chant of Fire
-		return 38;
-	case 3368: //Psalm of Veeshan
-		return 21;
-	case 3369: //Dreams of Terris
-		return 35;
-	case 3370: //Tuyen`s Chant of Venom
-		return 75;
-	case 3371: //Call of the Banshee
-		return 13;
-	case 3372: //Chorus of Marr
-		return 44;
-	case 3373: //Tuyen`s Chant of Ice
-		return 14;
-	case 3374: //Warsong of Zek
-		return 41;
-	case 3375: //Harmony of Sound
-		return 81;
-	case 3376: //Lullaby of Morell
-		return 35;
-	case 3377: //True Spirit
-		return 104;
-	case 3378: //Agility of the Wrulan
-		return 2;
-	case 3379: //Spear of Torment
-		return 75;
-	case 3380: //Cloud of Grummus
-		return 88;
-	case 3381: //Ancestral Guard
-		return 6;
-	case 3382: //Endurance of the Boar
-		return 94;
-	case 3383: //Talisman of the Wrulan
-		return 2;
-	case 3384: //Talisman of the Tribunal
-		return 80;
-	case 3385: //Tears of Saryrn
-		return 75;
-	case 3386: //Malicious Decay
-		return 81;
-	case 3387: //Malosinia
-		return 81;
-	case 3388: //Strength of the Diaku
-		return 96;
-	case 3389: //Talisman of the Boar
-		return 94;
-	case 3390: //Velium Strike
-		return 14;
-	case 3391: //Talisman of Alacrity
-		return 41;
-	case 3392: //Talisman of the Diaku
-		return 96;
-	case 3393: //Tiny Terror
-		return 64;
-	case 3394: //Breath of Ultor
-		return 29;
-	case 3395: //Malos
-		return 81;
-	case 3396: //Blood of Saryrn
-		return 75;
-	case 3397: //Focus of the Seventh
-		return 87;
-	case 3398: //Quiescence
-		return 32;
-	case 3399: //Ferine Avatar
-		return 7;
-	case 3400: //Festering Darkness
-		return 58;
-	case 3401: //Touch of Volatis
-		return 43;
-	case 3403: //Aura of Pain
-		return 76;
-	case 3405: //Terror of Thule
-		return 53;
-	case 3406: //Aura of Darkness
-		return 76;
-	case 3408: //Zevfeer's Bite
-		return 33;
-	case 3410: //Voice of Thule
-		return 128;
-	case 3411: //Aura of Hate
-		return 76;
-	case 3413: //Touch of Innoruuk
-		return 43;
-	case 3415: //Nature's Rebuke
-		return 16;
-	case 3416: //Nature's Rebuke Strike
-		return 111;
-	case 3417: //Spirit of the Predator
-		return 7;
-	case 3418: //Frozen Wind
-		return 14;
-	case 3419: //Call of the Rathe
-		return 21;
-	case 3420: //Cry of Thunder
-		return 16;
-	case 3421: //Cry of Thunder Strike
-		return 58;
-	case 3422: //Ward of Nife
-		return 16;
-	case 3423: //Ward of Nife Strike
-		return 124;
-	case 3424: //Pious Might
-		return 16;
-	case 3425: //Pious Might Strike
-		return 58;
-	case 3426: //Quellious' Word of Serenity
-		return 97;
-	case 3427: //Wave of Marr
-		return 42;
-	case 3428: //Deny Undead
-		return 124;
-	case 3429: //Touch of Nife
-		return 42;
-	case 3430: //Light of Nife
-		return 77;
-	case 3431: //Brushfire
-		return 38;
-	case 3432: //Brell's Stalwart Shield
-		return 47;
-	case 3433: //Replenishment
-		return 43;
-	case 3434: //Storm's Fury
-		return 58;
-	case 3435: //Hand of Ro
-		return 81;
-	case 3436: //Winter's Storm
-		return 14;
-	case 3437: //Immolation of Ro
-		return 38;
-	case 3438: //Karana's Rage
-		return 58;
-	case 3439: //Nature's Might
-		return 96;
-	case 3440: //Ro's Illumination
-		return 81;
-	case 3441: //Blessing of Replenishment
-		return 43;
-	case 3442: //E'ci's Frosty Breath
-		return 81;
-	case 3443: //Nature's Infusion
-		return 42;
-	case 3444: //Protection of Seasons
-		return 80;
-	case 3445: //Command of Tunare
-		return 13;
-	case 3446: //Swarming Death
-		return 58;
-	case 3447: //Savage Roots
-		return 83;
-	case 3448: //Shield of Bracken
-		return 21;
-	case 3449: //Summer's Flame
-		return 38;
-	case 3450: //Brackencoat
-		return 21;
-	case 3451: //Blessing of the Nine
-		return 46;
-	case 3452: //Winter's Frost
-		return 14;
-	case 3453: //Mask of the Forest
-		return 59;
-	case 3454: //Infusion of Spirit
-		return 96;
-	case 3455: //Healing of Sorsha
-		return 42;
-	case 3456: //Spiritual Vigor
-		return 47;
-	case 3457: //Spirit of Arag
-		return 104;
-	case 3458: //Arag`s Celerity
-		return 70;
-	case 3459: //Spirit of Rellic
-		return 71;
-	case 3460: //Spiritual Dominion
-		return 44;
-	case 3461: //Spirit of Sorsha
-		return 104;
-	case 3462: //Sha's Revenge
-		return 88;
-	case 3463: //Ferocity
-		return 7;
-	case 3464: //The Silent Command
-		return 97;
-	case 3465: //Supernal Remedy
-		return 77;
-	case 3466: //Symbol of Kazad
-		return 112;
-	case 3467: //Virtue
-		return 1;
-	case 3468: //Destroy Undead
-		return 124;
-	case 3469: //Mark of Kings
-		return 64;
-	case 3470: //Ward of Gallantry
-		return 6;
-	case 3471: //Word of Replenishment
-		return 42;
-	case 3472: //Blessing of Reverence
-		return 91;
-	case 3473: //Catastrophe
-		return 58;
-	case 3474: //Armor of the Zealot
-		return 87;
-	case 3475: //Supernal Elixir
-		return 32;
-	case 3476: //Condemnation
-		return 58;
-	case 3477: //Mark of the Righteous
-		return 21;
-	case 3478: //Hammer of Damnation
-		return 110;
-	case 3479: //Hand of Virtue
-		return 1;
-	case 3480: //Supernal Light
-		return 42;
-	case 3481: //Tarnation
-		return 97;
-	case 3482: //Sound of Might
-		return 97;
-	case 3483: //Elemental Silence
-		return 35;
-	case 3484: //Call of the Arch Mage
-		return 13;
-	case 3485: //Supernal Cleansing
-		return 32;
-	case 3486: //Maelstrom of Ro
-		return 21;
-	case 3487: //Strength of Tunare
-		return 47;
-	case 3488: //Pact of Hate
-		return 17;
-	case 3489: //Blood of Hate
-		return 75;
-	case 3490: //Cloak of Luclin
-		return 87;
-	case 3491: //Spear of Decay
-		return 29;
-	case 3492: //Scorpion Venom
-		return 75;
-	case 3493: //Frost Spear
-		return 14;
-	case 3494: //Luggald Blood
-		return 109;
-	case 3498: //Gallenite's Lifetap Test
-		return 58;
-	case 3560: //Spear of Pain
-		return 29;
-	case 3561: //Spear of Disease
-		return 29;
-	case 3562: //Spear of Plague
-		return 29;
-	case 3564: //Burning Arrow
-		return 38;
-	case 3565: //Flaming Arrow
-		return 38;
-	case 3566: //Tuyen`s Chant of Poison
-		return 75;
-	case 3567: //Tuyen`s Chant of Disease
-		return 29;
-	case 3568: //Ice Spear
-		return 14;
-	case 3569: //Frost Shard
-		return 14;
-	case 3570: //Ice Shard
-		return 14;
-	case 3571: //Torbas' Poison Blast
-		return 75;
-	case 3572: //Torbas' Venom Blast
-		return 75;
-	case 3573: //Shock of Venom
-		return 75;
-	case 3574: //Blast of Venom
-		return 75;
-	case 3575: //Blessing of Piety
-		return 91;
-	case 3576: //Blessing of Faith
-		return 91;
-	case 3577: //Wave of Life
-		return 42;
-	case 3578: //Brell's Steadfast Aegis
-		return 47;
-	case 3579: //Share Form of the Great Wolf
-		return 65;
-	case 3580: //Spirit of Ash
-		return 48;
-	case 3581: //O`Keils Levity
-		return 55;
-	case 3582: //Elemental Cloak
-		return 80;
-	case 3583: //Tiny Companion
-		return 64;
-	case 3584: //Refresh Summoning
-		return 42;
-	case 3585: //Entrancing Lights
-		return 35;
-	case 3586: //Illusion: Scaled Wolf
-		return 65;
-	case 3587: //Planar Strike
-		return 58;
-	case 3589: //Ethereal Strike
-		return 58;
-	case 3591: //Imbue Disease
-		return 50;
-	case 3592: //Imbue Valor
-		return 50;
-	case 3593: //Imbue War
-		return 50;
-	case 3594: //Imbue Torment
-		return 50;
-	case 3595: //Imbue Justice
-		return 50;
-	case 3601: //Harmony of Nature
-		return 11;
-	case 3618: //Eclipse Aura Strike
-		return 58;
-	case 3619: //Eclipse Aura Strike
-		return 58;
-	case 3621: //Frost Claw
-		return 14;
-	case 3623: //Burning Barb
-		return 38;
-	case 3624: //Anger
-		return 0;
-	case 3626: //Tendrils of Fire
-		return 38;
-	case 3630: //Time Lapse
-		return 58;
-	case 3645: //Sting of Ayonae
-		return 58;
-	case 3646: //Bite of Bertoxxulous
-		return 29;
-	case 3648: //Time Snap
-		return 58;
-	case 3650: //Dark Empathy Recourse
-		return 0;
-	case 3651: //Wind of Marr
-		return 44;
-	case 3665: //Curtain Call
-		return 38;
-	case 3668: //Pawn's Plight
-		return 29;
-	case 3670: //Queen's Checkmate
-		return 14;
-	case 3681: //Aria of Innocence
-		return 19;
-	case 3682: //Aria of Asceticism
-		return 19;
-	case 3683: //Ethereal Cleansing
-		return 32;
-	case 3684: //Light of Life
-		return 77;
-	case 3685: //Comatose
-		return 64;
-	case 3686: //Blood of Pain
-		return 75;
-	case 3687: //Swarm of Pain
-		return 58;
-	case 3688: //Icewind
-		return 14;
-	case 3689: //Malaria
-		return 29;
-	case 3690: //Bond of the Wild
-		return 70;
-	case 3691: //Bond of the Wild R.
-		return 0;
-	case 3692: //Temperance
-		return 1;
-	case 3693: //Pure Blood
-		return 19;
-	case 3694: //Stoicism
-		return 32;
-	case 3695: //Frost Zephyr
-		return 81;
-	case 3696: //Leviathan Eyes
-		return 129;
-	case 3697: //Scryer's Trespass
-		return 60;
-	case 3699: //Primal Remedy
-		return 42;
-	case 3700: //Elemental Empathy
-		return 70;
-	case 3702: //Auspice
-		return 33;
-	case 3704: //Soul Empathy
-		return 0;
-	case 3706: //Frozen Harpoon
-		return 14;
-	case 3748: //Insipid Decay
-		return 29;
-	case 3753: //Torrent of Agony
-		return 76;
-	case 3764: //Rain of Bile
-		return 75;
-	case 3785: //Hate's Fury
-		return 58;
-	case 3792: //Circle of Stonebrunt
-		return 67;
-	case 3793: //Stonebrunt Portal
-		return 67;
-	case 3794: //Ring of Stonebrunt
-		return 67;
-	case 3795: //Stonebrunt Gate
-		return 67;
-	case 3796: //Mind Tap
-		return 60;
-	case 3799: //Dismal Wind
-		return 97;
-	case 3803: //Pique
-		return 58;
-	case 3806: //Distraction
-		return 53;
-	case 3809: //Reclamation
-		return 43;
-	case 3810: //Eruption
-		return 38;
-	case 3811: //Vision Shift
-		return 129;
-	case 3833: //Translocate: Stonebrunt
-		return 67;
-	case 3834: //Healing Water
-		return 42;
-	case 3842: //Blood of Nadox
-		return 19;
-	case 3847: //Cloak of Khala Dun
-		return 48;
-	case 3848: //Tortured Memory II
-		return 38;
-	case 3849: //Alter Plane: Hate II
-		return 116;
-	case 3854: //Form of Protection
-		return 48;
-	case 3855: //Form of Defense
-		return 48;
-	case 3856: //Form of Endurance
-		return 48;
-	case 3857: //Form of Rejuvenation
-		return 48;
-	case 3861: //Pestilence Shock
-		return 16;
-	case 3864: //Soul Claw
-		return 16;
-	case 3876: //Frozen Shards
-		return 14;
-	case 3877: //Nightmares
-		return 58;
-	case 3878: //Time Rend
-		return 58;
-	case 3881: //Hand of Retribution
-		return 0;
-	case 3909: //Clinging Clay
-		return 88;
-	case 3910: //Flames of Condemnation
-		return 38;
-	case 3921: //Guide Evacuation
-		return 64;
-	case 3975: //Force of Akera
-		return 97;
-	case 3976: //Draught of Lightning
-		return 58;
-	case 3981: //Mass Clarify Mana
-		return 64;
-	case 3982: //Mass Crystallize Mana
-		return 64;
-	case 3983: //Mass Distill Mana
-		return 64;
-	case 3984: //Mass Enchant Adamantite
-		return 34;
-	case 3985: //Mass Enchant Brellium
-		return 34;
-	case 3986: //Mass Enchant Clay
-		return 34;
-	case 3987: //Mass Enchant Electrum
-		return 34;
-	case 3988: //Mass Enchant Gold
-		return 34;
-	case 3989: //Mass Enchant Mithril
-		return 34;
-	case 3990: //Mass Enchant Platinum
-		return 34;
-	case 3991: //Mass Enchant Silver
-		return 34;
-	case 3992: //Mass Enchant Steel
-		return 34;
-	case 3993: //Mass Enchant Velium
-		return 34;
-	case 3994: //Mass Imbue Amber
-		return 50;
-	case 3995: //Mass Imbue Black Pearl
-		return 50;
-	case 3996: //Mass Imbue Black Sapphire
-		return 50;
-	case 3997: //Mass Imbue Diamond
-		return 50;
-	case 3998: //Mass Imbue Emerald
-		return 50;
-	case 3999: //Mass Imbue Fire Opal
-		return 50;
-	case 4000: //Mass Imbue Ivory
-		return 50;
-	case 4001: //Mass Imbue Jade
-		return 50;
-	case 4002: //Mass Imbue Opal
-		return 50;
-	case 4003: //Mass Imbue Peridot
-		return 50;
-	case 4004: //Mass Imbue Plains Pebble
-		return 50;
-	case 4005: //Mass Imbue Rose Quartz
-		return 50;
-	case 4006: //Mass Imbue Ruby
-		return 50;
-	case 4007: //Mass Imbue Sapphire
-		return 50;
-	case 4008: //Mass Imbue Topaz
-		return 50;
-	case 4009: //Mass Purify Mana
-		return 64;
-	case 4010: //Mass Thicken Mana
-		return 64;
-	case 4011: //Kindle
-		return 70;
-	case 4017: //Illusion: Guktan
-		return 49;
-	case 4018: //RytanGuard1
-		return 10;
-	case 4019: //RytanGuard2
-		return 10;
-	case 4020: //RytanGuard3
-		return 10;
-	case 4021: //RytanGuard4
-		return 10;
-	case 4022: //RytanBoltTest
-		return 38;
-	case 4027: //Summon Wooden Bracelet
-		return 107;
-	case 4028: //Summon Stone Bracelet
-		return 107;
-	case 4029: //Summon Iron Bracelet
-		return 107;
-	case 4030: //Summon Steel Bracelet
-		return 107;
-	case 4049: //Circle of Cooling
-		return 80;
-	case 4050: //Circle of Warmth
-		return 80;
-	case 4051: //Talisman of Purity
-		return 80;
-	case 4052: //Talisman of Vitality
-		return 80;
-	case 4053: //Blessing of Temperance
-		return 1;
-	case 4054: //Spirit of the Shrew
-		return 65;
-	case 4055: //Pack Shrew
-		return 65;
-	case 4056: //Remove Minor Curse
-		return 19;
-	case 4057: //Remove Lesser Curse
-		return 19;
-	case 4058: //Feral Pack
-		return 65;
-	case 4059: //Call of Ice
-		return 16;
-	case 4062: //Dark Temptation
-		return 17;
-	case 4063: //Call of Darkness
-		return 17;
-	case 4064: //Austerity
-		return 1;
-	case 4065: //Blessing of Austerity
-		return 1;
-	case 4066: //Ice Meteor
-		return 14;
-	case 4067: //Ward of Calrena
-		return 92;
-	case 4068: //Guard of Calrena
-		return 92;
-	case 4069: //Protection of Calrena
-		return 92;
-	case 4070: //Magi Ward
-		return 92;
-	case 4071: //Mana Ward
-		return 92;
-	case 4072: //Deception
-		return 49;
-	case 4073: //Ward of Alendar
-		return 92;
-	case 4074: //Guard of Alendar
-		return 92;
-	case 4075: //Protection of Alendar
-		return 92;
-	case 4076: //Bulwark of Alendar
-		return 92;
-	case 4077: //Ordinance
-		return 13;
-	case 4078: //Wind of the Desert
-		return 38;
-	case 4079: //Ward of Calliav
-		return 10;
-	case 4080: //Guard of Calliav
-		return 10;
-	case 4081: //Protection of Calliav
-		return 10;
-	case 4082: //Summon: Orb of Exploration
-		return 109;
-	case 4083: //Rizlona's Embers
-		return 91;
-	case 4084: //Rizlona's Fire
-		return 91;
-	case 4085: //Forpar's Aria of Affliction
-		return 91;
-	case 4086: //Forpar's Psalm of Pain
-		return 91;
-	case 4087: //Forpar's Verse of Venom
-		return 91;
-	case 4088: //Ward of Vie
-		return 62;
-	case 4089: //Guard of Vie
-		return 62;
-	case 4090: //Protection of Vie
-		return 62;
-	case 4091: //Bulwark of Vie
-		return 62;
-	case 4092: //Curse
-		return 58;
-	case 4093: //Odium
-		return 58;
-	case 4094: //Anathema
-		return 58;
-	case 4095: //Bane
-		return 58;
-	case 4096: //Dark Soul
-		return 58;
-	case 4097: //Imprecation
-		return 58;
-	case 4098: //Horror
-		return 58;
-	case 4099: //Bounce
-		return 78;
-	case 4100: //Reflect
-		return 78;
-	case 4101: //Scythe of Innoruuk
-		return 124;
-	case 4102: //Scythe of Darkness
-		return 124;
-	case 4103: //Scythe of Death
-		return 124;
-	case 4104: //Vengeance of the Wild
-		return 38;
-	case 4105: //Vengeance of Nature
-		return 38;
-	case 4106: //Vengeance of Tunare
-		return 38;
-	case 4107: //Feral Form
-		return 65;
-	case 4108: //Aura of Reverence
-		return 91;
-	case 4109: //Guidance
-		return 1;
-	case 4110: //Burning Sand
-		return 38;
-	case 4111: //Fire Swarm
-		return 58;
-	case 4112: //Call of the Muse
-		return 91;
-	case 4210: //Fufil`s Diminishing Dirge
-		return 58;
-	case 4239: //Breathless Mist
-		return 64;
-	case 4240: //Essence of Concealment
-		return 51;
-	case 4241: //Weightless Mist
-		return 55;
-	case 4242: //Mist of the Wolf
-		return 65;
-	case 4252: //Xalirilan's Lesser Appraisal
-		return 85;
-	case 4253: //Xalirilan's Appraisal
-		return 85;
-	case 4254: //Xalirilan's Greater Appraisal
-		return 85;
-	case 4255: //Wuggan's Lesser Appraisal
-		return 85;
-	case 4256: //Wuggan's Appraisal
-		return 85;
-	case 4257: //Wuggan's Greater Appraisal
-		return 85;
-	case 4258: //Iony's Lesser Augury
-		return 85;
-	case 4259: //Iony's Augury
-		return 85;
-	case 4260: //Iony's Greater Augury
-		return 85;
-	case 4261: //Reebo's Lesser Augury
-		return 85;
-	case 4262: //Reebo's Augury
-		return 85;
-	case 4263: //Reebo's Greater Augury
-		return 85;
-	case 4264: //Xalirilan's Lesser Discombobulation
-		return 26;
-	case 4265: //Xalirilan's Discombobulation
-		return 26;
-	case 4266: //Xalirilan's Greater Discombobulation
-		return 26;
-	case 4267: //Wuggan's Lesser Discombobulation
-		return 26;
-	case 4268: //Wuggan's Discombobulation
-		return 26;
-	case 4269: //Wuggan's Greater Discombobulation
-		return 26;
-	case 4270: //Iony's Lesser Exorcism
-		return 26;
-	case 4271: //Iony's Exorcism
-		return 26;
-	case 4272: //Iony's Greater Exorcism
-		return 26;
-	case 4273: //Reebo's Lesser Exorcism
-		return 26;
-	case 4274: //Reebo's Exorcism
-		return 26;
-	case 4275: //Reebo's Greater Exorcism
-		return 26;
-	case 4276: //Xalirilan's Lesser Extrication
-		return 73;
-	case 4277: //Xalirilan's Extrication
-		return 73;
-	case 4278: //Xalirilan's Greater Extrication
-		return 73;
-	case 4279: //Wuggan's Lesser Extrication
-		return 73;
-	case 4280: //Wuggan's Extrication
-		return 73;
-	case 4281: //Wuggan's Greater Extrication
-		return 73;
-	case 4282: //Iony's Lesser Cleansing
-		return 73;
-	case 4283: //Iony's Cleansing
-		return 73;
-	case 4284: //Iony's Greater Cleansing
-		return 73;
-	case 4285: //Reebo's Lesser Cleansing
-		return 73;
-	case 4286: //Reebo's Cleansing
-		return 73;
-	case 4287: //Reebo's Greater Cleansing
-		return 73;
-	case 4291: //Aura of Quellious
-		return 59;
-	case 4350: //Transmute Hunter's Dagger
-		return 110;
-	case 4351: //Transmute Hunter's Barbs
-		return 110;
-	case 4352: //Transmute Wayfarer's Bread
-		return 110;
-	case 4353: //Transmute Wayfarer's Tonic
-		return 110;
-	case 4354: //Transmute Traveler's Bandage
-		return 110;
-	case 4355: //Transmute Wayfarer's Wine
-		return 110;
-	case 4356: //Bite of Ykesha
-		return 58;
-	case 4357: //Strike of Ykesha
-		return 58;
-	case 4358: //Force of Ykesha
-		return 58;
-	case 4359: //Wrath of Ykesha
-		return 58;
-	case 4360: //Rujarkian Breath
-		return 58;
-	case 4361: //Rujarkian Mist
-		return 58;
-	case 4362: //Rujarkian Poison
-		return 58;
-	case 4363: //Rujarkian Bile
-		return 58;
-	case 4364: //Rujarkian Venom
-		return 58;
-	case 4365: //Heated Blade
-		return 58;
-	case 4366: //Burning Blade
-		return 58;
-	case 4367: //Blazing Blade
-		return 58;
-	case 4368: //Flaming Blade
-		return 58;
-	case 4369: //Inferno Blade
-		return 58;
-	case 4370: //Vampire Touch
-		return 58;
-	case 4371: //Vampire Claw
-		return 58;
-	case 4372: //Vampire Talon
-		return 58;
-	case 4373: //Vampire Fangs
-		return 58;
-	case 4374: //Vampire Kiss
-		return 58;
-	case 4375: //Chill
-		return 58;
-	case 4376: //Icicle Strike
-		return 58;
-	case 4377: //Icicle Claw
-		return 58;
-	case 4378: //Vox' Bite
-		return 58;
-	case 4379: //Permafrost
-		return 58;
-	case 4380: //Mirror I
-		return 78;
-	case 4381: //Mirror II
-		return 78;
-	case 4382: //Mirror III
-		return 78;
-	case 4383: //Mirror IV
-		return 78;
-	case 4384: //Guard I
-		return 62;
-	case 4385: //Guard II
-		return 62;
-	case 4386: //Guard III
-		return 62;
-	case 4387: //Guard IV
-		return 62;
-	case 4388: //Spell Guard I
-		return 62;
-	case 4389: //Spell Guard II
-		return 62;
-	case 4390: //Spell Guard III
-		return 62;
-	case 4391: //Spell Guard IV
-		return 62;
-	case 4395: //Selo's Rhythm of Speed
-		return 65;
-	case 4408: //Color Cloud
-		return 97;
-	case 4413: //Golem Pulverize
-		return 58;
-	case 4414: //Rimebone Frost Burst
-		return 14;
-	case 4418: //Illusion: Frost Bone
-		return 48;
-	case 4489: //Taelosian Vengeance
-		return 88;
-	case 4492: //Geostrike
-		return 14;
-	case 4493: //Earth Wave
-		return 38;
-	case 4496: //Rock Storm
-		return 38;
-	case 4497: //Earth Shards
-		return 14;
-	case 4498: //Aggressive Discipline
-		return 119;
-	case 4499: //Defensive Discipline
-		return 117;
-	case 4500: //Holyforge Discipline
-		return 117;
-	case 4501: //Precision Discipline
-		return 119;
-	case 4502: //Voiddance Discipline
-		return 117;
-	case 4503: //Evasive Discipline
-		return 117;
-	case 4504: //Leechcurse Discipline
-		return 118;
-	case 4505: //Deadeye Discipline
-		return 119;
-	case 4506: //Trueshot Discipline
-		return 117;
-	case 4507: //Silentfist Discipline
-		return 119;
-	case 4508: //Ashenhand Discipline
-		return 119;
-	case 4509: //Whirlwind Discipline
-		return 117;
-	case 4510: //Stonestance Discipline
-		return 117;
-	case 4511: //Thunderkick Discipline
-		return 119;
-	case 4512: //Innerflame Discipline
-		return 118;
-	case 4513: //Hundred Fists Discipline
-		return 118;
-	case 4514: //Mighty Strike Discipline
-		return 119;
-	case 4515: //Nimble Discipline
-		return 117;
-	case 4516: //Deftdance Discipline
-		return 117;
-	case 4517: //Kinesthetics Discipline
-		return 118;
-	case 4518: //Sanctification Discipline
-		return 118;
-	case 4519: //Weapon Shield Discipline
-		return 118;
-	case 4520: //Unholy Aura Discipline
-		return 117;
-	case 4521: //Bestial Alignment I
-		return 7;
-	case 4522: //Bestial Alignment II
-		return 7;
-	case 4523: //Bestial Alignment III
-		return 7;
-	case 4524: //Bestial Alignment I
-		return 7;
-	case 4525: //Bestial Alignment II
-		return 7;
-	case 4526: //Bestial Alignment III
-		return 7;
-	case 4527: //Bestial Alignment I
-		return 7;
-	case 4528: //Bestial Alignment II
-		return 7;
-	case 4529: //Bestial Alignment III
-		return 7;
-	case 4530: //Bestial Alignment I
-		return 7;
-	case 4531: //Bestial Alignment II
-		return 7;
-	case 4532: //Bestial Alignment III
-		return 7;
-	case 4533: //Bestial Alignment I
-		return 7;
-	case 4534: //Bestial Alignment II
-		return 7;
-	case 4535: //Bestial Alignment III
-		return 7;
-	case 4536: //Frenzied Aura
-		return 48;
-	case 4537: //Icy Grasp
-		return 71;
-	case 4538: //Icy Grasp Strike
-		return 58;
-	case 4549: //Divine Avatar I
-		return 7;
-	case 4550: //Divine Avatar II
-		return 7;
-	case 4551: //Divine Avatar III
-		return 7;
-	case 4555: //Elemental Domination
-		return 13;
-	case 4567: //Aneuk Grasp
-		return 58;
-	case 4574: //Hynid Snap
-		return 58;
-	case 4578: //Turepta Crush
-		return 58;
-	case 4579: //Ukun Chains
-		return 58;
-	case 4585: //Resistant Discipline
-		return 120;
-	case 4586: //Puretone Discipline
-		return 118;
-	case 4587: //Fearless Discipline
-		return 120;
-	case 4588: //Infuriate
-		return 68;
-	case 4589: //Barrier
-		return 22;
-	case 4590: //Cover
-		return 22;
-	case 4591: //Guard
-		return 22;
-	case 4592: //Infallible
-		return 22;
-	case 4593: //Crippling Strike
-		return 90;
-	case 4595: //Muscle Shock
-		return 68;
-	case 4596: //Armor Slice
-		return 90;
-	case 4597: //Gauntlet Strike
-		return 68;
-	case 4598: //Head Bash
-		return 68;
-	case 4599: //Rally Cry
-		return 40;
-	case 4600: //Shin Kick
-		return 68;
-	case 4601: //Rage
-		return 40;
-	case 4602: //Power Slam
-		return 90;
-	case 4603: //Stomp
-		return 68;
-	case 4604: //Back Swing
-		return 68;
-	case 4605: //Slice
-		return 68;
-	case 4607: //Flurry
-		return 68;
-	case 4608: //Provoke
-		return 115;
-	case 4612: //Enrage
-		return 118;
-	case 4614: //Phantom Zephyr
-		return 115;
-	case 4615: //Fortitude
-		return 22;
-	case 4616: //Pain Tolerance
-		return 22;
-	case 4618: //Fortune
-		return 90;
-	case 4619: //Quick Feet
-		return 22;
-	case 4620: //Ton Po's Defense
-		return 22;
-	case 4621: //Focused Aura
-		return 22;
-	case 4622: //Overwhelm
-		return 68;
-	case 4623: //Tranquil Force
-		return 22;
-	case 4624: //Grapple
-		return 90;
-	case 4625: //Armor Crush
-		return 90;
-	case 4626: //Leg Sweep
-		return 68;
-	case 4627: //Nerve Strike
-		return 90;
-	case 4628: //Nerve Spasm
-		return 90;
-	case 4629: //Thunderkick
-		return 68;
-	case 4630: //Master's Fury
-		return 40;
-	case 4631: //Ashenhand
-		return 68;
-	case 4632: //Aura of Speed
-		return 40;
-	case 4633: //Whirlwind Kick
-		return 68;
-	case 4634: //Dragon Strike
-		return 68;
-	case 4635: //Tranquil Focus
-		return 90;
-	case 4636: //Rapid Jab
-		return 68;
-	case 4637: //Wind of Force
-		return 68;
-	case 4638: //Pain Strike
-		return 90;
-	case 4639: //Indirection
-		return 90;
-	case 4640: //Focus
-		return 90;
-	case 4641: //Reflexes
-		return 22;
-	case 4642: //Mental Block
-		return 22;
-	case 4643: //Proficiency
-		return 68;
-	case 4644: //Bind
-		return 90;
-	case 4645: //Armor Pierce
-		return 90;
-	case 4646: //Eye Gouge
-		return 90;
-	case 4647: //Tendon Slice
-		return 68;
-	case 4648: //Wrist Slice
-		return 90;
-	case 4649: //Assassin's Focus
-		return 40;
-	case 4650: //Lunge
-		return 68;
-	case 4651: //Direct Assault
-		return 40;
-	case 4652: //Vital Cut
-		return 68;
-	case 4653: //Blood Feast
-		return 40;
-	case 4654: //Blood Slice
-		return 68;
-	case 4655: //Energy Sap
-		return 68;
-	case 4656: //Mind Snap
-		return 90;
-	case 4657: //Burning Spasm
-		return 90;
-	case 4658: //Double Stab
-		return 68;
-	case 4659: //Sneak Attack
-		return 115;
-	case 4670: //Fortitude Discipline
-		return 118;
-	case 4671: //Protective Spirit Discipline
-		return 117;
-	case 4672: //Charge Discipline
-		return 119;
-	case 4673: //Counterattack Discipline
-		return 117;
-	case 4674: //Furious Discipline
-		return 118;
-	case 4675: //Fellstrike Discipline
-		return 119;
-	case 4676: //Duelist Discipline
-		return 118;
-	case 4677: //Blinding Speed Discipline
-		return 119;
-	case 4678: //Bestial Fury Discipline
-		return 118;
-	case 4679: //Energy Sap Recourse
-		return 68;
-	case 4680: //Cover Recourse
-		return 22;
-	case 4681: //Bellow
-		return 115;
-	case 4682: //Berate
-		return 115;
-	case 4683: //Phantom Wind
-		return 115;
-	case 4684: //Phantom Echo
-		return 115;
-	case 4685: //Thief's Vengeance
-		return 115;
-	case 4686: //Assassin's Strike
-		return 115;
-	case 4687: //Healing Will Discipline
-		return 120;
-	case 4688: //Stonewall Discipline
-		return 117;
-	case 4689: //Spirit of Rage Discipline
-		return 120;
-	case 4690: //Earthwalk Discipline
-		return 117;
-	case 4691: //Speed Focus Discipline
-		return 118;
-	case 4692: //Planeswalk Discipline
-		return 120;
-	case 4693: //Concentration Discipline
-		return 117;
-	case 4694: //Deadly Precision Discipline
-		return 119;
-	case 4695: //Twisted Chance Discipline
-		return 118;
-	case 4696: //Weapon Affinity Discipline
-		return 120;
-	case 4697: //Incite
-		return 115;
-	case 4698: //Phantom Call
-		return 115;
-	case 4699: //Bite of the Hounds
-		return 58;
-	case 4700: //Claw of the Beast
-		return 58;
-	case 4701: //Warhound's Affliction
-		return 58;
-	case 4704: //Blood Scream
-		return 19;
-	case 4706: //Mindless Rage
-		return 40;
-	case 4716: //Call of Rav
-		return 13;
-	case 4717: //Diseased Maw
-		return 88;
-	case 4721: //Focused Will Discipline
-		return 120;
-	case 4724: //Abysmal Replenishment
-		return 44;
-	case 4726: //Bite of Keras
-		return 58;
-	case 4741: //Reflection of Discord I
-		return 78;
-	case 4742: //Reflection of Discord II
-		return 78;
-	case 4743: //Reflection of Discord III
-		return 78;
-	case 4786: //Icy Grasp
-		return 71;
-	case 4788: //Feral Swipe
-		return 68;
-	case 4789: //Touch of the Divine
-		return 52;
-	case 4795: //Aura of Restoration
-		return 43;
-	case 4801: //Doppelganger Recourse
-		return 86;
-	case 4802: //Flames of Kesh`yk I
-		return 71;
-	case 4803: //Flames of Kesh`yk II
-		return 71;
-	case 4804: //Flames of Kesh`yk III
-		return 71;
-	case 4805: //Frost of Kesh`yk I
-		return 71;
-	case 4806: //Frost of Kesh`yk II
-		return 71;
-	case 4807: //Frost of Kesh`yk III
-		return 71;
-	case 4808: //Lightning of Kesh`yk I
-		return 71;
-	case 4809: //Lightning of Kesh`yk II
-		return 71;
-	case 4810: //Lightning of Kesh`yk III
-		return 71;
-	case 4811: //Flames of Kesh`yk Effect I
-		return 71;
-	case 4812: //Flames of Kesh`yk Effect II
-		return 71;
-	case 4813: //Flames of Kesh`yk Effect III
-		return 71;
-	case 4814: //Frost of Kesh`yk Effect I
-		return 71;
-	case 4815: //Frost of Kesh`yk Effect II
-		return 71;
-	case 4816: //Frost of Kesh`yk Effect III
-		return 71;
-	case 4817: //Lightning of Kesh`yk Effect I
-		return 71;
-	case 4818: //Lightning of Kesh`yk Effect II
-		return 71;
-	case 4819: //Lightning of Kesh`yk Effect III
-		return 71;
-	case 4820: //Rabid Companion I
-		return 71;
-	case 4821: //Rabid Companion II
-		return 71;
-	case 4822: //Rabid Companion III
-		return 71;
-	case 4841: //Aura of Fire
-		return 43;
-	case 4842: //Exultant Bellow I
-		return 58;
-	case 4843: //Exultant Bellow II
-		return 58;
-	case 4844: //Exultant Bellow III
-		return 58;
-	case 4845: //Exultant Bellow IV
-		return 58;
-	case 4846: //Exultant Bellow V
-		return 58;
-	case 4849: //Heartstopper
-		return 88;
-	case 4853: //Listless Strength
-		return 30;
-	case 4871: //War March of the Mastruq
-		return 41;
-	case 4872: //Echo of the Trusik
-		return 91;
-	case 4873: //Dark Echo
-		return 78;
-	case 4874: //Turepta Blood
-		return 75;
-	case 4875: //Trushar's Mending
-		return 42;
-	case 4876: //Trushar's Frost
-		return 14;
-	case 4877: //Apathy of the Nihil
-		return 35;
-	case 4878: //Bliss of the Nihil
-		return 35;
-	case 4879: //Madness of Ikkibi
-		return 58;
-	case 4880: //Holy Light
-		return 42;
-	case 4881: //Order
-		return 58;
-	case 4882: //Holy Elixir
-		return 32;
-	case 4883: //Sylvan Infusion
-		return 42;
-	case 4884: //Sylvan Fire
-		return 38;
-	case 4885: //Sylvan Embers
-		return 38;
-	case 4886: //Elemental Siphon
-		return 17;
-	case 4887: //Rock of Taelosia
-		return 58;
-	case 4888: //Monster Summoning IV
-		return 64;
-	case 4889: //Night Stalker
-		return 33;
-	case 4890: //Night Fire
-		return 38;
-	case 4891: //Night's Beckon
-		return 33;
-	case 4893: //Wave of Trushar
-		return 42;
-	case 4894: //Light of Order
-		return 77;
-	case 4895: //Holy Order
-		return 16;
-	case 4896: //Sylvan Light
-		return 42;
-	case 4897: //Sylvan Burn
-		return 38;
-	case 4898: //Sylvan Call
-		return 16;
-	case 4899: //Breath of Trushar
-		return 32;
-	case 4900: //Balance of the Nihil
-		return 88;
-	case 4901: //Daluda's Mending
-		return 42;
-	case 4902: //Mental Horror
-		return 16;
-	case 4903: //Black Shroud
-		return 16;
-	case 4904: //Miasmic spear
-		return 29;
-	case 4905: //Black Ice
-		return 14;
-	case 4906: //White Fire
-		return 38;
-	case 4907: //Telaka
-		return 97;
-	case 4908: //Mental Horror Strike
-		return 29;
-	case 4912: //Sylvan Call Strike
-		return 38;
-	case 4913: //Holy Order Strike
-		return 58;
-	case 4928: //Leg Strike
-		return 89;
-	case 4929: //Leg Cut
-		return 89;
-	case 4930: //Leg Slice
-		return 89;
-	case 4931: //Head Strike
-		return 97;
-	case 4932: //Head Pummel
-		return 97;
-	case 4933: //Head Crush
-		return 97;
-	case 4934: //Diversive Strike
-		return 53;
-	case 4935: //Distracting Strike
-		return 53;
-	case 4936: //Confusing Strike
-		return 53;
-	case 4937: //Corroded Axe
-		return 110;
-	case 4938: //Blunt Axe
-		return 110;
-	case 4939: //Steel Axe
-		return 110;
-	case 4940: //Bearded Axe
-		return 110;
-	case 4941: //Mithril Axe
-		return 110;
-	case 4942: //Balanced War Axe
-		return 110;
-	case 4943: //Bonesplicer Axe
-		return 110;
-	case 4944: //Fleshtear Axe
-		return 110;
-	case 4945: //Cold Steel Cleaving Axe
-		return 110;
-	case 4946: //Mithril Bloodaxe
-		return 110;
-	case 4947: //Rage Axe
-		return 110;
-	case 4948: //Bloodseekers Axe
-		return 110;
-	case 4949: //Battlerage Axe
-		return 110;
-	case 4950: //Deathfury Axe
-		return 110;
-	case 4957: //Shock of Discord
-		return 16;
-	case 4960: //Simmering Rage
-		return 115;
-	case 4961: //Bubbling Rage
-		return 115;
-	case 4962: //Boiling Rage
-		return 115;
-	case 4963: //Natimbi Gate
-		return 113;
-	case 4964: //Translocate: Natimbi
-		return 113;
-	case 4965: //Natimbi Portal
-		return 113;
-	case 4966: //Circle of Natimbi
-		return 113;
-	case 4967: //Ring of Natimbi
-		return 113;
-	case 4968: //Dark Arrow
-		return 38;
-	case 4970: //Prism Strike
-		return 14;
-	case 4971: //Ancient: Chaos Chant
-		return 29;
-	case 4972: //Ancient: Frozen Chaos
-		return 14;
-	case 4973: //Ancient: Chaos Censure
-		return 58;
-	case 4974: //Ancient: Chaos Frost
-		return 14;
-	case 4975: //Ancient: Chaos Madness
-		return 58;
-	case 4976: //Ancient: Chaos Vortex
-		return 38;
-	case 4977: //Ancient: Force of Chaos
-		return 97;
-	case 4978: //Ancient: Seduction of Chaos
-		return 17;
-	case 4979: //Ancient: Chaotic Pain
-		return 17;
-	case 4980: //Ancient: Burning Chaos
-		return 38;
-	case 4981: //Ancient: Strike of Chaos
-		return 38;
-	case 4982: //Ancient: Bite of Chaos
-		return 33;
-	case 4991: //Coordinated Strike
-		return 0;
-	case 4992: //Malevolent Assault
-		return 58;
-	case 4993: //Malevolent Vex
-		return 0;
-	case 4994: //Searing Blood Arrow I
-		return 88;
-	case 4995: //Searing Blood Arrow II
-		return 88;
-	case 4996: //Searing Blood Arrow III
-		return 88;
-	case 4997: //Arrow of Renewal
-		return 42;
-	case 5000: //Righteous Assault
-		return 0;
-	case 5001: //Bury
-		return 0;
-	case 5002: //Mana Blast
-		return 0;
-	case 5003: //Impoverished Lifeblood
-		return 0;
-	case 5004: //Tamuik's Suggestion
-		return 0;
-	case 5005: //Tamuik's Ghastly Presence
-		return 0;
-	case 5006: //Tamuik's Spectral Step
-		return 0;
-	case 5007: //Curse of Tunik Tamuik
-		return 0;
-	case 5008: //Bane of Tunik Tamuik
-		return 0;
-	case 5009: //Unholy Barrage
-		return 0;
-	case 5010: //Strike of Glory
-		return 0;
-	case 5011: //Salve
-		return 42;
-	case 5012: //Spike of Disease
-		return 29;
-	case 5013: //SpellTheft2
-		return 31;
-	case 5014: //SpellTheft3
-		return 31;
-	case 5015: //Bellow of the Mastruq
-		return 115;
-	case 5016: //Ancient: Chaos Cry
-		return 115;
-	case 5017: //Kyv Strike
-		return 115;
-	case 5018: //Ancient: Chaos Strike
-		return 115;
-	case 5019: //Phantom Shadow
-		return 115;
-	case 5020: //Ancient: Phantom Chaos
-		return 115;
-	case 5022: //Dark Balance
-		return 0;
-	case 5023: //Chaos Epidemic
-		return 0;
-	case 5024: //Chaos Epidemic
-		return 0;
-	case 5027: //Battle Cry
-		return 7;
-	case 5028: //War Cry
-		return 7;
-	case 5029: //Battle Cry of Dravel
-		return 7;
-	case 5030: //War Cry of Dravel
-		return 7;
-	case 5031: //Battle Cry of the Mastruq
-		return 7;
-	case 5032: //Ancient: Cry of Chaos
-		return 7;
-	case 5033: //Berserker Rage
-		return 7;
-	case 5034: //Burning Rage Discipline
-		return 119;
-	case 5035: //Focused Fury Discipline
-		return 119;
-	case 5036: //Battle Sense Discipline
-		return 117;
-	case 5037: //Cleaving Rage Discipline
-		return 119;
-	case 5038: //Battle Focus Discipline
-		return 118;
-	case 5039: //Inspired Anger Discipline
-		return 119;
-	case 5040: //Reckless Discipline
-		return 118;
-	case 5041: //Blind Rage Discipline
-		return 119;
-	case 5042: //Indomitable Discipline
-		return 118;
-	case 5043: //Cleaving Anger Discipline
-		return 118;
-	case 5044: //Sprint Discipline
-		return 120;
-	case 5045: //Test1
-		return 118;
-	case 5046: //Test2
-		return 115;
-	case 5047: //Test3
-		return 115;
-	case 5048: //Test4
-		return 115;
-	case 5049: //Test5
-		return 115;
-	case 5050: //Test6
-		return 118;
-	case 5051: //Aura of Destruction
-		return 0;
-	case 5052: //Spirit's Touch
-		return 0;
-	case 5053: //Destructive Crush
-		return 0;
-	case 5054: //Wave of Destruction
-		return 0;
-	case 5055: //Creeping Fury
-		return 0;
-	case 5056: //Rampaging Force
-		return 0;
-	case 5057: //Barxt's Destructive Touch
-		return 0;
-	case 5058: //Barxt's Mental Corruption
-		return 0;
-	case 5059: //Wave of Absolute Power
-		return 0;
-	case 5060: //Discordant Light
-		return 42;
-	case 5063: //Mug
-		return 68;
-	case 5064: //Hastened Thoughts
-		return 64;
-	case 5070: //Armor Shatter
-		return 0;
-	case 5071: //Energy Siphon
-		return 0;
-	case 5073: //Soul Vortex
-		return 0;
-	case 5074: //Black Pox
-		return 0;
-	case 5094: //test ac
-		return 118;
-	case 5095: //Item Pet I
-		return 99;
-	case 5096: //Item Pet II
-		return 99;
-	case 5101: //Fire Shard
-		return 64;
-	case 5102: //Frost Hammer
-		return 64;
-	case 5103: //Flame Strike
-		return 58;
-	case 5104: //Frost Strike
-		return 58;
-	case 5105: //Geomantra
-		return 92;
-	case 5107: //Tainted Axe of Hatred
-		return 110;
-	case 5118: //Intoxicating Fury
-		return 0;
-	case 5119: //Force of Trusik's Rage
-		return 0;
-	case 5120: //Withering Destruction
-		return 0;
-	case 5125: //Venom Claw
-		return 38;
-	case 5127: //Prism Skin
-		return 14;
-	case 5133: //Elemental Draw
-		return 17;
-	case 5135: //SpellTheft4
-		return 10;
-	case 5148: //Massive Explosion
-		return 0;
-	case 5150: //Gloomingdeep Guard
-		return 46;
-	case 5190: //PvPSilTest1
-		return 97;
-	case 5191: //PvPSilTest2
-		return 97;
-	case 5192: //PvPSilTest3
-		return 97;
-	case 5193: //PvPSilTest4
-		return 97;
-	case 5194: //PvPSilTest5
-		return 97;
-	case 5195: //PvPSil2Test1
-		return 97;
-	case 5196: //PvPSil2Test2
-		return 97;
-	case 5197: //PvPSil2Test3
-		return 97;
-	case 5198: //PvPSil2Test4
-		return 97;
-	case 5199: //PvPSil2Test5
-		return 97;
-	case 5200: //PvPStunTest1
-		return 71;
-	case 5201: //PvPStunTest2
-		return 71;
-	case 5202: //PvPStunTest3
-		return 71;
-	case 5203: //PvPStunTest4
-		return 71;
-	case 5204: //PvPStunTest5
-		return 71;
-	case 5205: //5200 Strike
-		return 71;
-	case 5206: //5201 Strike
-		return 71;
-	case 5207: //5202 Strike
-		return 71;
-	case 5208: //5203 Strike
-		return 71;
-	case 5209: //5204 Strike
-		return 71;
-	case 5210: //PvPSnareTest1
-		return 71;
-	case 5211: //PvPSnareTest2
-		return 71;
-	case 5212: //PvPSnareTest3
-		return 71;
-	case 5213: //PvPSnareTest4
-		return 71;
-	case 5214: //PvPSnareTest5
-		return 71;
-	case 5215: //5210 Strike
-		return 71;
-	case 5216: //5211 Strike
-		return 71;
-	case 5217: //5212 Strike
-		return 71;
-	case 5218: //5213 Strike
-		return 71;
-	case 5219: //5214 Strike
-		return 71;
-	case 5220: //Jarsath Frenzy
-		return 96;
-	case 5221: //Rage of Xyzith
-		return 58;
-	case 5222: //Morternum
-		return 33;
-	case 5226: //Arias' Guard
-		return 43;
-	case 5250: //Confidence
-		return 46;
-	case 5251: //Pious Remedy
-		return 77;
-	case 5252: //Symbol of Balikor
-		return 112;
-	case 5253: //Ward of Valiance
-		return 6;
-	case 5254: //Shock of Wonder
-		return 97;
-	case 5255: //Sermon of Reproach
-		return 124;
-	case 5256: //Unswerving Hammer of Retribution
-		return 99;
-	case 5257: //Conviction
-		return 1;
-	case 5258: //Blessing of Devotion
-		return 91;
-	case 5259: //Pious Elixir
-		return 32;
-	case 5260: //Reproach
-		return 58;
-	case 5261: //Panoply of Vie
-		return 62;
-	case 5262: //Omen-Cleric-PH
-		return 91;
-	case 5263: //Omen-Cleric-PH
-		return 64;
-	case 5264: //Hammer of Reproach
-		return 110;
-	case 5265: //Pious Light
-		return 42;
-	case 5266: //Sound of Divinity
-		return 97;
-	case 5267: //Omen-Cleric-PH
-		return 83;
-	case 5268: //Desolate Undead
-		return 124;
-	case 5269: //Mark of the Blameless
-		return 21;
-	case 5270: //Word of Vivification
-		return 42;
-	case 5271: //Calamity
-		return 58;
-	case 5272: //Aura of Devotion
-		return 91;
-	case 5273: //Yaulp VII
-		return 7;
-	case 5274: //Placate
-		return 11;
-	case 5275: //Silent Dictation
-		return 97;
-	case 5276: //Armor of the Pious
-		return 87;
-	case 5277: //Balikor's Mark
-		return 112;
-	case 5278: //Hand of Conviction
-		return 1;
-	case 5279: //Ancient: Pious Conscience
-		return 58;
-	case 5280: //Direction
-		return 46;
-	case 5281: //Omen-Paladin-PH
-		return 83;
-	case 5282: //Touch of Piety
-		return 42;
-	case 5283: //Crusader's Purity
-		return 19;
-	case 5284: //Force of Piety
-		return 97;
-	case 5285: //Silvered Fury
-		return 16;
-	case 5286: //Spurn Undead
-		return 124;
-	case 5287: //Symbol of Jeron
-		return 112;
-	case 5288: //Pious Fury
-		return 16;
-	case 5289: //Light of Piety
-		return 77;
-	case 5290: //Hand of Direction
-		return 46;
-	case 5291: //Armor of the Champion
-		return 87;
-	case 5292: //Serene Command
-		return 97;
-	case 5293: //Pious Cleansing
-		return 32;
-	case 5294: //Bulwark of Piety
-		return 6;
-	case 5295: //Jeron's Mark
-		return 112;
-	case 5296: //Wave of Piety
-		return 42;
-	case 5297: //Brell's Brawny Bulwark
-		return 47;
-	case 5298: //Affirmation
-		return 1;
-	case 5299: //Ancient: Force of Jeron
-		return 97;
-	case 5300: //Nature Veil
-		return 16;
-	case 5301: //Displace Summoned
-		return 111;
-	case 5302: //Shield of Briar
-		return 21;
-	case 5303: //Locust Swarm
-		return 58;
-	case 5304: //Sylvan Water
-		return 42;
-	case 5305: //Guard of the Earth
-		return 21;
-	case 5306: //Strength of the Hunter
-		return 47;
-	case 5307: //Briarcoat
-		return 21;
-	case 5308: //Nature's Veil Parry
-		return 83;
-	case 5309: //Frost Wind
-		return 14;
-	case 5310: //Hunter's Vigor
-		return 43;
-	case 5311: //Nature's Denial
-		return 16;
-	case 5312: //Howl of the Predator
-		return 7;
-	case 5313: //Hearth Embers
-		return 38;
-	case 5314: //Nature's Balance
-		return 31;
-	case 5315: //Onyx Skin
-		return 46;
-	case 5316: //Tranquility of the Glade
-		return 11;
-	case 5317: //Ward of the Hunter
-		return 21;
-	case 5318: //Call of Lightning
-		return 16;
-	case 5319: //Ancient: North Wind
-		return 14;
-	case 5320: //Blood of Discord
-		return 38;
-	case 5321: //Dark Tendrils
-		return 58;
-	case 5322: //Dark Constriction
-		return 29;
-	case 5323: //Bond of Inruku
-		return 33;
-	case 5324: //Touch of Inruku
-		return 43;
-	case 5325: //Inruku's Bite
-		return 33;
-	case 5326: //Omen-SK-PH
-		return 124;
-	case 5327: //Shroud of Discord
-		return 16;
-	case 5328: //Theft of Pain
-		return 76;
-	case 5329: //Terror of Discord
-		return 53;
-	case 5330: //Blood of Inruku
-		return 75;
-	case 5331: //Son of Decay
-		return 103;
-	case 5332: //Rune of Decay
-		return 70;
-	case 5333: //Pact of Decay
-		return 17;
-	case 5334: //Spear of Muram
-		return 29;
-	case 5335: //Scythe of Inruku
-		return 124;
-	case 5336: //Dread Gaze
-		return 53;
-	case 5337: //Theft of Hate
-		return 76;
-	case 5338: //Touch of the Devourer
-		return 43;
-	case 5339: //Cloak of Discord
-		return 87;
-	case 5340: //Ancient: Bite of Muram
-		return 33;
-	case 5341: //Omen-Druid-PH
-		return 83;
-	case 5342: //Oaken Vigor
-		return 43;
-	case 5343: //Stormwatch
-		return 58;
-	case 5344: //Hand of the Sun
-		return 81;
-	case 5345: //Tempest Wind
-		return 14;
-	case 5346: //Earth Shiver
-		return 58;
-	case 5347: //Nature's Serenity
-		return 11;
-	case 5348: //Immolation of the Sun
-		return 38;
-	case 5349: //Hungry Vines
-		return 89;
-	case 5350: //Lion's Strength
-		return 96;
-	case 5351: //Sun's Corona
-		return 81;
-	case 5352: //Steeloak Skin
-		return 46;
-	case 5353: //Blessing of Oak
-		return 43;
-	case 5354: //Glacier Breath
-		return 81;
-	case 5355: //Chlorotrope
-		return 42;
-	case 5356: //Oaken Guard
-		return 62;
-	case 5357: //Wasp Swarm
-		return 58;
-	case 5358: //Nettle Shield
-		return 21;
-	case 5359: //Nature's Beckon
-		return 13;
-	case 5360: //Omen-Druid-PH
-		return 83;
-	case 5361: //Solstice Strike
-		return 38;
-	case 5362: //Nettlecoat
-		return 21;
-	case 5363: //Vengeance of the Sun
-		return 38;
-	case 5364: //Desolate Summoned
-		return 111;
-	case 5365: //Circle of Nettles
-		return 21;
-	case 5366: //Blessing of Steeloak
-		return 46;
-	case 5367: //Glitterfrost
-		return 14;
-	case 5368: //Mask of the Wild
-		return 59;
-	case 5369: //Ancient: Glacier Frost
-		return 14;
-	case 5370: //Luvwen's Aria of Serenity
-		return 11;
-	case 5371: //Vulka's Chant of Disease
-		return 29;
-	case 5372: //Bellow of Chaos
-		return 58;
-	case 5373: //Luvwen's Lullaby
-		return 35;
-	case 5374: //Verse of Vesagran
-		return 6;
-	case 5375: //Zuriki's Song of Shenanigans
-		return 88;
-	case 5376: //War March of Muram
-		return 41;
-	case 5377: //Cantata of Life
-		return 44;
-	case 5378: //Vulka's Chant of Poison
-		return 75;
-	case 5379: //Vulka's Chant of Frost
-		return 14;
-	case 5380: //Yelhun's Mystic Call
-		return 91;
-	case 5381: //Dirge of Metala
-		return 89;
-	case 5382: //Eriki's Psalm of Power
-		return 41;
-	case 5383: //Voice of the Vampire
-		return 13;
-	case 5384: //Chorus of Life
-		return 44;
-	case 5385: //Vulka's Chant of Flame
-		return 38;
-	case 5386: //Omen-Bard-PH
-		return 81;
-	case 5387: //Vulka's Lullaby
-		return 35;
-	case 5388: //Ancient: Call of Power
-		return 41;
-	case 5389: //Farrel's Companion
-		return 104;
-	case 5390: //Spirit of Sense
-		return 2;
-	case 5391: //Yoppa's Spear of Venom
-		return 75;
-	case 5392: //Putrid Decay
-		return 81;
-	case 5393: //Spirit of Perseverance
-		return 43;
-	case 5394: //Crippling Spasm
-		return 30;
-	case 5395: //Yoppa's Mending
-		return 42;
-	case 5396: //Wunshi's Focusing
-		return 87;
-	case 5397: //Ancestral Bulwark
-		return 6;
-	case 5398: //Spirit of Fortitude
-		return 94;
-	case 5399: //Talisman of Sense
-		return 2;
-	case 5400: //Vindictive Spirit
-		return 88;
-	case 5401: //Yoppa's Rain of Venom
-		return 75;
-	case 5402: //Spirit Veil
-		return 51;
-	case 5403: //Pained Memory
-		return 17;
-	case 5404: //Spirit of Might
-		return 96;
-	case 5405: //Talisman of Fortitude
-		return 94;
-	case 5406: //Talisman of Perseverance
-		return 43;
-	case 5407: //Shroud of Erana
-		return 0;
-	case 5408: //Ice Age
-		return 14;
-	case 5409: //Talisman of Might
-		return 96;
-	case 5410: //Pure Spirit
-		return 19;
-	case 5411: //Breath of Wunshi
-		return 29;
-	case 5412: //Curse of Sisslak
-		return 58;
-	case 5413: //Shroud of Erana Parry
-		return 81;
-	case 5414: //Blood of Yoppa
-		return 75;
-	case 5415: //Talisman of Wunshi
-		return 87;
-	case 5416: //Spiritual Serenity
-		return 32;
-	case 5417: //Champion
-		return 7;
-	case 5418: //Ancient: Ancestral Calling
-		return 17;
-	case 5419: //Soulspike
-		return 43;
-	case 5420: //Acikin
-		return 75;
-	case 5421: //Shadow Guard
-		return 87;
-	case 5422: //Omen-Nec-PH
-		return 103;
-	case 5423: //Chaos Plague
-		return 29;
-	case 5424: //Grip of Mori
-		return 29;
-	case 5425: //Glyph of Darkness
-		return 70;
-	case 5426: //Fang of Death
-		return 33;
-	case 5427: //Scent of Midnight
-		return 81;
-	case 5428: //Dull Pain
-		return 84;
-	case 5429: //Dark Hold
-		return 35;
-	case 5430: //Desecrating Darkness
-		return 58;
-	case 5431: //Lost Soul
-		return 103;
-	case 5432: //Dark Nightmare
-		return 58;
-	case 5433: //Chaos Venom
-		return 75;
-	case 5434: //Dark Possession
-		return 17;
-	case 5435: //Dark Salve
-		return 42;
-	case 5436: //Bulwark of Calliav
-		return 10;
-	case 5437: //Pyre of Mori
-		return 38;
-	case 5438: //Dark Assassin
-		return 103;
-	case 5439: //Word of Chaos
-		return 13;
-	case 5440: //Desolate Undead
-		return 124;
-	case 5441: //Ancient: Curse of Mori
-		return 58;
-	case 5442: //Icebane
-		return 14;
-	case 5443: //Ether Shield
-		return 87;
-	case 5444: //Tears of the Sun
-		return 38;
-	case 5445: //Lightningbane
-		return 58;
-	case 5446: //Spark of Fire
-		return 38;
-	case 5447: //Firebane
-		return 38;
-	case 5448: //Ether Skin
-		return 84;
-	case 5449: //Spark of Thunder
-		return 58;
-	case 5450: //Thundaka
-		return 58;
-	case 5451: //Circle of Thunder
-		return 58;
-	case 5452: //Spark of Lightning
-		return 58;
-	case 5453: //Ether Ward
-		return 92;
-	case 5454: //Meteor Storm
-		return 38;
-	case 5455: //Circle of Fire
-		return 38;
-	case 5456: //Telekara
-		return 97;
-	case 5457: //Spark of Ice
-		return 14;
-	case 5458: //Gelidin Comet
-		return 14;
-	case 5459: //Bulwark of Calrena
-		return 92;
-	case 5460: //Solist's Frozen Sword
-		return 99;
-	case 5461: //Gelid Rains
-		return 14;
-	case 5462: //Corona Flare
-		return 38;
-	case 5463: //Ancient: Core Fire
-		return 38;
-	case 5464: //Summon Calliav's Runed Mantle
-		return 107;
-	case 5465: //Summon Staff of the North Wind
-		return 64;
-	case 5466: //Fireskin
-		return 21;
-	case 5467: //Summon Fireblade
-		return 64;
-	case 5468: //Summon Calliav's Jeweled Bracelet
-		return 107;
-	case 5469: //Summon Calliav's Spiked Ring
-		return 107;
-	case 5470: //Summon Calliav's Glowing Bauble
-		return 107;
-	case 5471: //Summon Calliav's Steel Bracelet
-		return 107;
-	case 5472: //Elemental Aura
-		return 87;
-	case 5473: //Child of Wind
-		return 98;
-	case 5474: //Bolt of Jerikor
-		return 38;
-	case 5475: //Summon Calliav's Platinum Choker
-		return 107;
-	case 5476: //Phantom Shield
-		return 44;
-	case 5477: //Summon Dagger of the Deep
-		return 64;
-	case 5478: //Elemental Fury
-		return 70;
-	case 5479: //Rain of Jerikor
-		return 38;
-	case 5480: //Child of Water
-		return 105;
-	case 5481: //Burning Earth
-		return 38;
-	case 5482: //Omen-Mage-PH
-		return 64;
-	case 5483: //Summon Pouch of Jerikor
-		return 107;
-	case 5484: //Blade Strike
-		return 58;
-	case 5485: //Child of Fire
-		return 102;
-	case 5486: //Summon Sphere of Air
-		return 109;
-	case 5487: //Omen-Mage-PH
-		return 35;
-	case 5488: //Circle of Fireskin
-		return 21;
-	case 5489: //Summon Crystal Belt
-		return 64;
-	case 5490: //Desolate Summoned
-		return 111;
-	case 5491: //Renewal of Jerikor
-		return 42;
-	case 5492: //Pyrilen Skin
-		return 21;
-	case 5493: //Star Scream
-		return 58;
-	case 5494: //Bulwark of Calliav
-		return 10;
-	case 5495: //Child of Earth
-		return 100;
-	case 5496: //Star Strike
-		return 38;
-	case 5497: //Elemental Simulcram
-		return 17;
-	case 5498: //Ancient: Nova Strike
-		return 38;
-	case 5499: //Synapsis Spasm
-		return 30;
-	case 5500: //Ethereal Rune
-		return 84;
-	case 5501: //Omen-Enc-PH
-		return 53;
-	case 5502: //Mystic Shield
-		return 87;
-	case 5503: //Felicity
-		return 35;
-	case 5504: //Rune of Salik
-		return 84;
-	case 5505: //Salik's Animation
-		return 99;
-	case 5506: //Placate
-		return 11;
-	case 5507: //Speed of Salik
-		return 41;
-	case 5508: //Omen-Enc-PH
-		return 80;
-	case 5509: //Arcane Noose
-		return 58;
-	case 5510: //Compel
-		return 13;
-	case 5511: //Wake of Felicity
-		return 35;
-	case 5512: //Omen-Enc-PH
-		return 58;
-	case 5513: //Clairvoyance
-		return 59;
-	case 5514: //Mayhem
-		return 84;
-	case 5515: //Wall of Alendar
-		return 92;
-	case 5516: //Color Snap
-		return 97;
-	case 5517: //Circle of Alendar
-		return 92;
-	case 5518: //Psychosis
-		return 58;
-	case 5519: //True Name
-		return 13;
-	case 5520: //Euphoria
-		return 35;
-	case 5521: //Hastening of Salik
-		return 41;
-	case 5522: //Voice of Clairvoyance
-		return 59;
-	case 5523: //Ancient: Neurosis
-		return 58;
-	case 5524: //Omen-Bst-PH
-		return 31;
-	case 5525: //Omen-Bst-PH
-		return 96;
-	case 5526: //Healing of Mikkily
-		return 42;
-	case 5527: //Chimera Blood
-		return 75;
-	case 5528: //Muada's Mending
-		return 42;
-	case 5529: //Focus of Alladnu
-		return 87;
-	case 5530: //Spiritual Vitality
-		return 47;
-	case 5531: //Spirit of Alladnu
-		return 104;
-	case 5532: //Omen-Bst-PH
-		return 41;
-	case 5533: //Growl of the Beast
-		return 70;
-	case 5534: //Spirit of Irionu
-		return 71;
-	case 5535: //Glacier Spear
-		return 14;
-	case 5536: //Feral Vigor
-		return 43;
-	case 5537: //Spiritual Ascendance
-		return 44;
-	case 5538: //Spirit of Rashara
-		return 104;
-	case 5539: //Feral Guard
-		return 10;
-	case 5540: //Festering Malady
-		return 29;
-	case 5541: //Omen-Bst-PH
-		return 88;
-	case 5542: //Ferocity of Irionu
-		return 7;
-	case 5543: //Ancient: Savage Ice
-		return 14;
-	case 5554: //Cloud of Discord
-		return 0;
-	case 5555: //Bellow of Tunat'Muram
-		return 0;
-	case 5556: //Whirling Smash
-		return 0;
-	case 5560: //Blistering Rage
-		return 115;
-	case 5570: //Pillage Magic
-		return 31;
-	case 5571: //Tangle
-		return 89;
-	case 5572: //Entangle
-		return 89;
-	case 5573: //Corporeal Empathy Recourse
-		return 56;
-	case 5605: //test mana
-		return 59;
-	case 5731: //Circle of Barindu
-		return 113;
-	case 5732: //Barindu Portal
-		return 113;
-	case 5733: //Ring of Barindu
-		return 113;
-	case 5734: //Barindu Gate
-		return 113;
-	case 5735: //Translocate: Barindu
-		return 113;
-	case 5741: //Pyrilen Bolt
-		return 0;
-	case 5744: //Kiss of the Pyrilen
-		return 0;
-	case 5745: //Pyrilonis' Vengeance
-		return 0;
-	case 5760: //Gelaqua's Embrace
-		return 0;
-	case 5761: //Heart of Frost
-		return 0;
-	case 5874: //Advanced Dire Charm
-		return 13;
-	case 5875: //Advanced Dire Charm Animal
-		return 13;
-	case 5876: //Advanced Dire Charm Undead
-		return 13;
-	case 5919: //Death Peace
-		return 64;
-	case 5924: //Celestial Stun
-		return 97;
-	case 5931: //Embrace of Shadows
-		return 51;
-	case 5976: //Plagued Filth
-		return 0;
-	case 5979: //Infection of Pain
-		return 0;
-	case 5980: //Orb's Curse
-		return 0;
-	case 5989: //Gloom Toxin
-		return 0;
-	case 5990: //Shade Mantle
-		return 0;
-	case 5992: //Numbing Touch
-		return 0;
-	case 5993: //Girplan Chatter
-		return 0;
-	case 5994: //Body Slam
-		return 0;
-	case 5996: //Bazu Grip
-		return 0;
-	case 5997: //Pyrilen Ember
-		return 0;
-	case 5998: //Pyrilen Charm
-		return 0;
-	case 5999: //Pyronic Lash
-		return 0;
-	case 6000: //Pyrilen Fury
-		return 0;
-	case 6001: //Pyronic Assault
-		return 0;
-	case 6003: //Chimeran Laceration
-		return 0;
-	case 6004: //Chimeran Breath
-		return 0;
-	case 6005: //Infected Bite
-		return 0;
-	case 6006: //Gelidran Sleet
-		return 0;
-	case 6007: //Frostcicle
-		return 0;
-	case 6008: //Gelidran Hail
-		return 0;
-	case 6009: //Gelidran Stalagmite
-		return 0;
-	case 6010: //Freezing Touch
-		return 0;
-	case 6012: //Crushing Ice
-		return 0;
-	case 6013: //Ice Shards
-		return 0;
-	case 6014: //Feranic Grasp
-		return 0;
-	case 6016: //Feran Tentacle
-		return 0;
-	case 6017: //Darkbreath
-		return 0;
-	case 6019: //Clinging Apathy
-		return 0;
-	case 6020: //Wing Strike
-		return 0;
-	case 6021: //Deep Gouge
-		return 0;
-	case 6023: //Dragornian Malady
-		return 0;
-	case 6024: //Dragornian Venom
-		return 0;
-	case 6025: //Discordling Leap
-		return 0;
-	case 6026: //Discordling Ruin
-		return 0;
-	case 6027: //Chaotica
-		return 0;
-	case 6028: //Seething Bite
-		return 0;
-	case 6029: //Sinking Fangs
-		return 0;
-	case 6049: //Lightning Strike
-		return 0;
-	case 6050: //Static Pulse
-		return 0;
-	case 6051: //Fire Strike
-		return 0;
-	case 6052: //Ice Strike
-		return 0;
-	case 6053: //Bane of Dranik
-		return 0;
-	case 6054: //Bane of Dranik
-		return 0;
-	case 6055: //Bane of Dranik
-		return 0;
-	case 6065: //Murk Acid
-		return 0;
-	case 6066: //Murk Acid
-		return 0;
-	case 6103: //Nature's Denial Strike
-		return 111;
-	case 6105: //Silvered Fury Strike
-		return 124;
-	case 6120: //Phase Walk
-		return 51;
-	case 6121: //Shroud of Air
-		return 51;
-	case 6122: //Cloud of Indifference
-		return 51;
-	case 6123: //Cloak of Nature
-		return 51;
-	case 6124: //Shadow of Death
-		return 51;
-	case 6125: //Sun Cloak
-		return 51;
-	case 6126: //Hand of Order
-		return 0;
-	case 6128: //Gelidran Aura
-		return 51;
-	case 6140: //Ancient: Hallowed Light
-		return 42;
-	case 6141: //Ancient: Chlorobon
-		return 42;
-	case 6142: //Ancient: Wilslik's Mending
-		return 42;
-	case 6143: //Ancient: Touch of Orshilak
-		return 43;
-	case 6144: //Ancient: Voice of Muram
-		return 13;
-	case 6145: //Ancient: Veil of Pyrilonus
-		return 21;
-	case 6146: //Ancient: Spear of Gelaqua
-		return 14;
-	case 6152: //Vindictive Spirit Recourse
-		return 62;
-	case 6153: //Elemental Simulcram Recourse
-		return 87;
-	case 6154: //Hungry Vines Recourse
-		return 62;
-	case 6156: //Oaken Guard Parry
-		return 53;
-	case 6169: //Crippling Strike
-		return 89;
-	case 6170: //Mind Strike
-		return 97;
-	case 6171: //Baffling Strike
-		return 53;
-	case 6172: //Axe of the Destroyer
-		return 110;
-	case 6173: //Bazu Bellow
-		return 115;
-	case 6174: //Daggerfall
-		return 115;
-	case 6175: //Phantom Cry
-		return 115;
-	case 6176: //Slaughter Gate
-		return 28;
-	case 6177: //Translocate: Slaughter
-		return 28;
-	case 6178: //Slaughter Portal
-		return 28;
-	case 6179: //Circle of Slaughter
-		return 28;
-	case 6180: //Ring of Slaughter
-		return 28;
-	case 6181: //Bloodfields Gate
-		return 28;
-	case 6182: //Translocate: Bloodfields
-		return 28;
-	case 6183: //Bloodfields Portal
-		return 28;
-	case 6184: //Circle of Bloodfields
-		return 28;
-	case 6185: //Ring of Bloodfields
-		return 28;
-	case 6187: //Limit Test Hit
-		return 43;
-	case 6190: //Shocking Defense Discipline
-		return 122;
-	case 6191: //Aura of Runes Discipline
-		return 120;
-	case 6192: //Savage Onslaught Discipline
-		return 121;
-	case 6193: //Dreamwalk Discipline
-		return 120;
-	case 6194: //Rapid Kick Discipline
-		return 121;
-	case 6195: //Counterforce Discipline
-		return 122;
-	case 6196: //Deadly Aim Discipline
-		return 122;
-	case 6197: //Frenzied Stabbing Discipline
-		return 121;
-	case 6198: //Imperceptible Discipline
-		return 120;
-	case 6199: //Vengeful Flurry Discipline
-		return 121;
-	case 6200: //Unpredictable Rage Discipline
-		return 122;
-	case 6201: //Unflinching Will Discipline
-		return 120;
-	case 6202: //Stun Effect
-		return 118;
-	case 6203: //Rune Effect
-		return 118;
-	case 6204: //Slow Effect
-		return 118;
-	case 6205: //Poison DD Effect
-		return 118;
-	case 6206: //Lower Hate Effect
-		return 118;
-	case 6207: //Increase Damage Effect
-		return 118;
-	case 6209: //Test Doom Rune
-		return 84;
-	case 6233: //Harmonic Balance
-		return 7;
-	case 6265: //Divine Balance
-		return 7;
-	case 6330: //Chaotic Strike I
-		return 58;
-	case 6331: //Chaotic Strike II
-		return 58;
-	case 6332: //Chaotic Strike III
-		return 58;
-	case 6333: //Chaotic Strike IV
-		return 58;
-	case 6334: //Chaotic Strike V
-		return 58;
-	case 6335: //Chaotic Strike VI
-		return 58;
-	case 6336: //Chaotic Strike VII
-		return 58;
-	case 6337: //Life Sap I
-		return 58;
-	case 6338: //Life Sap II
-		return 58;
-	case 6339: //Life Sap III
-		return 58;
-	case 6340: //Life Sap IV
-		return 58;
-	case 6341: //Freezing Strike I
-		return 58;
-	case 6342: //Freezing Strike II
-		return 58;
-	case 6343: //Freezing Strike III
-		return 58;
-	case 6344: //Freezing Strike IV
-		return 58;
-	case 6345: //Freezing Strike V
-		return 58;
-	case 6346: //Freezing Strike VI
-		return 58;
-	case 6347: //Freezing Strike VII
-		return 58;
-	case 6348: //Freezing Strike VIII
-		return 58;
-	case 6349: //Freezing Strike IX
-		return 58;
-	case 6350: //Fiery Strike I
-		return 58;
-	case 6351: //Fiery Strike II
-		return 58;
-	case 6352: //Fiery Strike III
-		return 58;
-	case 6353: //Fiery Strike IV
-		return 58;
-	case 6354: //Fiery Strike V
-		return 58;
-	case 6355: //Fiery Strike VI
-		return 58;
-	case 6356: //Fiery Strike VII
-		return 58;
-	case 6357: //Fiery Strike VIII
-		return 58;
-	case 6358: //Fiery Strike IX
-		return 58;
-	case 6359: //Form of Defense I
-		return 48;
-	case 6360: //Form of Defense III
-		return 48;
-	case 6361: //Form of Protection I
-		return 48;
-	case 6362: //Form of Protection III
-		return 48;
-	case 6363: //Form of Endurance I
-		return 48;
-	case 6364: //Form of Endurance III
-		return 48;
-	case 6365: //Form of Rejuvenation I
-		return 48;
-	case 6366: //Form of Rejuvenation III
-		return 48;
-	case 6499: //Gelid Claw
-		return 14;
-	case 6500: //Stunning Strike
-		return 97;
-	case 6502: //Unpack Brewer's Still
-		return 108;
-	case 6505: //Blood Dream
-		return 38;
-	case 6512: //Lupine Rage
-		return 58;
-	case 6513: //Devour Enchantment
-		return 31;
-	case 6514: //Blessing of Rallos Zek
-		return 34;
-	case 6515: //Blessing of The Tribunal
-		return 34;
-	case 6516: //Blessing of Cazic Thule
-		return 34;
-	case 6517: //Blessing of Brell Serilis
-		return 34;
-	case 6518: //Blessing of Tunare
-		return 34;
-	case 6519: //Blessing of Innoruuk
-		return 34;
-	case 6520: //Blessing of Prexus
-		return 34;
-	case 6521: //Blessing of Mithaniel Marr
-		return 34;
-	case 6522: //Blessing of Erollisi Marr
-		return 34;
-	case 6523: //Blessing of Bertoxxulous
-		return 34;
-	case 6524: //Blessing of Solusek Ro
-		return 34;
-	case 6525: //Blessing of Karana
-		return 34;
-	case 6526: //Blessing of Bristlebane
-		return 34;
-	case 6527: //Blessing of Quellious
-		return 34;
-	case 6528: //Blessing of Rodcet Nife
-		return 34;
-	case 6529: //Blessing of Veeshan
-		return 34;
-	case 6530: //Words of the Sceptic
-		return 34;
-	case 6532: //Makural's Curse
-		return 16;
-	case 6533: //RB_reflect_test
-		return 78;
-	case 6534: //Makural's Torment
-		return 38;
-	case 6535: //Makural's TormentSK
-		return 38;
-	case 6563: //Mass Illusion: Human
-		return 49;
-	case 6564: //Mass Illusion: Barbarian
-		return 49;
-	case 6565: //Mass Illusion: Erudite
-		return 49;
-	case 6566: //Mass Illusion: Wood Elf
-		return 49;
-	case 6567: //Mass Illusion: Fier`dal
-		return 49;
-	case 6568: //Mass Illusion: High Elf
-		return 49;
-	case 6569: //Mass Illusion: Dark Elf
-		return 49;
-	case 6570: //Mass Illusion: Half-Elf
-		return 49;
-	case 6571: //Mass Illusion: Dwarf
-		return 49;
-	case 6572: //Mass Illusion: Troll
-		return 49;
-	case 6573: //Mass Illusion: Ogre
-		return 49;
-	case 6574: //Mass Illusion: Halfling
-		return 49;
-	case 6575: //Mass Illusion: Gnome
-		return 49;
-	case 6576: //Mass Illusion: Werewolf
-		return 49;
-	case 6577: //Mass Illusion: Froglok
-		return 49;
-	case 6578: //Mass Illusion: Imp
-		return 49;
-	case 6579: //Mass Illusion: Earth Elemental
-		return 49;
-	case 6580: //Mass Illusion: Air Elemental
-		return 49;
-	case 6581: //Mass Illusion: Fire Elemental
-		return 49;
-	case 6582: //Mass Illusion: Water Elemental
-		return 49;
-	case 6583: //Mass Illusion: Scarecrow
-		return 49;
-	case 6584: //Mass Illusion: Spirit Wolf
-		return 49;
-	case 6585: //Mass Illusion: Iksar
-		return 49;
-	case 6586: //Mass Illusion: Vah Shir
-		return 49;
-	case 6587: //Mass Illusion: Guktan
-		return 49;
-	case 6588: //Mass Illusion: Scaled Wolf
-		return 49;
-	case 6589: //Mass Illusion: Skeleton
-		return 49;
-	case 6590: //Mass Illusion: Dry Bone
-		return 49;
-	case 6591: //Mass Illusion: Frost Bone
-		return 49;
-	case 6592: //GM Bind Sight
-		return 129;
-	case 6656: //Spray of Venom
-		return 75;
-	case 6662: //Ward of Retribution
-		return 16;
-	case 6663: //Guard of Righteousness
-		return 120;
-	case 6664: //Earthen Shackles
-		return 89;
-	case 6665: //Serpent Vines
-		return 89;
-	case 6666: //Storm Blade
-		return 16;
-	case 6667: //Spirit of the Panther
-		return 16;
-	case 6668: //Shadow Orb
-		return 18;
-	case 6669: //Claw of Vox
-		return 14;
-	case 6670: //Summon: Molten Orb
-		return 109;
-	case 6671: //Rune of Rikkukin
-		return 84;
-	case 6672: //Growl of the Panther
-		return 71;
-	case 6673: //Soul Shield
-		return 120;
-	case 6674: //Storm Blade Strike
-		return 38;
-	case 6675: //Storm Blade Strike SK
-		return 38;
-	case 6676: //Magma Jet
-		return 38;
-	case 6677: //Shadow Orb Recourse
-		return 109;
-	case 6717: //Growl of the Panther
-		return 7;
-	case 6719: //Ward of Retribution Parry
-		return 88;
-	case 6724: //Panther Maw
-		return 38;
-	case 6725: //Cyclone Blade
-		return 53;
-	case 6726: //Assassin's Feint
-		return 35;
-	case 6727: //Dragon Fang
-		return 25;
-	case 6728: //Dragon Fang Strike
-		return 72;
-	case 6729: //Destroyer's Volley
-		return 72;
-	case 6730: //Ward of Vengeance
-		return 16;
-	case 6731: //Guard of Humility
-		return 120;
-	case 6732: //Earthen Embrace
-		return 89;
-	case 6733: //Mire Thorns
-		return 89;
-	case 6734: //Song of the Storm
-		return 16;
-	case 6735: //Spirit of the Leopard
-		return 7;
-	case 6736: //Soul Orb
-		return 18;
-	case 6737: //Claw of Frost
-		return 14;
-	case 6738: //Summon: Lava Orb
-		return 109;
-	case 6739: //Rune of the Scale
-		return 84;
-	case 6740: //Growl of the Leopard
-		return 71;
-	case 6741: //Soul Guard
-		return 120;
-	case 6742: //Song of the Storm Strike
-		return 38;
-	case 6743: //Song of the Storm Strike SK
-		return 38;
-	case 6744: //Lava Jet
-		return 38;
-	case 6745: //Soul Orb Recourse
-		return 109;
-	case 6747: //Growl of the Leopard
-		return 7;
-	case 6748: //Ward of Vengeance Parry
-		return 35;
-	case 6749: //Leopard Maw
-		return 38;
-	case 6750: //Whirlwind Blade
-		return 53;
-	case 6751: //Rogue's Ploy
-		return 35;
-	case 6752: //Leopard Claw
-		return 25;
-	case 6753: //Leopard Claw Strike
-		return 72;
-	case 6754: //Rage Volley
-		return 72;
-	case 6771: //Geomantra II
-		return 92;
-	case 6777: //Leopard Maw
-		return 38;
-	case 6778: //Leopard Maw SK
-		return 38;
-	case 6779: //Panther Maw
-		return 38;
-	case 6780: //Panther Maw SK
-		return 38;
-	case 6782: //Magma Blast
-		return 0;
-	case 6826: //Desolate Deeds
-		return 88;
-	case 6827: //Balance of Discord
-		return 88;
-	case 6828: //Sha's Legacy
-		return 88;
-	case 6839: //Static Strike
-		return 58;
-	case 6840: //Firestrike
-		return 38;
-	case 6841: //Bolt of Flame
-		return 38;
-	case 6842: //Cinder Bolt
-		return 38;
-	case 6843: //Anarchy
-		return 58;
-	case 6844: //Shock of Spikes
-		return 58;
-	case 6845: //Dismiss Summoned
-		return 111;
-	case 6846: //Dismiss Undead
-		return 124;
-	case 6847: //Blaze
-		return 38;
-	case 6848: //Shock of Poison
-		return 75;
-	case 6849: //Shock of Flame
-		return 38;
-	case 6850: //Chaos Flux
-		return 58;
-	case 6851: //Icestrike
-		return 14;
-	case 6852: //Icicle Shock
-		return 14;
-	case 6853: //Lifedraw
-		return 43;
-	case 6854: //Drain Soul
-		return 43;
-	case 6855: //Frost Shock
-		return 14;
-	case 6856: //Inferno Shock
-		return 38;
-	case 6857: //Lightning Shock
-		return 58;
-	case 6858: //Winter's Roar
-		return 14;
-	case 6859: //Spirit Tap
-		return 43;
-	case 6860: //Drain Spirit
-		return 43;
-	case 6861: //Shock of Ice
-		return 14;
-	case 6862: //Flame Shock
-		return 38;
-	case 6863: //Ice Shock
-		return 14;
-	case 6864: //Conflagration
-		return 38;
-	case 6865: //Expel Undead
-		return 124;
-	case 6866: //Rend
-		return 58;
-	case 6867: //Torbas' Acid Blast
-		return 75;
-	case 6868: //Frost
-		return 14;
-	case 6869: //Sunstrike
-		return 38;
-	case 6870: //Blast of Frost
-		return 14;
-	case 6871: //Shock of Fiery Blades
-		return 38;
-	case 6872: //Burning Arrow
-		return 38;
-	case 6873: //Nature's Renewal
-		return 42;
-	case 6874: //Spirit Salve
-		return 42;
-	case 6875: //Healing Light
-		return 42;
-	case 6876: //Forest's Renewal
-		return 42;
-	case 6877: //Kragg's Salve
-		return 42;
-	case 6878: //Greater Healing Light
-		return 42;
-	case 6899: //Flash Powder Explosion
-		return 38;
-	case 6902: //Ward of the Divine
-		return 16;
-	case 6903: //Ward of Rebuke
-		return 16;
-	case 6904: //Ward of the Divine Parry
-		return 88;
-	case 6905: //Ward of Rebuke Parry
-		return 88;
-	case 6906: //Spirit of the Puma
-		return 16;
-	case 6907: //Spirit of the Jaguar
-		return 16;
-	case 6908: //Puma Maw
-		return 38;
-	case 6909: //Puma Maw SK
-		return 38;
-	case 6910: //Elixir of Healing I
-		return 32;
-	case 6911: //Elixir of Healing II
-		return 32;
-	case 6912: //Elixir of Healing III
-		return 32;
-	case 6913: //Elixir of Healing IV
-		return 32;
-	case 6914: //Elixir of Healing V
-		return 32;
-	case 6915: //Elixir of Healing VI
-		return 32;
-	case 6916: //Elixir of Healing VII
-		return 32;
-	case 6917: //Elixir of Healing VIII
-		return 32;
-	case 6918: //Elixir of Healing IX
-		return 32;
-	case 6919: //Elixir of Healing X
-		return 32;
-	case 6920: //Healing Potion I
-		return 32;
-	case 6921: //Healing Potion II
-		return 32;
-	case 6922: //Healing Potion III
-		return 32;
-	case 6923: //Healing Potion IV
-		return 32;
-	case 6924: //Healing Potion V
-		return 32;
-	case 6925: //Healing Potion VI
-		return 32;
-	case 6926: //Healing Potion VII
-		return 32;
-	case 6927: //Healing Potion VIII
-		return 32;
-	case 6928: //Healing Potion IX
-		return 32;
-	case 6929: //Healing Potion X
-		return 32;
-	case 6930: //Elixir of Health I
-		return 46;
-	case 6931: //Elixir of Health II
-		return 46;
-	case 6932: //Elixir of Health III
-		return 46;
-	case 6933: //Elixir of Health IV
-		return 46;
-	case 6934: //Elixir of Health V
-		return 46;
-	case 6935: //Elixir of Health VI
-		return 46;
-	case 6936: //Elixir of Health VII
-		return 46;
-	case 6937: //Elixir of Health VIII
-		return 46;
-	case 6938: //Elixir of Health IX
-		return 46;
-	case 6939: //Elixir of Health X
-		return 46;
-	case 6940: //Elixir of Speed I
-		return 41;
-	case 6941: //Elixir of Speed II
-		return 41;
-	case 6942: //Elixir of Speed III
-		return 41;
-	case 6943: //Elixir of Speed IV
-		return 41;
-	case 6944: //Elixir of Speed V
-		return 41;
-	case 6945: //Elixir of Speed VI
-		return 41;
-	case 6946: //Elixir of Speed VII
-		return 41;
-	case 6947: //Elixir of Speed VIII
-		return 41;
-	case 6948: //Elixir of Speed IX
-		return 41;
-	case 6949: //Elixir of Speed X
-		return 41;
-	case 6950: //Elixir of Clarity I
-		return 59;
-	case 6951: //Elixir of Clarity II
-		return 59;
-	case 6952: //Elixir of Clarity III
-		return 59;
-	case 6953: //Elixir of Clarity IV
-		return 59;
-	case 6954: //Elixir of Clarity V
-		return 59;
-	case 6955: //Elixir of Clarity VI
-		return 59;
-	case 6956: //Elixir of Clarity VII
-		return 59;
-	case 6957: //Elixir of Clarity VIII
-		return 59;
-	case 6958: //Elixir of Clarity IX
-		return 59;
-	case 6959: //Elixir of Clarity X
-		return 59;
-	case 6960: //Grip of Zanivar
-		return 29;
-	case 6961: //Zanivar's Lifedraw
-		return 43;
-	case 6962: //Zanivar's Poison Bolt
-		return 75;
-	case 6963: //Minion of Zanivar
-		return 103;
-	case 6965: //Rampage of Rathkan
-		return 0;
-	case 6966: //Hurl of Rathkan
-		return 58;
-	case 6967: //Shock of Rathkan
-		return 97;
-	case 6968: //Lantern Bomb
-		return 38;
-	case 6969: //Flashpowder Bomb
-		return 58;
-	case 6973: //Intangibility
-		return 52;
-	case 6976: //Retch Weed
-		return 58;
-	case 6977: //Deistic Voice
-		return 37;
-	case 6978: //Deistic Bellow
-		return 37;
-	case 6979: //Deistic Howl
-		return 37;
-	case 6980: //Unholy Voice
-		return 37;
-	case 6981: //Unholy Bellow
-		return 37;
-	case 6982: //Unholy Howl
-		return 37;
-	case 6983: //Phobia
-		return 37;
-	case 6984: //Jitterskin
-		return 37;
-	case 6985: //Anxiety Attack
-		return 37;
-	case 6986: //Shadow Voice
-		return 37;
-	case 6987: //Shadow Bellow
-		return 37;
-	case 6988: //Shadow Howl
-		return 37;
-	case 6989: //Cower the Dead
-		return 37;
-	case 6990: //Death's Despair
-		return 37;
-	case 6991: //Revulsion of Death
-		return 37;
-	case 6992: //Eidolon Voice
-		return 37;
-	case 6993: //Eidolon Bellow
-		return 37;
-	case 6994: //Eidolon Howl
-		return 37;
-	case 6995: //Soulless Fear
-		return 37;
-	case 6996: //Soulless Panic
-		return 37;
-	case 6997: //Soulless Terror
-		return 37;
-	case 6998: //Instinctual Fear
-		return 37;
-	case 6999: //Instinctual Panic
-		return 37;
-	case 7000: //Instinctual Terror
-		return 37;
-	case 7001: //Angstlich's Echo of Terror
-		return 37;
-	case 7002: //Angstlich's Wail of Panic
-		return 37;
-	case 7003: //Circle of Dreams
-		return 35;
-	case 7004: //Guard of Piety
-		return 120;
-	case 7005: //Ichor Guard
-		return 120;
-	case 7168: //Obscuring Sporecloud
-		return 51;
-	case 7169: //Root of Weakness
-		return 83;
-	case 7170: //Rage of the Root
-		return 95;
-	case 7171: //Fungal Refreshment
-		return 42;
-	case 7172: //Spore Snooze
-		return 35;
-	case 7173: //Fungal Sheen
-		return 0;
-	case 7177: //Blind Fury I
-		return 95;
-	case 7178: //Blind Fury II
-		return 95;
-	case 7179: //Blind Fury III
-		return 95;
-	case 7180: //Orc Smash I
-		return 97;
-	case 7181: //Orc Smash II
-		return 97;
-	case 7182: //Orc Smash III
-		return 97;
-	case 7183: //Blood Rage I
-		return 95;
-	case 7184: //Blood Rage II
-		return 95;
-	case 7185: //Blood Rage III
-		return 95;
-	case 7186: //Dark Bellow I
-		return 30;
-	case 7187: //Dark Bellow II
-		return 30;
-	case 7188: //Dark Bellow III
-		return 30;
-	case 7189: //Wave of Fire
-		return 38;
-	case 7190: //Tide of Sloth I
-		return 88;
-	case 7191: //Tide of Sloth II
-		return 88;
-	case 7192: //Tide of Sloth III
-		return 88;
-	case 7193: //Fiery Surge I
-		return 38;
-	case 7194: //Fiery Surge II
-		return 38;
-	case 7195: //Fiery Surge III
-		return 38;
-	case 7199: //Soothing Remedy
-		return 32;
-	case 7200: //Orcish Regeneration I
-		return 79;
-	case 7201: //Orcish Regeneration II
-		return 79;
-	case 7202: //Orcish Regeneration III
-		return 79;
-	case 7203: //Weak Knees
-		return 89;
-	case 7204: //Complete Refreshment
-		return 42;
-	case 7205: //Hand of Darkness
-		return 95;
-	case 7206: //Shadowmend
-		return 42;
-	case 7207: //Soulmend
-		return 0;
-	case 7208: //Arachnae Scream
-		return 97;
-	case 7209: //Voice of Vule
-		return 61;
-	case 7210: //Speed of the Spider
-		return 95;
-	case 7211: //Skinwalker's Mindwave
-		return 35;
-	case 7212: //Dire Musings
-		return 88;
-	case 7213: //Thoughtraze
-		return 58;
-	case 7214: //Dark Messenger
-		return 103;
-	case 7215: //Bite of Night
-		return 75;
-	case 7216: //Chanted Doom
-		return 58;
-	case 7217: //Vile Spirit
-		return 43;
-	case 7218: //Spiteful Hex
-		return 58;
-	case 7219: //Eboncall
-		return 58;
-	case 7220: //Stormreaver
-		return 58;
-	case 7221: //Ethereal Carapace
-		return 84;
-	case 7222: //Master's Shadow
-		return 92;
-	case 7223: //Ice Spray
-		return 14;
-	case 7224: //Needling Annoyance
-		return 53;
-	case 7232: //Jaguar Maw
-		return 38;
-	case 7233: //Jaguar Maw SK
-		return 38;
-	case 7400: //Heal Wounds I
-		return 42;
-	case 7401: //Heal Wounds II
-		return 42;
-	case 7402: //Heal Wounds III
-		return 42;
-	case 7403: //Heal Wounds IV
-		return 42;
-	case 7404: //Heal Wounds V
-		return 42;
-	case 7405: //Heal Wounds VI
-		return 42;
-	case 7406: //Heal Wounds VII
-		return 42;
-	case 7407: //Heal Wounds VIII
-		return 42;
-	case 7408: //Heal Wounds IX
-		return 42;
-	case 7409: //Heal Wounds X
-		return 42;
-	case 7410: //Heal Wounds XI
-		return 42;
-	case 7411: //Heal Wounds XII
-		return 42;
-	case 7412: //Heal Wounds XIII
-		return 42;
-	case 7413: //Heal Wounds XIV
-		return 42;
-	case 7414: //Fire I
-		return 38;
-	case 7415: //Fire II
-		return 38;
-	case 7416: //Fire III
-		return 38;
-	case 7417: //Fire IV
-		return 38;
-	case 7418: //Fire V
-		return 38;
-	case 7419: //Fire VI
-		return 38;
-	case 7420: //Fire VII
-		return 38;
-	case 7421: //Fire VIII
-		return 38;
-	case 7422: //Fire IX
-		return 38;
-	case 7423: //Fire X
-		return 38;
-	case 7424: //Fire XI
-		return 38;
-	case 7425: //Fire XII
-		return 38;
-	case 7426: //Fire XIII
-		return 38;
-	case 7427: //Fire XIV
-		return 38;
-	case 7428: //Frost I
-		return 38;
-	case 7429: //Frost II
-		return 38;
-	case 7430: //Frost III
-		return 38;
-	case 7431: //Frost IV
-		return 38;
-	case 7432: //Frost V
-		return 38;
-	case 7433: //Frost VI
-		return 38;
-	case 7434: //Frost VII
-		return 38;
-	case 7435: //Frost VIII
-		return 38;
-	case 7436: //Frost IX
-		return 38;
-	case 7437: //Frost X
-		return 38;
-	case 7438: //Frost XI
-		return 38;
-	case 7439: //Frost XII
-		return 38;
-	case 7440: //Frost XIII
-		return 38;
-	case 7441: //Frost XIV
-		return 38;
-	case 7442: //Thunder I
-		return 38;
-	case 7443: //Thunder II
-		return 38;
-	case 7444: //Thunder III
-		return 38;
-	case 7445: //Thunder IV
-		return 38;
-	case 7446: //Thunder V
-		return 38;
-	case 7447: //Thunder VI
-		return 38;
-	case 7448: //Thunder VII
-		return 38;
-	case 7449: //Thunder VIII
-		return 38;
-	case 7450: //Thunder IX
-		return 38;
-	case 7451: //Thunder X
-		return 38;
-	case 7452: //Thunder XI
-		return 38;
-	case 7453: //Thunder XII
-		return 38;
-	case 7454: //Thunder XIII
-		return 38;
-	case 7455: //Thunder XIV
-		return 38;
-	case 7465: //Smoke Bomb I
-		return 115;
-	case 7466: //Smoke Bomb II
-		return 115;
-	case 7467: //Smoke Bomb III
-		return 115;
-	case 7468: //Smoke Bomb IV
-		return 115;
-	case 7469: //Smoke Bomb V
-		return 115;
-	case 7470: //Smoke Bomb VI
-		return 115;
-	case 7471: //Smoke Bomb VII
-		return 115;
-	case 7472: //Smoke Bomb VIII
-		return 115;
-	case 7473: //Smoke Bomb IX
-		return 115;
-	case 7474: //Smoke Bomb X
-		return 115;
-	case 7475: //Smoke Screen
-		return 115;
-	case 7476: //Pain Tolerance
-		return 117;
-	case 7477: //Cazic Touch II
-		return 0;
-	case 7478: //Destroy II
-		return 0;
-	case 7481: //Hamstring I
-		return 89;
-	case 7482: //Hamstring II
-		return 89;
-	case 7483: //Lesion I
-		return 75;
-	case 7484: //Lesion II
-		return 75;
-	case 7485: //Lesion III
-		return 75;
-	case 7486: //Lesion IV
-		return 75;
-	case 7487: //Lesion V
-		return 75;
-	case 7488: //Lesion VI
-		return 75;
-	case 7489: //Lesion VII
-		return 75;
-	case 7490: //Lesion VIII
-		return 75;
-	case 7491: //Lesion IX
-		return 75;
-	case 7492: //Lesion X
-		return 75;
-	case 7496: //Frost of the Ancients I
-		return 75;
-	case 7497: //Frost of the Ancients II
-		return 75;
-	case 7498: //Frost of the Ancients III
-		return 75;
-	case 7499: //Frost of the Ancients IV
-		return 75;
-	case 7500: //Frost of the Ancients V
-		return 75;
-	case 7501: //Frost of the Ancients VI
-		return 75;
-	case 7502: //Frost of the Ancients VII
-		return 75;
-	case 7503: //Frost of the Ancients VIII
-		return 75;
-	case 7504: //Frost of the Ancients IX
-		return 75;
-	case 7505: //Frost of the Ancients X
-		return 75;
-	case 7506: //Cure Poison I
-		return 19;
-	case 7507: //Cure Poison II
-		return 19;
-	case 7508: //Cure Poison III
-		return 19;
-	case 7509: //Cure Poison IV
-		return 19;
-	case 7510: //Cure Disease I
-		return 19;
-	case 7511: //Cure Disease II
-		return 19;
-	case 7512: //Cure Disease III
-		return 19;
-	case 7513: //Cure Disease IV
-		return 19;
-	case 7514: //Remove Curse I
-		return 19;
-	case 7515: //Remove Curse II
-		return 19;
-	case 7516: //Remove Curse III
-		return 19;
-	case 7517: //Remove Curse IV
-		return 19;
-	case 7518: //Play Dead I
-		return 64;
-	case 7519: //Play Dead II
-		return 64;
-	case 7520: //Play Dead III
-		return 64;
-	case 7521: //Play Dead IV
-		return 64;
-	case 7522: //Gore I
-		return 97;
-	case 7523: //Gore II
-		return 97;
-	case 7524: //Gore III
-		return 97;
-	case 7525: //Gore IV
-		return 97;
-	case 7526: //Gore V
-		return 97;
-	case 7527: //Gore VI
-		return 97;
-	case 7528: //War Bellow
-		return 88;
-	case 7529: //War Bellow Recourse
-		return 7;
-	case 7531: //Sleep I
-		return 35;
-	case 7532: //Sleep II
-		return 35;
-	case 7533: //Sleep III
-		return 35;
-	case 7534: //Sleep IV
-		return 35;
-	case 7535: //Sleep V
-		return 35;
-	case 7536: //Lethargy I
-		return 88;
-	case 7537: //Lethargy II
-		return 88;
-	case 7538: //Lethargy III
-		return 88;
-	case 7539: //Lethargy IV
-		return 88;
-	case 7540: //Lethargy V
-		return 88;
-	case 7541: //Plane Shift: Ethereal
-		return 117;
-	case 7542: //Plane Shift: Material
-		return 118;
-	case 7543: //Blink
-		return 118;
-	case 7545: //Swarm of Pain I
-		return 75;
-	case 7546: //Swarm of Pain II
-		return 75;
-	case 7547: //Swarm of Pain III
-		return 75;
-	case 7548: //Swarm of Pain IV
-		return 75;
-	case 7549: //Swarm of Pain V
-		return 75;
-	case 7550: //Swarm of Pain VI
-		return 75;
-	case 7551: //Swarm of Pain VII
-		return 75;
-	case 7552: //Swarm of Pain VIII
-		return 75;
-	case 7553: //Swarm of Pain IX
-		return 75;
-	case 7554: //Swarm of Pain X
-		return 75;
-	case 7555: //Fungal Malady I
-		return 75;
-	case 7556: //Fungal Malady II
-		return 75;
-	case 7557: //Fungal Malady III
-		return 75;
-	case 7558: //Fungal Malady IV
-		return 75;
-	case 7559: //Fungal Malady V
-		return 75;
-	case 7560: //Fungal Malady VI
-		return 75;
-	case 7561: //Fungal Malady VII
-		return 75;
-	case 7562: //Fungal Malady VIII
-		return 75;
-	case 7563: //Fungal Malady IX
-		return 75;
-	case 7564: //Fungal Malady X
-		return 75;
-	case 7565: //Ward of the Bear I
-		return 47;
-	case 7566: //Ward of the Bear II
-		return 47;
-	case 7567: //Ward of the Bear III
-		return 47;
-	case 7568: //Ward of the Wolf I
-		return 65;
-	case 7569: //Ward of the Wolf II
-		return 2;
-	case 7570: //Ward of the Wolf III
-		return 2;
-	case 7571: //Ward of the Tiger I
-		return 39079;
-	case 7572: //Ward of the Tiger II
-		return 39079;
-	case 7573: //Ward of the Tiger III
-		return 64;
-	case 7574: //Ward of the Crocodile I
-		return 79;
-	case 7575: //Ward of the Crocodile II
-		return 79;
-	case 7576: //Ward of the Crocodile III
-		return 79;
-	case 7577: //Ward of the Scaled Wolf I
-		return 2;
-	case 7578: //Ward of the Scaled Wolf II
-		return 2;
-	case 7579: //Ward of the Scaled Wolf III
-		return 2;
-	case 7580: //Ward of the Raptor I
-		return 41;
-	case 7581: //Ward of the Raptor II
-		return 2;
-	case 7582: //Ward of the Raptor III
-		return 2;
-	case 7583: //Ward of the Garou I
-		return 2;
-	case 7584: //Ward of the Garou II
-		return 2;
-	case 7585: //Ward of the Garou III
-		return 2;
-	case 7589: //Fire Skin I
-		return 21;
-	case 7590: //Fire Skin II
-		return 21;
-	case 7591: //Fire Skin III
-		return 21;
-	case 7592: //Fire Skin IV
-		return 21;
-	case 7593: //Fire Skin V
-		return 21;
-	case 7594: //Fire Skin VI
-		return 21;
-	case 7595: //Fire Skin VII
-		return 21;
-	case 7596: //Fire Skin VIII
-		return 21;
-	case 7597: //Fire Skin IX
-		return 21;
-	case 7598: //Fire Skin X
-		return 21;
-	case 7599: //Gargoyle Glance
-		return 0;
-	case 7701: //Weakening Roots
-		return 83;
-	case 7729: //Stealth
-		return 51;
-	case 7745: //Stunning Roar
-		return 97;
-	case 7746: //Whirlwind
-		return 117;
-	case 7762: //Maul I
-		return 72;
-	case 7763: //Maul II
-		return 72;
-	case 7764: //Maul III
-		return 72;
-	case 7765: //Maul IV
-		return 72;
-	case 7766: //Maul V
-		return 72;
-	case 7767: //Maul VI
-		return 72;
-	case 7768: //Maul VII
-		return 72;
-	case 7769: //Maul VIII
-		return 72;
-	case 7770: //Maul IX
-		return 72;
-	case 7771: //Maul X
-		return 72;
-	case 7772: //Maul XI
-		return 72;
-	case 7773: //Maul XII
-		return 72;
-	case 7774: //Maul XIII
-		return 72;
-	case 7775: //Maul XIV
-		return 72;
-	case 7776: //Mana Bolt I
-		return 38;
-	case 7777: //Mana Bolt II
-		return 38;
-	case 7778: //Mana Bolt III
-		return 38;
-	case 7779: //Mana Bolt IV
-		return 38;
-	case 7780: //Mana Bolt V
-		return 38;
-	case 7781: //Mana Bolt VI
-		return 38;
-	case 7782: //Mana Bolt VII
-		return 38;
-	case 7783: //Mana Bolt VIII
-		return 38;
-	case 7784: //Mana Bolt IX
-		return 38;
-	case 7785: //Mana Bolt X
-		return 38;
-	case 7786: //Mana Bolt XI
-		return 38;
-	case 7787: //Mana Bolt XII
-		return 38;
-	case 7788: //Mana Bolt XIII
-		return 38;
-	case 7789: //Mana Bolt XIV
-		return 38;
-	case 7790: //Spirit Sending
-		return 64;
-	case 7800: //Draygun's Touch
-		return 75;
-	case 7801: //Draygun's Touch
-		return 75;
-	case 7802: //Draygun's Touch
-		return 75;
-	case 7803: //Draygun's Touch
-		return 75;
-	case 7804: //Draygun's Touch
-		return 75;
-	case 7805: //Curse of the Nine
-		return 75;
-	case 7806: //Curse of the Nine
-		return 75;
-	case 7807: //Curse of the Nine
-		return 75;
-	case 7808: //Curse of the Nine
-		return 75;
-	case 7809: //Curse of the Nine
-		return 75;
-	case 7810: //Blood of the Shadowmane
-		return 75;
-	case 7811: //Blood of the Shadowmane
-		return 75;
-	case 7812: //Blood of the Shadowmane
-		return 75;
-	case 7813: //Blood of the Shadowmane
-		return 75;
-	case 7814: //Blood of the Shadowmane
-		return 75;
-	case 7815: //Theft of Rage
-		return 75;
-	case 7816: //Theft of Rage
-		return 75;
-	case 7817: //Theft of Rage
-		return 75;
-	case 7818: //Theft of Rage
-		return 75;
-	case 7819: //Theft of Rage
-		return 75;
-	case 7820: //Curse of the Hivequeen
-		return 75;
-	case 7821: //Curse of the Hivequeen
-		return 75;
-	case 7822: //Curse of the Hivequeen
-		return 75;
-	case 7823: //Curse of the Hivequeen
-		return 75;
-	case 7824: //Curse of the Hivequeen
-		return 75;
-	case 7838: //Form of Defense IV
-		return 48;
-	case 7839: //Form of Protection IV
-		return 48;
-	case 7840: //Form of Endurance IV
-		return 48;
-	case 7841: //Form of Rejuvenation IV
-		return 48;
-	case 7994: //Dread Pyre
-		return 38;
-	case 7995: //Call for Blood
-		return 75;
-	case 7996: //Call for Blood Recourse
-		return 38;
-	case 7999: //Corath Venom
-		return 75;
-	case 8000: //Commanding Voice
-		return 64;
-	case 8001: //Thief's eyes
-		return 64;
-	case 8002: //Fists of Wu
-		return 64;
-	case 8003: //Cry Havoc
-		return 64;
-	case 8004: //Death's Regret
-		return 124;
-	case 8005: //Bind Death
-		return 124;
-	case 8006: //Chromastrike
-		return 72;
-	case 8007: //Desperate Renewal
-		return 42;
-	case 8008: //Skin of the Reptile
-		return 16;
-	case 8009: //Skin of the Rep. Trigger
-		return 42;
-	case 8010: //Spore Spiral
-		return 83;
-	case 8011: //Dawnstrike
-		return 38;
-	case 8012: //Blessing of the Dawn
-		return 38;
-	case 8015: //Lingering Sloth
-		return 16;
-	case 8016: //Lingering Sloth Trigger
-		return 16;
-	case 8017: //Hungry Plague
-		return 88;
-	case 8018: //Breath of Antraygus
-		return 75;
-	case 8019: //Warder's Wrath
-		return 117;
-	case 8020: //Hail of Arrows
-		return 72;
-	case 8021: //Bestial Empathy
-		return 104;
-	case 8022: //Fickle Shadows
-		return 124;
-	case 8023: //Fickle Shadows Recourse
-		return 38;
-	case 8025: //Touch of Draygun
-		return 43;
-	case 8026: //Gift of Draygun
-		return 47;
-	case 8027: //Last Rites
-		return 124;
-	case 8028: //Last Rites Trigger
-		return 124;
-	case 8029: //Silent Piety
-		return 64;
-	case 8030: //Thousand Blades
-		return 118;
-	case 8031: //Creeping Dreams
-		return 35;
-	case 8032: //Mana Flare
-		return 16;
-	case 8033: //Mana Flare Strike
-		return 71;
-	case 8034: //Colored Chaos
-		return 58;
-	case 8035: //Echoing Madness
-		return 35;
-	case 8036: //Illusion: Orc
-		return 48;
-	case 8037: //Raging Servant
-		return 102;
-	case 8038: //Burning Aura
-		return 16;
-	case 8039: //Burning Vengeance
-		return 16;
-	case 8040: //Fickle Fire
-		return 38;
-	case 8041: //Clinging Frost
-		return 14;
-	case 8042: //Clinging Frost Trigger
-		return 14;
-	case 8043: //Ether Flame
-		return 38;
-	case 8044: //Mana Weave
-		return 58;
-	case 8045: //Mana Weave Recourse
-		return 38;
-	case 8075: //Fickle Fire Recourse
-		return 38;
-	case 8090: //Armor Cleave I
-		return 81;
-	case 8091: //Armor Cleave II
-		return 81;
-	case 8092: //Armor Cleave III
-		return 81;
-	case 8093: //Armor Cleave IV
-		return 81;
-	case 8094: //Armor Cleave V
-		return 81;
-	case 8095: //Armor Cleave VI
-		return 81;
-	case 8096: //Armor Cleave VII
-		return 81;
-	case 8097: //Armor Cleave VIII
-		return 81;
-	case 8098: //Armor Cleave IX
-		return 81;
-	case 8099: //Armor Cleave X
-		return 81;
-	case 8106: //Perfected Heal
-		return 42;
-	case 8114: //Shrieker Sonic Wave
-		return 38;
-	case 8115: //Shrieker Sonic Wave
-		return 38;
-	case 8116: //Shrieker Sonic Wave
-		return 38;
-	case 8117: //Nimbus Shrieker Wave
-		return 38;
-	case 8118: //Nimbus Shrieker Wave
-		return 38;
-	case 8119: //Nimbus Shrieker Wave
-		return 38;
-	case 8120: //Retch Spore
-		return 58;
-	case 8121: //Retch Spore
-		return 58;
-	case 8122: //Retch Spore
-		return 58;
-	case 8123: //Hammer Time
-		return 58;
-	case 8144: //Net
-		return 89;
-	case 8145: //Clinging Net
-		return 89;
-	case 8149: //Stealthy Getaway
-		return 64;
-	case 8153: //Eternal Thought
-		return 59;
-	case 8171: //Pure Thought I
-		return 59;
-	case 8172: //Pure Thought II
-		return 59;
-	case 8173: //Pure Thought III
-		return 59;
-	case 8174: //Pure Thought IV
-		return 59;
-	case 8175: //Pure Thought V
-		return 59;
-	case 8176: //Pure Thought VI
-		return 59;
-	case 8177: //Pure Thought VII
-		return 59;
-	case 8178: //Pure Thought VIII
-		return 59;
-	case 8179: //Pure Thought IX
-		return 59;
-	case 8180: //Pure Thought X
-		return 59;
-	case 8200: //Gift of Illsalin
-		return 59;
-	case 8201: //Guardian of Ro
-		return 102;
-	case 8202: //Guardian of Ro
-		return 102;
-	case 8203: //Guardian of Ro
-		return 102;
-	case 8204: //Guardian's Bolt I
-		return 38;
-	case 8210: //Feral Roar I
-		return 115;
-	case 8211: //Feral Roar II
-		return 115;
-	case 8212: //Feral Roar III
-		return 115;
-	case 8213: //Feral Roar IV
-		return 115;
-	case 8214: //Greater Rabid Bear
-		return 48;
-	case 8215: //Greater Rabid Bear
-		return 48;
-	case 8216: //Greater Rabid Bear
-		return 48;
-	case 8218: //Ancestral Guard
-		return 62;
-	case 8219: //Ancestral Guard
-		return 62;
-	case 8220: //Ancestral Guard
-		return 62;
-	case 8233: //Empathic Fury
-		return 118;
-	case 8234: //Empathic Fury
-		return 118;
-	case 8235: //Circle of Undershore
-		return 5;
-	case 8236: //Undershore Portal
-		return 5;
-	case 8237: //Ring of Undershore
-		return 5;
-	case 8238: //Undershore Gate
-		return 5;
-	case 8239: //Translocate: Undershore
-		return 5;
-	case 8267: //Feral Roar V
-		return 115;
-	case 8268: //Feral Roar VI
-		return 115;
-	case 8275: //Infection Test 1
-		return 35;
-	case 8276: //Infection Test 2
-		return 35;
-	case 8277: //Fling
-		return 58;
-	case 8278: //Fetter of Spirits
-		return 71;
-	case 8280: //Boon of Vitality I
-		return 46;
-	case 8281: //Boon of Vitality II
-		return 46;
-	case 8282: //Boon of Vitality III
-		return 46;
-	case 8283: //Boon of Vitality IV
-		return 46;
-	case 8284: //Boon of Vitality V
-		return 46;
-	case 8285: //Boon of Vitality VI
-		return 46;
-	case 8286: //Boon of Vitality VII
-		return 46;
-	case 8287: //Boon of Vitality VIII
-		return 46;
-	case 8288: //Boon of Vitality IX
-		return 46;
-	case 8289: //Boon of Vitality X
-		return 46;
-	case 8290: //Gift of Speed I
-		return 41;
-	case 8291: //Gift of Speed II
-		return 41;
-	case 8292: //Gift of Speed III
-		return 41;
-	case 8293: //Gift of Speed IV
-		return 41;
-	case 8294: //Gift of Speed V
-		return 41;
-	case 8295: //Gift of Speed VI
-		return 41;
-	case 8296: //Gift of Speed VII
-		return 41;
-	case 8297: //Gift of Speed VIII
-		return 41;
-	case 8298: //Gift of Speed IX
-		return 41;
-	case 8299: //Gift of Speed X
-		return 41;
-	case 8300: //Malaise I
-		return 81;
-	case 8301: //Malaise II
-		return 81;
-	case 8302: //Malaise III
-		return 81;
-	case 8303: //Malaise IV
-		return 81;
-	case 8304: //Malaise V
-		return 81;
-	case 8305: //Stun I
-		return 97;
-	case 8306: //Stun II
-		return 97;
-	case 8307: //Stun III
-		return 97;
-	case 8308: //Stun IV
-		return 97;
-	case 8309: //Stun V
-		return 97;
-	case 8310: //Gaze of the Beholder I
-		return 13;
-	case 8311: //Gaze of the Beholder II
-		return 13;
-	case 8312: //Gaze of the Beholder III
-		return 13;
-	case 8313: //Gaze of the Beholder IV
-		return 13;
-	case 8314: //Gaze of the Beholder V
-		return 13;
-	case 8315: //Gaze of the Beholder VI
-		return 13;
-	case 8316: //Gaze of the Beholder VII
-		return 13;
-	case 8317: //Gaze of the Beholder VIII
-		return 13;
-	case 8318: //Gaze of the Beholder IX
-		return 13;
-	case 8319: //Gaze of the Beholder X
-		return 13;
-	case 8320: //Gaze of the Beholder XI
-		return 13;
-	case 8321: //Gaze of the Beholder XII
-		return 13;
-	case 8322: //Gaze of the Beholder XIII
-		return 13;
-	case 8323: //Gaze of the Beholder XIV
-		return 13;
-	case 8324: //Pure Water I
-		return 19;
-	case 8325: //Pure Water II
-		return 19;
-	case 8326: //Pure Water III
-		return 19;
-	case 8327: //Pure Water IV
-		return 19;
-	case 8328: //Gale Force
-		return 97;
-	case 8329: //Fungal Regrowth I
-		return 32;
-	case 8330: //Fungal Regrowth II
-		return 32;
-	case 8331: //Fungal Regrowth III
-		return 32;
-	case 8332: //Fungal Regrowth IV
-		return 32;
-	case 8333: //Fungal Regrowth V
-		return 32;
-	case 8334: //Creeping Plague
-		return 16;
-	case 8335: //Creeping Plague Trigger
-		return 16;
-	case 8336: //Stunning Blow I
-		return 97;
-	case 8337: //Stunning Blow II
-		return 97;
-	case 8338: //Stunning Blow III
-		return 97;
-	case 8339: //Stunning Blow IV
-		return 97;
-	case 8340: //Stunning Blow V
-		return 97;
-	case 8341: //Dark Gift I
-		return 17;
-	case 8342: //Dark Gift II
-		return 17;
-	case 8343: //Dark Gift III
-		return 17;
-	case 8344: //Dark Gift IV
-		return 17;
-	case 8345: //Dark Gift V
-		return 17;
-	case 8346: //Dark Gift VI
-		return 17;
-	case 8347: //Dark Gift VII
-		return 17;
-	case 8348: //Dark Siphon I
-		return 43;
-	case 8349: //Dark Siphon II
-		return 43;
-	case 8350: //Dark Siphon III
-		return 43;
-	case 8351: //Dark Siphon IV
-		return 43;
-	case 8352: //Dark Siphon V
-		return 43;
-	case 8353: //Dark Siphon VI
-		return 43;
-	case 8354: //Dark Siphon VII
-		return 43;
-	case 8372: //Stone Skin I
-		return 84;
-	case 8373: //Stone Skin II
-		return 84;
-	case 8374: //Stone Skin III
-		return 84;
-	case 8375: //Stone Skin IV
-		return 84;
-	case 8376: //Stone Skin V
-		return 84;
-	case 8377: //Stone Skin VI
-		return 84;
-	case 8378: //Shadowed Dark Hold
-		return 35;
-	case 8379: //Shadowed Word of Chaos
-		return 13;
-	case 8380: //Shadowed Curse of Mori
-		return 58;
-	case 8381: //Shadowed Meteor Storm
-		return 38;
-	case 8382: //Shadowed Corona Flare
-		return 38;
-	case 8383: //Shadowed Core Fire
-		return 38;
-	case 8400: //Guardian's Bolt II
-		return 38;
-	case 8401: //Guardian's Bolt III
-		return 38;
-	case 8410: //Hand of Holy Vengeance I
-		return 0;
-	case 8411: //Hand of Holy Vengeance II
-		return 0;
-	case 8412: //Hand of Holy Vengeance III
-		return 0;
-	case 8413: //Hand of Holy Vengeance IV
-		return 0;
-	case 8414: //Hand of Holy Vengeance V
-		return 0;
-	case 8421: //Jailor's Fury
-		return 58;
-	case 8444: //Blinding Dust
-		return 72;
-	default:
-		return 0;
-	}
-}
+
 static inline std::string GetSpellCategoryName(DWORD categoryID)
 {
 	switch (categoryID)

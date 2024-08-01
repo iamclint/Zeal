@@ -300,6 +300,10 @@ namespace Zeal
 			/*0x132*/	BYTE    Unknown0x132; /* CTextureAnimation */
 			/*0x133*/	BYTE    Unknown0x133; /* CTextureAnimation */
 		};
+		struct RaidWnd : EQWND
+		{
+			/*0x134*/	BYTE    ToggleState;
+		};
 		struct HotButton : EQWND
 		{
 			int GetPage() { return *(int*)0x7f69f6; }
@@ -746,7 +750,7 @@ namespace Zeal
 			EQWND* Loadskin;  // 0x63D60C
 			EQWND* Alarm;  // 0x63D610
 			EQWND* MusicPlayer;  // 0x63D614
-			EQWND* Raid;  // 0x63D618
+			RaidWnd* Raid;  // 0x63D618
 			EQWND* RaidOptions;  // 0x63D61C
 			EQWND* Breath;  // 0x63D620
 			EQWND* Target;  // 0x63D624

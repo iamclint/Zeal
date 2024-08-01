@@ -300,16 +300,19 @@ void SpellSets::create_context_menus(bool force)
         SpellCategory.clear();
         for (auto& s : spells) 
         {
+            SpellCat SpellCatData = getSpellCategoryAndSubcategory(s->ID);
             menudata md;
             md.ID = s->ID;
             int Level = s->Level[self_char->Class - 1];
             std::stringstream ss;
-            ss << Level << " - " << s->Name;
+            if (SpellCatData.NewName.length())
+                ss << Level << " - " << SpellCatData.NewName;
+            else
+                ss << Level << " - " << s->Name;
             md.Name = ss.str();
-            DWORD categoryID = GetSpellCategory(s->ID);
-            DWORD subcategoryID = GetSpellSubCategory(s->ID);
-            std::string category = GetSpellCategoryName(categoryID);
-            std::string subcategory = GetSpellSubCategoryName(subcategoryID);
+            
+            std::string category = GetSpellCategoryName(SpellCatData.Category);
+            std::string subcategory = GetSpellSubCategoryName(SpellCatData.SubCategory);
             SpellCategory[category][subcategory].push_back(md);
         }
         if (!menu)
