@@ -138,8 +138,8 @@ void ZealService::basic_binds()
 			}
 			if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->Raid && Zeal::EqGame::Windows->Raid->IsVisible)
 			{
-				Zeal::EqGame::Windows->Raid->show(0, false);
-				Zeal::EqGame::Windows->Raid->ToggleState = 0;
+				Zeal::EqGame::execute_cmd(109, 1, 0);
+				Zeal::EqGame::execute_cmd(109, 0, 0);
 				return true;
 			}
 		}
