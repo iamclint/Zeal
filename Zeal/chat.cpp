@@ -116,13 +116,19 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
         ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data_str, c->timestamps==1).c_str(), color_index, false);
         mem::write<byte>(0x5380C9, 0x75); //reset the logging
         if (u)
-            reinterpret_cast<void(__cdecl*)( const char* data)>(0x5240dc)(data); //add to log
+        {
+            reinterpret_cast<bool(__thiscall*)(int t, const char* data, int)>(0x538110)(t, data, 0); // do the percent convert for logging
+            reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data); //add to log
+        }
     }
     else
     {
         ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data_str.c_str(), color_index, false);
         if (u)
+        {
+            reinterpret_cast<bool(__thiscall*)(int t, const char* data, int)>(0x538110)(t, data, 0); // do the percent convert for logging
             reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data); //add to log
+        }
     }
 
 
