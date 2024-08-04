@@ -213,6 +213,9 @@
     <ClInclude Include="NPCGive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="nameplate.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -354,6 +357,9 @@
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="NPCGive.cpp">
+      <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="nameplate.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>

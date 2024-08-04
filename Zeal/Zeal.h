@@ -26,6 +26,7 @@ public:
 	std::shared_ptr<FloatingDamage> floating_damage = nullptr;
 	std::shared_ptr<directx> dx = nullptr;
 	std::shared_ptr<NPCGive> give = nullptr;
+	std::shared_ptr<NamePlate> nameplate = nullptr;
 
 	//other features
 	std::shared_ptr<OutputFile> outputfile = nullptr;

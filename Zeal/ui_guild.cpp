@@ -51,19 +51,6 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 				}
 				return true;
 			});
-		zeal->commands_hook->Add("/sortskill", {}, "",
-			[this](std::vector<std::string>& args) {
-				Zeal::EqUI::ListWnd* wnd = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Skills->GetChildItem("SkillList");
-				if (wnd)
-				{
-					wnd->Sort(0);
-				}
-				else
-				{
-					Zeal::EqGame::print_chat("skillist not found");
-				}
-			return true;
-			});
 		zeal->commands_hook->Add("/guildwindow", {}, "Toggle guild management window",
 			[this, mgr](std::vector<std::string>& args) {
 					if (guild)

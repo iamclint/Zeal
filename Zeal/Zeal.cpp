@@ -33,6 +33,7 @@ ZealService::ZealService()
 	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
 	give = std::make_shared<NPCGive>(this, ini.get());
 	game_patches = std::make_shared<patches>();
+	nameplate = std::make_shared<NamePlate>(this, ini.get());
 
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());
 	cycle_target = std::make_shared<CycleTarget>(this);

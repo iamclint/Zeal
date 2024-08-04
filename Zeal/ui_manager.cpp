@@ -190,5 +190,20 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour);
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);
+
+
+
+	zeal->commands_hook->Add("/sortskill", {}, "",
+		[this](std::vector<std::string>& args) {
+			if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->Skills && Zeal::EqGame::Windows->Skills->IsVisible)
+			{
+				Zeal::EqUI::ListWnd* wnd = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Skills->GetChildItem("SkillList");
+				if (wnd)
+				{
+					wnd->Sort(2);
+				}
+			}
+			return true;
+		});
 }
 
