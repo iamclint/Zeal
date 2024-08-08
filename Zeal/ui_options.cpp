@@ -34,6 +34,7 @@ void ui_options::InitUI()
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_UseOldSens", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->camera_mods->set_old_sens(wnd->Checked); });
 	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_TargetRing", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_ClassicClasses", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->chat_hook->set_classes(wnd->Checked); });
 	ui->AddComboCallback(Zeal::EqGame::Windows->Options, "Zeal_Timestamps_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->set_timestamp(value); });
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->set_pan_delay(value*4); 
@@ -98,7 +99,7 @@ void ui_options::CleanUI()
 
 void ui_options::UpdateOptions()
 {
-	ui->SetComboValue("Zeal_Timestamps_Combobox", ZealService::get_instance()->chat_hook->timestamps);
+	ui->SetComboValue("Zeal_Timestamps_Combobox", ZealService::get_instance()->chat_hook->TimeStampsStyle);
 	ui->SetComboValue("Zeal_HideCorpseCombobox", 2);
 	ui->SetSliderValue("Zeal_PanDelaySlider", ZealService::get_instance()->camera_mods->pan_delay > 0.f ? ZealService::get_instance()->camera_mods->pan_delay / 4 : 0.f);
 	ui->SetSliderValue("Zeal_HoverTimeout_Slider", ZealService::get_instance()->tooltips->hover_timeout > 0 ? ZealService::get_instance()->tooltips->hover_timeout / 5 : 0);
@@ -116,15 +117,16 @@ void ui_options::UpdateOptions()
 	ui->SetLabelValue("Zeal_HoverTimeout_Value", "%d ms", ZealService::get_instance()->tooltips->hover_timeout);
 	ui->SetChecked("Zeal_HideCorpse", ZealService::get_instance()->looting_hook->hide_looted);
 	ui->SetChecked("Zeal_Cam", ZealService::get_instance()->camera_mods->enabled);
-	ui->SetChecked("Zeal_BlueCon", ZealService::get_instance()->chat_hook->bluecon);
-	ui->SetChecked("Zeal_Timestamp", ZealService::get_instance()->chat_hook->timestamps);
-	ui->SetChecked("Zeal_Input", ZealService::get_instance()->chat_hook->zealinput);
+	ui->SetChecked("Zeal_BlueCon", ZealService::get_instance()->chat_hook->UseBlueCon);
+	ui->SetChecked("Zeal_Timestamp", ZealService::get_instance()->chat_hook->TimeStampsStyle);
+	ui->SetChecked("Zeal_Input", ZealService::get_instance()->chat_hook->UseZealInput);
 	ui->SetChecked("Zeal_Escape", ZealService::get_instance()->ini->getValue<bool>("Zeal", "Escape"));
 	ui->SetChecked("Zeal_AltContainerTooltips", ZealService::get_instance()->tooltips->all_containers);
 	ui->SetChecked("Zeal_SpellbookAutoStand", ZealService::get_instance()->movement->spellbook_autostand);
 	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled);
 	ui->SetChecked("Zeal_UseOldSens", ZealService::get_instance()->camera_mods->use_old_sens);
 	ui->SetChecked("Zeal_TargetRing", ZealService::get_instance()->target_ring->enabled);
+	ui->SetChecked("Zeal_ClassicClasses", ZealService::get_instance()->chat_hook->UseClassicClassNames);
 	ui->SetLabelValue("Zeal_VersionValue", "%s", ZEAL_VERSION);
 	ui->SetSliderValue("Zeal_TargetRingFill_Slider", static_cast<int>(ZealService::get_instance()->target_ring->get_ring_pct() * 100.0f));
 	ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", ZealService::get_instance()->target_ring->get_ring_pct());

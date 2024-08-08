@@ -90,7 +90,7 @@ std::string replaceUnderscores(const std::smatch& match) {
 UINT32  __fastcall GetRGBAFromIndex(int t, int u, USHORT index)
 {
     chat* c = ZealService::get_instance()->chat_hook.get();
-    if ((index == 4 || index == 0x10) && c->bluecon)
+    if ((index == 4 || index == 0x10) && c->UseBlueCon)
         index = 325;
     return ZealService::get_instance()->hooks->hook_map["GetRGBAFromIndex"]->original(GetRGBAFromIndex)(t, u, index);
 }
@@ -113,10 +113,10 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
     //    data_str = std::regex_replace(data_str, pattern, "$1");
     //    std::replace(data_str.begin(), data_str.end(), '_', ' ');
     //}
-    if (c->timestamps && strlen(data) > 0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
+    if (c->TimeStampsStyle && strlen(data) > 0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {
         mem::write<byte>(0x5380C9, 0xEB); // don't log information so we can manipulate data before between chat and logs
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data_str, c->timestamps==1).c_str(), color_index, false);
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data_str, c->TimeStampsStyle==1).c_str(), color_index, false);
         mem::write<byte>(0x5380C9, 0x75); //reset the logging
         if (u)
         {
@@ -141,7 +141,7 @@ char* __fastcall StripName(int t, int unused, char* data)
 {
     if (ZealService::get_instance()->hooks && ZealService::get_instance()->hooks->hook_map.count("StripName"))
     {
-        if (ZealService::get_instance()->chat_hook->uniquenames)
+        if (ZealService::get_instance()->chat_hook->UseUniqueNames)
             return data;
         else
             return ZealService::get_instance()->hooks->hook_map["StripName"]->original(StripName)(t, unused, data);
@@ -159,10 +159,13 @@ void chat::LoadSettings(IO_ini* ini)
         ini->setValue<bool>("Zeal", "ZealInput", false);
     if (!ini->exists("Zeal", "UniqueNames"))
         ini->setValue<bool>("Zeal", "UniqueNames", false);
-    uniquenames = ini->getValue<bool>("Zeal", "UniqueNames");
-    bluecon = ini->getValue<bool>("Zeal", "Bluecon");
-    timestamps = ini->getValue<int>("Zeal", "ChatTimestamps");
-    zealinput = ini->getValue<bool>("Zeal", "ZealInput");
+    if (!ini->exists("Zeal", "ClassicClasses"))
+        ini->setValue<bool>("Zeal", "ClassicClasses", false);
+    UseClassicClassNames = ini->getValue<bool>("Zeal", "ClassicClasses");
+    UseUniqueNames = ini->getValue<bool>("Zeal", "UniqueNames");
+    UseBlueCon = ini->getValue<bool>("Zeal", "Bluecon");
+    TimeStampsStyle = ini->getValue<int>("Zeal", "ChatTimestamps");
+    UseZealInput = ini->getValue<bool>("Zeal", "ZealInput");
 }
 
 enum class caret_dir : int
@@ -387,18 +390,31 @@ chat::chat(ZealService* zeal, IO_ini* ini)
             }
             else
             {
-                set_timestamp(timestamps > 0 ? 0 : 1);
+                set_timestamp(TimeStampsStyle > 0 ? 0 : 1);
             }
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
     zeal->commands_hook->Add("/zealinput", { "/zinput" }, "Toggles zeal input which gives you a more modern input feel.",
         [this](std::vector<std::string>& args) {
-            set_input(!zealinput);
+            set_input(!UseZealInput);
+            return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+        });
+    zeal->commands_hook->Add("/classicclasses", { "/cc" }, "Toggles classic classes only (no longer showing vicar for a 50+ cleric for example).",
+        [this](std::vector<std::string>& args) {
+            set_classes(!UseClassicClassNames);
+            if (UseClassicClassNames)
+            {
+                Zeal::EqGame::print_chat("Classic Class Names enabled");
+            }
+            else
+            {
+                Zeal::EqGame::print_chat("Classic Class Names disabled");
+            }
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
     zeal->commands_hook->Add("/bluecon", { }, "Toggles the custom color for blue con that you can adjust in options.",
         [this](std::vector<std::string>& args) {
-            set_bluecon(!bluecon);
+            set_bluecon(!UseBlueCon);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
     zeal->commands_hook->Add("/loc", { }, "Adds noprint arguments to /loc to not log the location to your chat.",
@@ -452,11 +468,26 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("GetRGBAFromIndex6", 0x438719, GetRGBAFromIndex, hook_type_replace_call); 
   
 }
+void chat::set_classes(bool val)
+{
+    UseClassicClassNames = val;
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "ClassicClasses", UseClassicClassNames);
+    if (UseClassicClassNames)
+    {
+        mem::write<byte>(0x4bc090, 66); //this just changes the if statement to check if the player is > 65 rather than > 50
+    }
+    else
+    {
+        mem::write<byte>(0x4bc090, 51);
+    }
+    ZealService::get_instance()->ui->options->UpdateOptions();
+}
+
 void chat::set_input(bool val)
 {
-    zealinput = val;
-    ZealService::get_instance()->ini->setValue<bool>("Zeal", "ZealInput", zealinput);
-    if (zealinput)
+    UseZealInput = val;
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "ZealInput", UseZealInput);
+    if (UseZealInput)
         Zeal::EqGame::print_chat("Zeal special input enabled");
     else
         Zeal::EqGame::print_chat("Zeal special input disabled");
@@ -464,9 +495,9 @@ void chat::set_input(bool val)
 }
 void chat::set_timestamp(int val)
 {
-    timestamps = val;
-    ZealService::get_instance()->ini->setValue<int>("Zeal", "ChatTimestamps", timestamps);
-    if (timestamps)
+    TimeStampsStyle = val;
+    ZealService::get_instance()->ini->setValue<int>("Zeal", "ChatTimestamps", TimeStampsStyle);
+    if (TimeStampsStyle)
         Zeal::EqGame::print_chat("Timestamps enabled");
     else
         Zeal::EqGame::print_chat("Timestamps disabled");
@@ -474,9 +505,9 @@ void chat::set_timestamp(int val)
 }
 void chat::set_bluecon(bool val)
 {
-    bluecon = val;
-    ZealService::get_instance()->ini->setValue<bool>("Zeal", "Bluecon", bluecon);
-    if (bluecon)
+    UseBlueCon = val;
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "Bluecon", UseBlueCon);
+    if (UseBlueCon)
         Zeal::EqGame::print_chat("Blue con color is now set to usercolor 70");
     else
         Zeal::EqGame::print_chat("Default blue con color.");

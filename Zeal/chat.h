@@ -6,14 +6,16 @@
 class chat
 {
 public:
-	int timestamps = 0;
-	bool bluecon = false;
-	bool zealinput = false;
-	bool uniquenames = false;
+	int TimeStampsStyle = 0;
+	bool UseBlueCon = false;
+	bool UseZealInput = false;
+	bool UseUniqueNames = false;
+	bool UseClassicClassNames = false;
 	void set_input_color(Zeal::EqUI::ARGBCOLOR col);
 	void set_bluecon(bool val);
 	void set_timestamp(int val);
 	void set_input(bool val);
+	void set_classes(bool val);
 	chat(class ZealService* pHookWrapper, class IO_ini* ini);
 	~chat();
 private:
