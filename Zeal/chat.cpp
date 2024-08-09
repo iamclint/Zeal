@@ -481,7 +481,7 @@ void chat::set_classes(bool val)
     {
         mem::write<byte>(0x4bc090, 51);
     }
-    if (ZealService::get_instance()->ui)
+    if (ZealService::get_instance()->ui && ZealService::get_instance()->ui->options)
         ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
