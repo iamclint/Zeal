@@ -162,6 +162,7 @@ void chat::LoadSettings(IO_ini* ini)
     if (!ini->exists("Zeal", "ClassicClasses"))
         ini->setValue<bool>("Zeal", "ClassicClasses", false);
     UseClassicClassNames = ini->getValue<bool>("Zeal", "ClassicClasses");
+    set_classes(UseClassicClassNames);
     UseUniqueNames = ini->getValue<bool>("Zeal", "UniqueNames");
     UseBlueCon = ini->getValue<bool>("Zeal", "Bluecon");
     TimeStampsStyle = ini->getValue<int>("Zeal", "ChatTimestamps");
