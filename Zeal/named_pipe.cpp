@@ -181,7 +181,7 @@ void named_pipe::main_loop()
 			if (RaidList)
 			{
 				nlohmann::json raid_array = nlohmann::json::array();
-				for (int i = 1; i < RaidList->ItemCount; i++)
+				for (int i = 0; i < RaidList->ItemCount; i++)
 				{
 					Zeal::EqUI::CXSTR _grp;
 					Zeal::EqUI::CXSTR _name;
@@ -195,7 +195,7 @@ void named_pipe::main_loop()
 					RaidList->GetItemText(&_rank, i, 4);
 					raid_array.push_back({ {"group", _grp.Data->Text},{"name", _name.Data->Text},{"level", _lvl.Data->Text},{"class", _class.Data->Text},{"rank", _rank.Data->Text} });
 				}
-				for (int i = 1; i < RaidListNonGrouped->ItemCount; i++)
+				for (int i = 0; i < RaidListNonGrouped->ItemCount; i++)
 				{
 					Zeal::EqUI::CXSTR _grp;
 					Zeal::EqUI::CXSTR _name;
