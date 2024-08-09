@@ -9,7 +9,8 @@ enum struct pipe_data_type
 	label,
 	gauge,
 	player,
-	custom
+	custom,
+	raid
 };
 struct pipe_data
 {

@@ -172,6 +172,47 @@ void named_pipe::main_loop()
 	static auto last_output = GetTickCount64();
 	if (GetTickCount64() - last_output > pipe_delay)
 	{
+
+		if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->Raid)
+		{
+			
+			Zeal::EqUI::ListWnd* RaidList = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Raid->GetChildItem("RAID_PlayerList");
+			Zeal::EqUI::ListWnd* RaidListNonGrouped = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Raid->GetChildItem("RAID_NotInGroupPlayerList");
+			if (RaidList)
+			{
+				nlohmann::json raid_array = nlohmann::json::array();
+				for (int i = 1; i < RaidList->ItemCount; i++)
+				{
+					Zeal::EqUI::CXSTR _grp;
+					Zeal::EqUI::CXSTR _name;
+					Zeal::EqUI::CXSTR _lvl;
+					Zeal::EqUI::CXSTR _class;
+					Zeal::EqUI::CXSTR _rank;
+					RaidList->GetItemText(&_grp, i, 0);
+					RaidList->GetItemText(&_name, i, 1);
+					RaidList->GetItemText(&_lvl, i, 2);
+					RaidList->GetItemText(&_class, i, 3);
+					RaidList->GetItemText(&_rank, i, 4);
+					raid_array.push_back({ {"group", _grp.Data->Text},{"name", _name.Data->Text},{"level", _lvl.Data->Text},{"class", _class.Data->Text},{"rank", _rank.Data->Text} });
+				}
+				for (int i = 1; i < RaidListNonGrouped->ItemCount; i++)
+				{
+					Zeal::EqUI::CXSTR _grp;
+					Zeal::EqUI::CXSTR _name;
+					Zeal::EqUI::CXSTR _lvl;
+					Zeal::EqUI::CXSTR _class;
+					Zeal::EqUI::CXSTR _rank;
+					RaidListNonGrouped->GetItemText(&_grp, i, 0);
+					RaidListNonGrouped->GetItemText(&_name, i, 1);
+					RaidListNonGrouped->GetItemText(&_lvl, i, 2);
+					RaidListNonGrouped->GetItemText(&_class, i, 3);
+					RaidListNonGrouped->GetItemText(&_rank, i, 4);
+					raid_array.push_back({ {"group", "0"},{"name", _name.Data->Text},{"level", _lvl.Data->Text},{"class", _class.Data->Text},{"rank", _rank.Data->Text} });
+				}
+				write(raid_array.dump(), pipe_data_type::raid);
+			}
+		}
+		
 		nlohmann::json label_array = nlohmann::json::array();
 		for (auto& [id, name] : LabelNames)
 		{
