@@ -339,22 +339,45 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
 
 void __fastcall DoPercentConvert(int* t, int u, char* data, int u2)
 {
-    ZealService::get_instance()->hooks->hook_map["DoPercentConvert"]->original(DoPercentConvert)(t, u, data, u2);
     std::string str_data = data;
     if (str_data.find('%', 0) == std::string::npos) //if there isn't any % just early out
         return;
     if (Zeal::EqGame::is_in_game())
     {
-        std::string mana, hp;
-        ZealService::get_instance()->labels_hook->GetLabel(20, mana);
-        ZealService::get_instance()->labels_hook->GetLabel(19, hp);
-        str_data = Zeal::String::replace(str_data, "%n", mana + "%");
-        str_data = Zeal::String::replace(str_data, "%h", hp + "%");
+        ZealService::get_instance()->chat_hook->DoPercentReplacements(str_data);
         size_t new_len = str_data.length();
         strncpy_s(data, new_len+1, str_data.c_str(), new_len);
         data[new_len] = '\0';
     }
+    ZealService::get_instance()->hooks->hook_map["DoPercentConvert"]->original(DoPercentConvert)(t, u, data, u2);
 }
+void chat::DoPercentReplacements(std::string& str_data)
+{
+    for (auto& fn : percent_replacements)
+        fn(str_data);
+}
+
+void chat::InitPercentReplacements()
+{
+    percent_replacements.push_back([](std::string& str_data) { 
+        std::string mana; 
+        ZealService::get_instance()->labels_hook->GetLabel(20, mana); 
+        Zeal::String::replace(str_data, "%mana", mana + "%"); 
+        Zeal::String::replace(str_data, "%n", mana + "%"); 
+     });
+    percent_replacements.push_back([](std::string& str_data) { 
+        std::string hp; 
+        ZealService::get_instance()->labels_hook->GetLabel(19, hp);  
+        Zeal::String::replace(str_data, "%hp", hp + "%"); 
+        Zeal::String::replace(str_data, "%h", hp + "%"); 
+    });
+    percent_replacements.push_back([](std::string& str_data) { 
+        std::stringstream ss; 
+        ss << std::fixed << std::setprecision(2) << std::ceil(Zeal::EqGame::get_self()->Position.x * 100) / 100 << ", " << std::ceil(Zeal::EqGame::get_self()->Position.y * 100) / 100 << ", " << std::ceil(Zeal::EqGame::get_self()->Position.z * 100) / 100; 
+        Zeal::String::replace(str_data, "%loc", ss.str());
+    });
+}
+
 
 void chat::set_input_color(Zeal::EqUI::ARGBCOLOR col)
 {
@@ -466,8 +489,8 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("GetRGBAFromIndex3", 0x407d90, GetRGBAFromIndex, hook_type_replace_call); 
     zeal->hooks->Add("GetRGBAFromIndex4", 0x407da2, GetRGBAFromIndex, hook_type_replace_call); 
     zeal->hooks->Add("GetRGBAFromIndex5", 0x4139eb, GetRGBAFromIndex, hook_type_replace_call); 
-    zeal->hooks->Add("GetRGBAFromIndex6", 0x438719, GetRGBAFromIndex, hook_type_replace_call); 
-  
+    zeal->hooks->Add("GetRGBAFromIndex6", 0x438719, GetRGBAFromIndex, hook_type_replace_call);   
+    InitPercentReplacements();
 }
 void chat::set_classes(bool val)
 {

@@ -6,7 +6,7 @@ namespace Zeal
 {
 	namespace String
 	{
-		std::string replace(std::string input, const std::string& from, const std::string& to) {
+		std::string replace(std::string& input, const std::string& from, const std::string& to) {
 			size_t start_pos = 0;
 			while ((start_pos = input.find(from, start_pos)) != std::string::npos) {
 				input.replace(start_pos, from.length(), to);

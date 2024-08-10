@@ -16,8 +16,11 @@ public:
 	void set_timestamp(int val);
 	void set_input(bool val);
 	void set_classes(bool val);
+	void DoPercentReplacements(std::string& str_data);
 	chat(class ZealService* pHookWrapper, class IO_ini* ini);
 	~chat();
 private:
 	void LoadSettings(class IO_ini* ini);
+	void InitPercentReplacements();
+	std::vector<std::function<void(std::string& str_data)>> percent_replacements;
 };
