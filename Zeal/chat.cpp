@@ -376,6 +376,12 @@ void chat::InitPercentReplacements()
         ss << std::fixed << std::setprecision(2) << std::ceil(Zeal::EqGame::get_self()->Position.x * 100) / 100 << ", " << std::ceil(Zeal::EqGame::get_self()->Position.y * 100) / 100 << ", " << std::ceil(Zeal::EqGame::get_self()->Position.z * 100) / 100; 
         Zeal::String::replace(str_data, "%loc", ss.str());
     });
+    percent_replacements.push_back([](std::string& str_data) {
+        std::string target_hp;
+        ZealService::get_instance()->labels_hook->GetLabel(29, target_hp);
+        Zeal::String::replace(str_data, "%targethp", target_hp + "%");
+        Zeal::String::replace(str_data, "%th", target_hp + "%");
+     });
 }
 
 

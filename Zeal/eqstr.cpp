@@ -20,7 +20,7 @@ const char* __fastcall GetString(int stringtable, int unused, int string_id, boo
 			*valid = true;
 		return t->str_replacements[string_id];
 	}
-	if (t->str_noprint[string_id])
+	if (t->str_noprint.count(string_id) && t->str_noprint[string_id])
 		return "";
 	const char* d = ZealService::get_instance()->hooks->hook_map["GetString"]->original(GetString)(stringtable, unused, string_id, valid);
 	return d;
