@@ -170,7 +170,7 @@ void named_pipe::main_loop()
 	if (!pipe_handles.size()) //nothing is connected don't waste the cpu time getting values
 		return;
 	static auto last_output = GetTickCount64();
-	if (GetTickCount64() - last_output > pipe_delay)
+	if (GetTickCount64() - last_output > pipe_delay && pipe_delay>0)
 	{
 
 		if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->Raid)

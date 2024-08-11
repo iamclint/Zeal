@@ -15,8 +15,19 @@
 - Various bug fixes
 - Unique npc naming for better parsing
 
+### % Replacements
+- %n or %mana for mana%
+- %h or %hp for hp%
+- %loc for your location
+- %th or %thp for your targets health %
+
 ### Commands
 ___
+- `/cc`
+  - **Arguments:** ``
+  - **Example:** `/cc`
+  - **Description:** toggles classic classes in who and other areas.
+
 - `/targetring`
   - **Arguments:** `float size`
   - **Example:** `/targetring 0.25`
