@@ -19,7 +19,7 @@
 - %n or %mana for mana%
 - %h or %hp for hp%
 - %loc for your location
-- %th or %thp for your targets health %
+- %th or %targethp for your targets health %
 
 ### Commands
 ___
