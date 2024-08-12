@@ -194,6 +194,16 @@ void named_pipe::main_loop()
 					RaidList->GetItemText(&_class, i, 3);
 					RaidList->GetItemText(&_rank, i, 4);
 					raid_array.push_back({ {"group", _grp.Data->Text},{"name", _name.Data->Text},{"level", _lvl.Data->Text},{"class", _class.Data->Text},{"rank", _rank.Data->Text} });
+					if (_grp.Data)
+						_grp.FreeRep();
+					if (_name.Data)
+						_name.FreeRep();
+					if (_lvl.Data)
+						_lvl.FreeRep();
+					if (_class.Data)
+						_class.FreeRep();
+					if (_rank.Data)
+						_rank.FreeRep();
 				}
 				for (int i = 0; i < RaidListNonGrouped->ItemCount; i++)
 				{
@@ -208,6 +218,16 @@ void named_pipe::main_loop()
 					RaidListNonGrouped->GetItemText(&_class, i, 3);
 					RaidListNonGrouped->GetItemText(&_rank, i, 4);
 					raid_array.push_back({ {"group", "0"},{"name", _name.Data->Text},{"level", _lvl.Data->Text},{"class", _class.Data->Text},{"rank", _rank.Data->Text} });
+					if (_grp.Data)
+						_grp.FreeRep();
+					if (_name.Data)
+						_name.FreeRep();
+					if (_lvl.Data)
+						_lvl.FreeRep();
+					if (_class.Data)
+						_class.FreeRep();
+					if (_rank.Data)
+						_rank.FreeRep();
 				}
 				write(raid_array.dump(), pipe_data_type::raid);
 			}
