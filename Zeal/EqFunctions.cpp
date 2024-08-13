@@ -208,6 +208,14 @@ namespace Zeal
 		{
 			return (int*)(*(int*)0x63dea8);
 		}
+		void DoPercentConvert(std::string& data)
+		{
+			reinterpret_cast<void(__thiscall*)(int everquest, const char* name, int len)>(0x538110)(*(int*)0x809478, data.data(), 1);
+		}
+		void log(std::string& data)
+		{
+			reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data.c_str());
+		}
 		Zeal::EqStructures::EQCHARINFO* get_char_info()
 		{
 			return (Zeal::EqStructures::EQCHARINFO*)(*(int*)0x7F94E8);

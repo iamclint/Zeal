@@ -26,11 +26,15 @@ patches::patches()
 {
 	const char sit_stand_patch[] = { (char)0xEB, (char)0x1A };
 	mem::write(0x42d14d, sit_stand_patch); //fix pet sit shortcut crash (makes default return of function the sit/stand button not sure why its passing in 0)
-
+	
+	//disable client sided hp ticking
+	//mem::set(0x4b9141, 0x90, 6);
 
 	//disable client sided mana ticking
 	mem::set(0x4C3F93, 0x90, 7);
 	mem::set(0x4C7642, 0x90, 7);
+
+
 	mem::write<BYTE>(0x4A14CF, 0xEB); //don't print Your XML files are not compatible with current EverQuest files, certain windows may not perform correctly.  Use "/loadskin Default 1" to load the EverQuest default skin.
 
 	ZealService::get_instance()->hooks->Add("GetZoneInfoFromNetwork", 0x53D026, GetZoneInfoFromNetwork, hook_type_detour);

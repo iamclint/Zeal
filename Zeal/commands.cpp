@@ -426,6 +426,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				}
 			return false;
 		});
+
 	Add("/help", { "/hel" }, "Adds zeal to the help list.",
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)

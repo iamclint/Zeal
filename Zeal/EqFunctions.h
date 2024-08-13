@@ -82,6 +82,8 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+
+		void DoPercentConvert(std::string& str);
 		void move_item(int a1, int slot, int a2, int a3);
 		bool can_inventory_item(Zeal::EqStructures::EQITEMINFO* item);
 		bool can_equip_item(Zeal::EqStructures::EQITEMINFO* item);
@@ -122,6 +124,7 @@ namespace Zeal
 		void set_target(Zeal::EqStructures::Entity* target);
 		bool can_move();
 		bool is_on_ground(Zeal::EqStructures::Entity* ent);
+		void log(std::string& data);
 		Zeal::EqStructures::EQCHARINFO* get_char_info();
 		Zeal::EqStructures::Entity* get_active_corpse();
 		Zeal::EqStructures::Entity* get_target();

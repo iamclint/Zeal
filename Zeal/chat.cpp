@@ -453,11 +453,33 @@ chat::chat(ZealService* zeal, IO_ini* ini)
             {
                 std::stringstream ss;
                 ss << "Your Location is " << std::fixed << std::setprecision(2) << std::ceil(Zeal::EqGame::get_self()->Position.x * 100) / 100 << ", " << std::ceil(Zeal::EqGame::get_self()->Position.y * 100) / 100 << ", " << std::ceil(Zeal::EqGame::get_self()->Position.z * 100) / 100;
-                //Zeal::EqGame::print_chat(ss.str().c_str());
-                reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(ss.str().c_str());
+                std::string result = ss.str();
+                Zeal::EqGame::log(result);
                 return true;
             }
             return false; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+        });
+    zeal->commands_hook->Add("/log", {}, "Toggles log on/off or adds something directly to your log",
+        [this, zeal](std::vector<std::string>& args) {
+            std::string full_str;
+            if (args.size() == 2 && (Zeal::String::compare_insensitive(args[1], "on") || Zeal::String::compare_insensitive(args[1], "off")))
+            {
+                return false;
+            }
+            if (args.size() > 1)
+            {
+                for (size_t i = 1; i < args.size(); ++i)
+                {
+                    if (i < args.size() - 1)
+                        full_str += args[i] + " ";
+                    else
+                        full_str += args[i];
+                }
+                Zeal::EqGame::DoPercentConvert(full_str);
+                Zeal::EqGame::log(full_str);
+                return true;
+            }
+            return false;
         });
     LoadSettings(ini);
 
