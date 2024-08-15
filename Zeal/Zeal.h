@@ -27,6 +27,7 @@ public:
 	std::shared_ptr<directx> dx = nullptr;
 	std::shared_ptr<NPCGive> give = nullptr;
 	std::shared_ptr<NamePlate> nameplate = nullptr;
+	std::shared_ptr<TellWindows> tells = nullptr;
 
 	//other features
 	std::shared_ptr<OutputFile> outputfile = nullptr;

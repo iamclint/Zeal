@@ -22,6 +22,7 @@
 #include "floating_damage.h"
 #include "directx.h"
 #include "nameplate.h"
+#include "tellwindows.h"
 // other features
 #include "NPCGive.h"
 #include "cycle_target.h"
@@ -39,6 +40,7 @@
 #include "target_ring.h"
 #include "crash_handler.h"
 #include "patches.h"
+
 #include "Zeal.h" 
 
 extern HMODULE this_module;

@@ -167,6 +167,7 @@
     <ClInclude Include="patches.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="target_ring.h" />
+    <ClInclude Include="tellwindows.h" />
     <ClInclude Include="tooltip.h" />
     <ClInclude Include="ui_bank.h" />
     <ClInclude Include="item_display.h" />
@@ -225,6 +226,7 @@
     <ClCompile Include="patches.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="target_ring.cpp" />
+    <ClCompile Include="tellwindows.cpp" />
     <ClCompile Include="tooltip.cpp" />
     <ClCompile Include="ui_bank.cpp" />
     <ClCompile Include="item_display.cpp" />
