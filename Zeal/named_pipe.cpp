@@ -236,18 +236,35 @@ void named_pipe::main_loop()
 		nlohmann::json label_array = nlohmann::json::array();
 		for (auto& [id, name] : LabelNames)
 		{
+			nlohmann::json meta_data = nlohmann::json::object();
+			nlohmann::json label_data = nlohmann::json::object();
 			std::string value;
+			if (id >= 45 && id <= 59 && Zeal::EqGame::get_char_info()) //buff
+			{
+					int spellId = Zeal::EqGame::get_char_info()->Buff[id-45].SpellId;
+					int buffTicks = 0;
+					if (spellId != USHRT_MAX)
+						buffTicks = Zeal::EqGame::get_char_info()->Buff[id - 45].Ticks;
+					meta_data["ticks"] = buffTicks;
+			}
 			if (ZealService::get_instance()->labels_hook->GetLabel(id, value))
 			{
-				label_array.push_back({ {"type", id}, {"value", value} });
+				label_data["type"] = id;
+				label_data["value"] = value;
+				label_data["meta"] = meta_data;
+				label_array.push_back(label_data);
 			}
 		}
 		nlohmann::json gauge_array = nlohmann::json::array();
 		for (auto& [id, name] : GaugeNames)
 		{
+			nlohmann::json gauge_data = nlohmann::json::object();
 			std::string text;
 			int val = ZealService::get_instance()->labels_hook->GetGauge(id, text);
-			gauge_array.push_back({ {"type", id}, {"text", text}, {"value", val} });
+			gauge_data["type"] = id;
+			gauge_data["text"] = text;
+			gauge_data["value"] = val;
+			gauge_array.push_back(gauge_data);
 		}
 
 		write(label_array.dump(), pipe_data_type::label);
@@ -255,8 +272,14 @@ void named_pipe::main_loop()
 
 		if (Zeal::EqGame::get_self())
 		{
-			nlohmann::json data = { {"zone", Zeal::EqGame::get_self()->ZoneId}, {"location", Zeal::EqGame::get_self()->Position.toJson() }, {"heading", Zeal::EqGame::get_self()->Heading}, {"autoattack", (bool)(*(BYTE*)0x7f6ffe)} };
-			write(data.dump(), pipe_data_type::player);
+
+			nlohmann::json player_data = nlohmann::json::object();
+			player_data["zone"] = Zeal::EqGame::get_self()->ZoneId;
+			player_data["location"] = Zeal::EqGame::get_self()->Position.toJson();
+			player_data["heading"] = Zeal::EqGame::get_self()->Heading;
+			player_data["autoattack"] = (bool)(*(BYTE*)0x7f6ffe);
+			//nlohmann::json data = { {"zone", Zeal::EqGame::get_self()->ZoneId}, {"location", Zeal::EqGame::get_self()->Position.toJson() }, {"heading", Zeal::EqGame::get_self()->Heading}, {"autoattack", (bool)(*(BYTE*)0x7f6ffe)} };
+			write(player_data.dump(), pipe_data_type::player);
 		}
 		last_output = GetTickCount64();
 	}

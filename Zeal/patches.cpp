@@ -34,6 +34,12 @@ patches::patches()
 	mem::set(0x4C3F93, 0x90, 7);
 	mem::set(0x4C7642, 0x90, 7);
 
+	//the following does not work entirely needs more effort
+	//mem::write<byte>(0x4A594B, 15); //load font sizes 1 to 14 (default is 6)
+	//mem::write<byte>(0X4FDB6A, 15); //allow /chatfontsize to be larger than 5
+	
+
+	ZealService::get_instance()->callbacks->AddGeneric([this]() { ; }, callback_type::InitUI);
 
 	mem::write<BYTE>(0x4A14CF, 0xEB); //don't print Your XML files are not compatible with current EverQuest files, certain windows may not perform correctly.  Use "/loadskin Default 1" to load the EverQuest default skin.
 
