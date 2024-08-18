@@ -134,6 +134,7 @@ TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
                 else
                     return false;
             }
+            return false;
 
         }); //reply hotkey
 
