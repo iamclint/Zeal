@@ -13,7 +13,7 @@ bool Binds::execute_cmd(UINT cmd, bool isdown)
 	if (!Zeal::EqGame::game_wants_input() || !isdown) //checks if the game wants keyboard input... don't call our binds when the game wants input
 	{
 		//if (isdown)
-		//	Zeal::EqGame::print_chat("cmd: %i unk2: 0x%x down: %i", cmd, unk2, isdown);
+		//	Zeal::EqGame::print_chat("cmd: %i down: %i", cmd, isdown);
 		if (zeal->binds_hook->ReplacementFunctions.count(cmd) > 0)
 		{
 			for (auto& fn : zeal->binds_hook->ReplacementFunctions[cmd])

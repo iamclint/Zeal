@@ -672,16 +672,11 @@ namespace Zeal
 			struct ChatWnd* GetActiveChatWindow() const {
 				return reinterpret_cast<struct ChatWnd* (__thiscall*)(const CChatManager*)>(0x41114A)(this);
 			}
-			struct ChatWnd* CreateChatWindow() const {
+			void CreateChatWindow() const {
 				reinterpret_cast<void (__thiscall*)(const CChatManager*)>(0x410C5A)(this);
-				for (int i = 0; i < 32; i++)
-				{
-					if (!ChatWindows[i] && i>0)
-					{
-						return ChatWindows[i - 1];
-					}
-				}
-				return nullptr;
+			}
+			void CreateChatWindow(const char* name, int language , int default_channel, int chat_channel, const char* tell_target, int font) const {
+				reinterpret_cast<void(__thiscall*)(const CChatManager*, const char* name, int language, int default_channel, int chat_channel, const char* tell_target, int font)>(0x410e84)(this, name,language,default_channel,chat_channel, tell_target,font);
 			}
 			ChatWnd* ChatWindows[32];
 			DWORD MaxChatWindows;

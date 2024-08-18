@@ -41,8 +41,15 @@ void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
 	std::string str_cmd = Zeal::String::trim_and_reduce_spaces(cmd);
 	if (str_cmd.length() == 0)
 		return;
-	if (str_cmd.length()>0 && str_cmd.front() != '/')
+	if (str_cmd.length() > 0 && str_cmd.front() != '/')
+	{
+		if (zeal->tells && zeal->tells->HandleTell(str_cmd))
+		{
+			InterpretCommand(c, unused, player, (char*)str_cmd.c_str());
+			return;
+		}
 		str_cmd = "/" + str_cmd;
+	}
 	std::vector<std::string> args = Zeal::String::split(str_cmd," ");
 	const std::string& cmd_name = args.front();
 	if (!args.empty() && !cmd_name.empty() && Zeal::EqGame::is_in_game())

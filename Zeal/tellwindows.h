@@ -6,8 +6,10 @@
 class TellWindows
 {
 public:
+	bool HandleTell(std::string& cmd_data);
 	TellWindows(class ZealService* zeal, class IO_ini* ini);
 	~TellWindows();
 private:
+	void CleanUI();
 };
 
