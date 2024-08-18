@@ -237,6 +237,8 @@ void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
 
 int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 key, int modifier, char keydown)
 {
+    if (!ZealService::get_instance()->chat_hook->UseZealInput)
+        return ZealService::get_instance()->hooks->hook_map["EditWndHandleKey"]->original(EditWndHandleKey)(active_edit, u, key, modifier, keydown);
     //Zeal::EqGame::print_chat("EditWnd: 0x%x key: %x modifier: %i state: %i", active_edit, key, modifier, keydown);
     //you can use a bitwise & operator on the modifier with eq_modifier_keys to check key states
     if (keydown)

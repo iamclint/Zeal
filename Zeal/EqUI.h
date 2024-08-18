@@ -289,7 +289,7 @@ namespace Zeal
 			};
 			/*0x120*/   union {
 
-				struct _CXSTR* INIStorageName;
+				CXSTR INIStorageName;
 				struct _EQINVSLOT* pEQInvSlot;
 			};
 			/*0x124*/   DWORD   Unknown0x124; /* CTextureAnimation */
@@ -666,13 +666,24 @@ namespace Zeal
 			CXPoint(int _x, int _y) : x(_x), y(_y) {};
 		};
 
-		class CChatManager : public EQWND
+		class CChatManager// : public EQWND
 		{
 		public: //this class is a complete hack lol
 			struct ChatWnd* GetActiveChatWindow() const {
 				return reinterpret_cast<struct ChatWnd* (__thiscall*)(const CChatManager*)>(0x41114A)(this);
 			}
-			EQWND* ChatWindows[32];
+			struct ChatWnd* CreateChatWindow() const {
+				reinterpret_cast<void (__thiscall*)(const CChatManager*)>(0x410C5A)(this);
+				for (int i = 0; i < 32; i++)
+				{
+					if (!ChatWindows[i] && i>0)
+					{
+						return ChatWindows[i - 1];
+					}
+				}
+				return nullptr;
+			}
+			ChatWnd* ChatWindows[32];
 			DWORD MaxChatWindows;
 		};
 

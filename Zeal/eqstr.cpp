@@ -30,7 +30,13 @@ eqstr::eqstr(ZealService* zeal)
 {
 	str_replacements =
 	{
-		{6551, "Toggle target and myself"}
+		{6551, "Toggle target and myself"},
+		{4061, "You are already dragging as much as you can!"},
+		{4062, "You are already dragging % 1."},
+		{4063, "Someone else is dragging % 1."},
+		{4064, "You begin to drag % 1."},
+		{4065, "You stop dragging the corpses."},
+		{4066, "You stop dragging the corpse."},
 		//{13085, "Well hello there, %1"}, //replaces Hail, player was for testing purposes
 	};
 	zeal->hooks->Add("GetString", 0x550EFE, GetString, hook_type_detour); //add extra prints for new loot types
