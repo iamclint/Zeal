@@ -2,6 +2,7 @@
 #include "Zeal.h"
 #include "EqAddresses.h"
 #include "string_util.h"
+#include <regex>
 
 //people will see this commit and be like OMG, then they will see this comment and message the discord channel.
 //such hopes and dreams -- its on the list!
@@ -10,7 +11,7 @@ bool TellWindows::HandleTell(std::string& cmd_data)
 {
     if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->ChatManager)
     {
-        Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->GetActiveChatWindow();
+        Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
         if (wnd)
         {
             std::string window_title = wnd->Text.Data->Text;
@@ -44,55 +45,47 @@ std::string GetName(std::string& data)
     std::string lower_msg = data;
     std::transform(lower_msg.begin(), lower_msg.end(), lower_msg.begin(), ::tolower);
 
-    // Define phrases for both scenarios
-    std::string told_phrase = "you told ";
-    std::string tells_phrase = " tells you";
+    // Regex pattern for matching exactly one word before "tells you"
+    std::regex tells_pattern(R"((?:^|\]\s*)(\b\w+\b)\s+tells\s+you)");
+    // Regex pattern for matching exactly one word after "you told"
+    std::regex told_pattern(R"((?:^|\]\s*)you\s+told\s+(\b\w+\b))");
 
-    std::size_t start_pos;
-    std::string name="";
-    bool found_name = false;
+    std::smatch match;
 
-    // Check if the message indicates that you told someone
-    if ((start_pos = lower_msg.find(told_phrase)) != std::string::npos) {
-        start_pos += told_phrase.length();
-        std::size_t end_pos = lower_msg.find(',', start_pos);
-        if (end_pos != std::string::npos)
-        {
-            name = lower_msg.substr(start_pos, end_pos - start_pos);
-            found_name = true;
-        }
+    // Check for "tells you" pattern with only one word before it
+    if (std::regex_search(lower_msg, match, tells_pattern)) {
+        return match[1].str();  // Return the matched single word before "tells you"
     }
-    else if ((start_pos = lower_msg.find(tells_phrase)) != std::string::npos) {
-        std::size_t end_pos = lower_msg.rfind(' ', start_pos - 1); // Find the space before the sender's name
-        if (end_pos != std::string::npos)
-        {
-            name = lower_msg.substr(end_pos + 1, start_pos - end_pos - 1);
-            found_name = true;
-        }
+    // Check for "you told" pattern with only one word after it
+    else if (std::regex_search(lower_msg, match, told_pattern)) {
+        return match[1].str();  // Return the matched single word after "you told"
     }
-    return name;
+
+    return "";  // Return an empty string if no match found
 }
-
 
 void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR msg, byte channel)
 {
-    int multiByteSize = WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, NULL, 0, NULL, NULL);
-    char* multiByteStr = new char[multiByteSize];
-    WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, multiByteStr, multiByteSize, NULL, NULL);
-    std::string msg_data = multiByteStr;
-    std::string name = GetName(msg_data);
-    if (name.length())
+    if (channel == 1 || channel==52) //tell channel
     {
-        Zeal::EqUI::ChatWnd* tell_window = FindTellWnd(name);
-        if (!tell_window)
+        int multiByteSize = WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, NULL, 0, NULL, NULL);
+        char* multiByteStr = new char[multiByteSize];
+        WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, multiByteStr, multiByteSize, NULL, NULL);
+        std::string msg_data = multiByteStr;
+        std::string name = GetName(msg_data);
+        if (name.length())
         {
-            std::string WinName = "*" + name;
-            Zeal::EqGame::Windows->ChatManager->CreateChatWindow(WinName.c_str(), 0, 3, -1, "", 3);
-            tell_window = FindTellWnd(name);
-        }
+            Zeal::EqUI::ChatWnd* tell_window = FindTellWnd(name);
+            if (!tell_window)
+            {
+                std::string WinName = "*" + name;
+                Zeal::EqGame::Windows->ChatManager->CreateChatWindow(WinName.c_str(), 0, 3, -1, "", 3);
+                tell_window = FindTellWnd(name);
+            }
 
-        if (tell_window)
-            wnd = tell_window;
+            if (tell_window)
+                wnd = tell_window;
+        }
     }
     ZealService::get_instance()->hooks->hook_map["AddOutputText"]->original(AddOutputText)(wnd, u, msg, channel);
 }

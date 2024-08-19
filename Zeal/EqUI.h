@@ -678,8 +678,10 @@ namespace Zeal
 			void CreateChatWindow(const char* name, int language , int default_channel, int chat_channel, const char* tell_target, int font) const {
 				reinterpret_cast<void(__thiscall*)(const CChatManager*, const char* name, int language, int default_channel, int chat_channel, const char* tell_target, int font)>(0x410e84)(this, name,language,default_channel,chat_channel, tell_target,font);
 			}
-			ChatWnd* ChatWindows[32];
-			DWORD MaxChatWindows;
+			/*0x000*/	ChatWnd* ChatWindows[32];
+			/*0x080*/	DWORD MaxChatWindows;
+			/*0x084*/	int ActiveChatWnd;
+			/*0x088*/	int AlwaysChatHereIndex;
 		};
 
 
