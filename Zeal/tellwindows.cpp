@@ -9,6 +9,8 @@
 
 bool TellWindows::HandleTell(std::string& cmd_data)
 {
+    if (!enabled)
+        return false;
     if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->ChatManager)
     {
         Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
@@ -66,6 +68,11 @@ std::string GetName(std::string& data)
 
 void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR msg, byte channel)
 {
+    if (!ZealService::get_instance()->tells->enabled) //just early out if tell windows are not enabled
+    {
+        ZealService::get_instance()->hooks->hook_map["AddOutputText"]->original(AddOutputText)(wnd, u, msg, channel);
+        return;
+    }
     if (channel == 1 || channel==52) //tell channel
     {
         int multiByteSize = WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, NULL, 0, NULL, NULL);
@@ -92,7 +99,7 @@ void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR
 
 void TellWindows::CleanUI()
 {
-    if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager)
+    if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager || !enabled)
         return;
     for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
     {
@@ -103,16 +110,52 @@ void TellWindows::CleanUI()
             if (title.substr(0, 1) == "*")
             {
                 cwnd->show(0, false);
+                cwnd->IsOpen = false;
                 break;
             }
         }
     }
 }
 
+void TellWindows::SetEnabled(bool val)
+{
+    enabled = val;
+    ZealService::get_instance()->ini->setValue<bool>(Zeal::EqGame::get_self()->Name, "TellWindows", val);
+    ZealService::get_instance()->ui->options->UpdateOptions();
+}
+
+void TellWindows::LoadUI()
+{
+    IO_ini* ini = ZealService::get_instance()->ini.get();
+    if (!ini->exists(Zeal::EqGame::get_self()->Name, "TellWindows"))
+        ini->setValue<bool>(Zeal::EqGame::get_self()->Name, "TellWindows", false);
+    enabled = ini->getValue<bool>(Zeal::EqGame::get_self()->Name, "TellWindows");
+    ZealService::get_instance()->ui->options->UpdateOptions();
+}
+
 TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
 {
+    zeal->hooks->Add("AddOutputText", 0x4139A2, AddOutputText, hook_type_detour);
+    zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
+    zeal->callbacks->AddGeneric([this]() { LoadUI(); }, callback_type::InitUI);
+
+    zeal->commands_hook->Add("/tellwindows", {}, "Toggle tell windows",
+        [this](std::vector<std::string>& args) {
+            enabled = !enabled;
+            if (enabled)
+                Zeal::EqGame::print_chat("Tell windows enabled.");
+            else
+                Zeal::EqGame::print_chat("Tell windows disabled.");
+
+            SetEnabled(enabled);
+            return true;
+        });
+
+
     zeal->binds_hook->replace_cmd(0x3B, [this](int state)
         {
+            if (!enabled)
+                return false;
             if (state && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
             {
                 int last_tell_index = *(int*)0x7cf0dc;
@@ -131,8 +174,7 @@ TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
 
         }); //reply hotkey
 
-    zeal->hooks->Add("AddOutputText", 0x4139A2, AddOutputText, hook_type_detour);
-    zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
+
 
 }
 
