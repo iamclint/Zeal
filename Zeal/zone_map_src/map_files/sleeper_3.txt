@@ -1,0 +1,15 @@
+P 1907.9890, 2800.9063, -995.9977,  240, 0, 0,  2,  Vyskudra_the_Ancient
+P 1905.3402, 1967.3770, -995.9977,  240, 0, 0,  2,  Kildrukaun_teh_Ancient
+P 1070.9746, 1971.1195, -995.9977,  240, 0, 0,  2,  ZeixshiKar_the_Ancient
+P 1072.7369, 2800.9299, -995.9977,  240, 0, 0,  2,  Tjudawos_the_Ancient
+P -264.6406, 2384.2336, -703.8414,  240, 0, 0,  2,  Drakeen_Apprentice_/_Drakeen_Protector_/_Drakeen_Controller
+P -1008.8434, 1329.7040, -127.8417,  240, 0, 0,  2,  Sinister_Gargoyle
+P -1295.3203, 1392.3521, -127.8417,  0, 0, 240,  2,  Ulessa_Bladesoul
+P -1583.8090, 1327.2943, -127.8417,  240, 0, 0,  2,  Sinister_Gargoyle
+P -625.5784, 1233.5023, -447.8416,  240, 0, 0,  2,  Forbidding_Gargoyle_/_Wyvern_Fanatic
+P 78.6538, 1243.4100, 100.1581,  0, 0, 240,  2,  Paldar_Bladesoul
+P 80.2980, 597.2806, 100.1581,  127, 0, 0,  2,  The_Progenitor
+P -399.6637, 886.4108, 54.1069,  127, 0, 0,  2,  Master_of_the_Guard
+P -399.2250, 366.7792, 100.1581,  240, 0, 0,  2,  The_Overseer
+P -623.1760, 2061.9927, -447.9977,  240, 0, 0,  2,  Drakeen_Guardian?
+P 38.1683, 29.6150, 0.2000,  0, 127, 0,  3,  to_Eastern_Waste

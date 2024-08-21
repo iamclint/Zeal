@@ -219,6 +219,12 @@
     <ClInclude Include="tellwindows.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="zone_map.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="zone_map_data.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -367,6 +373,12 @@
     </ClCompile>
     <ClCompile Include="tellwindows.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="zone_map.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="zone_map_data.cpp">
+      <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

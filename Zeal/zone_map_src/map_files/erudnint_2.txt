@@ -1,0 +1,7 @@
+P -626.0000, -662.0000, 0.0000,  127, 64, 0,  3,  Vials_of_Vitality
+P -782.0000, -664.0000, 0.0000,  127, 64, 0,  3,  City_Office
+P -629.5608, -764.1742, -13.4423,  127, 64, 0,  3,  Sothure's_Fine_Gems
+P -747.3798, -607.1277, 35.5591,  127, 64, 0,  2,  Tower_of_the_Craft_Keepers_(Enchanters)
+P -851.7919, -709.7432, 36.5553,  127, 64, 0,  2,  Tower_of_the_Gate_Callers_(Mage)
+P -746.6250, -822.7549, 35.5307,  127, 64, 0,  2,  Tower_of_the_Crimson_Hands_(Wizards)
+P -556.9409, -761.5172, -15.9969,  0, 0, 127,  2,  Mairee_Silentone(Rng_Epic)

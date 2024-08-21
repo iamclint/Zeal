@@ -1,0 +1,12 @@
+P -639.5634, -1127.5343, 73.6843,  0, 0, 0,  3,  Hasten
+P -598.6928, -1024.7480, 73.6937,  0, 0, 0,  3,  Kashva_-_malevolence
+P -463.2885, -1028.4760, 62.1064,  0, 0, 0,  3,  Eggsniffer_-_dead
+P -420.8254, -1156.7822, 66.7394,  0, 0, 0,  3,  Tired_Farmer_Jestle-_kill_room-hail
+P -470.3211, -898.6056, 76.6899,  0, 0, 0,  3,  Farwhendle_Higglespout_-_Captain_Pete
+P -661.4801, -953.4552, 73.6787,  0, 0, 0,  3,  Romella_'Mynthi_Davissi'
+P -782.3414, -1073.5586, 72.3919,  0, 0, 0,  3,  Patseeker_Rhondarra_-_hail_in_illusion_Vah_shir
+P -770.6579, -1151.1350, 73.4766,  0, 0, 0,  3,  Fixxin_Followig_-_kill_room-hail
+P -861.2987, -1043.7297, 73.8208,  0, 0, 0,  3,  Galdorin_Visigothe_-_'Queen_of_Thorns'
+P -511.3860, -786.7980, 72.4321,  0, 0, 0,  3,  Glob_-_kill_room-hail
+P -836.2500, -854.6350, 73.6868,  0, 0, 0,  3,  an_old_froglok_-_kill_room-hail
+P -842.7640, -999.4578, 73.6791,  0, 0, 0,  3,  Captain_Pete_-_'Wretched_Sands'

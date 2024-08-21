@@ -1,0 +1,11 @@
+P -220.6827, -457.4658, 1.5265, 240, 0, 0, 2, The_Widowmistress
+P -217.442, -357.1519, -13.999, 240, 0, 0, 2, Trazdon
+P 115.599, 154.4509, -26.9989, 240, 0, 0, 2, Rathyl(Bloodstained_Key)
+P 50.1989, 161.8609, -26.7429, 127, 0, 0, 2, Ekeros(Bloodstained_Key)Mnk1.0)
+P -104.6503, -354.9492, 1.5381, 240, 0, 0, 2, Najena
+P -234.286, -90.7223, -26.4678, 240, 0, 0, 2, Officer_Grush
+P 146.4826, 73.3452, -27.8937, 0, 0, 0, 1, Guard's_Keyring
+P -188.1468, -52.9224, -27.8937, 127, 0, 0, 2, guard_captain(Shiny_Metal_Key)
+P -175.651, -257.374, -27.9989, 127, 0, 0, 2, BoneCracker(Dull_Bone_Key)
+P 113.4206, 83.9158, -27.8937, 127, 0, 0, 2, Moosh*(Guard's_Keyring)
+P 217.473, 34.4832, -12.4792, 240, 0, 0, 2, Drelzna(Golden_Crescent_Key)

@@ -1,0 +1,16 @@
+P 133.8694, -866.4638, -25.9980,  240, 0, 0,  2,  Earthmaster_Grundag
+P 8.2079, -605.8532, -63.8751,  240, 0, 0,  2,  Scorch
+P 155.7050, -487.1229, -62.2674,  240, 0, 0,  2,  Overlord_Flargor
+P -9.1532, -1243.3190, 0.2021,  240, 0, 0,  2,  Rockbeast_Kloorg
+P 340.3971, -603.1775, 1.6886,  240, 0, 0,  2,  Stormrider_Hilooa
+P 40.8552, -1079.1591, -0.9980,  240, 0, 0,  2,  Windlord_Brizoris
+P -176.8703, -1222.8560, 1.5285,  240, 0, 0,  2,  Blazemaster_Arnab
+P 71.3730, -1190.2627, 0.2000,  240, 0, 0,  2,  Air_Elemental_Breeze_Master
+P 230.6665, -682.2179, -58.4356,  240, 0, 0,  2,  Sertiki_the_Master_of_Tides
+P 172.2232, -445.8770, -47.9667,  240, 0, 0,  2,  Water_Elemental_Overseer
+P -207.1913, -745.3818, -24.7856,  240, 0, 0,  2,  Tidemaster_Aquinius
+P -77.1310, -1150.8895, -1.1208,  240, 0, 0,  2,  Water_Elemental_Officer*
+P 136.7165, -743.9870, -36.4740,  240, 0, 0,  2,  Fire_Elemental_Brigand*
+P 308.8373, -536.1683, 0.1582,  240, 0, 0,  2,  Vrek_Hillmaster
+P -151.1964, -695.3224, -47.9763,  240, 0, 0,  2,  a_tidal_monstrosity
+P -236.5636, -764.7360, -17.9980,  240, 0, 0,  2,  Windspirit_Glorn

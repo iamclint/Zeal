@@ -1,0 +1,8 @@
+P -61.1308, -594.1358, 16.1582, 240, 0, 0, 2, Khrix_Fritchoff
+P 203.867, -383.9266, 1.5359, 0, 0, 0, 1, Frightfull_Carved_Pimpkin
+P 38.3074, -667.5937, 36.1582, 240, 0, 0, 2, an_undead_barkeep
+P -27.4451, -699.9099, 32.1582, 240, 0, 0, 2, reclusive_ghoul_magus
+P 75.9701, -696.6037, 52.127, 240, 0, 0, 2, an_undead_knight_of_Unrest
+P -146.9987, -485.3417, -35.8417, 240, 0, 0, 2, Garanel_Rucksif
+P 16.705, -574.51, 44.127, 240, 0, 0, 2, a_reanimated_hand(not_accurate)
+P -25.1908, -642.8665, 2.1581, 240, 0, 0, 2, an_undead_brewer
