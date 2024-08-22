@@ -50,6 +50,7 @@ ZealService::ZealService()
 	autofire = std::make_shared<AutoFire>(this, ini.get());
 	physics = std::make_shared<Physics>(this, ini.get());
 	target_ring = std::make_shared<TargetRing>(this, ini.get());
+	zone_map = std::make_shared<ZoneMap>(this, ini.get());
 	this->basic_binds();
 }
 

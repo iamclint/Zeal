@@ -1,0 +1,1 @@
+P 593.3599, -433.2574, -71.1927, 0, 0, 0, 1, Emerald-Tipped_Staff(GS)Wiz

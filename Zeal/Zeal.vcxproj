@@ -163,6 +163,7 @@
     <ClInclude Include="crash_handler.h" />
     <ClInclude Include="directx.h" />
     <ClInclude Include="floating_damage.h" />
+    <ClInclude Include="zone_map.h" />
     <ClInclude Include="miniz.h" />
     <ClInclude Include="named_pipe.h" />
     <ClInclude Include="nameplate.h" />
@@ -214,6 +215,7 @@
     <ClInclude Include="ui_raid.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="Zeal.h" />
+    <ClInclude Include="zone_map_data.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
@@ -222,6 +224,7 @@
     <ClCompile Include="directx.cpp" />
     <ClCompile Include="EqPackets.h" />
     <ClCompile Include="floating_damage.cpp" />
+    <ClCompile Include="zone_map.cpp" />
     <ClCompile Include="miniz.c" />
     <ClCompile Include="named_pipe.cpp" />
     <ClCompile Include="nameplate.cpp" />
@@ -265,6 +268,7 @@
     <ClCompile Include="ui_raid.cpp" />
     <ClCompile Include="vectors.cpp" />
     <ClCompile Include="Zeal.cpp" />
+    <ClCompile Include="zone_map_data.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Zeal.rc" />

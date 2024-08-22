@@ -41,6 +41,7 @@ public:
 	std::shared_ptr<Melody> melody = nullptr;
 	std::shared_ptr<AutoFire> autofire = nullptr;
 	std::shared_ptr<TargetRing> target_ring = nullptr;
+	std::shared_ptr<ZoneMap> zone_map = nullptr;
 	std::shared_ptr<patches> game_patches = nullptr;
 	
 	ZealService();

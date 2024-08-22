@@ -1,0 +1,13 @@
+P -235, -1000, -82, 240, 0, 0, 2, A_Frost_Spinner
+P -185, -430, 17, 240, 0, 0, 2, a_goblin_archeologist
+P -200, -470, -41, 240, 0, 0, 2, Snowfang
+P 264.5557, -660.3894, -41.8104, 127, 0, 0, 2, High_Priest_Zaharn(Mnk1.0)
+P 373, -302, 0, 240, 0, 0, 2, Alchemist_Zmegk
+P 585, -189, 0, 240, 0, 0, 2, a_goblin_scryer(PH:Diviner)
+P 327, -125, 0, 240, 0, 0, 2, Jailmaster_Nomk
+P -261, -225, 0, 240, 0, 0, 2, a_goblin_preacher
+P 248.9576, -973.254, 1.6939, 240, 0, 0, 2, A_Guardian_of_Vox*
+P -21.2508, -952.8328, -83.8104, 240, 0, 0, 2, The_Chilling_Terror
+P 280.3888, -679.327, -40.4262, 240, 0, 0, 2, King_Thex`Ka_IV
+P 312.9678, -659.105, -40.435, 240, 0, 0, 2, an_elite_honor_guard
+P -0.4798, -837.778, -110.4454, 240, 0, 0, 2, an_injured_polar_bear(not_accurate)

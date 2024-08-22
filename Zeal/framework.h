@@ -38,6 +38,7 @@
 #include "tooltip.h"
 #include "physics.h"
 #include "target_ring.h"
+#include "zone_map.h"
 #include "crash_handler.h"
 #include "patches.h"
 

@@ -1,0 +1,15 @@
+P -76.2094, 445.136, -14.5009, 127, 0, 0, 3, Dracolich*DDD*
+P -729.371, 145.6032, -22.9768, 240, 0, 0, 3, a_writhing_maw_of_misery
+P 5.8674, 656.33, 25.3745, 240, 0, 0, 3, a_wailing_wretch
+P 365.4791, -258.9372, 95.134, 127, 64, 0, 3, Terror_Temple
+P 362.3648, 584.68, 88.7574, 127, 64, 0, 3, Fright_Temple
+P 1198.2138, 567.8369, 101.796, 127, 64, 0, 3, Dread_Temple
+P -678.32, 1001.6096, 0.787, 240, 0, 0, 3, a_trembling_courier
+P -264.3842, 1215.3308, -19.1722, 127, 64, 0, 2, Worry_Wraith_Tower
+P -1294.2093, 48.3671, -2.8001, 240, 0, 0, 3, a_grim_ruffian
+P 1119.7487, 279.99, -2.8001, 240, 0, 0, 3, a_wildly_gesticulating_digit
+P -402.9402, -981.5557, 79.762, 240, 0, 0, 3, Koth_the_Lobe-gorged
+P -794.9927, -1243.647, 5.5842, 240, 0, 0, 3, a_trepid_gazer
+P -1201.8043, -1149.6181, -1.2766, 240, 0, 0, 3, a_scar-covered_shiverback
+P -876.6535, 836.3076, 35.1912, 240, 0, 0, 3, an_ice_encrusted_spinechiller
+P 65.31, 876.1654, 6.24, 240, 0, 0, 3, an_anxiety_corpuscle

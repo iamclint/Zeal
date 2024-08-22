@@ -1,0 +1,5 @@
+P 472, 1033, 0, 0, 0, 0, 2, Large_Kobold_Camp
+P 1050, 1900, 0, 0, 0, 0, 2, Kobold_Camp
+P 250, 2400, 0, 0, 0, 0, 2, Skeleton_Camp
+P 909, 1483, -38.6741, 0, 0, 0, 3, Great_Spires
+P 359, -1081, -60.6019, 0, 0, 0, 3, Druid_Circle

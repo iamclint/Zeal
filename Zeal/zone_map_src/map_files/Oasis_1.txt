@@ -1,0 +1,7 @@
+P 261, 1321, 4.8498, 0, 0, 0, 3, Marnan_(Merchant)
+P 306, 1307, 7.3498, 0, 0, 0, 3, Tizzy_(Brewer)
+P 6, -597, 3.323, 0, 0, 0, 3, Sythan_(Merchant)
+P -51, -613, 3.323, 0, 0, 0, 3, Transan_(Weapons)
+P -71, -512, 3.322, 0, 0, 0, 3, Isslana_(Merchant)
+P 43, -542, 3.323, 0, 0, 0, 3, Tran_(Brewer)
+P 0, -493, 3.323, 0, 0, 0, 3, Gadallion_(Spells)
