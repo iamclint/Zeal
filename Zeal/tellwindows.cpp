@@ -217,7 +217,8 @@ void TellWindows::LoadUI()
 
 TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
 {
-    zeal->hooks->Add("GetActiveChatWindow", 0x41114A, GetActiveChatWindow, hook_type_detour); //hook to fix item linking to tell windows if always chat here is selected anywhere
+    //zeal->hooks->Add("GetActiveChatWindow", 0x41114A, GetActiveChatWindow, hook_type_detour); 
+    zeal->hooks->Add("GetActiveChatWindow", 0x425D27, GetActiveChatWindow, hook_type_replace_call);//hook to fix item linking to tell windows if always chat here is selected anywhere
     zeal->hooks->Add("AddOutputText", 0x4139A2, AddOutputText, hook_type_detour);
     zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
     zeal->callbacks->AddGeneric([this]() { LoadUI(); }, callback_type::InitUI);
