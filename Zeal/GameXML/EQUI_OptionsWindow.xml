@@ -476,7 +476,7 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
+      <CX>498</CX>
       <CY>355</CY>
     </Size>
   </Page>
@@ -1260,7 +1260,7 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
+      <CX>498</CX>
       <CY>355</CY>
     </Size>
   </Page>
@@ -1444,7 +1444,7 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
+      <CX>498</CX>
       <CY>355</CY>
     </Size>
   </Page>
@@ -1576,7 +1576,7 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
+      <CX>498</CX>
       <CY>355</CY>
     </Size>
   </Page>
@@ -2135,7 +2135,7 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
+      <CX>498</CX>
       <CY>355</CY>
     </Size>
   </Page>
@@ -4356,7 +4356,7 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
+      <CX>498</CX>
       <CY>355</CY>
     </Size>
   </Page>
@@ -4395,7 +4395,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>46</Y>
+      <Y>14</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4425,7 +4425,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>68</Y>
+      <Y>46</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4485,7 +4485,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>90</Y>
+      <Y>68</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4515,7 +4515,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>112</Y>
+      <Y>90</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4545,7 +4545,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>134</Y>
+      <Y>112</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4575,7 +4575,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>178</Y>
+      <Y>156</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4605,7 +4605,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>200</Y>
+      <Y>178</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4635,8 +4635,8 @@
     <ScreenID>Zeal_Timestamps_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>10</X>
-      <Y>334</Y>
+      <X>194</X>
+      <Y>199</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4656,8 +4656,8 @@
     <ScreenID>Zeal_Timestamps_Combobox</ScreenID>
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
-      <X>10</X>
-      <Y>354</Y>
+      <X>194</X>
+      <Y>219</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4737,7 +4737,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>200</X>
-      <Y>188</Y>
+      <Y>10</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4759,7 +4759,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>212</Y>
+      <Y>34</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4780,7 +4780,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>232</Y>
+      <Y>54</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4793,7 +4793,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>231</Y>
+      <Y>53</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4815,7 +4815,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>250</Y>
+      <Y>72</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4836,7 +4836,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>270</Y>
+      <Y>92</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4849,7 +4849,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>269</Y>
+      <Y>91</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4871,7 +4871,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>291</Y>
+      <Y>113</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4892,7 +4892,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>311</Y>
+      <Y>133</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4905,7 +4905,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>310</Y>
+      <Y>132</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4927,7 +4927,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>329</Y>
+      <Y>151</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4948,7 +4948,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>349</Y>
+      <Y>171</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4961,7 +4961,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>348</Y>
+      <Y>170</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -5093,7 +5093,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>222</Y>
+      <Y>200</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5123,7 +5123,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>244</Y>
+      <Y>36</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5153,7 +5153,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>266</Y>
+      <Y>222</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5283,7 +5283,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>156</Y>
+      <Y>134</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5314,7 +5314,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>288</Y>
+      <Y>244</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5345,7 +5345,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>310</Y>
+      <Y>266</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5392,26 +5392,12 @@
     </TabTextActiveColor>
     <Style_Sizable>true</Style_Sizable>
     <Pieces>Zeal_HideCorpse</Pieces>
-    <Pieces>Zeal_Cam</Pieces>
     <Pieces>Zeal_BlueCon</Pieces>
     <!--<Pieces>Zeal_Timestamp</Pieces>-->
     <Pieces>Zeal_Input</Pieces>
     <Pieces>Zeal_PanDelayLabel</Pieces>
     <Pieces>Zeal_PanDelaySlider</Pieces>
     <Pieces>Zeal_PanDelayValueLabel</Pieces>
-    <Pieces>Zeal_CamSensitivityLabel</Pieces>
-    <Pieces>Zeal_FirstPersonXLabel</Pieces>
-    <Pieces>Zeal_FirstPersonSlider_X</Pieces>
-    <Pieces>Zeal_FirstPersonLabel_X</Pieces>
-    <Pieces>Zeal_FirstPersonYLabel</Pieces>
-    <Pieces>Zeal_FirstPersonSlider_Y</Pieces>
-    <Pieces>Zeal_FirstPersonLabel_Y</Pieces>
-    <Pieces>Zeal_ThirdPersonXLabel</Pieces>
-    <Pieces>Zeal_ThirdPersonSlider_X</Pieces>
-    <Pieces>Zeal_ThirdPersonLabel_X</Pieces>
-    <Pieces>Zeal_ThirdPersonYLabel</Pieces>
-    <Pieces>Zeal_ThirdPersonSlider_Y</Pieces>
-    <Pieces>Zeal_ThirdPersonLabel_Y</Pieces>
     <Pieces>Zeal_ShowHelm</Pieces>
     <Pieces>Zeal_Escape</Pieces>
     <Pieces>Zeal_Fov</Pieces>
@@ -5423,7 +5409,6 @@
     <Pieces>Zeal_AltContainerTooltips</Pieces>
     <Pieces>Zeal_SpellbookAutoStand</Pieces>
     <Pieces>Zeal_FloatingDamage</Pieces>
-    <Pieces>Zeal_UseOldSens</Pieces>
     <Pieces>Zeal_Timestamps_Combobox</Pieces>
     <Pieces>Zeal_Timestamps_Label</Pieces>
     <Pieces>Zeal_TargetRing</Pieces>
@@ -5440,7 +5425,83 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
+      <CX>498</CX>
+      <CY>355</CY>
+    </Size>
+  </Page>
+  <!-- *** Zeal Cam Tab *** -->
+  <Page item="OptionsZealCamPage">
+    <ScreenID>OptionsZealCamPage</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <!-- Pages are sized and positioned by their parent tab -->
+    <Style_VScroll>true</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <DrawTemplate>WDT_Def</DrawTemplate>
+    <TabText>Cam</TabText>
+    <TabTextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TabTextColor>
+    <TabTextActiveColor>
+      <R>255</R>
+      <G>255</G>
+      <B>0</B>
+    </TabTextActiveColor>
+    <Style_Sizable>true</Style_Sizable>
+    <Pieces>Zeal_Cam</Pieces>
+    <Pieces>Zeal_UseOldSens</Pieces>
+    <Pieces>Zeal_CamSensitivityLabel</Pieces>
+    <Pieces>Zeal_FirstPersonXLabel</Pieces>
+    <Pieces>Zeal_FirstPersonSlider_X</Pieces>
+    <Pieces>Zeal_FirstPersonLabel_X</Pieces>
+    <Pieces>Zeal_FirstPersonYLabel</Pieces>
+    <Pieces>Zeal_FirstPersonSlider_Y</Pieces>
+    <Pieces>Zeal_FirstPersonLabel_Y</Pieces>
+    <Pieces>Zeal_ThirdPersonXLabel</Pieces>
+    <Pieces>Zeal_ThirdPersonSlider_X</Pieces>
+    <Pieces>Zeal_ThirdPersonLabel_X</Pieces>
+    <Pieces>Zeal_ThirdPersonYLabel</Pieces>
+    <Pieces>Zeal_ThirdPersonSlider_Y</Pieces>
+    <Pieces>Zeal_ThirdPersonLabel_Y</Pieces>
+    <Location>
+      <X>0</X>
+      <Y>22</Y>
+    </Location>
+    <Size>
+      <CX>498</CX>
+      <CY>355</CY>
+    </Size>
+  </Page>
+  <!-- *** Zeal Map Tab *** -->
+  <Page item="OptionsZealMapPage">
+    <ScreenID>OptionsZealMapPage</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <!-- Pages are sized and positioned by their parent tab -->
+    <Style_VScroll>true</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <DrawTemplate>WDT_Def</DrawTemplate>
+    <TabText>Map</TabText>
+    <TabTextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TabTextColor>
+    <TabTextActiveColor>
+      <R>255</R>
+      <G>255</G>
+      <B>0</B>
+    </TabTextActiveColor>
+    <Style_Sizable>true</Style_Sizable>
+    <!--<Pieces></Pieces>-->
+    <Location>
+      <X>0</X>
+      <Y>22</Y>
+    </Location>
+    <Size>
+      <CX>498</CX>
       <CY>355</CY>
     </Size>
   </Page>
@@ -5462,6 +5523,8 @@
     <Pages>OptionsChatPage</Pages>
     <Pages>OptionsColorPage</Pages>
     <Pages>OptionsZealPage</Pages>
+    <Pages>OptionsZealCamPage</Pages>
+    <Pages>OptionsZealMapPage</Pages>
   </TabBox>
   <Screen item="OptionsWindow">
     <ScreenID />
