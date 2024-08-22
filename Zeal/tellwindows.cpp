@@ -6,7 +6,86 @@
 
 //people will see this commit and be like OMG, then they will see this comment and message the discord channel.
 //such hopes and dreams -- its on the list!
+Zeal::EqUI::ChatWnd* __fastcall GetActiveChatWindow(Zeal::EqUI::CChatManager* cm, int unused)
+{
+    //fix up a little bit so the active window for things like linking items don't go to your always chat here if you are using tell windows
+    if (ZealService::get_instance()->tells && ZealService::get_instance()->tells->enabled)
+    {
+        Zeal::EqUI::ChatWnd* wnd = cm->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
+        std::string window_title = wnd->Text.Data->Text;
+        if (window_title.substr(0, 1) == "*")
+            return wnd;
+    }
+    return ZealService::get_instance()->hooks->hook_map["GetActiveChatWindow"]->original(GetActiveChatWindow)(cm, unused);
+}
+Zeal::EqUI::ChatWnd* FindPreviousTellWnd()
+{
+    Zeal::EqUI::ChatWnd* wnd = nullptr;
+    if (Zeal::EqGame::Windows->ChatManager->ActiveChatWnd > 0)
+    {
+        for (int i = Zeal::EqGame::Windows->ChatManager->ActiveChatWnd - 1; i != Zeal::EqGame::Windows->ChatManager->ActiveChatWnd; i--)
+        {
+            if (i<=-1)
+                i = Zeal::EqGame::Windows->ChatManager->MaxChatWindows;
+          
+            wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
+            if (wnd)
+            {
+                std::string window_title = wnd->Text.Data->Text;
+                if (window_title.substr(0, 1) == "*")
+                    return wnd;
+            }
+        }
+    }
+    return nullptr;
+}
+Zeal::EqUI::ChatWnd* FindNextTellWnd()
+{
+    Zeal::EqUI::ChatWnd* wnd = nullptr;
 
+    for (int i = Zeal::EqGame::Windows->ChatManager->ActiveChatWnd + 1 ; i != Zeal::EqGame::Windows->ChatManager->ActiveChatWnd; i++)
+    {
+        if (i == Zeal::EqGame::Windows->ChatManager->MaxChatWindows)
+            i = 0;
+
+        wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
+        if (wnd)
+        {
+            std::string window_title = wnd->Text.Data->Text;
+            if (window_title.substr(0, 1) == "*")
+                return wnd;
+        }
+    }
+    return nullptr;
+}
+
+bool TellWindows::HandleKeyPress(int key, bool down, int modifier)
+{
+    if (!enabled || !Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager)
+        return false;
+    Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
+    if (wnd)
+    {
+        std::string window_title = wnd->Text.Data->Text;
+        if (window_title.substr(0, 1) == "*")
+        {
+            if (key == 0xf && down)
+            {
+                Zeal::EqUI::ChatWnd* focus_wnd = nullptr;
+                if (modifier==1)
+                    focus_wnd=FindPreviousTellWnd();
+                else
+                    focus_wnd=FindNextTellWnd();
+                if (focus_wnd && focus_wnd->edit)
+                {
+                    focus_wnd->edit->SetFocus();
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
 bool TellWindows::HandleTell(std::string& cmd_data)
 {
     if (!enabled)
@@ -133,8 +212,12 @@ void TellWindows::LoadUI()
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
+
+
+
 TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
 {
+    zeal->hooks->Add("GetActiveChatWindow", 0x41114A, GetActiveChatWindow, hook_type_detour); //hook to fix item linking to tell windows if always chat here is selected anywhere
     zeal->hooks->Add("AddOutputText", 0x4139A2, AddOutputText, hook_type_detour);
     zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
     zeal->callbacks->AddGeneric([this]() { LoadUI(); }, callback_type::InitUI);
