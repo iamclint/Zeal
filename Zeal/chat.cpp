@@ -338,6 +338,12 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
             }
         }
     }
+
+    if (key == 0x1C && !keydown) //enter
+    {
+        ZealService::get_instance()->tells->ResetChatToAlwaysWindow();
+        active_edit->InputText.Assure(32, 0);
+    }
     return ZealService::get_instance()->hooks->hook_map["EditWndHandleKey"]->original(EditWndHandleKey)(active_edit, u, key, modifier, keydown);
 }
 

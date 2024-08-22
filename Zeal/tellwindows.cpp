@@ -59,6 +59,17 @@ Zeal::EqUI::ChatWnd* FindNextTellWnd()
     return nullptr;
 }
 
+bool TellWindows::ResetChatToAlwaysWindow() 
+{
+    Zeal::EqUI::ChatWnd* cwnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->AlwaysChatHereIndex];
+    if (cwnd && cwnd->edit)
+    {
+		cwnd->edit->SetFocus();
+		return true;
+	}
+    return false;
+}
+
 bool TellWindows::HandleKeyPress(int key, bool down, int modifier)
 {
     if (!enabled || !Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager)
@@ -233,7 +244,6 @@ TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
             SetEnabled(enabled);
             return true;
         });
-
 
     zeal->binds_hook->replace_cmd(0x3B, [this](int state)
         {
