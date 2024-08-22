@@ -79,12 +79,13 @@ ___
   - **Description:** plays songs in order until interrupted in any fashion.
 
 - `/map`
-  - **Arguments:** `on`, `off`, `rect`, `marker`, `background`
+  - **Arguments:** `on`, `off`, `rect`, `marker`, `background`, `zoom`
   - **Example:** `/map` toggles map on and off
   - **Example:** `/map marker 500 -100` sets a target marker at loc 500, -100 (default size)
   - **Example:** `/map marker 500 -100 0.03` sets a target marker at loc 500, -100 with size = 3% of screen
   - **Example:** `/map 500 -100` shortcut for map marker 500 -100
   - **Example:** `/map 0` shortcut for map marker 0 0 0 (clears marker)
+  - **Example:** `/map zoom 200` sets map scaling to 200% (2x) and centers on position
   - **Example:** `/map rect 0.02 0.03 0.5 0.6` map window top=2% left=3% bottom=50% right=60% of screen dimensions
   - **Description:** controls map enable, size, and markers
     

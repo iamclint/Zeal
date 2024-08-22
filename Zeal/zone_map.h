@@ -33,18 +33,20 @@ private:
 	static constexpr float kDefaultPositionSize = 0.01f;
 	static constexpr float kDefaultMarkerSize = 0.02f;
 
-	// Methods that run in the parser thread.
+	// UI and parser methods.
 	bool parse_command(const std::vector<std::string>& args);
 	bool parse_shortcuts(const std::vector<std::string>& args);
 	void parse_rect(const std::vector<std::string>& args);
 	void parse_marker(const std::vector<std::string>& args);
 	void parse_background(const std::vector<std::string>& args);
+	void parse_zoom(const std::vector<std::string>& args);
 	void set_marker(int y, int x);
 	void clear_marker();
+	bool set_zoom(int zoom_percent);
 	void load_ini(class IO_ini* ini);
 	void dump();
 
-	// The following methods execute under the callback_render() thread.
+	// The following methods execute as part of callback_render().
 	void render_release_resources();
 	void render_load_map();
 	void render_map();
@@ -59,6 +61,7 @@ private:
 	int marker_y = 0;
 
 	float scale_factor = 0;  // Conversion factors for map data to screen coordinates.
+	float zoom_factor = 1.f;
 	float offset_x = 0;
 	float offset_y = 0;
 	float map_rect_top = kDefaultRectTop;
