@@ -252,7 +252,19 @@ void Binds::add_binds()
 				Zeal::EqGame::set_target(ent);
 		}
 	});
-	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down) 
+	add_bind(228, "Toggle Map", "ToggleMap", key_category::UI, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			ZealService::get_instance()->zone_map->set_enabled(!ZealService::get_instance()->zone_map->is_enabled());
+		}
+		});
+	add_bind(229, "Toggle Map Background", "ToggleMapBackground", key_category::UI, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			ZealService::get_instance()->zone_map->toggle_background();
+		}
+		});
+	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)
 		{
