@@ -61,7 +61,7 @@ Physics::Physics(ZealService* zeal, IO_ini* ini)
 
 	zeal->hooks->Add("ProcessPhysics", 0x54D964, ProcessPhysics, hook_type_detour);
 	zeal->hooks->Add("MovePlayer", 0x504765, MovePlayer, hook_type_detour);
-	mem::write<float>(0x5e6204, 0.06f);
+	//mem::write<float>(0x5e6204, 0.06f);  // Interferes with bard instrument mods (resists, selo's)
 	//zeal->hooks->Add("GetTime", 0x54dbad, GetTime, hook_type_replace_call);
 	//-*(float*)0x5e6204 = 0.06f;
 	//0x5e44d4 How high off the ground you stop dropping during levitate

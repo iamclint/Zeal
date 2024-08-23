@@ -7,11 +7,10 @@
 
 // Possible enhancements:
 // - Support a command for default small / med / large map sizes
-// - Refine zoom render to filter off screen lines and intersect vs clamp
 // - Support 'windowed mode' (drag and drop, resizing)
-// - Implement map data points of interest (or purge to reduce memory/map sizes)
 
 static constexpr int kBackgroundCount = 2;  // Two triangles in split mode.
+static constexpr int kBackgroundVertices = 3 + (kBackgroundCount - 1);  // Two triangles using split.
 static constexpr int kMarkerCount = 4;  // Four triangles.
 static constexpr int kPositionCount = 2;  // Two triangles.
 static constexpr int kPositionVertices = kPositionCount * 3; // Fixed triangle list.
@@ -22,6 +21,101 @@ struct MapVertex {
     float x, y, z, rhw;  // Position coordinates and rhw (D3DFVF_XYZRHW).
     D3DCOLOR color; // Color from the D3DFVF_DIFFUSE flag.
 };
+
+struct TwoPoints {
+    float x0, y0, x1, y1;  // Either line segment end or rect TL BR.
+};
+
+
+
+// Implements Cohen-Sutherland clipping (with +y towards bottom).
+// https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
+
+typedef int OutCode;
+
+static constexpr int INSIDE = 0b0000;
+static constexpr int LEFT = 0b0001;
+static constexpr int RIGHT = 0b0010;
+static constexpr int TOP = 0b0100;
+static constexpr int BOTTOM = 0b1000;
+
+// Returns the bit code for the point (x, y) relative to the clip rectangle.
+OutCode compute_outcode(const TwoPoints& clip_rect, double x, double y)
+{
+    OutCode code = INSIDE;  // initialised as being inside of clip window
+
+    if (x < clip_rect.x0)           // to the left of clip window
+        code |= LEFT;
+    else if (x > clip_rect.x1)      // to the right of clip window
+        code |= RIGHT;
+    if (y < clip_rect.y0)           // above the clip window
+        code |= TOP;
+    else if (y > clip_rect.y1)      // below the clip window
+        code |= BOTTOM;
+
+    return code;
+}
+
+// Returns true if the line parameter is visible (after clipping).
+bool clip_line_segment(const TwoPoints& clip_rect, TwoPoints& line) {
+    // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
+    OutCode outcode0 = compute_outcode(clip_rect, line.x0, line.y0);
+    OutCode outcode1 = compute_outcode(clip_rect, line.x1, line.y1);
+    bool accept = false;
+
+    while (true) {
+        if (!(outcode0 | outcode1)) {
+            return true;  // Bitwise OR is 0: Both points inside window. Done.
+        }
+        else if (outcode0 & outcode1) {
+            return false;  // Points share an outside zone, so both outside. Done.
+        }
+        else {
+            // Calculate the line segment to clip outside point to edge intersection.
+            float x, y;
+
+            // At least one endpoint is outside the clip rectangle; pick it.
+            OutCode outcodeOut = outcode1 > outcode0 ? outcode1 : outcode0;
+
+            // Now find the intersection point;
+            // use formulas:
+            //   slope = (y1 - y0) / (x1 - x0)
+            //   x = x0 + (1 / slope) * (ym - y0), where ym is ymin or ymax
+            //   y = y0 + slope * (xm - x0), where xm is xmin or xmax
+            // No need to worry about divide-by-zero because, in each case, the
+            // outcode bit being tested guarantees the denominator is non-zero
+            if (outcodeOut & BOTTOM) {           // point is below the clip window
+                x = line.x0 + (line.x1 - line.x0) * (clip_rect.y1 - line.y0) / (line.y1 - line.y0);
+                y = clip_rect.y1;
+            }
+            else if (outcodeOut & TOP) { // point is above the clip window
+                x = line.x0 + (line.x1 - line.x0) * (clip_rect.y0 - line.y0) / (line.y1 - line.y0);
+                y = clip_rect.y0;
+            }
+            else if (outcodeOut & RIGHT) {  // point is to the right of clip window
+                y = line.y0 + (line.y1 - line.y0) * (clip_rect.x1 - line.x0) / (line.x1 - line.x0);
+                x = clip_rect.x1;
+            }
+            else if (outcodeOut & LEFT) {   // point is to the left of clip window
+                y = line.y0 + (line.y1 - line.y0) * (clip_rect.x0 - line.x0) / (line.x1 - line.x0);
+                x = clip_rect.x0;
+            }
+
+            // Now we move outside point to intersection point to clip
+            // and get ready for next pass.
+            if (outcodeOut == outcode0) {
+                line.x0 = x;
+                line.y0 = y;
+                outcode0 = compute_outcode(clip_rect, line.x0, line.y0);
+            }
+            else {
+                line.x1 = x;
+                line.y1 = y;
+                outcode1 = compute_outcode(clip_rect, line.x1, line.y1);
+            }
+        }
+    }
+}
 
 
 void ZoneMap::render_release_resources() {
@@ -72,11 +166,7 @@ void ZoneMap::render_load_map() {
     offset_x = rect_left - zone_map_data->min_x * scale_factor;
     offset_y = rect_top - zone_map_data->min_y * scale_factor;
 
-    // Update right and bottom clipping edges after common scale_factor (for background).
-    rect_right = rect_left + (zone_map_data->max_x - zone_map_data->min_x) * scale_factor;
-    rect_bottom = rect_top + (zone_map_data->max_y - zone_map_data->min_y) * scale_factor;
-
-    // In zoom, keep the background constant and just adjust scale and offsets.
+    // In zoom, the background is the full window and just adjust scale and offsets.
     if (zoom_factor > 1.f && Zeal::EqGame::get_self()) {
         scale_factor *= zoom_factor;  // Scale is easy.
         // For the offsets, map position in world coordinates to center of screen rect.
@@ -88,30 +178,46 @@ void ZoneMap::render_load_map() {
         offset_x = rect_center_x - position_x * scale_factor;
         offset_y = rect_center_y - position_y * scale_factor;
     }
+    else {
+        // Clip right and bottom clipping edges using common scale factor (for background).
+        rect_right = rect_left + (zone_map_data->max_x - zone_map_data->min_x) * scale_factor;
+        rect_bottom = rect_top + (zone_map_data->max_y - zone_map_data->min_y) * scale_factor;
+    }
 
-    line_count = zone_map_data->num_lines;
-    std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(line_count * 2);
+    const int kMaxLineCount = zone_map_data->num_lines;  // Allocate a buffer assuming all visible.
+    std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(kMaxLineCount * 2);
 
-    // TODO: Cleanly clip (intersect the lines versus hard clamp when zoom enabled).
-    for (int i = 0; i < line_count; ++i) {
+    const TwoPoints clip_rect = { .x0 = rect_left, .y0 = rect_top, .x1 = rect_right, .y1 = rect_bottom };
+    line_count = 0;  // Tracks number of visible (after clipping) lines.
+    for (int i = 0; i < kMaxLineCount; ++i) {
+        TwoPoints line = { zone_map_data->lines[i].x0 * scale_factor + offset_x,
+                            zone_map_data->lines[i].y0 * scale_factor + offset_y,
+                            zone_map_data->lines[i].x1 * scale_factor + offset_x,
+                            zone_map_data->lines[i].y1 * scale_factor + offset_y
+        };
+        if (!clip_line_segment(clip_rect, line))
+            continue;
+
         auto color = D3DCOLOR_XRGB(zone_map_data->lines[i].red, zone_map_data->lines[i].green, zone_map_data->lines[i].blue);
         if (color == D3DCOLOR_XRGB(0, 0, 0)) {
-            color = D3DCOLOR_XRGB(128, 128, 128);
+            color = D3DCOLOR_XRGB(64, 64, 64);  // Increase visibility of black lines.
         }
-        line_vertices[2 * i].x = max(rect_left, min(rect_right, zone_map_data->lines[i].x0 * scale_factor + offset_x));
-        line_vertices[2 * i].y = max(rect_top, min(rect_bottom, zone_map_data->lines[i].y0 * scale_factor + offset_y));
-        line_vertices[2 * i].z = 0.5f;
-        line_vertices[2 * i].rhw = 1.f;
-        line_vertices[2 * i].color = color;
-        line_vertices[2 * i + 1].x = max(rect_left, min(rect_right, zone_map_data->lines[i].x1 * scale_factor + offset_x));
-        line_vertices[2 * i + 1].y = max(rect_top, min(rect_bottom, zone_map_data->lines[i].y1 * scale_factor + offset_y));
-        line_vertices[2 * i + 1].z = 0.5f;
-        line_vertices[2 * i + 1].rhw = 1.f;
-        line_vertices[2 * i + 1].color = color;
+
+        line_vertices[2 * line_count].x = line.x0;
+        line_vertices[2 * line_count].y = line.y0;
+        line_vertices[2 * line_count].z = 0.5f;
+        line_vertices[2 * line_count].rhw = 1.f;
+        line_vertices[2 * line_count].color = color;
+        line_vertices[2 * line_count + 1].x = line.x1;
+        line_vertices[2 * line_count + 1].y = line.y1;
+        line_vertices[2 * line_count + 1].z = 0.5f;
+        line_vertices[2 * line_count + 1].rhw = 1.f;
+        line_vertices[2 * line_count + 1].color = color;
+        line_count++;
     }
 
     // Add the background triangle vertices at the end of the buffer. 
-    const int kNumBackgroundVertices = 3 + (kBackgroundCount - 1);  // Two triangles using split.
+
     auto background_color = D3DCOLOR_XRGB(0, 0, 0);  // Black or clear.
     if (map_background_state == 2) {
         background_color = D3DCOLOR_XRGB(160, 160, 160);  // Light grey.
@@ -119,7 +225,7 @@ void ZoneMap::render_load_map() {
     else if (map_background_state == 3) {
         background_color = D3DCOLOR_XRGB(240, 180, 140);  // Tan.
     }
-    MapVertex background_vertices[kNumBackgroundVertices] = {
+    MapVertex background_vertices[kBackgroundVertices] = {
         { rect_left, rect_top, 0.5f, 1.f, background_color },  // x, y, z, rhw, color
         { rect_right, rect_top, 0.5f, 1.f, background_color },
         { rect_left, rect_bottom, 0.5f, 1.f, background_color },
@@ -127,7 +233,7 @@ void ZoneMap::render_load_map() {
     };
 
     const int line_buffer_size = sizeof(MapVertex) * line_count * 2;
-    const int background_buffer_size = sizeof(MapVertex) * kNumBackgroundVertices;
+    const int background_buffer_size = sizeof(MapVertex) * kBackgroundVertices;
     // Create a Vertex buffer and copy the map line segments over.
     if (FAILED(device->CreateVertexBuffer(line_buffer_size + background_buffer_size,
         D3DUSAGE_WRITEONLY,
@@ -143,8 +249,8 @@ void ZoneMap::render_load_map() {
         render_release_resources();
         return;
     }
-    memcpy(data, (const void*)line_vertices.get(), line_buffer_size);
-    memcpy(data + line_buffer_size, background_vertices, background_buffer_size);
+    memcpy(data, background_vertices, background_buffer_size);
+    memcpy(data + background_buffer_size, (const void*)line_vertices.get(), line_buffer_size);
     line_vertex_buffer->Unlock();
 
     // Create a worst-case sized Vertex buffer for live position updates.
@@ -162,7 +268,7 @@ void ZoneMap::render_load_map() {
 void ZoneMap::render_map()
 {
     IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-    if (!device || !line_count || !line_vertex_buffer)
+    if (!device || !line_vertex_buffer)
         return;
      
     device->SetTexture(0, NULL);  // Ensure no texture is bound
@@ -170,11 +276,13 @@ void ZoneMap::render_map()
 
     if (map_background_state) {
         device->SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
-        device->DrawPrimitive(D3DPT_TRIANGLESTRIP, line_count * 2, kBackgroundCount);
+        device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, kBackgroundCount);
     }
 
-    device->SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
-    device->DrawPrimitive(D3DPT_LINELIST, 0, line_count);
+    if (line_count) {
+        device->SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
+        device->DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices, line_count);
+    }
 
     // Note: Markers are currently getting drawn under the map lines (good or bad?).
     if (position_vertex_buffer) {
@@ -237,7 +345,7 @@ int ZoneMap::render_update_position_buffer() {
         position_vertices[i].y = max(rect_top, min(rect_bottom, symbol[i].y + screen_y));
         position_vertices[i].z = 0.5f;
         position_vertices[i].rhw = 1.f;
-        position_vertices[i].color = D3DCOLOR_XRGB(0, 0, 255);
+        position_vertices[i].color = D3DCOLOR_XRGB(250, 250, 51);  // Lemon yellow.
     }
 
     if (zoom_factor > 1.f && (rect_bottom - screen_y < size || screen_y - rect_top < size ||
@@ -399,6 +507,24 @@ void ZoneMap::set_marker(int y, int x) {
     marker_y = y;
 }
 
+void ZoneMap::toggle_zoom() {
+    const int kNumDefaultZoomFactors = 4;
+    const float kDefaultZoomFactors[kNumDefaultZoomFactors] = {2.f, 4.f, 8.f };
+
+    // Assumes zoom factors are monotonic and look for the first zoom higher
+    // than the current state.  Wraps back to 100% if beyond max zoom.
+    float new_zoom_factor = 1.f;
+    for (int i = 0; i < kNumDefaultZoomFactors; ++i) {
+        if (zoom_factor < kDefaultZoomFactors[i]) {
+            new_zoom_factor = kDefaultZoomFactors[i];
+            break;
+        }
+    }
+    zone_id = kInvalidZoneId;  // Triggers reload (including marker).
+    zoom_factor = new_zoom_factor;
+}
+
+
 bool ZoneMap::set_zoom(int zoom_percent) {
     zone_id = kInvalidZoneId;  // Triggers reload (including marker).
     zoom_factor = zoom_percent * 0.01f;
@@ -547,6 +673,40 @@ void ZoneMap::parse_zoom(const std::vector<std::string>& args) {
         Zeal::EqGame::print_chat( "Usage: /map zoom <percent> (<= 100 disables)");
 }
 
+void ZoneMap::parse_poi(const std::vector<std::string>& args) {
+
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (!self)
+        return;
+
+    const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+    if (!zone_map_data || zone_map_data->num_labels == 0) {
+        Zeal::EqGame::print_chat("No map POI data available for this zone");
+        return;
+    }
+
+    // Note: Need to negate y and x to go from map data to world coordinates.
+    int poi = 0;
+    if (args.size() == 2) {
+        for (int i = 0; i < zone_map_data->num_labels; ++i) {
+            const ZoneMapLabel& label = zone_map_data->labels[i];
+            Zeal::EqGame::print_chat("[%i]: (%i, %i): %s", i, -label.y, -label.x, label.label);
+        }
+    }
+    else if (args.size() == 3 && Zeal::String::tryParse(args[2], &poi)) {
+        if (poi < 0 || poi >= zone_map_data->num_labels) {
+            Zeal::EqGame::print_chat("Invalid selection index");
+            return;
+        }
+        set_marker(-zone_map_data->labels[poi].y, -zone_map_data->labels[poi].x);
+        set_enabled(true);
+    }
+    else {
+        Zeal::EqGame::print_chat("Usage: /map poi <selection>");
+    }
+}
+
+
 void ZoneMap::dump() {
     Zeal::EqGame::print_chat("enabled: %i, background: %i, zone: %i", enabled, map_background_state, zone_id);
     Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i", marker_zone_id, marker_y, marker_x);
@@ -579,11 +739,14 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "zoom") {
         parse_zoom(args);
     }
+    else if (args[1] == "poi") {
+        parse_poi(args);
+    }
     else if (args[1] == "dump") {
         dump();
     }
     else if (!parse_shortcuts(args)) {
-        Zeal::EqGame::print_chat("Usage: /map [on|off|rect|marker|background|zoom], /map <y> <x>, /map 0");
+        Zeal::EqGame::print_chat("Usage: /map [on|off|rect|marker|background|zoom|poi], /map <y> <x>, /map 0");
     }
     return true;
 }

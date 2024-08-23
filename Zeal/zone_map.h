@@ -20,6 +20,7 @@ public:
 	void set_position_default_size(float new_size);
 	void set_marker_default_size(float new_size);
 	void toggle_background();
+	void toggle_zoom();
 
 	void callback_render();
 
@@ -40,6 +41,7 @@ private:
 	void parse_marker(const std::vector<std::string>& args);
 	void parse_background(const std::vector<std::string>& args);
 	void parse_zoom(const std::vector<std::string>& args);
+	void parse_poi(const std::vector<std::string>& args);
 	void set_marker(int y, int x);
 	void clear_marker();
 	bool set_zoom(int zoom_percent);
