@@ -3,6 +3,7 @@
 #include "EqAddresses.h"
 
 static int pseudo_fps = 60;
+static float lev_fall_multiplier = 0.1;
 
 void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 {
@@ -61,12 +62,9 @@ Physics::Physics(ZealService* zeal, IO_ini* ini)
 
 	zeal->hooks->Add("ProcessPhysics", 0x54D964, ProcessPhysics, hook_type_detour);
 	zeal->hooks->Add("MovePlayer", 0x504765, MovePlayer, hook_type_detour);
-	//mem::write<float>(0x5e6204, 0.06f);  // Interferes with bard instrument mods (resists, selo's)
+	mem::write<int>(0x54E132, (int)&lev_fall_multiplier);
 	//zeal->hooks->Add("GetTime", 0x54dbad, GetTime, hook_type_replace_call);
-	//-*(float*)0x5e6204 = 0.06f;
 	//0x5e44d4 How high off the ground you stop dropping during levitate
-
-
 }
 
 Physics::~Physics()
