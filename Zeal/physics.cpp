@@ -3,7 +3,7 @@
 #include "EqAddresses.h"
 
 static int pseudo_fps = 60;
-static float lev_fall_multiplier = 0.1;
+static float lev_fall_multiplier = 0.15f;
 
 void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 {

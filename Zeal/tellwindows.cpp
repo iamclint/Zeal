@@ -180,20 +180,18 @@ void TellWindows::CleanUI()
 {
     if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager || !enabled)
         return;
-    for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
-    {
-        Zeal::EqUI::ChatWnd* cwnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
-        if (cwnd && cwnd->Text.Data)
-        {
-            std::string title = cwnd->Text.Data->Text;
-            if (title.substr(0, 1) == "*")
-            {
-                cwnd->show(0, false);
-                cwnd->IsOpen = false;
-                break;
-            }
-        }
-    }
+    //for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
+    //{
+    //    Zeal::EqUI::ChatWnd* cwnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
+    //    if (cwnd && cwnd->Text.Data)
+    //    {
+    //        std::string title = cwnd->Text.Data->Text;
+    //        if (title.substr(0, 1) == "*")
+    //        {
+    //            Zeal::EqGame::Windows->ChatManager->ChatWindows[i]->show(false, false);
+    //        }
+    //    }
+    //}
 }
 
 void TellWindows::SetEnabled(bool val)
@@ -213,13 +211,32 @@ void TellWindows::LoadUI()
 }
 
 
-
+void DeactivateMainUI()
+{
+    if (ZealService::get_instance()->tells && ZealService::get_instance()->tells->enabled)
+    {
+        for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
+        {
+            Zeal::EqUI::ChatWnd* cwnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
+            if (cwnd && cwnd->Text.Data)
+            {
+                std::string title = cwnd->Text.Data->Text;
+                if (title.substr(0, 1) == "*")
+                {
+                    cwnd->show(false, false);
+                    Zeal::EqGame::Windows->ChatManager->FreeChatWindow(cwnd);
+                }
+            }
+        }
+    }
+    return ZealService::get_instance()->hooks->hook_map["DeactivateMainUI"]->original(DeactivateMainUI)();
+}
 
 TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
 {
-    //zeal->hooks->Add("GetActiveChatWindow", 0x41114A, GetActiveChatWindow, hook_type_detour); 
     zeal->hooks->Add("GetActiveChatWindow", 0x425D27, GetActiveChatWindow, hook_type_replace_call);//hook to fix item linking to tell windows if always chat here is selected anywhere
     zeal->hooks->Add("AddOutputText", 0x4139A2, AddOutputText, hook_type_detour);
+    zeal->hooks->Add("DeactivateMainUI", 0x4a7705, DeactivateMainUI, hook_type_detour); //clean up tell windows just before they save
     zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
     zeal->callbacks->AddGeneric([this]() { LoadUI(); }, callback_type::InitUI);
 

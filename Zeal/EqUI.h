@@ -675,6 +675,9 @@ namespace Zeal
 			void CreateChatWindow() const {
 				reinterpret_cast<void (__thiscall*)(const CChatManager*)>(0x410C5A)(this);
 			}
+			void FreeChatWindow(struct ChatWnd* wnd) const {
+				reinterpret_cast<void(__thiscall*)(const CChatManager*, struct ChatWnd*)>(0x41110C)(this, wnd);
+			}
 			void CreateChatWindow(const char* name, int language , int default_channel, int chat_channel, const char* tell_target, int font) const {
 				reinterpret_cast<void(__thiscall*)(const CChatManager*, const char* name, int language, int default_channel, int chat_channel, const char* tell_target, int font)>(0x410e84)(this, name,language,default_channel,chat_channel, tell_target,font);
 			}
