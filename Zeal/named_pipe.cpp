@@ -436,7 +436,9 @@ named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 		});
 	zeal->commands_hook->Add("/pipe", {}, "outputs text to a pipe",
 		[this](std::vector<std::string>& args) {
-			nlohmann::json data = { {"text", ArgsToString(args, " ")} };
+			std::string full_str = ArgsToString(args, " ");
+			Zeal::EqGame::DoPercentConvert(full_str);
+			nlohmann::json data = { {"text", full_str} };
 			write(data.dump(), pipe_data_type::custom);
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
