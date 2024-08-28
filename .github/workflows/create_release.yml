@@ -1,0 +1,93 @@
+# Manually triggered release workflow.
+
+name: Create manual release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: 'Summary description prepended to changelog'
+        required: true
+        type: string
+
+env:
+  SOLUTION_FILE_PATH: ./Zeal.sln
+
+jobs:
+  build_release:
+    name: Build and upload release
+    runs-on: windows-2022
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Parse the git short hash to embed in the build using a compiler define
+        id: parse_git
+        shell: bash
+        run: |
+          SHORT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          echo short_hash=$SHORT_HASH >> $GITHUB_OUTPUT
+
+      - name: Extract the ZEAL_VERSION from the source code to use as the tag for the release
+        id: zeal_version
+        shell: bash
+        env:
+          SED_PARAMS: 's/^[^"]*"\([^"]*\)".*/\1/'
+        run: |
+          ZEAL_VERSION=$(grep '#define ZEAL_VERSION' Zeal/Zeal.h | sed $SED_PARAMS)
+          echo version=v$ZEAL_VERSION >> $GITHUB_OUTPUT
+
+      - name: Build the Zeal solution using msbuild to find the path to VS Studio
+        env:
+          ZEAL_BUILD_VERSION: ${{ steps.parse_git.outputs.short_hash }} # Consider also appending a dirty flag.
+        run: |
+          msbuild /m /p:Configuration=Release /p:Platform=x86 /p:zeal_build_version=$env:ZEAL_BUILD_VERSION $env:SOLUTION_FILE_PATH
+
+      - name: Create the zip filename (using bash shell)
+        id: zip_filename
+        shell: bash
+        env:
+          ZEAL_VERSION: ${{ steps.zeal_version.outputs.version }}
+          ZEAL_BUILD_VERSION: ${{ steps.parse_git.outputs.short_hash }}
+        run: |
+          ZIP_FILENAME=zeal\_$ZEAL_VERSION\_$ZEAL_BUILD_VERSION.zip
+          echo $ZIP_FILENAME
+          echo filename=$ZIP_FILENAME >> $GITHUB_OUTPUT
+
+      - name: Zip up the artifacts
+        id: zip
+        shell: pwsh
+        env:
+          ZIP_FILENAME:  ${{ steps.zip_filename.outputs.filename }}
+        run: |
+          7z a -tzip $env:ZIP_FILENAME ./Release/Zeal.asi ./Release/Zeal.pdb ./Zeal/GameXML/EQUI_OptionsWindow.xml
+
+      - name: Create a changelog since the last release tag
+        id: changelog
+        shell: bash
+        run: |
+          CHANGELOG="${{ github.workspace }}-changelog.txt"
+          LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "# Release notes" > $CHANGELOG
+          echo ${{ github.event.inputs.release_notes }} >> $CHANGELOG
+          echo ""
+          echo "# Changes since $LAST_TAG" >> $CHANGELOG
+          git log --pretty=format:"- %s" $LAST_TAG..HEAD >> $CHANGELOG
+          echo filename=$CHANGELOG >> $GITHUB_OUTPUT
+
+      - name: Create the github release tag and upload artifacts
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "${{ steps.zip_filename.outputs.filename }}"
+          artifactContentType: application/zip
+          artifactErrorsFailBuild: true
+          bodyFile:  "${{ steps.changelog.outputs.filename }}"
+          commit: ${{ github.sha }}
+          generateReleaseNotes: true
+          tag: ${{ steps.zeal_version.outputs.version }}
+

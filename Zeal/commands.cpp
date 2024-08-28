@@ -336,7 +336,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "version"))
 			{
 				std::stringstream ss;
-				ss << "Zeal version: " << ZEAL_VERSION << std::endl;
+				ss << "Zeal version: " << ZEAL_VERSION << " (" << ZEAL_BUILD_VERSION << ")" << std::endl;
 				Zeal::EqGame::print_chat(ss.str());
 				return true;
 			}

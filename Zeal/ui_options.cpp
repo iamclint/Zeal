@@ -130,7 +130,7 @@ void ui_options::UpdateOptions()
 	ui->SetChecked("Zeal_ClassicClasses", ZealService::get_instance()->chat_hook->UseClassicClassNames);
 	ui->SetChecked("Zeal_TellWindows", ZealService::get_instance()->tells->enabled);
 
-	ui->SetLabelValue("Zeal_VersionValue", "%s", ZEAL_VERSION);
+	ui->SetLabelValue("Zeal_VersionValue", "%s (%s)", ZEAL_VERSION, ZEAL_BUILD_VERSION);
 	ui->SetSliderValue("Zeal_TargetRingFill_Slider", static_cast<int>(ZealService::get_instance()->target_ring->get_ring_pct() * 100.0f));
 	ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", ZealService::get_instance()->target_ring->get_ring_pct());
 
