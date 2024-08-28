@@ -79,7 +79,7 @@ ___
   - **Description:** plays songs in order until interrupted in any fashion.
 
 - `/map`
-  - **Arguments:** `on`, `off`, `rect`, `marker`, `background`, `zoom`
+  - **Arguments:** `on`, `off`, `rect`, `marker`, `background`, `zoom`, `poi`
   - **Example:** `/map` toggles map on and off
   - **Example:** `/map marker 500 -100` sets a target marker at loc 500, -100 (default size)
   - **Example:** `/map marker 500 -100 0.03` sets a target marker at loc 500, -100 with size = 3% of screen
@@ -87,6 +87,7 @@ ___
   - **Example:** `/map 0` shortcut for map marker 0 0 0 (clears marker)
   - **Example:** `/map zoom 200` sets map scaling to 200% (2x) and centers on position
   - **Example:** `/map rect 0.02 0.03 0.5 0.6` map window top=2% left=3% bottom=50% right=60% of screen dimensions
+  - **Example:** `/map poi` lists points of interest, use `/map poi 2` to drop marker at index [2] of list
   - **Description:** controls map enable, size, and markers
     
 - `/pandelay`
@@ -189,6 +190,9 @@ ___
 - Slow turn right
 - Target nearest pc corpse
 - Target nearest npc corpse
+- Toggle map on/off
+- Toggle through map default zooms
+- Toggle through map backgrounds
 ___
 ### UI
 - **Gauge EqType's**
@@ -229,10 +233,24 @@ ___
   - Zeal_FirstPersonLabel_Y
   - Zeal_PanDelayLabel
 ___
-### Building and Installation
-<br>
-32bit x86
-<br>
-file extension .asi
-<br>
-move zeal.asi into the root of your game folder
+### Building
+#### Github official release builds
+1. Commit an updated, unique ZEAL_VERSION in Zeal/Zeal.h that will be used as the release tag.
+2. Go to the "Actions" tab of the Github workspace
+3. Select the "Create Manual Release" workflow on the left
+4. Click the drop-down menu on the right top side titled "Run workflow"
+5. Select the branch with the commit to be released
+6. Add a summary description that will be prepended to the change log notes
+7. Click the green "Run workflow" button
+8. After the green checkmark appears, go back to the main workspace and verify the content of the new release tag.
+
+#### Local builds
+Build in 32bit x86 mode using Microsoft Visual Studio 2022 (free Community edition works)
+
+### Installation
+1. Download the "zeal_v*.zip" from a tagged release on github
+2. Extract zeal.asi and place it in the root of your game folder
+3. Extract EQUI_OptionsWindow.xml and place it in your active ui folder (example: uifiles/duxaUI)
+
+The zeal.pdb file is a symbols file only useful for debugging with developer tools (ignore).
+

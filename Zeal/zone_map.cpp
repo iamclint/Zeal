@@ -616,6 +616,7 @@ void ZoneMap::parse_rect(const std::vector<std::string>& args) {
     if ((tlbr.size() != 4) || !set_map_rect(tlbr[0], tlbr[1], tlbr[2], tlbr[3]))
     {
         Zeal::EqGame::print_chat("Usage: /map rect <top> <left> <bottom> <right> (fraction of screen dimensions)");
+        Zeal::EqGame::print_chat("Example: /map rect 0.1 0.2 0.5 0.6");
     }
 }
 
@@ -642,6 +643,7 @@ void ZoneMap::parse_marker(const std::vector<std::string>& args) {
     }
 
     Zeal::EqGame::print_chat("Usage: /map marker <y> <x> [size] (fractional size: optional, 0 disables)");
+    Zeal::EqGame::print_chat("Example: /map marker 500 -1000 (drops a marker at loc 500, -1000)");
 }
 
 bool ZoneMap::parse_shortcuts(const std::vector<std::string>& args) {
@@ -702,7 +704,8 @@ void ZoneMap::parse_poi(const std::vector<std::string>& args) {
         set_enabled(true);
     }
     else {
-        Zeal::EqGame::print_chat("Usage: /map poi <selection>");
+        Zeal::EqGame::print_chat("Usage: /map poi <index> (displays list if <index> is blank)");
+        Zeal::EqGame::print_chat("Example: /map poi 2 (drops a marker at list item [2])");
     }
 }
 
@@ -747,6 +750,7 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     }
     else if (!parse_shortcuts(args)) {
         Zeal::EqGame::print_chat("Usage: /map [on|off|rect|marker|background|zoom|poi], /map <y> <x>, /map 0");
+        Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
     }
     return true;
 }
