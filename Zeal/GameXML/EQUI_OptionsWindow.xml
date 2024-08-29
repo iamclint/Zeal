@@ -4636,7 +4636,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>194</X>
-      <Y>199</Y>
+      <Y>111</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4657,7 +4657,7 @@
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
       <X>194</X>
-      <Y>219</Y>
+      <Y>131</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4681,7 +4681,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>62</Y>
+      <Y>10</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4702,7 +4702,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>82</Y>
+      <Y>30</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4715,7 +4715,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>297</X>
-      <Y>82</Y>
+      <Y>30</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4737,7 +4737,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>200</X>
-      <Y>10</Y>
+      <Y>101</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4759,7 +4759,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>34</Y>
+      <Y>125</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4780,7 +4780,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>54</Y>
+      <Y>145</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4793,7 +4793,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>53</Y>
+      <Y>144</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4815,7 +4815,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>72</Y>
+      <Y>163</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4836,7 +4836,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>92</Y>
+      <Y>183</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4849,7 +4849,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>91</Y>
+      <Y>182</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4871,7 +4871,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>113</Y>
+      <Y>204</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4892,7 +4892,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>133</Y>
+      <Y>224</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4905,7 +4905,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>132</Y>
+      <Y>223</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4927,7 +4927,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>151</Y>
+      <Y>242</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -4948,7 +4948,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>220</X>
-      <Y>171</Y>
+      <Y>262</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -4961,7 +4961,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>310</X>
-      <Y>170</Y>
+      <Y>261</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -4982,7 +4982,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>104</Y>
+      <Y>52</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5003,7 +5003,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>124</Y>
+      <Y>72</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -5016,7 +5016,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>297</X>
-      <Y>124</Y>
+      <Y>72</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -5038,7 +5038,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>146</Y>
+      <Y>62</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -5059,7 +5059,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
-      <Y>166</Y>
+      <Y>82</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -5072,7 +5072,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>297</X>
-      <Y>166</Y>
+      <Y>82</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -5395,14 +5395,8 @@
     <Pieces>Zeal_BlueCon</Pieces>
     <!--<Pieces>Zeal_Timestamp</Pieces>-->
     <Pieces>Zeal_Input</Pieces>
-    <Pieces>Zeal_PanDelayLabel</Pieces>
-    <Pieces>Zeal_PanDelaySlider</Pieces>
-    <Pieces>Zeal_PanDelayValueLabel</Pieces>
     <Pieces>Zeal_ShowHelm</Pieces>
     <Pieces>Zeal_Escape</Pieces>
-    <Pieces>Zeal_Fov</Pieces>
-    <Pieces>Zeal_FovLabel</Pieces>
-    <Pieces>Zeal_FovLabel_</Pieces>
     <Pieces>Zeal_HoverTimeout_Label</Pieces>
     <Pieces>Zeal_HoverTimeout_Slider</Pieces>
     <Pieces>Zeal_HoverTimeout_Value</Pieces>
@@ -5465,6 +5459,12 @@
     <Pieces>Zeal_ThirdPersonYLabel</Pieces>
     <Pieces>Zeal_ThirdPersonSlider_Y</Pieces>
     <Pieces>Zeal_ThirdPersonLabel_Y</Pieces>
+    <Pieces>Zeal_PanDelayLabel</Pieces>
+    <Pieces>Zeal_PanDelaySlider</Pieces>
+    <Pieces>Zeal_PanDelayValueLabel</Pieces>
+    <Pieces>Zeal_Fov</Pieces>
+    <Pieces>Zeal_FovLabel</Pieces>
+    <Pieces>Zeal_FovLabel_</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>
