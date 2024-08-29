@@ -3,6 +3,7 @@ class patches
 {
 public:
 	patches();
+	void fonts();
 private:
 };
 

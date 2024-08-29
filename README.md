@@ -29,9 +29,10 @@ ___
   - **Description:** toggles classic classes in who and other areas.
 
 - `/targetring`
-  - **Arguments:** `float size`
+  - **Arguments:** `size`, `indicator`
   - **Example:** `/targetring 0.25`
-  - **Description:** toggles targetring on/off if float is specified it sets the size.
+  - **Example:** `/targetring indicator` toggles auto attack indicator.
+  - **Description:** toggles targetring on/off.
 
 - `/resetexp`
   - **Arguments:** ``

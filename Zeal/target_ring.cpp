@@ -378,7 +378,48 @@ void TargetRing::callback_render()
     radius *= target->ActorInfo->ViewActor_->ScaleFactor;
     if (radius > 60)
         radius = 60;
-    render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, GetLevelCon(target));
+
+    DWORD originalColor = GetLevelCon(target);
+    DWORD Color = originalColor;
+
+    static ULONGLONG lastTime = 0; // Store the last time the color was changed
+    ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
+
+    if ((bool)(*(BYTE*)0x7f6ffe) && attack_indicator) // auto attack is enabled
+    {
+        if (currentTime - lastTime >= 300) // Reset the timer every 300ms
+        {
+            lastTime = currentTime;
+        }
+
+        float elapsedTime = (currentTime - lastTime) / 300.0f; // Get the time elapsed in the current cycle as a fraction
+        float fadeFactor;
+
+        if (elapsedTime < 0.5f)
+        {
+            fadeFactor = elapsedTime * 2; // Fade in during the first half of the cycle
+        }
+        else
+        {
+            fadeFactor = (1.0f - elapsedTime) * 2; // Fade out during the second half of the cycle
+        }
+
+        // Extract the ARGB components from the original color
+        BYTE originalA = (originalColor >> 24) & 0xFF;
+        BYTE originalR = (originalColor >> 16) & 0xFF;
+        BYTE originalG = (originalColor >> 8) & 0xFF;
+        BYTE originalB = originalColor & 0xFF;
+
+        // Calculate the faded color components
+        BYTE fadedA = originalA; // Keep the original alpha value
+        BYTE fadedR = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalR);
+        BYTE fadedG = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalG);
+        BYTE fadedB = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalB);
+
+        // Set the color with the faded components
+        Color = D3DCOLOR_ARGB(fadedA, fadedR, fadedG, fadedB);
+    }
+    render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color);
 
 } 
 
@@ -396,14 +437,24 @@ void TargetRing::set_pct(float pct)
         set_enabled(true);
 }
 
+void TargetRing::set_indicator(bool enabled)
+{
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "AttackIndicator", enabled);
+    attack_indicator = enabled;
+    if (!enabled)
+        set_enabled(true);
+}
 void TargetRing::load_ini(IO_ini* ini)
 {
     if (!ini->exists("Zeal", "TargetRing"))
         ini->setValue<bool>("Zeal", "TargetRing", false);
     if (!ini->exists("Zeal", "RingPCT"))
         ini->setValue<float>("Zeal", "RingPCT", 0);
+    if (!ini->exists("Zeal", "AttackIndicator"))
+        ini->setValue<bool>("Zeal", "AttackIndicator", false);
 
     enabled = ini->getValue<bool>("Zeal", "TargetRing");
+    attack_indicator = ini->getValue<bool>("Zeal", "AttackIndicator");
     ring_pct = ini->getValue<float>("Zeal", "RingPCT");
 }
 
@@ -418,6 +469,11 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
       
             if (args.size() == 2) 
             {
+                if (args[2] == "indicator")
+                {
+                    set_indicator(!attack_indicator);
+                    return true;
+                }
                 float pct = 0;
                 if (!Zeal::String::tryParse(args[1], &pct))
                     return true;

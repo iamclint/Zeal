@@ -27,8 +27,10 @@ public:
 	void callback_render();
 	void set_enabled(bool enable);
 	void set_pct(float pct);
+	void set_indicator(bool enable);
 	void render_ring(Vec3 position, float size, DWORD color);
 	bool enabled;
+	bool attack_indicator;
 	TargetRing(class ZealService* zeal, class IO_ini* ini);
 	~TargetRing();
 
