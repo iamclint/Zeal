@@ -17,11 +17,17 @@ public:
 	void set_enabled(bool enable, bool update_default = false);
 	bool set_background(int new_state, bool update_default = false);
 	bool set_map_rect(float top, float left, float bottom, float right, bool update_default = true);
+	void set_map_width(float width);
+	void set_map_height(float height);
+	int get_map_width();
+	int get_map_height();
 	void set_position_default_size(float new_size);
 	void set_marker_default_size(float new_size);
+	bool set_zoom(int zoom_percent);
+	int get_zoom();
+	int get_background();
 	void toggle_background();
 	void toggle_zoom();
-
 	void callback_render();
 
 private:
@@ -44,7 +50,7 @@ private:
 	void parse_poi(const std::vector<std::string>& args);
 	void set_marker(int y, int x);
 	void clear_marker();
-	bool set_zoom(int zoom_percent);
+	
 	void load_ini(class IO_ini* ini);
 	void dump();
 

@@ -454,6 +454,7 @@ void ZoneMap::set_enabled(bool _enabled, bool update_default)
         render_release_resources();
         zone_id = kInvalidZoneId;  // Triggers update when re-enabled.
     }
+    ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
 void ZoneMap::toggle_background() {
@@ -461,6 +462,11 @@ void ZoneMap::toggle_background() {
         map_background_state = 0;
     }
     zone_id = kInvalidZoneId;  // Triggers reload.
+}
+
+int ZoneMap::get_background()
+{
+    return map_background_state;
 }
 
 bool ZoneMap::set_background(int new_state, bool update_default) {
@@ -473,6 +479,7 @@ bool ZoneMap::set_background(int new_state, bool update_default) {
 
     map_background_state = new_state;
     zone_id = kInvalidZoneId;  // Triggers reload.
+    ZealService::get_instance()->ui->options->UpdateOptions();
     return true;
 }
 
@@ -523,12 +530,16 @@ void ZoneMap::toggle_zoom() {
     zone_id = kInvalidZoneId;  // Triggers reload (including marker).
     zoom_factor = new_zoom_factor;
 }
-
+int ZoneMap::get_zoom() {
+    int val = zoom_factor * 100;
+    return val;
+}
 
 bool ZoneMap::set_zoom(int zoom_percent) {
     zone_id = kInvalidZoneId;  // Triggers reload (including marker).
     zoom_factor = zoom_percent * 0.01f;
     zoom_factor = min(100.f, max(1.f, zoom_factor));
+    ZealService::get_instance()->ui->options->UpdateOptions();
     return true;
 }
 
@@ -573,6 +584,31 @@ void ZoneMap::load_ini(IO_ini* ini)
     }
     position_size = max(0.01f, min(0.10f, position_size));
     marker_size = max(0.01f, min(0.10f, marker_size));
+}
+
+void ZoneMap::set_map_width(float width) {
+    map_rect_right = width;
+    if (ZealService::get_instance() && ZealService::get_instance()->ini) {
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectRight", map_rect_right);
+    }
+    render_release_resources();  // Invalidate buffers.
+    zone_id = kInvalidZoneId;  // Triggers reload.
+}
+void ZoneMap::set_map_height(float height) {
+    map_rect_bottom = height;
+    if (ZealService::get_instance() && ZealService::get_instance()->ini) {
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectBottom", map_rect_bottom);
+    }
+    render_release_resources();  // Invalidate buffers.
+    zone_id = kInvalidZoneId;  // Triggers reload.
+}
+int ZoneMap::get_map_width()
+{
+    return (int)map_rect_right*100;
+}
+int ZoneMap::get_map_height()
+{
+    return (int)map_rect_bottom*100;
 }
 
 bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, bool update_default) {
