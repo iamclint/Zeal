@@ -135,7 +135,7 @@ void ZoneMap::render_release_resources() {
 
 void ZoneMap::render_load_map() {
     IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-    if (!device)
+    if (!device || !Zeal::EqGame::get_self())
         return;
 
     render_release_resources();  // Forces update of all graphics.
@@ -144,6 +144,16 @@ void ZoneMap::render_load_map() {
     if (!zone_map_data) {
         return;
     }
+
+    // In some Zoom transitions, we lock the position on the screen, so calculate the current
+    // position in screen coordinate using the existing scales and offsets.
+    // Translate loc (world) coordinates to screen coordinates. Note that the game
+    // world coordinates are negated (polarity flipped) to match the map data.
+    const Vec3 position = Zeal::EqGame::get_self()->Position;
+    const float position_y = -position.x; // Note position is y,x,z.
+    const float position_x = -position.y;
+    float screen_position_y = position_y * scale_factor + offset_y;
+    float screen_position_x = position_x * scale_factor + offset_x;
 
     // Notes on scaling the map_data world coordinates to map screen window coordinates.
     //   The map data coordinate system is in the game world scale but negated y and x values.
@@ -154,40 +164,50 @@ void ZoneMap::render_load_map() {
     //     scale_factor = window_size_x/map_size_x and offset = window_x_offset - min(map_x)*scale_factor.
     const Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
     const float rect_left = map_rect_left * screen_size.x;
-    float rect_right = map_rect_right * screen_size.x;
+    const float rect_right = map_rect_right * screen_size.x;
     const float rect_top = map_rect_top * screen_size.y;
-    float rect_bottom = map_rect_bottom * screen_size.y;
+    const float rect_bottom = map_rect_bottom * screen_size.y;
 
     float window_size_x = rect_right - rect_left;
     float window_size_y = rect_bottom - rect_top;
     float scale_factor_x = window_size_x / (zone_map_data->max_x - zone_map_data->min_x);
     float scale_factor_y = window_size_y / (zone_map_data->max_y - zone_map_data->min_y);
     scale_factor = min(scale_factor_x, scale_factor_y);  // Preserve aspect ratio.
-    offset_x = rect_left - zone_map_data->min_x * scale_factor;
-    offset_y = rect_top - zone_map_data->min_y * scale_factor;
 
-    // In zoom, the background is the full window and just adjust scale and offsets.
+    // Calculate the initial offset based on alignment of the full map data.
+    offset_y = rect_top - zone_map_data->min_y * scale_factor;
+    if (map_alignment_state == 2)  // Right alignment
+        offset_x = rect_right - zone_map_data->max_x * scale_factor;
+    else if (map_alignment_state == 1)  // Center alignment
+        offset_x = (rect_right + rect_left) * 0.5 -
+          (zone_map_data->max_x + zone_map_data->min_x) * 0.5f * scale_factor;
+    else  // Default left alignment.
+        offset_x = rect_left - zone_map_data->min_x * scale_factor;
+
+    // Update the scale and offsets in zoom if enabled.
     if (zoom_factor > 1.f && Zeal::EqGame::get_self()) {
         scale_factor *= zoom_factor;  // Scale is easy.
-        // For the offsets, map position in world coordinates to center of screen rect.
-        Vec3 position = Zeal::EqGame::get_self()->Position;
-        float position_y = -position.x;  // Note x and y are polarity flipped.
-        float position_x = -position.y;  // And position is y, x, z.
-        float rect_center_x = (rect_right + rect_left) * 0.5;
-        float rect_center_y = (rect_bottom + rect_top) * 0.5;
-        offset_x = rect_center_x - position_x * scale_factor;
-        offset_y = rect_center_y - position_y * scale_factor;
+
+        // We set offsets based on where we want the position marker to be on the screen.
+        if (zoom_recenter_zone_id == zone_id) {
+            screen_position_x = (rect_left + rect_right) * 0.5;
+            screen_position_y = (rect_bottom + rect_top) * 0.5;
+        }
+        offset_x = screen_position_x - position_x * scale_factor;
+        offset_y = screen_position_y - position_y * scale_factor;
     }
-    else {
-        // Clip right and bottom clipping edges using common scale factor (for background).
-        rect_right = rect_left + (zone_map_data->max_x - zone_map_data->min_x) * scale_factor;
-        rect_bottom = rect_top + (zone_map_data->max_y - zone_map_data->min_y) * scale_factor;
-    }
+    zoom_recenter_zone_id = kInvalidZoneId;
+
+    // Clip the background (and lines) to the available map data.
+    clip_rect_left = max(rect_left, zone_map_data->min_x * scale_factor + offset_x);
+    clip_rect_right = min(rect_right, zone_map_data->max_x * scale_factor + offset_x);
+    clip_rect_top = max(rect_top, zone_map_data->min_y * scale_factor + offset_y);
+    clip_rect_bottom = min(rect_bottom, zone_map_data->max_y * scale_factor + offset_y);
 
     const int kMaxLineCount = zone_map_data->num_lines;  // Allocate a buffer assuming all visible.
     std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(kMaxLineCount * 2);
 
-    const TwoPoints clip_rect = { .x0 = rect_left, .y0 = rect_top, .x1 = rect_right, .y1 = rect_bottom };
+    const TwoPoints clip_rect = { .x0 = clip_rect_left, .y0 = clip_rect_top, .x1 = clip_rect_right, .y1 = clip_rect_bottom };
     line_count = 0;  // Tracks number of visible (after clipping) lines.
     for (int i = 0; i < kMaxLineCount; ++i) {
         TwoPoints line = { zone_map_data->lines[i].x0 * scale_factor + offset_x,
@@ -226,10 +246,10 @@ void ZoneMap::render_load_map() {
         background_color = D3DCOLOR_XRGB(240, 180, 140);  // Tan.
     }
     MapVertex background_vertices[kBackgroundVertices] = {
-        { rect_left, rect_top, 0.5f, 1.f, background_color },  // x, y, z, rhw, color
-        { rect_right, rect_top, 0.5f, 1.f, background_color },
-        { rect_left, rect_bottom, 0.5f, 1.f, background_color },
-        { rect_right, rect_bottom, 0.5f, 1.f, background_color },
+        { clip_rect_left, clip_rect_top, 0.5f, 1.f, background_color },  // x, y, z, rhw, color
+        { clip_rect_right, clip_rect_top, 0.5f, 1.f, background_color },
+        { clip_rect_left, clip_rect_bottom, 0.5f, 1.f, background_color },
+        { clip_rect_right, clip_rect_bottom, 0.5f, 1.f, background_color },
     };
 
     const int line_buffer_size = sizeof(MapVertex) * line_count * 2;
@@ -335,22 +355,27 @@ int ZoneMap::render_update_position_buffer() {
     Vec3 symbol[kPositionVertices] = { vertex0, vertex1, vertex3,
         vertex0, vertex3, vertex2};
 
+    // Allow the position marker to exceed the rect limits by size but must stay on screen.
+    const float clip_left = max(clip_rect_left - size, 0);
+    const float clip_top = max(clip_rect_top - size, 0);
+    const float clip_right = min(clip_rect_right + size, screen_size.x - 1);
+    const float clip_bottom = min(clip_rect_bottom + size, screen_size.y - 1);
     MapVertex position_vertices[kPositionVertices];
-    const float rect_left = map_rect_left * screen_size.x;
-    const float rect_right = map_rect_right * screen_size.x;
-    const float rect_top = map_rect_top * screen_size.y;
-    const float rect_bottom = map_rect_bottom * screen_size.y;
     for (int i = 0; i < kPositionVertices; ++i) {
-        position_vertices[i].x = max(rect_left, min(rect_right, symbol[i].x + screen_x));
-        position_vertices[i].y = max(rect_top, min(rect_bottom, symbol[i].y + screen_y));
+        position_vertices[i].x = max(clip_left, min(clip_right, symbol[i].x + screen_x));
+        position_vertices[i].y = max(clip_top, min(clip_bottom, symbol[i].y + screen_y));
         position_vertices[i].z = 0.5f;
         position_vertices[i].rhw = 1.f;
         position_vertices[i].color = D3DCOLOR_XRGB(250, 250, 51);  // Lemon yellow.
     }
 
-    if (zoom_factor > 1.f && (rect_bottom - screen_y < size || screen_y - rect_top < size ||
-        rect_right - screen_x < size || screen_x - rect_left < size)) {
-        zone_id = kInvalidZoneId;  // Trigger an update (next render) to re-center the zoom region.
+    // Note: The limit is set low to avoid issues on maps that allow movement to the edge (zone
+    // boundaries) that would trigger excessive retries.
+    float limit = 1.f;
+    if (zoom_factor > 1.f && (clip_rect_bottom - screen_y < limit || screen_y - clip_rect_top < limit ||
+        clip_rect_right - screen_x < limit || screen_x - clip_rect_left < limit)) {
+        zoom_recenter_zone_id = zone_id;  // Trigger it to re-center the zoom region.
+        zone_id = kInvalidZoneId; // Triggers the update.
     }
 
     BYTE* data = nullptr;
@@ -432,6 +457,8 @@ void ZoneMap::callback_render()
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     if (zone_id != self->ZoneId) {
+        if (zone_id != kInvalidZoneId)  // Not internally triggered so probably a zone event.
+            zoom_factor = 1.f;  // Reset zoom factor on a zone to reduce corner cases.
         zone_id = self->ZoneId;
         render_load_map();
     }
@@ -446,15 +473,16 @@ void ZoneMap::callback_render()
 
 void ZoneMap::set_enabled(bool _enabled, bool update_default)
 {
-    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
-        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapEnabled", _enabled);
-
     enabled = _enabled;
     if (!enabled) {
         render_release_resources();
         zone_id = kInvalidZoneId;  // Triggers update when re-enabled.
     }
-    ZealService::get_instance()->ui->options->UpdateOptions();
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapEnabled", enabled);
+
+    update_ui_options();
 }
 
 void ZoneMap::toggle_background() {
@@ -462,37 +490,60 @@ void ZoneMap::toggle_background() {
         map_background_state = 0;
     }
     zone_id = kInvalidZoneId;  // Triggers reload.
-}
-
-int ZoneMap::get_background()
-{
-    return map_background_state;
+    update_ui_options();
 }
 
 bool ZoneMap::set_background(int new_state, bool update_default) {
     if ((new_state < 0) || (new_state >= kBackgroundStates)) {
+        update_ui_options();  // Keep UI in sync when fails.
         return false;
     }
+
+    map_background_state = new_state;
+    zone_id = kInvalidZoneId;  // Triggers reload.
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<int>("Zeal", "MapBackgroundState", new_state);
 
-    map_background_state = new_state;
-    zone_id = kInvalidZoneId;  // Triggers reload.
-    ZealService::get_instance()->ui->options->UpdateOptions();
+    update_ui_options();
     return true;
 }
 
-void ZoneMap::set_position_default_size(float new_size) {
-    position_size = max(0.01f, min(0.1f, new_size));
-    if (ZealService::get_instance() && ZealService::get_instance()->ini)
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapPositionSize", marker_size);
+bool ZoneMap::set_alignment(int alignment, bool update_default) {
+    alignment = max(0, min(kAlignmentStates - 1, alignment));
+
+    map_alignment_state = alignment;
+    zone_id = kInvalidZoneId;  // Triggers reload.
+
+    set_zoom(100);  // Reset zoom on an alignment change to avoid confusion and corner cases.
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+            ZealService::get_instance()->ini->setValue<int>("Zeal", "MapAlignment", alignment);
+ 
+    update_ui_options();
+    return true;
 }
 
-void ZoneMap::set_marker_default_size(float new_size) {
-    marker_size = max(0.01f, min(0.1f, new_size));
-    if (ZealService::get_instance() && ZealService::get_instance()->ini)
+bool ZoneMap::set_position_size(int new_size_percent, bool update_default) {
+    position_size = max(0.01f, min(kMaxPositionSize, new_size_percent / 100.f * kMaxPositionSize));
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapPositionSize", position_size);
+
+    update_ui_options();
+    return true;  // Just clamp and report success.
+}
+
+bool ZoneMap::set_marker_size(int new_size_percent, bool update_default) {
+    marker_size = max(0.01f, min(kMaxMarkerSize, new_size_percent / 100.f * kMaxMarkerSize));
+    int zone_id = marker_zone_id;  // Save across clear.
+    clear_marker();  // Release any resources (also triggers update).
+    marker_zone_id = zone_id;
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<float>("Zeal", "MapMarkerSize", marker_size);
+
+    update_ui_options();
+    return true;  // Just clamp and report success.
 }
 
 void ZoneMap::clear_marker() {
@@ -516,7 +567,7 @@ void ZoneMap::set_marker(int y, int x) {
 
 void ZoneMap::toggle_zoom() {
     const int kNumDefaultZoomFactors = 4;
-    const float kDefaultZoomFactors[kNumDefaultZoomFactors] = {2.f, 4.f, 8.f };
+    const float kDefaultZoomFactors[kNumDefaultZoomFactors] = { 2.f, 4.f, 8.f };
 
     // Assumes zoom factors are monotonic and look for the first zoom higher
     // than the current state.  Wraps back to 100% if beyond max zoom.
@@ -529,18 +580,16 @@ void ZoneMap::toggle_zoom() {
     }
     zone_id = kInvalidZoneId;  // Triggers reload (including marker).
     zoom_factor = new_zoom_factor;
-}
-int ZoneMap::get_zoom() {
-    int val = zoom_factor * 100;
-    return val;
+    update_ui_options();
 }
 
 bool ZoneMap::set_zoom(int zoom_percent) {
     zone_id = kInvalidZoneId;  // Triggers reload (including marker).
     zoom_factor = zoom_percent * 0.01f;
     zoom_factor = min(100.f, max(1.f, zoom_factor));
-    ZealService::get_instance()->ui->options->UpdateOptions();
-    return true;
+
+    update_ui_options();
+    return true;  // Just clamp and return success.
 }
 
 void ZoneMap::load_ini(IO_ini* ini)
@@ -549,6 +598,8 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<bool>("Zeal", "MapEnabled", false);
     if (!ini->exists("Zeal", "MapBackgroundState"))
         ini->setValue<int>("Zeal", "MapBackgroundState", 0);
+    if (!ini->exists("Zeal", "MapAlignment"))
+        ini->setValue<int>("Zeal", "MapAlignment", 0);
     if (!ini->exists("Zeal", "MapRectTop"))
         ini->setValue<float>("Zeal", "MapRectTop", kDefaultRectTop);
     if (!ini->exists("Zeal", "MapRectLeft"))
@@ -565,6 +616,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
     enabled = ini->getValue<bool>("Zeal", "MapEnabled");
     map_background_state = ini->getValue<int>("Zeal", "MapBackgroundState");
+    map_alignment_state = ini->getValue<int>("Zeal", "MapAlignment");
     map_rect_top = ini->getValue<float>("Zeal", "MapRectTop");
     map_rect_left = ini->getValue<float>("Zeal", "MapRectLeft");
     map_rect_bottom = ini->getValue<float>("Zeal", "MapRectBottom");
@@ -574,6 +626,7 @@ void ZoneMap::load_ini(IO_ini* ini)
 
     // Sanity clamp ini values.
     map_background_state = max(0, min(kBackgroundStates - 1, map_background_state));
+    map_alignment_state = max(0, min(kAlignmentStates - 1, map_alignment_state));
     if (map_rect_top < 0 || map_rect_top > map_rect_bottom || map_rect_bottom > 1) {
         map_rect_top = kDefaultRectTop;
         map_rect_bottom = kDefaultRectBottom;
@@ -582,33 +635,30 @@ void ZoneMap::load_ini(IO_ini* ini)
         map_rect_left = kDefaultRectLeft;
         map_rect_right = kDefaultRectRight;
     }
-    position_size = max(0.01f, min(0.10f, position_size));
-    marker_size = max(0.01f, min(0.10f, marker_size));
+    position_size = max(0.01f, min(kMaxPositionSize, position_size));
+    marker_size = max(0.01f, min(kMaxMarkerSize, marker_size));
 }
 
-void ZoneMap::set_map_width(float width) {
-    map_rect_right = width;
-    if (ZealService::get_instance() && ZealService::get_instance()->ini) {
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectRight", map_rect_right);
-    }
-    render_release_resources();  // Invalidate buffers.
-    zone_id = kInvalidZoneId;  // Triggers reload.
+void ZoneMap::update_ui_options() {
+    if (ZealService::get_instance() && ZealService::get_instance()->ui
+                    && ZealService::get_instance()->ui->options)
+       ZealService::get_instance()->ui->options->UpdateOptionsMapOnly();
 }
-void ZoneMap::set_map_height(float height) {
-    map_rect_bottom = height;
-    if (ZealService::get_instance() && ZealService::get_instance()->ini) {
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectBottom", map_rect_bottom);
-    }
-    render_release_resources();  // Invalidate buffers.
-    zone_id = kInvalidZoneId;  // Triggers reload.
+
+bool ZoneMap::set_map_top(int top_percent, bool update_default) {
+    return set_map_rect(top_percent / 100.f, map_rect_left, map_rect_bottom, map_rect_right, update_default);
 }
-int ZoneMap::get_map_width()
-{
-    return (int)map_rect_right*100;
+
+bool ZoneMap::set_map_left(int left_percent, bool update_default) {
+    return set_map_rect(map_rect_top, left_percent / 100.f , map_rect_bottom, map_rect_right, update_default);
 }
-int ZoneMap::get_map_height()
-{
-    return (int)map_rect_bottom*100;
+
+bool ZoneMap::set_map_bottom(int bottom_percent, bool update_default) {
+    return set_map_rect(map_rect_top, map_rect_left, bottom_percent / 100.f, map_rect_right, update_default);
+}
+
+bool ZoneMap::set_map_right(int right_percent, bool update_default) {
+    return set_map_rect(map_rect_top, map_rect_left, map_rect_bottom, right_percent / 100.f, update_default);
 }
 
 bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, bool update_default) {
@@ -618,14 +668,8 @@ bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, boo
     bottom = max(0.f, min(1.f, bottom));
     right = max(0.f, min(1.f, right));
     if ((top > bottom - kMinimumDimension) || (left > right - kMinimumDimension)) {
+        update_ui_options();
         return false;  // Reject if not at least minimum size.
-    }
-
-    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini) {
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectTop", top);
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectLeft", left);
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectBottom", bottom);
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectRight", right);
     }
 
     map_rect_top = top;
@@ -635,24 +679,33 @@ bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, boo
 
     render_release_resources();  // Invalidate buffers.
     zone_id = kInvalidZoneId;  // Triggers reload.
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini) {
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectTop", top);
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectLeft", left);
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectBottom", bottom);
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectRight", right);
+    }
+    update_ui_options();
+
     return true;
 }
 
 void ZoneMap::parse_rect(const std::vector<std::string>& args) {
-    std::vector<float> tlbr;
+    std::vector<int> tlbr;
     for (int i = 2; i < args.size(); i++)
     {
-        float value = 0;
+        int value = 0;
         if (Zeal::String::tryParse(args[i], &value))
             tlbr.push_back(value);
         else
             break;
     }
 
-    if ((tlbr.size() != 4) || !set_map_rect(tlbr[0], tlbr[1], tlbr[2], tlbr[3]))
+    if ((tlbr.size() != 4) || !set_map_rect(tlbr[0] / 100.f, tlbr[1] / 100.f, tlbr[2] / 100.f, tlbr[3] / 100.f))
     {
-        Zeal::EqGame::print_chat("Usage: /map rect <top> <left> <bottom> <right> (fraction of screen dimensions)");
-        Zeal::EqGame::print_chat("Example: /map rect 0.1 0.2 0.5 0.6");
+        Zeal::EqGame::print_chat("Usage: /map rect <top> <left> <bottom> <right> (percent of screen dimensions)");
+        Zeal::EqGame::print_chat("Example: /map rect 10 20 50 60");
     }
 }
 
@@ -666,19 +719,19 @@ void ZoneMap::parse_marker(const std::vector<std::string>& args) {
     int x = 0;
     if (args.size() >= 4 && args.size() < 6 && Zeal::String::tryParse(args[2], &y) && Zeal::String::tryParse(args[3], &x)) {
         if (args.size() == 5) {
-            float new_size = 0;
+            int new_size = 0;
             if (!Zeal::String::tryParse(args[4], &new_size) || new_size <= 0) {
                 clear_marker();
                 return;
             }
-            set_marker_default_size(new_size);
+            set_marker_size(new_size, false);
         }
         set_marker(y, x);
         set_enabled(true);
         return;
     }
 
-    Zeal::EqGame::print_chat("Usage: /map marker <y> <x> [size] (fractional size: optional, 0 disables)");
+    Zeal::EqGame::print_chat("Usage: /map marker <y> <x> [size] (percent size: optional, 0 disables)");
     Zeal::EqGame::print_chat("Example: /map marker 500 -1000 (drops a marker at loc 500, -1000)");
 }
 
@@ -701,7 +754,7 @@ bool ZoneMap::parse_shortcuts(const std::vector<std::string>& args) {
 
 void ZoneMap::parse_background(const std::vector<std::string>& args) {
     int state = 0;
-    if (args.size() != 3 || !Zeal::String::tryParse(args[2], &state) || !set_background(state))
+    if (args.size() != 3 || !Zeal::String::tryParse(args[2], &state) || !set_background(state, false))
         Zeal::EqGame::print_chat( "Usage: /map background <select> (0 to %i)", kBackgroundStates);
 }
 
@@ -750,7 +803,8 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("enabled: %i, background: %i, zone: %i", enabled, map_background_state, zone_id);
     Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i", marker_zone_id, marker_y, marker_x);
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
-    Zeal::EqGame::print_chat("position_size: %f, marker_size: %f", position_size, marker_size);
+    Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
+    Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, zoom_id: %i", position_size, marker_size, zoom_recenter_zone_id);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f", scale_factor, offset_y, offset_x, zoom_factor);
     Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i", line_count,
         line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr);
