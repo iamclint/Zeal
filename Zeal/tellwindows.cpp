@@ -6,19 +6,19 @@
 
 //people will see this commit and be like OMG, then they will see this comment and message the discord channel.
 //such hopes and dreams -- its on the list!
+std::string TellWindowIdentifier = " ";
 Zeal::EqUI::ChatWnd* __fastcall GetActiveChatWindow(Zeal::EqUI::CChatManager* cm, int unused)
 {
     //fix up a little bit so the active window for things like linking items don't go to your always chat here if you are using tell windows
     if (ZealService::get_instance()->tells && ZealService::get_instance()->tells->enabled)
     {
         Zeal::EqUI::ChatWnd* wnd = cm->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
-        std::string window_title = wnd->Text.Data->Text;
-        if (window_title.substr(0, 1) == "*")
+        if (ZealService::get_instance()->tells->IsTellWindow(wnd))
             return wnd;
     }
     return ZealService::get_instance()->hooks->hook_map["GetActiveChatWindow"]->original(GetActiveChatWindow)(cm, unused);
 }
-Zeal::EqUI::ChatWnd* FindPreviousTellWnd()
+Zeal::EqUI::ChatWnd* TellWindows::FindPreviousTellWnd()
 {
     Zeal::EqUI::ChatWnd* wnd = nullptr;
     if (Zeal::EqGame::Windows->ChatManager->ActiveChatWnd > 0)
@@ -29,17 +29,13 @@ Zeal::EqUI::ChatWnd* FindPreviousTellWnd()
                 i = Zeal::EqGame::Windows->ChatManager->MaxChatWindows;
           
             wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
-            if (wnd)
-            {
-                std::string window_title = wnd->Text.Data->Text;
-                if (window_title.substr(0, 1) == "*")
-                    return wnd;
-            }
+            if (IsTellWindow(wnd))
+                return wnd;
         }
     }
     return nullptr;
 }
-Zeal::EqUI::ChatWnd* FindNextTellWnd()
+Zeal::EqUI::ChatWnd* TellWindows::FindNextTellWnd()
 {
     Zeal::EqUI::ChatWnd* wnd = nullptr;
 
@@ -49,12 +45,8 @@ Zeal::EqUI::ChatWnd* FindNextTellWnd()
             i = 0;
 
         wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
-        if (wnd)
-        {
-            std::string window_title = wnd->Text.Data->Text;
-            if (window_title.substr(0, 1) == "*")
-                return wnd;
-        }
+        if (IsTellWindow(wnd))
+            return wnd;
     }
     return nullptr;
 }
@@ -64,23 +56,19 @@ bool TellWindows::HandleKeyPress(int key, bool down, int modifier)
     if (!enabled || !Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager)
         return false;
     Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
-    if (wnd)
+    if (IsTellWindow(wnd))
     {
-        std::string window_title = wnd->Text.Data->Text;
-        if (window_title.substr(0, 1) == "*")
+        if (key == 0xf && down)
         {
-            if (key == 0xf && down)
+            Zeal::EqUI::ChatWnd* focus_wnd = nullptr;
+            if (modifier==1)
+                focus_wnd=FindPreviousTellWnd();
+            else
+                focus_wnd=FindNextTellWnd();
+            if (focus_wnd && focus_wnd->edit)
             {
-                Zeal::EqUI::ChatWnd* focus_wnd = nullptr;
-                if (modifier==1)
-                    focus_wnd=FindPreviousTellWnd();
-                else
-                    focus_wnd=FindNextTellWnd();
-                if (focus_wnd && focus_wnd->edit)
-                {
-                    focus_wnd->edit->SetFocus();
-                    return true;
-                }
+                focus_wnd->edit->SetFocus();
+                return true;
             }
         }
     }
@@ -93,20 +81,17 @@ bool TellWindows::HandleTell(std::string& cmd_data)
     if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->ChatManager)
     {
         Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
-        if (wnd)
+        if (IsTellWindow(wnd))
         {
-            std::string window_title = wnd->Text.Data->Text;
-            if (window_title.substr(0,1) == "*")
-            {
+                std::string window_title = wnd->Text.Data->Text;
                 cmd_data = "/tell " + window_title.substr(1, window_title.length()-1) + " " + cmd_data;
                 return true;
-            }
         }
     }
     return false;
 }
 
-Zeal::EqUI::ChatWnd* FindTellWnd(std::string& name)
+Zeal::EqUI::ChatWnd* TellWindows::FindTellWnd(std::string& name)
 {
     for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
     {
@@ -114,7 +99,7 @@ Zeal::EqUI::ChatWnd* FindTellWnd(std::string& name)
         if (cwnd && cwnd->Text.Data)
         {
             std::string title = cwnd->Text.Data->Text;
-            if (title.substr(0, 1) == "*" && Zeal::String::compare_insensitive(title.substr(1, title.length() - 1), name))
+            if (IsTellWindow(cwnd) && Zeal::String::compare_insensitive(title.substr(1, title.length() - 1), name))
                 return cwnd;
         }
     }
@@ -161,12 +146,13 @@ void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR
         std::string name = GetName(msg_data);
         if (name.length())
         {
-            Zeal::EqUI::ChatWnd* tell_window = FindTellWnd(name);
+            name[0] = std::toupper(name[0]);
+            Zeal::EqUI::ChatWnd* tell_window = ZealService::get_instance()->tells->FindTellWnd(name);
             if (!tell_window)
             {
-                std::string WinName = "*" + name;
+                std::string WinName = TellWindowIdentifier + name;
                 Zeal::EqGame::Windows->ChatManager->CreateChatWindow(WinName.c_str(), 0, 3, -1, "", 3);
-                tell_window = FindTellWnd(name);
+                tell_window = ZealService::get_instance()->tells->FindTellWnd(name);
             }
 
             if (tell_window)
@@ -176,6 +162,20 @@ void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR
     ZealService::get_instance()->hooks->hook_map["AddOutputText"]->original(AddOutputText)(wnd, u, msg, channel);
 }
 
+
+bool TellWindows::IsTellWindow(Zeal::EqUI::ChatWnd* wnd)
+{
+    if (wnd && wnd->Text.Data)
+    {
+        std::string title = wnd->Text.Data->Text;
+        if (title.substr(0, 1) == TellWindowIdentifier)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void TellWindows::CleanUI()
 {
     if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager || !enabled)
@@ -183,14 +183,8 @@ void TellWindows::CleanUI()
     for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
     {
         Zeal::EqUI::ChatWnd* cwnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
-        if (cwnd && cwnd->Text.Data)
-        {
-            std::string title = cwnd->Text.Data->Text;
-            if (title.substr(0, 1) == "*")
-            {
-                cwnd->show(false, false);
-            }
-        }
+        if (IsTellWindow(cwnd))
+            cwnd->show(false, false);
     }
 }
 
@@ -219,14 +213,10 @@ void DeactivateMainUI()
         for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
         {
             Zeal::EqUI::ChatWnd* cwnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
-            if (cwnd && cwnd->Text.Data)
+            if (ZealService::get_instance()->tells->IsTellWindow(cwnd))
             {
-                std::string title = cwnd->Text.Data->Text;
-                if (title.substr(0, 1) == "*")
-                {
-                    reset_windows.push_back({ i, cwnd });
-                    Zeal::EqGame::Windows->ChatManager->ChatWindows[i] = nullptr; //set to nullptr so it doesn't save this window as 'open'
-                }
+                reset_windows.push_back({ i, cwnd });
+                Zeal::EqGame::Windows->ChatManager->ChatWindows[i] = nullptr; //set to nullptr so it doesn't save this window as 'open'
             }
         }
     }
@@ -282,6 +272,20 @@ TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
             return false;
 
         }); //reply hotkey
+
+
+    zeal->binds_hook->replace_cmd(0xCE, [this](int state)
+        {
+            if (!enabled)
+                return false;
+
+            if (state && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+            {
+                if (Zeal::EqGame::Windows->ChatManager->AlwaysChatHereIndex>=0)
+                    Zeal::EqGame::Windows->ChatManager->ActiveChatWnd = Zeal::EqGame::Windows->ChatManager->AlwaysChatHereIndex;
+                return false;
+            }
+        }); //chat hotkey
 
 
 
