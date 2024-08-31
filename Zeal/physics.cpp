@@ -2,7 +2,8 @@
 #include "Zeal.h"
 #include "EqAddresses.h"
 
-static int pseudo_fps = 60;
+static constexpr int fps = 60;
+static constexpr int frametime = 1000 / fps;
 static float lev_fall_multiplier = 0.15f;
 
 void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
@@ -12,7 +13,8 @@ void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 		static int prev_time = Zeal::EqGame::get_eq_time();
 		int time_diff = Zeal::EqGame::get_eq_time() - prev_time;
 		prev_time = Zeal::EqGame::get_eq_time();
-		if (Zeal::EqGame::get_eq_time() - ent->ActorInfo->PhysicsTimer >= (1000/pseudo_fps))
+		int physics_delta = Zeal::EqGame::get_eq_time() - ent->ActorInfo->PhysicsTimer;
+		if (physics_delta >= frametime)
 		{
 			ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
 		}
@@ -31,7 +33,7 @@ bool Physics::can_move(short spawn_id)
 	bool move = false;
 	if (move_timers.count(spawn_id) > 0)
 	{
-		move = Zeal::EqGame::get_eq_time() - move_timers[spawn_id] >= (1000 / pseudo_fps);
+		move = Zeal::EqGame::get_eq_time() - move_timers[spawn_id] >= frametime;
 	}
 	else
 	{
@@ -62,7 +64,8 @@ Physics::Physics(ZealService* zeal, IO_ini* ini)
 
 	zeal->hooks->Add("ProcessPhysics", 0x54D964, ProcessPhysics, hook_type_detour);
 	zeal->hooks->Add("MovePlayer", 0x504765, MovePlayer, hook_type_detour);
-	mem::write<int>(0x54E132, (int)&lev_fall_multiplier);
+	mem::write<int>(0x54E132, (int)&lev_fall_multiplier); //additional rate you fall while > 60 units off floor while levitating
+
 	//zeal->hooks->Add("GetTime", 0x54dbad, GetTime, hook_type_replace_call);
 	//0x5e44d4 How high off the ground you stop dropping during levitate
 }
