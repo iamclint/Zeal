@@ -151,7 +151,10 @@ void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR
             if (!tell_window)
             {
                 std::string WinName = TellWindowIdentifier + name;
-                Zeal::EqGame::Windows->ChatManager->CreateChatWindow(WinName.c_str(), 0, 3, -1, "", 3);
+                std::string ini_name = ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+                IO_ini ui_ini(ini_name);
+                int font_size = ui_ini.getValue<int>("ChatManager", "ChatWindow0_FontStyle");
+                Zeal::EqGame::Windows->ChatManager->CreateChatWindow(WinName.c_str(), 0, 3, -1, "", font_size);
                 tell_window = ZealService::get_instance()->tells->FindTellWnd(name);
             }
 
@@ -208,7 +211,7 @@ void TellWindows::LoadUI()
 void DeactivateMainUI()
 {
     std::vector<std::pair<int, Zeal::EqUI::ChatWnd*>> reset_windows;
-    if (ZealService::get_instance()->tells && ZealService::get_instance()->tells->enabled)
+    if (ZealService::get_instance()->tells && ZealService::get_instance()->tells->enabled && Zeal::EqGame::Windows && Zeal::EqGame::Windows->ChatManager)
     {
         for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
         {

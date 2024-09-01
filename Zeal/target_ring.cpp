@@ -469,7 +469,7 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
       
             if (args.size() == 2) 
             {
-                if (args[2] == "indicator")
+                if (args[1] == "indicator")
                 {
                     set_indicator(!attack_indicator);
                     return true;
