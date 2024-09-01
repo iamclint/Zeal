@@ -70,7 +70,7 @@ std::string GetModuleNameFromAddress(LPVOID address) {
     return "";
 }
 
-void ZipCrash(const std::string& folderName, const std::string& dumpFilePath, const std::string& reasonFilePath)
+std::string ZipCrash(const std::string& folderName, const std::string& dumpFilePath, const std::string& reasonFilePath)
 {
     // Zip the files
     std::time_t t = std::time(nullptr);
@@ -85,19 +85,19 @@ void ZipCrash(const std::string& folderName, const std::string& dumpFilePath, co
 
     if (!mz_zip_writer_init_file(&zip_archive, zipFilePath.c_str(), 0)) {
         std::cerr << "Failed to initialize zip archive." << std::endl;
-        return;
+        return "";
     }
 
     if (!mz_zip_writer_add_file(&zip_archive, "minidump.dmp", dumpFilePath.c_str(), NULL, 0, MZ_BEST_COMPRESSION)) {
         std::cerr << "Failed to add minidump to zip archive." << std::endl;
         mz_zip_writer_end(&zip_archive);
-        return;
+        return "";
     }
 
     if (!mz_zip_writer_add_file(&zip_archive, "crash_reason.txt", reasonFilePath.c_str(), NULL, 0, MZ_BEST_COMPRESSION)) {
         std::cerr << "Failed to add crash reason to zip archive." << std::endl;
         mz_zip_writer_end(&zip_archive);
-        return;
+        return "";
     }
 
     mz_zip_writer_finalize_archive(&zip_archive);
@@ -107,6 +107,7 @@ void ZipCrash(const std::string& folderName, const std::string& dumpFilePath, co
     DeleteFileA(dumpFilePath.c_str());
     DeleteFileA(reasonFilePath.c_str());
     RemoveDirectoryA(folderName.c_str());
+    return CrashFileName.str();
 }
 
 
@@ -153,6 +154,7 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
         MINIDUMP_TYPE mdt = (MINIDUMP_TYPE)(MiniDumpWithHandleData | MiniDumpWithProcessThreadData | MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules);
 
         BOOL result = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, mdt, (pep != 0) ? &mdei : 0, 0, 0);
+        std::string moduleName = "";
         std::string reasonFilePath = folderName + "\\crash_reason.txt";
         if (!result) {
             std::cerr << "Failed to write dump file." << std::endl;
@@ -169,7 +171,7 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
                         reasonFile << "Exception String: " << std::hex << exceptionCodeStrings[pep->ExceptionRecord->ExceptionCode] << std::endl;
                     reasonFile << "Exception Address: 0x" << std::hex << pep->ExceptionRecord->ExceptionAddress << std::endl;
                     // Get and write module information
-                    std::string moduleName = GetModuleNameFromAddress(pep->ExceptionRecord->ExceptionAddress);
+                    moduleName = GetModuleNameFromAddress(pep->ExceptionRecord->ExceptionAddress);
                     if (!moduleName.empty()) {
                         reasonFile << "Exception occurred in module: " << moduleName << std::endl;
                     }
@@ -182,10 +184,51 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
             }
         }
         CloseHandle(hFile);
-        ZipCrash(folderName, dumpFilePath, reasonFilePath);
-    }
-    else {
-        std::cerr << "Could not create directory: " << folderName << std::endl;
+        std::string CrashFileName = ZipCrash(folderName, dumpFilePath, reasonFilePath);
+        if (std::filesystem::exists("crashes\\ZealCrashSender.exe"))
+        {
+            std::stringstream arguments;
+            arguments << "\"";
+            arguments << "Version: " << ZEAL_VERSION << std::endl;
+            arguments << "Reason: " << reason << std::endl;
+            arguments << "Exception: " << exceptionCodeStrings[pep->ExceptionRecord->ExceptionCode] << std::endl;
+            arguments << "Address: 0x" << pep->ExceptionRecord->ExceptionAddress << std::endl;
+            arguments << "Module Information: " << moduleName << std::endl;
+            arguments << "Zipped Crash: " << CrashFileName << ".zip";
+            arguments << "\" ";
+            arguments << "\"" << CrashFileName << ".zip\" ";
+
+            std::string cmdLine = "crashes\\ZealCrashSender.exe " + arguments.str();
+
+            // Convert to writable format
+            size_t bufferSize = cmdLine.size() + 1;
+            char* cmdLineWritable = new char[cmdLine.size() + 1];
+            strcpy_s(cmdLineWritable, bufferSize, cmdLine.c_str());
+
+            // Set up STARTUPINFO and PROCESS_INFORMATION structures
+            STARTUPINFOA si;
+            ZeroMemory(&si, sizeof(si));
+            si.cb = sizeof(si);
+
+            PROCESS_INFORMATION pi;
+            ZeroMemory(&pi, sizeof(pi));
+
+            // Start the process
+            CreateProcessA(
+                NULL,         // No module name (use command line)
+                cmdLineWritable,      // Command line
+                NULL,         // Process handle not inheritable
+                NULL,         // Thread handle not inheritable
+                FALSE,        // Set handle inheritance to FALSE
+                CREATE_NO_WINDOW, // No window
+                NULL,         // Use parent's environment block
+                NULL,         // Use parent's starting directory 
+                &si,          // Pointer to STARTUPINFO structure
+                &pi);          // Pointer to PROCESS_INFORMATION structure
+        }
+        else {
+            std::cerr << "Could not create directory: " << folderName << std::endl;
+        }
     }
 }
 

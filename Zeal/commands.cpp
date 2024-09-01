@@ -93,6 +93,12 @@ ChatCommands::~ChatCommands()
 }
 ChatCommands::ChatCommands(ZealService* zeal)
 {
+	Add("/crash", {}, "Tests a crash",
+		[](std::vector<std::string>& args) {
+			int* x = 0;
+			*x = 0; //nullptr exception
+			return false;
+		});
 	Add("o", {}, "Removes the o command that is switching ui from new to old.",
 		[](std::vector<std::string>& args) {
 			if (Zeal::String::compare_insensitive(args[0], "o"))
