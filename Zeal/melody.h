@@ -7,7 +7,7 @@ class Melody
 public:
 	bool start(const std::vector<int>& new_songs); //returns true if no errors
 	void end();
-	void handle_stop_cast_callback(BYTE reason);
+	void handle_stop_cast_callback(BYTE reason, short spell_id);
 	Melody(class ZealService* pHookWrapper, class IO_ini* ini);
 	~Melody();
 private:

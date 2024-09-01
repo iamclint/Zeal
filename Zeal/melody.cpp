@@ -95,7 +95,7 @@ void Melody::end()
     }
 }
 
-void Melody::handle_stop_cast_callback(BYTE reason)
+void Melody::handle_stop_cast_callback(BYTE reason, short spell_id)
 {
     // Terminate melody on stop except for missed note (part of reason == 3) rewind attempts.
     if (reason != 3 || !songs.size())
@@ -109,7 +109,14 @@ void Melody::handle_stop_cast_callback(BYTE reason)
     // is not allowed in the zone), so we use a retry_count to limit the spammy loop that is
     // difficult to click off with UI spell gems (/stopsong, /melody still work fine). The modulo
     // check skips the rewind so it advances to the next song but then allows that song to retry.
-    if ((current_index >= 0) && (++retry_count % RETRY_COUNT_REWIND_LIMIT)) {
+    Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+    if (char_info
+        && current_index >= 0
+        && current_index < songs.size()
+        && char_info->MemorizedSpell[songs[current_index]] == spell_id
+        && (++retry_count % RETRY_COUNT_REWIND_LIMIT)
+    )
+    {
         current_index--;
         if (current_index < 0) {  // Handle wraparound.
             current_index = songs.size() - 1;
@@ -119,16 +126,16 @@ void Melody::handle_stop_cast_callback(BYTE reason)
 
 void __fastcall StopCast(int t, int u, BYTE reason, short spell_id)
 {
-    ZealService::get_instance()->melody->handle_stop_cast_callback(reason);
+    ZealService::get_instance()->melody->handle_stop_cast_callback(reason, spell_id);
     ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)(t, u, reason, spell_id);
 }
 
 void Melody::stop_current_cast()
 {
-    // Note: This code assumes the current_index is valid to look up the spell_id for the StopCast call.
     Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
-    if (char_info && current_index>=0 && current_index < songs.size())
-        ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)((int)char_info, 0, 0, char_info->MemorizedSpell[songs[current_index]]);
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (self && self->ActorInfo && self->ActorInfo->CastingSpellId != 0xFFFF)
+        ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)((int)char_info, 0, 0, self->ActorInfo->CastingSpellId);
 }
 
 void Melody::tick()
@@ -162,16 +169,15 @@ void Melody::tick()
         return;
     }
 
-    if ((current_timestamp - casting_visible_timestamp) < 150)
-        return;
- 
     // Handles situations like trade windows, looting (Stance::Bind), and ducking.
     if (!Zeal::EqGame::get_eq() || !Zeal::EqGame::get_eq()->IsOkToTransact() ||
         self->StandingState != Stance::Stand)
         return;
 
-    if (self->ActorInfo && self->ActorInfo->CastingSpellGemNumber == 255) //255 = Bard Singing
-        stop_current_cast();  //abort bard song if active.
+    stop_current_cast();  //abort bard song if active.
+
+    if ((current_timestamp - casting_visible_timestamp) < 150)
+        return;
 
     current_index++;
     if (current_index >= songs.size() || current_index < 0)
