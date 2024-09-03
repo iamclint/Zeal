@@ -65,7 +65,8 @@ jobs:
         env:
           ZIP_FILENAME:  ${{ steps.zip_filename.outputs.filename }}
         run: |
-          7z a -tzip $env:ZIP_FILENAME ./Release/Zeal.asi ./Release/Zeal.pdb ./Zeal/GameXML/EQUI_OptionsWindow.xml
+          7z a -tzip $env:ZIP_FILENAME ./Release/Zeal.asi ./Release/Zeal.pdb ./Zeal/GameXML/EQUI_OptionsWindow.xml ./Zeal/crashes
+          7z rn $env:ZIP_FILENAME EQUI_OptionsWindow.xml uifiles/default/EQUI_OptionsWindow.xml
 
       - name: Create a changelog since the last release tag
         id: changelog
