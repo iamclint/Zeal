@@ -7,6 +7,17 @@
 //people will see this commit and be like OMG, then they will see this comment and message the discord channel.
 //such hopes and dreams -- its on the list!
 std::string TellWindowIdentifier = " ";
+
+void RestoreWindowState(Zeal::EqUI::ChatWnd* wnd)
+{
+    while (wnd->ParentWnd)
+    {
+        wnd = (Zeal::EqUI::ChatWnd*)wnd->ParentWnd;
+    }
+    if (wnd->IsMinimized)
+        wnd->MinimizeToggle();
+}
+
 Zeal::EqUI::ChatWnd* __fastcall GetActiveChatWindow(Zeal::EqUI::CChatManager* cm, int unused)
 {
     //fix up a little bit so the active window for things like linking items don't go to your always chat here if you are using tell windows
@@ -67,6 +78,7 @@ bool TellWindows::HandleKeyPress(int key, bool down, int modifier)
                 focus_wnd=FindNextTellWnd();
             if (focus_wnd && focus_wnd->edit)
             {
+                RestoreWindowState(focus_wnd);
                 focus_wnd->edit->SetFocus();
                 return true;
             }
@@ -154,12 +166,16 @@ void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR
                 std::string ini_name = ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
                 IO_ini ui_ini(ini_name);
                 int font_size = ui_ini.getValue<int>("ChatManager", "ChatWindow0_FontStyle");
+                font_size = std::clamp(font_size, 1, 6);
                 Zeal::EqGame::Windows->ChatManager->CreateChatWindow(WinName.c_str(), 0, 3, -1, "", font_size);
                 tell_window = ZealService::get_instance()->tells->FindTellWnd(name);
-            }
-
-            if (tell_window)
                 wnd = tell_window;
+            }
+            else 
+            {
+                wnd = tell_window;
+                RestoreWindowState(wnd);
+            }
         }
     }
     ZealService::get_instance()->hooks->hook_map["AddOutputText"]->original(AddOutputText)(wnd, u, msg, channel);
@@ -266,6 +282,7 @@ TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
                 Zeal::EqUI::ChatWnd* wnd = FindTellWnd(reply_to_str);
                 if (wnd && wnd->edit)
                 {
+                    RestoreWindowState(wnd);
                     wnd->edit->SetFocus();
                     return true;
                 }

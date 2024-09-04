@@ -197,6 +197,10 @@ namespace Zeal
 			{
 				return reinterpret_cast<int(__thiscall*)(const BasicWnd*, int,int,int)>(vtbl->WndNotification)(this, a1, a2, a3);
 			}
+			void MinimizeToggle()
+			{
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(vtbl->OnMinimizeBox)(this);
+			}
 
 			/* 0x0000 */ BaseVTable* vtbl;
 			/* 0x0004 */ DWORD MouseHoverTimer;
