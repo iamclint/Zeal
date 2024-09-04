@@ -4,6 +4,7 @@
 #include "EqAddresses.h"
 #include "string_util.h"
 #include "zone_map_data.h"
+#include <string>
 
 // Possible enhancements:
 // - Support a command for default small / med / large map sizes
@@ -26,6 +27,71 @@ struct TwoPoints {
     float x0, y0, x1, y1;  // Either line segment end or rect TL BR.
 };
 
+// Convenience class for stashing the active D3D render state before modifying
+// a list of parameters.
+class RenderStateStash {
+public:
+    struct Pair {
+        D3DRENDERSTATETYPE state_type;
+        DWORD value;
+    };
+
+    RenderStateStash(IDirect3DDevice8* device_) {
+        device = device_;
+    }
+
+    // Processes list of pairs stashing current state and modifying to new state.
+    void store_and_modify(const std::vector<Pair>& pairs) {
+        for (const auto& pair : pairs) {
+            DWORD value;
+            device->GetRenderState(pair.state_type, &value);
+            stored_pairs.push_back({ pair.state_type, value });
+            device->SetRenderState(pair.state_type, pair.value);
+        }
+    }
+
+    // Copies the stashed state back.
+    void restore_state() {
+        for (const auto& pair : stored_pairs)
+            device->SetRenderState(pair.state_type, pair.value);
+    }
+
+private:
+    IDirect3DDevice8* device;
+    std::vector<Pair> stored_pairs;
+};
+
+class TextureStateStash {
+public:
+    struct Pair {
+        D3DTEXTURESTAGESTATETYPE state_type;
+        DWORD value;
+    };
+
+    TextureStateStash(IDirect3DDevice8* device_) {
+        device = device_;
+    }
+
+    // Processes list of pairs stashing current state and modifying to new state.
+    void store_and_modify(const std::vector<Pair>& pairs) {
+        for (const auto& pair : pairs) {
+            DWORD value;
+            device->GetTextureStageState(0, pair.state_type, &value);
+            stored_pairs.push_back({ pair.state_type, value });
+            device->SetTextureStageState(0, pair.state_type, pair.value);
+        }
+    }
+
+    // Copies the stashed state back.
+    void restore_state() {
+        for (const auto& pair : stored_pairs)
+            device->SetTextureStageState(0, pair.state_type, pair.value);
+    }
+
+private:
+    IDirect3DDevice8* device;
+    std::vector<Pair> stored_pairs;
+};
 
 
 // Implements Cohen-Sutherland clipping (with +y towards bottom).
@@ -176,9 +242,9 @@ void ZoneMap::render_load_map() {
 
     // Calculate the initial offset based on alignment of the full map data.
     offset_y = rect_top - zone_map_data->min_y * scale_factor;
-    if (map_alignment_state == 2)  // Right alignment
+    if (map_alignment_state == AlignmentType::kRight)
         offset_x = rect_right - zone_map_data->max_x * scale_factor;
-    else if (map_alignment_state == 1)  // Center alignment
+    else if (map_alignment_state == AlignmentType::kCenter)
         offset_x = (rect_right + rect_left) * 0.5 -
           (zone_map_data->max_x + zone_map_data->min_x) * 0.5f * scale_factor;
     else  // Default left alignment.
@@ -236,14 +302,14 @@ void ZoneMap::render_load_map() {
         line_count++;
     }
 
-    // Add the background triangle vertices at the end of the buffer. 
-
-    auto background_color = D3DCOLOR_XRGB(0, 0, 0);  // Black or clear.
-    if (map_background_state == 2) {
-        background_color = D3DCOLOR_XRGB(160, 160, 160);  // Light grey.
+    // Create the background as two triangles using 4 vertices.
+    unsigned int alpha = static_cast<int>(map_background_alpha * 255 + 0.5f);
+    auto background_color = D3DCOLOR_ARGB(alpha, 0, 0, 0);  // Black or clear.
+    if (map_background_state == BackgroundType::kLight) {
+        background_color = D3DCOLOR_ARGB(alpha, 160, 160, 160);  // Light grey.
     }
-    else if (map_background_state == 3) {
-        background_color = D3DCOLOR_XRGB(240, 180, 140);  // Tan.
+    else if (map_background_state == BackgroundType::kTan) {
+        background_color = D3DCOLOR_ARGB(alpha, 240, 180, 140);  // Tan.
     }
     MapVertex background_vertices[kBackgroundVertices] = {
         { clip_rect_left, clip_rect_top, 0.5f, 1.f, background_color },  // x, y, z, rhw, color
@@ -290,14 +356,12 @@ void ZoneMap::render_map()
     IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
     if (!device || !line_vertex_buffer)
         return;
-     
+
     device->SetTexture(0, NULL);  // Ensure no texture is bound
     device->SetVertexShader(kMapVertexFvfCode);
 
-    if (map_background_state) {
-        device->SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
-        device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, kBackgroundCount);
-    }
+    if (map_background_state != BackgroundType::kClear)
+        render_background();  // Background supports alpha blending which needs pipeline.
 
     if (line_count) {
         device->SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
@@ -315,7 +379,38 @@ void ZoneMap::render_map()
         device->SetStreamSource(0, marker_vertex_buffer, sizeof(MapVertex));
         device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, kMarkerCount);
     }
+}
 
+void ZoneMap::render_background() {
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+
+    // Enable alpha blending for the background
+    std::vector<RenderStateStash::Pair> render_pairs;
+    render_pairs.push_back({ D3DRS_CULLMODE, D3DCULL_NONE });
+    render_pairs.push_back({ D3DRS_ALPHABLENDENABLE, TRUE });
+    render_pairs.push_back({ D3DRS_SRCBLEND, D3DBLEND_SRCALPHA });
+    render_pairs.push_back({ D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA });
+    render_pairs.push_back({ D3DRS_ZENABLE, TRUE });
+    render_pairs.push_back({ D3DRS_ZWRITEENABLE, TRUE });  // Enable depth writing
+    render_pairs.push_back({ D3DRS_LIGHTING, FALSE });  // Disable lighting
+    RenderStateStash render_state(device);
+    render_state.store_and_modify(render_pairs);
+
+    // Set texture stage states to avoid any unexpected texturing
+    std::vector<TextureStateStash::Pair> texture_pairs;
+    texture_pairs.push_back({ D3DTSS_COLOROP, D3DTOP_SELECTARG1 });
+    texture_pairs.push_back({ D3DTSS_COLORARG1, D3DTA_DIFFUSE });
+    texture_pairs.push_back({ D3DTSS_ALPHAOP, D3DTOP_SELECTARG1 });
+    texture_pairs.push_back({ D3DTSS_ALPHAARG1, D3DTA_DIFFUSE });
+    TextureStateStash texture_state(device);
+    texture_state.store_and_modify(texture_pairs);
+
+    // Background vertices are stored at the start of the line_vertex_buffer.
+    device->SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
+    device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, kBackgroundCount);
+
+    render_state.restore_state();
+    texture_state.restore_state();
 }
 
 int ZoneMap::render_update_position_buffer() {
@@ -417,14 +512,21 @@ void ZoneMap::render_update_marker_buffer() {
                                     {0, 0, 0}, {size, -short_size, 0}, {size, short_size, 0},
                                     {0, 0, 0}, {-size, short_size, 0}, {-size, -short_size, 0}
     };
-    MapVertex marker_vertices[kNumVertices];
+
+    // Skip drawing the marker if the center is off the map.
     const float rect_left = map_rect_left * screen_size.x;
     const float rect_right = map_rect_right * screen_size.x;
     const float rect_top = map_rect_top * screen_size.y;
     const float rect_bottom = map_rect_bottom * screen_size.y;
+    if ((screen_x <= rect_left) || (screen_x >= rect_right) ||
+        (screen_y <= rect_top) || (screen_y >= rect_bottom))
+        return;
+
+    // Add vertices constraining to fit within the valid screen.
+    MapVertex marker_vertices[kNumVertices];
     for (int i = 0; i < kNumVertices; ++i) {
-        marker_vertices[i].x = max(rect_left, min(rect_right, marker[i].x + screen_x));
-        marker_vertices[i].y = max(rect_top, min(rect_bottom, marker[i].y + screen_y));
+        marker_vertices[i].x = max(0, min(screen_size.x - 1, marker[i].x + screen_x));
+        marker_vertices[i].y = max(0, min(screen_size.y - 1, marker[i].y + screen_y));
         marker_vertices[i].z = 0.5f;
         marker_vertices[i].rhw = 1.f;
         marker_vertices[i].color = D3DCOLOR_XRGB(255, 0, 0);
@@ -480,21 +582,23 @@ void ZoneMap::set_enabled(bool _enabled, bool update_default)
     }
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
-        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapEnabled", enabled);
+        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapEnabled", enabled);
 
     update_ui_options();
 }
 
 void ZoneMap::toggle_background() {
-    if (++map_background_state >= kBackgroundStates) {
-        map_background_state = 0;
+    map_background_state = BackgroundType::e(static_cast<int>(map_background_state) + 1);
+    if (map_background_state > BackgroundType::kLast) {
+        map_background_state = BackgroundType::kFirst;
     }
     zone_id = kInvalidZoneId;  // Triggers reload.
     update_ui_options();
 }
 
-bool ZoneMap::set_background(int new_state, bool update_default) {
-    if ((new_state < 0) || (new_state >= kBackgroundStates)) {
+bool ZoneMap::set_background(int new_state_in, bool update_default) {
+    BackgroundType::e new_state = BackgroundType::e(new_state_in);
+    if ((new_state < BackgroundType::kFirst) || (new_state > BackgroundType::kLast)) {
         update_ui_options();  // Keep UI in sync when fails.
         return false;
     }
@@ -509,8 +613,22 @@ bool ZoneMap::set_background(int new_state, bool update_default) {
     return true;
 }
 
-bool ZoneMap::set_alignment(int alignment, bool update_default) {
-    alignment = max(0, min(kAlignmentStates - 1, alignment));
+bool ZoneMap::set_background_alpha(int percent, bool update_default) {
+    map_background_alpha = max(0, min(1.f, percent / 100.f));
+    zone_id = kInvalidZoneId;  // Triggers reload.
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
+
+    update_ui_options();
+    return true;
+}
+
+
+
+bool ZoneMap::set_alignment(int alignment_in, bool update_default) {
+    AlignmentType::e alignment{ alignment_in };
+    alignment = max(AlignmentType::kFirst, min(AlignmentType::kLast, alignment));
 
     map_alignment_state = alignment;
     zone_id = kInvalidZoneId;  // Triggers reload.
@@ -597,9 +715,11 @@ void ZoneMap::load_ini(IO_ini* ini)
     if (!ini->exists("Zeal", "MapEnabled"))
         ini->setValue<bool>("Zeal", "MapEnabled", false);
     if (!ini->exists("Zeal", "MapBackgroundState"))
-        ini->setValue<int>("Zeal", "MapBackgroundState", 0);
+        ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(BackgroundType::kClear));
+    if (!ini->exists("Zeal", "MapBackgroundAlpha"))
+        ini->setValue<float>("Zeal", "MapBackgroundAlpha", kDefaultBackgroundAlpha);
     if (!ini->exists("Zeal", "MapAlignment"))
-        ini->setValue<int>("Zeal", "MapAlignment", 0);
+        ini->setValue<int>("Zeal", "MapAlignment", static_cast<int>(AlignmentType::kFirst));
     if (!ini->exists("Zeal", "MapRectTop"))
         ini->setValue<float>("Zeal", "MapRectTop", kDefaultRectTop);
     if (!ini->exists("Zeal", "MapRectLeft"))
@@ -615,8 +735,9 @@ void ZoneMap::load_ini(IO_ini* ini)
 
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
     enabled = ini->getValue<bool>("Zeal", "MapEnabled");
-    map_background_state = ini->getValue<int>("Zeal", "MapBackgroundState");
-    map_alignment_state = ini->getValue<int>("Zeal", "MapAlignment");
+    map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
+    map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
+    map_alignment_state = AlignmentType::e(ini->getValue<int>("Zeal", "MapAlignment"));
     map_rect_top = ini->getValue<float>("Zeal", "MapRectTop");
     map_rect_left = ini->getValue<float>("Zeal", "MapRectLeft");
     map_rect_bottom = ini->getValue<float>("Zeal", "MapRectBottom");
@@ -625,8 +746,9 @@ void ZoneMap::load_ini(IO_ini* ini)
     marker_size = ini->getValue<float>("Zeal", "MapMarkerSize");
 
     // Sanity clamp ini values.
-    map_background_state = max(0, min(kBackgroundStates - 1, map_background_state));
-    map_alignment_state = max(0, min(kAlignmentStates - 1, map_alignment_state));
+    map_background_state = max(BackgroundType::kFirst, min(BackgroundType::kLast, map_background_state));
+    map_background_alpha = max(0, min(1.f, map_background_alpha));
+    map_alignment_state = max(AlignmentType::kFirst, min(AlignmentType::kLast, map_alignment_state));
     if (map_rect_top < 0 || map_rect_top > map_rect_bottom || map_rect_bottom > 1) {
         map_rect_top = kDefaultRectTop;
         map_rect_bottom = kDefaultRectBottom;
@@ -645,20 +767,32 @@ void ZoneMap::update_ui_options() {
        ZealService::get_instance()->ui->options->UpdateOptionsMapOnly();
 }
 
-bool ZoneMap::set_map_top(int top_percent, bool update_default) {
-    return set_map_rect(top_percent / 100.f, map_rect_left, map_rect_bottom, map_rect_right, update_default);
+bool ZoneMap::set_map_top(int top_percent, bool update_default, bool preserve_height) {
+    float new_top = top_percent / 100.f;
+    float bottom = preserve_height ? (new_top + (map_rect_bottom - map_rect_top)) : map_rect_bottom;
+    return set_map_rect(new_top, map_rect_left, bottom, map_rect_right, update_default);
 }
 
-bool ZoneMap::set_map_left(int left_percent, bool update_default) {
-    return set_map_rect(map_rect_top, left_percent / 100.f , map_rect_bottom, map_rect_right, update_default);
+bool ZoneMap::set_map_left(int left_percent, bool update_default, bool preserve_width) {
+    float new_left = left_percent / 100.f;
+    float right = preserve_width ? (new_left + (map_rect_right - map_rect_left)) : map_rect_right;
+    return set_map_rect(map_rect_top, new_left, map_rect_bottom, right, update_default);
 }
 
 bool ZoneMap::set_map_bottom(int bottom_percent, bool update_default) {
     return set_map_rect(map_rect_top, map_rect_left, bottom_percent / 100.f, map_rect_right, update_default);
 }
 
+bool ZoneMap::set_map_height(int height_percent, bool update_default) {
+    return set_map_rect(map_rect_top, map_rect_left, map_rect_top + height_percent / 100.f, map_rect_right, update_default);
+}
+
 bool ZoneMap::set_map_right(int right_percent, bool update_default) {
     return set_map_rect(map_rect_top, map_rect_left, map_rect_bottom, right_percent / 100.f, update_default);
+}
+
+bool ZoneMap::set_map_width(int width_percent, bool update_default) {
+    return set_map_rect(map_rect_top, map_rect_left, map_rect_bottom, map_rect_left + width_percent / 100.f, update_default);
 }
 
 bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, bool update_default) {
@@ -705,9 +839,47 @@ void ZoneMap::parse_rect(const std::vector<std::string>& args) {
     if ((tlbr.size() != 4) || !set_map_rect(tlbr[0] / 100.f, tlbr[1] / 100.f, tlbr[2] / 100.f, tlbr[3] / 100.f))
     {
         Zeal::EqGame::print_chat("Usage: /map rect <top> <left> <bottom> <right> (percent of screen dimensions)");
-        Zeal::EqGame::print_chat("Example: /map rect 10 20 50 60");
+        Zeal::EqGame::print_chat("Example: /map rect 10 20 50 65");
     }
 }
+
+// Alternative to the more direct rect that supports width and height.
+void ZoneMap::parse_size(const std::vector<std::string>& args) {
+    std::vector<int> tlhw;
+    for (int i = 2; i < args.size(); i++)
+    {
+        int value = 0;
+        if (Zeal::String::tryParse(args[i], &value))
+            tlhw.push_back(value);
+        else
+            break;
+    }
+
+    if ((tlhw.size() != 4) || !set_map_rect(tlhw[0] / 100.f, tlhw[1] / 100.f,
+        (tlhw[0] + tlhw[2]) / 100.f,    // Convert height to bottom (top + height).
+        (tlhw[1] + tlhw[3]) / 100.f))   // And width to right (left + width).
+    {
+        Zeal::EqGame::print_chat("Usage: /map size <top> <left> <height> <width> (percent of screen dimensions)");
+        Zeal::EqGame::print_chat("Example: /map size 10 20 40 45");
+    }
+}
+
+void ZoneMap::parse_alignment(const std::vector<std::string>& args) {
+    int alignment = AlignmentType::kFirst - 1;
+    if (args.size() == 3) {
+        if (args[2] == "left")
+            alignment = AlignmentType::kLeft;
+        else  if (args[2] == "center")
+            alignment = AlignmentType::kCenter;
+        else if (args[2] == "right")
+            alignment = AlignmentType::kRight;
+    }
+
+    if ((alignment < AlignmentType::kFirst) || !set_alignment(alignment)) {
+        Zeal::EqGame::print_chat("Usage: /map alignment left,center,right");
+    }
+}
+
 
 void ZoneMap::parse_marker(const std::vector<std::string>& args) {
     if (args.size() <= 2) {
@@ -735,14 +907,58 @@ void ZoneMap::parse_marker(const std::vector<std::string>& args) {
     Zeal::EqGame::print_chat("Example: /map marker 500 -1000 (drops a marker at loc 500, -1000)");
 }
 
+bool ZoneMap::search_poi(const std::string& search_term) {
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (!self)
+        return false;  // Not handled here.
+
+    const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+    if (!zone_map_data || zone_map_data->num_labels == 0) {
+        Zeal::EqGame::print_chat("No map POI data available for this zone");
+        return false;
+    }
+
+    // Go through the labels looking for a match. Use lowercase for both.
+    std::string search_lower = search_term;
+    std::transform(search_lower.begin(), search_lower.end(), search_lower.begin(), ::tolower);
+    int match_count = 0;
+    for (int i = 0; i < zone_map_data->num_labels; ++i) {
+        const ZoneMapLabel& label = zone_map_data->labels[i];
+        std::string label_lower = std::string(label.label);
+        std::transform(label_lower.begin(), label_lower.end(), label_lower.begin(), ::tolower);
+        if (label_lower.find(search_lower) != std::string::npos) {
+            match_count++;
+            const char* flag = "-";
+            if (match_count == 1) {
+                Zeal::EqGame::print_chat("Map poi search results for: %s:", search_term.c_str());
+                flag = "+";  // Flag the POI that was used for the marker.
+                // Note: Need to negate y and x to go from map data to world coordinates.
+                set_marker(-zone_map_data->labels[i].y, -zone_map_data->labels[i].x);
+                set_enabled(true);
+            }
+            Zeal::EqGame::print_chat("%s[%i]: (%i, %i): %s", flag, i, -label.y, -label.x, label.label);
+        }
+    }
+    if (match_count == 0) {
+        Zeal::EqGame::print_chat("%s is not a poi match", search_term.c_str());
+        return false;
+    }
+    return true;
+}
+
 bool ZoneMap::parse_shortcuts(const std::vector<std::string>& args) {
     // Support implicit shortcuts (/map 0 = clear marker, /map y x = set marker).
     int y = 0;
     int x = 0;
-    if (args.size() == 2 && args[1] == "0") {
-        clear_marker();
-        return true;
-    } 
+    if (args.size() == 2) {
+        if (args[1] == "0") {
+            clear_marker();
+            return true;
+        }
+        if (args[1] != "help") {
+            return search_poi(args[1]);
+        }
+    }
     else if (args.size() == 3 && Zeal::String::tryParse(args[1], &y) && Zeal::String::tryParse(args[2], &x)) {
         set_marker(y, x);
         set_enabled(true);
@@ -754,8 +970,17 @@ bool ZoneMap::parse_shortcuts(const std::vector<std::string>& args) {
 
 void ZoneMap::parse_background(const std::vector<std::string>& args) {
     int state = 0;
-    if (args.size() != 3 || !Zeal::String::tryParse(args[2], &state) || !set_background(state, false))
-        Zeal::EqGame::print_chat( "Usage: /map background <select> (0 to %i)", kBackgroundStates);
+    if ((args.size() == 3 || args.size() == 4) && Zeal::String::tryParse(args[2], &state)
+                                                        && set_background(state, false)) {
+        if (args.size() == 3)
+            return;
+        int alpha = 100;
+        if (Zeal::String::tryParse(args[3], &alpha) &&
+                    set_background_alpha(alpha, false))
+            return;
+    }
+    Zeal::EqGame::print_chat( "Usage: /map background <%i to %i> [alpha]",
+                            BackgroundType::kFirst, BackgroundType::kLast);
 }
 
 void ZoneMap::parse_zoom(const std::vector<std::string>& args) {
@@ -779,12 +1004,13 @@ void ZoneMap::parse_poi(const std::vector<std::string>& args) {
     // Note: Need to negate y and x to go from map data to world coordinates.
     int poi = 0;
     if (args.size() == 2) {
+        Zeal::EqGame::print_chat("Map POI list for zone: %s", zone_map_data->name);
         for (int i = 0; i < zone_map_data->num_labels; ++i) {
             const ZoneMapLabel& label = zone_map_data->labels[i];
             Zeal::EqGame::print_chat("[%i]: (%i, %i): %s", i, -label.y, -label.x, label.label);
         }
     }
-    else if (args.size() == 3 && Zeal::String::tryParse(args[2], &poi)) {
+    else if (args.size() == 3 && Zeal::String::tryParse(args[2], &poi, true)) {
         if (poi < 0 || poi >= zone_map_data->num_labels) {
             Zeal::EqGame::print_chat("Invalid selection index");
             return;
@@ -792,15 +1018,18 @@ void ZoneMap::parse_poi(const std::vector<std::string>& args) {
         set_marker(-zone_map_data->labels[poi].y, -zone_map_data->labels[poi].x);
         set_enabled(true);
     }
-    else {
-        Zeal::EqGame::print_chat("Usage: /map poi <index> (displays list if <index> is blank)");
+    else if (args.size() != 3 || !search_poi(args[2])) {
+        Zeal::EqGame::print_chat("Usage: /map poi (displays list of all points of interest)");
+        Zeal::EqGame::print_chat("Usage: /map poi <#> (drops a marker at numeric list [#])");
+        Zeal::EqGame::print_chat("Usage: /map poi <phrase> (search poi labels for phrase)");
         Zeal::EqGame::print_chat("Example: /map poi 2 (drops a marker at list item [2])");
+        Zeal::EqGame::print_chat("Example: /map poi cazic (searches poi labels for 'cazic')");
     }
 }
 
-
 void ZoneMap::dump() {
-    Zeal::EqGame::print_chat("enabled: %i, background: %i, zone: %i", enabled, map_background_state, zone_id);
+    Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), align: %i, zone: %i",
+                            enabled, map_background_state, map_background_alpha, map_alignment_state, zone_id);
     Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i", marker_zone_id, marker_y, marker_x);
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
@@ -823,6 +1052,12 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "rect") {
         parse_rect(args);  // Set the Top, Left, Bottom, Right coordinates of window.
     }
+    else if (args[1] == "size") {
+        parse_size(args);  // Set the Top, Left, Height, Width of window.
+    }
+    else if (args[1] == "alignment") {
+        parse_alignment(args);
+    }
     else if (args[1] == "marker") {
         parse_marker(args);
     }
@@ -839,7 +1074,8 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
         dump();
     }
     else if (!parse_shortcuts(args)) {
-        Zeal::EqGame::print_chat("Usage: /map [on|off|rect|marker|background|zoom|poi], /map <y> <x>, /map 0");
+        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi]");
+        Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
     }
     return true;

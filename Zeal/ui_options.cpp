@@ -80,19 +80,19 @@ void ui_options::InitUI()
 		ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", val);
 	});
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapZoom_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->zone_map->set_zoom(value + 100);  // Note zoom offset.
+		ZealService::get_instance()->zone_map->set_zoom(value * 15 + 100);  // Note scale and zoom offset.
 	});
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapLeft_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_map_left(value);
 	});
-	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapRight_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->zone_map->set_map_right(value);
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapWidth_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		ZealService::get_instance()->zone_map->set_map_width(value);
 	});
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapTop_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_map_top(value);
 	});
-	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapBottom_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->zone_map->set_map_bottom(value);
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapHeight_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		ZealService::get_instance()->zone_map->set_map_height(value);
 	});
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapPositionSize_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_position_size(value);
@@ -100,6 +100,9 @@ void ui_options::InitUI()
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapMarkerSize_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_marker_size(value);
 	});
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapBackgroundAlpha_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		ZealService::get_instance()->zone_map->set_background_alpha(value);
+		});
 
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_PanDelayValueLabel");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonLabel_X");
@@ -112,11 +115,12 @@ void ui_options::InitUI()
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_TargetRingFill_Value");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapZoom_Value");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapLeft_Value");
-	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapRight_Value");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapWidth_Value");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapTop_Value");
-	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapBottom_Value");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapHeight_Value");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapPositionSize_Value");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapMarkerSize_Value");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapBackgroundAlpha_Value");
 
 	/*set the current states*/
 	UpdateOptions();
@@ -175,20 +179,22 @@ void ui_options::UpdateOptionsMapOnly()
 	ui->SetChecked("Zeal_Map", ZealService::get_instance()->zone_map->is_enabled());
 	ui->SetComboValue("Zeal_MapBackground_Combobox", ZealService::get_instance()->zone_map->get_background());
 	ui->SetComboValue("Zeal_MapAlignment_Combobox", ZealService::get_instance()->zone_map->get_alignment());
-	ui->SetSliderValue("Zeal_MapZoom_Slider", ZealService::get_instance()->zone_map->get_zoom() - 100);
+	ui->SetSliderValue("Zeal_MapZoom_Slider", (ZealService::get_instance()->zone_map->get_zoom() - 100)/15);  // 100 to 1600%
 	ui->SetSliderValue("Zeal_MapLeft_Slider", ZealService::get_instance()->zone_map->get_map_left());
-	ui->SetSliderValue("Zeal_MapRight_Slider", ZealService::get_instance()->zone_map->get_map_right());
+	ui->SetSliderValue("Zeal_MapWidth_Slider", ZealService::get_instance()->zone_map->get_map_width());
 	ui->SetSliderValue("Zeal_MapTop_Slider", ZealService::get_instance()->zone_map->get_map_top());
-	ui->SetSliderValue("Zeal_MapBottom_Slider", ZealService::get_instance()->zone_map->get_map_bottom());
+	ui->SetSliderValue("Zeal_MapHeight_Slider", ZealService::get_instance()->zone_map->get_map_height());
 	ui->SetSliderValue("Zeal_MapPositionSize_Slider", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetSliderValue("Zeal_MapMarkerSize_Slider", ZealService::get_instance()->zone_map->get_marker_size());
+	ui->SetSliderValue("Zeal_MapBackgroundAlpha_Slider", ZealService::get_instance()->zone_map->get_background_alpha());
 	ui->SetLabelValue("Zeal_MapZoom_Value", "%i%%", ZealService::get_instance()->zone_map->get_zoom());
 	ui->SetLabelValue("Zeal_MapLeft_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_left());
-	ui->SetLabelValue("Zeal_MapRight_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_right());
+	ui->SetLabelValue("Zeal_MapWidth_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_width());
 	ui->SetLabelValue("Zeal_MapTop_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_top());
-	ui->SetLabelValue("Zeal_MapBottom_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_bottom());
+	ui->SetLabelValue("Zeal_MapHeight_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_height());
 	ui->SetLabelValue("Zeal_MapPositionSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetLabelValue("Zeal_MapMarkerSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_marker_size());
+	ui->SetLabelValue("Zeal_MapBackgroundAlpha_Value", "%i%%", ZealService::get_instance()->zone_map->get_background_alpha());
 }
 
 
