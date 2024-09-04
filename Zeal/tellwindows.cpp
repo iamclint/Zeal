@@ -286,8 +286,8 @@ TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
             {
                 if (Zeal::EqGame::Windows->ChatManager->AlwaysChatHereIndex>=0)
                     Zeal::EqGame::Windows->ChatManager->ActiveChatWnd = Zeal::EqGame::Windows->ChatManager->AlwaysChatHereIndex;
-                return false;
             }
+            return false;
         }); //chat hotkey
 
 
