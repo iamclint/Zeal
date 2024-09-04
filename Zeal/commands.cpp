@@ -188,7 +188,8 @@ ChatCommands::ChatCommands(ZealService* zeal)
 	Add("/useitem", {}, "Use an item's right click function arugment is 0-29 which indicates the slot",
 		[](std::vector<std::string>& args) {
 			Zeal::EqStructures::EQCHARINFO* chr = Zeal::EqGame::get_char_info();
-			if (!chr)
+			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+			if (!chr || !self)
 			{
 				Zeal::EqGame::print_chat(USERCOLOR_SHOUT,"[Fatal Error] Failed to get charinfo for useitem!");
 				return true;
@@ -212,15 +213,21 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					Zeal::EqGame::print_chat("There isn't an item at %i", item_index);
 					return true;
 				}
-				if (item->Common.SpellId)
+				if (item->Type != 0 || !item->Common.SpellId)
 				{
-					chr->cast(0xA, 0, (int*)&item, item_index < 21 ? item_index+1 : item_index);
+					Zeal::EqGame::print_chat("item %s does not have a spell attached to it.", item->Name);
+					return true;
 				}
-				else
+				if (!self->ActorInfo || self->ActorInfo->CastingSpellId != 0xffff)
 				{
-					if (item)
-						Zeal::EqGame::print_chat("item %s does not have a spell attached to it.", item->Name);
+					Zeal::EqGame::print_chat(USERCOLOR_SPELLS, "You must stop casting to cast this spell!");
+					return true;
 				}
+				if (self->StandingState != Stance::Stand) {
+					Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "You must be standing to cast a spell.");
+					return true;
+				}
+				chr->cast(0xA, 0, (int*)&item, item_index < 21 ? item_index + 1 : item_index);
 			}
 			else
 			{
