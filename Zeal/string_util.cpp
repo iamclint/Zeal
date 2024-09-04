@@ -76,32 +76,37 @@ namespace Zeal
 		}
 
 
-		bool tryParse(const std::string& str, int* result) {
+		bool tryParse(const std::string& str, int* result, bool quiet) {
 			try {
 				*result = std::stoi(str);
 				return true;
 			}
 			catch (const std::invalid_argument& e) {
-				Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
+				if (!quiet)
+					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
 				return false;
 			}
 			catch (const std::out_of_range& e) {
-				Zeal::EqGame::print_chat("Out of range: %s", e.what());
+				if (!quiet) {
+					Zeal::EqGame::print_chat("Out of range: %s", e.what());
+				}
 				return false;
 			}
 		}
 
-		bool tryParse(const std::string& str, float* result) {
+		bool tryParse(const std::string& str, float* result, bool quiet) {
 			try {
 				*result = std::stof(str);
 				return true;
 			}
 			catch (const std::invalid_argument& e) {
-				Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
+				if (!quiet)
+					Zeal::EqGame::print_chat("Invalid Argument %s", e.what());
 				return false;
 			}
 			catch (const std::out_of_range& e) {
-				Zeal::EqGame::print_chat("Out of range: %s", e.what());
+				if (!quiet)
+					Zeal::EqGame::print_chat("Out of range: %s", e.what());
 				return false;
 			}
 		}

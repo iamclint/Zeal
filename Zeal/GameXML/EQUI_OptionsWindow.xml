@@ -5562,9 +5562,9 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>true</AlignRight>
   </Label>
-  <!-- Zeal Map Right -->
-  <Label item="Zeal_MapRight_Label">
-    <ScreenID>Zeal_MapRight_Label</ScreenID>
+  <!-- Zeal Map Width -->
+  <Label item="Zeal_MapWidth_Label">
+    <ScreenID>Zeal_MapWidth_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
@@ -5574,7 +5574,7 @@
       <CX>150</CX>
       <CY>14</CY>
     </Size>
-    <Text>Right edge limit</Text>
+    <Text>Width limit</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -5584,8 +5584,8 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>false</AlignRight>
   </Label>
-  <Slider item="Zeal_MapRight_Slider">
-    <ScreenID>Zeal_MapRight_Slider</ScreenID>
+  <Slider item="Zeal_MapWidth_Slider">
+    <ScreenID>Zeal_MapWidth_Slider</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
@@ -5597,8 +5597,8 @@
     </Size>
     <SliderArt>SDT_DefSlider</SliderArt>
   </Slider>
-  <Label item="Zeal_MapRight_Value">
-    <ScreenID>Zeal_MapRight_Value</ScreenID>
+  <Label item="Zeal_MapWidth_Value">
+    <ScreenID>Zeal_MapWidth_Value</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>297</X>
@@ -5674,9 +5674,9 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>true</AlignRight>
   </Label>
-  <!-- Zeal Map Bottom -->
-  <Label item="Zeal_MapBottom_Label">
-    <ScreenID>Zeal_MapBottom_Label</ScreenID>
+  <!-- Zeal Map Height -->
+  <Label item="Zeal_MapHeight_Label">
+    <ScreenID>Zeal_MapHeight_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
@@ -5686,7 +5686,7 @@
       <CX>150</CX>
       <CY>14</CY>
     </Size>
-    <Text>Bottom edge limit</Text>
+    <Text>Height limit</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -5696,8 +5696,8 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>false</AlignRight>
   </Label>
-  <Slider item="Zeal_MapBottom_Slider">
-    <ScreenID>Zeal_MapBottom_Slider</ScreenID>
+  <Slider item="Zeal_MapHeight_Slider">
+    <ScreenID>Zeal_MapHeight_Slider</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>197</X>
@@ -5709,8 +5709,8 @@
     </Size>
     <SliderArt>SDT_DefSlider</SliderArt>
   </Slider>
-  <Label item="Zeal_MapBottom_Value">
-    <ScreenID>Zeal_MapBottom_Value</ScreenID>
+  <Label item="Zeal_MapHeight_Value">
+    <ScreenID>Zeal_MapHeight_Value</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>297</X>
@@ -6014,15 +6014,15 @@
     <Pieces>Zeal_MapLeft_Label</Pieces>
     <Pieces>Zeal_MapLeft_Slider</Pieces>
     <Pieces>Zeal_MapLeft_Value</Pieces>
-    <Pieces>Zeal_MapRight_Label</Pieces>
-    <Pieces>Zeal_MapRight_Slider</Pieces>
-    <Pieces>Zeal_MapRight_Value</Pieces>
+    <Pieces>Zeal_MapWidth_Label</Pieces>
+    <Pieces>Zeal_MapWidth_Slider</Pieces>
+    <Pieces>Zeal_MapWidth_Value</Pieces>
     <Pieces>Zeal_MapTop_Label</Pieces>
     <Pieces>Zeal_MapTop_Slider</Pieces>
     <Pieces>Zeal_MapTop_Value</Pieces>
-    <Pieces>Zeal_MapBottom_Label</Pieces>
-    <Pieces>Zeal_MapBottom_Slider</Pieces>
-    <Pieces>Zeal_MapBottom_Value</Pieces>
+    <Pieces>Zeal_MapHeight_Label</Pieces>
+    <Pieces>Zeal_MapHeight_Slider</Pieces>
+    <Pieces>Zeal_MapHeight_Value</Pieces>
     <Pieces>Zeal_MapPositionSize_Label</Pieces>
     <Pieces>Zeal_MapPositionSize_Slider</Pieces>
     <Pieces>Zeal_MapPositionSize_Value</Pieces>

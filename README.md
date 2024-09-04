@@ -87,8 +87,9 @@ ___
   - **Example:** `/map 500 -100` shortcut for map marker 500 -100
   - **Example:** `/map 0` shortcut for map marker 0 0 0 (clears marker)
   - **Example:** `/map zoom 200` sets map scaling to 200% (2x) and centers on position
-  - **Example:** `/map rect 2 3 50 60` map window top=2% left=3% bottom=50% right=60% of screen dimensions
+  - **Example:** `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of screen dimensions
   - **Example:** `/map poi` lists points of interest, use `/map poi 2` to drop marker at index [2] of list
+  - **Example:** `/map search_term` searches poi list for 'search_term' and drops a marker at first match
   - **Description:** controls map enable, size, and markers
     
 - `/pandelay`
