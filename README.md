@@ -80,7 +80,7 @@ ___
   - **Description:** plays songs in order until interrupted in any fashion.
 
 - `/map`
-  - **Arguments:** `on`, `off`, `rect`, `marker`, `background`, `zoom`, `poi`
+  - **Arguments:** `on`, `off`, `size`, `alignment`, `marker`, `background`, `zoom`, `poi`
   - **Example:** `/map` toggles map on and off
   - **Example:** `/map marker 500 -100` sets a target marker at loc 500, -100 (default size)
   - **Example:** `/map marker 500 -100 3` sets a target marker at loc 500, -100 with size = 3% of screen

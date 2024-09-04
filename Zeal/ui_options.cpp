@@ -100,6 +100,9 @@ void ui_options::InitUI()
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapMarkerSize_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_marker_size(value);
 	});
+	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_MapBackgroundAlpha_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		ZealService::get_instance()->zone_map->set_background_alpha(value);
+		});
 
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_PanDelayValueLabel");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_FirstPersonLabel_X");
@@ -117,6 +120,7 @@ void ui_options::InitUI()
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapHeight_Value");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapPositionSize_Value");
 	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapMarkerSize_Value");
+	ui->AddLabel(Zeal::EqGame::Windows->Options, "Zeal_MapBackgroundAlpha_Value");
 
 	/*set the current states*/
 	UpdateOptions();
@@ -182,6 +186,7 @@ void ui_options::UpdateOptionsMapOnly()
 	ui->SetSliderValue("Zeal_MapHeight_Slider", ZealService::get_instance()->zone_map->get_map_height());
 	ui->SetSliderValue("Zeal_MapPositionSize_Slider", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetSliderValue("Zeal_MapMarkerSize_Slider", ZealService::get_instance()->zone_map->get_marker_size());
+	ui->SetSliderValue("Zeal_MapBackgroundAlpha_Slider", ZealService::get_instance()->zone_map->get_background_alpha());
 	ui->SetLabelValue("Zeal_MapZoom_Value", "%i%%", ZealService::get_instance()->zone_map->get_zoom());
 	ui->SetLabelValue("Zeal_MapLeft_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_left());
 	ui->SetLabelValue("Zeal_MapWidth_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_width());
@@ -189,6 +194,7 @@ void ui_options::UpdateOptionsMapOnly()
 	ui->SetLabelValue("Zeal_MapHeight_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_height());
 	ui->SetLabelValue("Zeal_MapPositionSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetLabelValue("Zeal_MapMarkerSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_marker_size());
+	ui->SetLabelValue("Zeal_MapBackgroundAlpha_Value", "%i%%", ZealService::get_instance()->zone_map->get_background_alpha());
 }
 
 
