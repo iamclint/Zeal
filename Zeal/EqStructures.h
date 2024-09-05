@@ -99,6 +99,7 @@
 #define USERCOLOR_ECHO_CHAT_9           0xFF +  68 //  68 - chat 9 echo
 #define USERCOLOR_ECHO_CHAT_10          0xFF +  69 //  69 - chat 10 echo
 
+constexpr WORD kInvalidSpellId = 0xffff; // spell_id used when not casting or empty spell gem
 
 namespace Zeal
 {
@@ -165,6 +166,53 @@ namespace Zeal
 			Sit = 9,
 			Stand = 10,
 			Taunt = 11
+		};
+		enum SpellTargetType
+		{
+			/* 01 */	TargetOptional = 0x01,
+			/* 02 */	AEClientV1 = 0x02,
+			/* 03 */	GroupV1 = 0x03,
+			/* 04 */	PBAE = 0x04,
+			/* 05 */	Target = 0x05,
+			/* 06 */	Self = 0x06,
+			/* 07 */	// NOT USED
+			/* 08 */	TargetedAE = 0x08,
+			/* 09 */	Animal = 0x09,
+			/* 10 */	Undead = 0x0a,
+			/* 11 */	Summoned = 0x0b,
+			/* 12 */	// NOT USED
+			/* 13 */	Tap = 0x0d,
+			/* 14 */	Pet = 0x0e,
+			/* 15 */	Corpse = 0x0f,
+			/* 16 */	Plant = 0x10,
+			/* 17 */	UberGiant = 0x11, //special giant
+			/* 18 */	UberDragon = 0x12, //special dragon
+			/* 19 */	// NOT USED
+			/* 20 */	TargetedAETap = 0x14,
+			/* 21 */	// NOT USED
+			/* 22 */	// NOT USED
+			/* 23 */	// NOT USED
+			/* 24 */	UndeadAE = 0x18,
+			/* 25 */	SummonedAE = 0x19,
+			/* 26 */	// NOT USED
+			/* 27 */	// NOT USED
+			/* 28 */	// NOT USED
+			/* 29 */	// NOT USED
+			/* 30 */	// NOT USED
+			/* 31 */	// NOT USED
+			/* 32 */	// NOT USED
+			/* 33 */	// NOT USED
+			/* 34 */	// NOT USED
+			/* 35 */	// NOT USED
+			/* 36 */	// NOT USED
+			/* 37 */	// NOT USED
+			/* 38 */	// NOT USED
+			/* 39 */	// NOT USED
+			/* 40 */	AEBard = 0x28,
+			/* 41 */	GroupV2 = 0x29,
+			/* 42 */	// NOT USED
+			/* 43 */	ProjectIllusion = 0x2b, // Not found in spell data, used internally.
+
 		};
 
 
@@ -453,13 +501,13 @@ namespace Zeal
 			{
 				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*)>(0x4b9450)(this);
 			}
-			int cast(UINT gem, short spell_id, int* item, short item_slot)
+			int cast(UINT gem, WORD spell_id, int* item, short item_slot)
 			{
-				return reinterpret_cast<int(__thiscall*)(EQCHARINFO*, UINT, short, int*, short)>(0x4c483b)(this, gem, spell_id, item, item_slot);
+				return reinterpret_cast<int(__thiscall*)(EQCHARINFO*, UINT, WORD, int*, short)>(0x4c483b)(this, gem, spell_id, item, item_slot);
 			}
-			void stop_cast(UINT reason, short spell_id)
+			void stop_cast(UINT reason, WORD spell_id)
 			{
-				return reinterpret_cast<void(__thiscall*)(EQCHARINFO*, UINT, short)>(0x4cb510)(this, reason, spell_id);
+				return reinterpret_cast<void(__thiscall*)(EQCHARINFO*, UINT, WORD)>(0x4cb510)(this, reason, spell_id);
 			}
 			/* 0x0000 */ BYTE Unknown0000[2];
 			/* 0x0002 */ CHAR Name[64]; // [0x40]

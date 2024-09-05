@@ -218,7 +218,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					Zeal::EqGame::print_chat("item %s does not have a spell attached to it.", item->Name);
 					return true;
 				}
-				if (!self->ActorInfo || self->ActorInfo->CastingSpellId != 0xffff)
+				if (!self->ActorInfo || self->ActorInfo->CastingSpellId != kInvalidSpellId)
 				{
 					Zeal::EqGame::print_chat(USERCOLOR_SPELLS, "You must stop casting to cast this spell!");
 					return true;

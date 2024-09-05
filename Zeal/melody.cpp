@@ -38,9 +38,9 @@
 //   failing (like Selo's indoors), the vulnerable timing window is dominant, making it
 //   hard to click off the melody with the UI. The new retry_count logic mitigates this.
 
-
 constexpr int RETRY_COUNT_REWIND_LIMIT = 8;  // Will rewind up to 8 times.
 constexpr int RETRY_COUNT_END_LIMIT = 15;  // Will terminate if 15 retries w/out a 'success'.
+constexpr ULONGLONG MELODY_SONG_INTERVAL = 150; // Interval between songs. If too low, the song may not fire.
 
 bool Melody::start(const std::vector<int>& new_songs)
 {
@@ -79,6 +79,7 @@ bool Melody::start(const std::vector<int>& new_songs)
     songs = new_songs;
     current_index = -1;
     retry_count = 0;
+    casting_melody_spell_id = kInvalidSpellId;
     if (songs.size())
         Zeal::EqGame::print_chat(USERCOLOR_SPELLS, "You begin playing a melody.");
     return true;
@@ -91,11 +92,12 @@ void Melody::end()
         current_index = -1;
         songs.clear();
         retry_count = 0;
+        casting_melody_spell_id = kInvalidSpellId;
         Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Your melody has ended.");
     }
 }
 
-void Melody::handle_stop_cast_callback(BYTE reason)
+void Melody::handle_stop_cast_callback(BYTE reason, WORD spell_id)
 {
     // Terminate melody on stop except for missed note (part of reason == 3) rewind attempts.
     if (reason != 3 || !songs.size())
@@ -109,26 +111,29 @@ void Melody::handle_stop_cast_callback(BYTE reason)
     // is not allowed in the zone), so we use a retry_count to limit the spammy loop that is
     // difficult to click off with UI spell gems (/stopsong, /melody still work fine). The modulo
     // check skips the rewind so it advances to the next song but then allows that song to retry.
-    if ((current_index >= 0) && (++retry_count % RETRY_COUNT_REWIND_LIMIT)) {
+    if (casting_melody_spell_id == spell_id && (++retry_count % RETRY_COUNT_REWIND_LIMIT)) {
         current_index--;
         if (current_index < 0) {  // Handle wraparound.
             current_index = songs.size() - 1;
         }
     }
+    casting_melody_spell_id = kInvalidSpellId;
 }
 
-void __fastcall StopCast(int t, int u, BYTE reason, short spell_id)
+void __fastcall StopCast(int t, int u, BYTE reason, WORD spell_id)
 {
-    ZealService::get_instance()->melody->handle_stop_cast_callback(reason);
+    ZealService::get_instance()->melody->handle_stop_cast_callback(reason, spell_id);
     ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)(t, u, reason, spell_id);
 }
 
 void Melody::stop_current_cast()
 {
-    // Note: This code assumes the current_index is valid to look up the spell_id for the StopCast call.
     Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
-    if (char_info && current_index>=0 && current_index < songs.size())
-        ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)((int)char_info, 0, 0, char_info->MemorizedSpell[songs[current_index]]);
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (char_info && self && self->ActorInfo && self->ActorInfo->CastingSpellId != kInvalidSpellId) {
+        ZealService::get_instance()->hooks->hook_map["StopCast"]->original(StopCast)((int)char_info, 0, 0, self->ActorInfo->CastingSpellId);
+    }
+    casting_melody_spell_id = kInvalidSpellId;
 }
 
 void Melody::tick()
@@ -162,28 +167,35 @@ void Melody::tick()
         return;
     }
 
-    if ((current_timestamp - casting_visible_timestamp) < 150)
+    // Successfully finished casting current song/spell
+    // Reseting this field prevents the song from repeating after this point
+    casting_melody_spell_id = kInvalidSpellId;
+
+    // Wait for MELODY_SONG_INTERVAL ms between casting the next song
+    if ((current_timestamp - casting_visible_timestamp) < MELODY_SONG_INTERVAL)
         return;
- 
+
     // Handles situations like trade windows, looting (Stance::Bind), and ducking.
     if (!Zeal::EqGame::get_eq() || !Zeal::EqGame::get_eq()->IsOkToTransact() ||
         self->StandingState != Stance::Stand)
         return;
 
-    if (self->ActorInfo && self->ActorInfo->CastingSpellGemNumber == 255) //255 = Bard Singing
-        stop_current_cast();  //abort bard song if active.
+    stop_current_cast();  //abort bard song if active.
 
+    // Cast the next song in the melody
     current_index++;
     if (current_index >= songs.size() || current_index < 0)
         current_index = 0;
 
     int current_gem = songs[current_index];  // songs is 'guaranteed' to have a valid gem index from start().
-    if (char_info->MemorizedSpell[current_gem] == -1)
+    WORD current_gem_spell_id = char_info->MemorizedSpell[current_gem];
+    if (current_gem_spell_id == kInvalidSpellId)
         return;  //simply skip empty gem slots (unexpected to occur)
 
     //handle a common issue of no target gracefully (notify once and skip to next song w/out retry failures).
     if (Zeal::EqGame::get_spell_mgr() &&
-        Zeal::EqGame::get_spell_mgr()->Spells[char_info->MemorizedSpell[current_gem]]->TargetType == 5 &&
+        (Zeal::EqGame::get_spell_mgr()->Spells[current_gem_spell_id]->TargetType == Zeal::EqEnums::SpellTargetType::Target ||
+            Zeal::EqGame::get_spell_mgr()->Spells[current_gem_spell_id]->TargetType == Zeal::EqEnums::SpellTargetType::TargetedAE) &&
         !Zeal::EqGame::get_target())
     {
         Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "You must first select a target for spell %i", current_gem + 1);
@@ -191,7 +203,8 @@ void Melody::tick()
         return;
     }
 
-    char_info->cast(current_gem, char_info->MemorizedSpell[current_gem], 0, 0);
+    casting_melody_spell_id = current_gem_spell_id;
+    char_info->cast(current_gem, current_gem_spell_id, 0, 0);
     start_of_cast_timestamp = current_timestamp;
 }
 
