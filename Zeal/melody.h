@@ -3,8 +3,6 @@
 #include "memory.h"
 #include "EqUI.h"
 
-constexpr WORD kInvalidSpellId = 0xffff; // spell_id used when not casting or empty spell gem
-
 class Melody
 {
 public:
