@@ -138,10 +138,11 @@ bool clip_line_segment(const TwoPoints& clip_rect, TwoPoints& line) {
         }
         else {
             // Calculate the line segment to clip outside point to edge intersection.
-            float x, y;
-
             // At least one endpoint is outside the clip rectangle; pick it.
             OutCode outcodeOut = outcode1 > outcode0 ? outcode1 : outcode0;
+
+            float x = (outcodeOut == outcode0) ? line.x1 : line.x0;  // Satisfy compiler.
+            float y = (outcodeOut == outcode0) ? line.y1 : line.x0;
 
             // Now find the intersection point;
             // use formulas:
@@ -196,6 +197,10 @@ void ZoneMap::render_release_resources() {
     if (marker_vertex_buffer) {
         marker_vertex_buffer->Release();
         marker_vertex_buffer = nullptr;
+    }
+    if (label_font) {
+        label_font->Release();
+        label_font = nullptr;
     }
 }
 
@@ -349,6 +354,79 @@ void ZoneMap::render_load_map() {
         return;
     }
 
+    render_load_labels(*zone_map_data);
+}
+
+void ZoneMap::render_load_labels(const ZoneMapData& zone_map_data) {
+    labels_list.clear();
+    if (map_labels_mode == LabelsMode::kOff || zone_map_data.num_labels == 0)
+        return;  // Nothing else to do.
+
+    // Scan through POI's adding to the list if appropriate.
+    for (int i = 0; i < zone_map_data.num_labels; ++i) {
+        const ZoneMapLabel& label = zone_map_data.labels[i];
+
+        // First check if the label is visible on the clipped map rect.
+        float label_x = label.x * scale_factor + offset_x;
+        float label_y = label.y * scale_factor + offset_y;
+        if ((label_x < clip_rect_left) || (label_x > clip_rect_right) ||
+            (label_y < clip_rect_top) || (label_y > clip_rect_bottom))
+            continue;  // Off-screen, skip the label.
+
+        // Then filter if required (kOff bailed out above and kAll doesn't need it).
+        if (map_labels_mode == LabelsMode::kSummary) {
+            std::string label_string = std::string(label.label);
+            constexpr std::string_view zone_prefix{ "to_" };
+            if (label_string.compare(0, zone_prefix.size(), zone_prefix) != 0) {
+                constexpr std::string_view circle_string{ "druid_circle" };
+                constexpr std::string_view ring_string{ "druid_ring" };
+                constexpr std::string_view portal_string{ "_portal" };
+                constexpr std::string_view spires_string{ "_spire" };
+                constexpr std::string_view succor_string{ "succor" };
+                std::transform(label_string.begin(), label_string.end(), label_string.begin(), ::tolower);
+                if (label_string.find(circle_string) == std::string::npos &&
+                    label_string.find(ring_string) == std::string::npos &&
+                    label_string.find(portal_string) == std::string::npos &&
+                    label_string.find(spires_string) == std::string::npos &&
+                    label_string.find(succor_string) == std::string::npos)
+                    continue;  // Skip label.
+            }
+        }
+        labels_list.push_back(&label);
+    }
+
+    if (!labels_list.empty())
+        render_load_font();
+}
+
+void ZoneMap::render_load_font() {
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+    if (!device)
+        return;
+
+    if (label_font) {
+        label_font->Release();
+        label_font = nullptr;
+    }
+    LOGFONT log_font = {
+            14, //height
+            0,  //width
+            0,  // lfEscapement
+            0,  //lfOrientation
+            FW_NORMAL, // lfWeight
+            FALSE, // lfItalic
+            FALSE, // lfUnderline
+            FALSE, // lfStrikeOut
+            DEFAULT_CHARSET, // lfCharSet
+            OUT_DEFAULT_PRECIS, //lfOutPrecision
+            CLIP_DEFAULT_PRECIS, // lfClipPrecision
+            ANTIALIASED_QUALITY,// lfQuality
+            DEFAULT_PITCH,// lfPitchAndFamily
+            L"Arial"// lfFaceName[LF_FACESIZE]
+    };
+    HRESULT hr = D3DXCreateFontIndirect(device, &log_font, &label_font);
+    if (FAILED(hr))
+        label_font = nullptr;  // Just in case.
 }
 
 void ZoneMap::render_map()
@@ -368,8 +446,9 @@ void ZoneMap::render_map()
         device->DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices, line_count);
     }
 
-    // Note: Markers are currently getting drawn under the map lines (good or bad?).
-    if (position_vertex_buffer) {
+    render_labels();
+
+     if (position_vertex_buffer) {
         int triangle_count = render_update_position_buffer();
         device->SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
         device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, triangle_count);
@@ -413,6 +492,45 @@ void ZoneMap::render_background() {
     texture_state.restore_state();
 }
 
+void ZoneMap::render_labels() {
+    if (!label_font || labels_list.empty())
+        return;
+
+    const Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
+    const int screen_size_x = static_cast<int>(screen_size.x);
+    const int screen_size_y = static_cast<int>(screen_size.y);
+
+    for (const ZoneMapLabel* label : labels_list) {
+        // ZoneMapData colors are difficult to see. Just use white and black for now.
+        D3DCOLOR font_color = D3DCOLOR_XRGB(255, 255, 255);  // Default to white
+        if (map_background_state == BackgroundType::kLight && map_background_alpha > 0.25) {
+            font_color = D3DCOLOR_XRGB(0, 0, 0);  // Switch to dark on light background.
+        }
+
+        // Calculate and clip the on-screen coordinate position of the text.
+        const int kHalfHeight = 25;  // Centered so just has to be sufficiently large.
+        const int kHalfWidth = 60;
+        int label_x = static_cast<int>(label->x * scale_factor + offset_x + 0.5f);
+        int label_y = static_cast<int>(label->y * scale_factor + offset_y + 0.5f);
+        RECT text_rect = { .left = label_x - kHalfWidth, .top = label_y - kHalfHeight,
+                        .right = label_x + kHalfWidth, .bottom = label_y + kHalfHeight };
+        text_rect.left = max(0, min(screen_size_x - 1, text_rect.left));
+        text_rect.right = max(0, min(screen_size_x - 1, text_rect.right));
+        text_rect.top = max(0, min(screen_size_y - 1, text_rect.top));
+        text_rect.bottom = max(0, min(screen_size_y - 1, text_rect.bottom));
+        int length = strlen(label->label);
+        if (length > 20) {
+            length = 20;  // Truncate it to 20.
+            for (int i = 1; i < length; ++i) {
+                if (label->label[i] == '(')  // Extra info in () to drop.
+                    length = i;  // Truncates and breaks loop.
+            }
+        }
+
+        label_font->DrawTextA(label->label, length, &text_rect, DT_VCENTER | DT_CENTER | DT_SINGLELINE, font_color);
+    }
+}
+
 int ZoneMap::render_update_position_buffer() {
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     if (!position_vertex_buffer || !self) {
@@ -434,7 +552,7 @@ int ZoneMap::render_update_position_buffer() {
     // So: Screen x tracks -sin(heading) and y tracks -cos(heading).
     float heading = self->Heading;
     float direction = static_cast<float>(heading * M_PI / 256); // In radians.
-    const float rotation = static_cast<float>(120 * M_PI / 180);
+    const float rotation = static_cast<float>(135 * M_PI / 180);
     float cos_theta0 = cosf(direction);
     float sin_theta0 = sinf(direction);
     float cos_theta1 = cosf(direction - rotation);  // Rotated clockwise.
@@ -596,6 +714,16 @@ void ZoneMap::toggle_background() {
     update_ui_options();
 }
 
+void ZoneMap::toggle_labels() {
+    map_labels_mode = LabelsMode::e(static_cast<int>(map_labels_mode) + 1);
+    if (map_labels_mode > LabelsMode::kLast) {
+        map_labels_mode = LabelsMode::kFirst;
+    }
+    zone_id = kInvalidZoneId;  // Triggers reload.
+    update_ui_options();
+}
+
+
 bool ZoneMap::set_background(int new_state_in, bool update_default) {
     BackgroundType::e new_state = BackgroundType::e(new_state_in);
     if ((new_state < BackgroundType::kFirst) || (new_state > BackgroundType::kLast)) {
@@ -624,8 +752,6 @@ bool ZoneMap::set_background_alpha(int percent, bool update_default) {
     return true;
 }
 
-
-
 bool ZoneMap::set_alignment(int alignment_in, bool update_default) {
     AlignmentType::e alignment{ alignment_in };
     alignment = max(AlignmentType::kFirst, min(AlignmentType::kLast, alignment));
@@ -641,6 +767,21 @@ bool ZoneMap::set_alignment(int alignment_in, bool update_default) {
     update_ui_options();
     return true;
 }
+
+bool ZoneMap::set_labels_mode(int mode_in, bool update_default) {
+    LabelsMode::e mode{ mode_in };
+    mode = max(LabelsMode::kFirst, min(LabelsMode::kLast, mode));
+
+    map_labels_mode = mode;
+    zone_id = kInvalidZoneId;  // Triggers reload.
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapLabelsMode", mode);
+
+    update_ui_options();
+    return true;
+}
+
 
 bool ZoneMap::set_position_size(int new_size_percent, bool update_default) {
     position_size = max(0.01f, min(kMaxPositionSize, new_size_percent / 100.f * kMaxPositionSize));
@@ -720,6 +861,8 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<float>("Zeal", "MapBackgroundAlpha", kDefaultBackgroundAlpha);
     if (!ini->exists("Zeal", "MapAlignment"))
         ini->setValue<int>("Zeal", "MapAlignment", static_cast<int>(AlignmentType::kFirst));
+    if (!ini->exists("Zeal", "MapLabelsMode"))
+        ini->setValue<int>("Zeal", "MapLabelsMode", static_cast<int>(LabelsMode::kOff));
     if (!ini->exists("Zeal", "MapRectTop"))
         ini->setValue<float>("Zeal", "MapRectTop", kDefaultRectTop);
     if (!ini->exists("Zeal", "MapRectLeft"))
@@ -738,6 +881,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
     map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
     map_alignment_state = AlignmentType::e(ini->getValue<int>("Zeal", "MapAlignment"));
+    map_labels_mode = LabelsMode::e(ini->getValue<int>("Zeal", "MapLabelsMode"));
     map_rect_top = ini->getValue<float>("Zeal", "MapRectTop");
     map_rect_left = ini->getValue<float>("Zeal", "MapRectLeft");
     map_rect_bottom = ini->getValue<float>("Zeal", "MapRectBottom");
@@ -749,6 +893,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_background_state = max(BackgroundType::kFirst, min(BackgroundType::kLast, map_background_state));
     map_background_alpha = max(0, min(1.f, map_background_alpha));
     map_alignment_state = max(AlignmentType::kFirst, min(AlignmentType::kLast, map_alignment_state));
+    map_labels_mode = max(LabelsMode::kFirst, min(LabelsMode::kLast, map_labels_mode));
     if (map_rect_top < 0 || map_rect_top > map_rect_bottom || map_rect_bottom > 1) {
         map_rect_top = kDefaultRectTop;
         map_rect_bottom = kDefaultRectBottom;
@@ -880,6 +1025,21 @@ void ZoneMap::parse_alignment(const std::vector<std::string>& args) {
     }
 }
 
+void ZoneMap::parse_labels(const std::vector<std::string>& args) {
+    int labels = LabelsMode::kFirst - 1;
+    if (args.size() == 3) {
+        if (args[2] == "off")
+            labels = LabelsMode::kOff;
+        else if (args[2] == "summary")
+            labels = LabelsMode::kSummary;
+        else if (args[2] == "all")
+            labels = LabelsMode::kAll;
+    }
+
+    if ((labels < LabelsMode::kFirst) || !set_labels_mode(labels)) {
+        Zeal::EqGame::print_chat("Usage: /map labels off,summary,all");
+    }
+}
 
 void ZoneMap::parse_marker(const std::vector<std::string>& args) {
     if (args.size() <= 2) {
@@ -1028,15 +1188,15 @@ void ZoneMap::parse_poi(const std::vector<std::string>& args) {
 }
 
 void ZoneMap::dump() {
-    Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), align: %i, zone: %i",
-                            enabled, map_background_state, map_background_alpha, map_alignment_state, zone_id);
-    Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i", marker_zone_id, marker_y, marker_x);
+    Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), align: %i, labels:%i, zone: %i",
+                            enabled, map_background_state, map_background_alpha, map_alignment_state, map_labels_mode, zone_id);
+    Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i, num_labels: %i", marker_zone_id, marker_y, marker_x, labels_list.size());
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
     Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, zoom_id: %i", position_size, marker_size, zoom_recenter_zone_id);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f", scale_factor, offset_y, offset_x, zoom_factor);
-    Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i", line_count,
-        line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr);
+    Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i, font: %i", line_count,
+        line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr, label_font != nullptr);
 }
 
 bool ZoneMap::parse_command(const std::vector<std::string>& args) {
@@ -1070,11 +1230,14 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "poi") {
         parse_poi(args);
     }
+    else if (args[1] == "labels") {
+        parse_labels(args);
+    }
     else if (args[1] == "dump") {
         dump();
     }
     else if (!parse_shortcuts(args)) {
-        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi]");
+        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels]");
         Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
     }

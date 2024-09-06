@@ -270,6 +270,12 @@ void Binds::add_binds()
 			ZealService::get_instance()->zone_map->toggle_zoom();
 		}
 		});
+	add_bind(231, "Toggle Map Labels", "ToggleMapLabels", key_category::UI, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			ZealService::get_instance()->zone_map->toggle_labels();
+		}
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)
