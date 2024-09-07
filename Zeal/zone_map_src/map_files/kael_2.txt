@@ -1,8 +1,0 @@
-P -1339.5890, -2369.7905, -38.4189,  127, 0, 0,  2,  Miriku_the_Chaotic(Ench2.0)
-P -1342.7062, -238.8153, -138.2952,  0, 0, 240,  2,  Slaggak_the_Trainer(Q)War-Pal
-P -1561.2310, 47.5623, -198.2488,  0, 0, 240,  2,  Yimmrek_the_Herald(Q)
-P -1479.7385, 1670.4102, -158.2912,  0, 0, 240,  2,  Keldor_Dek`Torek(Q)Casters
-P -1430.1259, -936.6096, -59.6542,  0, 0, 240,  2,  Vkjor(Q)War-Pal
-P -1516.7700, 1740.1803, -159.6228,  0, 0, 240,  2,  Fjokar_Frozenshard(Q)Rogue
-P -1639.5751, 952.4006, -219.5917,  0, 0, 240,  2,  Gleed_Dragonhunter(Q)Ranger
-P -1883.4811, -328.5058, -199.5915,  0, 0, 240,  2,  Wenglawks_Kkeak(Q)Rogue

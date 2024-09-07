@@ -115,11 +115,9 @@ def add_zone_max_mins(all_zone_data: dict) -> dict:
             max_x = max(max_x, max(line[0], line[3]))
             min_y = min(min_y, min(line[1], line[4]))
             max_y = max(max_y, max(line[1], line[4]))
-        for label in zone_data['labels']:
-            min_x = min(min_x, line[0])
-            max_x = max(max_x, line[0])
-            min_y = min(min_y, line[1])
-            max_y = max(max_y, line[1])
+        # Ignore the labels for max and mins but handle empty label case.
+        if not zone_data['labels']:
+            zone_data['labels'].append((0.0, 0.0, 0.0, 0, 0, 0, 'origin'),)
         if max_x == min_x:
             max_x = min_x + 1
         if max_y == min_y:

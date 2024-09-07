@@ -3,10 +3,12 @@
 Support scripts and data files for producing the auto-generated zone_map_data.h and zone_map_data.cpp files.
 
 ## Map data source:
-* The map_files/ directory was downloaded from below without modification:
-  https://github.com/EJWellman/QuarmTool/tree/a728dc9fd00fd8599dfb15b973749f43a5043435/src/map_files
-* The map data files above are 18 MB and add ~4 MB to Zeal after conversion to zone_map_data.cpp
-* The alternative, richer Brewtal maps were 142 MB
+* The map data in the `map_files` directly was sourced from:
+  https://www.eqmaps.info/eq-map-files/ (Brewall's Everquest Maps 20240109)
+* The Brewall maps have greater detail and consistent layer color coding (useful for z-filtering).
+* The original unzipped download was 142 MB but included maps from eras past PoP.
+* The `extract_brewall_maps.py` used the zone names in the `zone_id_lut.csv` file described below
+  to copy out only Quarm PoP related maps, which reduced the `map_files` down to 36 MB.
 
 ## Integer zone_id to short zone name lookup (zone_id_lut.csv)
 * Zeal has access to the current zone with an integer zone_id

@@ -1,1 +1,62 @@
-P -2781.5022, 2798.3357, -341.7273,  0, 0, 240,  2,  Crusader_Vragor
+P -1503.4429, -3939.7256, -344.4677, 255, 0, 0, 3, to_The_Emerald_Jungle
+P -4433.5269, -1589.1725, -285.7695, 255, 0, 0, 3, to_The_Swamp_of_No_Hope
+P 4763.4644, 1597.2205, -474.2907, 255, 0, 0, 3, to_The_Ruins_of_Sebilis
+P -1486.0000, -3868.0000, 0.0000, 255, 0, 0, 2, Succor
+P -1905.9713, 514.3250, -121.4066, 240, 240, 240, 1, TIP:_Climb_this_tree_to_lev_to_aqueducts
+P -2520.8262, 3265.0203, -311.7401, 0, 127, 127, 2, a_forgotten_noble_(Missions)
+P -2650.0000, 3330.0000, 0.0000, 0, 0, 0, 2, Emperor_Ganak
+P 4369.6143, 1836.1410, -358.5040, 0, 0, 0, 2, Pained_Soul
+P -2780.1421, 2796.5000, -341.6880, 0, 0, 0, 2, Crusader_Vragor
+P -2830.6863, -1675.6675, -378.0794, 0, 0, 0, 2, Dragontail_(Roam)
+P -3400.5767, -2877.4153, -396.9950, 0, 0, 0, 2, Thruke_(Roam)
+P -2837.5071, -1970.3699, -360.9484, 0, 0, 0, 2, Flayhte_(Roam)
+P -845.9232, -2698.1814, -367.2781, 0, 0, 0, 2, Lativ
+P -2068.9141, -2032.3434, -349.9674, 0, 0, 0, 2, Lashrazz_Krazz
+P -3179.8040, 2575.9590, -337.5144, 0, 0, 0, 2, Zuikzan_Moorkan
+P 437.4741, 689.7546, -336.7879, 0, 0, 0, 2, Garkorra_Aruacki
+P 2647.7610, 1558.7897, -357.1841, 0, 0, 0, 2, Likkorsis_Zillkar
+P -4507.0225, -2029.1536, -329.1505, 0, 0, 0, 2, Khellibak_Killsoro
+P 2022.0945, 1244.4662, -147.1015, 0, 0, 0, 2, Spirit_of_Kotiz_(on_Aqueduct)
+P -2977.5081, 2186.5889, -333.3804, 0, 0, 0, 2, Tortured_Wraith
+P -2095.3477, 1967.8257, -287.5562, 0, 0, 0, 2, Seshkar_(Roam)
+P -3507.9080, -2429.5044, -336.7836, 127, 64, 0, 2, Bloodeye_(Hunter_Roam)
+P 67.0980, 1597.1438, -319.1863, 127, 64, 0, 2, Bloodeye_(Hunter,Roam,HS)
+P -3255.3406, -3623.5889, -269.1027, 127, 64, 0, 2, Bloodeye_(Hunter,Roam,HS)
+P -3429.0000, -2111.0000, -354.0000, 127, 64, 0, 2, Champion_Arlek_(Hunter,Roam)
+P -3183.8379, -3657.8230, -312.8876, 127, 64, 0, 2, Champion_Thenrin_(Hunter,Roam)
+P -3247.7283, -3443.1653, -201.0572, 127, 64, 0, 2, Crusader_Zoglic_(Hunter,Roam,HS)
+P -1118.9468, -3448.1177, -345.1141, 127, 64, 0, 2, Dreadlord_Dekir_(Hunter,Roam,HS)
+P -3553.3853, -646.1354, -391.6407, 127, 64, 0, 2, Dreadlord_Fanrik_(Hunter,Roam)
+P -3368.9341, -2121.5430, -238.6870, 127, 64, 0, 2, Dreadlord_Fanrik_(Hunter,Roam,HS)
+P -31.3230, -3264.8135, -264.4416, 127, 64, 0, 2, Ebon_Lotus_(Hunter,Roam,HS)
+P -2729.0552, -3449.4915, -259.2080, 127, 64, 0, 2, Ffroaak_(Hunter,Roam,HS)
+P -958.4693, -2858.4893, -346.8970, 127, 64, 0, 2, froglock_forager_(Hunter,Roam)
+P -2824.2659, -2510.4036, -348.4820, 127, 64, 0, 2, froglock_hunter_(Hunter,Roam,HS)
+P -3438.5596, -3659.7449, -344.4565, 127, 64, 0, 2, Hangman_(Hunter)
+P -3383.1133, -1511.2621, -292.4746, 127, 64, 0, 2, Harbinger_Dronik_(Hunter,Roam)
+P -3154.7085, -3278.0164, -322.8030, 127, 64, 0, 2, Harbinger_Josk_(Hunter,Roam,HS)
+P -210.4555, -3080.1250, -166.7489, 127, 64, 0, 2, Hierophant_Ixyl_(Hunter,Roam,HS)
+P -1141.9087, 1646.8152, -244.7298, 127, 64, 0, 2, Keeper_Lasnik_(Hunter,Roam)
+P -3624.4517, -2815.8411, -366.7998, 127, 64, 0, 2, Keeper_Sepsis_(Hunter,Roam,HS)
+P -1884.9928, -2522.6919, -253.2545, 127, 64, 0, 2, Master_Fasliw_(Hunter,Roam,HS)
+P -2760.3230, -3205.7515, -328.8620, 127, 64, 0, 2, Oracle_Froskil_(Hunter,Roam,HS)
+P -2773.5706, -3192.3147, -332.6419, 127, 64, 0, 2, Partisan_Yinlen_(Hunter,Roam,HS)
+P -2688.5481, -1225.3484, -354.7206, 127, 64, 0, 2, Sigra_(Hunter,Roam,HS)
+P -134.0575, 1363.0564, -345.7971, 127, 64, 0, 2, Sigra_(Hunter,Roam,HS)
+P -3398.3545, -1141.8456, -237.6553, 127, 64, 0, 2, Silvermane_(Hunter)
+P -3292.6543, -963.6653, -238.5269, 127, 64, 0, 2, Squire_Gilk_(Hunter,Roam)
+P -3099.2996, -3385.4861, -244.6971, 127, 64, 0, 2, Stonebeak_(Hunter,Roam,HS)
+P -2106.4480, -2993.9268, -331.4057, 127, 64, 0, 2, Stonebeak_(Hunter,Roam)
+P -1758.7782, 1484.6570, -206.7428, 127, 64, 0, 2, Titail_Sinok_(Hunter,Roam)
+P -2058.1038, -3085.6116, -305.1244, 127, 64, 0, 2, Trakanausaurus_Rex_(Hunter,Roam)
+P -3631.2012, -2822.2764, -370.1909, 127, 64, 0, 2, Vessel_Fryn_(Hunter,Roam,HS)
+
+
+
+
+
+
+
+
+
+
