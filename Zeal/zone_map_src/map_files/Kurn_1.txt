@@ -1,0 +1,16 @@
+P 288.0000, -45.0000, -99.0000, 255, 0, 0, 3, to_The_Field_of_Bone
+P 71.4902, 280.4863, 0.0019, 240, 0, 0, 3, to_The_Field_of_Bone
+P 139.0591, -178.1070, 0.0019, 240, 240, 0, 2, Fake_Wall
+P 0.1185, -0.0000, 4.8125, 240, 0, 0, 2, Succor
+P 174.6765, 108.3428, 42.1769, 0, 0, 0, 2, Observant_Skeleton
+P -79.1593, 31.7983, -41.7604, 0, 0, 0, 2, Crackling_Bones
+P -63.6102, 52.4118, 101.5519, 0, 0, 0, 2, Shattered_Skeleton_(Roam)
+P -267.7582, 113.5238, -118.5940, 127, 64, 0, 2, Bargynn_(Hunter)
+P -37.3097, 127.1831, -41.7604, 127, 64, 0, 2, fingered_skeleton_(Hunter)
+P 48.4979, -79.9196, 128.4922, 127, 64, 0, 2, a_skeletal_cook_(Hunter)
+P -45.8288, -47.2000, -41.7604, 127, 64, 0, 2, thick_boned_skeleton_(Hunter,Roam)
+P 50.2617, -76.0609, 127.5922, 127, 64, 0, 2, thick_skulled_skeleton_(Hunter)
+P -61.1112, -171.7227, -41.6541, 127, 64, 0, 2, thick_tailed_skeleton_(Hunter,Roam)
+P 112.5411, -30.1401, 100.2831, 127, 64, 0, 2, undead_crusader_(Hunter,Roam)
+P -151.2282, -186.2030, -38.7649, 127, 64, 0, 2, an_undead_jester_(Hunter,Roam)
+P -273.6582, 97.2986, -124.9354, 240, 240, 240, 2, Cave_of_Wishes

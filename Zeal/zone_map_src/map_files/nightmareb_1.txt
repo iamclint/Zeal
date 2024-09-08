@@ -1,0 +1,5 @@
+P -1658.6718, -26.4849, -342.0811, 240, 0, 0, 3, to_The_Plane_of_Nightmare_(click_gate)
+P 1801.0000, 54.0000, 0.0000, 255, 255, 255, 2, Stonehenge
+P 1714, -14, 149, 240, 127, 0, 2, Terris-Thule_(Raid)
+P -1257, -87, -277, 127, 64, 0, 2, Sentry_of_Nightmares_(Hunter)
+P 1001.0230, 102.8051, 8.4631, 127, 64, 0, 2, Protector_of_Terris_(Hunter)

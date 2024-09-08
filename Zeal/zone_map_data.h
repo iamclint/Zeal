@@ -13,6 +13,7 @@ struct ZoneMapLine {
    uint8_t red;  // Line RGB color.
    uint8_t green;
    uint8_t blue;
+   int8_t level_id;
 };
 
 struct ZoneMapLabel {
@@ -25,16 +26,27 @@ struct ZoneMapLabel {
     const char* label;  // Label text.
 };
 
+static constexpr int8_t kZoneMapInvalidLevelId = -128;
+struct ZoneMapLevel {
+    int8_t level_id;  // -6 to +4, InvalidLevelId for non-level
+    int max_z;
+    int min_z;
+};
+
 struct ZoneMapData {
    const char* name;
    const int max_x;
    const int min_x;
    const int max_y;
    const int min_y;
+   const int max_z;
+   const int min_z;
    const int num_lines;
    const int num_labels;
+   const int num_levels;
    const ZoneMapLine* lines;
    const ZoneMapLabel* labels;
+   const ZoneMapLevel* levels;  // Sorted by ascending level_id.
 };
 
 const ZoneMapData* get_zone_map_data(int zone_id);

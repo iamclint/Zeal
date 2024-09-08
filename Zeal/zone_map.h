@@ -55,6 +55,8 @@ public:
 	void toggle_background();
 	void toggle_zoom();
 	void toggle_labels();
+	void toggle_level_up();
+	void toggle_level_down();
 	void callback_render();
 
 private:
@@ -78,11 +80,13 @@ private:
 	void parse_background(const std::vector<std::string>& args);
 	void parse_zoom(const std::vector<std::string>& args);
 	void parse_labels(const std::vector<std::string>& args);
+	void parse_level(const std::vector<std::string>& args);
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
 	void set_marker(int y, int x);
 	void clear_marker();
 	bool set_map_rect(float top, float left, float bottom, float right, bool update_default = false);
+	bool set_level(int level);  // Set to 0 to show all levels.
 	void update_ui_options();
 
 	void load_ini(class IO_ini* ini);
@@ -109,7 +113,11 @@ private:
 	int zoom_recenter_zone_id = kInvalidZoneId;
 	int marker_x = 0;
 	int marker_y = 0;
-	
+	int map_level_zone_id = kInvalidZoneId;
+	int map_level_index = 0;
+	ZoneMapLabel map_level_label;
+	char map_level_label_string[20];
+
 	float scale_factor = 0;  // Conversion factors for map data to screen coordinates.
 	float zoom_factor = 1.f;
 	float offset_x = 0;
@@ -122,6 +130,8 @@ private:
 	float clip_rect_left = 0;
 	float clip_rect_bottom = 0;
 	float clip_rect_right = 0;
+	int clip_max_z = 0;
+	int clip_min_z = 0;
 	float position_size = kDefaultPositionSize;
 	float marker_size = kDefaultMarkerSize;
 

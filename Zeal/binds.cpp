@@ -276,6 +276,18 @@ void Binds::add_binds()
 			ZealService::get_instance()->zone_map->toggle_labels();
 		}
 		});
+	add_bind(232, "Toggle Map Level Up", "ToggleMapLevelUp", key_category::UI, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			ZealService::get_instance()->zone_map->toggle_level_up();
+		}
+		});
+	add_bind(233, "Toggle Map Level Down", "ToggleMapLevelDown", key_category::UI, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			ZealService::get_instance()->zone_map->toggle_level_down();
+		}
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)
