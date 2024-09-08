@@ -278,9 +278,24 @@ void ZoneMap::render_load_map() {
     const int kMaxLineCount = zone_map_data->num_lines;  // Allocate a buffer assuming all visible.
     std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(kMaxLineCount * 2);
 
+    bool z_filtering = (map_level_zone_id == zone_id);
+    int level_id = z_filtering ? zone_map_data->levels[map_level_index].level_id : kZoneMapInvalidLevelId;
+    clip_max_z = z_filtering ? zone_map_data->levels[map_level_index].max_z : zone_map_data->max_z;
+    clip_max_z += 10;  // Pad up for player height and other labels.
+    clip_min_z = z_filtering ? zone_map_data->levels[map_level_index].min_z : zone_map_data->min_z;
     const TwoPoints clip_rect = { .x0 = clip_rect_left, .y0 = clip_rect_top, .x1 = clip_rect_right, .y1 = clip_rect_bottom };
     line_count = 0;  // Tracks number of visible (after clipping) lines.
     for (int i = 0; i < kMaxLineCount; ++i) {
+        if (z_filtering) {
+            if (zone_map_data->lines[i].level_id == kZoneMapInvalidLevelId) {
+                // Filter all unknown lines based on z height range.
+                int line_max_z = max(zone_map_data->lines[i].z0, zone_map_data->lines[i].z1);
+                int line_min_z = min(zone_map_data->lines[i].z0, zone_map_data->lines[i].z1);
+                if (line_max_z < clip_min_z || line_min_z > clip_max_z)
+                    continue; // Skip if line does not cross level.
+            } else if (zone_map_data->lines[i].level_id != level_id)
+                    continue;  // Skip display of all other map levels.
+        }
         TwoPoints line = { zone_map_data->lines[i].x0 * scale_factor + offset_x,
                             zone_map_data->lines[i].y0 * scale_factor + offset_y,
                             zone_map_data->lines[i].x1 * scale_factor + offset_x,
@@ -359,14 +374,34 @@ void ZoneMap::render_load_map() {
 
 void ZoneMap::render_load_labels(const ZoneMapData& zone_map_data) {
     labels_list.clear();
-    if (map_labels_mode == LabelsMode::kOff || zone_map_data.num_labels == 0)
-        return;  // Nothing else to do.
+
+    // Sneak in the current Level filter setting as another label.
+    if (map_level_zone_id == zone_id) {
+        snprintf(map_level_label_string, sizeof(map_level_label_string), "Level: %i", map_level_index);
+        map_level_label_string[sizeof(map_level_label_string) - 1] = 0;
+        map_level_label.x = static_cast<int16_t>((clip_rect_left - offset_x + 25) / scale_factor);
+        map_level_label.y = static_cast<int16_t>((clip_rect_top - offset_y + 15) / scale_factor);
+        map_level_label.z = clip_min_z;
+        map_level_label.red = 255;
+        map_level_label.green = 255;
+        map_level_label.blue = 255;
+        map_level_label.label = map_level_label_string;
+        labels_list.push_back(&map_level_label);
+    }
+
+    int num_labels_to_scan = zone_map_data.num_labels;
+    if (map_labels_mode == LabelsMode::kOff)
+        num_labels_to_scan = 0;  // Disable the scan below.
 
     // Scan through POI's adding to the list if appropriate.
-    for (int i = 0; i < zone_map_data.num_labels; ++i) {
+    for (int i = 0; i < num_labels_to_scan; ++i) {
         const ZoneMapLabel& label = zone_map_data.labels[i];
 
-        // First check if the label is visible on the clipped map rect.
+        // First do a quick vertical z-axis check.
+        if (label.z < clip_min_z || label.z > clip_max_z)
+            continue;  // Not on visible level, skip it.
+
+        // Then check if the label is visible on the clipped map rect.
         float label_x = label.x * scale_factor + offset_x;
         float label_y = label.y * scale_factor + offset_y;
         if ((label_x < clip_rect_left) || (label_x > clip_rect_right) ||
@@ -501,11 +536,10 @@ void ZoneMap::render_labels() {
     const int screen_size_y = static_cast<int>(screen_size.y);
 
     for (const ZoneMapLabel* label : labels_list) {
-        // ZoneMapData colors are difficult to see. Just use white and black for now.
-        D3DCOLOR font_color = D3DCOLOR_XRGB(255, 255, 255);  // Default to white
-        if (map_background_state == BackgroundType::kLight && map_background_alpha > 0.25) {
-            font_color = D3DCOLOR_XRGB(0, 0, 0);  // Switch to dark on light background.
-        }
+        // Use colorful labels but override the black ones on most map backgrounds.
+        D3DCOLOR font_color = D3DCOLOR_XRGB(label->red, label->green, label->blue);
+        if (font_color == D3DCOLOR_XRGB(0, 0, 0))
+            font_color = D3DCOLOR_XRGB(192, 192, 192);  // Flip to light grey.
 
         // Calculate and clip the on-screen coordinate position of the text.
         const int kHalfHeight = 25;  // Centered so just has to be sufficiently large.
@@ -521,8 +555,8 @@ void ZoneMap::render_labels() {
         int length = strlen(label->label);
         if (length > 20) {
             length = 20;  // Truncate it to 20.
-            for (int i = 1; i < length; ++i) {
-                if (label->label[i] == '(')  // Extra info in () to drop.
+            for (int i = 1; i < length - 1; ++i) {
+                if (label->label[i] == '_' && label->label[i + 1] == '(')  // Extra info in () to drop.
                     length = i;  // Truncates and breaks loop.
             }
         }
@@ -568,6 +602,11 @@ int ZoneMap::render_update_position_buffer() {
     Vec3 symbol[kPositionVertices] = { vertex0, vertex1, vertex3,
         vertex0, vertex3, vertex2};
 
+    // Adjust the color if the position is not within the z clipping range.
+    bool within_level = position.z >= clip_min_z && position.z <= clip_max_z;
+    auto color = within_level ? D3DCOLOR_XRGB(250, 250, 51) : // Lemon yellow
+        D3DCOLOR_XRGB(195, 176, 145); // Lemon khaki.
+
     // Allow the position marker to exceed the rect limits by size but must stay on screen.
     const float clip_left = max(clip_rect_left - size, 0);
     const float clip_top = max(clip_rect_top - size, 0);
@@ -579,7 +618,7 @@ int ZoneMap::render_update_position_buffer() {
         position_vertices[i].y = max(clip_top, min(clip_bottom, symbol[i].y + screen_y));
         position_vertices[i].z = 0.5f;
         position_vertices[i].rhw = 1.f;
-        position_vertices[i].color = D3DCOLOR_XRGB(250, 250, 51);  // Lemon yellow.
+        position_vertices[i].color = color;
     }
 
     // Note: The limit is set low to avoid issues on maps that allow movement to the edge (zone
@@ -677,8 +716,10 @@ void ZoneMap::callback_render()
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     if (zone_id != self->ZoneId) {
-        if (zone_id != kInvalidZoneId)  // Not internally triggered so probably a zone event.
+        if (zone_id != kInvalidZoneId) { // Not internally triggered so probably a zone event.
             zoom_factor = 1.f;  // Reset zoom factor on a zone to reduce corner cases.
+            map_level_zone_id = kInvalidZoneId;  // TODO: More reliable reset.
+        }
         zone_id = self->ZoneId;
         render_load_map();
     }
@@ -1149,6 +1190,76 @@ void ZoneMap::parse_zoom(const std::vector<std::string>& args) {
         Zeal::EqGame::print_chat( "Usage: /map zoom <percent> (<= 100 disables)");
 }
 
+void ZoneMap::toggle_level_up() {
+    set_level(map_level_index + 1);
+}
+
+void ZoneMap::toggle_level_down() {
+    set_level(map_level_index - 1);
+}
+
+bool ZoneMap::set_level(int level_index) {
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (!self)
+        return false;
+
+    const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+    if (zone_id == kInvalidZoneId || !zone_map_data || zone_map_data->num_levels < 2)
+        return false;
+
+    // Commit to making an update. Disable level filtering by default.
+    int current_zone_id = zone_id;
+    zone_id = kInvalidZoneId;  // Triggers refresh.
+    map_level_zone_id = kInvalidZoneId;
+    map_level_index = 0;
+
+    // Support wraparound of toggles up and down.
+    if (level_index == zone_map_data->num_levels) {
+        level_index = 0;
+    }
+    else if (level_index == -1) {
+        level_index = zone_map_data->num_levels - 1;
+    }
+
+    // Index [0] is expected to be the leftover kZoneMapInvalidLevelId lines. Return
+    // success if that is correct.
+    if (level_index == 0)
+        return (zone_map_data->levels[level_index].level_id == kZoneMapInvalidLevelId);
+
+    if (level_index < 0 || level_index >= zone_map_data->num_levels ||
+        zone_map_data->levels[level_index].level_id == kZoneMapInvalidLevelId)
+        return false;  // Ineligible index.
+
+    map_level_zone_id = current_zone_id;
+    map_level_index = level_index;
+    return true;
+}
+
+void ZoneMap::parse_level(const std::vector<std::string>& args) {
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (!self)
+        return;
+
+    const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+    if (!zone_map_data || zone_map_data->num_levels < 2) {
+        Zeal::EqGame::print_chat("No map level data available for this zone");
+        return;
+    }
+
+    int level_index = 0;
+    if (args.size() == 2) {
+        Zeal::EqGame::print_chat("Levels for zone: %s", zone_map_data->name);
+        for (int i = 0; i < zone_map_data->num_levels; ++i) {
+            const ZoneMapLevel& level = zone_map_data->levels[i];
+            Zeal::EqGame::print_chat("[%i]: min_z: %i, max_z: %i, id: %i",
+                i, level.min_z, level.max_z, level.level_id);
+        }
+    }
+    else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &level_index) || !set_level(level_index))
+        Zeal::EqGame::print_chat("Usage: /map level <index> (set to 0 to show all levels)");
+}
+
+
 void ZoneMap::parse_poi(const std::vector<std::string>& args) {
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
@@ -1193,6 +1304,7 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i, num_labels: %i", marker_zone_id, marker_y, marker_x, labels_list.size());
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
+    Zeal::EqGame::print_chat("level: zone: %i, index: %i, z_max: %i, z_min: %i", map_level_zone_id, map_level_index, clip_max_z, clip_min_z);
     Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, zoom_id: %i", position_size, marker_size, zoom_recenter_zone_id);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f", scale_factor, offset_y, offset_x, zoom_factor);
     Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i, font: %i", line_count,
@@ -1233,11 +1345,14 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "labels") {
         parse_labels(args);
     }
+    else if (args[1] == "level") {
+        parse_level(args);
+    }
     else if (args[1] == "dump") {
         dump();
     }
     else if (!parse_shortcuts(args)) {
-        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels]");
+        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level]");
         Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
     }
