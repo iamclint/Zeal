@@ -70,14 +70,15 @@ void ItemDisplay::CleanUI()
 		for (auto& w : windows)
 		{
 			if (w)
-				w->IsVisible = false;
+				w->IsVisible = false; 
 		}
+		windows.clear();
 }
 
 ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 {
 	windows.clear();
-	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
+//	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);

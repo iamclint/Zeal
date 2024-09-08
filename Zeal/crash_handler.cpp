@@ -14,7 +14,8 @@ std::vector<DWORD> nonCrashExceptionCodes =
     EXCEPTION_BREAKPOINT,         // 0x80000003, Used by debuggers to temporarily suspend execution
     EXCEPTION_SINGLE_STEP,        // 0x80000004, Used by debuggers for single-step tracing
     DBG_CONTROL_C,                // 0x40010005, Control-C exception for console applications
-    0x80000007  //  Used to wake up the system debugger
+    0x80000007,  //  Used to wake up the system debugger
+    0xe06d7363 //C++ exception typically thrown but not caught but since I use vectored exception handler
 };
 
 // Define a map to store exception codes and their descriptions
