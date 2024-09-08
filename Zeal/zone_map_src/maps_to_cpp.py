@@ -35,6 +35,7 @@ struct ZoneMapLine {
    uint8_t red;  // Line RGB color.
    uint8_t green;
    uint8_t blue;
+   int8_t level_id;
 };
 
 struct ZoneMapLabel {
@@ -47,16 +48,27 @@ struct ZoneMapLabel {
     const char* label;  // Label text.
 };
 
+static constexpr int8_t kZoneMapInvalidLevelId = -128;
+struct ZoneMapLevel {
+    int8_t level_id;  // -6 to +4, InvalidLevelId for non-level
+    int max_z;
+    int min_z;
+};
+
 struct ZoneMapData {
    const char* name;
    const int max_x;
    const int min_x;
    const int max_y;
    const int min_y;
+   const int max_z;
+   const int min_z;
    const int num_lines;
    const int num_labels;
+   const int num_levels;
    const ZoneMapLine* lines;
    const ZoneMapLabel* labels;
+   const ZoneMapLevel* levels;  // Sorted by ascending level_id.
 };
 
 const ZoneMapData* get_zone_map_data(int zone_id);
@@ -110,11 +122,15 @@ def add_zone_max_mins(all_zone_data: dict) -> dict:
         max_x = min_x
         min_y = zone_data['lines'][0][1]
         max_y = min_y
+        min_z = zone_data['lines'][0][2]
+        max_z = min_z
         for line in zone_data['lines']:
             min_x = min(min_x, min(line[0], line[3]))
             max_x = max(max_x, max(line[0], line[3]))
             min_y = min(min_y, min(line[1], line[4]))
             max_y = max(max_y, max(line[1], line[4]))
+            min_z = min(min_z, min(line[2], line[5]))
+            max_z = max(max_z, max(line[2], line[5]))
         # Ignore the labels for max and mins but handle empty label case.
         if not zone_data['labels']:
             zone_data['labels'].append((0.0, 0.0, 0.0, 0, 0, 0, 'origin'),)
@@ -122,12 +138,62 @@ def add_zone_max_mins(all_zone_data: dict) -> dict:
             max_x = min_x + 1
         if max_y == min_y:
             max_y = min_y + 1
+        if max_z == min_z:
+            max_z = min_z + 1
         zone_data['max_x'] = max_x
         zone_data['min_x'] = min_x
         zone_data['max_y'] = max_y
         zone_data['min_y'] = min_y
+        zone_data['max_z'] = max_z
+        zone_data['min_z'] = min_z
 
     return all_zone_data
+
+
+
+def add_zone_level_info(all_zone_data: dict) -> dict:
+    # Uses Brewal color coding to tag lines with levels and generate
+    # a look up table with the max and min z values for each level.
+
+    # Brewal maps: https://www.eqmaps.info/eq-map-files/mapping-standards/
+    level_lut = {
+        (255, 168, 102): 6, # Layer 2: Highest z (top).
+        (204, 102, 0): 5, # Layer 3
+        (102, 255, 102): 4, # Layer 4
+        (0, 204, 0): 3, # Layer 5
+        (102, 255, 255): 2, # Layer 6
+        (0, 204, 204): 1, # Layer 7
+        (0, 0, 0): 0, # Layer main
+        (255, 102, 255): -1, # Layer 8
+        (204, 0, 204): -2, # Layer 9
+        (178, 102, 255): -3, # Layer 10
+        (102, 0, 204): -4, # Layer 11: Most negative z (bottom).
+    }
+
+    for zone_data in all_zone_data.values():
+        # Update every line with it's level ID based on line color and
+        # track how many levels are in this zone data set.
+        zone_levels = set()
+        for index, line in enumerate(zone_data['lines']):
+            rgb = (line[6], line[7], line[8])
+            level = level_lut.get(rgb, -128)  # kZoneMapInvalidLevelId = -128
+            zone_levels.add(level)
+            zone_data['lines'][index] += (level,)  # Exported as an int8.
+
+        # Extract the per level max and min z heights.
+        level_heights = {}
+        for level in zone_levels:
+            level_heights[level] = {'min': 32767, 'max': -32768}
+            for line in zone_data['lines']:
+                if line[9] == level:
+                    level_heights[level]['min'] = min(
+                        level_heights[level]['min'], min(line[2], line[5]))
+                    level_heights[level]['max'] = max(
+                        level_heights[level]['max'], max(line[2], line[5]))
+
+        zone_data['levels'] = level_heights  # Keys are the levels.
+    return all_zone_data
+
 
 def add_zone_ids(input_directory:str, all_zone_data: dict) -> dict:
     """Adds the zone id lookup numbers for the zone names."""
@@ -162,23 +228,37 @@ def format_label(label) -> str:
     result += '}'
     return result
 
+def format_level(level_id: int, values: dict[str]) -> str:
+    result = f'{level_id}, {math.ceil(values["max"])}, {math.floor(values["min"])}'
+    return '{' + result + '}'
+
 def export_single_zone_data(zone_name: str, zone_data: dict, fp):
     """Write the zone data to the existing open fp."""
 
     fp.write(f'\nstatic const ZoneMapLine {zone_name}_lines[] = {{')
-    for line in zone_data['lines']:
-        fp.write(format_line(line) + ',')
+    # Export in sorted ascending average z-value so lower are drawn first.
+    sorted_line_index = [i[0] for i in sorted(enumerate(zone_data['lines']), 
+                                              key = lambda x:(x[1][2] + x[1][5]))]
+    for index in sorted_line_index:
+        fp.write(format_line(zone_data['lines'][index]) + ',')
     fp.write('};\n')
     fp.write(f'static const ZoneMapLabel {zone_name}_labels[] = {{')
     for label in zone_data['labels']:
         fp.write(format_label(label) + ',')
     fp.write('};\n')
+    fp.write(f'static const ZoneMapLevel {zone_name}_levels[] = {{')
+    sorted_level_ids = sorted(zone_data['levels'].keys())
+    for key in sorted_level_ids:
+        fp.write(format_level(key, zone_data['levels'][key]) + ',')
+    fp.write('};\n')
     fp.write(f'static const ZoneMapData {zone_name}_data = {{\n')
     fp.write(f'    "{zone_name}", ')
     fp.write(f'{math.ceil(zone_data["max_x"])}, {math.floor(zone_data["min_x"])}, ')
     fp.write(f'{math.ceil(zone_data["max_y"])}, {math.floor(zone_data["min_y"])}, ')
-    fp.write(f'{len(zone_data["lines"])}, {len(zone_data["labels"])},\n')
-    fp.write(f'    {zone_name}_lines, {zone_name}_labels\n')
+    fp.write(f'{math.ceil(zone_data["max_z"])}, {math.floor(zone_data["min_z"])}, ')
+    fp.write(f'{len(zone_data["lines"])}, {len(zone_data["labels"])}, '
+             f'{len(zone_data["levels"])}, \n')
+    fp.write(f'    {zone_name}_lines, {zone_name}_labels, {zone_name}_levels,\n')
     fp.write('};\n')
 
 def export_lookup_function(all_zone_data: dict, fp):
@@ -229,7 +309,7 @@ def process_directory(input_directory: str, output_directory: str):
         all_zone_data[zone_name] = append_zone_data(all_zone_data.get(zone_name, None), zone_data)
 
     all_zone_data = add_zone_max_mins(all_zone_data)  # Add max and min boundaries for each zone.
-
+    all_zone_data = add_zone_level_info(all_zone_data)  # Add level id's and heights.
     # Add the zone IDs and then export the data (generate the c++ files).
     all_zone_data = add_zone_ids(input_directory, all_zone_data)
     export_files(all_zone_data, output_directory)

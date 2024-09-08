@@ -80,7 +80,7 @@ ___
   - **Description:** plays songs in order until interrupted in any fashion.
 
 - `/map`
-  - **Arguments:** `on`, `off`, `size`, `alignment`, `marker`, `background`, `zoom`, `poi`, `labels`
+  - **Arguments:** `on`, `off`, `size`, `alignment`, `marker`, `background`, `zoom`, `poi`, `labels`, `level`
   - **Example:** `/map` toggles map on and off
   - **Example:** `/map marker 500 -100` sets a target marker at loc 500, -100 (default size)
   - **Example:** `/map marker 500 -100 3` sets a target marker at loc 500, -100 with size = 3% of screen
@@ -195,6 +195,8 @@ ___
 - Toggle map on/off
 - Toggle through map default zooms
 - Toggle through map backgrounds
+- Toggle through map label modes
+- Toggle up or down through visible map levels
 ___
 ### UI
 - **Gauge EqType's**

@@ -3,7 +3,7 @@
 Support scripts and data files for producing the auto-generated zone_map_data.h and zone_map_data.cpp files.
 
 ## Map data source:
-* The map data in the `map_files` directly was sourced from:
+* The map data in the `map_files` directory was sourced from:
   https://www.eqmaps.info/eq-map-files/ (Brewall's Everquest Maps 20240109)
 * The Brewall maps have greater detail and consistent layer color coding (useful for z-filtering).
 * The original unzipped download was 142 MB but included maps from eras past PoP.
