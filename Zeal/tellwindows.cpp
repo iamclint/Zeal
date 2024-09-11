@@ -210,7 +210,8 @@ void TellWindows::CleanUI()
 void TellWindows::SetEnabled(bool val)
 {
     enabled = val;
-    ZealService::get_instance()->ini->setValue<bool>(Zeal::EqGame::get_self()->Name, "TellWindows", val);
+    if (Zeal::EqGame::get_self() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>(Zeal::EqGame::get_self()->Name, "TellWindows", val);
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
 
