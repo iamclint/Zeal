@@ -72,9 +72,6 @@
     <ClInclude Include="FindPattern.h">
       <Filter>Header Files\memory</Filter>
     </ClInclude>
-    <ClInclude Include="Zeal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="looting.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
@@ -224,6 +221,12 @@
     </ClInclude>
     <ClInclude Include="zone_map_data.h">
       <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="Zeal.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_group.h">
+      <Filter>Header Files\ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -379,6 +382,9 @@
     </ClCompile>
     <ClCompile Include="zone_map_data.cpp">
       <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_group.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

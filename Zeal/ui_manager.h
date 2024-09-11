@@ -5,6 +5,7 @@
 #include "ui_guild.h"
 #include "ui_raid.h"
 #include "ui_hotbutton.h"
+#include "ui_group.h"
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
@@ -43,6 +44,7 @@ public:
 	std::shared_ptr<ui_guild> guild = nullptr;
 	std::shared_ptr<ui_raid> raid = nullptr;
 	std::shared_ptr<ui_hotbutton> hotbutton = nullptr;
+	std::shared_ptr<ui_group> group = nullptr;
 private:
 	void CleanUI();
 	void init_ui();
