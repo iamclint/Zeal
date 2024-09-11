@@ -9,13 +9,18 @@
 
 std::vector<DWORD> nonCrashExceptionCodes =
 {
-    0x40010006, // Application-defined exception used by Visual Studio for debug events
-    0x406D1388, // Exception used to set thread names for debugging
-    EXCEPTION_BREAKPOINT,         // 0x80000003, Used by debuggers to temporarily suspend execution
-    EXCEPTION_SINGLE_STEP,        // 0x80000004, Used by debuggers for single-step tracing
-    DBG_CONTROL_C,                // 0x40010005, Control-C exception for console applications
-    0x80000007,  //  Used to wake up the system debugger
-    0xe06d7363 //C++ exception typically thrown but not caught but since I use vectored exception handler
+    DBG_PRINTEXCEPTION_C,  // 0x40010006, OutputDebugString exception for ASCII strings
+    DBG_COMMAND_EXCEPTION,  // 0x40010009, Used for internal command execution during debugging
+    DBG_PRINTEXCEPTION_WIDE_C,  // 0x4001000A, OutputDebugString exception for wide-character strings
+    DBG_CONTROL_C,  // 0x40010005, Control-C exception for console applications
+    EXCEPTION_BREAKPOINT,  // 0x80000003, Used by debuggers to temporarily suspend execution
+    EXCEPTION_SINGLE_STEP,  // 0x80000004, Used by debuggers for single-step tracing
+    STATUS_GUARD_PAGE_VIOLATION,  // 0x80000001, Occurs on a stack overflow guard page hit
+    STATUS_DATATYPE_MISALIGNMENT,  // 0x80000002, Memory access is misaligned
+    STATUS_STACK_OVERFLOW,  // 0xC00000FD, Stack overflow occurred but might be recoverable
+    0x406D1388,  // Exception used to set thread names for debugging
+    0x80000007,  // Used to wake up the system debugger
+    0xe06d7363  // C++ exception, funny enough in ascii this code is 'MSC'
 };
 
 // Define a map to store exception codes and their descriptions
