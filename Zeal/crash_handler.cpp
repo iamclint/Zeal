@@ -122,10 +122,8 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
     if (pep != nullptr && pep->ExceptionRecord != nullptr) {
         DWORD exceptionCode = pep->ExceptionRecord->ExceptionCode;
         for (DWORD nonCrashCode : nonCrashExceptionCodes) {
-            if (exceptionCode == nonCrashCode) {
-                std::cerr << "Non-crash exception detected, skipping mini-dump generation." << std::endl;
+            if (exceptionCode == nonCrashCode)                 
                 return;
-            }
         }
     }
     // Get the current time for a unique folder name
