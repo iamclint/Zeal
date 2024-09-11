@@ -223,7 +223,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					Zeal::EqGame::print_chat(USERCOLOR_SPELLS, "You must stop casting to cast this spell!");
 					return true;
 				}
-				if (self->StandingState != Stance::Stand) {
+				if (self->StandingState != Stance::Stand && self->StandingState != Stance::Sit) { 	//on quarm spell casting has autostand while sitting
 					Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "You must be standing to cast a spell.");
 					return true;
 				}
