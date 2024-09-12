@@ -739,16 +739,13 @@ void ZoneMap::callback_render()
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     if (zone_id != self->ZoneId) {
-        if (zone_id != kInvalidZoneId) { // Not internally triggered so probably a zone event.
-            zoom_factor = 1.f;  // Reset zoom factor on a zone to reduce corner cases.
-            map_level_zone_id = kInvalidZoneId;  // TODO: More reliable reset.
-        }
         zone_id = self->ZoneId;
         render_load_map();
     }
 
     // Add the marker if it is empty and this is the right zone.
-    if (marker_zone_id == zone_id && marker_vertex_buffer == nullptr) {
+    if (zone_id != kInvalidZoneId && marker_zone_id == zone_id
+        && marker_vertex_buffer == nullptr) {
         render_update_marker_buffer();
     }
 
@@ -1428,10 +1425,21 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     return true;
 }
 
+void ZoneMap::callback_zone() {
+    zone_id = kInvalidZoneId;
+    marker_zone_id = kInvalidZoneId;
+    zoom_recenter_zone_id = kInvalidZoneId;
+    dynamic_labels_zone_id = kInvalidZoneId;
+    map_level_zone_id = kInvalidZoneId;
+    map_level_index = 0;
+    zoom_factor = 1.f;  // Reset for more consistent behavior.
+}
+
 ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
 {
     load_ini(ini);
     zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
+    zeal->callbacks->AddGeneric([this]() { callback_zone(); }, callback_type::Zone);
     zeal->commands_hook->Add("/map", {}, "Controls map overlay",
         [this](const std::vector<std::string>& args) {
             return parse_command(args);

@@ -63,8 +63,6 @@ public:
 	void add_dynamic_label(const std::string& label, int loc_y, int loc_x,
 		unsigned int duration_ms = 0, D3DCOLOR font_color = D3DCOLOR_XRGB(250, 250, 51));
 
-	void callback_render();
-
 private:
 	// DynamicLabels are added using add_label() and are in addition to the static map data labels.
 	struct DynamicLabel {
@@ -106,6 +104,9 @@ private:
 
 	void load_ini(class IO_ini* ini);
 	void dump();
+
+	void callback_zone();
+	void callback_render();
 
 	// The following methods execute as part of callback_render().
 	void render_release_resources();
