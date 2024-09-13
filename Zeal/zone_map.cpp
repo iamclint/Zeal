@@ -246,6 +246,7 @@ void ZoneMap::render_load_map() {
     float scale_factor_x = rect_delta_x / (zone_map_data->max_x - zone_map_data->min_x + 2*kPadding);
     float scale_factor_y = rect_delta_y / (zone_map_data->max_y - zone_map_data->min_y + 2*kPadding);
     scale_factor = min(scale_factor_x, scale_factor_y);  // Preserve aspect ratio.
+    scale_factor *= zoom_factor;  // Apply scale factor.
 
     // Calculate the initial offset based on alignment of the full map data.
     offset_y = rect_top - zone_map_data->min_y * scale_factor + kPadding;
@@ -257,19 +258,19 @@ void ZoneMap::render_load_map() {
     else  // Default left alignment.
         offset_x = rect_left - zone_map_data->min_x * scale_factor + kPadding;
 
-    // Update the scale and offsets in zoom if enabled.
-    if (zoom_factor > 1.f && Zeal::EqGame::get_self()) {
-        scale_factor *= zoom_factor;  // Scale is easy.
+    // In certain modes force the position marker to be at the center of the rect.
+    bool align_to_center = always_align_to_center ||
+                            (zoom_recenter_zone_id == zone_id && zoom_factor > 1.f);
+    if (align_to_center) {
+        screen_position_x = (rect_left + rect_right) * 0.5;
+        screen_position_y = (rect_bottom + rect_top) * 0.5;
+    }
+    zoom_recenter_zone_id = kInvalidZoneId;
 
-        // We set offsets based on where we want the position marker to be on the screen.
-        if (zoom_recenter_zone_id == zone_id) {
-            screen_position_x = (rect_left + rect_right) * 0.5;
-            screen_position_y = (rect_bottom + rect_top) * 0.5;
-        }
+    if (align_to_center || zoom_factor > 1.f) {
         offset_x = screen_position_x - position_x * scale_factor;
         offset_y = screen_position_y - position_y * scale_factor;
     }
-    zoom_recenter_zone_id = kInvalidZoneId;
 
     // Clip the background (and lines) to the available map data. Add a padding of 1.
     clip_rect_left = max(rect_left, zone_map_data->min_x * scale_factor + offset_x - kPadding);
@@ -585,7 +586,6 @@ void ZoneMap::render_label_text(const char * label, int y, int x, D3DCOLOR font_
     label_font->DrawTextA(label, length, &text_rect, DT_VCENTER | DT_CENTER | DT_SINGLELINE, font_color);
 }
 
-
 int ZoneMap::render_update_position_buffer() {
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     if (!position_vertex_buffer || !self) {
@@ -645,13 +645,34 @@ int ZoneMap::render_update_position_buffer() {
         position_vertices[i].color = color;
     }
 
-    // Note: The limit is set low to avoid issues on maps that allow movement to the edge (zone
-    // boundaries) that would trigger excessive retries.
-    float limit = 1.f;
-    if (zoom_factor > 1.f && (clip_rect_bottom - screen_y < limit || screen_y - clip_rect_top < limit ||
-        clip_rect_right - screen_x < limit || screen_x - clip_rect_left < limit)) {
-        zoom_recenter_zone_id = zone_id;  // Trigger it to re-center the zoom region.
-        zone_id = kInvalidZoneId; // Triggers the update.
+    if (zoom_factor > 1.f) {
+        // Trigger a re-centering if:
+        // (1) within 20% of an edge and that edge isn't already
+        //    at the maximum of the map data.
+        // (2) movement in that direction
+        float delta_y = -self->MovementSpeedY;  // World direction is negated.
+        float delta_x = -self->MovementSpeedX;
+
+        const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+        float vertical_limit = (clip_rect_bottom - clip_rect_top) * 0.20f;
+        float map_top = zone_map_data->min_y * scale_factor + offset_y;
+        bool trigger = (delta_y < 0) && (screen_y - clip_rect_top < vertical_limit) &&
+            (clip_rect_top > map_top);
+        float map_bottom = zone_map_data->max_y * scale_factor + offset_y;
+        trigger = trigger || ((delta_y > 0) && (clip_rect_bottom - screen_y < vertical_limit) &&
+            (clip_rect_bottom < map_bottom));
+        float horizontal_limit = (clip_rect_right - clip_rect_left) * 0.20f;
+        float map_left = zone_map_data->min_x * scale_factor + offset_x;
+        trigger = trigger || ((delta_x < 0) && (screen_x - clip_rect_left < horizontal_limit) &&
+            (clip_rect_left > map_left));
+        float map_right = zone_map_data->max_x * scale_factor + offset_x;
+        trigger = trigger || ((delta_x > 0) && (clip_rect_right - screen_x < horizontal_limit) &&
+            (clip_rect_right < map_right));
+
+        if (trigger) {
+            zoom_recenter_zone_id = zone_id;  // Arm it to re-center the zoom region.
+            zone_id = kInvalidZoneId; // Triggers the update.
+        }
     }
 
     BYTE* data = nullptr;
@@ -738,7 +759,7 @@ void ZoneMap::callback_render()
         return;
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (zone_id != self->ZoneId) {
+    if (zone_id != self->ZoneId || (always_align_to_center && self->MovementSpeed > 0)) {
         zone_id = self->ZoneId;
         render_load_map();
     }
@@ -1413,6 +1434,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     }
     else if (args[1] == "level") {
         parse_level(args);
+    }
+    else if (args[1] == "always_center") {
+        always_align_to_center = !always_align_to_center;  // Experimental option.
     }
     else if (args[1] == "dump") {
         dump();

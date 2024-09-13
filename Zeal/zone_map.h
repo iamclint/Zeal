@@ -128,6 +128,7 @@ private:
 	int zone_id = kInvalidZoneId;
 	int marker_zone_id = kInvalidZoneId;
 	int zoom_recenter_zone_id = kInvalidZoneId;
+	bool always_align_to_center = false;
 	int marker_x = 0;
 	int marker_y = 0;
 	int map_level_zone_id = kInvalidZoneId;
