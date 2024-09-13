@@ -103,6 +103,7 @@ private:
 	void update_ui_options();
 
 	void load_ini(class IO_ini* ini);
+	void save_ini();
 	void dump();
 
 	void callback_zone();

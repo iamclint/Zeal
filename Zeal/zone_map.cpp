@@ -1024,6 +1024,27 @@ void ZoneMap::load_ini(IO_ini* ini)
     marker_size = max(0.01f, min(kMaxMarkerSize, marker_size));
 }
 
+void ZoneMap::save_ini()
+{
+    if (!ZealService::get_instance())
+        return;
+    std::shared_ptr<IO_ini> ini = ZealService::get_instance()->ini;
+    if (!ini)
+        return;
+
+    ini->setValue<bool>("Zeal", "MapEnabled", enabled);
+    ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
+    ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
+    ini->setValue<int>("Zeal", "MapAlignment", static_cast<int>(map_alignment_state));
+    ini->setValue<int>("Zeal", "MapLabelsMode", static_cast<int>(map_labels_mode));
+    ini->setValue<float>("Zeal", "MapRectTop", map_rect_top);
+    ini->setValue<float>("Zeal", "MapRectLeft", map_rect_left);
+    ini->setValue<float>("Zeal", "MapRectBottom", map_rect_bottom);
+    ini->setValue<float>("Zeal", "MapRectRight", map_rect_right);
+    ini->setValue<float>("Zeal", "MapPositionSize", position_size);
+    ini->setValue<float>("Zeal", "MapMarkerSize", marker_size);
+}
+
 void ZoneMap::update_ui_options() {
     if (ZealService::get_instance() && ZealService::get_instance()->ui
                     && ZealService::get_instance()->ui->options)
@@ -1099,7 +1120,7 @@ void ZoneMap::parse_rect(const std::vector<std::string>& args) {
             break;
     }
 
-    if ((tlbr.size() != 4) || !set_map_rect(tlbr[0] / 100.f, tlbr[1] / 100.f, tlbr[2] / 100.f, tlbr[3] / 100.f))
+    if ((tlbr.size() != 4) || !set_map_rect(tlbr[0] / 100.f, tlbr[1] / 100.f, tlbr[2] / 100.f, tlbr[3] / 100.f, false))
     {
         Zeal::EqGame::print_chat("Usage: /map rect <top> <left> <bottom> <right> (percent of screen dimensions)");
         Zeal::EqGame::print_chat("Example: /map rect 10 20 50 65");
@@ -1120,7 +1141,7 @@ void ZoneMap::parse_size(const std::vector<std::string>& args) {
 
     if ((tlhw.size() != 4) || !set_map_rect(tlhw[0] / 100.f, tlhw[1] / 100.f,
         (tlhw[0] + tlhw[2]) / 100.f,    // Convert height to bottom (top + height).
-        (tlhw[1] + tlhw[3]) / 100.f))   // And width to right (left + width).
+        (tlhw[1] + tlhw[3]) / 100.f), false)   // And width to right (left + width).
     {
         Zeal::EqGame::print_chat("Usage: /map size <top> <left> <height> <width> (percent of screen dimensions)");
         Zeal::EqGame::print_chat("Example: /map size 10 20 40 45");
@@ -1138,7 +1159,7 @@ void ZoneMap::parse_alignment(const std::vector<std::string>& args) {
             alignment = AlignmentType::kRight;
     }
 
-    if ((alignment < AlignmentType::kFirst) || !set_alignment(alignment)) {
+    if ((alignment < AlignmentType::kFirst) || !set_alignment(alignment, false)) {
         Zeal::EqGame::print_chat("Usage: /map alignment left,center,right");
     }
 }
@@ -1162,7 +1183,7 @@ void ZoneMap::parse_labels(const std::vector<std::string>& args) {
             labels = LabelsMode::kAll;
     }
 
-    if ((labels < LabelsMode::kFirst) || !set_labels_mode(labels)) {
+    if ((labels < LabelsMode::kFirst) || !set_labels_mode(labels, false)) {
         Zeal::EqGame::print_chat("Usage: /map labels off,summary,all");
     }
 }
@@ -1435,6 +1456,10 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "level") {
         parse_level(args);
     }
+    else if (args[1] == "save_ini") {
+        Zeal::EqGame::print_chat("Saving current map settings");
+        save_ini();
+    }
     else if (args[1] == "always_center") {
         always_align_to_center = !always_align_to_center;  // Experimental option.
     }
@@ -1442,7 +1467,7 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
         dump();
     }
     else if (!parse_shortcuts(args)) {
-        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level]");
+        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level|save_ini]");
         Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
     }
