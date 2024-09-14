@@ -1152,25 +1152,24 @@ void TargetRing::callback_render() {
 		return;
 	float radius = CalcCombatRange(Zeal::EqGame::get_self(), target);
 
-	DWORD originalColor = GetLevelCon(target);
+	ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
+
 	// ### Target Ring Color ###
-	DWORD targetRingColor = D3DCOLOR_ARGB(0xFF,
+	DWORD originalColor = GetLevelCon(target);
+	// Max Red, Green, and Blue by default
+	DWORD Color = Color = D3DCOLOR_ARGB(0xFF,
 		(originalColor & 0x00FF0000) ? 0xFF : 0x00,
 		(originalColor & 0x0000FF00) ? 0xFF : 0x00,
 		(originalColor & 0x000000FF) ? 0xFF : 0x00);
-
-
-	DWORD Color = originalColor;
+	
 	static ULONGLONG lastColorChanged = 0; // Store the last time the color was changed
-	static ULONGLONG lastTextureLoadAttempted = 0; // Store the last time the texture was attempted to be loaded
-	ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
 
-	// ### Auto Attack Indicator ###
+	// ### Auto Attack Indicator (fade/unfade target's color while autoattack turned on)###
 	if ((bool)(*(BYTE*)0x7f6ffe) && attack_indicator) // auto attack is enabled
 	{
 		if (currentTime - lastColorChanged >= 300) // Reset the timer every 300ms
 			lastColorChanged = currentTime;
-		
+
 		float elapsedTime = (currentTime - lastColorChanged) / 300.0f; // Get the time elapsed in the current cycle as a fraction
 		float fadeFactor;
 		if (elapsedTime < 0.5f)
@@ -1194,9 +1193,8 @@ void TargetRing::callback_render() {
 		Color = D3DCOLOR_ARGB(fadedA, fadedR, fadedG, fadedB);
 	}
 
-
-
 	// ### Load Target Ring Texture ###
+	static ULONGLONG lastTextureLoadAttempted = 0; // Store the last time the texture was attempted to be loaded
 	if (currentTime - lastTextureLoadAttempted >= 15000) // Reset the timer every 15s
 	{
 		lastTextureLoadAttempted = currentTime;
@@ -1221,9 +1219,9 @@ void TargetRing::callback_render() {
 
 		// ### Render Target Ring ###
 		// cannot figure out how to render the texture and color ring at same time so rendering texture on above and below a solid color ring
-		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.29f }, radius, targetRingColor, targetRingTexture, rotationAngle);
-		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius - 0.05f, targetRingColor);
-		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.31f }, radius, targetRingColor, targetRingTexture, rotationAngle);
+		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.29f }, radius, Color, targetRingTexture, rotationAngle);
+		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius - 0.05f, Color);
+		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.31f }, radius, Color, targetRingTexture, rotationAngle);
 	}
 }
 
