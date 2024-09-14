@@ -284,20 +284,20 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 	Vertex* vertices = new Vertex[numSegments * 2 + 2];
 
 	// Calculate angle increment for each segment
-	float angleStep = 2.0f * M_PI / numSegments;
+	float angleStep = 2.0f * static_cast<float>(M_PI) / numSegments;  // Fixed truncation warning
 
 	// Loop to create vertices for inner and outer circles
 	int vertexIndex = 0;
-	for (int i = 0; i < numSegments; ++i) {
+	for (int i = 0; i <= numSegments; ++i) {
 		float angle = i * angleStep;
 
 		// Outer circle vertices
 		vertices[vertexIndex].x = outerRadius * cosf(angle);
 		vertices[vertexIndex].y = outerRadius * sinf(angle);
 		vertices[vertexIndex].z = 0.05f;
-		// Rotate texture coordinates by 90 degrees
-		vertices[vertexIndex].u = 1.0f;
-		vertices[vertexIndex].v = (float)i / (float)numSegments;
+		//// Rotate texture coordinates by 90 degrees
+		//vertices[vertexIndex].u = 1.0f;
+		//vertices[vertexIndex].v = (float)i / (float)numSegments;
 		vertices[vertexIndex].color = color;
 		vertexIndex++;
 
@@ -305,27 +305,20 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 		vertices[vertexIndex].x = innerRadius * cosf(angle);
 		vertices[vertexIndex].y = innerRadius * sinf(angle);
 		vertices[vertexIndex].z = 0.05f;
-		// Rotate texture coordinates by 90 degrees
-		vertices[vertexIndex].u = 0.0f;
-		vertices[vertexIndex].v = (float)i / (float)numSegments;
+		//// Rotate texture coordinates by 90 degrees
+		//vertices[vertexIndex].u = 0.0f;
+		//vertices[vertexIndex].v = (float)i / (float)numSegments;
 		vertices[vertexIndex].color = color;
 		vertexIndex++;
 	}
 
 
 
-	// Duplicate the first two vertices to close the ring
-	vertices[vertexIndex] = vertices[0];
-	vertexIndex++;
-	vertices[vertexIndex] = vertices[1];
-	vertexIndex++;
-
-
 	// Create vertex buffer
 	IDirect3DVertexBuffer8* vertexBuffer = nullptr;
 	if (FAILED(device->CreateVertexBuffer(sizeof(Vertex) * (numSegments * 2 + 2),
 		D3DUSAGE_WRITEONLY,
-		D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1,
+		D3DFVF_XYZ | D3DFVF_DIFFUSE,
 		D3DPOOL_MANAGED,
 		&vertexBuffer))) {
 		delete[] vertices;
@@ -355,10 +348,9 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 	device->SetRenderState(D3DRS_LIGHTING, FALSE);  // Disable lighting
 
 
-	// Set texture stage states to use custom alpha
-	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	// Set texture stage states to avoid any unexpected texturing
+	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
 	device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 	device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
 	device->SetTexture(0, NULL);  // Ensure no texture is bound
@@ -370,7 +362,7 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
 	// Set the world transformation matrix
 	D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
 	device->SetTransform(D3DTS_WORLD, &worldMatrix);
-	device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+	device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	device->SetStreamSource(0, vertexBuffer, sizeof(Vertex));
 	device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
 	device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
@@ -449,9 +441,9 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
         vertices[vertexIndex].x = outerRadius * cosf(angle);
         vertices[vertexIndex].y = outerRadius * sinf(angle);
         vertices[vertexIndex].z = 0.05f;
-		// Rotate texture coordinates by 90 degrees
+        // Flip the texture coordinates
         vertices[vertexIndex].u = 1.0f;
-        vertices[vertexIndex].v = (float)i / (float)numSegments;
+        vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
         vertices[vertexIndex].color = color;
         vertexIndex++;
 
@@ -459,9 +451,9 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
         vertices[vertexIndex].x = innerRadius * cosf(angle);
         vertices[vertexIndex].y = innerRadius * sinf(angle);
         vertices[vertexIndex].z = 0.05f;
-		// Rotate texture coordinates by 90 degrees
+        // Flip the texture coordinates
         vertices[vertexIndex].u = 0.0f;
-        vertices[vertexIndex].v = (float)i / (float)numSegments;
+        vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
         vertices[vertexIndex].color = color;
         vertexIndex++;
     }
@@ -1171,18 +1163,18 @@ void TargetRing::callback_render() {
 
 	if (!textures.size())
 	{
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_green.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_ltblue.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_dkblue.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_white.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_yellow.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_red.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing3.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing3.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing3.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing3.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing3.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing3.tga"));
+		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_green.tga"));
+		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_ltblue.tga"));
+		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_dkblue.tga"));
+		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_white.tga"));
+		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_yellow.tga"));
+		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_red.tga"));
+		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
+		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
+		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
+		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
+		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
+		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
 	}
 
 
@@ -1291,7 +1283,12 @@ void TargetRing::callback_render() {
 	}
 
 	// Call the render method with the rotation angle
-	render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color, texture, rotationAngle);
+	if (color_index == 3)
+		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color, texture, rotationAngle);
+	else
+		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color);
+	
+	
 	//}
 
 /*
