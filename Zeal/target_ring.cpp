@@ -407,7 +407,7 @@ void printMessageWithChance(const std::string& message, int denominator) {
 }
 
 
-void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture) {
+void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle) {
     IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
     if (!device)
         return;
@@ -439,7 +439,6 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
 
     // Create vertices for the ring
     Vertex* vertices = new Vertex[numSegments * 2 + 2];
-	//float angleStep = 2.0f * M_PI / numSegments;
     float angleStep = 2.0f * static_cast<float>(M_PI) / numSegments;  // Fixed truncation warning
     int vertexIndex = 0;
 
@@ -451,8 +450,8 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
         vertices[vertexIndex].y = outerRadius * sinf(angle);
         vertices[vertexIndex].z = 0.05f;
 		// Rotate texture coordinates by 90 degrees
-		vertices[vertexIndex].u = 1.0f;
-		vertices[vertexIndex].v = (float)i / (float)numSegments;
+        vertices[vertexIndex].u = 1.0f;
+        vertices[vertexIndex].v = (float)i / (float)numSegments;
         vertices[vertexIndex].color = color;
         vertexIndex++;
 
@@ -461,8 +460,8 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
         vertices[vertexIndex].y = innerRadius * sinf(angle);
         vertices[vertexIndex].z = 0.05f;
 		// Rotate texture coordinates by 90 degrees
-		vertices[vertexIndex].u = 0.0f;
-		vertices[vertexIndex].v = (float)i / (float)numSegments;
+        vertices[vertexIndex].u = 0.0f;
+        vertices[vertexIndex].v = (float)i / (float)numSegments;
         vertices[vertexIndex].color = color;
         vertexIndex++;
     }
@@ -513,9 +512,19 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
     device->SetTexture(0, texture);
 
     // Save the original world matrix and set the new one
-    D3DXMATRIX worldMatrix, originalWorldMatrix;
+    D3DXMATRIX worldMatrix, originalWorldMatrix, rotationMatrix;
     device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
+
+    // Create rotation matrix
+    D3DXMatrixRotationZ(&rotationMatrix, rotationAngle);
+
+    // Create translation matrix
     D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
+
+    // Combine rotation and translation matrices
+    D3DXMatrixMultiply(&worldMatrix, &rotationMatrix, &worldMatrix);
+
+    // Set the combined transformation matrix
     device->SetTransform(D3DTS_WORLD, &worldMatrix);
 
     // Render the ring
@@ -1261,7 +1270,28 @@ void TargetRing::callback_render() {
 	//	render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color);
 	//}
 	//else {
-		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color, texture);
+
+
+	// Static variable to keep track of the rotation angle
+	static float rotationAngle = 0.0f;
+
+	// Calculate the increment for a full rotation every 6 seconds
+	static const float rotationIncrement = (2.0f * M_PI) / (6.0f * 1000.0f); // radians per millisecond
+
+	// Update the rotation angle based on the elapsed time
+	static ULONGLONG lastRotationTime = GetTickCount64();
+	ULONGLONG currentRotationTime = GetTickCount64();
+	ULONGLONG elapsedRotationTime = currentRotationTime - lastRotationTime;
+	rotationAngle += rotationIncrement * elapsedRotationTime;
+	lastRotationTime = currentRotationTime;
+
+	// Reset the rotation angle after a full rotation
+	if (rotationAngle >= 2.0f * M_PI) {
+		rotationAngle -= 2.0f * M_PI;
+	}
+
+	// Call the render method with the rotation angle
+	render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color, texture, rotationAngle);
 	//}
 
 /*

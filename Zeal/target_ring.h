@@ -31,7 +31,7 @@ public:
 	void render_ring(Vec3 position, float size, DWORD color);
 	bool enabled;
 	bool attack_indicator;
-	void render_ring_with_texture(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture);
+	void render_ring_with_texture(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle);
 	TargetRing(class ZealService* zeal, class IO_ini* ini);
 	~TargetRing();
 
