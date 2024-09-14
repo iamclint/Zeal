@@ -9,6 +9,11 @@
 
 struct Vertex {
 	float x, y, z;  // Position coordinates
+	//float u, v;     // Texture coordinates
+	D3DCOLOR color; // Optional color (0 for white)
+};
+struct TextureVertex {
+	float x, y, z;  // Position coordinates
 	float u, v;     // Texture coordinates
 	D3DCOLOR color; // Optional color (0 for white)
 };
@@ -265,112 +270,98 @@ void TargetRing::reset_render_states()
 }
 
 
-void TargetRing::render_ring(Vec3 pos, float size, DWORD color)
-{
-	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-	if (!device)
-		return;
-	float innerRadius = 0;
-	if (ring_pct > 0.01f && ring_pct < 1.0f)
-	{
-		float inner = size - (size * ring_pct);
-		innerRadius = inner > 0 ? inner : 0;  // Adjust these values for ring size
-	}
-	const float outerRadius = size;
-	const int numSegments = 32;     // Adjust for smoothness of the ring
+void TargetRing::render_ring(Vec3 pos, float size, DWORD color) {
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+    if (!device)
+        return;
 
+    float innerRadius = 0;
+    if (ring_pct > 0.01f && ring_pct < 1.0f) {
+        float inner = size - (size * ring_pct);
+        innerRadius = inner > 0 ? inner + 0.05f : 0;  // Adjust these values for ring size
+    }
+    const float outerRadius = size;
+    const int numSegments = 128;  // Adjust for smoothness of the ring
 
-	D3DXMATRIX worldMatrix, originalWorldMatrix;
-	Vertex* vertices = new Vertex[numSegments * 2 + 2];
+    D3DXMATRIX worldMatrix, originalWorldMatrix;
+    Vertex* vertices = new Vertex[numSegments * 2 + 2];
 
-	// Calculate angle increment for each segment
+    // Calculate angle increment for each segment
 	float angleStep = 2.0f * static_cast<float>(M_PI) / numSegments;  // Fixed truncation warning
 
-	// Loop to create vertices for inner and outer circles
-	int vertexIndex = 0;
-	for (int i = 0; i <= numSegments; ++i) {
-		float angle = i * angleStep;
+    // Loop to create vertices for inner and outer circles
+    int vertexIndex = 0;
+    for (int i = 0; i <= numSegments; ++i) {
+        float angle = i * angleStep;
 
-		// Outer circle vertices
-		vertices[vertexIndex].x = outerRadius * cosf(angle);
-		vertices[vertexIndex].y = outerRadius * sinf(angle);
-		vertices[vertexIndex].z = 0.05f;
-		//// Rotate texture coordinates by 90 degrees
-		//vertices[vertexIndex].u = 1.0f;
-		//vertices[vertexIndex].v = (float)i / (float)numSegments;
-		vertices[vertexIndex].color = color;
-		vertexIndex++;
+        // Outer circle vertices first (ensure consistent winding order)
+        vertices[vertexIndex].x = outerRadius * cosf(angle);
+        vertices[vertexIndex].y = outerRadius * sinf(angle);
+        vertices[vertexIndex].z = 0.05f;  // Slightly above the XY plane
+        vertices[vertexIndex].color = color;
+        vertexIndex++;
 
-		// Inner circle vertices
-		vertices[vertexIndex].x = innerRadius * cosf(angle);
-		vertices[vertexIndex].y = innerRadius * sinf(angle);
-		vertices[vertexIndex].z = 0.05f;
-		//// Rotate texture coordinates by 90 degrees
-		//vertices[vertexIndex].u = 0.0f;
-		//vertices[vertexIndex].v = (float)i / (float)numSegments;
-		vertices[vertexIndex].color = color;
-		vertexIndex++;
-	}
+        // Inner circle vertices
+        vertices[vertexIndex].x = innerRadius * cosf(angle);
+        vertices[vertexIndex].y = innerRadius * sinf(angle);
+        vertices[vertexIndex].z = 0.05f;  // Slightly above the XY plane
+        vertices[vertexIndex].color = color;
+        vertexIndex++;
+    }
 
+    // Create vertex buffer
+    IDirect3DVertexBuffer8* vertexBuffer = nullptr;
+    if (FAILED(device->CreateVertexBuffer(sizeof(Vertex) * (numSegments * 2 + 2),
+        D3DUSAGE_WRITEONLY,
+        D3DFVF_XYZ | D3DFVF_DIFFUSE,
+        D3DPOOL_MANAGED,
+        &vertexBuffer))) {
+        delete[] vertices;
+        return;
+    }
 
+    // Lock the vertex buffer
+    BYTE* data = nullptr;
+    if (FAILED(vertexBuffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
+        vertexBuffer->Release();
+        delete[] vertices;
+        return;
+    }
+    memcpy(data, (const void*)vertices, sizeof(Vertex) * (numSegments * 2 + 2));
+    vertexBuffer->Unlock();
 
-	// Create vertex buffer
-	IDirect3DVertexBuffer8* vertexBuffer = nullptr;
-	if (FAILED(device->CreateVertexBuffer(sizeof(Vertex) * (numSegments * 2 + 2),
-		D3DUSAGE_WRITEONLY,
-		D3DFVF_XYZ | D3DFVF_DIFFUSE,
-		D3DPOOL_MANAGED,
-		&vertexBuffer))) {
-		delete[] vertices;
-		return;
-	}
+    store_render_states();
 
+    // Enable alpha blending for the ring
+    device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+    device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    device->SetRenderState(D3DRS_ZENABLE, TRUE);
+    device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);  // Enable depth writing
+    device->SetRenderState(D3DRS_LIGHTING, FALSE);  // Disable lighting
 
-	// Lock the vertex buffer
-	BYTE* data = nullptr;
-	if (FAILED(vertexBuffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
-		vertexBuffer->Release();
-		delete[] vertices;
-		return;
-	}
-	memcpy(data, (const void*)vertices, sizeof(Vertex) * (numSegments * 2 + 2));
-	vertexBuffer->Unlock();
+    // Set texture stage states to avoid any unexpected texturing
+    device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+    device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+    device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+    device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+    device->SetTexture(0, NULL);  // Ensure no texture is bound
 
-	store_render_states();
+    // Save the original world matrix
+    device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
+    // Set the world transformation matrix
+    D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
+    device->SetTransform(D3DTS_WORLD, &worldMatrix);
+    device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+    device->SetStreamSource(0, vertexBuffer, sizeof(Vertex));
+    device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
+    device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
 
-	// Enable alpha blending for the ring
-	device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	device->SetRenderState(D3DRS_ZENABLE, TRUE);
-	device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);  // Enable depth writing
-	device->SetRenderState(D3DRS_LIGHTING, FALSE);  // Disable lighting
-
-
-	// Set texture stage states to avoid any unexpected texturing
-	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-	device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-	device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-	device->SetTexture(0, NULL);  // Ensure no texture is bound
-
-
-
-	// Save the original world matrix
-	device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
-	// Set the world transformation matrix
-	D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
-	device->SetTransform(D3DTS_WORLD, &worldMatrix);
-	device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-	device->SetStreamSource(0, vertexBuffer, sizeof(Vertex));
-	device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
-	device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
-
-	reset_render_states();
-	// Release resources
-	vertexBuffer->Release();
-	delete[] vertices;
+    reset_render_states();
+    // Release resources
+    vertexBuffer->Release();
+    delete[] vertices;
 }
 
 
@@ -430,7 +421,7 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
     const int numSegments = 128;  // Adjust for smoothness of the ring
 
     // Create vertices for the ring
-    Vertex* vertices = new Vertex[numSegments * 2 + 2];
+	TextureVertex* vertices = new TextureVertex[numSegments * 2 + 2];
     float angleStep = 2.0f * static_cast<float>(M_PI) / numSegments;  // Fixed truncation warning
     int vertexIndex = 0;
 
@@ -442,20 +433,20 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
         vertices[vertexIndex].y = outerRadius * sinf(angle);
         vertices[vertexIndex].z = 0.05f;
         // Flip the texture coordinates
-        vertices[vertexIndex].u = 1.0f;
-        vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
         vertices[vertexIndex].color = color;
-        vertexIndex++;
+		vertices[vertexIndex].u = 1.0f;
+		vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
+		vertexIndex++;
 
         // Inner circle vertices
         vertices[vertexIndex].x = innerRadius * cosf(angle);
         vertices[vertexIndex].y = innerRadius * sinf(angle);
         vertices[vertexIndex].z = 0.05f;
         // Flip the texture coordinates
-        vertices[vertexIndex].u = 0.0f;
-        vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
         vertices[vertexIndex].color = color;
-        vertexIndex++;
+		vertices[vertexIndex].u = 0.0f;
+		vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
+		vertexIndex++;
     }
 	//// Duplicate the first two vertices to close the ring
 	//vertices[vertexIndex] = vertices[0];
@@ -465,7 +456,7 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
 
     // Create vertex buffer
     IDirect3DVertexBuffer8* vertexBuffer = nullptr;
-    if (FAILED(device->CreateVertexBuffer(sizeof(Vertex) * (numSegments * 2 + 2),
+    if (FAILED(device->CreateVertexBuffer(sizeof(TextureVertex) * (numSegments * 2 + 2),
         D3DUSAGE_WRITEONLY,
         D3DFVF_XYZ | D3DFVF_TEX1,
         D3DPOOL_MANAGED,
@@ -481,7 +472,7 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
         delete[] vertices;
         return;
     }
-    memcpy(data, (const void*)vertices, sizeof(Vertex) * (numSegments * 2 + 2));
+    memcpy(data, (const void*)vertices, sizeof(TextureVertex) * (numSegments * 2 + 2));
     vertexBuffer->Unlock();
 
     // Store and set render states
@@ -521,7 +512,7 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
 
     // Render the ring
     device->SetVertexShader(D3DFVF_XYZ | D3DFVF_TEX1);
-    device->SetStreamSource(0, vertexBuffer, sizeof(Vertex));
+    device->SetStreamSource(0, vertexBuffer, sizeof(TextureVertex));
     device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
 
     // Restore the original world matrix and render states
@@ -1180,7 +1171,7 @@ void TargetRing::callback_render() {
 
 	DWORD originalColor = GetLevelCon(target);
 	DWORD Color = originalColor;
-
+	DWORD OpaqueColor = NULL;
 	static ULONGLONG lastTime = 0; // Store the last time the color was changed
 	ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
 
@@ -1217,6 +1208,7 @@ void TargetRing::callback_render() {
 
 		// Set the color with the faded components
 		Color = D3DCOLOR_ARGB(fadedA, fadedR, fadedG, fadedB);
+		OpaqueColor = D3DCOLOR_ARGB(0xFF, originalR, originalG, originalB);
 	}
 
 	// Call the new method
@@ -1235,21 +1227,27 @@ void TargetRing::callback_render() {
 	{
 	case CON_GREEN:
 		color_index = 0;
+		Color = D3DCOLOR_ARGB(0xFF, 0x0, 0xFF, 0x0);
 		break;
 	case CON_LIGHTBLUE:
 		color_index = 1;
+		Color = D3DCOLOR_ARGB(0xFF, 0x0, 0xFF, 0xFF);
 		break;
 	case CON_BLUE:
 		color_index = 2;
+		Color = D3DCOLOR_ARGB(0xFF, 0x0, 0x0, 0xFF);
 		break;
 	case CON_WHITE:
 		color_index = 3;
+		Color = D3DCOLOR_ARGB(0xFF, 0xFF, 0xFF, 0xFF);
 		break;
 	case CON_YELLOW:
 		color_index = 4;
+		Color = D3DCOLOR_ARGB(0xFF, 0xFF, 0xFF, 0x0);
 		break;
 	case CON_RED:
 		color_index = 5;
+		Color = D3DCOLOR_ARGB(0xFF, 0xFF, 0x0, 0x0);
 		break;
 	default:
 		color_index = 0;
@@ -1284,9 +1282,16 @@ void TargetRing::callback_render() {
 
 	// Call the render method with the rotation angle
 	if (color_index == 3)
-		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color, texture, rotationAngle);
+	{
+		//render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color);
+		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius - 0.05f, Color);
+		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.31f }, radius, Color, texture, rotationAngle);
+	}
 	else
-		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color);
+	{
+		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius - 0.05f, Color);
+		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.31f }, radius, Color, texture, rotationAngle);
+	}
 	
 	
 	//}
