@@ -57,9 +57,22 @@ public:
 	void toggle_labels();
 	void toggle_level_up();
 	void toggle_level_down();
-	void callback_render();
+
+	// Adds a temporary "dynamic" text label to the current map with optional timeout that can be
+	// used to mark locations or track player names. Note that y and x are in world (loc) coordinates.
+	void add_dynamic_label(const std::string& label, int loc_y, int loc_x,
+		unsigned int duration_ms = 0, D3DCOLOR font_color = D3DCOLOR_XRGB(250, 250, 51));
 
 private:
+	// DynamicLabels are added using add_label() and are in addition to the static map data labels.
+	struct DynamicLabel {
+		std::string label;  // Label to display.
+		int loc_y = 0;  // Game location y.
+		int loc_x = 0;  // Game location x.
+		ULONGLONG timeout = 0;  // 0 disables the timeout.
+		D3DCOLOR color = 0;
+	};
+
 	static constexpr int kInvalidZoneId = 0;
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
 	static constexpr float kDefaultRectTop = 0.1f;
@@ -90,7 +103,11 @@ private:
 	void update_ui_options();
 
 	void load_ini(class IO_ini* ini);
+	void save_ini();
 	void dump();
+
+	void callback_zone();
+	void callback_render();
 
 	// The following methods execute as part of callback_render().
 	void render_release_resources();
@@ -102,6 +119,7 @@ private:
 	int render_update_position_buffer();
 	void render_update_marker_buffer();
 	void render_labels();
+	void render_label_text(const char* label, int y, int x, D3DCOLOR font_color);
 
 	bool enabled = false;
 	BackgroundType::e map_background_state = BackgroundType::kClear;
@@ -111,13 +129,17 @@ private:
 	int zone_id = kInvalidZoneId;
 	int marker_zone_id = kInvalidZoneId;
 	int zoom_recenter_zone_id = kInvalidZoneId;
+	bool always_align_to_center = false;
 	int marker_x = 0;
 	int marker_y = 0;
 	int map_level_zone_id = kInvalidZoneId;
 	int map_level_index = 0;
 	ZoneMapLabel map_level_label;
 	char map_level_label_string[20];
+	int dynamic_labels_zone_id = kInvalidZoneId;
+	std::vector<DynamicLabel> dynamic_labels_list;  // Optional temporary labels.
 
+	D3DVIEWPORT8 viewport = {};  // On-screen coordinates of viewport.
 	float scale_factor = 0;  // Conversion factors for map data to screen coordinates.
 	float zoom_factor = 1.f;
 	float offset_x = 0;

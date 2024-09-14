@@ -24,10 +24,24 @@ def extract_map_files(input_directory: str):
 
     missing_zones = []
     for zone_name in zone_list:
-        file_list = [f'{zone_name}.txt', f'{zone_name}_1.txt']
-        for filename in file_list:
-            if os.path.exists(os.path.join(input_directory, filename)):
-                shutil.copy(os.path.join(input_directory, filename), output_map_dir)
+        suffix_list = ['.txt', '_1.txt']
+        for suffix in suffix_list:
+            base_filename = f'{zone_name}{suffix}'
+            input_file = os.path.join(input_directory, base_filename)
+            output_file = os.path.join(output_map_dir, base_filename)
+
+            # If available, use the original versions of some completely revamped zones.
+            # There are two possible permutations of the original tag.
+            base_original = f'{zone_name}_original{suffix}'
+            input_original = os.path.join(input_directory, base_original)
+            if not os.path.exists(input_original):  # Try the second type.
+                base_original = base_original.replace('_original_1.txt', '_1_original.txt')
+                input_original = os.path.join(input_directory, base_original)
+
+            if os.path.exists(input_original):
+                shutil.copy(input_original, output_file)  # Renamed in the copy.
+            elif os.path.exists(input_file):
+                shutil.copy(input_file, output_file)  # Otherwise a straight copy.
             else:
                 missing_zones.append(zone_name)
 
