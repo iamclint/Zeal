@@ -44,7 +44,8 @@ private:
 	void load_ini(class IO_ini* ini);
 	void store_render_states();
 	void reset_render_states();
-	std::vector<IDirect3DTexture8*> textures;
+	IDirect3DTexture8* targetRingTexture;
+
 };
 
 

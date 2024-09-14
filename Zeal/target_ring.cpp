@@ -271,97 +271,97 @@ void TargetRing::reset_render_states()
 
 
 void TargetRing::render_ring(Vec3 pos, float size, DWORD color) {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-    if (!device)
-        return;
+	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+	if (!device)
+		return;
 
-    float innerRadius = 0;
-    if (ring_pct > 0.01f && ring_pct < 1.0f) {
-        float inner = size - (size * ring_pct);
-        innerRadius = inner > 0 ? inner + 0.05f : 0;  // Adjust these values for ring size
-    }
-    const float outerRadius = size;
-    const int numSegments = 128;  // Adjust for smoothness of the ring
+	float innerRadius = 0;
+	if (ring_pct > 0.01f && ring_pct < 1.0f) {
+		float inner = size - (size * ring_pct);
+		innerRadius = inner > 0 ? inner + 0.1f : 0;  // Adjust these values for ring size
+	}
+	const float outerRadius = size;
+	const int numSegments = 128;  // Adjust for smoothness of the ring
 
-    D3DXMATRIX worldMatrix, originalWorldMatrix;
-    Vertex* vertices = new Vertex[numSegments * 2 + 2];
+	D3DXMATRIX worldMatrix, originalWorldMatrix;
+	Vertex* vertices = new Vertex[numSegments * 2 + 2];
 
-    // Calculate angle increment for each segment
+	// Calculate angle increment for each segment
 	float angleStep = 2.0f * static_cast<float>(M_PI) / numSegments;  // Fixed truncation warning
 
-    // Loop to create vertices for inner and outer circles
-    int vertexIndex = 0;
-    for (int i = 0; i <= numSegments; ++i) {
-        float angle = i * angleStep;
+	// Loop to create vertices for inner and outer circles
+	int vertexIndex = 0;
+	for (int i = 0; i <= numSegments; ++i) {
+		float angle = i * angleStep;
 
-        // Outer circle vertices first (ensure consistent winding order)
-        vertices[vertexIndex].x = outerRadius * cosf(angle);
-        vertices[vertexIndex].y = outerRadius * sinf(angle);
-        vertices[vertexIndex].z = 0.05f;  // Slightly above the XY plane
-        vertices[vertexIndex].color = color;
-        vertexIndex++;
+		// Outer circle vertices first (ensure consistent winding order)
+		vertices[vertexIndex].x = outerRadius * cosf(angle);
+		vertices[vertexIndex].y = outerRadius * sinf(angle);
+		vertices[vertexIndex].z = 0.05f;  // Slightly above the XY plane
+		vertices[vertexIndex].color = color;
+		vertexIndex++;
 
-        // Inner circle vertices
-        vertices[vertexIndex].x = innerRadius * cosf(angle);
-        vertices[vertexIndex].y = innerRadius * sinf(angle);
-        vertices[vertexIndex].z = 0.05f;  // Slightly above the XY plane
-        vertices[vertexIndex].color = color;
-        vertexIndex++;
-    }
+		// Inner circle vertices
+		vertices[vertexIndex].x = innerRadius * cosf(angle);
+		vertices[vertexIndex].y = innerRadius * sinf(angle);
+		vertices[vertexIndex].z = 0.05f;  // Slightly above the XY plane
+		vertices[vertexIndex].color = color;
+		vertexIndex++;
+	}
 
-    // Create vertex buffer
-    IDirect3DVertexBuffer8* vertexBuffer = nullptr;
-    if (FAILED(device->CreateVertexBuffer(sizeof(Vertex) * (numSegments * 2 + 2),
-        D3DUSAGE_WRITEONLY,
-        D3DFVF_XYZ | D3DFVF_DIFFUSE,
-        D3DPOOL_MANAGED,
-        &vertexBuffer))) {
-        delete[] vertices;
-        return;
-    }
+	// Create vertex buffer
+	IDirect3DVertexBuffer8* vertexBuffer = nullptr;
+	if (FAILED(device->CreateVertexBuffer(sizeof(Vertex) * (numSegments * 2 + 2),
+		D3DUSAGE_WRITEONLY,
+		D3DFVF_XYZ | D3DFVF_DIFFUSE,
+		D3DPOOL_MANAGED,
+		&vertexBuffer))) {
+		delete[] vertices;
+		return;
+	}
 
-    // Lock the vertex buffer
-    BYTE* data = nullptr;
-    if (FAILED(vertexBuffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
-        vertexBuffer->Release();
-        delete[] vertices;
-        return;
-    }
-    memcpy(data, (const void*)vertices, sizeof(Vertex) * (numSegments * 2 + 2));
-    vertexBuffer->Unlock();
+	// Lock the vertex buffer
+	BYTE* data = nullptr;
+	if (FAILED(vertexBuffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
+		vertexBuffer->Release();
+		delete[] vertices;
+		return;
+	}
+	memcpy(data, (const void*)vertices, sizeof(Vertex) * (numSegments * 2 + 2));
+	vertexBuffer->Unlock();
 
-    store_render_states();
+	store_render_states();
 
-    // Enable alpha blending for the ring
-    device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-    device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-    device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-    device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-    device->SetRenderState(D3DRS_ZENABLE, TRUE);
-    device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);  // Enable depth writing
-    device->SetRenderState(D3DRS_LIGHTING, FALSE);  // Disable lighting
+	// Enable alpha blending for the ring
+	device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	device->SetRenderState(D3DRS_ZENABLE, TRUE);
+	device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);  // Enable depth writing
+	device->SetRenderState(D3DRS_LIGHTING, FALSE);  // Disable lighting
 
-    // Set texture stage states to avoid any unexpected texturing
-    device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-    device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-    device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-    device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-    device->SetTexture(0, NULL);  // Ensure no texture is bound
+	// Set texture stage states to avoid any unexpected texturing
+	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+	device->SetTexture(0, NULL);  // Ensure no texture is bound
 
-    // Save the original world matrix
-    device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
-    // Set the world transformation matrix
-    D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
-    device->SetTransform(D3DTS_WORLD, &worldMatrix);
-    device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-    device->SetStreamSource(0, vertexBuffer, sizeof(Vertex));
-    device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
-    device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
+	// Save the original world matrix
+	device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
+	// Set the world transformation matrix
+	D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
+	device->SetTransform(D3DTS_WORLD, &worldMatrix);
+	device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+	device->SetStreamSource(0, vertexBuffer, sizeof(Vertex));
+	device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
+	device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
 
-    reset_render_states();
-    // Release resources
-    vertexBuffer->Release();
-    delete[] vertices;
+	reset_render_states();
+	// Release resources
+	vertexBuffer->Release();
+	delete[] vertices;
 }
 
 
@@ -391,9 +391,9 @@ void printMessageWithChance(const std::string& message, int denominator) {
 
 
 void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle) {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-    if (!device)
-        return;
+	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+	if (!device)
+		return;
 
 	//// Load the texture (ensure it's loaded only once)
 	//static IDirect3DTexture8* texture = nullptr;
@@ -407,121 +407,121 @@ void TargetRing::render_ring_with_texture(Vec3 pos, float size, DWORD color, IDi
 		//}
 	}
 
-    // Get the surface description
-    D3DSURFACE_DESC desc;
-    texture->GetLevelDesc(0, &desc);
+	// Get the surface description
+	D3DSURFACE_DESC desc;
+	texture->GetLevelDesc(0, &desc);
 
-    // Calculate inner and outer radii
-    float innerRadius = 0;
-    if (ring_pct > 0.01f && ring_pct < 1.0f) {
-        float inner = size - (size * ring_pct);
-        innerRadius = inner > 0 ? inner : 0;
-    }
-    const float outerRadius = size;
-    const int numSegments = 128;  // Adjust for smoothness of the ring
+	// Calculate inner and outer radii
+	float innerRadius = 0;
+	if (ring_pct > 0.01f && ring_pct < 1.0f) {
+		float inner = size - (size * ring_pct);
+		innerRadius = inner > 0 ? inner : 0;
+	}
+	const float outerRadius = size;
+	const int numSegments = 128;  // Adjust for smoothness of the ring
 
-    // Create vertices for the ring
+	// Create vertices for the ring
 	TextureVertex* vertices = new TextureVertex[numSegments * 2 + 2];
-    float angleStep = 2.0f * static_cast<float>(M_PI) / numSegments;  // Fixed truncation warning
-    int vertexIndex = 0;
+	float angleStep = 2.0f * static_cast<float>(M_PI) / numSegments;  // Fixed truncation warning
+	int vertexIndex = 0;
 
-    for (int i = 0; i <= numSegments; ++i) {  // Use <= to include the last segment
-        float angle = i * angleStep;
+	for (int i = 0; i <= numSegments; ++i) {  // Use <= to include the last segment
+		float angle = i * angleStep;
 
-        // Outer circle vertices
-        vertices[vertexIndex].x = outerRadius * cosf(angle);
-        vertices[vertexIndex].y = outerRadius * sinf(angle);
-        vertices[vertexIndex].z = 0.05f;
-        // Flip the texture coordinates
-        vertices[vertexIndex].color = color;
+		// Outer circle vertices
+		vertices[vertexIndex].x = outerRadius * cosf(angle);
+		vertices[vertexIndex].y = outerRadius * sinf(angle);
+		vertices[vertexIndex].z = 0.05f;
+		// Flip the texture coordinates
+		vertices[vertexIndex].color = color;
 		vertices[vertexIndex].u = 1.0f;
 		vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
 		vertexIndex++;
 
-        // Inner circle vertices
-        vertices[vertexIndex].x = innerRadius * cosf(angle);
-        vertices[vertexIndex].y = innerRadius * sinf(angle);
-        vertices[vertexIndex].z = 0.05f;
-        // Flip the texture coordinates
-        vertices[vertexIndex].color = color;
+		// Inner circle vertices
+		vertices[vertexIndex].x = innerRadius * cosf(angle);
+		vertices[vertexIndex].y = innerRadius * sinf(angle);
+		vertices[vertexIndex].z = 0.05f;
+		// Flip the texture coordinates
+		vertices[vertexIndex].color = color;
 		vertices[vertexIndex].u = 0.0f;
 		vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
 		vertexIndex++;
-    }
+	}
 	//// Duplicate the first two vertices to close the ring
 	//vertices[vertexIndex] = vertices[0];
 	//vertexIndex++;
 	//vertices[vertexIndex] = vertices[1];
 	//vertexIndex++;
 
-    // Create vertex buffer
-    IDirect3DVertexBuffer8* vertexBuffer = nullptr;
-    if (FAILED(device->CreateVertexBuffer(sizeof(TextureVertex) * (numSegments * 2 + 2),
-        D3DUSAGE_WRITEONLY,
-        D3DFVF_XYZ | D3DFVF_TEX1,
-        D3DPOOL_MANAGED,
-        &vertexBuffer))) {
-        delete[] vertices;
-        return;
-    }
+	// Create vertex buffer
+	IDirect3DVertexBuffer8* vertexBuffer = nullptr;
+	if (FAILED(device->CreateVertexBuffer(sizeof(TextureVertex) * (numSegments * 2 + 2),
+		D3DUSAGE_WRITEONLY,
+		D3DFVF_XYZ | D3DFVF_TEX1,
+		D3DPOOL_MANAGED,
+		&vertexBuffer))) {
+		delete[] vertices;
+		return;
+	}
 
-    // Lock the vertex buffer
-    BYTE* data = nullptr;
-    if (FAILED(vertexBuffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
-        vertexBuffer->Release();
-        delete[] vertices;
-        return;
-    }
-    memcpy(data, (const void*)vertices, sizeof(TextureVertex) * (numSegments * 2 + 2));
-    vertexBuffer->Unlock();
+	// Lock the vertex buffer
+	BYTE* data = nullptr;
+	if (FAILED(vertexBuffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
+		vertexBuffer->Release();
+		delete[] vertices;
+		return;
+	}
+	memcpy(data, (const void*)vertices, sizeof(TextureVertex) * (numSegments * 2 + 2));
+	vertexBuffer->Unlock();
 
-    // Store and set render states
-    store_render_states();
-    device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-    device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-    device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-    device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-    device->SetRenderState(D3DRS_ZENABLE, TRUE);
-    device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-    device->SetRenderState(D3DRS_LIGHTING, FALSE);
+	// Store and set render states
+	store_render_states();
+	device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	device->SetRenderState(D3DRS_ZENABLE, TRUE);
+	device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	device->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-    // Set texture stage states
-    device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-    device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-    device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-    device->SetTexture(0, texture);
+	// Set texture stage states
+	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	device->SetTexture(0, texture);
 
-    // Save the original world matrix and set the new one
-    D3DXMATRIX worldMatrix, originalWorldMatrix, rotationMatrix;
-    device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
+	// Save the original world matrix and set the new one
+	D3DXMATRIX worldMatrix, originalWorldMatrix, rotationMatrix;
+	device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
 
-    // Create rotation matrix
-    D3DXMatrixRotationZ(&rotationMatrix, rotationAngle);
+	// Create rotation matrix
+	D3DXMatrixRotationZ(&rotationMatrix, rotationAngle);
 
-    // Create translation matrix
-    D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
+	// Create translation matrix
+	D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
 
-    // Combine rotation and translation matrices
-    D3DXMatrixMultiply(&worldMatrix, &rotationMatrix, &worldMatrix);
+	// Combine rotation and translation matrices
+	D3DXMatrixMultiply(&worldMatrix, &rotationMatrix, &worldMatrix);
 
-    // Set the combined transformation matrix
-    device->SetTransform(D3DTS_WORLD, &worldMatrix);
+	// Set the combined transformation matrix
+	device->SetTransform(D3DTS_WORLD, &worldMatrix);
 
-    // Render the ring
-    device->SetVertexShader(D3DFVF_XYZ | D3DFVF_TEX1);
-    device->SetStreamSource(0, vertexBuffer, sizeof(TextureVertex));
-    device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
+	// Render the ring
+	device->SetVertexShader(D3DFVF_XYZ | D3DFVF_TEX1);
+	device->SetStreamSource(0, vertexBuffer, sizeof(TextureVertex));
+	device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, numSegments * 2);
 
-    // Restore the original world matrix and render states
-    device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
-    reset_render_states();
+	// Restore the original world matrix and render states
+	device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
+	reset_render_states();
 
-    // Release resources
-    vertexBuffer->Release();
-    delete[] vertices;
+	// Release resources
+	vertexBuffer->Release();
+	delete[] vertices;
 }
 
 float CalcBoundingRadius(Zeal::EqStructures::Entity* ent)
@@ -1144,7 +1144,7 @@ float CalcCombatRange(Zeal::EqStructures::Entity* entity1, Zeal::EqStructures::E
 	return size_mod;
 }
 
-void TargetRing::callback_render() {	
+void TargetRing::callback_render() {
 	if (!enabled)
 		return;
 	Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
@@ -1152,47 +1152,31 @@ void TargetRing::callback_render() {
 		return;
 	float radius = CalcCombatRange(Zeal::EqGame::get_self(), target);
 
-	if (!textures.size())
-	{
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_green.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_ltblue.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_dkblue.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_white.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_yellow.tga"));
-		//textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTarget_red.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
-		textures.push_back(LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing5.tga"));
-	}
-
-
 	DWORD originalColor = GetLevelCon(target);
+	// ### Target Ring Color ###
+	DWORD targetRingColor = D3DCOLOR_ARGB(0xFF,
+		(originalColor & 0x00FF0000) ? 0xFF : 0x00,
+		(originalColor & 0x0000FF00) ? 0xFF : 0x00,
+		(originalColor & 0x000000FF) ? 0xFF : 0x00);
+
+
 	DWORD Color = originalColor;
-	DWORD OpaqueColor = NULL;
-	static ULONGLONG lastTime = 0; // Store the last time the color was changed
+	static ULONGLONG lastColorChanged = 0; // Store the last time the color was changed
+	static ULONGLONG lastTextureLoadAttempted = 0; // Store the last time the texture was attempted to be loaded
 	ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
 
+	// ### Auto Attack Indicator ###
 	if ((bool)(*(BYTE*)0x7f6ffe) && attack_indicator) // auto attack is enabled
 	{
-		if (currentTime - lastTime >= 300) // Reset the timer every 300ms
-		{
-			lastTime = currentTime;
-		}
-
-		float elapsedTime = (currentTime - lastTime) / 300.0f; // Get the time elapsed in the current cycle as a fraction
+		if (currentTime - lastColorChanged >= 300) // Reset the timer every 300ms
+			lastColorChanged = currentTime;
+		
+		float elapsedTime = (currentTime - lastColorChanged) / 300.0f; // Get the time elapsed in the current cycle as a fraction
 		float fadeFactor;
-
 		if (elapsedTime < 0.5f)
-		{
 			fadeFactor = elapsedTime * 2; // Fade in during the first half of the cycle
-		}
 		else
-		{
 			fadeFactor = (1.0f - elapsedTime) * 2; // Fade out during the second half of the cycle
-		}
 
 		// Extract the ARGB components from the original color
 		BYTE originalA = (originalColor >> 24) & 0xFF;
@@ -1208,112 +1192,39 @@ void TargetRing::callback_render() {
 
 		// Set the color with the faded components
 		Color = D3DCOLOR_ARGB(fadedA, fadedR, fadedG, fadedB);
-		OpaqueColor = D3DCOLOR_ARGB(0xFF, originalR, originalG, originalB);
 	}
 
-	// Call the new method
-	//try
-	//{
 
-	//}
-	//catch (const std::string err)
-	//{
-	//	Zeal::EqGame::print_chat(err.c_str());
-	//	// Commented out the old method call
 
-	IDirect3DTexture8* texture = nullptr;
-	int color_index = 0;
-	switch (Color)
+	// ### Load Target Ring Texture ###
+	if (currentTime - lastTextureLoadAttempted >= 15000) // Reset the timer every 15s
 	{
-	case CON_GREEN:
-		color_index = 0;
-		Color = D3DCOLOR_ARGB(0xFF, 0x0, 0xFF, 0x0);
-		break;
-	case CON_LIGHTBLUE:
-		color_index = 1;
-		Color = D3DCOLOR_ARGB(0xFF, 0x0, 0xFF, 0xFF);
-		break;
-	case CON_BLUE:
-		color_index = 2;
-		Color = D3DCOLOR_ARGB(0xFF, 0x0, 0x0, 0xFF);
-		break;
-	case CON_WHITE:
-		color_index = 3;
-		Color = D3DCOLOR_ARGB(0xFF, 0xFF, 0xFF, 0xFF);
-		break;
-	case CON_YELLOW:
-		color_index = 4;
-		Color = D3DCOLOR_ARGB(0xFF, 0xFF, 0xFF, 0x0);
-		break;
-	case CON_RED:
-		color_index = 5;
-		Color = D3DCOLOR_ARGB(0xFF, 0xFF, 0x0, 0x0);
-		break;
-	default:
-		color_index = 0;
-		break;
+		lastTextureLoadAttempted = currentTime;
+		targetRingTexture = LoadTexture(ZealService::get_instance()->dx->GetDevice(), "ZealTargetRing.tga");
 	}
-	texture = textures[color_index];
-	//if (!texture) {
-	//	//throw "Failed to load texture.";
-	//	printMessageWithChance("Failed to load texture.", 100);
-	//	render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color);
-	//}
-	//else {
+	if (targetRingTexture) {
 
+		// ### Rotate Target Ring ###
+		static float rotationAngle = 0.0f;
+		// Calculate the increment for a full rotation every 6 seconds
+		static const float rotationIncrement = (2.0f * M_PI) / (6.0f * 1000.0f); // radians per millisecond
+		// Update the rotation angle based on the elapsed time
+		static ULONGLONG lastRotationTime = GetTickCount64();
+		ULONGLONG currentRotationTime = GetTickCount64();
+		ULONGLONG elapsedRotationTime = currentRotationTime - lastRotationTime;
+		rotationAngle += rotationIncrement * elapsedRotationTime;
+		lastRotationTime = currentRotationTime;
+		// Reset the rotation angle after a full rotation
+		if (rotationAngle >= 2.0f * M_PI) {
+			rotationAngle -= 2.0f * M_PI;
+		}
 
-	// Static variable to keep track of the rotation angle
-	static float rotationAngle = 0.0f;
-
-	// Calculate the increment for a full rotation every 6 seconds
-	static const float rotationIncrement = (2.0f * M_PI) / (6.0f * 1000.0f); // radians per millisecond
-
-	// Update the rotation angle based on the elapsed time
-	static ULONGLONG lastRotationTime = GetTickCount64();
-	ULONGLONG currentRotationTime = GetTickCount64();
-	ULONGLONG elapsedRotationTime = currentRotationTime - lastRotationTime;
-	rotationAngle += rotationIncrement * elapsedRotationTime;
-	lastRotationTime = currentRotationTime;
-
-	// Reset the rotation angle after a full rotation
-	if (rotationAngle >= 2.0f * M_PI) {
-		rotationAngle -= 2.0f * M_PI;
+		// ### Render Target Ring ###
+		// cannot figure out how to render the texture and color ring at same time so rendering texture on above and below a solid color ring
+		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.29f }, radius, targetRingColor, targetRingTexture, rotationAngle);
+		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius - 0.05f, targetRingColor);
+		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.31f }, radius, targetRingColor, targetRingTexture, rotationAngle);
 	}
-
-	// Call the render method with the rotation angle
-	if (color_index == 3)
-	{
-		//render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius, Color);
-		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius - 0.05f, Color);
-		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.31f }, radius, Color, texture, rotationAngle);
-	}
-	else
-	{
-		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.3f }, radius - 0.05f, Color);
-		render_ring_with_texture({ target->Position.x, target->Position.y,  target->ActorInfo->Z + 0.31f }, radius, Color, texture, rotationAngle);
-	}
-	
-	
-	//}
-
-/*
-ZealTarget_green.tga
-ZealTarget_ltblue.tga
-ZealTarget_dkblue.tga
-ZealTarget_white.tga
-ZealTarget_yellow.tga
-ZealTarget_red.tga
-
-#define CON_WHITE D3DCOLOR_ARGB(0x55, 0xf0, 0xf0, 0xf0)
-#define CON_RED D3DCOLOR_ARGB(0x55, 0xf0, 0x0, 0x0)
-#define CON_BLUE D3DCOLOR_ARGB(0x55, 0x0, 0x0, 0xf0)
-#define CON_YELLOW D3DCOLOR_ARGB(0x55, 0xf0, 0xf0, 0x0)
-#define CON_LIGHTBLUE D3DCOLOR_ARGB(0x55, 0x0, 0xf0, 0xf0)
-#define CON_GREEN D3DCOLOR_ARGB(0x55, 0x0, 0xf0, 0x0)
-
-	*/
-
-		//}
 }
 
 void TargetRing::set_enabled(bool _enabled)
@@ -1354,7 +1265,6 @@ void TargetRing::load_ini(IO_ini* ini)
 //don't get too excited this isn't functioning
 TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
-
 	load_ini(ini);
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->commands_hook->Add("/targetring", {}, "Toggles target ring",
@@ -1376,25 +1286,8 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 			set_enabled(!enabled);
 			return true;
 		});
-
-	//textures[0] = LoadTexture(zeal->dx->GetDevice(), "ZealTarget_green.tga");
-	//textures[1] = LoadTexture(zeal->dx->GetDevice(), "ZealTarget_ltblue.tga");
-	//textures[2] = LoadTexture(zeal->dx->GetDevice(), "ZealTarget_dkblue.tga");
-	//textures[3] = LoadTexture(zeal->dx->GetDevice(), "ZealTarget_white.tga");
-	//textures[4] = LoadTexture(zeal->dx->GetDevice(), "ZealTarget_yellow.tga");
-	//textures[5] = LoadTexture(zeal->dx->GetDevice(), "ZealTarget_red.tga");
-
-
-	//texture = LoadTexture(device, "ZealTargetRing2.tga");
-
 }
 
 TargetRing::~TargetRing()
 {
-	//for (int i = 0; i < 6; ++i) {
-	//	if (textures[i]) {
-	//		textures[i]->Release();
-	//		textures[i] = nullptr;
-	//	}
-	//}
 }
