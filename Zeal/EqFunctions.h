@@ -82,7 +82,9 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
-
+		float CalcCombatRange(Zeal::EqStructures::Entity* entity1, Zeal::EqStructures::Entity* entity2);
+		float CalcZOffset(Zeal::EqStructures::Entity* ent);
+		float CalcBoundingRadius(Zeal::EqStructures::Entity* ent);
 		void DoPercentConvert(std::string& str);
 		void move_item(int a1, int slot, int a2, int a3);
 		bool can_inventory_item(Zeal::EqStructures::EQITEMINFO* item);

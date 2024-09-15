@@ -25,6 +25,7 @@ class TargetRing
 {
 public:
 	void callback_render();
+	void callback_initui();
 	void set_enabled(bool enable);
 	void set_pct(float pct);
 	void set_indicator(bool enable);
