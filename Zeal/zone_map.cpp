@@ -4,6 +4,7 @@
 #include "EqAddresses.h"
 #include "string_util.h"
 #include "zone_map_data.h"
+#include <fstream>
 #include <string>
 
 // Possible enhancements:
@@ -212,7 +213,7 @@ void ZoneMap::render_load_map() {
 
     render_release_resources();  // Forces update of all graphics.
 
-    const ZoneMapData* zone_map_data = get_zone_map_data(zone_id);
+    const ZoneMapData* zone_map_data = get_zone_map(zone_id);
     if (!zone_map_data) {
         return;
     }
@@ -653,7 +654,7 @@ int ZoneMap::render_update_position_buffer() {
         float delta_y = -self->MovementSpeedY;  // World direction is negated.
         float delta_x = -self->MovementSpeedX;
 
-        const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+        const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
         float vertical_limit = (clip_rect_bottom - clip_rect_top) * 0.20f;
         float map_top = zone_map_data->min_y * scale_factor + offset_y;
         bool trigger = (delta_y < 0) && (screen_y - clip_rect_top < vertical_limit) &&
@@ -809,6 +810,148 @@ void ZoneMap::add_dynamic_label(const std::string& label_text, int loc_y, int lo
     dynamic_labels_list.emplace_back(label_text, loc_y, loc_x, timeout, font_color);
 }
 
+const ZoneMapData* ZoneMap::get_zone_map(int zone_id) {
+    // Based on map_data_mode uses internal data and/or external data.
+    const ZoneMapData* internal_map = get_zone_map_data(zone_id);
+    if (!internal_map || (map_data_mode == MapDataMode::kInternal))
+        return internal_map;
+
+    auto it = map_data_cache.find(zone_id);
+    if (it != map_data_cache.end())
+        if (!it->second || !it->second->zone_map_data || !it->second->zone_map_data->num_lines)
+            return internal_map;  // Failed previous search so return default.
+        else
+            return it->second->zone_map_data.get();  // Note: Sharing a naked pointer here.
+
+    // Not in cache, so try to load it. Note the internal_map->name field is required.
+    auto new_map = std::make_unique<CustomMapData>();
+
+    // Primary file must exist.
+    std::string filename = "map_files/" + std::string(internal_map->name) + ".txt";
+    if (!add_map_data_from_file(filename, *new_map)) {
+        map_data_cache[zone_id] = nullptr;  // Flag it as a failed load.
+        return internal_map;
+    }
+
+    // Optional data from a second file (typically poi's).
+    std::string filename_1 = "map_files/" + std::string(internal_map->name) + "_1.txt";
+    add_map_data_from_file(filename_1, *new_map);
+
+    if (map_data_mode == MapDataMode::kBoth)
+        add_map_data_from_internal(*internal_map, *new_map);
+    else if (new_map->lines.size() == 0) {
+        map_data_cache[zone_id] = nullptr;  // Flag it as a failed load.
+        return internal_map;
+    }
+
+    // Analyzes all added data to populate the final ZoneMapData structure.
+    assemble_zone_map(internal_map->name, *new_map);
+
+    map_data_cache.emplace(zone_id, std::move(new_map));
+    return map_data_cache[zone_id]->zone_map_data.get();
+}
+
+
+void ZoneMap::add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data) {
+    for (int i = 0; i < internal_map.num_lines; ++i)
+        map_data.lines.push_back(internal_map.lines[i]);
+    for (int i = 0; i < internal_map.num_labels; ++i)
+        map_data.labels.push_back(internal_map.labels[i]);  // Not modifying label pointers.
+    for (int i = 0; i < internal_map.num_levels; ++i)
+        map_data.levels.push_back(internal_map.levels[i]);
+}
+
+
+bool ZoneMap::add_map_data_from_file(const std::string& filename, CustomMapData& map_data) {
+    // Not yet cached, so check if an external file is present.
+    std::ifstream map_file;
+    map_file.open(filename);
+    if (map_file.fail())
+        return false;
+
+    // Parse the map_file. Use old-school sscanf_s for easy parsing of the csv.
+    std::string line;
+    while (std::getline(map_file, line))
+    {
+        float x0, y0, z0, x1, y1, z1;
+        int dummy;
+        unsigned int red, green, blue;
+        char buffer[64];
+        if (sscanf_s(line.c_str(), "L %f, %f, %f, %f, %f, %f, %u, %u, %u",
+            &x0, &y0, &z0, &x1, &y1, &z1, &red, &green, &blue) == 9) {
+    
+            map_data.lines.emplace_back(
+                static_cast<int>(x0 + 0.5f), static_cast<int>(y0 + 0.5f),
+                static_cast<int>(z0 + 0.5f), static_cast<int>(x1 + 0.5f),
+                static_cast<int>(y1 + 0.5f), static_cast<int>(z1 + 0.5f),
+                static_cast<uint8_t>(red), static_cast<uint8_t>(green),
+                static_cast<uint8_t>(blue), 0);
+        }
+        else if (sscanf_s(line.c_str(), "P %f, %f, %f, %u, %u, %u, %i, %s",
+            &x0, &y0, &z1, &red, &green, &blue, &dummy, buffer, sizeof(buffer)) == 8) {
+            map_data.label_strings.emplace_back(std::string(buffer));
+            map_data.labels.emplace_back(static_cast<int>(x0 + 0.5f),
+                static_cast<int>(y0 + 0.5f), static_cast<int>(z0 + 0.5f),
+                static_cast<uint8_t>(red), static_cast<uint8_t>(green),
+                static_cast<uint8_t>(blue),
+                map_data.label_strings.back().c_str());
+        }
+    }
+
+    // Note: map_data.levels not currently supported.
+    return true;
+}
+
+void ZoneMap::assemble_zone_map(const char* zone_name, CustomMapData& map_data) {
+
+    // Sort the lines by z so they are rendered from bottom to top.
+    std::stable_sort(map_data.lines.begin(), map_data.lines.end(), [](const ZoneMapLine& lhs, const ZoneMapLine& rhs) {
+        return lhs.z0 + lhs.z1 < rhs.z0 + rhs.z1; });
+
+    // Pull out limits of all map data. Note that in the python script the floating point values
+    // were used along with floor() and ceil(), while this is running on the already rounded ints.
+    int max_x = map_data.lines[0].x0;
+    int min_x = max_x;
+    int max_y = map_data.lines[0].y0;
+    int min_y = max_y;
+    int max_z = map_data.lines[0].z0;
+    int min_z = max_z;
+    for (const auto& line : map_data.lines) {
+        max_x = max(max_x, max(line.x0, line.x1));
+        min_x = min(min_x, min(line.x0, line.x1));
+        max_y = max(max_y, max(line.y0, line.y1));
+        min_y = min(min_y, min(line.y0, line.y1));
+        max_z = max(max_z, max(line.z0, line.z1));
+        min_z = min(min_z, min(line.z0, line.z1));
+    }
+
+    max_x = max(max_x, min_x + 1); // Sanity clamp limits.
+    max_y = max(max_y, min_y + 1);
+    max_z = max(max_z, min_z + 1);
+
+    if (!map_data.levels.size())
+        map_data.levels.emplace_back(0, max_z, min_z);
+
+    // Assemble and assign the zone_map_data.
+    map_data.zone_map_data = std::make_unique<ZoneMapData>(ZoneMapData(
+        {
+            .name = zone_name,
+            .max_x = max_x,
+            .min_x = min_x,
+            .max_y = max_y,
+            .min_y = min_y,
+            .max_z = max_z,
+            .min_z = min_z,
+            .num_lines = static_cast<int>(map_data.lines.size()),
+            .num_labels = static_cast<int>(map_data.labels.size()),
+            .num_levels = static_cast<int>(map_data.levels.size()),
+            .lines = &map_data.lines[0],
+            .labels = &map_data.labels[0],
+            .levels = &map_data.levels[0]
+        }));
+
+}
+
 void ZoneMap::set_enabled(bool _enabled, bool update_default)
 {
     enabled = _enabled;
@@ -900,6 +1043,26 @@ bool ZoneMap::set_labels_mode(int mode_in, bool update_default) {
     return true;
 }
 
+bool ZoneMap::set_map_data_mode(int mode_in, bool update_default) {
+    MapDataMode::e mode{ mode_in };
+    if (mode < MapDataMode::kFirst || mode > MapDataMode::kLast) {
+        update_ui_options();  // Ensure in sync.
+        return false;
+    }
+
+    map_data_mode = mode;
+    map_data_cache.clear();  // Wipe cache clean.
+    zone_id = kInvalidZoneId;  // Triggers reload.
+    map_level_zone_id = kInvalidZoneId;  // Reset (may be out of date).
+    marker_zone_id = kInvalidZoneId;
+    dynamic_labels_zone_id = kInvalidZoneId;
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapDataMode", mode);
+
+    update_ui_options();
+    return true;
+}
 
 bool ZoneMap::set_position_size(int new_size_percent, bool update_default) {
     position_size = max(0.01f, min(kMaxPositionSize, new_size_percent / 100.f * kMaxPositionSize));
@@ -973,6 +1136,8 @@ void ZoneMap::load_ini(IO_ini* ini)
 {
     if (!ini->exists("Zeal", "MapEnabled"))
         ini->setValue<bool>("Zeal", "MapEnabled", false);
+    if (!ini->exists("Zeal", "MapDataMode"))
+        ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(MapDataMode::kInternal));
     if (!ini->exists("Zeal", "MapBackgroundState"))
         ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(BackgroundType::kClear));
     if (!ini->exists("Zeal", "MapBackgroundAlpha"))
@@ -996,6 +1161,7 @@ void ZoneMap::load_ini(IO_ini* ini)
 
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
     enabled = ini->getValue<bool>("Zeal", "MapEnabled");
+    map_data_mode = MapDataMode::e(ini->getValue<int>("Zeal", "MapDataMode"));
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
     map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
     map_alignment_state = AlignmentType::e(ini->getValue<int>("Zeal", "MapAlignment"));
@@ -1008,6 +1174,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     marker_size = ini->getValue<float>("Zeal", "MapMarkerSize");
 
     // Sanity clamp ini values.
+    map_data_mode = max(MapDataMode::kFirst, min(MapDataMode::kLast, map_data_mode));
     map_background_state = max(BackgroundType::kFirst, min(BackgroundType::kLast, map_background_state));
     map_background_alpha = max(0, min(1.f, map_background_alpha));
     map_alignment_state = max(AlignmentType::kFirst, min(AlignmentType::kLast, map_alignment_state));
@@ -1033,6 +1200,7 @@ void ZoneMap::save_ini()
         return;
 
     ini->setValue<bool>("Zeal", "MapEnabled", enabled);
+    ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(map_data_mode));
     ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
     ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
     ini->setValue<int>("Zeal", "MapAlignment", static_cast<int>(map_alignment_state));
@@ -1188,6 +1356,22 @@ void ZoneMap::parse_labels(const std::vector<std::string>& args) {
     }
 }
 
+void ZoneMap::parse_map_data_mode(const std::vector<std::string>& args) {
+    int mode = MapDataMode::kFirst - 1;
+    if (args.size() == 3) {
+        if (args[2] == "internal")
+            mode = MapDataMode::kInternal;
+        else if (args[2] == "both")
+            mode = MapDataMode::kBoth;
+        else if (args[2] == "external")
+            mode = MapDataMode::kExternal;
+    }
+
+    if ((mode < MapDataMode::kFirst) || !set_map_data_mode(mode, false)) {
+        Zeal::EqGame::print_chat("Usage: /map data_mode internal, both, external");
+    }
+}
+
 void ZoneMap::parse_marker(const std::vector<std::string>& args) {
     if (args.size() <= 2) {
         clear_marker();
@@ -1219,7 +1403,7 @@ bool ZoneMap::search_poi(const std::string& search_term) {
     if (!self)
         return false;  // Not handled here.
 
-    const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+    const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
     if (!zone_map_data || zone_map_data->num_labels == 0) {
         Zeal::EqGame::print_chat("No map POI data available for this zone");
         return false;
@@ -1309,7 +1493,7 @@ bool ZoneMap::set_level(int level_index) {
     if (!self)
         return false;
 
-    const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+    const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
     if (zone_id == kInvalidZoneId || !zone_map_data || zone_map_data->num_levels < 2)
         return false;
 
@@ -1346,7 +1530,7 @@ void ZoneMap::parse_level(const std::vector<std::string>& args) {
     if (!self)
         return;
 
-    const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+    const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
     if (!zone_map_data || zone_map_data->num_levels < 2) {
         Zeal::EqGame::print_chat("No map level data available for this zone");
         return;
@@ -1372,7 +1556,7 @@ void ZoneMap::parse_poi(const std::vector<std::string>& args) {
     if (!self)
         return;
 
-    const ZoneMapData* zone_map_data = get_zone_map_data(self->ZoneId);
+    const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
     if (!zone_map_data || zone_map_data->num_labels == 0) {
         Zeal::EqGame::print_chat("No map POI data available for this zone");
         return;
@@ -1414,7 +1598,8 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("level: zone: %i, index: %i, z_max: %i, z_min: %i", map_level_zone_id, map_level_index, clip_max_z, clip_min_z);
     Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, zoom_id: %i", position_size, marker_size, zoom_recenter_zone_id);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f", scale_factor, offset_y, offset_x, zoom_factor);
-    Zeal::EqGame::print_chat("dynamic_labels_size: %i, dynamic_labels_zone_id: %i", dynamic_labels_list.size(), dynamic_labels_zone_id);
+    Zeal::EqGame::print_chat("dyn_labels_size: %i, dyn_labels_zone_id: %i, data_mode: %i, data_cache: %i", 
+        dynamic_labels_list.size(), dynamic_labels_zone_id, map_data_mode, map_data_cache.size());
     Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i, font: %i", line_count,
         line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr, label_font != nullptr);
 }
@@ -1456,6 +1641,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "level") {
         parse_level(args);
     }
+    else if (args[1] == "data_mode") {
+        parse_map_data_mode(args);
+    }
     else if (args[1] == "save_ini") {
         Zeal::EqGame::print_chat("Saving current map settings");
         save_ini();
@@ -1468,6 +1656,7 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     }
     else if (!parse_shortcuts(args)) {
         Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level|save_ini]");
+        Zeal::EqGame::print_chat("Beta: /map [data_mode|always_center]");
         Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
     }

@@ -5,13 +5,18 @@
 #include "EqUI.h"
 #include "directx.h"
 #include "zone_map_data.h"
+#include <list>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 class ZoneMap
 {
 public:
-	struct AlignmentType { enum e: int{ kLeft = 0, kCenter, kRight, kFirst = kLeft, kLast = kRight }; };
-	struct BackgroundType { enum e: int { kClear = 0, kDark, kLight, kTan, kFirst = kClear, kLast = kTan }; };
+	struct AlignmentType { enum e : int { kLeft = 0, kCenter, kRight, kFirst = kLeft, kLast = kRight }; };
+	struct BackgroundType { enum e : int { kClear = 0, kDark, kLight, kTan, kFirst = kClear, kLast = kTan }; };
 	struct LabelsMode { enum e : int { kOff = 0, kSummary, kAll, kFirst = kOff, kLast = kAll }; };
+	struct MapDataMode { enum e : int { kInternal = 0, kBoth, kExternal, kFirst = kInternal, kLast = kExternal }; };
 
 	static constexpr float kMaxPositionSize = 0.05f;  // In fraction of screen size.
 	static constexpr float kMaxMarkerSize = 0.05f;
@@ -24,6 +29,7 @@ public:
 	// Setting update_default stores to the ini. All trigger a ui_options update.
 	bool is_enabled() const { return enabled; }
 	void set_enabled(bool enable, bool update_default = false);
+	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
 	bool set_background_alpha(int percent, bool update_default = true);
 	bool set_alignment(int new_state, bool update_default = true); // [left, center, right]
@@ -38,6 +44,7 @@ public:
 	bool set_marker_size(int new_size_percent, bool update_default = true);
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
 
+	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
 	int get_background() const { return static_cast<int>(map_background_state); }
 	int get_background_alpha() const { return static_cast<int>(map_background_alpha * 100 + 0.5f); }
 	int get_alignment() const { return static_cast<int>(map_alignment_state); }
@@ -73,6 +80,14 @@ private:
 		D3DCOLOR color = 0;
 	};
 
+	struct CustomMapData {
+		std::vector<ZoneMapLine> lines;  // Contains heap memory for zone_map_data.
+		std::vector<ZoneMapLabel> labels;
+		std::list<std::string> label_strings;  // Used as heap for const char* in labels.
+		std::vector<ZoneMapLevel> levels;
+		std::unique_ptr<ZoneMapData> zone_map_data;
+	};
+
 	static constexpr int kInvalidZoneId = 0;
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
 	static constexpr float kDefaultRectTop = 0.1f;
@@ -94,6 +109,7 @@ private:
 	void parse_zoom(const std::vector<std::string>& args);
 	void parse_labels(const std::vector<std::string>& args);
 	void parse_level(const std::vector<std::string>& args);
+	void parse_map_data_mode(const std::vector<std::string>& args);
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
 	void set_marker(int y, int x);
@@ -121,11 +137,17 @@ private:
 	void render_labels();
 	void render_label_text(const char* label, int y, int x, D3DCOLOR font_color);
 
+	const ZoneMapData* get_zone_map(int zone_id);
+	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
+	bool add_map_data_from_file(const std::string& filename, CustomMapData& map_data);
+	void assemble_zone_map(const char* zone_name, CustomMapData& map_data);
+
 	bool enabled = false;
 	BackgroundType::e map_background_state = BackgroundType::kClear;
 	float map_background_alpha = kDefaultBackgroundAlpha;
 	AlignmentType::e map_alignment_state = AlignmentType::kFirst;
 	LabelsMode::e map_labels_mode = LabelsMode::kOff;
+	MapDataMode::e map_data_mode = MapDataMode::kInternal;
 	int zone_id = kInvalidZoneId;
 	int marker_zone_id = kInvalidZoneId;
 	int zoom_recenter_zone_id = kInvalidZoneId;
@@ -138,6 +160,7 @@ private:
 	char map_level_label_string[20];
 	int dynamic_labels_zone_id = kInvalidZoneId;
 	std::vector<DynamicLabel> dynamic_labels_list;  // Optional temporary labels.
+	std::unordered_map<int, std::unique_ptr<CustomMapData>> map_data_cache;
 
 	D3DVIEWPORT8 viewport = {};  // On-screen coordinates of viewport.
 	float scale_factor = 0;  // Conversion factors for map data to screen coordinates.
