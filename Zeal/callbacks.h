@@ -18,7 +18,9 @@ enum class callback_type
 	Delayed,
 	RenderUI,
 	EndScene,
-	AddDeferred
+	AddDeferred,
+	DXReset,
+	DXResetComplete,
 };
 class CallbackManager
 {

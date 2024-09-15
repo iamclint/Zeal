@@ -25,12 +25,14 @@ class TargetRing
 {
 public:
 	void callback_render();
+	void callback_initui();
 	void set_enabled(bool enable);
 	void set_pct(float pct);
 	void set_indicator(bool enable);
 	void render_ring(Vec3 position, float size, DWORD color);
 	bool enabled;
 	bool attack_indicator;
+	void render_ring_with_texture(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle);
 	TargetRing(class ZealService* zeal, class IO_ini* ini);
 	~TargetRing();
 
@@ -43,6 +45,8 @@ private:
 	void load_ini(class IO_ini* ini);
 	void store_render_states();
 	void reset_render_states();
+	IDirect3DTexture8* targetRingTexture;
+
 };
 
 

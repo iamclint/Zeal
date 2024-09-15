@@ -18,7 +18,11 @@ HRESULT WINAPI Local_EndScene(LPDIRECT3DDEVICE8 pDevice)
 
 HRESULT WINAPI Local_Reset(IDirect3DDevice8* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
+    if (ZealService::get_instance()->callbacks)
+        ZealService::get_instance()->callbacks->invoke_generic(callback_type::DXReset);
     HRESULT ret = ZealService::get_instance()->hooks->hook_map["Reset"]->original(Local_Reset)(pDevice, pPresentationParameters);
+    if (ZealService::get_instance()->callbacks)
+        ZealService::get_instance()->callbacks->invoke_generic(callback_type::DXResetComplete);
     return ret;
 }
 
