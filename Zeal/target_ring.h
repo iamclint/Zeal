@@ -43,8 +43,9 @@ private:
 	float ring_pct;
 	std::vector<RenderState> render_states;
 	void load_ini(class IO_ini* ini);
-	void store_render_states();
+	void setup_render_states();
 	void reset_render_states();
+	void render_vertex(const void* VertexBuffer, DWORD VertexBufferSize, DWORD numSegments, Vec3 pos, DWORD color, IDirect3DTexture8* texture);
 	IDirect3DTexture8* targetRingTexture;
 
 };
