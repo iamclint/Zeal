@@ -29,10 +29,9 @@ public:
 	void set_enabled(bool enable);
 	void set_pct(float pct);
 	void set_indicator(bool enable);
-	void render_ring(Vec3 position, float size, DWORD color);
 	bool enabled;
 	bool attack_indicator;
-	void render_ring_with_texture(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle);
+	void render_ring(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle);
 	TargetRing(class ZealService* zeal, class IO_ini* ini);
 	~TargetRing();
 
@@ -45,7 +44,7 @@ private:
 	void load_ini(class IO_ini* ini);
 	void setup_render_states();
 	void reset_render_states();
-	void render_vertex(const void* VertexBuffer, DWORD VertexBufferSize, DWORD numSegments, Vec3 pos, DWORD color, IDirect3DTexture8* texture);
+	int numSegments = 128;  // Adjust for smoothness of the ring
 	IDirect3DTexture8* targetRingTexture;
 
 };
