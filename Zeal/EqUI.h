@@ -689,7 +689,8 @@ namespace Zeal
 			/*0x080*/	DWORD MaxChatWindows;
 			/*0x084*/	int ActiveChatWnd;
 			/*0x088*/	int AlwaysChatHereIndex;
-			/*0x090*/   int ChannelMapWnd[40];
+			/*0x08C*/   int unknown;
+			/*0x090*/   int ChannelMapWnd[0x29];
 		};
 
 

@@ -168,45 +168,45 @@ int32_t __fastcall ColorToChannelMap(int this_, int u, int filter)
   return channelMap;
 }
 
-void __fastcall ClearChannelMaps(int this_, int u, int window)
+void __fastcall ClearChannelMaps(Zeal::EqUI::CChatManager* cman, int u, int window)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
 
-    if (window != *(int*)this_)
+    if (window != (int)cman->ChatWindows[0])
     {
         for (int i = 0; i < EF_LEN; i++)
         {
             if (cf->extendedChannelMaps[i] == window)
             {
-                cf->extendedChannelMaps[i] = *(int*)this_;
+                cf->extendedChannelMaps[i] = (int)cman->ChatWindows[0];
             }
         }
         for (int i = 0; i <= ChannelMap40; i++)
         {
-            if (*(int*)(this_ + 0x90 + 4 * i) == window)
+            if (cman->ChannelMapWnd[i] == window)
             {
-                *(int*)(this_ + 0x90 + 4 * i) = *(int*)this_;
+                cman->ChannelMapWnd[i] = (int)cman->ChatWindows[0];
             }
         }
     }
 }
 
-void __fastcall ClearChannelMap(int this_, int u, int filter)
+void __fastcall ClearChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     if (filter == (RANDOM - FILTER_OFFSET) || filter == (LOOT - FILTER_OFFSET))
     {
         int index = filter - (0x1000000 - FILTER_OFFSET);
-        cf->extendedChannelMaps[index] = *(int *)this_;
+        cf->extendedChannelMaps[index] = (int)cman->ChatWindows[0];
     }
     else if (filter <= ChannelMap40 and filter >= ChannelMap0)
     {
-        *(int*)(this_ + 0x90 + filter * 4) = *(int*)this_;
+        cman->ChannelMapWnd[filter] = (int)cman->ChatWindows[0];
     }
 }
 
 //Return a Window handle for a filter. We'll need to store our own references here.
-int  __fastcall GetChannelMap(int t, int u, int filter)
+int  __fastcall GetChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     int windowHandle = 0;
@@ -218,12 +218,12 @@ int  __fastcall GetChannelMap(int t, int u, int filter)
 
     }
     else if ((filter >= ChannelMap0) && (filter <= ChannelMap40)) {
-        windowHandle = *(int*)(t + 0x90 + filter * 4);
+        windowHandle = cman->ChannelMapWnd[filter];
     } 
     return windowHandle;
 }
 
-void __fastcall SetChannelMap(int this_, int u, int filter, int window)
+void __fastcall SetChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter, int window)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     
@@ -233,7 +233,7 @@ void __fastcall SetChannelMap(int this_, int u, int filter, int window)
         cf->extendedChannelMaps[index] = window;
     }
     else if ((filter >= ChannelMap0) && (filter <= ChannelMap40)) {
-        *(int*)(this_ + 0x90 + filter * 4) = window;
+        cman->ChannelMapWnd[filter] = window;
     }
 }
 
@@ -283,17 +283,15 @@ int SelectWindow(int this_, int ChannelMap)
     return window;
 }
 
-int32_t __fastcall AddMenu(int this_, int u, int m)
+int32_t __fastcall AddMenu(int this_, int u, Zeal::EqUI::ContextMenu* menu)
 {
-	Zeal::EqUI::ContextMenu* menu = (Zeal::EqUI::ContextMenu*)m;
-
 	Zeal::EqUI::CXSTR rand("Random");
 	menu->AddMenuItem(rand, RANDOM);
 
 	Zeal::EqUI::CXSTR loot("Loot");
 	menu->AddMenuItem(loot, LOOT);
 
-	return ZealService::get_instance()->hooks->hook_map["AddMenu"]->original(AddMenu)(this_, u, m);
+	return ZealService::get_instance()->hooks->hook_map["AddMenu"]->original(AddMenu)(this_, u, menu);
 }
 
 void chatfilter::LoadSettings()
@@ -317,13 +315,13 @@ void chatfilter::LoadSettings()
     }
 }
 
-int __fastcall CChatManager(int this_, int u)
+int __fastcall CChatManager(Zeal::EqUI::CChatManager* cman, int u)
 {
-    int  retVal = ZealService::get_instance()->hooks->hook_map["CChatManager"]->original(CChatManager)(this_, u);
+    int  retVal = ZealService::get_instance()->hooks->hook_map["CChatManager"]->original(CChatManager)(cman, u);
 
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     cf->LoadSettings();
-    Zeal::EqUI::CChatManager* cman = (Zeal::EqUI::CChatManager*)this_;
+
     for (int i = 0; i < EF_LEN; i++)
     {
         int window_index = cf->extendedChannelMaps[i];
@@ -332,7 +330,7 @@ int __fastcall CChatManager(int this_, int u)
     return retVal;
 }
 
-void __fastcall Deactivate(int this_, int u)
+void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
 {
     std::string ini_name = ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
     IO_ini ui_ini(ini_name);
@@ -340,7 +338,6 @@ void __fastcall Deactivate(int this_, int u)
     std::string cmap = "ChannelMap";
     int num = 41;
 
-    Zeal::EqUI::CChatManager* cman = (Zeal::EqUI::CChatManager*)this_;
     for (int i = 0; i < EF_LEN; i++)
     {
         int window_pos = 0;
@@ -355,7 +352,7 @@ void __fastcall Deactivate(int this_, int u)
         }
     }
 
-    ZealService::get_instance()->hooks->hook_map["Deactivate"]->original(Deactivate)(this_, u);
+    ZealService::get_instance()->hooks->hook_map["Deactivate"]->original(Deactivate)(cman, u);
 }
 
 
