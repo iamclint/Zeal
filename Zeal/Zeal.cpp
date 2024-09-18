@@ -40,6 +40,7 @@ ZealService::ZealService()
 	cycle_target = std::make_shared<CycleTarget>(this);
 	experience = std::make_shared<Experience>(this);
 	chat_hook = std::make_shared<chat>(this, ini.get());
+	chatfilter_hook = std::make_shared<chatfilter>(this, ini.get());
 	outputfile = std::make_shared<OutputFile>(this);
 	buff_timers = std::make_shared<BuffTimers>(this);
 	movement = std::make_shared<PlayerMovement>(this, binds_hook.get(), ini.get());
@@ -179,6 +180,7 @@ ZealService::~ZealService()
 	buff_timers.reset();
 	outputfile.reset();
 	chat_hook.reset();
+	chatfilter_hook.reset();
 	experience.reset();
 	cycle_target.reset();
 	camera_mods.reset();
