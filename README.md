@@ -1,21 +1,64 @@
-### Zeal pipes in c#
-- https://github.com/OkieDan/ZealPipes
+### Description
+Zeal adds quality of life functionality to the legacy (2002) Everquest client
+used by most TAKP EqEMU players. The Miles Sound System used by that client
+supports plug-ins for arbitrary filtering, and Zeal injects itself into the
+client like a standard dll by using the .asi extension in the EQ root directory.
+It can then patch itself into the client's processing loop and callbacks to
+add new functionality and smooth out issues in the old client.
+
+Zeal custom code is entirely open source and the releases are built directly
+from the repo using github actions, providing clear transparency on the contents.
+
+### Features
+- Camera motion improvements
+- Additional key binds (tab targeting, strafe, pet)
+- Additional commands (melody, useitem, autoinventory)
+- Additional ui support (new gauges, bag control, looting, spellsets, targetrings)
+- Third party tool support (silent log messages, direct ZealPipes)
+- Integrated (in-game) map
+- Various bug fixes
+- Unique npc naming for better parsing
+
+### Installation
+A comprehensive guide, including troubleshooting, can be found at
+https://quarm.guide/install-guides under "Installing Zeal" or a
+simplified checklist under "Checklist for Installing Zeal".
+
+Note that the method Zeal uses to inject itself into the client can trigger the
+heuristics of anti-virus scanners to label it as malware. See trouble-shooting
+guide above if your `Zeal.asi` file keeps disappearing.
+
+A summary of the process is below:
+1. Ensure that sound is enabled in the game (the volume level can be set to zero).
+  - Check that `Sound=TRUE` in the eqclient.ini in your root Everquest directory.
+2. [Download](https://github.com/iamclint/Zeal/releases) the latest Zeal
+   release zip file (`zeal_v#.#.#_*.zip`) from the "Assets" section.
+  - Ignore the Source code files. See troubleshooting if your browser complains.
+3. Quit Everquest and extract the `Zeal.asi` from the zip file to your root
+   Everquest install directory.
+  - The `Zeal.pdb` file is a symbol file only needed by developers for debugging
+    and can be ignored.
+4. Extract the `EQUI_Options.xml` to the `uifiles/default` directory
+   or to your active custom UI skin directory (like `uifiles/duxaui`).
+  - Some functionality is only accessible through the updated options UI.
+5. Recommended: Install a UI skin modified with the extra Zeal UI functionality
+   such as mana gauges, experience per hour, loot all / link buttons, etc.
+  - If the UI is not updated, there will be some XML error complaints that can be ignored
+  - Check the list below, the Quarm discord `#ui-discussion` channel, or the Quarm guide
+    link above for compatible UI's
+6. Optional: Extract the `crashes` folder to your Everquest root directory.
+  - If the folder is present and includes the ZealCrashSender.exe, a crash log
+    can be automatically submitted for debugging.
+7. Test Zeal installation in game by typing "/zeal version" and "/help zeal".
+8. Configure Zeal using the new Zeal tabs in EQ options and assign new key binds.
 
 ### Compatible UI's
 - https://github.com/NilliP/NillipussUI_1080p
 - https://github.com/NilliP/NillipussUI_1440p
 - https://www.eqinterface.com/downloads/fileinfo.php?id=6959
+- https://github.com/LordDemonos/Quarm.Guide/blob/master/assets/duxaUI.7z?raw=true
 
-
-### Features
-- Camera motion improvements
-- Additional binds
-- Additional commands
-- Additional ui support
-- Various bug fixes
-- Unique npc naming for better parsing
-
-### % Replacements
+### Chat % Replacements
 - %n or %mana for mana%
 - %h or %hp for hp%
 - %loc for your location
@@ -86,10 +129,13 @@ ___
   - **Example:** `/map marker 500 -100 3` sets a target marker at loc 500, -100 with size = 3% of screen
   - **Example:** `/map 500 -100` shortcut for map marker 500 -100
   - **Example:** `/map 0` shortcut for map marker 0 0 0 (clears marker)
-  - **Example:** `/map zoom 200` sets map scaling to 200% (2x) and centers on position
+  - **Example:** `/map zoom 200` sets map scaling to 200% (2x)
   - **Example:** `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of screen dimensions
+  - **Example:** `/map alignment center` aligns the aspect ratio constrained map to the top center of the window
   - **Example:** `/map poi` lists points of interest, use `/map poi 2` to drop marker at index [2] of list
   - **Example:** `/map search_term` searches poi list for 'search_term' and drops a marker at first match
+  - **Example:** `/map labels summary` adds a selected summary list of poi text labels to the map
+  - **Example:** `/map data_mode external` loads external custom map files (Brewall format) from map_files directory
   - **Description:** controls map enable, size, and markers
     
 - `/pandelay`
@@ -237,6 +283,10 @@ ___
   - Zeal_FirstPersonLabel_Y
   - Zeal_PanDelayLabel
 ___
+
+### Zeal pipes in c#
+- https://github.com/OkieDan/ZealPipes
+
 ### Building
 #### Github official release builds
 1. Commit an updated, unique ZEAL_VERSION in Zeal/Zeal.h that will be used as the release tag.
@@ -251,10 +301,4 @@ ___
 #### Local builds
 Build in 32bit x86 mode using Microsoft Visual Studio 2022 (free Community edition works)
 
-### Installation
-1. Download the "zeal_v*.zip" from a tagged release on github
-2. Extract zeal.asi and place it in the root of your game folder
-3. Extract EQUI_OptionsWindow.xml and place it in your active ui folder (example: uifiles/duxaUI)
-
-The zeal.pdb file is a symbols file only useful for debugging with developer tools (ignore).
 
