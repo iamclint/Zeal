@@ -158,12 +158,12 @@ int32_t __fastcall ColorToChannelMap(int this_, int u, int filter)
   default:  // The dreaded 'Other' Category
     channelMap = 0x16;
     break;
-  case USERCOLOR_RANDOM: //New Category One
+  case USERCOLOR_RANDOM:
     channelMap = RANDOM;
     break;
- // case USERCOLOR_LOOT:   //New Category Two
- //   channelMap = LOOT;
- //   break;
+  case USERCOLOR_LOOT:
+    channelMap = LOOT;
+    break;
   }
   return channelMap;
 }
