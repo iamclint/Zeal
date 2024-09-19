@@ -623,9 +623,10 @@ int ZoneMap::render_update_position_buffer() {
     Vec3 symbol[kPositionVertices] = { vertex0, vertex1, vertex3,
         vertex0, vertex3, vertex2};
 
-    // Adjust the color if the position is not within the z clipping range.
-    bool within_level = position.z >= clip_min_z && position.z <= clip_max_z;
-    auto color = within_level ? D3DCOLOR_XRGB(250, 250, 51) : // Lemon yellow
+    // Use default cursor color if levels not active or within the z clipping range.
+    bool use_default_color = (map_level_zone_id != zone_id) ||
+                (position.z >= clip_min_z && position.z <= clip_max_z);
+    auto color = use_default_color ? D3DCOLOR_XRGB(250, 250, 51) : // Lemon yellow
         D3DCOLOR_XRGB(195, 176, 145); // Lemon khaki.
 
     // Allow the position marker to exceed the rect limits by size but must stay on screen.
@@ -649,26 +650,26 @@ int ZoneMap::render_update_position_buffer() {
     if (zoom_factor > 1.f) {
         // Trigger a re-centering if:
         // (1) within 20% of an edge and that edge isn't already
-        //    at the maximum of the map data.
-        // (2) movement in that direction
+        //    at the maximum of the map data and movement in that direction
+        // (2) or recenter if the screen x,y is outside the clip_rect (fallback case)
         float delta_y = -self->MovementSpeedY;  // World direction is negated.
         float delta_x = -self->MovementSpeedX;
 
         const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
         float vertical_limit = (clip_rect_bottom - clip_rect_top) * 0.20f;
         float map_top = zone_map_data->min_y * scale_factor + offset_y;
-        bool trigger = (delta_y < 0) && (screen_y - clip_rect_top < vertical_limit) &&
-            (clip_rect_top > map_top);
+        bool trigger = ((delta_y < 0) && (screen_y - clip_rect_top < vertical_limit) &&
+            (clip_rect_top > map_top)) || (screen_y < clip_rect_top);
         float map_bottom = zone_map_data->max_y * scale_factor + offset_y;
         trigger = trigger || ((delta_y > 0) && (clip_rect_bottom - screen_y < vertical_limit) &&
-            (clip_rect_bottom < map_bottom));
+            (clip_rect_bottom < map_bottom)) || (screen_y > clip_rect_bottom);
         float horizontal_limit = (clip_rect_right - clip_rect_left) * 0.20f;
         float map_left = zone_map_data->min_x * scale_factor + offset_x;
         trigger = trigger || ((delta_x < 0) && (screen_x - clip_rect_left < horizontal_limit) &&
-            (clip_rect_left > map_left));
+            (clip_rect_left > map_left)) || (screen_x < clip_rect_left);
         float map_right = zone_map_data->max_x * scale_factor + offset_x;
         trigger = trigger || ((delta_x > 0) && (clip_rect_right - screen_x < horizontal_limit) &&
-            (clip_rect_right < map_right));
+            (clip_rect_right < map_right)) || (screen_x > clip_rect_right);
 
         if (trigger) {
             zoom_recenter_zone_id = zone_id;  // Arm it to re-center the zoom region.
