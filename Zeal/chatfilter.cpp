@@ -4,15 +4,41 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 
-#define RANDOM 0x1000000
-#define LOOT  0x1000001
+//Extended (Custom) Filters
+#define RANDOM 0x10000
+#define LOOT  0x10001
 #define EF_LEN 2
 
+const int Extended_Filters[] = { RANDOM, LOOT };
+
+//Standard ChannelMaps and filter offset
 #define ChannelMap0 0
 #define ChannelMap40 0x28
 #define FILTER_OFFSET 0x64
 
-int32_t __fastcall ColorToChannelMap(int this_, int u, int filter)
+bool isCustomFilter(int filter, int applyOffset = 0)
+{
+    for (int i = 0; i < EF_LEN; i++)
+    {
+        if ((filter + applyOffset) == Extended_Filters[i])
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isStandardFilter(int filter, int applyOffset = 0)
+{
+    filter = filter + applyOffset;
+    if (filter >= ChannelMap0 && filter <= ChannelMap40)
+    {
+        return true;
+    }
+    return false;
+}
+
+int32_t __fastcall ColorToChannelMap(int this_, int u, uint16_t filter)
 {
 	uint32_t channelMap;
 	switch (filter)
@@ -165,7 +191,7 @@ int32_t __fastcall ColorToChannelMap(int this_, int u, int filter)
     channelMap = LOOT;
     break;
   }
-  return channelMap;
+  return channelMap; 
 }
 
 void __fastcall ClearChannelMaps(Zeal::EqUI::CChatManager* cman, int u, int window)
@@ -194,12 +220,12 @@ void __fastcall ClearChannelMaps(Zeal::EqUI::CChatManager* cman, int u, int wind
 void __fastcall ClearChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
-    if (filter == (RANDOM - FILTER_OFFSET) || filter == (LOOT - FILTER_OFFSET))
+    if (isCustomFilter(filter, FILTER_OFFSET))
     {
-        int index = filter - (0x1000000 - FILTER_OFFSET);
+        int index = filter - (0x10000 - FILTER_OFFSET);
         cf->extendedChannelMaps[index] = (int)cman->ChatWindows[0];
     }
-    else if (filter <= ChannelMap40 and filter >= ChannelMap0)
+    else if (isStandardFilter(filter))
     {
         cman->ChannelMapWnd[filter] = (int)cman->ChatWindows[0];
     }
@@ -211,13 +237,13 @@ int  __fastcall GetChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter)
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     int windowHandle = 0;
 
-    if (filter == (RANDOM - FILTER_OFFSET) || filter == (LOOT - FILTER_OFFSET))
+    if (isCustomFilter(filter, FILTER_OFFSET))
     {
-        int index = filter - (0x1000000 - FILTER_OFFSET);
+        int index = filter - (0x10000 - FILTER_OFFSET);
         return cf->extendedChannelMaps[index];
 
     }
-    else if ((filter >= ChannelMap0) && (filter <= ChannelMap40)) {
+    else if (isStandardFilter(filter)) {
         windowHandle = cman->ChannelMapWnd[filter];
     } 
     return windowHandle;
@@ -227,35 +253,40 @@ void __fastcall SetChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter,
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     
-    if (filter == (RANDOM - FILTER_OFFSET) || filter == (LOOT- FILTER_OFFSET))
+    if (isCustomFilter(filter, FILTER_OFFSET))
     {
-        int index = filter - (0x1000000 - FILTER_OFFSET);
+        int index = filter - (0x10000 - FILTER_OFFSET);
         cf->extendedChannelMaps[index] = window;
     }
-    else if ((filter >= ChannelMap0) && (filter <= ChannelMap40)) {
+    else if (isStandardFilter(filter)) {
         cman->ChannelMapWnd[filter] = window;
     }
 }
 
 __declspec (naked) void FilterConditional(void)
 {
-    __asm {
-        cmp ebx, RANDOM
-        je validFilter
-        cmp ebx, LOOT
-        je validFilter
-        cmp ebx, 8Ch
-        jg invalidFilter
-    validFilter:
-        mov eax, 414123h
-        jmp eax
-    invalidFilter:
-        mov eax, 41426Fh
-        jmp eax
+    DWORD filterID;
+    __asm mov filterID, ebx
+
+    if (isCustomFilter(filterID) || isStandardFilter(filterID,-FILTER_OFFSET))
+    {
+        __asm
+        {
+            mov eax, 414123h
+            jmp eax
+        }
+    }
+    else
+    {
+        __asm
+        {
+            mov eax, 41426Fh
+            jmp eax
+        }
     }
 }
 
-int SelectWindow(int this_, int ChannelMap)
+int SelectWindow(Zeal::EqUI::CChatManager* cman, int ChannelMap)
 {
     _asm //Save ECX
     {
@@ -266,13 +297,13 @@ int SelectWindow(int this_, int ChannelMap)
 
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
 
-    if (ChannelMap >= ChannelMap0 && ChannelMap <= ChannelMap40)
+    if (isStandardFilter(ChannelMap))
     {
-        window = this_ + 0x90 + ChannelMap * 4;
+        window = (int)&cman->ChannelMapWnd[ChannelMap];
     }
-    else if (ChannelMap == RANDOM || ChannelMap == LOOT)
+    else if (isCustomFilter(ChannelMap))
     {
-        int index = ChannelMap - 0x1000000;
+        int index = ChannelMap - 0x10000;
         window = (int)&cf->extendedChannelMaps[index];
     }
 
