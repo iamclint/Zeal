@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "target_ring.h"
 #include "EqPackets.h"
 #include "Zeal.h"
@@ -5,6 +6,7 @@
 #include "string_util.h"
 #include "d3dx8\d3dx8.h"
 #include <random>
+#include <algorithm>
 #define NUM_VERTICES 4
 
 struct TextureVertex {
@@ -339,26 +341,28 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color, IDirect3DTexture
 	const float outerRadius = size;
 	const float angleStep = 2.0f * static_cast<float>(M_PI) / numSegments;  // Fixed truncation warning
 	int vertexIndex = 0;
-	const float terrain_height_threshold = 5.f;
-	Vec3 outerTerrainHeight;
-	Vec3 innerTerrainHeight;
+
 
 	TextureVertex* texture_vertices = new TextureVertex[numSegments * 2 + 2];
 	Vertex* solid_vertices = new Vertex[numSegments * 2 + 2];
-
-	for (int i = 0; i <= numSegments; ++i) {  // Use <= to include the last segment
+	Vec3 outerTerrainHeight, innerTerrainHeight;
+	for (int i = 0; i <= numSegments; ++i) {
 		float angle = (i * angleStep) + rotationAngle;
+		Vec2 outerRadiusVertex = { outerRadius * cosf(angle), outerRadius * sinf(angle) };
+		Vec2 innerRadiusVertex = { innerRadius * cosf(angle), innerRadius * sinf(angle) };
 
-		Vec2 outerRadiusVertex = { outerRadius * cosf(angle) , outerRadius * sinf(angle) };
-		Vec2 innerRadiusVertex = { innerRadius * cosf(angle) , innerRadius * sinf(angle) };
-		//float prev_outer_height = outerTerrainHeight.z;
-		//float prev_inner_height = innerTerrainHeight.z;
-		Zeal::EqGame::collide_with_world({ pos.x + outerRadiusVertex.x,pos.y + outerRadiusVertex.y, pos.z + (size*2) }, { pos.x + outerRadiusVertex.x,pos.y + outerRadiusVertex.y, pos.z - (size * 2) }, outerTerrainHeight);
-		Zeal::EqGame::collide_with_world({ pos.x + innerRadiusVertex.x,pos.y + innerRadiusVertex.y, pos.z + (size*2) }, { pos.x + innerRadiusVertex.x,pos.y + innerRadiusVertex.y, pos.z - (size * 2) }, innerTerrainHeight);
+		//// Collide with world to get terrain height (this looks great on slopes but steep drop offs and walls are terrible)
+		//Zeal::EqGame::collide_with_world({ pos.x + outerRadiusVertex.x, pos.y + outerRadiusVertex.y, pos.z + (size * 2) },
+		//	{ pos.x + outerRadiusVertex.x, pos.y + outerRadiusVertex.y, pos.z - (size * 2) },
+		//	outerTerrainHeight);
+		//Zeal::EqGame::collide_with_world({ pos.x + innerRadiusVertex.x, pos.y + innerRadiusVertex.y, pos.z + (size * 2) },
+		//	{ pos.x + innerRadiusVertex.x, pos.y + innerRadiusVertex.y, pos.z - (size * 2) },
+		//	innerTerrainHeight);
+
 		// Outer circle vertices
 		texture_vertices[vertexIndex].x = outerRadiusVertex.x;
 		texture_vertices[vertexIndex].y = outerRadiusVertex.y;
-		texture_vertices[vertexIndex].z = outerTerrainHeight.z - pos.z;
+		texture_vertices[vertexIndex].z = 1.f;// outerTerrainHeight.z - pos.z;
 		texture_vertices[vertexIndex].color = color;
 		texture_vertices[vertexIndex].u = 1.0f;
 		texture_vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
@@ -368,14 +372,13 @@ void TargetRing::render_ring(Vec3 pos, float size, DWORD color, IDirect3DTexture
 		// Inner circle vertices
 		texture_vertices[vertexIndex].x = innerRadiusVertex.x;
 		texture_vertices[vertexIndex].y = innerRadiusVertex.y;
-		texture_vertices[vertexIndex].z = innerTerrainHeight.z - pos.z;
+		texture_vertices[vertexIndex].z = 1.f;// innerTerrainHeight.z - pos.z;
 		texture_vertices[vertexIndex].color = color;
 		texture_vertices[vertexIndex].u = 0.0f;
 		texture_vertices[vertexIndex].v = 1.0f - (float)i / (float)numSegments;
 		solid_vertices[vertexIndex] = Vertex(texture_vertices[vertexIndex]);
 		vertexIndex++;
 	}
-
 	DWORD vertex_count = numSegments * 2 + 2;
 	// Create vertex buffers
 	
