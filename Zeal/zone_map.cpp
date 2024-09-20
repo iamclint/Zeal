@@ -7,9 +7,15 @@
 #include <fstream>
 #include <string>
 
+namespace {
+
 // Possible enhancements:
-// - Support a command for default small / med / large map sizes
+// - Current design was intended as a static background map with minimal use of modifying
+//   the D3D matrices or use of D3D clip planes, which is suboptimal for the always_center_align
+//   type of operation which requires frequent full map reloads
 // - Support 'windowed mode' (drag and drop, resizing)
+// - Support rendering outside of viewport
+// - Look into intermittent z-depth clipping due to walls or heads/faces
 
 static constexpr int kBackgroundCount = 2;  // Two triangles in split mode.
 static constexpr int kBackgroundVertices = 3 + (kBackgroundCount - 1);  // Two triangles using split.
@@ -17,13 +23,17 @@ static constexpr int kMarkerCount = 4;  // Four triangles.
 static constexpr int kPositionCount = 2;  // Two triangles.
 static constexpr int kPositionVertices = kPositionCount * 3; // Fixed triangle list.
 static constexpr int kMaxDynamicLabels = 10;
+static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * kPositionVertices
+                                            * (EQ_NUM_GROUP_MEMBERS + 1);
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 
-struct MapVertex {
-    float x, y, z, rhw;  // Position coordinates and rhw (D3DFVF_XYZRHW).
-    D3DCOLOR color; // Color from the D3DFVF_DIFFUSE flag.
-};
+// Group member position support.
+using GroupNameArrayType = char[0x40];
+using GroupEntityPtrArrayType = Zeal::EqStructures::Entity*;
+
+GroupEntityPtrArrayType* groupEntityPtrs = reinterpret_cast<GroupEntityPtrArrayType*>(0x7913F8);
+GroupNameArrayType* groupNames = reinterpret_cast<GroupNameArrayType*>(0x7912B5);
 
 struct TwoPoints {
     float x0, y0, x1, y1;  // Either line segment end or rect TL BR.
@@ -185,7 +195,7 @@ bool clip_line_segment(const TwoPoints& clip_rect, TwoPoints& line) {
         }
     }
 }
-
+}  // namespace
 
 void ZoneMap::render_release_resources() {
     if (line_vertex_buffer) {
@@ -259,25 +269,31 @@ void ZoneMap::render_load_map() {
     else  // Default left alignment.
         offset_x = rect_left - zone_map_data->min_x * scale_factor + kPadding;
 
-    // In certain modes force the position marker to be at the center of the rect.
-    bool align_to_center = always_align_to_center ||
-                            (zoom_recenter_zone_id == zone_id && zoom_factor > 1.f);
+    bool align_to_center = always_align_to_center;
+    if (!align_to_center && zoom_factor > 1.f) {
+        // Initially set offset so the screen position doesn't change and then
+        // perform the check to see if it needs to recenter.
+        offset_x = screen_position_x - position_x * scale_factor;
+        offset_y = screen_position_y - position_y * scale_factor;
+        align_to_center = render_check_for_zoom_recenter();
+    }
+
     if (align_to_center) {
         screen_position_x = (rect_left + rect_right) * 0.5;
         screen_position_y = (rect_bottom + rect_top) * 0.5;
-    }
-    zoom_recenter_zone_id = kInvalidZoneId;
-
-    if (align_to_center || zoom_factor > 1.f) {
         offset_x = screen_position_x - position_x * scale_factor;
         offset_y = screen_position_y - position_y * scale_factor;
     }
 
     // Clip the background (and lines) to the available map data. Add a padding of 1.
-    clip_rect_left = max(rect_left, zone_map_data->min_x * scale_factor + offset_x - kPadding);
-    clip_rect_right = min(rect_right, zone_map_data->max_x * scale_factor + offset_x + kPadding);
-    clip_rect_top = max(rect_top, zone_map_data->min_y * scale_factor + offset_y - kPadding);
-    clip_rect_bottom = min(rect_bottom, zone_map_data->max_y * scale_factor + offset_y + kPadding);
+    clip_rect_left = min(rect_right,
+        max(rect_left, zone_map_data->min_x * scale_factor + offset_x - kPadding));
+    clip_rect_right = max(clip_rect_left,
+        min(rect_right, zone_map_data->max_x * scale_factor + offset_x + kPadding));
+    clip_rect_top = min(rect_bottom,
+        max(rect_top, zone_map_data->min_y * scale_factor + offset_y - kPadding));
+    clip_rect_bottom = max(clip_rect_top,
+        min(rect_bottom, zone_map_data->max_y * scale_factor + offset_y + kPadding));
 
     const int kMaxLineCount = zone_map_data->num_lines;  // Allocate a buffer assuming all visible.
     std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(kMaxLineCount * 2);
@@ -364,8 +380,7 @@ void ZoneMap::render_load_map() {
     line_vertex_buffer->Unlock();
 
     // Create a worst-case sized Vertex buffer for live position updates.
-    int position_buffer_size = sizeof(MapVertex) * kPositionVertices;
-    if (FAILED(device->CreateVertexBuffer(position_buffer_size,
+    if (FAILED(device->CreateVertexBuffer(kPositionBufferSize,
         D3DUSAGE_WRITEONLY,
         kMapVertexFvfCode,
         D3DPOOL_MANAGED,
@@ -587,25 +602,12 @@ void ZoneMap::render_label_text(const char * label, int y, int x, D3DCOLOR font_
     label_font->DrawTextA(label, length, &text_rect, DT_VCENTER | DT_CENTER | DT_SINGLELINE, font_color);
 }
 
-int ZoneMap::render_update_position_buffer() {
-    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (!position_vertex_buffer || !self) {
-        return 0;
-    }
 
-    // Translate loc (world) coordinates to screen coordinates. Note that the game
-    // world coordinates are negated (polarity flipped) to match the map data.
-    Vec3 position = self->Position;
-    float screen_y = -position.x * scale_factor + offset_y;  // Note position is y,x,z.
-    float screen_x = -position.y * scale_factor + offset_x;
-
-    // Generate the vertices for two triangles that makeup the target.
-    float size = position_size * min(viewport.Width, viewport.Height);
-    size = max(5.f, size);  // Constrain so it remains visible.
+void ZoneMap::add_position_marker_vertices(float screen_y, float screen_x, float heading, float size,
+                                    D3DCOLOR color, std::vector<MapVertex>& vertices) const {
 
     // Heading: 0 = N = -y, 128 = W = -x, 256 = S = +y, 384 = E = +x.
     // So: Screen x tracks -sin(heading) and y tracks -cos(heading).
-    float heading = self->Heading;
     float direction = static_cast<float>(heading * M_PI / 256); // In radians.
     const float rotation = static_cast<float>(135 * M_PI / 180);
     float cos_theta0 = cosf(direction);
@@ -618,16 +620,10 @@ int ZoneMap::render_update_position_buffer() {
     Vec3 vertex0 = { -sin_theta0 * size, -cos_theta0 * size, 0 };
     Vec3 vertex1 = { -sin_theta1 * size, -cos_theta1 * size, 0 };
     Vec3 vertex2 = { -sin_theta2 * size, -cos_theta2 * size, 0 };
-    Vec3 vertex3 = { -vertex0.x/8, -vertex0.y/8, 0 };
+    Vec3 vertex3 = { -vertex0.x / 8, -vertex0.y / 8, 0 };
 
     Vec3 symbol[kPositionVertices] = { vertex0, vertex1, vertex3,
-        vertex0, vertex3, vertex2};
-
-    // Use default cursor color if levels not active or within the z clipping range.
-    bool use_default_color = (map_level_zone_id != zone_id) ||
-                (position.z >= clip_min_z && position.z <= clip_max_z);
-    auto color = use_default_color ? D3DCOLOR_XRGB(250, 250, 51) : // Lemon yellow
-        D3DCOLOR_XRGB(195, 176, 145); // Lemon khaki.
+        vertex0, vertex3, vertex2 };
 
     // Allow the position marker to exceed the rect limits by size but must stay on screen.
     const int view_left = viewport.X;
@@ -640,42 +636,75 @@ int ZoneMap::render_update_position_buffer() {
     const float clip_bottom = min(clip_rect_bottom + size, view_bottom);
     MapVertex position_vertices[kPositionVertices];
     for (int i = 0; i < kPositionVertices; ++i) {
-        position_vertices[i].x = max(clip_left, min(clip_right, symbol[i].x + screen_x));
-        position_vertices[i].y = max(clip_top, min(clip_bottom, symbol[i].y + screen_y));
-        position_vertices[i].z = 0.5f;
-        position_vertices[i].rhw = 1.f;
-        position_vertices[i].color = color;
+        vertices.push_back(MapVertex{
+                .x = max(clip_left, min(clip_right, symbol[i].x + screen_x)),
+                .y = max(clip_top, min(clip_bottom, symbol[i].y + screen_y)),
+                .z = 0.5f,
+                .rhw = 1.f,
+                .color = color
+            });
+    }
+}
+
+void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertices) const {
+    if (!map_show_group)
+        return;
+
+    const float kShrinkFactor = 0.8f;  // Make group members 20% smaller.
+    float size = position_size * min(viewport.Width, viewport.Height) * kShrinkFactor;
+    size = max(5.f, size);  // Constrain so it remains visible.
+
+    const D3DCOLOR kGroupColorLut[EQ_NUM_GROUP_MEMBERS] = {
+        D3DCOLOR_XRGB(255, 0, 0),  // Red
+        D3DCOLOR_XRGB(255, 165, 0), // Orange
+        D3DCOLOR_XRGB(102, 255, 102),  // Green
+        D3DCOLOR_XRGB(153, 204, 255),  // Blue
+        D3DCOLOR_XRGB(104, 153, 255),  // Purple (violet)
+    };
+
+    for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
+        Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
+        if ((strlen(groupNames[i]) == 0) || !member)
+            continue;  // Not a valid group member.
+
+        float screen_y = -member->Position.x * scale_factor + offset_y;  // Position is y,x,z.
+        float screen_x = -member->Position.y * scale_factor + offset_x;
+        add_position_marker_vertices(screen_y, screen_x, member->Heading, size,
+            kGroupColorLut[i], vertices);
+    }
+}
+
+int ZoneMap::render_update_position_buffer() {
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (!position_vertex_buffer || !self) {
+        return 0;
     }
 
-    if (zoom_factor > 1.f) {
-        // Trigger a re-centering if:
-        // (1) within 20% of an edge and that edge isn't already
-        //    at the maximum of the map data and movement in that direction
-        // (2) or recenter if the screen x,y is outside the clip_rect (fallback case)
-        float delta_y = -self->MovementSpeedY;  // World direction is negated.
-        float delta_x = -self->MovementSpeedX;
+    // Populate a vector with D3DPT_TRIANGLELIST vertices.
+    std::vector<MapVertex> position_vertices;
+    add_group_member_position_vertices(position_vertices);
 
-        const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
-        float vertical_limit = (clip_rect_bottom - clip_rect_top) * 0.20f;
-        float map_top = zone_map_data->min_y * scale_factor + offset_y;
-        bool trigger = ((delta_y < 0) && (screen_y - clip_rect_top < vertical_limit) &&
-            (clip_rect_top > map_top)) || (screen_y < clip_rect_top);
-        float map_bottom = zone_map_data->max_y * scale_factor + offset_y;
-        trigger = trigger || ((delta_y > 0) && (clip_rect_bottom - screen_y < vertical_limit) &&
-            (clip_rect_bottom < map_bottom)) || (screen_y > clip_rect_bottom);
-        float horizontal_limit = (clip_rect_right - clip_rect_left) * 0.20f;
-        float map_left = zone_map_data->min_x * scale_factor + offset_x;
-        trigger = trigger || ((delta_x < 0) && (screen_x - clip_rect_left < horizontal_limit) &&
-            (clip_rect_left > map_left)) || (screen_x < clip_rect_left);
-        float map_right = zone_map_data->max_x * scale_factor + offset_x;
-        trigger = trigger || ((delta_x > 0) && (clip_rect_right - screen_x < horizontal_limit) &&
-            (clip_rect_right < map_right)) || (screen_x > clip_rect_right);
+    // Translate loc (world) coordinates to screen coordinates. Note that the game
+    // world coordinates are negated (polarity flipped) to match the map data.
+    Vec3 position = self->Position;
+    float screen_y = -position.x * scale_factor + offset_y;  // Note position is y,x,z.
+    float screen_x = -position.y * scale_factor + offset_x;
 
-        if (trigger) {
-            zoom_recenter_zone_id = zone_id;  // Arm it to re-center the zoom region.
-            zone_id = kInvalidZoneId; // Triggers the update.
-        }
-    }
+    float size = position_size * min(viewport.Width, viewport.Height);
+    size = max(5.f, size);  // Constrain so it remains visible.
+
+    // Use default cursor color if levels not active or within the z clipping range.
+    bool use_default_color = (map_level_zone_id != zone_id) ||
+                (position.z >= clip_min_z && position.z <= clip_max_z);
+    auto color = use_default_color ? D3DCOLOR_XRGB(250, 250, 51) : // Lemon yellow
+        D3DCOLOR_XRGB(195, 176, 145); // Lemon khaki.
+
+    add_position_marker_vertices(screen_y, screen_x, self->Heading, size,
+        color, position_vertices);
+
+    int copy_size = position_vertices.size() * sizeof(position_vertices[0]);
+    if (copy_size > kPositionBufferSize)
+        return 0; // Error. Don't overrun buffer, just hide the markers.
 
     BYTE* data = nullptr;
     if (FAILED(position_vertex_buffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
@@ -683,11 +712,49 @@ int ZoneMap::render_update_position_buffer() {
         position_vertex_buffer = nullptr;
         return 0;
     }
-    int position_buffer_size = sizeof(MapVertex) * kPositionVertices;
-    memcpy(data, position_vertices, position_buffer_size);
+    memcpy(data, position_vertices.data(), copy_size);
     position_vertex_buffer->Unlock();
 
-    return kPositionCount;
+    return position_vertices.size() / 3;  // Three vertices per triagle in D3DPT_TRIANGLELIST.
+}
+
+bool ZoneMap::render_check_for_zoom_recenter() {
+    if (always_align_to_center)
+        return true;
+
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (zone_id == kInvalidZoneId || zoom_factor <= 1.f || !self)
+        return false;
+
+    // Trigger a re-centering in zoom if:
+    // (1) the marker position is within 20% of an edge and that edge isn't already
+    //    at the maximum of the map data and there is movement in that direction
+    // (2) or recenter if the screen x,y is outside the clip_rect (fallback case)
+    float delta_y = -self->MovementSpeedY;  // World direction is negated.
+    float delta_x = -self->MovementSpeedX;
+
+    // Translate loc (world) coordinates to screen coordinates. Note that the game
+    // world coordinates are negated (polarity flipped) to match the map data.
+    float screen_y = -self->Position.x * scale_factor + offset_y;  // Note position is y,x,z.
+    float screen_x = -self->Position.y * scale_factor + offset_x;
+
+    const ZoneMapData* zone_map_data = get_zone_map(zone_id);
+    float vertical_limit = (clip_rect_bottom - clip_rect_top) * 0.20f;
+    float map_top = zone_map_data->min_y * scale_factor + offset_y;
+    bool trigger = ((delta_y < 0) && (screen_y - clip_rect_top < vertical_limit) &&
+        (clip_rect_top > map_top)) || (screen_y < clip_rect_top);
+    float map_bottom = zone_map_data->max_y * scale_factor + offset_y;
+    trigger = trigger || ((delta_y > 0) && (clip_rect_bottom - screen_y < vertical_limit) &&
+        (clip_rect_bottom < map_bottom)) || (screen_y > clip_rect_bottom);
+    float horizontal_limit = (clip_rect_right - clip_rect_left) * 0.20f;
+    float map_left = zone_map_data->min_x * scale_factor + offset_x;
+    trigger = trigger || ((delta_x < 0) && (screen_x - clip_rect_left < horizontal_limit) &&
+        (clip_rect_left > map_left)) || (screen_x < clip_rect_left);
+    float map_right = zone_map_data->max_x * scale_factor + offset_x;
+    trigger = trigger || ((delta_x > 0) && (clip_rect_right - screen_x < horizontal_limit) &&
+        (clip_rect_right < map_right)) || (screen_x > clip_rect_right);
+
+    return trigger;
 }
 
 void ZoneMap::render_update_marker_buffer() {
@@ -761,7 +828,8 @@ void ZoneMap::callback_render()
         return;
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (zone_id != self->ZoneId || (always_align_to_center && self->MovementSpeed > 0)) {
+    if (zone_id != self->ZoneId || (always_align_to_center && self->MovementSpeed > 0) 
+        || render_check_for_zoom_recenter()) {
         zone_id = self->ZoneId;
         render_load_map();
     }
@@ -890,6 +958,7 @@ bool ZoneMap::add_map_data_from_file(const std::string& filename, CustomMapData&
         }
         else if (sscanf_s(line.c_str(), "P %f, %f, %f, %u, %u, %u, %i, %s",
             &x0, &y0, &z1, &red, &green, &blue, &dummy, buffer, sizeof(buffer)) == 8) {
+            buffer[sizeof(buffer) - 1] = 0; // Guarantee null-termination.
             map_data.label_strings.emplace_back(std::string(buffer));
             map_data.labels.emplace_back(static_cast<int>(x0 + 0.5f),
                 static_cast<int>(y0 + 0.5f), static_cast<int>(z0 + 0.5f),
@@ -963,6 +1032,18 @@ void ZoneMap::set_enabled(bool _enabled, bool update_default)
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapEnabled", enabled);
+
+    update_ui_options();
+}
+
+void ZoneMap::set_show_group(bool enable, bool update_default) {
+    if (map_show_group != enable) {
+        map_show_group = enable;
+        zone_id = kInvalidZoneId;  // Triggers reload.
+    }
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapShowGroup", map_show_group);
 
     update_ui_options();
 }
@@ -1137,6 +1218,8 @@ void ZoneMap::load_ini(IO_ini* ini)
 {
     if (!ini->exists("Zeal", "MapEnabled"))
         ini->setValue<bool>("Zeal", "MapEnabled", false);
+    if (!ini->exists("Zeal", "MapShowGroup"))
+        ini->setValue<bool>("Zeal", "MapShowGroup", true);
     if (!ini->exists("Zeal", "MapDataMode"))
         ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(MapDataMode::kInternal));
     if (!ini->exists("Zeal", "MapBackgroundState"))
@@ -1162,6 +1245,7 @@ void ZoneMap::load_ini(IO_ini* ini)
 
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
     enabled = ini->getValue<bool>("Zeal", "MapEnabled");
+    map_show_group = ini->getValue<bool>("Zeal", "MapShowGroup");
     map_data_mode = MapDataMode::e(ini->getValue<int>("Zeal", "MapDataMode"));
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
     map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
@@ -1201,6 +1285,7 @@ void ZoneMap::save_ini()
         return;
 
     ini->setValue<bool>("Zeal", "MapEnabled", enabled);
+    ini->setValue<bool>("Zeal", "MapShowGroup", map_show_group);
     ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(map_data_mode));
     ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
     ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
@@ -1371,6 +1456,11 @@ void ZoneMap::parse_map_data_mode(const std::vector<std::string>& args) {
     if ((mode < MapDataMode::kFirst) || !set_map_data_mode(mode, false)) {
         Zeal::EqGame::print_chat("Usage: /map data_mode internal, both, external");
     }
+}
+
+void ZoneMap::parse_show_group(const std::vector<std::string>& args) {
+    set_show_group(!is_show_group_enabled(), false);
+    Zeal::EqGame::print_chat("Showing group members is %s", is_show_group_enabled() ? "ON" : "OFF");
 }
 
 void ZoneMap::parse_marker(const std::vector<std::string>& args) {
@@ -1597,7 +1687,7 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
     Zeal::EqGame::print_chat("level: zone: %i, index: %i, z_max: %i, z_min: %i", map_level_zone_id, map_level_index, clip_max_z, clip_min_z);
-    Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, zoom_id: %i", position_size, marker_size, zoom_recenter_zone_id);
+    Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, show_group: %i", position_size, marker_size, map_show_group);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f", scale_factor, offset_y, offset_x, zoom_factor);
     Zeal::EqGame::print_chat("dyn_labels_size: %i, dyn_labels_zone_id: %i, data_mode: %i, data_cache: %i", 
         dynamic_labels_list.size(), dynamic_labels_zone_id, map_data_mode, map_data_cache.size());
@@ -1645,6 +1735,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "data_mode") {
         parse_map_data_mode(args);
     }
+    else if (args[1] == "show_group") {
+        parse_show_group(args);
+    }
     else if (args[1] == "save_ini") {
         Zeal::EqGame::print_chat("Saving current map settings");
         save_ini();
@@ -1656,7 +1749,7 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
         dump();
     }
     else if (!parse_shortcuts(args)) {
-        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level|save_ini]");
+        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level|show_group|save_ini]");
         Zeal::EqGame::print_chat("Beta: /map [data_mode|always_center]");
         Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
@@ -1667,7 +1760,6 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
 void ZoneMap::callback_zone() {
     zone_id = kInvalidZoneId;
     marker_zone_id = kInvalidZoneId;
-    zoom_recenter_zone_id = kInvalidZoneId;
     dynamic_labels_zone_id = kInvalidZoneId;
     map_level_zone_id = kInvalidZoneId;
     map_level_index = 0;

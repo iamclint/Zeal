@@ -13,6 +13,11 @@
 class ZoneMap
 {
 public:
+	struct MapVertex {
+		float x, y, z, rhw;  // Position coordinates and rhw (D3DFVF_XYZRHW).
+		D3DCOLOR color; // Color from the D3DFVF_DIFFUSE flag.
+	};
+
 	struct AlignmentType { enum e : int { kLeft = 0, kCenter, kRight, kFirst = kLeft, kLast = kRight }; };
 	struct BackgroundType { enum e : int { kClear = 0, kDark, kLight, kTan, kFirst = kClear, kLast = kTan }; };
 	struct LabelsMode { enum e : int { kOff = 0, kSummary, kAll, kFirst = kOff, kLast = kAll }; };
@@ -29,6 +34,7 @@ public:
 	// Setting update_default stores to the ini. All trigger a ui_options update.
 	bool is_enabled() const { return enabled; }
 	void set_enabled(bool enable, bool update_default = false);
+	void set_show_group(bool enable, bool update_default = true);
 	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
 	bool set_background_alpha(int percent, bool update_default = true);
@@ -44,6 +50,7 @@ public:
 	bool set_marker_size(int new_size_percent, bool update_default = true);
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
 
+	bool is_show_group_enabled() const { return map_show_group; }
 	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
 	int get_background() const { return static_cast<int>(map_background_state); }
 	int get_background_alpha() const { return static_cast<int>(map_background_alpha * 100 + 0.5f); }
@@ -110,6 +117,7 @@ private:
 	void parse_labels(const std::vector<std::string>& args);
 	void parse_level(const std::vector<std::string>& args);
 	void parse_map_data_mode(const std::vector<std::string>& args);
+	void parse_show_group(const std::vector<std::string>& args);
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
 	void set_marker(int y, int x);
@@ -136,6 +144,10 @@ private:
 	void render_update_marker_buffer();
 	void render_labels();
 	void render_label_text(const char* label, int y, int x, D3DCOLOR font_color);
+	bool render_check_for_zoom_recenter();
+	void add_position_marker_vertices(float screen_y, float screen_x, float heading, float size,
+		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
+	void add_group_member_position_vertices(std::vector<MapVertex>& vertices) const;
 
 	const ZoneMapData* get_zone_map(int zone_id);
 	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
@@ -143,6 +155,7 @@ private:
 	void assemble_zone_map(const char* zone_name, CustomMapData& map_data);
 
 	bool enabled = false;
+	bool map_show_group = false;
 	BackgroundType::e map_background_state = BackgroundType::kClear;
 	float map_background_alpha = kDefaultBackgroundAlpha;
 	AlignmentType::e map_alignment_state = AlignmentType::kFirst;
@@ -150,7 +163,6 @@ private:
 	MapDataMode::e map_data_mode = MapDataMode::kInternal;
 	int zone_id = kInvalidZoneId;
 	int marker_zone_id = kInvalidZoneId;
-	int zoom_recenter_zone_id = kInvalidZoneId;
 	bool always_align_to_center = false;
 	int marker_x = 0;
 	int marker_y = 0;
