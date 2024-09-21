@@ -665,7 +665,7 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
         if ((strlen(groupNames[i]) == 0) || !member)
-            continue;  // Not a valid group member.
+            continue;  // Not a valid group member (or member = nullptr when out of zone).
 
         float screen_y = -member->Position.x * scale_factor + offset_y;  // Position is y,x,z.
         float screen_x = -member->Position.y * scale_factor + offset_x;
