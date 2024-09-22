@@ -15,7 +15,7 @@ from the repo using github actions, providing clear transparency on the contents
 - Additional commands (melody, useitem, autoinventory)
 - Additional ui support (new gauges, bag control, looting, spellsets, targetrings)
 - Third party tool support (silent log messages, direct ZealPipes)
-- Integrated (in-game) map
+- Integrated map (see In-game Map section below)
 - Various bug fixes
 - Unique npc naming for better parsing
 
@@ -124,19 +124,8 @@ ___
 
 - `/map`
   - **Arguments:** `on`, `off`, `size`, `alignment`, `marker`, `background`, `zoom`, `poi`, `labels`, `level`
-  - **Example:** `/map` toggles map on and off
-  - **Example:** `/map marker 500 -100` sets a target marker at loc 500, -100 (default size)
-  - **Example:** `/map marker 500 -100 3` sets a target marker at loc 500, -100 with size = 3% of screen
-  - **Example:** `/map 500 -100` shortcut for map marker 500 -100
-  - **Example:** `/map 0` shortcut for map marker 0 0 0 (clears marker)
-  - **Example:** `/map zoom 200` sets map scaling to 200% (2x)
-  - **Example:** `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of screen dimensions
-  - **Example:** `/map alignment center` aligns the aspect ratio constrained map to the top center of the window
-  - **Example:** `/map poi` lists points of interest, use `/map poi 2` to drop marker at index [2] of list
-  - **Example:** `/map search_term` searches poi list for 'search_term' and drops a marker at first match
-  - **Example:** `/map labels summary` adds a selected summary list of poi text labels to the map
-  - **Example:** `/map data_mode external` loads external custom map files (Brewall format) from map_files directory
-  - **Description:** controls map enable, size, and markers
+  - **Example:** See In-game map section below
+  - **Description:** controls map enable, size, labels, zoom, and markers
     
 - `/pandelay`
   - **Arguments:** `ms delay`, `none`
@@ -301,4 +290,131 @@ ___
 #### Local builds
 Build in 32bit x86 mode using Microsoft Visual Studio 2022 (free Community edition works)
 
+
+### In-game Map
+#### Setup and configuration
+Zeal 4.0 and later includes an integrated in-game map that contains the map data for
+all zones through Planes of Power. The map is drawn into the game's DirectX viewport
+as part of the rendering sequence and is currently not 'clickable'.
+
+The map is controlled through three interfaces:
+* Dedicated EQ options window tab (requires `EQUI_Options.xml`, see Installation notes above)
+* Key binds for frequent map actions (configure in Options->Keyboard->UI)
+* The /map command
+
+The default map settings are stored in the EQClient.ini file of the root Everquest directory.
+The defaults are updated when adjusting settings in the EQ options tab. The key binds and
+/map commands are temporary changes unless the `/map save_ini` command is used.
+
+It is recommended to use the Options tab to adjust the basic map settings to the preferred
+defaults (size, position, background, marker sizes) and then use the keybinds for more
+frequent map adjustments (on/off, toggle zoom, toggle backgrounds, toggle labels,
+toggle visible levels).  The /map commands include extra options like poi search.
+
+#### Enabling the map
+* UI options checkbox
+* Key bind: "Toggle Map" - Toggles map on and off
+* Command examples:
+  - `/map` - Toggles map on and off
+  - `/map on` - Turns map on
+  - `/map off` - Turns map off
+
+#### Map size, position, and alignment
+The map is drawn to fit within rectangular limits view defined by a top left corner,
+a height, and a width. The zones have different aspect ratios, so some zones will scale
+to fill the height and others the width.  The alignment setting controls where
+the map goes when it is height constrained (top left, top center, top right).
+
+* UI options sliders for top, left, height, and width and a combobox for alignment
+* Command examples:
+  - `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of screen dimensions
+  - `/map alignment center` aligns the aspect ratio constrained map to the top center of the window
+
+#### Map background
+The map supports four different options for the map background for contrast enhancement:
+clear (0) , dark (1), light (2), or tan (3).  Additionally, it supports alpha transparency.
+
+* UI options combo box for map background and slider for setting alpha as a percent
+* Key bind: "Toggle Map Background" - toggles through the four settings
+* Command examples:
+  - `/map background 1` sets the background to dark with no change to alpha
+  - `/map background 2 40` sets the background to light with 40% alpha
+
+#### Map zoom
+The default 100% map scale makes the entire zone visible sized to the height or width constraint.
+In zoom, the map draws all available data that fits within the rectangular viewport. The 
+view re-centers when the position marker is within 20% of an edge and moving towards that edge.
+
+* UI options slider
+* Key bind: "Toggle Map Zoom" - toggles through 100%, 200%, 400%, 800% zoom
+* Command examples:
+  - `/map zoom 200` sets map scaling to 200% (2x)
+
+#### Showing group members
+The map supports showing the live position of other group members. The group members are colored
+in this order relative to their group listing: red, orange, green, blue, purple.
+
+* UI options checkbox to enable / disable
+* Command examples:
+  - `/map show_group` toggles it on and off
+
+#### Showing map levels
+The map supports showing different levels based on the Brewall map color standards. Not all of
+the zones are properly colored, but it does work well in some of the 3-D overlapping zones.
+
+* Key bind: "Toggle Map Level Up", "Toggle Map Level Down" - toggles up or down the visible level
+* Command examples:
+  - `/map level` shows the current zone's map data level info
+  - `/map level 0` shows default of all levels
+  - `/map level 2` shows the current zone's level 2 data
+
+#### Position marker
+The map supports adding a position marker to easier identification of target coordinates.
+
+* UI options slider to adjust the marker size
+* Command examples:
+  - `/map marker 1100 -500` sets a map marker at /loc of 1100, -500
+  - `/map 1100 -500` is a shortcut for the command above to set a marker at 1100, -500
+  - `/map marker` clears the marker
+  - `/map 0` is a shortcut for clearing the marker
+
+#### Map points of interest (poi), labels, and search
+The map supports listing the available points of interest and adding them as labels to the map.
+
+Note that DirectX rendering of text is slow and this is unoptimized, so using the all setting
+for the labels can have a significant framerate impact (use keybind to toggle on and off).
+
+* UI combobox for setting the labels mode (off, summary, all)
+* Key bind: "Toggle Map Labels" - toggles through the labels modes
+* Command examples:
+  - `/map poi` lists the available poi's, including their indices
+  - `/map poi 4` drops a marker on index [4] of the `/map poi` list
+  - `/map poi butcherblock` performs a text search of the poi list for butcherblock, reports 
+     any matches, and drops a marker on the first one
+  - `/map butcherblock` shortcut for above (does not work for terms that match other commands)
+  - `/map labels summary` enables the summary labels (other options are `off` or `all`)
+
+#### Map data source
+The map has simple support for external map data files. The map data_mode can be set to `internal`,
+`both`, or `external`. In `both`, the internal maps are combined with any available data from an
+external file for that zone. In `external`, the internal map data for the zone is ignored if
+external file data exists for that zone. In all cases internal data is used if external data is
+not present.
+
+Note that some features, such as level recognition, are not currently supported with external data.
+
+The external map files must be placed in a `map_files` directory in the root everquest directory
+with zones named to match their short names (ie `map_files/commons.txt` contains the data for
+West Commonlands).  An optional, `_1.txt` file (ie `map_files/commons_1.txt`) will also be
+parsed if present, so Brewall map files with POIs can be directly dropped in.
+
+The external map support requires a format compatible with Brewall map data.
+```
+L x0, y0, z0, x1, y1, z1, red, green, blue
+P x, y, z, red, green, blue, ignored, label_string
+```
+
+* Command examples:
+  - `/map data_mode both` adds external zone map file data if present to internal maps
+  - `/map data_mode external` uses external zone map files if present to replace internal maps
 

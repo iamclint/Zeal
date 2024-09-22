@@ -5506,6 +5506,37 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+  <!-- Zeal Map On/Off-->
+  <Button item="Zeal_MapShowGroup">
+    <ScreenID>Zeal_MapShowGroup</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>252</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Shows group members on map</TooltipReference>
+    <Text>Show Group</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <!-- Zeal Map Left -->
   <Label item="Zeal_MapLeft_Label">
     <ScreenID>Zeal_MapLeft_Label</ScreenID>
@@ -6050,7 +6081,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>268</Y>
+      <Y>282</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -6133,6 +6164,7 @@
     </TabTextActiveColor>
     <Style_Sizable>true</Style_Sizable>
     <Pieces>Zeal_Map</Pieces>
+    <Pieces>Zeal_MapShowGroup</Pieces>
     <Pieces>Zeal_MapLeft_Label</Pieces>
     <Pieces>Zeal_MapLeft_Slider</Pieces>
     <Pieces>Zeal_MapLeft_Value</Pieces>
