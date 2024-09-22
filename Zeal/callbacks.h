@@ -1,4 +1,5 @@
 #pragma once
+#include "EqStructures.h"
 #include "hook_wrapper.h"
 #include "memory.h"
 #include <functional>
@@ -21,6 +22,8 @@ enum class callback_type
 	AddDeferred,
 	DXReset,
 	DXResetComplete,
+	EntitySpawn,
+	EntityDespawn
 };
 class CallbackManager
 {
@@ -29,6 +32,8 @@ public:
 	void AddPacket(std::function<bool(UINT, char*, UINT)> callback_function, callback_type fn = callback_type::WorldMessage);
 	void AddCommand(std::function<bool(UINT, BOOL)> callback_function, callback_type fn = callback_type::ExecuteCmd);
 	void AddDelayed(std::function<void()> callback_function, int ms);
+	void AddEntity(std::function<void(struct Zeal::EqStructures::Entity*)> callback_function, callback_type cb);
+	void invoke_player(struct Zeal::EqStructures::Entity* ent, callback_type cb);
 	void invoke_generic(callback_type fn);
 	bool invoke_packet(callback_type fn, UINT opcode, char* buffer, UINT len);
 	bool invoke_command(callback_type fn, UINT opcode, bool state);
@@ -41,5 +46,6 @@ private:
 	std::unordered_map<callback_type, std::vector<std::function<void()>>> generic_functions;
 	std::unordered_map<callback_type, std::vector<std::function<bool(UINT, char*, UINT)>>> packet_functions;
 	std::unordered_map<callback_type, std::vector<std::function<bool(UINT, BOOL)>>> cmd_functions;
+	std::unordered_map<callback_type, std::vector<std::function<void(struct Zeal::EqStructures::Entity*)>>> player_spawn_functions;
 };
 

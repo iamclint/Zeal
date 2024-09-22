@@ -222,11 +222,14 @@
     <ClInclude Include="zone_map_data.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
-    <ClInclude Include="Zeal.h">
-      <Filter>Header Files\ui</Filter>
-    </ClInclude>
     <ClInclude Include="ui_group.h">
       <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Zeal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityManager.h">
+      <Filter>Header Files\other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -385,6 +388,9 @@
     </ClCompile>
     <ClCompile Include="ui_group.cpp">
       <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityManager.cpp">
+      <Filter>Source Files\other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

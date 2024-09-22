@@ -100,6 +100,18 @@ void ui_manager::SetSliderValue(std::string name, float value)
 		ZealService::get_instance()->hooks->hook_map["SetSliderValue"]->original(SetSliderValue_hook)(slider_names[name], 0, static_cast<int>(value));
 	}
 }
+
+void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::string> data)
+{
+
+	for (int row = 0; auto & current_row : data)
+	{
+		int x = wnd->AddString("");
+		wnd->SetItemText(current_row, row, 0);
+		wnd->SetItemData(row);
+		row++;
+	}
+}
 void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>>data)
 {
 

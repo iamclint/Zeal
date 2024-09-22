@@ -262,6 +262,7 @@ namespace Zeal
 
 				struct pCXSTR* SidlText;
 				DWORD Items;
+				struct ListWnd* CmbListWnd;
 			};
 			/*0x100*/   union {
 
@@ -314,6 +315,13 @@ namespace Zeal
 			BYTE GetType(int button_index) { return *(BYTE*)(0x7f6862 + (button_index + (GetPage() * 0xA))); }
 		};
 
+		struct ComboWnd : EQWND
+		{
+			void DeleteAll()
+			{
+				reinterpret_cast<int(__thiscall*)(const ComboWnd*)>(0x5a18e0)(this);
+			}
+		};
 		struct ListWnd : EQWND
 		{
 			ListWnd() {};

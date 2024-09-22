@@ -36,6 +36,7 @@ ZealService::ZealService()
 	nameplate = std::make_shared<NamePlate>(this, ini.get());
 	tells = std::make_shared<TellWindows>(this, ini.get());
 
+	entity_manager = std::make_shared<EntityManager>(this, ini.get());
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());
 	cycle_target = std::make_shared<CycleTarget>(this);
 	experience = std::make_shared<Experience>(this);
@@ -51,6 +52,7 @@ ZealService::ZealService()
 	physics = std::make_shared<Physics>(this, ini.get());
 	target_ring = std::make_shared<TargetRing>(this, ini.get());
 	zone_map = std::make_shared<ZoneMap>(this, ini.get());
+	
 	this->basic_binds();
 }
 

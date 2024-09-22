@@ -40,6 +40,7 @@
 #include "target_ring.h"
 #include "zone_map.h"
 #include "crash_handler.h"
+#include "EntityManager.h"
 #include "patches.h"
 
 #include "Zeal.h" 

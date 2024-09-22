@@ -42,6 +42,7 @@ void ui_options::InitUI()
 	ui->AddComboCallback(Zeal::EqGame::Windows->Options, "Zeal_MapBackground_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_background(value); });
 	ui->AddComboCallback(Zeal::EqGame::Windows->Options, "Zeal_MapAlignment_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_alignment(value); });
 	ui->AddComboCallback(Zeal::EqGame::Windows->Options, "Zeal_MapLabels_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_labels_mode(value); });
+	ui->AddComboCallback(Zeal::EqGame::Windows->Options, "Zeal_TargetRingTexture_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { });
 	ui->AddSliderCallback(Zeal::EqGame::Windows->Options, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->set_pan_delay(value*4); 
 		ui->SetLabelValue("Zeal_PanDelayValueLabel", "%d ms", ZealService::get_instance()->camera_mods->pan_delay);
