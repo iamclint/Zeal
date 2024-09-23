@@ -35,6 +35,7 @@ public:
 	bool is_enabled() const { return enabled; }
 	void set_enabled(bool enable, bool update_default = false);
 	void set_show_group(bool enable, bool update_default = true);
+	void set_show_raid(bool enable, bool update_default = true);
 	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
 	bool set_background_alpha(int percent, bool update_default = true);
@@ -51,6 +52,7 @@ public:
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
 
 	bool is_show_group_enabled() const { return map_show_group; }
+	bool is_show_raid_enabled() const { return map_show_raid; }
 	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
 	int get_background() const { return static_cast<int>(map_background_state); }
 	int get_background_alpha() const { return static_cast<int>(map_background_alpha * 100 + 0.5f); }
@@ -118,6 +120,7 @@ private:
 	void parse_level(const std::vector<std::string>& args);
 	void parse_map_data_mode(const std::vector<std::string>& args);
 	void parse_show_group(const std::vector<std::string>& args);
+	void parse_show_raid(const std::vector<std::string>& args);
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
 	void set_marker(int y, int x);
@@ -148,6 +151,9 @@ private:
 	void add_position_marker_vertices(float screen_y, float screen_x, float heading, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 	void add_group_member_position_vertices(std::vector<MapVertex>& vertices) const;
+	void add_raid_member_position_vertices(std::vector<MapVertex>& vertices) const;
+	void add_raid_marker_vertices(float screen_y, float screen_x, float size,
+		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 
 	const ZoneMapData* get_zone_map(int zone_id);
 	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
@@ -156,6 +162,7 @@ private:
 
 	bool enabled = false;
 	bool map_show_group = false;
+	bool map_show_raid = false;
 	BackgroundType::e map_background_state = BackgroundType::kClear;
 	float map_background_alpha = kDefaultBackgroundAlpha;
 	AlignmentType::e map_alignment_state = AlignmentType::kFirst;
