@@ -1,16 +1,16 @@
 ### Description
 Zeal adds quality of life functionality to the legacy (2002) Everquest client
 used by most TAKP EqEMU players. The Miles Sound System used by that client
-supports plug-ins for arbitrary filtering, and Zeal injects itself into the
+supports plug-ins for arbitrary audio filtering, and Zeal injects itself into the
 client like a standard dll by using the .asi extension in the EQ root directory.
 It can then patch itself into the client's processing loop and callbacks to
 add new functionality and smooth out issues in the old client.
 
 Zeal custom code is entirely open source and the releases are built directly
-from the repo using github actions, providing clear transparency on the contents.
+from the repo using github actions, providing full transparency on the contents.
 
 ### Features
-- Camera motion improvements
+- Camera motion improvements (major improvements to third person view)
 - Additional key binds (tab targeting, strafe, pet)
 - Additional commands (melody, useitem, autoinventory)
 - Additional ui support (new gauges, bag control, looting, spellsets, targetrings)
@@ -350,13 +350,19 @@ view re-centers when the position marker is within 20% of an edge and moving tow
 * Command examples:
   - `/map zoom 200` sets map scaling to 200% (2x)
 
-#### Showing group members
-The map supports showing the live position of other group members. The group members are colored
-in this order relative to their group listing: red, orange, green, blue, purple.
+#### Showing group and raid members
+The map supports showing the live position of other group and raid members. The group
+member markers are slighly shrunken player position markers and colored in this order
+relative to their group listing: red, orange, green, blue, purple. The raid member
+markers are simple fixed triangles with varying color.  Since there are a high number
+of potential raid members, it is recommended to not use the persistent Show Raid checkbox
+in the options tab and instead use the key bind to situationally toggle it on and off.
 
-* UI options checkbox to enable / disable
+* UI options checkbox to enable / disable (one each for group and raid)
+* Key bind: "Toggle Show Raid" - Toggles visibility of raid members
 * Command examples:
-  - `/map show_group` toggles it on and off
+  - `/map show_group` toggles the group member markers on and off
+  - `/map show_raid` toggles the raid member markers on and off
 
 #### Showing map levels
 The map supports showing different levels based on the Brewall map color standards. Not all of

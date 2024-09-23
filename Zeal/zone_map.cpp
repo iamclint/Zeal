@@ -22,9 +22,11 @@ static constexpr int kBackgroundVertices = 3 + (kBackgroundCount - 1);  // Two t
 static constexpr int kMarkerCount = 4;  // Four triangles.
 static constexpr int kPositionCount = 2;  // Two triangles.
 static constexpr int kPositionVertices = kPositionCount * 3; // Fixed triangle list.
+static constexpr int kRaidMaxMembers = 72;
+static constexpr int kRaidPositionVertices = 3; // Fixed triangle list with one triangle.
 static constexpr int kMaxDynamicLabels = 10;
-static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * kPositionVertices
-                                            * (EQ_NUM_GROUP_MEMBERS + 1);
+static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositionVertices
+                                            * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers);
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 
@@ -634,7 +636,6 @@ void ZoneMap::add_position_marker_vertices(float screen_y, float screen_x, float
     const float clip_top = max(clip_rect_top - size, view_top);
     const float clip_right = min(clip_rect_right + size, view_right);
     const float clip_bottom = min(clip_rect_bottom + size, view_bottom);
-    MapVertex position_vertices[kPositionVertices];
     for (int i = 0; i < kPositionVertices; ++i) {
         vertices.push_back(MapVertex{
                 .x = max(clip_left, min(clip_right, symbol[i].x + screen_x)),
@@ -674,6 +675,87 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
     }
 }
 
+void ZoneMap::add_raid_marker_vertices(float screen_y, float screen_x, float size,
+    D3DCOLOR color, std::vector<MapVertex>& vertices) const {
+
+    // Add a simple equilateral triangle centered at the position pointing up.
+    const float kFactor1 = 0.577350f; // 1 / sqrt(3)
+    const float kFactor2 = 0.288675f; // 1 / (2 * sqrt(3))
+    Vec3 vertex0 = { 0, -size * kFactor1, 0 };
+    Vec3 vertex1 = { +size * 0.5f, size * kFactor2, 0 };
+    Vec3 vertex2 = { -size * 0.5f, size * kFactor2, 0 };
+    Vec3 symbol[kRaidPositionVertices] = { vertex0, vertex1, vertex2};
+
+    // Allow the position marker to exceed the rect limits by size but must stay on screen.
+    const int view_left = viewport.X;
+    const int view_top = viewport.Y;
+    const int view_right = viewport.X + viewport.Width - 1;
+    const int view_bottom = viewport.Y + viewport.Height - 1;
+    const float clip_left = max(clip_rect_left - size, view_left);
+    const float clip_top = max(clip_rect_top - size, view_top);
+    const float clip_right = min(clip_rect_right + size, view_right);
+    const float clip_bottom = min(clip_rect_bottom + size, view_bottom);
+    for (int i = 0; i < kRaidPositionVertices; ++i) {
+        vertices.push_back(MapVertex{
+                .x = max(clip_left, min(clip_right, symbol[i].x + screen_x)),
+                .y = max(clip_top, min(clip_bottom, symbol[i].y + screen_y)),
+                .z = 0.5f,
+                .rhw = 1.f,
+                .color = color
+            });
+    }
+}
+
+void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices) const {
+    if (!map_show_raid)
+        return;
+
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    auto entity_manager = ZealService::get_instance()->entity_manager.get();  // Short-term ptr.
+    if (!entity_manager || !self)
+        return;
+
+    float size = position_size * min(viewport.Width, viewport.Height);
+    size = max(5.f, size);  // Constrain so it remains visible.
+
+    // TODO: Review color coding to be more distinct. Possibly by class.
+    const DWORD kUngrouped = 0xffffffff;
+    const D3DCOLOR kColorLeader = D3DCOLOR_XRGB(255, 153, 153);
+    const D3DCOLOR kColorUngrouped = D3DCOLOR_XRGB(255, 204, 153);
+
+    const Zeal::EqStructures::RaidMember* raidMembers =
+        reinterpret_cast<const Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
+
+    // Disable the markers for the same group if show_group is active.
+    DWORD self_group_number = kUngrouped - 1;  // Unique default number.
+    if (map_show_group) {
+        // Consider optimizing this with a cache if there's a way to detect raid member changes.
+        for (int i = 0; i < kRaidMaxMembers; ++i) {
+            if (strcmp(raidMembers[i].Name, self->Name) == 0) {
+                if (raidMembers[i].GroupNumber != kUngrouped)
+                    self_group_number = raidMembers[i].GroupNumber;
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < kRaidMaxMembers; ++i) {
+        const auto& member = raidMembers[i];
+        if ((member.GroupNumber == self_group_number) || (strlen(member.Name) == 0)
+            || (strcmp(member.Name, self->Name) == 0))
+            continue;  // In same group or no raid member or it is self.
+        auto entity = entity_manager->Get(member.Name);
+        if (!entity)
+            continue;  // Could be out of zone.
+
+        auto color = member.IsGroupLeader ? kColorLeader :
+            (member.GroupNumber == kUngrouped ? kColorUngrouped :
+                D3DCOLOR_XRGB(224, 224, 128 + member.GroupNumber * 8));
+        float screen_y = -entity->Position.x * scale_factor + offset_y;  // Position is y,x,z.
+        float screen_x = -entity->Position.y * scale_factor + offset_x;
+        add_raid_marker_vertices(screen_y, screen_x, size, color, vertices);
+    }
+}
+
 int ZoneMap::render_update_position_buffer() {
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     if (!position_vertex_buffer || !self) {
@@ -682,6 +764,7 @@ int ZoneMap::render_update_position_buffer() {
 
     // Populate a vector with D3DPT_TRIANGLELIST vertices.
     std::vector<MapVertex> position_vertices;
+    add_raid_member_position_vertices(position_vertices);
     add_group_member_position_vertices(position_vertices);
 
     // Translate loc (world) coordinates to screen coordinates. Note that the game
@@ -1048,6 +1131,18 @@ void ZoneMap::set_show_group(bool enable, bool update_default) {
     update_ui_options();
 }
 
+void ZoneMap::set_show_raid(bool enable, bool update_default) {
+    if (map_show_raid != enable) {
+        map_show_raid = enable;
+        zone_id = kInvalidZoneId;  // Triggers reload.
+    }
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapShowRaid", map_show_raid);
+
+    update_ui_options();
+}
+
 void ZoneMap::toggle_background() {
     map_background_state = BackgroundType::e(static_cast<int>(map_background_state) + 1);
     if (map_background_state > BackgroundType::kLast) {
@@ -1220,6 +1315,8 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<bool>("Zeal", "MapEnabled", false);
     if (!ini->exists("Zeal", "MapShowGroup"))
         ini->setValue<bool>("Zeal", "MapShowGroup", true);
+    if (!ini->exists("Zeal", "MapShowRaid"))
+        ini->setValue<bool>("Zeal", "MapShowRaid", false);
     if (!ini->exists("Zeal", "MapDataMode"))
         ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(MapDataMode::kInternal));
     if (!ini->exists("Zeal", "MapBackgroundState"))
@@ -1246,6 +1343,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
     enabled = ini->getValue<bool>("Zeal", "MapEnabled");
     map_show_group = ini->getValue<bool>("Zeal", "MapShowGroup");
+    map_show_raid = ini->getValue<bool>("Zeal", "MapShowRaid");
     map_data_mode = MapDataMode::e(ini->getValue<int>("Zeal", "MapDataMode"));
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
     map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
@@ -1286,6 +1384,7 @@ void ZoneMap::save_ini()
 
     ini->setValue<bool>("Zeal", "MapEnabled", enabled);
     ini->setValue<bool>("Zeal", "MapShowGroup", map_show_group);
+    ini->setValue<bool>("Zeal", "MapShowRaid", map_show_raid);
     ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(map_data_mode));
     ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
     ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
@@ -1461,6 +1560,11 @@ void ZoneMap::parse_map_data_mode(const std::vector<std::string>& args) {
 void ZoneMap::parse_show_group(const std::vector<std::string>& args) {
     set_show_group(!is_show_group_enabled(), false);
     Zeal::EqGame::print_chat("Showing group members is %s", is_show_group_enabled() ? "ON" : "OFF");
+}
+
+void ZoneMap::parse_show_raid(const std::vector<std::string>& args) {
+    set_show_raid(!is_show_raid_enabled(), false);
+    Zeal::EqGame::print_chat("Showing raid members is %s", is_show_raid_enabled() ? "ON" : "OFF");
 }
 
 void ZoneMap::parse_marker(const std::vector<std::string>& args) {
@@ -1687,7 +1791,8 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
     Zeal::EqGame::print_chat("level: zone: %i, index: %i, z_max: %i, z_min: %i", map_level_zone_id, map_level_index, clip_max_z, clip_min_z);
-    Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, show_group: %i", position_size, marker_size, map_show_group);
+    Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, show_group: %i, show_raid: %i",
+        position_size, marker_size, map_show_group, map_show_raid);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f", scale_factor, offset_y, offset_x, zoom_factor);
     Zeal::EqGame::print_chat("dyn_labels_size: %i, dyn_labels_zone_id: %i, data_mode: %i, data_cache: %i", 
         dynamic_labels_list.size(), dynamic_labels_zone_id, map_data_mode, map_data_cache.size());
@@ -1737,6 +1842,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     }
     else if (args[1] == "show_group") {
         parse_show_group(args);
+    }
+    else if (args[1] == "show_raid") {
+        parse_show_raid(args);
     }
     else if (args[1] == "save_ini") {
         Zeal::EqGame::print_chat("Saving current map settings");

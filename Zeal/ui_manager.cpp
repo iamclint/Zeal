@@ -100,6 +100,18 @@ void ui_manager::SetSliderValue(std::string name, float value)
 		ZealService::get_instance()->hooks->hook_map["SetSliderValue"]->original(SetSliderValue_hook)(slider_names[name], 0, static_cast<int>(value));
 	}
 }
+
+void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::string> data)
+{
+
+	for (int row = 0; auto & current_row : data)
+	{
+		int x = wnd->AddString("");
+		wnd->SetItemText(current_row, row, 0);
+		wnd->SetItemData(row);
+		row++;
+	}
+}
 void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>>data)
 {
 
@@ -174,6 +186,26 @@ void ui_manager::init_ui()
 //	return rval;
 //}
 
+void __fastcall LoadSidl(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
+{
+	ui_manager* ui = ZealService::get_instance()->ui.get();
+	std::string file = "uifiles\\zeal\\" + std::string(filename.Data->Text);
+	if (std::filesystem::exists(file))
+		path1 = Zeal::EqUI::CXSTR("uifiles\\zeal\\");
+	
+	ZealService::get_instance()->hooks->hook_map["LoadSidl"]->original(LoadSidl)(t, unused, path1, path2, filename);
+}
+
+int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
+{
+	ui_manager* ui = ZealService::get_instance()->ui.get();
+	std::string file = "uifiles\\zeal\\" + std::string(filename.Data->Text);
+	if (std::filesystem::exists(file))
+		path1 = Zeal::EqUI::CXSTR("uifiles\\zeal\\");
+
+	ZealService::get_instance()->hooks->hook_map["XMLRead"]->original(XMLRead)(t, unused, path1, path2, filename);
+}
+
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
@@ -191,7 +223,8 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour);
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);
-
+	zeal->hooks->Add("LoadSidl", 0x5992c0, LoadSidl, hook_type_detour);
+	zeal->hooks->Add("XMLRead", 0x58D640, XMLRead, hook_type_detour);
 
 
 	zeal->commands_hook->Add("/sortskill", {}, "",

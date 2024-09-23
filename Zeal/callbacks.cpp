@@ -124,6 +124,15 @@ bool CallbackManager::invoke_command(callback_type cb_type, UINT opcode, bool st
 	}
 	return false;
 }
+void CallbackManager::AddEntity(std::function<void(Zeal::EqStructures::Entity*)> callback_function, callback_type type)
+{
+	player_spawn_functions[type].push_back(callback_function);
+}
+void CallbackManager::invoke_player(Zeal::EqStructures::Entity* ent, callback_type cb)
+{
+	for (auto& fn : player_spawn_functions[cb])
+		fn(ent);
+}
 
 char __fastcall handleworldmessage_hk(int* connection, int unused, UINT unk, UINT opcode, char* buffer, UINT len)
 {
@@ -181,6 +190,27 @@ int __fastcall AddDeferred(int t, int u)
 	return ZealService::get_instance()->hooks->hook_map["AddDeferred"]->original(AddDeferred)(t, u);
 }
 
+
+
+
+Zeal::EqStructures::Entity* __fastcall EQPlayer(Zeal::EqStructures::Entity* ent_buffer, int unused, Zeal::EqStructures::Entity* unk_cpy, BYTE Gender, WORD Race, BYTE Class, const char* Name)
+{
+	ZealService* zeal = ZealService::get_instance();
+	Zeal::EqStructures::Entity* ret_ent = zeal->hooks->hook_map["EQPlayer"]->original(EQPlayer)(ent_buffer, unused, unk_cpy, Gender, Race, Class, Name);
+	if (ret_ent)
+		zeal->callbacks->invoke_player(ret_ent, callback_type::EntitySpawn);
+	return ret_ent;
+}
+
+
+void __fastcall EQPlayerDeconstruct(Zeal::EqStructures::Entity* ent, int unused)
+{
+	ZealService* zeal = ZealService::get_instance();
+	if (ent)
+		zeal->callbacks->invoke_player(ent, callback_type::EntityDespawn);
+	zeal->hooks->hook_map["EQPlayerDeconstruct"]->original(EQPlayerDeconstruct)(ent, unused);
+}
+
 CallbackManager::CallbackManager(ZealService* zeal)
 {
 	zeal->hooks->Add("AddDeferred", 0x59E000, AddDeferred, hook_type_detour); //render in this hook so damage is displayed behind ui
@@ -198,4 +228,6 @@ CallbackManager::CallbackManager(ZealService* zeal)
 	zeal->hooks->Add("InitGameUI", 0x4a60b5, initgameui_hk, hook_type_detour);
 	zeal->hooks->Add("HandleWorldMessage", 0x4e829f, handleworldmessage_hk, hook_type_detour);
 	zeal->hooks->Add("SendMessage", 0x54e51a, send_message_hk, hook_type_detour);
+	zeal->hooks->Add("EQPlayer", 0x506802, EQPlayer, hook_type_detour);
+	zeal->hooks->Add("EQPlayerDeconstruct", 0x50723D, EQPlayerDeconstruct, hook_type_detour);
 }

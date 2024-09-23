@@ -534,6 +534,21 @@ void TargetRing::callback_initui()
 	targetRingTexture = LoadTexture("uifiles\\ZealTargetRing.tga");
 }
 
+std::vector<std::string> GetTGAFiles(const std::string& directoryPath) {
+	std::vector<std::string> tgaFiles;
+
+	// Iterate over the directory
+	for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
+		// Check if it's a file and has a .tga extension
+		if (entry.is_regular_file() && entry.path().extension() == ".tga") {
+			// Get the filename without extension and add to the vector
+			tgaFiles.push_back(entry.path().stem().string());
+		}
+	}
+
+	return tgaFiles;
+}
+
 //don't get too excited this isn't functioning
 TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
@@ -541,6 +556,35 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CharacterSelect);
+
+	zeal->commands_hook->Add("/loadtextures", {}, "",
+		[this](std::vector<std::string>& args) {
+
+			std::vector<std::string> tgas = GetTGAFiles("uifiles/TargetRings");
+			tgas.insert(tgas.begin(), "None");
+			for (auto& t : tgas)
+			{
+				Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)Zeal::EqGame::Windows->Options->GetChildItem("Zeal_TargetRingTexture_Combobox");
+				if (!cmb)
+				{
+					Zeal::EqGame::print_chat("Couldn't find target ring texture combobox");
+					return true;
+				}
+				cmb->DeleteAll();
+				Zeal::EqUI::ListWnd* lst = cmb->CmbListWnd;
+				if (!lst)
+				{
+					Zeal::EqGame::print_chat("Couldn't find the list wnd");
+					return true;
+				}
+				Zeal::EqGame::print_chat("Combo: 0x%x   List: 0x%x", (int)cmb, (int)lst);
+				lst->Location.Bottom = lst->Location.Top + (23 * (tgas.size()-1));
+				ZealService::get_instance()->ui->AddListItems(lst, tgas);
+				return true;
+				
+			}
+			return true;
+		});
 	zeal->commands_hook->Add("/targetring", {}, "Toggles target ring",
 		[this](std::vector<std::string>& args) {
 
