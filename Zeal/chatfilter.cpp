@@ -4,23 +4,16 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 
-//Extended (Custom) Filters
-#define RANDOM 0x10000
-#define LOOT  0x10001
-#define EF_LEN 2
-
-const int Extended_Filters[] = { RANDOM, LOOT };
-
 //Standard ChannelMaps and filter offset
 #define ChannelMap0 0
 #define ChannelMap40 0x28
 #define FILTER_OFFSET 0x64
 
-bool isCustomFilter(int filter, int applyOffset = 0)
+bool chatfilter::isExtendedCM(int channelMap, int applyOffset)
 {
-    for (int i = 0; i < EF_LEN; i++)
+    for (auto& ec : Extended_ChannelMaps)
     {
-        if ((filter + applyOffset) == Extended_Filters[i])
+        if ((channelMap + applyOffset) == ec.channelMap)
         {
             return true;
         }
@@ -28,169 +21,173 @@ bool isCustomFilter(int filter, int applyOffset = 0)
     return false;
 }
 
-bool isStandardFilter(int filter, int applyOffset = 0)
+bool chatfilter::isStandardCM(int channelMap, int applyOffset)
 {
-    filter = filter + applyOffset;
-    if (filter >= ChannelMap0 && filter <= ChannelMap40)
+    channelMap = channelMap + applyOffset;
+    if (channelMap >= ChannelMap0 && channelMap <= ChannelMap40)
     {
         return true;
     }
     return false;
 }
 
-int32_t __fastcall ColorToChannelMap(int this_, int u, uint16_t filter)
+int32_t __fastcall ColorToChannelMap(int this_, int u, uint16_t colorID)
 {
+    chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
 	uint32_t channelMap;
-	switch (filter)
-	{
-  case USERCOLOR_SAY:
-  case USERCOLOR_ECHO_SAY:
-    channelMap = 0;
-    break;
-  case USERCOLOR_TELL:
-  case USERCOLOR_ECHO_TELL:
-    channelMap = 1;
-    break;
-  case USERCOLOR_GROUP:
-  case USERCOLOR_ECHO_GROUP:
-    channelMap = 2;
-    break;
-  case USERCOLOR_GUILD:
-  case USERCOLOR_ECHO_GUILD:
-    channelMap = 4;
-    break;
-  case USERCOLOR_OOC:
-  case USERCOLOR_ECHO_OOC:
-    channelMap = 5;
-    break;
-  case USERCOLOR_AUCTION:
-  case USERCOLOR_ECHO_AUCTION:
-    channelMap = 6;
-    break;
-  case USERCOLOR_SHOUT:
-  case USERCOLOR_ECHO_SHOUT:
-    channelMap = 7;
-    break;
-  case USERCOLOR_EMOTE:
-  case USERCOLOR_ECHO_EMOTE:
-    channelMap = 8;
-    break;
-  case USERCOLOR_SPELLS:
-    channelMap = 10;
-    break;
-  case USERCOLOR_YOU_HIT_OTHER:
-    channelMap = 9;
-    break;
-  case USERCOLOR_OTHER_HIT_YOU:
-    channelMap = 0x18;
-    break;
-  case USERCOLOR_YOU_MISS_OTHER:
-    channelMap = 0x17;
-    break;
-  case USERCOLOR_OTHER_MISS_YOU:
-    channelMap = 0x19;
-    break;
-  case USERCOLOR_SKILLS:
-    channelMap = 0xb;
-    break;
-  case USERCOLOR_DISCIPLINES:
-    channelMap = 0x1f;
-    break;
-  case USERCOLOR_YOUR_DEATH:
-    channelMap = 0x1c;
-    break;
-  case USERCOLOR_OTHER_DEATH:
-    channelMap = 0x1d;
-    break;
-  case USERCOLOR_OTHER_HIT_OTHER:
-    channelMap = 0x1a;
-    break;
-  case USERCOLOR_OTHER_MISS_OTHER:
-    channelMap = 0x1b;
-    break;
-  case USERCOLOR_NON_MELEE:
-    channelMap = 0x28;
-    break;
-  case USERCOLOR_SPELL_WORN_OFF:
-    channelMap = 0x27;
-    break;
-  case USERCOLOR_OTHERS_SPELLS:
-    channelMap = 0x24;
-    break;
-  case USERCOLOR_SPELL_FAILURE:
-    channelMap = 0x25;
-    break;
-  case USERCOLOR_CHAT_1:
-  case USERCOLOR_ECHO_CHAT_1:
-    channelMap = 0xc;
-    break;
-  case USERCOLOR_CHAT_2:
-  case USERCOLOR_ECHO_CHAT_2:
-    channelMap = 0xd;
-    break;
-  case USERCOLOR_CHAT_3:
-  case USERCOLOR_ECHO_CHAT_3:
-    channelMap = 0xe;
-    break;
-  case USERCOLOR_CHAT_4:
-  case USERCOLOR_ECHO_CHAT_4:
-    channelMap = 0xf;
-    break;
-  case USERCOLOR_CHAT_5:
-  case USERCOLOR_ECHO_CHAT_5:
-    channelMap = 0x10;
-    break;
-  case USERCOLOR_CHAT_6:
-  case USERCOLOR_ECHO_CHAT_6:
-    channelMap = 0x11;
-    break;
-  case USERCOLOR_CHAT_7:
-  case USERCOLOR_ECHO_CHAT_7:
-    channelMap = 0x12;
-    break;
-  case USERCOLOR_CHAT_8:
-  case USERCOLOR_ECHO_CHAT_8:
-    channelMap = 0x13;
-    break;
-  case 299:
-  case USERCOLOR_ECHO_CHAT_9:
-    channelMap = 0x14;
-    break;
-  case 300:
-  case USERCOLOR_ECHO_CHAT_10:
-    channelMap = 0x15;
-    break;
-  case USERCOLOR_MELEE_CRIT:
-    channelMap = 0x1e;
-    break;
-  case USERCOLOR_SPELL_CRIT:
-    channelMap = 0x26;
-    break;
-  case USERCOLOR_TOO_FAR_AWAY:
-    channelMap = 0x20;
-    break;
-  case USERCOLOR_NPC_RAMAGE:
-    channelMap = 0x21;
-    break;
-  case USERCOLOR_NPC_FURRY:
-    channelMap = 0x22;
-    break;
-  case USERCOLOR_NPC_ENRAGE:
-    channelMap = 0x23;
-    break;
-  case 0x147:
-    channelMap = 3;
-    break;
-  default:  // The dreaded 'Other' Category
-    channelMap = 0x16;
-    break;
-  case USERCOLOR_RANDOM:
-    channelMap = RANDOM;
-    break;
-  case USERCOLOR_LOOT:
-    channelMap = LOOT;
-    break;
-  }
+
+    for (auto& ec : cf->Extended_ChannelMaps)
+    {
+        if (colorID == ec.colorID)
+        {
+            return ec.channelMap;
+        }
+    }
+
+    switch (colorID)
+    {
+    case USERCOLOR_SAY:
+    case USERCOLOR_ECHO_SAY:
+        channelMap = 0;
+        break;
+    case USERCOLOR_TELL:
+    case USERCOLOR_ECHO_TELL:
+        channelMap = 1;
+        break;
+    case USERCOLOR_GROUP:
+    case USERCOLOR_ECHO_GROUP:
+        channelMap = 2;
+        break;
+    case USERCOLOR_GUILD:
+    case USERCOLOR_ECHO_GUILD:
+        channelMap = 4;
+        break;
+    case USERCOLOR_OOC:
+    case USERCOLOR_ECHO_OOC:
+        channelMap = 5;
+        break;
+    case USERCOLOR_AUCTION:
+    case USERCOLOR_ECHO_AUCTION:
+        channelMap = 6;
+        break;
+    case USERCOLOR_SHOUT:
+    case USERCOLOR_ECHO_SHOUT:
+        channelMap = 7;
+        break;
+    case USERCOLOR_EMOTE:
+    case USERCOLOR_ECHO_EMOTE:
+        channelMap = 8;
+        break;
+    case USERCOLOR_SPELLS:
+        channelMap = 10;
+        break;
+    case USERCOLOR_YOU_HIT_OTHER:
+        channelMap = 9;
+        break;
+    case USERCOLOR_OTHER_HIT_YOU:
+        channelMap = 0x18;
+        break;
+    case USERCOLOR_YOU_MISS_OTHER:
+        channelMap = 0x17;
+        break;
+    case USERCOLOR_OTHER_MISS_YOU:
+        channelMap = 0x19;
+        break;
+    case USERCOLOR_SKILLS:
+        channelMap = 0xb;
+        break;
+    case USERCOLOR_DISCIPLINES:
+        channelMap = 0x1f;
+        break;
+    case USERCOLOR_YOUR_DEATH:
+        channelMap = 0x1c;
+        break;
+    case USERCOLOR_OTHER_DEATH:
+        channelMap = 0x1d;
+        break;
+    case USERCOLOR_OTHER_HIT_OTHER:
+        channelMap = 0x1a;
+        break;
+    case USERCOLOR_OTHER_MISS_OTHER:
+        channelMap = 0x1b;
+        break;
+    case USERCOLOR_NON_MELEE:
+        channelMap = 0x28;
+        break;
+    case USERCOLOR_SPELL_WORN_OFF:
+        channelMap = 0x27;
+        break;
+    case USERCOLOR_OTHERS_SPELLS:
+        channelMap = 0x24;
+        break;
+    case USERCOLOR_SPELL_FAILURE:
+        channelMap = 0x25;
+        break;
+    case USERCOLOR_CHAT_1:
+    case USERCOLOR_ECHO_CHAT_1:
+        channelMap = 0xc;
+        break;
+    case USERCOLOR_CHAT_2:
+    case USERCOLOR_ECHO_CHAT_2:
+        channelMap = 0xd;
+        break;
+    case USERCOLOR_CHAT_3:
+    case USERCOLOR_ECHO_CHAT_3:
+        channelMap = 0xe;
+        break;
+    case USERCOLOR_CHAT_4:
+    case USERCOLOR_ECHO_CHAT_4:
+        channelMap = 0xf;
+        break;
+    case USERCOLOR_CHAT_5:
+    case USERCOLOR_ECHO_CHAT_5:
+        channelMap = 0x10;
+        break;
+    case USERCOLOR_CHAT_6:
+    case USERCOLOR_ECHO_CHAT_6:
+        channelMap = 0x11;
+        break;
+    case USERCOLOR_CHAT_7:
+    case USERCOLOR_ECHO_CHAT_7:
+        channelMap = 0x12;
+        break;
+    case USERCOLOR_CHAT_8:
+    case USERCOLOR_ECHO_CHAT_8:
+        channelMap = 0x13;
+        break;
+    case 299:
+    case USERCOLOR_ECHO_CHAT_9:
+        channelMap = 0x14;
+        break;
+    case 300:
+    case USERCOLOR_ECHO_CHAT_10:
+        channelMap = 0x15;
+        break;
+    case USERCOLOR_MELEE_CRIT:
+        channelMap = 0x1e;
+        break;
+    case USERCOLOR_SPELL_CRIT:
+        channelMap = 0x26;
+        break;
+    case USERCOLOR_TOO_FAR_AWAY:
+        channelMap = 0x20;
+        break;
+    case USERCOLOR_NPC_RAMAGE:
+        channelMap = 0x21;
+        break;
+    case USERCOLOR_NPC_FURRY:
+        channelMap = 0x22;
+        break;
+    case USERCOLOR_NPC_ENRAGE:
+        channelMap = 0x23;
+        break;
+    case 0x147:
+        channelMap = 3;
+        break;
+    default:  // The dreaded 'Other' Category
+        channelMap = 0x16;
+        break;
+    }
   return channelMap; 
 }
 
@@ -200,11 +197,11 @@ void __fastcall ClearChannelMaps(Zeal::EqUI::CChatManager* cman, int u, int wind
 
     if (window != (int)cman->ChatWindows[0])
     {
-        for (int i = 0; i < EF_LEN; i++)
+        for (auto& ec : cf->Extended_ChannelMaps)
         {
-            if (cf->extendedChannelMaps[i] == window)
+            if (ec.windowHandle == window)
             {
-                cf->extendedChannelMaps[i] = (int)cman->ChatWindows[0];
+                ec.windowHandle = (int)cman->ChatWindows[0];
             }
         }
         for (int i = 0; i <= ChannelMap40; i++)
@@ -220,12 +217,12 @@ void __fastcall ClearChannelMaps(Zeal::EqUI::CChatManager* cman, int u, int wind
 void __fastcall ClearChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
-    if (isCustomFilter(filter, FILTER_OFFSET))
+    if (cf->isExtendedCM(filter, FILTER_OFFSET))
     {
         int index = filter - (0x10000 - FILTER_OFFSET);
-        cf->extendedChannelMaps[index] = (int)cman->ChatWindows[0];
+        cf->Extended_ChannelMaps.at(index).windowHandle = (int)cman->ChatWindows[0];
     }
-    else if (isStandardFilter(filter))
+    else if (cf->isStandardCM(filter))
     {
         cman->ChannelMapWnd[filter] = (int)cman->ChatWindows[0];
     }
@@ -237,13 +234,13 @@ int  __fastcall GetChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter)
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     int windowHandle = 0;
 
-    if (isCustomFilter(filter, FILTER_OFFSET))
+    if (cf->isExtendedCM(filter, FILTER_OFFSET))
     {
         int index = filter - (0x10000 - FILTER_OFFSET);
-        return cf->extendedChannelMaps[index];
+        windowHandle = cf->Extended_ChannelMaps.at(index).windowHandle;
 
     }
-    else if (isStandardFilter(filter)) {
+    else if (cf->isStandardCM(filter)) {
         windowHandle = cman->ChannelMapWnd[filter];
     } 
     return windowHandle;
@@ -253,25 +250,31 @@ void __fastcall SetChannelMap(Zeal::EqUI::CChatManager* cman, int u, int filter,
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     
-    if (isCustomFilter(filter, FILTER_OFFSET))
+    if (cf->isExtendedCM(filter, FILTER_OFFSET))
     {
         int index = filter - (0x10000 - FILTER_OFFSET);
-        cf->extendedChannelMaps[index] = window;
+        cf->Extended_ChannelMaps.at(index).windowHandle = window;
     }
-    else if (isStandardFilter(filter)) {
+    else if (cf->isStandardCM(filter)) {
         cman->ChannelMapWnd[filter] = window;
     }
 }
 
 __declspec (naked) void FilterConditional(void)
 {
-    DWORD filterID;
-    __asm mov filterID, ebx
+    __asm pushad
 
-    if (isCustomFilter(filterID) || isStandardFilter(filterID,-FILTER_OFFSET))
+    DWORD filterID;
+    chatfilter* cf;
+
+    cf = ZealService::get_instance()->chatfilter_hook.get();
+
+    __asm mov filterID, ebx
+    if (cf->isExtendedCM(filterID) || cf->isStandardCM(filterID,-FILTER_OFFSET))
     {
         __asm
         {
+            popad
             mov eax, 414123h
             jmp eax
         }
@@ -280,6 +283,7 @@ __declspec (naked) void FilterConditional(void)
     {
         __asm
         {
+            popad
             mov eax, 41426Fh
             jmp eax
         }
@@ -297,14 +301,14 @@ int SelectWindow(Zeal::EqUI::CChatManager* cman, int ChannelMap)
 
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
 
-    if (isStandardFilter(ChannelMap))
+    if (cf->isStandardCM(ChannelMap))
     {
         window = (int)&cman->ChannelMapWnd[ChannelMap];
     }
-    else if (isCustomFilter(ChannelMap))
+    else if (cf->isExtendedCM(ChannelMap))
     {
         int index = ChannelMap - 0x10000;
-        window = (int)&cf->extendedChannelMaps[index];
+        window = (int)&cf->Extended_ChannelMaps.at(index).windowHandle;
     }
 
     _asm
@@ -316,11 +320,15 @@ int SelectWindow(Zeal::EqUI::CChatManager* cman, int ChannelMap)
 
 int32_t __fastcall AddMenu(int this_, int u, Zeal::EqUI::ContextMenu* menu)
 {
-	Zeal::EqUI::CXSTR rand("Random");
-	menu->AddMenuItem(rand, RANDOM);
+    chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
 
-	Zeal::EqUI::CXSTR loot("Loot");
-	menu->AddMenuItem(loot, LOOT);
+    menu->AddSeparator();
+
+    for (auto& ec : cf->Extended_ChannelMaps)
+    {
+        Zeal::EqUI::CXSTR cstr(ec.name);
+        menu->AddMenuItem(cstr, ec.channelMap);
+    }
 
 	return ZealService::get_instance()->hooks->hook_map["AddMenu"]->original(AddMenu)(this_, u, menu);
 }
@@ -332,7 +340,9 @@ void chatfilter::LoadSettings()
     std::string cmap = "ChannelMap";
     int num = 41;
 
-    for (int i = 0; i < EF_LEN; i++)
+    chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
+
+    for (int i = 0; i < cf->Extended_ChannelMaps.size(); i++)
     {
         std::string this_cmap = cmap + std::to_string(num + i);
         if (!ui_ini.exists("ChatManager", this_cmap))
@@ -341,7 +351,7 @@ void chatfilter::LoadSettings()
         }
         else
         {
-            extendedChannelMaps[i] = ui_ini.getValue<int>("ChatManager", this_cmap);
+            cf->Extended_ChannelMaps.at(i).windowHandle = ui_ini.getValue<int>("ChatManager", this_cmap);
         }
     }
 }
@@ -353,10 +363,10 @@ int __fastcall CChatManager(Zeal::EqUI::CChatManager* cman, int u)
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     cf->LoadSettings();
 
-    for (int i = 0; i < EF_LEN; i++)
+    for (int i = 0; i < cf->Extended_ChannelMaps.size(); i++)
     {
-        int window_index = cf->extendedChannelMaps[i];
-        cf->extendedChannelMaps[i] = (int)cman->ChatWindows[window_index];
+        int window_index = cf->Extended_ChannelMaps.at(i).windowHandle;
+        cf->Extended_ChannelMaps.at(i).windowHandle = (int)cman->ChatWindows[window_index];
     }
     return retVal;
 }
@@ -369,12 +379,12 @@ void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
     std::string cmap = "ChannelMap";
     int num = 41;
 
-    for (int i = 0; i < EF_LEN; i++)
+    for (int i = 0; i < cf->Extended_ChannelMaps.size(); i++)
     {
         int window_pos = 0;
         for (int j = 0; j < cman->MaxChatWindows; j++)
         {
-            if ((int)cman->ChatWindows[j] == cf->extendedChannelMaps[i])
+            if ((int)cman->ChatWindows[j] == cf->Extended_ChannelMaps.at(i).windowHandle)
             {
                 std::string this_cmap = cmap + std::to_string(num + i);
                 ui_ini.setValue<int>("ChatManager", this_cmap, j);
@@ -389,6 +399,11 @@ void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
 
 chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 {  
+    Extended_ChannelMaps = {
+        {"Random", 0x10000, USERCOLOR_RANDOM, NULL },
+        {"Loot",   0x10001, USERCOLOR_LOOT, NULL }
+    };
+
     zeal->hooks->Add("CChatManager", 0x4100e2, CChatManager, hook_type_detour);
     zeal->hooks->Add("Deactivate", 0x410871, Deactivate, hook_type_detour);
 	zeal->hooks->Add("AddMenu", 0x4120DD, AddMenu, hook_type_replace_call);
