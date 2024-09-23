@@ -155,7 +155,7 @@ private:
 	void add_raid_marker_vertices(float screen_y, float screen_x, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 
-		const ZoneMapData* get_zone_map(int zone_id);
+	const ZoneMapData* get_zone_map(int zone_id);
 	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
 	bool add_map_data_from_file(const std::string& filename, CustomMapData& map_data);
 	void assemble_zone_map(const char* zone_name, CustomMapData& map_data);
