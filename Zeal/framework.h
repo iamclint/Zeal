@@ -14,6 +14,7 @@
 #include "raid.h"
 #include "eqstr.h"
 #include "chat.h"
+#include "chatfilter.h"
 #include "IO_ini.h"
 #include "callbacks.h"
 #include "item_display.h"
