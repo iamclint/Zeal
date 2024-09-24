@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="alarm.h" />
     <ClInclude Include="autofire.h" />
+    <ClInclude Include="chatfilter.h" />
     <ClInclude Include="crash_handler.h" />
     <ClInclude Include="directx.h" />
     <ClInclude Include="EntityManager.h" />
@@ -223,6 +224,7 @@
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
     <ClCompile Include="autofire.cpp" />
+    <ClCompile Include="chatfilter.cpp" />
     <ClCompile Include="crash_handler.cpp" />
     <ClCompile Include="directx.cpp" />
     <ClCompile Include="EntityManager.cpp" />
