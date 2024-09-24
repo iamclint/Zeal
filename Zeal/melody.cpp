@@ -102,7 +102,7 @@ void Melody::end()
 
 bool Melody::use_item(int item_index)
 {
-    if (songs.empty())
+    if (songs.empty() || item_index < 0 || item_index > 29)
         return false;
 
     // Set fields so use_item(item_index) will execute during tick().
@@ -270,6 +270,29 @@ Melody::Melody(ZealService* zeal, IO_ini* ini)
             }
             start(new_songs);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+        });
+
+    // Hooking '/stopsong' to address a client bug: '/stopsong' during a clicky-casted causes client/server desync in casting state:
+    // - Client cast bar disappears, but the spell is not interrupted on the server side.
+    // - To fix, we will just ignore '/stopsong' unless it's actually a song you have memorized
+    zeal->commands_hook->Add("/stopsong", {}, "Stops the current bard song from casting",
+        [this](std::vector<std::string>& args) {
+
+            Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+            if (!char_info || Zeal::EqGame::get_char_info()->Class != Zeal::EqEnums::ClassTypes::Bard)
+                return false; // not a bard, fall-through to regular '/stopsong' logic
+
+            Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+            if (!self || !self->ActorInfo || self->ActorInfo->CastingSpellId == kInvalidSpellId)
+                return false; // not casting anything, fall-through to regular '/stopsong' logic
+
+            for (int gem = 0; gem < EQ_NUM_SPELL_GEMS; gem++) {
+                if (self->ActorInfo->CastingSpellId == char_info->MemorizedSpell[gem]) {
+                    return false; // casting a song from our spell gems, fall-through to regular '/stopsong' logic to interrupt it
+                }
+            }
+
+            return true; // casting a non-gem'd spell (likely a clicky). Prevent '/stopsong' from running.
         });
 }
 
