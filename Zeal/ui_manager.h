@@ -13,7 +13,7 @@
 class ui_manager
 {
 public:
-
+	static constexpr const char* ui_path = "uifiles\\zeal\\";
 	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*)>> checkbox_callbacks;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> checkbox_names;
 	std::unordered_map<Zeal::EqUI::SliderWnd*, std::function<void(Zeal::EqUI::SliderWnd*, int)>> slider_callbacks;
@@ -49,5 +49,6 @@ public:
 private:
 	void CleanUI();
 	void init_ui();
+	
 };
 

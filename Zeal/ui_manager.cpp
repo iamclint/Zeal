@@ -189,9 +189,9 @@ void ui_manager::init_ui()
 void __fastcall LoadSidl(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
-	std::string file = "uifiles\\zeal\\" + std::string(filename.Data->Text);
+	std::string file = ui_manager::ui_path + std::string(filename.Data->Text);
 	if (std::filesystem::exists(file))
-		path1 = Zeal::EqUI::CXSTR("uifiles\\zeal\\");
+		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
 	
 	ZealService::get_instance()->hooks->hook_map["LoadSidl"]->original(LoadSidl)(t, unused, path1, path2, filename);
 }
@@ -199,9 +199,11 @@ void __fastcall LoadSidl(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqU
 int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
-	std::string file = "uifiles\\zeal\\" + std::string(filename.Data->Text);
+	std::string file = ui_manager::ui_path + std::string(filename.Data->Text);
 	if (std::filesystem::exists(file))
-		path1 = Zeal::EqUI::CXSTR("uifiles\\zeal\\");
+		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
+	else
+		path1 = Zeal::EqUI::CXSTR((char*)0x63D3C0);
 
 	ZealService::get_instance()->hooks->hook_map["XMLRead"]->original(XMLRead)(t, unused, path1, path2, filename);
 }
