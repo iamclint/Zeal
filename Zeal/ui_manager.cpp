@@ -205,7 +205,7 @@ int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI:
 	else
 		path1 = Zeal::EqUI::CXSTR((char*)0x63D3C0);
 
-	ZealService::get_instance()->hooks->hook_map["XMLRead"]->original(XMLRead)(t, unused, path1, path2, filename);
+	return ZealService::get_instance()->hooks->hook_map["XMLRead"]->original(XMLRead)(t, unused, path1, path2, filename);
 }
 
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)

@@ -12,10 +12,14 @@ public:
 	~EntityManager();
 	void Add(struct Zeal::EqStructures::Entity*);
 	void Remove(struct Zeal::EqStructures::Entity*);
-	Zeal::EqStructures::Entity* Get(const char* name) const;  // Returns nullptr if not found.
+	Zeal::EqStructures::Entity* GetPlayer(std::string name) const;  // Returns nullptr if not found.
+	Zeal::EqStructures::Entity* GetPet(std::string name) const;
+	Zeal::EqStructures::Entity* GetNPC(std::string name) const;
 	void Dump() const;
 
 private:
 	std::unordered_map<std::string, struct Zeal::EqStructures::Entity*> player_map;
+	std::unordered_map<std::string, struct Zeal::EqStructures::Entity*> pet_map;
+	std::unordered_map<std::string, struct Zeal::EqStructures::Entity*> npc_map;
 };
 

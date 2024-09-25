@@ -743,7 +743,7 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
         if ((member.GroupNumber == self_group_number) || (strlen(member.Name) == 0)
             || (strcmp(member.Name, self->Name) == 0))
             continue;  // In same group or no raid member or it is self.
-        auto entity = entity_manager->Get(member.Name);
+        auto entity = entity_manager->GetPlayer(member.Name);
         if (!entity)
             continue;  // Could be out of zone.
 

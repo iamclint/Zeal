@@ -2,12 +2,24 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
+#include <functional>
 
 struct CustomFilter {
 	std::string name; //String name - Appears in the Menu
 	int channelMap;   //Extended Channel Map ID - Zeal developer set
-	short colorID;    //ColorID - Will redirect prints with this ColorID
-	int windowHandle; //Window Handle - Maintains the currently filtered Chat Window handle
+	Zeal::EqUI::ChatWnd* windowHandle; //Window Handle - Maintains the currently filtered Chat Window handle
+	std::function<bool(short, std::string)> isHandled;
+    // Default Constructor
+    CustomFilter()
+        : name(""), channelMap(0), windowHandle(nullptr), isHandled(nullptr) {
+        // Optionally, add default lambda for isHandled
+    }
+
+    CustomFilter(const std::string& name, int channelMap, std::function<bool(short, std::string)> isHandled)
+        : name(name), channelMap(channelMap), isHandled(isHandled) {
+    }
+
+    ~CustomFilter() {  }
 };
 
 class chatfilter
@@ -15,7 +27,8 @@ class chatfilter
   public:
 	chatfilter(class ZealService* pHookWrapper, class IO_ini* ini);
 	std::vector<CustomFilter> Extended_ChannelMaps;
-	void LoadSettings();	
+	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, BYTE channel);
+	void LoadSettings(Zeal::EqUI::CChatManager* cm);
 	bool isExtendedCM(int channelMap, int applyOffset = 0);
 	bool isStandardCM(int channelMap, int applyOffset = 0);
 	~chatfilter();

@@ -8,7 +8,14 @@ void EntityManager::Add(struct Zeal::EqStructures::Entity* ent)
 	if (ent->Type == Zeal::EqEnums::EntityTypes::Player)
 	{
 		player_map[ent->Name] = ent;
-		//Zeal::EqGame::print_chat("Adding player: %s count: %i", ent->Name, player_map.size());
+	}
+	else if (ent->PetOwnerSpawnId)
+	{
+		pet_map[ent->Name] = ent;
+	}
+	else if (ent->Type == Zeal::EqEnums::EntityTypes::NPC)
+	{
+		npc_map[ent->Name] = ent;
 	}
 }
 
@@ -21,7 +28,15 @@ void EntityManager::Remove(struct Zeal::EqStructures::Entity* ent)
 	}
 }
 
-Zeal::EqStructures::Entity* EntityManager::Get(const char* name) const {
+Zeal::EqStructures::Entity* EntityManager::GetPet(std::string name) const {
+	auto it = pet_map.find(name);
+	return (it == pet_map.end()) ? nullptr : it->second;
+}
+Zeal::EqStructures::Entity* EntityManager::GetNPC(std::string name) const {
+	auto it = npc_map.find(name);
+	return (it == npc_map.end()) ? nullptr : it->second;
+}
+Zeal::EqStructures::Entity* EntityManager::GetPlayer(std::string  name) const {
 	auto it = player_map.find(name);
 	return (it == player_map.end()) ? nullptr : it->second;
 }

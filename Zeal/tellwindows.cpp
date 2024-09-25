@@ -142,20 +142,13 @@ std::string GetName(std::string& data)
     return "";  // Return an empty string if no match found
 }
 
-void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR msg, byte channel)
+void TellWindows::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, byte channel)
 {
     if (!ZealService::get_instance()->tells->enabled) //just early out if tell windows are not enabled
-    {
-        ZealService::get_instance()->hooks->hook_map["AddOutputText"]->original(AddOutputText)(wnd, u, msg, channel);
-        return;
-    }
+            return;
     if (channel == 1 || channel==52) //tell channel
     {
-        int multiByteSize = WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, NULL, 0, NULL, NULL);
-        char* multiByteStr = new char[multiByteSize];
-        WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, multiByteStr, multiByteSize, NULL, NULL);
-        std::string msg_data = multiByteStr;
-        std::string name = GetName(msg_data);
+        std::string name = GetName(msg);
         if (name.length())
         {
             name[0] = std::toupper(name[0]);
@@ -178,7 +171,6 @@ void __fastcall AddOutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR
             }
         }
     }
-    ZealService::get_instance()->hooks->hook_map["AddOutputText"]->original(AddOutputText)(wnd, u, msg, channel);
 }
 
 
@@ -253,10 +245,10 @@ void DeactivateMainUI()
 TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
 {
     zeal->hooks->Add("GetActiveChatWindow", 0x425D27, GetActiveChatWindow, hook_type_replace_call);//hook to fix item linking to tell windows if always chat here is selected anywhere
-    zeal->hooks->Add("AddOutputText", 0x4139A2, AddOutputText, hook_type_detour);
     zeal->hooks->Add("DeactivateMainUI", 0x4a7705, DeactivateMainUI, hook_type_detour); //clean up tell windows just before they save
     zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
     zeal->callbacks->AddGeneric([this]() { LoadUI(); }, callback_type::InitUI);
+    zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, byte channel) { this->AddOutputText(wnd, msg, channel); });
 
     zeal->commands_hook->Add("/tellwindows", {}, "Toggle tell windows",
         [this](std::vector<std::string>& args) {
