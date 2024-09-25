@@ -1216,7 +1216,50 @@ namespace Zeal
 			std::ostringstream oss;
 			oss << std::put_time(&timeinfo, "%Y-%m-%d_%H-%M-%S");
 			return oss.str();
-		}		
+		}
+		bool use_item(int item_index)
+		{
+			Zeal::EqStructures::EQCHARINFO* chr = Zeal::EqGame::get_char_info();
+			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+			if (!chr || !self)
+			{
+				Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "[Fatal Error] Failed to get charinfo for useitem!");
+				return false;
+			}
+			Zeal::EqStructures::EQITEMINFO* item = nullptr;
+			if (item_index < 0 || item_index > 29)
+			{
+				Zeal::EqGame::print_chat("useitem requires an item slot between 0 and 29, you tried to use %i", item_index);
+				return false;
+			}
+			if (item_index < 21)
+				item = chr->InventoryItem[item_index];
+			else
+				item = chr->InventoryPackItem[item_index - 22]; //-22 to make it back to 0 index
+
+			if (!item)
+			{
+				Zeal::EqGame::print_chat("There isn't an item at %i", item_index);
+				return false;
+			}
+			if (item->Type != 0 || !item->Common.SpellId)
+			{
+				Zeal::EqGame::print_chat("item %s does not have a spell attached to it.", item->Name);
+				return false;
+			}
+			if (!self->ActorInfo || self->ActorInfo->CastingSpellId != kInvalidSpellId)
+			{
+				Zeal::EqGame::print_chat(USERCOLOR_SPELLS, "You must stop casting to cast this spell!");
+				return false;
+			}
+			if (self->StandingState != Stance::Stand && self->StandingState != Stance::Sit)       //on quarm spell casting has autostand while sitting
+			{
+				Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "You must be standing to cast a spell.");
+				return false;
+			}
+			chr->cast(0xA, 0, (int*)&item, item_index < 21 ? item_index + 1 : item_index);
+			return true;
+		}
 		Zeal::EqStructures::Entity* get_active_corpse()
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::Active_Corpse;

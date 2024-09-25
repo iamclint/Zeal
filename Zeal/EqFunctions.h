@@ -155,5 +155,6 @@ namespace Zeal
 		EqUI::CXWndManager* get_wnd_manager();
 		std::vector<Zeal::EqStructures::RaidMember*> get_raid_list();
 		std::string generateTimestamp();
+		bool use_item(int item_index);
 	}
 }

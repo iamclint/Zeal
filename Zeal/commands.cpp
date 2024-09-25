@@ -187,53 +187,25 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		});
 	Add("/useitem", {}, "Use an item's right click function arugment is 0-29 which indicates the slot",
 		[](std::vector<std::string>& args) {
-			Zeal::EqStructures::EQCHARINFO* chr = Zeal::EqGame::get_char_info();
+			Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-			if (!chr || !self)
+			if (!char_info || !self || !self->ActorInfo)
 			{
-				Zeal::EqGame::print_chat(USERCOLOR_SHOUT,"[Fatal Error] Failed to get charinfo for useitem!");
+				Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "[Fatal Error] Failed to get entity for useitem!");
 				return true;
 			}
 			int item_index = 0;
 			if (args.size() > 1 && Zeal::String::tryParse(args[1], &item_index))
 			{
-				Zeal::EqStructures::EQITEMINFO* item = nullptr;
-				if (item_index > 29) //just early out of it this is beyond your inventory indices
-				{
-					Zeal::EqGame::print_chat("useitem requires an item slot between 0 and 29, you tried to use %i", item_index);
+				if (char_info->Class == Zeal::EqEnums::ClassTypes::Bard && ZealService::get_instance()->melody->use_item(item_index))
 					return true;
-				}
-				if (item_index < 21)
-					item = chr->InventoryItem[item_index];
-				else
-					item = chr->InventoryPackItem[item_index-22]; //-22 to make it back to 0 index
-
-				if (!item)
-				{
-					Zeal::EqGame::print_chat("There isn't an item at %i", item_index);
-					return true;
-				}
-				if (item->Type != 0 || !item->Common.SpellId)
-				{
-					Zeal::EqGame::print_chat("item %s does not have a spell attached to it.", item->Name);
-					return true;
-				}
-				if (!self->ActorInfo || self->ActorInfo->CastingSpellId != kInvalidSpellId)
-				{
-					Zeal::EqGame::print_chat(USERCOLOR_SPELLS, "You must stop casting to cast this spell!");
-					return true;
-				}
-				if (self->StandingState != Stance::Stand && self->StandingState != Stance::Sit) { 	//on quarm spell casting has autostand while sitting
-					Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "You must be standing to cast a spell.");
-					return true;
-				}
-				chr->cast(0xA, 0, (int*)&item, item_index < 21 ? item_index + 1 : item_index);
+				Zeal::EqGame::use_item(item_index);
 			}
 			else
 			{
-				Zeal::EqGame::print_chat("useitem requires an item slot between 0 and 29");
+				Zeal::EqGame::print_chat("useitem requires an item slot between 0 and 29"); // Missing parameter to /useitem
 			}
-			return true;
+			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		}
 	);
 	Add("/autoinventory", { "/autoinv", "/ai" }, "Puts whatever is on your cursor into your inventory.",
