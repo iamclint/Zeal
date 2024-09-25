@@ -24,7 +24,14 @@ void EntityManager::Remove(struct Zeal::EqStructures::Entity* ent)
 	if (ent->Type==Zeal::EqEnums::EntityTypes::Player)
 	{
 		player_map.erase(ent->Name);
-		//Zeal::EqGame::print_chat("Removing player: %s count: %i", ent->Name, player_map.size());
+	}
+	else if (ent->PetOwnerSpawnId)
+	{
+		pet_map.erase(ent->Name);
+	}
+	else if (ent->Type == Zeal::EqEnums::EntityTypes::NPC)
+	{
+		npc_map.erase(ent->Name);
 	}
 }
 
