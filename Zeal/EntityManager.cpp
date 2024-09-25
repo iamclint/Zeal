@@ -5,52 +5,32 @@
 
 void EntityManager::Add(struct Zeal::EqStructures::Entity* ent)
 {
-	if (ent->Type == Zeal::EqEnums::EntityTypes::Player)
-	{
-		player_map[ent->Name] = ent;
-	}
-	else if (ent->PetOwnerSpawnId)
-	{
-		pet_map[ent->Name] = ent;
-	}
-	else if (ent->Type == Zeal::EqEnums::EntityTypes::NPC)
-	{
-		npc_map[ent->Name] = ent;
-	}
+	entity_map[ent->Name] = ent;
+	entity_id_map[ent->SpawnId] = ent;
 }
 
 void EntityManager::Remove(struct Zeal::EqStructures::Entity* ent)
 {
-	if (ent->Type==Zeal::EqEnums::EntityTypes::Player)
-	{
-		player_map.erase(ent->Name);
-	}
-	else if (ent->PetOwnerSpawnId)
-	{
-		pet_map.erase(ent->Name);
-	}
-	else if (ent->Type == Zeal::EqEnums::EntityTypes::NPC)
-	{
-		npc_map.erase(ent->Name);
-	}
+	entity_map.erase(ent->Name);
+	entity_id_map.erase(ent->SpawnId);
 }
 
-Zeal::EqStructures::Entity* EntityManager::GetPet(std::string name) const {
-	auto it = pet_map.find(name);
-	return (it == pet_map.end()) ? nullptr : it->second;
+Zeal::EqStructures::Entity* EntityManager::Get(std::string  name) const {
+	auto it = entity_map.find(name);
+	return (it == entity_map.end()) ? nullptr : it->second;
 }
-Zeal::EqStructures::Entity* EntityManager::GetNPC(std::string name) const {
-	auto it = npc_map.find(name);
-	return (it == npc_map.end()) ? nullptr : it->second;
-}
-Zeal::EqStructures::Entity* EntityManager::GetPlayer(std::string  name) const {
-	auto it = player_map.find(name);
-	return (it == player_map.end()) ? nullptr : it->second;
+Zeal::EqStructures::Entity* EntityManager::Get(WORD id) const
+{
+	auto it = entity_id_map.find(id);
+	return (it == entity_id_map.end()) ? nullptr : it->second;
 }
 
 void EntityManager::Dump() const {
-	for (const auto& [key, value] : player_map)
-		Zeal::EqGame::print_chat("name: %s, entity: 0x%08x", key.c_str(), reinterpret_cast<uint32_t>(value));
+	for (const auto& [key, value] : entity_map)
+	{
+		if (value->Type==Zeal::EqEnums::EntityTypes::Player)
+			Zeal::EqGame::print_chat("name: %s, entity: 0x%08x", key.c_str(), reinterpret_cast<uint32_t>(value));
+	}
 }
 
 EntityManager::EntityManager(class ZealService* zeal, class IO_ini* ini)

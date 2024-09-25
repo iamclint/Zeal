@@ -2,6 +2,7 @@
 #include "EqStructures.h"
 #include "EqAddresses.h"
 #include "EqFunctions.h"
+#include "EqPackets.h"
 #include "Zeal.h"
 CallbackManager::~CallbackManager()
 {
@@ -231,6 +232,33 @@ void __fastcall OutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR ms
 	zeal->hooks->hook_map["AddOutputText"]->original(OutputText)(wnd, u, msg, channel);
 }
 
+///*000*/	UINT16	target;
+///*002*/	UINT16	source;
+///*004*/	UINT16	type;
+///*006*/	INT16	spellid;
+///*008*/	INT16	damage;
+///*00A*/	float	force;
+///*00E*/	float	sequence; // see above notes in Action_Struct
+///*012*/	float	pushup_angle; // associated with force.  Sine of this angle, multiplied by force, will be z push.
+/// 
+void CallbackManager::AddReportSuccessfulHit(std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal)> callback_function)
+{
+	ReportSuccessfulHit_functions.push_back(callback_function);
+}
+void CallbackManager::invoke_ReportSuccessfulHit(Zeal::Packets::Damage_Struct* dmg, int heal)
+{
+	auto em = ZealService::get_instance()->entity_manager.get();
+	
+	for (auto& fn : ReportSuccessfulHit_functions)
+		fn(em->Get(dmg->source), em->Get(dmg->target), dmg->type, dmg->spellid, dmg->damage, heal);
+}
+
+void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int heal)
+{
+	ZealService::get_instance()->callbacks->invoke_ReportSuccessfulHit(dmg, heal);
+	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, heal);
+}
+
 CallbackManager::CallbackManager(ZealService* zeal)
 {
 	zeal->hooks->Add("AddDeferred", 0x59E000, AddDeferred, hook_type_detour); //render in this hook so damage is displayed behind ui
@@ -251,4 +279,5 @@ CallbackManager::CallbackManager(ZealService* zeal)
 	zeal->hooks->Add("EQPlayer", 0x506802, EQPlayer, hook_type_detour);
 	zeal->hooks->Add("EQPlayerDeconstruct", 0x50723D, EQPlayerDeconstruct, hook_type_detour);
 	zeal->hooks->Add("AddOutputText", 0x4139A2, OutputText, hook_type_detour);
+	zeal->hooks->Add("ReportSuccessfulHit", 0x5297D2, ReportSuccessfulHit, hook_type_detour);
 }

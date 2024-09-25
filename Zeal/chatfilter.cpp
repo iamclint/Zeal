@@ -435,7 +435,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
             std::string name = GetNameDamage(data);
             if (!name.length())
                 return false;
-            Zeal::EqStructures::Entity* pet_ent = zeal->entity_manager->GetPet(name +"000"); //not the best method but works
+            Zeal::EqStructures::Entity* pet_ent = zeal->entity_manager->Get(name +"000"); //not the best method but works
             if (pet_ent && pet_ent->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
                 return true;
             return false;

@@ -25,7 +25,7 @@ struct DamageData
 class FloatingDamage
 {
 public:
-	void add_damage(int* dmg, int heal);
+	void add_damage(struct Zeal::EqStructures::Entity* source, struct  Zeal::EqStructures::Entity* target, short dmg, int heal, short spell_id);
 	void callback_deferred();
 	void set_enabled(bool enable);
 	bool enabled;

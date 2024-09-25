@@ -154,30 +154,20 @@ void FloatingDamage::callback_deferred()
 	}
 }
 
-void FloatingDamage::add_damage(int* dmg_ptr, int heal)
+void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, short dmg, int heal, short spell_id)
 {
 	if (!enabled)
 		return;
-	Zeal::Packets::Damage_Struct* dmg = (Zeal::Packets::Damage_Struct*)dmg_ptr;
-	if (dmg && ((int)dmg->damage > 0 || heal>0))
+	if ((int)dmg > 0 || heal>0)
 	{
-		Zeal::EqStructures::Entity* ent = Zeal::EqGame::get_entity_by_id(dmg->target);
-		Zeal::EqStructures::Entity* src = Zeal::EqGame::get_entity_by_id(dmg->source);
-		if (ent)
+		if (target)
 		{
 			bool is_me = false;
-			if (src && src == Zeal::EqGame::get_controlled())
+			if (source && source == Zeal::EqGame::get_controlled())
 				is_me = true;
-			damage_numbers[ent].push_back(DamageData(dmg->damage, is_me, dmg->spellid > 0, heal));
+			damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal));
 		}
 	}
-}
-
-
-void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int heal)
-{
-	ZealService::get_instance()->floating_damage->add_damage((int*)dmg, heal);
-	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, heal);
 }
 
 void FloatingDamage::set_enabled(bool _enabled)
@@ -193,6 +183,7 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 		ini->setValue<bool>("Zeal", "FloatingDamage", true);
 	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
 	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::AddDeferred);
+	zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal) { add_damage(source, target, damage, heal, spell_id); });
 	zeal->commands_hook->Add("/fcd", {}, "Toggles floating combat text or adjusts the font size with argument",
 		[this, ini](std::vector<std::string>& args) {
 			int new_size = 5;
@@ -212,7 +203,7 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 			return true;
 		});
 
-	zeal->hooks->Add("ReportSuccessfulHit", 0x5297D2, ReportSuccessfulHit, hook_type_detour);
+	
 	
 	//zeal->callbacks->add_generic([this]() { callback_render();  }, callback_type::Render);
 }

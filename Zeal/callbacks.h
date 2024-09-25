@@ -1,5 +1,6 @@
 #pragma once
 #include "EqStructures.h"
+#include "EqPackets.h"
 #include "hook_wrapper.h"
 #include "memory.h"
 #include <functional>
@@ -26,7 +27,8 @@ enum class callback_type
 	DXResetComplete,
 	EntitySpawn,
 	EntityDespawn,
-	AddOutputText
+	AddOutputText,
+	ReportSuccessfulHit
 };
 class CallbackManager
 {
@@ -37,6 +39,8 @@ public:
 	void AddDelayed(std::function<void()> callback_function, int ms);
 	void AddEntity(std::function<void(struct Zeal::EqStructures::Entity*)> callback_function, callback_type cb);
 	void AddOutputText(std::function<void(struct Zeal::EqUI::ChatWnd*& wnd, std::string msg, BYTE channel)> callback_function);
+	void AddReportSuccessfulHit(std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal)> callback_function);
+	void invoke_ReportSuccessfulHit(struct Zeal::Packets::Damage_Struct* dmg, int heal);
 	void invoke_player(struct Zeal::EqStructures::Entity* ent, callback_type cb);
 	void invoke_generic(callback_type fn);
 	bool invoke_packet(callback_type fn, UINT opcode, char* buffer, UINT len);
@@ -53,5 +57,6 @@ private:
 	std::unordered_map<callback_type, std::vector<std::function<bool(UINT, BOOL)>>> cmd_functions;
 	std::unordered_map<callback_type, std::vector<std::function<void(struct Zeal::EqStructures::Entity*)>>> player_spawn_functions;
 	std::vector<std::function<void(struct Zeal::EqUI::ChatWnd*& wnd,std::string msg, BYTE channel)>> output_text_functions;
+	std::vector < std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* victim, WORD type, short spell_id, short damage, int heal)>> ReportSuccessfulHit_functions;
 };
 
