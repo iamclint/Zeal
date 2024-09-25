@@ -40,7 +40,8 @@
 
 constexpr int RETRY_COUNT_REWIND_LIMIT = 8;  // Will rewind up to 8 times.
 constexpr int RETRY_COUNT_END_LIMIT = 15;  // Will terminate if 15 retries w/out a 'success'.
-constexpr ULONGLONG MELODY_SONG_INTERVAL = 150; // Interval between songs. If too low, the song may not fire.
+constexpr ULONGLONG MELODY_SONG_INTERVAL = 150; // Interval between songs and after clickies. If too low, the song may not fire.
+constexpr ULONGLONG USE_ITEM_QUEUE_TIMEOUT = 3500 + MELODY_SONG_INTERVAL; // Max duration a useitem will stay queued for before giving up (mostly to prevent ultra-stale clicks).
 
 bool Melody::start(const std::vector<int>& new_songs)
 {
@@ -80,6 +81,7 @@ bool Melody::start(const std::vector<int>& new_songs)
     current_index = -1;
     retry_count = 0;
     casting_melody_spell_id = kInvalidSpellId;
+    use_item_index = -1;
     if (songs.size())
         Zeal::EqGame::print_chat(USERCOLOR_SPELLS, "You begin playing a melody.");
     return true;
@@ -93,8 +95,20 @@ void Melody::end()
         songs.clear();
         retry_count = 0;
         casting_melody_spell_id = kInvalidSpellId;
+        use_item_index = -1;
         Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Your melody has ended.");
     }
+}
+
+bool Melody::use_item(int item_index)
+{
+    if (songs.empty() || item_index < 0 || item_index > 29)
+        return false;
+
+    // Set fields so use_item(item_index) will execute during tick().
+    use_item_index = item_index;
+    use_item_timeout = GetTickCount64() + USE_ITEM_QUEUE_TIMEOUT;
+    return true;
 }
 
 void Melody::handle_stop_cast_callback(BYTE reason, WORD spell_id)
@@ -158,6 +172,7 @@ void Melody::tick()
     static ULONGLONG start_of_cast_timestamp = casting_visible_timestamp;
 
     ULONGLONG current_timestamp = GetTickCount64();
+
     if (!Zeal::EqGame::Windows->Casting || Zeal::EqGame::Windows->Casting->IsVisible)
     {
         casting_visible_timestamp = current_timestamp;
@@ -181,6 +196,17 @@ void Melody::tick()
         return;
 
     stop_current_cast();  //abort bard song if active.
+
+    // Execute a pending use_item() call here
+    if (use_item_index >= 0)
+    {
+        bool success = (use_item_timeout >= current_timestamp) && Zeal::EqGame::use_item(use_item_index);
+        use_item_index = -1;
+        if (success) {
+            casting_visible_timestamp = current_timestamp; // Pushes back the start of next song by MELODY_SONG_INTERVAL ms.
+            return;
+        }
+    }
 
     // Cast the next song in the melody
     current_index++;
@@ -244,6 +270,29 @@ Melody::Melody(ZealService* zeal, IO_ini* ini)
             }
             start(new_songs);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
+        });
+
+    // Hooking '/stopsong' to address a client bug: '/stopsong' during a clicky-casted causes client/server desync in casting state:
+    // - Client cast bar disappears, but the spell is not interrupted on the server side.
+    // - To fix, we will just ignore '/stopsong' unless it's actually a song you have memorized
+    zeal->commands_hook->Add("/stopsong", {}, "Stops the current bard song from casting",
+        [this](std::vector<std::string>& args) {
+
+            Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+            if (!char_info || Zeal::EqGame::get_char_info()->Class != Zeal::EqEnums::ClassTypes::Bard)
+                return false; // not a bard, fall-through to regular '/stopsong' logic
+
+            Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+            if (!self || !self->ActorInfo || self->ActorInfo->CastingSpellId == kInvalidSpellId)
+                return false; // not casting anything, fall-through to regular '/stopsong' logic
+
+            for (int gem = 0; gem < EQ_NUM_SPELL_GEMS; gem++) {
+                if (self->ActorInfo->CastingSpellId == char_info->MemorizedSpell[gem]) {
+                    return false; // casting a song from our spell gems, fall-through to regular '/stopsong' logic to interrupt it
+                }
+            }
+
+            return true; // casting a non-gem'd spell (likely a clicky). Prevent '/stopsong' from running.
         });
 }
 
