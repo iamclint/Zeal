@@ -225,9 +225,8 @@ void __fastcall OutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR ms
 {
 	ZealService* zeal = ZealService::get_instance();
 	int multiByteSize = WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, NULL, 0, NULL, NULL);
-	char* multiByteStr = new char[multiByteSize];
-	WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, multiByteStr, multiByteSize, NULL, NULL);
-	std::string msg_data = multiByteStr;
+	std::string msg_data(multiByteSize, '\0');
+	WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, msg_data.data(), multiByteSize, NULL, NULL);
 	zeal->callbacks->invoke_outputtext(wnd, msg_data, channel);
 	zeal->hooks->hook_map["AddOutputText"]->original(OutputText)(wnd, u, msg, channel);
 }
