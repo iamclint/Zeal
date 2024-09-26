@@ -505,18 +505,14 @@ void ZoneMap::render_map()
         device->DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices, line_count);
     }
 
-    render_labels();
-
-     if (position_vertex_buffer) {
-        int triangle_count = render_update_position_buffer();
-        device->SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
-        device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, triangle_count);
-    }
-
     if (marker_vertex_buffer) {
         device->SetStreamSource(0, marker_vertex_buffer, sizeof(MapVertex));
         device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, kMarkerCount);
     }
+
+    render_labels();
+
+    render_positions();
 }
 
 void ZoneMap::render_background() {
@@ -675,6 +671,29 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
     }
 }
 
+void ZoneMap::render_group_member_labels() {
+    if (!map_show_group_labels)
+        return;
+
+    if (!label_font) {
+        render_load_font();
+        if (!label_font)
+            return;
+    }
+
+    for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
+        Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
+        if ((strlen(groupNames[i]) == 0) || !member)
+            continue;  // Not a valid group member (or member = nullptr when out of zone).
+
+        // Writes the character group number (F2 - F6) centered at the character position.
+        int loc_y = static_cast<int>(member->Position.x + 0.5f);  // Position is y,x,z.
+        int loc_x = static_cast<int>(member->Position.y + 0.5f);  // Also need to negate it below.
+        const char label[] = { i + '2', 0};
+        render_label_text(label,-loc_y, -loc_x, D3DCOLOR_XRGB(255, 255, 255));
+    }
+}
+
 void ZoneMap::add_raid_marker_vertices(float screen_y, float screen_x, float size,
     D3DCOLOR color, std::vector<MapVertex>& vertices) const {
 
@@ -721,7 +740,7 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
     // TODO: Review color coding to be more distinct. Possibly by class.
     const DWORD kUngrouped = 0xffffffff;
     const D3DCOLOR kColorLeader = D3DCOLOR_XRGB(255, 153, 153);
-    const D3DCOLOR kColorUngrouped = D3DCOLOR_XRGB(255, 204, 153);
+    const D3DCOLOR kColorUngrouped = D3DCOLOR_XRGB(240, 240, 240);
 
     const Zeal::EqStructures::RaidMember* raidMembers =
         reinterpret_cast<const Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
@@ -756,16 +775,20 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
     }
 }
 
-int ZoneMap::render_update_position_buffer() {
+
+void ZoneMap::render_positions() {
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (!position_vertex_buffer || !self) {
-        return 0;
+    if (!position_vertex_buffer || !self || !device) {
+        return;
     }
 
     // Populate a vector with D3DPT_TRIANGLELIST vertices.
     std::vector<MapVertex> position_vertices;
     add_raid_member_position_vertices(position_vertices);
     add_group_member_position_vertices(position_vertices);
+
+    int other_triangle_vertices = position_vertices.size();
 
     // Translate loc (world) coordinates to screen coordinates. Note that the game
     // world coordinates are negated (polarity flipped) to match the map data.
@@ -787,18 +810,30 @@ int ZoneMap::render_update_position_buffer() {
 
     int copy_size = position_vertices.size() * sizeof(position_vertices[0]);
     if (copy_size > kPositionBufferSize)
-        return 0; // Error. Don't overrun buffer, just hide the markers.
+        return; // Error. Don't overrun buffer, just hide the markers.
 
     BYTE* data = nullptr;
     if (FAILED(position_vertex_buffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
         position_vertex_buffer->Release();
         position_vertex_buffer = nullptr;
-        return 0;
+        return;
     }
     memcpy(data, position_vertices.data(), copy_size);
     position_vertex_buffer->Unlock();
 
-    return position_vertices.size() / 3;  // Three vertices per triagle in D3DPT_TRIANGLELIST.
+    device->SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
+
+    // First draw the "other" (raid, group) markers.
+    int other_triangle_count = other_triangle_vertices / 3; // D3DPT_TRIANGLELIST
+    if (other_triangle_count)
+        device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, other_triangle_count);
+
+    // Then draw the group labels (on top of markers but below self marker).
+    render_group_member_labels();
+
+    // And finally draw the self marker. Three vertices per triangle in D3DPT_TRIANGLELIST.
+    int self_triangle_count = position_vertices.size() / 3 - other_triangle_count;
+    device->DrawPrimitive(D3DPT_TRIANGLELIST, other_triangle_vertices, self_triangle_count);
 }
 
 bool ZoneMap::render_check_for_zoom_recenter() {
@@ -1131,6 +1166,18 @@ void ZoneMap::set_show_group(bool enable, bool update_default) {
     update_ui_options();
 }
 
+void ZoneMap::set_show_group_labels(bool enable, bool update_default) {
+    if (map_show_group_labels != enable) {
+        map_show_group_labels = enable;
+        zone_id = kInvalidZoneId;  // Triggers reload.
+    }
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapShowGroupLabels", map_show_group_labels);
+
+    update_ui_options();
+}
+
 void ZoneMap::set_show_raid(bool enable, bool update_default) {
     if (map_show_raid != enable) {
         map_show_raid = enable;
@@ -1315,6 +1362,8 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<bool>("Zeal", "MapEnabled", false);
     if (!ini->exists("Zeal", "MapShowGroup"))
         ini->setValue<bool>("Zeal", "MapShowGroup", true);
+    if (!ini->exists("Zeal", "MapShowGroupLabels"))
+        ini->setValue<bool>("Zeal", "MapShowGroupLabels", false);
     if (!ini->exists("Zeal", "MapShowRaid"))
         ini->setValue<bool>("Zeal", "MapShowRaid", false);
     if (!ini->exists("Zeal", "MapDataMode"))
@@ -1343,6 +1392,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
     enabled = ini->getValue<bool>("Zeal", "MapEnabled");
     map_show_group = ini->getValue<bool>("Zeal", "MapShowGroup");
+    map_show_group_labels = ini->getValue<bool>("Zeal", "MapShowGroupLabels");
     map_show_raid = ini->getValue<bool>("Zeal", "MapShowRaid");
     map_data_mode = MapDataMode::e(ini->getValue<int>("Zeal", "MapDataMode"));
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
@@ -1384,6 +1434,7 @@ void ZoneMap::save_ini()
 
     ini->setValue<bool>("Zeal", "MapEnabled", enabled);
     ini->setValue<bool>("Zeal", "MapShowGroup", map_show_group);
+    ini->setValue<bool>("Zeal", "MapShowGroupLabels", map_show_group_labels);
     ini->setValue<bool>("Zeal", "MapShowRaid", map_show_raid);
     ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(map_data_mode));
     ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
@@ -1558,8 +1609,18 @@ void ZoneMap::parse_map_data_mode(const std::vector<std::string>& args) {
 }
 
 void ZoneMap::parse_show_group(const std::vector<std::string>& args) {
-    set_show_group(!is_show_group_enabled(), false);
-    Zeal::EqGame::print_chat("Showing group members is %s", is_show_group_enabled() ? "ON" : "OFF");
+    if (args.size() == 2) {
+        set_show_group(!is_show_group_enabled(), false);
+        Zeal::EqGame::print_chat("Showing group members is %s", is_show_group_enabled() ? "ON" : "OFF");
+    }
+    else if (args.size() == 3 && args[2] == "labels") {
+        set_show_group_labels(!is_show_group_labels_enabled(), false);
+        Zeal::EqGame::print_chat("Showing group member labels is %s",
+            is_show_group_labels_enabled() ? "ON" : "OFF");
+    }
+    else {
+        Zeal::EqGame::print_chat("Usage: /map show_group (toggles on/off), /map show_group labels (toggles)");
+    }
 }
 
 void ZoneMap::parse_show_raid(const std::vector<std::string>& args) {
@@ -1791,8 +1852,8 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
     Zeal::EqGame::print_chat("level: zone: %i, index: %i, z_max: %i, z_min: %i", map_level_zone_id, map_level_index, clip_max_z, clip_min_z);
-    Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, show_group: %i, show_raid: %i",
-        position_size, marker_size, map_show_group, map_show_raid);
+    Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, show_group: %i, %i, show_raid: %i",
+        position_size, marker_size, map_show_group, map_show_group_labels, map_show_raid);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f", scale_factor, offset_y, offset_x, zoom_factor);
     Zeal::EqGame::print_chat("dyn_labels_size: %i, dyn_labels_zone_id: %i, data_mode: %i, data_cache: %i", 
         dynamic_labels_list.size(), dynamic_labels_zone_id, map_data_mode, map_data_cache.size());
