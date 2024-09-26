@@ -62,6 +62,7 @@ bool Melody::start(const std::vector<int>& new_songs)
     }
 
     //confirm all gem indices in new_songs are valid indices with memorized spells.
+    std::vector<int> valid_songs;  // Valid, non-empty gem indices.
     for (const int& gem_index : new_songs)
     {
         if (gem_index < 0 || gem_index >= EQ_NUM_SPELL_GEMS)
@@ -71,13 +72,17 @@ bool Melody::start(const std::vector<int>& new_songs)
         }
 
         if (char_info->MemorizedSpell[gem_index] == -1)
-        {
-            Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Error: spell gem %i is empty", gem_index + 1);
-            return false;
-        }
+            Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Error: skipping empty spell gem %i", gem_index + 1);
+        else
+            valid_songs.push_back(gem_index);
     }
 
-    songs = new_songs;
+    if (valid_songs.empty()) {
+        Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Error: no valid songs");
+        return false;
+    }
+
+    songs = valid_songs;
     current_index = -1;
     retry_count = 0;
     casting_melody_spell_id = kInvalidSpellId;
