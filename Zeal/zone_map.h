@@ -35,6 +35,7 @@ public:
 	bool is_enabled() const { return enabled; }
 	void set_enabled(bool enable, bool update_default = false);
 	void set_show_group(bool enable, bool update_default = true);
+	void set_show_group_labels(bool enable, bool update_default = true);
 	void set_show_raid(bool enable, bool update_default = true);
 	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
@@ -52,6 +53,7 @@ public:
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
 
 	bool is_show_group_enabled() const { return map_show_group; }
+	bool is_show_group_labels_enabled() const { return map_show_group_labels; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
 	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
 	int get_background() const { return static_cast<int>(map_background_state); }
@@ -143,7 +145,8 @@ private:
 	void render_load_labels(const ZoneMapData& zone_map_data);
 	void render_map();
 	void render_background();
-	int render_update_position_buffer();
+	void render_positions();
+	void render_group_member_labels();
 	void render_update_marker_buffer();
 	void render_labels();
 	void render_label_text(const char* label, int y, int x, D3DCOLOR font_color);
@@ -162,6 +165,7 @@ private:
 
 	bool enabled = false;
 	bool map_show_group = false;
+	bool map_show_group_labels = false;
 	bool map_show_raid = false;
 	BackgroundType::e map_background_state = BackgroundType::kClear;
 	float map_background_alpha = kDefaultBackgroundAlpha;
