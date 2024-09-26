@@ -22,6 +22,16 @@ struct CustomFilter {
     ~CustomFilter() {  }
 };
 
+struct damage_data
+{
+	Zeal::EqStructures::Entity* source;
+	Zeal::EqStructures::Entity* target;
+	WORD type; 
+	short spell_id; 
+	short damage; 
+	int heal;
+};
+
 class chatfilter
 {
   public:
@@ -31,5 +41,7 @@ class chatfilter
 	void LoadSettings(Zeal::EqUI::CChatManager* cm);
 	bool isExtendedCM(int channelMap, int applyOffset = 0);
 	bool isStandardCM(int channelMap, int applyOffset = 0);
+	bool isDamage;
+	damage_data damageData;
 	~chatfilter();
 };

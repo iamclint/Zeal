@@ -31,166 +31,6 @@ bool chatfilter::isStandardCM(int channelMap, int applyOffset)
     return false;
 }
 
-//int32_t __fastcall ColorToChannelMap(int this_, int u, uint16_t colorID)
-//{
-//    chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
-//	uint32_t channelMap;
-//
-//    for (auto& ec : cf->Extended_ChannelMaps)
-//    {
-//        if (colorID == ec.colorID)
-//        {
-//            return ec.channelMap;
-//        }
-//    }
-//
-//    switch (colorID)
-//    {
-//    case USERCOLOR_SAY:
-//    case USERCOLOR_ECHO_SAY:
-//        channelMap = 0;
-//        break;
-//    case USERCOLOR_TELL:
-//    case USERCOLOR_ECHO_TELL:
-//        channelMap = 1;
-//        break;
-//    case USERCOLOR_GROUP:
-//    case USERCOLOR_ECHO_GROUP:
-//        channelMap = 2;
-//        break;
-//    case USERCOLOR_GUILD:
-//    case USERCOLOR_ECHO_GUILD:
-//        channelMap = 4;
-//        break;
-//    case USERCOLOR_OOC:
-//    case USERCOLOR_ECHO_OOC:
-//        channelMap = 5;
-//        break;
-//    case USERCOLOR_AUCTION:
-//    case USERCOLOR_ECHO_AUCTION:
-//        channelMap = 6;
-//        break;
-//    case USERCOLOR_SHOUT:
-//    case USERCOLOR_ECHO_SHOUT:
-//        channelMap = 7;
-//        break;
-//    case USERCOLOR_EMOTE:
-//    case USERCOLOR_ECHO_EMOTE:
-//        channelMap = 8;
-//        break;
-//    case USERCOLOR_SPELLS:
-//        channelMap = 10;
-//        break;
-//    case USERCOLOR_YOU_HIT_OTHER:
-//        channelMap = 9;
-//        break;
-//    case USERCOLOR_OTHER_HIT_YOU:
-//        channelMap = 0x18;
-//        break;
-//    case USERCOLOR_YOU_MISS_OTHER:
-//        channelMap = 0x17;
-//        break;
-//    case USERCOLOR_OTHER_MISS_YOU:
-//        channelMap = 0x19;
-//        break;
-//    case USERCOLOR_SKILLS:
-//        channelMap = 0xb;
-//        break;
-//    case USERCOLOR_DISCIPLINES:
-//        channelMap = 0x1f;
-//        break;
-//    case USERCOLOR_YOUR_DEATH:
-//        channelMap = 0x1c;
-//        break;
-//    case USERCOLOR_OTHER_DEATH:
-//        channelMap = 0x1d;
-//        break;
-//    case USERCOLOR_OTHER_HIT_OTHER:
-//        channelMap = 0x1a;
-//        break;
-//    case USERCOLOR_OTHER_MISS_OTHER:
-//        channelMap = 0x1b;
-//        break;
-//    case USERCOLOR_NON_MELEE:
-//        channelMap = 0x28;
-//        break;
-//    case USERCOLOR_SPELL_WORN_OFF:
-//        channelMap = 0x27;
-//        break;
-//    case USERCOLOR_OTHERS_SPELLS:
-//        channelMap = 0x24;
-//        break;
-//    case USERCOLOR_SPELL_FAILURE:
-//        channelMap = 0x25;
-//        break;
-//    case USERCOLOR_CHAT_1:
-//    case USERCOLOR_ECHO_CHAT_1:
-//        channelMap = 0xc;
-//        break;
-//    case USERCOLOR_CHAT_2:
-//    case USERCOLOR_ECHO_CHAT_2:
-//        channelMap = 0xd;
-//        break;
-//    case USERCOLOR_CHAT_3:
-//    case USERCOLOR_ECHO_CHAT_3:
-//        channelMap = 0xe;
-//        break;
-//    case USERCOLOR_CHAT_4:
-//    case USERCOLOR_ECHO_CHAT_4:
-//        channelMap = 0xf;
-//        break;
-//    case USERCOLOR_CHAT_5:
-//    case USERCOLOR_ECHO_CHAT_5:
-//        channelMap = 0x10;
-//        break;
-//    case USERCOLOR_CHAT_6:
-//    case USERCOLOR_ECHO_CHAT_6:
-//        channelMap = 0x11;
-//        break;
-//    case USERCOLOR_CHAT_7:
-//    case USERCOLOR_ECHO_CHAT_7:
-//        channelMap = 0x12;
-//        break;
-//    case USERCOLOR_CHAT_8:
-//    case USERCOLOR_ECHO_CHAT_8:
-//        channelMap = 0x13;
-//        break;
-//    case 299:
-//    case USERCOLOR_ECHO_CHAT_9:
-//        channelMap = 0x14;
-//        break;
-//    case 300:
-//    case USERCOLOR_ECHO_CHAT_10:
-//        channelMap = 0x15;
-//        break;
-//    case USERCOLOR_MELEE_CRIT:
-//        channelMap = 0x1e;
-//        break;
-//    case USERCOLOR_SPELL_CRIT:
-//        channelMap = 0x26;
-//        break;
-//    case USERCOLOR_TOO_FAR_AWAY:
-//        channelMap = 0x20;
-//        break;
-//    case USERCOLOR_NPC_RAMAGE:
-//        channelMap = 0x21;
-//        break;
-//    case USERCOLOR_NPC_FURRY:
-//        channelMap = 0x22;
-//        break;
-//    case USERCOLOR_NPC_ENRAGE:
-//        channelMap = 0x23;
-//        break;
-//    case 0x147:
-//        channelMap = 3;
-//        break;
-//    default:  // The dreaded 'Other' Category
-//        channelMap = 0x16;
-//        break;
-//    }
-//  return channelMap; 
-//}
-
 void __fastcall ClearChannelMaps(Zeal::EqUI::CChatManager* cman, int u, Zeal::EqUI::ChatWnd* window)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
@@ -290,34 +130,6 @@ __declspec (naked) void FilterConditional(void)
     }
 }
 
-//int SelectWindow(Zeal::EqUI::CChatManager* cman, int ChannelMap)
-//{
-//    _asm //Save ECX
-//    {
-//        push ecx
-//    }
-//
-//    int window = 0;
-//
-//    chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
-//
-//    if (cf->isStandardCM(ChannelMap))
-//    {
-//        window = (int)&cman->ChannelMapWnd[ChannelMap];
-//    }
-//    else if (cf->isExtendedCM(ChannelMap))
-//    {
-//        int index = ChannelMap - 0x10000;
-//        window = (int)&cf->Extended_ChannelMaps.at(index).windowHandle;
-//    }
-//
-//    _asm
-//    {
-//        pop ecx
-//    }
-//    return window;
-//}
-
 int32_t __fastcall AddMenu(int this_, int u, Zeal::EqUI::ContextMenu* menu)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
@@ -384,21 +196,6 @@ void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
         }
         i++;
     }
-
-   /* for (int i = 0; i < cf->Extended_ChannelMaps.size(); i++)
-    {
-        int window_pos = 0;
-        for (int j = 0; j < cman->MaxChatWindows; j++)
-        {
-            if ((int)cman->ChatWindows[j] == cf->Extended_ChannelMaps.at(i).windowHandle)
-            {
-                std::string this_cmap = cmap + std::to_string(num + i);
-                ui_ini.setValue<int>("ChatManager", this_cmap, j);
-                break;
-            }
-        }
-    }*/
-
     ZealService::get_instance()->hooks->hook_map["Deactivate"]->original(Deactivate)(cman, u);
 }
 
@@ -409,34 +206,34 @@ void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, BYTE 
         if (filter.isHandled(channel+0x100, msg))
             wnd = filter.windowHandle;
     }
+    isDamage = false;
 }
 
-std::string GetNameDamage(std::string& data)
-{
-    std::string lower_msg = data;
-    //std::transform(lower_msg.begin(), lower_msg.end(), lower_msg.begin(), ::tolower);
-
-    std::regex damage_pattern(R"((?:^|\]\s*)(\b\w+\b)+[\w\W]+(?:points of damage|but misses))");
-    std::smatch match;
-
-    if (std::regex_search(lower_msg, match, damage_pattern))
-        return match[1].str(); 
-    return "";
-}
+//std::string GetNameDamage(std::string& data)
+//{
+//    std::string lower_msg = data;
+//    //std::transform(lower_msg.begin(), lower_msg.end(), lower_msg.begin(), ::tolower);
+//
+//    std::regex damage_pattern(R"((?:^|\]\s*)(\b\w+\b)+[\w\W]+(?:points of damage|but misses))");
+//    std::smatch match;
+//
+//    if (std::regex_search(lower_msg, match, damage_pattern))
+//        return match[1].str(); 
+//    return "";
+//}
 
 
 chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 {
+    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal) { isDamage = true; damageData = { source, target, type, spell_id, damage, heal }; });
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short color, std::string data) { return color == USERCOLOR_RANDOM; }));
     Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short color, std::string data) { return color == USERCOLOR_LOOT; }));
     Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short color, std::string data) { return color == USERCOLOR_MONEY_SPLIT; }));
     Extended_ChannelMaps.push_back(CustomFilter("MyPet", 0x10003, [this, zeal](short color, std::string data)
         {
-            std::string name = GetNameDamage(data);
-            if (!name.length())
-                return false;
-            Zeal::EqStructures::Entity* pet_ent = zeal->entity_manager->Get(name +"000"); //not the best method but works
-            if (pet_ent && pet_ent->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
+            if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
+                return true;
+            if (isDamage && damageData.target && damageData.target->PetOwnerSpawnId && damageData.target->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
                 return true;
             return false;
         }));

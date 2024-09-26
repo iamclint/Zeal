@@ -232,7 +232,7 @@
       <Filter>Header Files\other</Filter>
     </ClInclude>
     <ClInclude Include="chatfilter.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
