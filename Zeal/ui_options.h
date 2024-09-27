@@ -6,13 +6,16 @@
 class ui_options
 {
 public:
+	Zeal::EqUI::BasicWnd* wnd = nullptr;
 	void UpdateOptions();
 	void UpdateOptionsMapOnly();
 	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_options();
 private:
+	bool isReady = false;
 	void InitUI();
 	void CleanUI();
+	void RenderUI();
 	void LoadSettings(class IO_ini* ini);
 	ui_manager* ui;
 };

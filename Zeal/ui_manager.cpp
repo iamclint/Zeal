@@ -151,7 +151,8 @@ void ui_manager::SetComboValue(std::string name, int value)
 {
 	if (combo_names.count(name) > 0)
 	{
-		ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name]->FirstChildWnd, 0, value);
+		//	ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name]->FirstChildWnd, 0, value); //this is crashing since firstchildwnd is null, may have to maintain the combo windows ourselves?
+		ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name], 0, value);
 	}
 }
 

@@ -531,7 +531,7 @@ void TargetRing::load_ini(IO_ini* ini)
 
 void TargetRing::callback_initui()
 {
-	targetRingTexture = LoadTexture("uifiles\\ZealTargetRing.tga");
+	targetRingTexture = LoadTexture("uifiles\\zeal\\targetrings\\ZealTargetRing.tga");
 }
 
 std::vector<std::string> GetTGAFiles(const std::string& directoryPath) {
