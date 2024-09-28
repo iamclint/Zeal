@@ -1971,6 +1971,7 @@ ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
 {
     load_ini(ini);
     zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
+    zeal->callbacks->AddGeneric([this]() { render_release_resources(); }, callback_type::DXReset);
     zeal->callbacks->AddGeneric([this]() { callback_zone(); }, callback_type::Zone);
     zeal->commands_hook->Add("/map", {}, "Controls map overlay",
         [this](const std::vector<std::string>& args) {
