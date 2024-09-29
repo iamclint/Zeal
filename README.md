@@ -320,19 +320,27 @@ toggle visible levels).  The /map commands include extra options like poi search
   - `/map off` - Turns map off
 
 #### Map size, position, and alignment
-The map is drawn to fit within rectangular limits view defined by a top left corner,
-a height, and a width. The zones have different aspect ratios, so some zones will scale
-to fill the height and others the width.  The alignment setting controls where
-the map goes when it is height constrained (top left, top center, top right).
+The map is drawn to fit within a rectangular viewport defined by a top left corner,
+a height, and a width specified as a percentage of the game window dimensions. The
+map viewport is relative to the game window and independent of the game /viewport,
+so the map can be placed anywhere in the game window.
+
+The easiest method for adjusting the map size is through the Zeal Map options
+tab sliders, but convenient toggling between map sizes (say small to large) is
+possible by setting up macros with /map size commands.
+
+The zones have different aspect ratios, so some zones will scale to fill the height
+and others the width.  The map alignment setting (top left, top center, top right)
+controls where the map is drawn when it is height constrained.
 
 * UI options sliders for top, left, height, and width and a combobox for alignment
 * Command examples:
-  - `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of screen dimensions
-  - `/map alignment center` aligns the aspect ratio constrained map to the top center of the window
+  - `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of game window dimensions
+  - `/map alignment center` aligns the aspect ratio constrained map to the top center of the viewport
 
 #### Map background
 The map supports four different options for the map background for contrast enhancement:
-clear (0) , dark (1), light (2), or tan (3).  Additionally, it supports alpha transparency.
+clear (0), dark (1), light (2), or tan (3).  Additionally, it supports alpha transparency.
 
 * UI options combo box for map background and slider for setting alpha as a percent
 * Key bind: "Toggle Map Background" - toggles through the four settings

@@ -140,6 +140,7 @@ private:
 
 	// The following methods execute as part of callback_render().
 	void render_release_resources();
+	void render_update_viewport(IDirect3DDevice8& device);
 	void render_load_map();
 	void render_load_font();
 	void render_load_labels(const ZoneMapData& zone_map_data);
@@ -186,6 +187,8 @@ private:
 	std::unordered_map<int, std::unique_ptr<CustomMapData>> map_data_cache;
 
 	D3DVIEWPORT8 viewport = {};  // On-screen coordinates of viewport.
+	DWORD render_target_width = 0;  // Full game window (ignores /viewport).
+	DWORD render_target_height = 0;
 	float scale_factor = 0;  // Conversion factors for map data to screen coordinates.
 	float zoom_factor = 1.f;
 	float offset_x = 0;

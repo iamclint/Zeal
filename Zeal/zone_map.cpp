@@ -218,6 +218,32 @@ void ZoneMap::render_release_resources() {
     }
 }
 
+void ZoneMap::render_update_viewport(IDirect3DDevice8& device) {
+    // Use a 'custom' viewport for the map so that it ignores the games /viewport
+    // settings and can draw outside of it. The rect/size scalefactors are relative
+    // to the entire game window (render target, ignores /viewport).
+    IDirect3DSurface8* surface;
+    device.GetRenderTarget(&surface);
+    D3DSURFACE_DESC description;
+    if (surface)
+        surface->GetDesc(&description);
+    else {
+        description.Width = 320;  // "safe" fallback values.
+        description.Height = 320;
+    }
+
+    render_target_width = description.Width;
+    render_target_height = description.Height;
+    const DWORD rect_left = static_cast<DWORD>(std::floor(map_rect_left * description.Width));
+    const DWORD rect_right = static_cast<DWORD>(std::ceil(map_rect_right * description.Width));
+    const DWORD rect_top = static_cast<DWORD>(std::floor(map_rect_top * description.Height));
+    const DWORD rect_bottom = static_cast<DWORD>(std::ceil(map_rect_bottom * description.Height));
+
+    viewport = D3DVIEWPORT8{ .X = rect_left, .Y = rect_top,
+        .Width = rect_right - rect_left, .Height = rect_bottom - rect_top,
+        .MinZ = 0.0f, .MaxZ = 1.0f };
+}
+
 void ZoneMap::render_load_map() {
     IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
     if (!device || !Zeal::EqGame::get_self())
@@ -247,11 +273,11 @@ void ZoneMap::render_load_map() {
     //   window_x[i] = (map_x[i] - min(map_x)) * window_size_x/map_size_x + window_x_offset
     //   window_x[i] = map_x[i] * scale_factor + offset where
     //     scale_factor = window_size_x/map_size_x and offset = window_x_offset - min(map_x)*scale_factor.
-    device->GetViewport(&viewport);  // Update viewport (drawable screen size and offset).
-    const float rect_left = std::floor(map_rect_left * viewport.Width) + viewport.X;
-    const float rect_right = std::ceil(map_rect_right * viewport.Width) + viewport.X - 1;
-    const float rect_top = std::floor(map_rect_top * viewport.Height) + viewport.Y;
-    const float rect_bottom = std::ceil(map_rect_bottom * viewport.Height) + viewport.Y - 1;
+    render_update_viewport(*device);
+    const float rect_left = static_cast<float>(viewport.X);
+    const float rect_right = rect_left + viewport.Width - 1;
+    const float rect_top = static_cast<float>(viewport.Y);
+    const float rect_bottom = rect_top + viewport.Height - 1;
 
     const float kPadding = 1.f;  // Small padding to prevent any clipping of edge lines.
     float rect_delta_x = rect_right - rect_left;
@@ -383,9 +409,9 @@ void ZoneMap::render_load_map() {
 
     // Create a worst-case sized Vertex buffer for live position updates.
     if (FAILED(device->CreateVertexBuffer(kPositionBufferSize,
-        D3DUSAGE_WRITEONLY,
+        D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC,
         kMapVertexFvfCode,
-        D3DPOOL_MANAGED,
+        D3DPOOL_DEFAULT,
         &position_vertex_buffer))) {
         return;
     }
@@ -494,6 +520,10 @@ void ZoneMap::render_map()
     if (!device || !line_vertex_buffer)
         return;
 
+    D3DVIEWPORT8 original_viewport;
+    device->GetViewport(&original_viewport);  // Stash viewport (game /viewport).
+    device->SetViewport(&viewport);  // Allows drawing map outside of /viewport region.
+
     device->SetTexture(0, NULL);  // Ensure no texture is bound
     device->SetVertexShader(kMapVertexFvfCode);
 
@@ -513,6 +543,7 @@ void ZoneMap::render_map()
     render_labels();
 
     render_positions();
+    device->SetViewport(&original_viewport);
 }
 
 void ZoneMap::render_background() {
@@ -648,7 +679,7 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
         return;
 
     const float kShrinkFactor = 0.8f;  // Make group members 20% smaller.
-    float size = position_size * min(viewport.Width, viewport.Height) * kShrinkFactor;
+    float size = position_size * min(render_target_width, render_target_height) * kShrinkFactor;
     size = max(5.f, size);  // Constrain so it remains visible.
 
     const D3DCOLOR kGroupColorLut[EQ_NUM_GROUP_MEMBERS] = {
@@ -689,7 +720,7 @@ void ZoneMap::render_group_member_labels() {
         // Writes the character group number (F2 - F6) centered at the character position.
         int loc_y = static_cast<int>(member->Position.x + 0.5f);  // Position is y,x,z.
         int loc_x = static_cast<int>(member->Position.y + 0.5f);  // Also need to negate it below.
-        const char label[] = { i + '2', 0};
+        const char label[] = { static_cast<uint8_t>(i) + '2', 0};
         render_label_text(label,-loc_y, -loc_x, D3DCOLOR_XRGB(255, 255, 255));
     }
 }
@@ -734,7 +765,7 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
     if (!entity_manager || !self)
         return;
 
-    float size = position_size * min(viewport.Width, viewport.Height);
+    float size = position_size * min(render_target_width, render_target_height);
     size = max(5.f, size);  // Constrain so it remains visible.
 
     // TODO: Review color coding to be more distinct. Possibly by class.
@@ -796,7 +827,7 @@ void ZoneMap::render_positions() {
     float screen_y = -position.x * scale_factor + offset_y;  // Note position is y,x,z.
     float screen_x = -position.y * scale_factor + offset_x;
 
-    float size = position_size * min(viewport.Width, viewport.Height);
+    float size = position_size * min(render_target_width, render_target_height);
     size = max(5.f, size);  // Constrain so it remains visible.
 
     // Use default cursor color if levels not active or within the z clipping range.
@@ -892,7 +923,7 @@ void ZoneMap::render_update_marker_buffer() {
 
     // Generate the vertices for four triangles that makeup the target.
     // Calculate the individual triangle 'size' in screen resolution.
-    float size = max(5.f, marker_size * min(viewport.Width, viewport.Height) * 0.5f);
+    float size = max(5.f, marker_size * min(render_target_width, render_target_height) * 0.5f);
     float short_size = size * 0.25f;
     const int kNumVertices = kMarkerCount * 3;  // Separate triangles with 3 vertices (CW direction).
     Vec3 marker[kNumVertices] = {{0, 0, 0}, {short_size, size, 0}, {-short_size, size, 0},
@@ -1848,7 +1879,8 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), align: %i, labels:%i, zone: %i",
                             enabled, map_background_state, map_background_alpha, map_alignment_state, map_labels_mode, zone_id);
     Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i, num_labels: %i", marker_zone_id, marker_y, marker_x, labels_list.size());
-    Zeal::EqGame::print_chat("view: t: %i, l: %i, h: %i, w: %i", viewport.Y, viewport.X, viewport.Height, viewport.Width);
+    Zeal::EqGame::print_chat("view: t: %i, l: %i, h: %i, w: %i, Render H: %i, W: %i", 
+        viewport.Y, viewport.X, viewport.Height, viewport.Width, render_target_height, render_target_width);
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
     Zeal::EqGame::print_chat("level: zone: %i, index: %i, z_max: %i, z_min: %i", map_level_zone_id, map_level_index, clip_max_z, clip_min_z);
@@ -1939,6 +1971,7 @@ ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
 {
     load_ini(ini);
     zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
+    zeal->callbacks->AddGeneric([this]() { render_release_resources(); }, callback_type::DXReset);
     zeal->callbacks->AddGeneric([this]() { callback_zone(); }, callback_type::Zone);
     zeal->commands_hook->Add("/map", {}, "Controls map overlay",
         [this](const std::vector<std::string>& args) {
