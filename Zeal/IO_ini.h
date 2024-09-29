@@ -76,14 +76,20 @@ public:
     }
 
     template<typename T>
-    void setValue(const std::string& section, const std::string& key, const T& value) {
-
-        std::string valueStr = std::to_string(value);
-         if constexpr (std::is_same_v<T, bool>) {
-             if (value)
-                 valueStr = "TRUE";
-            else
-                 valueStr = "FALSE";
+    void setValue(const std::string& section, const std::string& key, const T& value) 
+    {
+        std::string valueStr;
+        if constexpr (std::is_same_v<T, bool>)
+        {
+            valueStr = value ? "TRUE" : "FALSE";
+        }
+        else if constexpr (!std::is_same_v<T, std::string>)
+        {
+            valueStr = std::to_string(value);
+        }
+        else
+        {
+            valueStr = value;
         }
         BOOL result = WritePrivateProfileStringA(section.c_str(), key.c_str(), valueStr.c_str(), filename.c_str());
         if (!result) {

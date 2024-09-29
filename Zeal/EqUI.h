@@ -128,6 +128,7 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const CXSTR*, pCXSTR*)>(0x575DC0)(this, Data);
 			}
+			
 			pCXSTR* Data;
 		};
 
@@ -170,6 +171,10 @@ namespace Zeal
 		struct BasicWnd
 		{
 			//BasicWnd() {};
+			void Deconstruct()
+			{
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, BYTE)>(vtbl->Deconstructor)(this, 0);
+			}
 			void SetFocus()
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(0x572290)(this);
@@ -283,6 +288,7 @@ namespace Zeal
 		};
 		struct EQWND : BasicWnd
 		{
+			~EQWND() {};
 			EQWND() {};
 		
 			/*0x114*/   DWORD   Selector;

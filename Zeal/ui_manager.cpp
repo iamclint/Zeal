@@ -19,8 +19,8 @@ static void __fastcall SetSliderValue_hook(Zeal::EqUI::SliderWnd* pWnd, int unus
 
 	if (value < 0)
 		value = 0;
-	if (value > 100)
-		value = 100;
+	if (value > pWnd->max_val)
+		value = pWnd->max_val;
 	if (ui->slider_callbacks.count(pWnd) > 0)
 		ui->slider_callbacks[pWnd](pWnd, value);
 }
@@ -47,7 +47,7 @@ void ui_manager::AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name
 	}
 }
 
-void ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback)
+void ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback, int max_val)
 {
 	if (wnd)
 	{
@@ -56,7 +56,7 @@ void ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, 
 		{
 			slider_callbacks[btn] = callback;
 			slider_names[name] = btn;
-			btn->max_val = 100;
+			btn->max_val = max_val;
 		}
 	}
 }
@@ -152,7 +152,7 @@ void ui_manager::SetComboValue(std::string name, int value)
 	if (combo_names.count(name) > 0)
 	{
 		//	ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name]->FirstChildWnd, 0, value); //this is crashing since firstchildwnd is null, may have to maintain the combo windows ourselves?
-		ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name], 0, value);
+		ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name]->CmbListWnd, 0, value);
 	}
 }
 

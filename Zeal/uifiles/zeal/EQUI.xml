@@ -80,6 +80,7 @@
 		<Include>EQUI_MusicPlayerWnd.xml</Include>
 		<Include>EQUI_FileSelectionWnd.xml</Include>
 		<Include>EQUI_GuildManagementWnd.xml</Include>
+		<Include>EQUI_ZealOptions.xml</Include>
     </Composite>
     <Schema xmlns = "EverQuestData" xmlns:dt = "EverQuestDataTypes"/>
 </XML>

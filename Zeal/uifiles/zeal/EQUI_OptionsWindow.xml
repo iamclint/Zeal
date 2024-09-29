@@ -505,8 +505,8 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
   <!-- *********** Options Tab Window, Display Options Page *********** -->
@@ -1289,8 +1289,8 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
   <!-- *********** Options Tab Window, Mouse Options Page *********** -->
@@ -1473,8 +1473,8 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
   <!-- *********** Options Tab Window, Keyboard Options Page *********** -->
@@ -1605,8 +1605,8 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
   <!-- *********** Options Tab Window, Chat Filters Page *********** -->
@@ -2164,8 +2164,8 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
   <!-- *********** Options Tab Window, Chat Colors Page *********** -->
@@ -4385,11 +4385,10 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
- 
   <!-- *********** Options Tab Window, Top level *********** -->
   <TabBox item="OPTW_OptionsSubwindows">
     <ScreenID>OPTW_OptionsSubwindows</ScreenID>

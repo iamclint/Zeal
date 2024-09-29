@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <XML ID="EQInterfaceDefinitionLanguage">
   <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
-   <Button item="Zeal_HideCorpse">
+  <Button item="Zeal_HideCorpse">
     <ScreenID>Zeal_HideCorpse</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
@@ -47,7 +47,7 @@
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>true</Style_Checkbox>
     <TooltipReference>Toggles Zeal's mouse look smoothing</TooltipReference>
-    <Text>Cam</Text>
+    <Text>Enabled</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -794,7 +794,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>11</X>
-      <Y>266</Y>
+      <Y>10</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -805,7 +805,7 @@
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>true</Style_Checkbox>
     <TooltipReference>Toggles Target Rings</TooltipReference>
-    <Text>Target Ring</Text>
+    <Text>Enabled</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -824,7 +824,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>11</X>
-      <Y>288</Y>
+      <Y>32</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -835,7 +835,37 @@
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>true</Style_Checkbox>
     <TooltipReference>Toggles Target Rings Attack Indicator</TooltipReference>
-    <Text>Target Ring Attack Indicator</Text>
+    <Text>Attack Indicator</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+    <Button item="Zeal_TargetRingForward">
+    <ScreenID>Zeal_TargetRingForward</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>11</X>
+      <Y>54</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Always rotate the target ring the same direction as the targets heading</TooltipReference>
+    <Text>Follow Heading</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -897,14 +927,14 @@
     <ScreenID>Zeal_TargetRingFill_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>196</X>
-      <Y>124</Y>
+      <X>213</X>
+      <Y>9</Y>
     </Location>
     <Size>
       <CX>150</CX>
       <CY>14</CY>
     </Size>
-    <Text>Target Ring Fill</Text>
+    <Text>Inner Fill</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -918,8 +948,8 @@
     <ScreenID>Zeal_TargetRingFill_Slider</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>196</X>
-      <Y>144</Y>
+      <X>213</X>
+      <Y>29</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -931,8 +961,8 @@
     <ScreenID>Zeal_TargetRingFill_Value</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>296</X>
-      <Y>144</Y>
+      <X>313</X>
+      <Y>29</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -954,14 +984,14 @@
     <ScreenID>Zeal_TargetRingSize_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>196</X>
-      <Y>164</Y>
+      <X>213</X>
+      <Y>49</Y>
     </Location>
     <Size>
       <CX>150</CX>
       <CY>14</CY>
     </Size>
-    <Text>Target Ring Size</Text>
+    <Text>Outter Size</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -975,8 +1005,8 @@
     <ScreenID>Zeal_TargetRingSize_Slider</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>196</X>
-      <Y>184</Y>
+      <X>213</X>
+      <Y>69</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -988,8 +1018,8 @@
     <ScreenID>Zeal_TargetRingSize_Value</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>296</X>
-      <Y>184</Y>
+      <X>313</X>
+      <Y>69</Y>
     </Location>
     <Size>
       <CX>50</CX>
@@ -1005,18 +1035,18 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>true</AlignRight>
   </Label>
-  <Label item="Zeal_TargetRingSizing_Label">
-    <ScreenID>Zeal_TargetRingSizing_Label</ScreenID>
+  <Label item="Zeal_TargetRingRotation_Label">
+    <ScreenID>Zeal_TargetRingRotation_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>194</X>
-      <Y>204</Y>
+      <X>213</X>
+      <Y>89</Y>
     </Location>
     <Size>
       <CX>150</CX>
       <CY>14</CY>
     </Size>
-    <Text>Target Ring Sizing Type</Text>
+    <Text>Rotation</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -1026,40 +1056,109 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>false</AlignRight>
   </Label>
-  <Combobox item="Zeal_TargetRingSizing_Combobox">
-    <ScreenID>Zeal_TargetRingSizing_Combobox</ScreenID>
-    <DrawTemplate>WDT_Inner</DrawTemplate>
+  <Slider item="Zeal_TargetRingRotation_Slider">
+    <ScreenID>Zeal_TargetRingRotation_Slider</ScreenID>
+    <RelativePosition>true</RelativePosition>
     <Location>
-      <X>194</X>
-      <Y>224</Y>
+      <X>213</X>
+      <Y>109</Y>
     </Location>
     <Size>
-      <CX>150</CX>
-      <CY>24</CY>
+      <CX>100</CX>
+      <CY>16</CY>
     </Size>
+    <SliderArt>SDT_DefSlider</SliderArt>
+  </Slider>
+  <Label item="Zeal_TargetRingRotation_Value">
+    <ScreenID>Zeal_TargetRingRotation_Value</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>313</X>
+      <Y>109</Y>
+    </Location>
+    <Size>
+      <CX>50</CX>
+      <CY>16</CY>
+    </Size>
+    <Text>0.0</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
       <B>255</B>
     </TextColor>
-    <ListHeight>70</ListHeight>
-    <Button>BDT_Combo</Button>
-    <Style_Border>true</Style_Border>
-    <Choices>Combat Range</Choices>
-    <Choices>Custom</Choices>
-  </Combobox>
-  <Label item="Zeal_TargetRingTexture_Label">
-    <ScreenID>Zeal_TargetRingTexture_Label</ScreenID>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>true</AlignRight>
+  </Label>
+  
+  <Label item="Zeal_TargetRingSegments_Label">
+    <ScreenID>Zeal_TargetRingSegments_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>194</X>
-      <Y>248</Y>
+      <X>213</X>
+      <Y>129</Y>
     </Location>
     <Size>
       <CX>150</CX>
       <CY>14</CY>
     </Size>
-    <Text>Target Ring Texture</Text>
+    <Text>Segments</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>false</AlignRight>
+  </Label>
+  <Slider item="Zeal_TargetRingSegments_Slider">
+    <ScreenID>Zeal_TargetRingSegments_Slider</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>213</X>
+      <Y>149</Y>
+    </Location>
+    <Size>
+      <CX>100</CX>
+      <CY>16</CY>
+    </Size>
+    <SliderArt>SDT_DefSlider</SliderArt>
+  </Slider>
+  <Label item="Zeal_TargetRingSegments_Value">
+    <ScreenID>Zeal_TargetRingSegments_Value</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>313</X>
+      <Y>149</Y>
+    </Location>
+    <Size>
+      <CX>50</CX>
+      <CY>16</CY>
+    </Size>
+    <Text>0.0</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>true</AlignRight>
+  </Label>
+  
+  <Label item="Zeal_TargetRingTexture_Label">
+    <ScreenID>Zeal_TargetRingTexture_Label</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>211</X>
+      <Y>169</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>14</CY>
+    </Size>
+    <Text>Texture</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -1073,8 +1172,8 @@
     <ScreenID>Zeal_TargetRingTexture_Combobox</ScreenID>
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
-      <X>194</X>
-      <Y>265</Y>
+      <X>211</X>
+      <Y>189</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -1191,7 +1290,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <DrawTemplate>WDT_Def</DrawTemplate>
-    <TabText>Zeal</TabText>
+    <TabText>General</TabText>
     <TabTextColor>
       <R>255</R>
       <G>255</G>
@@ -1221,14 +1320,14 @@
     <Pieces>Zeal_RaidEscapeLock</Pieces>
     <Pieces>Zeal_ClassicClasses</Pieces>
     <Pieces>Zeal_TellWindows</Pieces>
-	<Pieces>Zeal_Timestamps_Combobox</Pieces>
+    <Pieces>Zeal_Timestamps_Combobox</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
   <!-- *** Zeal Cam Tab *** -->
@@ -1278,8 +1377,8 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>398</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
   <!-- ***Zeal Map Tab*** -->
@@ -1300,7 +1399,7 @@
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>true</Style_Checkbox>
     <TooltipReference>Toggles the map overlay</TooltipReference>
-    <Text>Map</Text>
+    <Text>Enabled</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -1926,7 +2025,7 @@
       <CX>150</CX>
       <CY>32</CY>
     </Size>
-    <Text>See Keyboard->UI for Map Keybinds (recommended)</Text>
+    <Text>See Keyboard-&gt;UI for Map Keybinds (recommended)</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -2041,11 +2140,11 @@
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>498</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
-   <Page item="Tab_TargetRing">
+  <Page item="Tab_TargetRing">
     <ScreenID>Tab_TargetRing</ScreenID>
     <RelativePosition>true</RelativePosition>
     <!-- Pages are sized and positioned by their parent tab -->
@@ -2065,28 +2164,33 @@
       <B>0</B>
     </TabTextActiveColor>
     <Style_Sizable>true</Style_Sizable>
-	<Pieces>Zeal_TargetRing</Pieces>
+    <Pieces>Zeal_TargetRing</Pieces>
     <Pieces>Zeal_TargetRingFill_Label</Pieces>
     <Pieces>Zeal_TargetRingFill_Slider</Pieces>
     <Pieces>Zeal_TargetRingFill_Value</Pieces>
     <Pieces>Zeal_TargetRingSize_Label</Pieces>
     <Pieces>Zeal_TargetRingSize_Slider</Pieces>
     <Pieces>Zeal_TargetRingSize_Value</Pieces>
-    <Pieces>Zeal_TargetRingSizing_Label</Pieces>
+    <Pieces>Zeal_TargetRingRotation_Label</Pieces>
+    <Pieces>Zeal_TargetRingRotation_Slider</Pieces>
+    <Pieces>Zeal_TargetRingRotation_Value</Pieces>
+    <Pieces>Zeal_TargetRingSegments_Label</Pieces>
+    <Pieces>Zeal_TargetRingSegments_Slider</Pieces>
+    <Pieces>Zeal_TargetRingSegments_Value</Pieces>
     <Pieces>Zeal_TargetRingTexture_Label</Pieces>
-	<Pieces>Zeal_TargetRingAttackIndicator</Pieces>
-	<Pieces>Zeal_TargetRingTexture_Combobox</Pieces>
-	<Pieces>Zeal_TargetRingSizing_Combobox</Pieces>
+    <Pieces>Zeal_TargetRingAttackIndicator</Pieces>
+	<Pieces>Zeal_TargetRingForward</Pieces>
+    <Pieces>Zeal_TargetRingTexture_Combobox</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>
     </Location>
     <Size>
-      <CX>498</CX>
-      <CY>355</CY>
+      <CX>380</CX>
+      <CY>339</CY>
     </Size>
   </Page>
-   <!-- *********** Options Tab Window, Top level *********** -->
+  <!-- *********** Options Tab Window, Top level *********** -->
   <TabBox item="ZealOptionsTabs">
     <ScreenID>ZealOptionsTabs</ScreenID>
     <RelativePosition>true</RelativePosition>
@@ -2100,14 +2204,14 @@
     <Pages>Tab_General</Pages>
     <Pages>Tab_Camera</Pages>
     <Pages>Tab_Map</Pages>
-	<Pages>Tab_TargetRing</Pages>
+    <Pages>Tab_TargetRing</Pages>
   </TabBox>
   <Screen item="ZealOptions">
     <ScreenID>ZealOptions</ScreenID>
     <RelativePosition>false</RelativePosition>
     <Location>
-      <X>90</X>
-      <Y>47</Y>
+      <X>10</X>
+      <Y>10</Y>
     </Location>
     <Size>
       <CX>400</CX>

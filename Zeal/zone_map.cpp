@@ -1452,7 +1452,7 @@ void ZoneMap::save_ini()
 void ZoneMap::update_ui_options() {
     if (ZealService::get_instance() && ZealService::get_instance()->ui
                     && ZealService::get_instance()->ui->options)
-       ZealService::get_instance()->ui->options->UpdateOptionsMapOnly();
+       ZealService::get_instance()->ui->options->UpdateOptionsMap();
 }
 
 bool ZoneMap::set_map_top(int top_percent, bool update_default, bool preserve_height) {
