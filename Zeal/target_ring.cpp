@@ -317,6 +317,7 @@ void TargetRing::load_texture(const std::string& filename) {
 		HRESULT result = D3DXCreateTextureFromFileA(device, texturePath.c_str(), &targetRingTexture);
 		if (FAILED(result))
 		{
+			targetRingTexture = nullptr;
 			Zeal::EqGame::print_chat("Error: Failed to load texture file: " + texturePath);
 			return;
 		}
@@ -597,7 +598,6 @@ void TargetRing::set_texture(std::string name)
 }
 void TargetRing::set_size(float size)
 {
-	Zeal::EqGame::print_chat("Size");
 	outer_size = size;
 	save_ini();
 }

@@ -36,6 +36,28 @@ void ui_options::InitUI()
 	UpdateOptions();
 }
 
+int ScaleFloatToSlider(float value, float fmin, float fmax, Zeal::EqUI::SliderWnd* wnd)
+{
+	// Clamp the float value between fmin and fmax
+	value = std::clamp(value, fmin, fmax);
+
+	// Normalize the float value to the range [0, 1]
+	float normalized = (value - fmin) / (fmax - fmin);
+
+	// Map the normalized float to the integer range [imin, imax]
+	return static_cast<int>(0 + normalized * (wnd->max_val));
+}
+float ScaleSliderToFloat(int ivalue, float fmin, float fmax, Zeal::EqUI::SliderWnd* wnd)
+{
+	// Clamp the integer value between imin and imax
+	ivalue = std::clamp(ivalue, 0, wnd->max_val);
+
+	// Normalize the integer value to the range [0, 1]
+	float normalized = static_cast<float>(ivalue) / (wnd->max_val);
+
+	// Map the normalized value to the float range [fmin, fmax]
+	return fmin + normalized * (fmax - fmin);
+}
 
 void ui_options::InitGeneral()
 {
@@ -166,17 +188,19 @@ void ui_options::InitTargetRing()
 		}
 	});
 	ui->AddSliderCallback(wnd, "Zeal_TargetRingFill_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		float val = static_cast<float>(value) / 100.0f;
+		float val = ScaleSliderToFloat(value, 0, 1, wnd);
 		ZealService::get_instance()->target_ring->set_pct(val);
 		ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", val);
 	});
 	ui->AddSliderCallback(wnd, "Zeal_TargetRingSize_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		float val = static_cast<float>(value) / 5.0f;
+		//float val = static_cast<float>(value) / 5.0f;
+		float val = ScaleSliderToFloat(value, 0, 20, wnd);
 		ZealService::get_instance()->target_ring->set_size(val);
 		ui->SetLabelValue("Zeal_TargetRingSize_Value", "%.2f", val);
 		});
 	ui->AddSliderCallback(wnd, "Zeal_TargetRingRotation_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		float val = ((static_cast<float>(value)-50.f)/100.f)*2;
+		//float val = ((static_cast<float>(value)-50.f)/100.f)*2;
+		float val = ScaleSliderToFloat(value, -1, 1, wnd);
 		ZealService::get_instance()->target_ring->set_rotation_speed(val);
 		ui->SetLabelValue("Zeal_TargetRingRotation_Value", "%.2f", val);
 		});
@@ -238,9 +262,9 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetChecked("Zeal_TargetRing", ZealService::get_instance()->target_ring->get_enabled());
 	ui->SetChecked("Zeal_TargetRingAttackIndicator", ZealService::get_instance()->target_ring->get_indicator());
 	ui->SetChecked("Zeal_TargetRingForward", ZealService::get_instance()->target_ring->get_rotation_match());
-	ui->SetSliderValue("Zeal_TargetRingFill_Slider", static_cast<int>(ZealService::get_instance()->target_ring->get_pct() * 100.0f));
-	ui->SetSliderValue("Zeal_TargetRingSize_Slider", static_cast<int>(ZealService::get_instance()->target_ring->get_size() * 100.0f));
-	ui->SetSliderValue("Zeal_TargetRingRotation_Slider", static_cast<int>(((ZealService::get_instance()->target_ring->get_rotation_speed()*100)+50.f)*2));
+	ui->SetSliderValue("Zeal_TargetRingFill_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->get_pct(), 0, 1, ui->slider_names["Zeal_TargetRingFill_Slider"]));
+	ui->SetSliderValue("Zeal_TargetRingSize_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->get_size(), 0, 20, ui->slider_names["Zeal_TargetRingSize_Slider"]));
+	ui->SetSliderValue("Zeal_TargetRingRotation_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->get_rotation_speed(), -1, 1, ui->slider_names["Zeal_TargetRingSize_Slider"]));
 	ui->SetSliderValue("Zeal_TargetRingSegments_Slider", static_cast<int>(ZealService::get_instance()->target_ring->get_segments()));
 	ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", ZealService::get_instance()->target_ring->get_pct());
 	ui->SetLabelValue("Zeal_TargetRingSegments_Value", "%i", ZealService::get_instance()->target_ring->get_segments());
