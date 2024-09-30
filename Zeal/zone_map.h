@@ -4,6 +4,7 @@
 #include "EqStructures.h"
 #include "EqUI.h"
 #include "directx.h"
+#include "vectors.h"
 #include "zone_map_data.h"
 #include <list>
 #include <string>
@@ -14,7 +15,7 @@ class ZoneMap
 {
 public:
 	struct MapVertex {
-		float x, y, z, rhw;  // Position coordinates and rhw (D3DFVF_XYZRHW).
+		float x, y, z;  // Position coordinates and rhw (D3DFVF).
 		D3DCOLOR color; // Color from the D3DFVF_DIFFUSE flag.
 	};
 
@@ -126,7 +127,7 @@ private:
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
 	void set_marker(int y, int x);
-	void clear_marker();
+	void clear_marker(bool invalidate_zone_id = true);
 	bool set_map_rect(float top, float left, float bottom, float right, bool update_default = false);
 	bool set_level(int level);  // Set to 0 to show all levels.
 	void update_ui_options();
@@ -141,23 +142,27 @@ private:
 	// The following methods execute as part of callback_render().
 	void render_release_resources();
 	void render_update_viewport(IDirect3DDevice8& device);
-	void render_load_map();
-	void render_load_font();
-	void render_load_labels(const ZoneMapData& zone_map_data);
-	void render_map();
-	void render_background();
-	void render_positions();
-	void render_group_member_labels();
-	void render_update_marker_buffer();
+	void render_update_transforms(const ZoneMapData& zone_map_data);
+	void render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_map_data);
+	void render_load_font(IDirect3DDevice8& device);
+	void render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zone_map_data);
+	void render_map(IDirect3DDevice8& device);
+	void render_background(IDirect3DDevice8& device);
+	void render_positions(IDirect3DDevice8& device);
+	void render_group_member_labels(IDirect3DDevice8& device);
+	void render_update_marker_buffer(IDirect3DDevice8& device);
 	void render_labels();
-	void render_label_text(const char* label, int y, int x, D3DCOLOR font_color);
-	bool render_check_for_zoom_recenter();
-	void add_position_marker_vertices(float screen_y, float screen_x, float heading, float size,
+	void render_label_text(const char* label, int map_y, int map_x, D3DCOLOR font_color);
+	void add_position_marker_vertices(float map_y, float map_x, float heading, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 	void add_group_member_position_vertices(std::vector<MapVertex>& vertices) const;
 	void add_raid_member_position_vertices(std::vector<MapVertex>& vertices) const;
-	void add_raid_marker_vertices(float screen_y, float screen_x, float size,
+	void add_raid_marker_vertices(const Vec3& position_loc, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
+	float convert_size_fraction_to_model(float sizes_fraction) const;
+	float scale_pixels_to_model(float pixels) const;
+	Vec3 transform_model_to_world(const Vec3& model) const;
+	Vec3 transform_model_to_screen(const Vec3& model) const;
 
 	const ZoneMapData* get_zone_map(int zone_id);
 	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
@@ -189,18 +194,16 @@ private:
 	D3DVIEWPORT8 viewport = {};  // On-screen coordinates of viewport.
 	DWORD render_target_width = 0;  // Full game window (ignores /viewport).
 	DWORD render_target_height = 0;
-	float scale_factor = 0;  // Conversion factors for map data to screen coordinates.
+	D3DXMATRIX mat_model2world;  // Map model data to viewport centered pixel data.
 	float zoom_factor = 1.f;
-	float offset_x = 0;
-	float offset_y = 0;
 	float map_rect_top = kDefaultRectTop;
 	float map_rect_left = kDefaultRectLeft;
 	float map_rect_bottom = kDefaultRectBottom;
 	float map_rect_right = kDefaultRectRight;
-	float clip_rect_top = 0;
-	float clip_rect_left = 0;
-	float clip_rect_bottom = 0;
-	float clip_rect_right = 0;
+	float clip_max_x = 0;  // Visible (non-clipped) model data limits.
+	float clip_min_x = 0;
+	float clip_max_y = 0;
+	float clip_min_y = 0;
 	int clip_max_z = 0;
 	int clip_min_z = 0;
 	float position_size = kDefaultPositionSize;
