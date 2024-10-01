@@ -10,6 +10,7 @@
 // Possible enhancements:
 // - Support 'windowed mode' (drag and drop, resizing)
 // - Look into intermittent z-depth clipping due to walls or heads/faces
+// - DrawText is extremely slow and could use optimization
 
 // Implementation notes:
 //
@@ -455,8 +456,8 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
     render_pairs.push_back({ D3DRS_ALPHABLENDENABLE, FALSE });
     render_pairs.push_back({ D3DRS_SRCBLEND, D3DBLEND_SRCALPHA });
     render_pairs.push_back({ D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA });
-    render_pairs.push_back({ D3DRS_ZENABLE, TRUE });
-    render_pairs.push_back({ D3DRS_ZWRITEENABLE, TRUE });  // Enable depth writing
+    render_pairs.push_back({ D3DRS_ZENABLE, FALSE });  // Rely on render order.
+    render_pairs.push_back({ D3DRS_ZWRITEENABLE, FALSE });
     render_pairs.push_back({ D3DRS_LIGHTING, FALSE });  // Disable lighting
     RenderStateStash render_state(&device);
     render_state.store_and_modify(render_pairs);
@@ -495,14 +496,12 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
     device.SetVertexShader(kMapVertexFvfCode);
 
     if (map_background_state != BackgroundType::kClear)
-        render_background(device);  // Background supports alpha blending which needs pipeline.
+        render_background(device);
 
     if (line_count) {
         device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
         device.DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices, line_count);
     }
-
-    device.SetVertexShader(kMapVertexFvfCode);
 
     if (marker_vertex_buffer) {
         device.SetStreamSource(0, marker_vertex_buffer, sizeof(MapVertex));
@@ -541,7 +540,7 @@ void ZoneMap::render_labels() {
     if (!label_font || (labels_list.empty() && dynamic_labels_list.empty()))
         return;
 
-    //label_font->Begin();  // TODO: Check if this improves performance.
+    label_font->Begin();  // Minor 10% performance improvement with Begin/End.
     for (const ZoneMapLabel* label : labels_list)
         render_label_text(label->label, label->y, label->x, D3DCOLOR_XRGB(label->red, label->green, label->blue));
 
@@ -555,7 +554,7 @@ void ZoneMap::render_labels() {
             it = dynamic_labels_list.erase(it);  // Drop timed out labels.
         }
     }
-    //label_font->End();
+    label_font->End();
 }
 
 // Handles writing a text label at map coordinates y and x to the screen.
@@ -580,19 +579,7 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
         font_color = D3DCOLOR_XRGB(192, 192, 192);  // Flip to light grey.
 
     // Calculate and clip the on-screen coordinate position of the text.
-    const int kHalfHeight = 25;  // Centered so just has to be sufficiently large.
-    const int kHalfWidth = 60;
-
-    Vec3 label_screen = transform_model_to_screen(Vec3(xf, yf, 0));
-    int label_x = static_cast<int>(label_screen[0] + 0.5f);
-    int label_y = static_cast<int>(label_screen[1] + 0.5f);
-    RECT text_rect = { .left = label_x - kHalfWidth, .top = label_y - kHalfHeight,
-                    .right = label_x + kHalfWidth, .bottom = label_y + kHalfHeight};
-
-    text_rect.left = max(view_left, min(view_right, text_rect.left));
-    text_rect.right = max(view_left, min(view_right, text_rect.right));
-    text_rect.top = max(view_top, min(view_bottom, text_rect.top));
-    text_rect.bottom = max(view_top, min(view_bottom, text_rect.bottom));
+    const int kHalfHeight = 10;  // Centered so just has to be sufficiently large.
     int length = strlen(label);
     if (length > 20) {
         length = 20;  // Truncate it to 20.
@@ -601,6 +588,18 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
                 length = i;  // Truncates and breaks loop.
         }
     }
+    const int half_width = length * 3 + 5;  // Approximate size for centering.
+
+    Vec3 label_screen = transform_model_to_screen(Vec3(xf, yf, 0));
+    int label_x = static_cast<int>(label_screen[0] + 0.5f);
+    int label_y = static_cast<int>(label_screen[1] + 0.5f);
+    RECT text_rect = { .left = label_x - half_width, .top = label_y - kHalfHeight,
+                    .right = label_x + half_width, .bottom = label_y + kHalfHeight };
+
+    text_rect.left = max(view_left, min(view_right - 2 * half_width, text_rect.left));
+    text_rect.right = min(view_right, max(view_left + 2 * half_width, text_rect.right));
+    text_rect.top = max(view_top, min(view_bottom - 2 * kHalfHeight, text_rect.top));
+    text_rect.bottom = min(view_bottom, max(view_top + 2 * kHalfHeight, text_rect.bottom));
 
     label_font->DrawTextA(label, length, &text_rect, DT_VCENTER | DT_CENTER | DT_SINGLELINE, font_color);
 }
