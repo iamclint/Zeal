@@ -142,11 +142,11 @@ std::string GetName(std::string& data)
     return "";  // Return an empty string if no match found
 }
 
-void TellWindows::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, byte channel)
+void TellWindows::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel)
 {
     if (!ZealService::get_instance()->tells->enabled) //just early out if tell windows are not enabled
             return;
-    if (channel == 1 || channel==52) //tell channel
+    if (channel == USERCOLOR_TELL || channel== USERCOLOR_ECHO_TELL) //tell channel
     {
         std::string name = GetName(msg);
         if (name.length())
