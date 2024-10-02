@@ -56,6 +56,25 @@ void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, Zeal::EqStr
 	wnd->IconBtn->ZLayer = wnd->ZLayer;
 	wnd->Activate();
 }
+char* build_token_string_PARAM(char* buffer, int stringID, char* string1, char* string2, int u1, int u2, int u3, int u4, int u5, int u6, int u7)
+{
+	Zeal::EqStructures::_EQITEMINFO* item;
+
+	__asm mov item, esi
+
+	if (strcmp(string1, "Haste") == 0)
+	{
+		if (strcmp(string2, "(Worn)") == 0)
+		{
+			int haste_percentage = item->Common.CastingLevel + 1;
+			char* haste = new char[24];
+			sprintf_s(haste, 24, "Haste: %d", haste_percentage);
+			return ZealService::get_instance()->hooks->hook_map["ModifyHaste"]->original(build_token_string_PARAM)(buffer, stringID, haste, 0, 0, 0, 0, 0, 0, 0, 0);
+		}
+	}
+	return ZealService::get_instance()->hooks->hook_map["ModifyHaste"]->original(build_token_string_PARAM)(buffer, stringID, string1, string2, 0, 0, 0, 0, 0, 0, 0);
+}
+
 void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_id, bool show, int unknown)
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -81,6 +100,7 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 //	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
+	zeal->hooks->Add("ModifyHaste", 0x424a95, build_token_string_PARAM, hook_type_replace_call);
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	//zeal->callbacks->add_generic([this]() { if (!Zeal::EqGame::is_in_game()) CleanUI(); }, callback_type::MainLoop);
