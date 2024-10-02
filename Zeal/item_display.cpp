@@ -67,7 +67,7 @@ char* build_token_string_PARAM(char* buffer, int stringID, char* string1, char* 
 		if (strcmp(string2, "(Worn)") == 0)
 		{
 			int haste_percentage = item->Common.CastingLevel + 1;
-			char* haste = new char[24];
+			char haste[24];
 			sprintf_s(haste, 24, "Haste: %d%%%%", haste_percentage);
 			return ZealService::get_instance()->hooks->hook_map["ModifyHaste"]->original(build_token_string_PARAM)(buffer, stringID, haste, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
