@@ -232,6 +232,7 @@ ___
 - Toggle through map backgrounds
 - Toggle through map label modes
 - Toggle up or down through visible map levels
+- Toggle map visibility of raid members
 ___
 ### UI
 - **Gauge EqType's**
@@ -350,8 +351,10 @@ clear (0), dark (1), light (2), or tan (3).  Additionally, it supports alpha tra
 
 #### Map zoom
 The default 100% map scale makes the entire zone visible sized to the height or width constraint.
-In zoom, the map draws all available data that fits within the rectangular viewport. The 
-view re-centers when the position marker is within 20% of an edge and moving towards that edge.
+In zoom, the map draws all available data that fits within the rectangular viewport. The zoom
+algorithm works to maximize the visible map closest to the player. Map edges will be pinned
+to a viewport edge until the user moves at least half the viewport away, and then the map
+background will scroll with the player centered in the viewport.
 
 * UI options slider
 * Key bind: "Toggle Map Zoom" - toggles through 100%, 200%, 400%, 800% zoom
@@ -370,6 +373,7 @@ in the options tab and instead use the key bind to situationally toggle it on an
 * Key bind: "Toggle Show Raid" - Toggles visibility of raid members
 * Command examples:
   - `/map show_group` toggles the group member markers on and off
+  - `/map show_group labels` toggles numeric (F2-F6) group member labels (FPS hit)
   - `/map show_raid` toggles the raid member markers on and off
 
 #### Showing map levels
