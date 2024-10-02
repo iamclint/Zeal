@@ -255,6 +255,7 @@ void CallbackManager::invoke_ReportSuccessfulHit(Zeal::Packets::Damage_Struct* d
 
 void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int heal)
 {
+	output_text = 1; //print all the messages to remove some of the distance limitations
 	ZealService::get_instance()->callbacks->invoke_ReportSuccessfulHit(dmg, heal);
 	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, heal);
 }

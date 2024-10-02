@@ -71,7 +71,8 @@ public:
         if (bytesRead == 0) {
             return T{};
         }
-
+        if constexpr (std::is_same_v<T, std::string>)
+            return buffer;
         return convertFromString<T>(std::string(buffer));
     }
 

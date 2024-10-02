@@ -237,7 +237,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short color, std::string data) { return color == USERCOLOR_RANDOM; }));
     Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short color, std::string data) { return color == USERCOLOR_LOOT; }));
     Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short color, std::string data) { return color == USERCOLOR_MONEY_SPLIT || color == USERCOLOR_ECHO_AUTOSPLIT; }));
-    Extended_ChannelMaps.push_back(CustomFilter("MyPet", 0x10003, [this, zeal](short color, std::string data)
+    Extended_ChannelMaps.push_back(CustomFilter("My Pet", 0x10003, [this, zeal](short color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
                 return true;
@@ -245,7 +245,14 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
                 return true;
             return false;
         }));
-
+    Extended_ChannelMaps.push_back(CustomFilter("Other Pets", 0x10004, [this, zeal](short color, std::string data)
+        {
+            if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
+                return true;
+            if (isDamage && damageData.target && damageData.target->PetOwnerSpawnId && damageData.target->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
+                return true;
+            return false;
+        }));
 
     zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel) { this->AddOutputText(wnd, msg, channel); });
 

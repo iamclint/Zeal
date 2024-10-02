@@ -248,7 +248,7 @@ TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("DeactivateMainUI", 0x4a7705, DeactivateMainUI, hook_type_detour); //clean up tell windows just before they save
     zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
     zeal->callbacks->AddGeneric([this]() { LoadUI(); }, callback_type::InitUI);
-    zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, byte channel) { this->AddOutputText(wnd, msg, channel); });
+    zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel) { this->AddOutputText(wnd, msg, channel); });
 
     zeal->commands_hook->Add("/tellwindows", {}, "Toggle tell windows",
         [this](std::vector<std::string>& args) {

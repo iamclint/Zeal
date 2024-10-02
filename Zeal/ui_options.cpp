@@ -21,11 +21,11 @@ int GetSensitivityForSlider(float* value)
 //most of the options window xml was put together by nillipus
 void ui_options::InitUI()
 {
+	if (wnd)
+		delete wnd;
 	wnd = new Zeal::EqUI::BasicWnd();
-	wnd->vtbl = (Zeal::EqUI::BaseVTable*)0x5e60f0;
 	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(wnd, 0, Zeal::EqUI::CXSTR("ZealOptions"), -1, 0);
 	wnd->CreateChildren();
-
 	InitGeneral();
 	InitCamera();
 	InitMap();
@@ -337,11 +337,11 @@ void ui_options::RenderUI()
 void ui_options::CleanUI()
 {
 	isReady = false;
-	if (wnd)
-	{
-		wnd->Deconstruct();
-		//delete wnd;
-	}
+	//if (wnd)
+	//{
+	//	..wnd->Deconstruct();
+	//	//delete wnd;
+	//}
 }
 
 ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
