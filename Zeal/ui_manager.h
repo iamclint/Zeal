@@ -36,7 +36,7 @@ public:
 	void AddLabel(Zeal::EqUI::BasicWnd* wnd, std::string name);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>> data);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::string> data);
-
+	Zeal::EqUI::EQWND* CreateSidlScreenWnd(const std::string& name, LPVOID destructor);
 	ui_manager(class ZealService* zeal, class IO_ini* ini);
 
 	std::shared_ptr<ui_options> options = nullptr;

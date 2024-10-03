@@ -7,7 +7,7 @@ class Melody
 {
 public:
 	bool start(const std::vector<int>& new_songs); //returns true if no errors
-	void end();
+	void end(bool do_print=false);
 	void handle_stop_cast_callback(BYTE reason, WORD spell_id);
 	bool use_item(int item_index); // asks Melody to handle /useitem command. Returns true if melody handled the command.
 	Melody(class ZealService* pHookWrapper, class IO_ini* ini);

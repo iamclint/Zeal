@@ -17,15 +17,26 @@ int GetSensitivityForSlider(float* value)
 	else
 		return 0;
 }
-
+//Zeal::EqUI::EQWND* __fastcall deconstructor(Zeal::EqUI::EQWND* wnd, int u, byte p1)
+//{
+//	wnd->IsVisible = false;
+//	//reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*)>(0x56e680)(wnd);
+//	//if (p1)
+//	//{
+//	//	reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*)>(0x5c63b3)(wnd, wnd);
+//	//}
+//	wnd->MouseHoverTimer = 0;
+//	wnd->ValidCXWnd = 0;
+//	wnd->Unknown0008 = 0;
+//	wnd->vtbl->Deconstructor = 0;
+//	MessageBoxA(0, "UHH deconstruct??", "Zeal options", 1);
+//	return 0;
+//}
 //most of the options window xml was put together by nillipus
 void ui_options::InitUI()
 {
-	if (wnd)
-		delete wnd;
-	wnd = new Zeal::EqUI::BasicWnd();
-	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(wnd, 0, Zeal::EqUI::CXSTR("ZealOptions"), -1, 0);
-	wnd->CreateChildren();
+	if (!wnd)
+		wnd = ui->CreateSidlScreenWnd("ZealOptions", 0);
 	InitGeneral();
 	InitCamera();
 	InitMap();
@@ -337,11 +348,23 @@ void ui_options::RenderUI()
 void ui_options::CleanUI()
 {
 	isReady = false;
+	if (wnd)
+	{
+		wnd->Deconstruct();
+		wnd = nullptr;
+	}
+	//if (wnd)
+	//	wnd->IsVisible = false;
 	//if (wnd)
 	//{
 	//	..wnd->Deconstruct();
 	//	//delete wnd;
 	//}
+}
+void ui_options::Deactivate()
+{
+	if (wnd)
+		wnd->show(0, 0);
 }
 
 ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
@@ -351,6 +374,7 @@ ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { RenderUI(); }, callback_type::RenderUI);
+	zeal->callbacks->AddGeneric([this]() { Deactivate(); }, callback_type::DeactivateUI);
 	//if (Zeal::EqGame::is_in_game()) InitUI();
 }
 ui_options::~ui_options()

@@ -241,23 +241,28 @@ void __fastcall OutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR ms
 ///*00E*/	float	sequence; // see above notes in Action_Struct
 ///*012*/	float	pushup_angle; // associated with force.  Sine of this angle, multiplied by force, will be z push.
 /// 
-void CallbackManager::AddReportSuccessfulHit(std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal)> callback_function)
+void CallbackManager::AddReportSuccessfulHit(std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text)> callback_function)
 {
 	ReportSuccessfulHit_functions.push_back(callback_function);
 }
-void CallbackManager::invoke_ReportSuccessfulHit(Zeal::Packets::Damage_Struct* dmg, int heal)
+void CallbackManager::invoke_ReportSuccessfulHit(Zeal::Packets::Damage_Struct* dmg, int heal, char output_text)
 {
 	auto em = ZealService::get_instance()->entity_manager.get();
 	
 	for (auto& fn : ReportSuccessfulHit_functions)
-		fn(em->Get(dmg->source), em->Get(dmg->target), dmg->type, dmg->spellid, dmg->damage, heal);
+		fn(em->Get(dmg->source), em->Get(dmg->target), dmg->type, dmg->spellid, dmg->damage, heal, output_text);
 }
 
 void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int heal)
 {
-	output_text = 1; //print all the messages to remove some of the distance limitations
-	ZealService::get_instance()->callbacks->invoke_ReportSuccessfulHit(dmg, heal);
+	ZealService::get_instance()->callbacks->invoke_ReportSuccessfulHit(dmg, heal, output_text);
 	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, heal);
+}
+
+void DeactivateMainUI()
+{
+	ZealService::get_instance()->callbacks->invoke_generic(callback_type::DeactivateUI);
+	ZealService::get_instance()->hooks->hook_map["DeactivateMainUI"]->original(DeactivateMainUI)();
 }
 
 CallbackManager::CallbackManager(ZealService* zeal)
@@ -281,4 +286,5 @@ CallbackManager::CallbackManager(ZealService* zeal)
 	zeal->hooks->Add("EQPlayerDeconstruct", 0x50723D, EQPlayerDeconstruct, hook_type_detour);
 	zeal->hooks->Add("AddOutputText", 0x4139A2, OutputText, hook_type_detour);
 	zeal->hooks->Add("ReportSuccessfulHit", 0x5297D2, ReportSuccessfulHit, hook_type_detour);
+	zeal->hooks->Add("DeactivateMainUI", 0x4A7705, DeactivateMainUI, hook_type_detour);
 }

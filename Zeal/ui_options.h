@@ -6,7 +6,7 @@
 class ui_options
 {
 public:
-	Zeal::EqUI::BasicWnd* wnd = nullptr;
+	Zeal::EqUI::EQWND* wnd = nullptr;
 	void UpdateOptions();
 	void UpdateOptionsMap();
 	void UpdateOptionsTargetRing();
@@ -23,6 +23,7 @@ private:
 	void InitUI();
 	void CleanUI();
 	void RenderUI();
+	void Deactivate();
 	void LoadSettings(class IO_ini* ini);
 	ui_manager* ui;
 };

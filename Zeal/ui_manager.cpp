@@ -4,6 +4,19 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
+Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name, LPVOID Deconstructor)
+{
+	Zeal::EqUI::EQWND* wnd = new Zeal::EqUI::EQWND;
+	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name)>(0x56e2b0)(wnd, 0, Zeal::EqUI::CXSTR(name));
+	//reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::EQWND*, Zeal::EqUI::EQWND*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(wnd, 0, Zeal::EqUI::CXSTR(name), -1, 0);
+	wnd->SetupCustomVTable();
+	wnd->CreateChildren();
+	if (Deconstructor)
+		wnd->vtbl->Deconstructor = Deconstructor;
+	return wnd;
+}
+
+
 static int __fastcall CheckboxClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();

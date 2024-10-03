@@ -233,7 +233,7 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
 
 chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 {
-    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal) { isDamage = true; damageData = { source, target, type, spell_id, damage, heal }; });
+    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { if (output_text) { isDamage = true; damageData = { source, target, type, spell_id, damage, heal }; } });
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short color, std::string data) { return color == USERCOLOR_RANDOM; }));
     Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short color, std::string data) { return color == USERCOLOR_LOOT; }));
     Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short color, std::string data) { return color == USERCOLOR_MONEY_SPLIT || color == USERCOLOR_ECHO_AUTOSPLIT; }));

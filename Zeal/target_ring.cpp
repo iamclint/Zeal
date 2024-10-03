@@ -624,7 +624,7 @@ void TargetRing::load_ini()
 	if (!ini.exists("TargetRing", "Enabled"))
 		ini.setValue<bool>("TargetRing", "Enabled", false);
 	if (!ini.exists("TargetRing", "InnerSize"))
-		ini.setValue<float>("TargetRing", "InnerSize", 0);
+		ini.setValue<float>("TargetRing", "InnerSize", .5);
 	if (!ini.exists("TargetRing", "AttackIndicator"))
 		ini.setValue<bool>("TargetRing", "AttackIndicator", false);
 	if (!ini.exists("TargetRing", "MatchHeading"))
