@@ -34,6 +34,7 @@ public:
 	void AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback, int max_val=100);
 	void AddComboCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback);
 	void AddLabel(Zeal::EqUI::BasicWnd* wnd, std::string name);
+	void AddListItems(Zeal::EqUI::ComboWnd* wnd, const std::vector<std::string> data);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>> data);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::string> data);
 	Zeal::EqUI::EQWND* CreateSidlScreenWnd(const std::string& name, LPVOID destructor);

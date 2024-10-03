@@ -300,8 +300,9 @@ void TargetRing::reset_render_states()
 void TargetRing::load_texture(const std::string& filename) {
 	try
 	{
+		if (targetRingTexture)
+			targetRingTexture->Release();
 		targetRingTexture = nullptr;
-		Zeal::EqGame::print_chat("New texture file: " + filename);
 		// Full texture path
 		std::string texturePath = "./uifiles/zeal/targetrings/" + filename + ".tga";
 
@@ -321,9 +322,6 @@ void TargetRing::load_texture(const std::string& filename) {
 			Zeal::EqGame::print_chat("Error: Failed to load texture file: " + texturePath);
 			return;
 		}
-
-		Zeal::EqGame::print_chat("Texture successfully loaded: " + texturePath);
-
 	}
 	catch (const std::exception& ex)
 	{
@@ -455,7 +453,7 @@ void TargetRing::callback_render() {
 	Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
 	if (!target || !target->ActorInfo || !target->ActorInfo->ViewActor_)
 		return;
-	float radius = Zeal::EqGame::CalcCombatRange(Zeal::EqGame::get_self(), target);
+	float radius = 10.f;// Zeal::EqGame::CalcCombatRange(Zeal::EqGame::get_self(), target);
 
 	ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
 
@@ -675,14 +673,14 @@ void TargetRing::options_opened()
 			return;
 		}
 		cmb->DeleteAll();
-		Zeal::EqUI::ListWnd* lst = cmb->CmbListWnd;
-		if (!lst)
-		{
-			Zeal::EqGame::print_chat("Couldn't find the list wnd");
-			return;
-		}
-		lst->Location.Bottom = lst->Location.Top + (23 * (tgas.size() - 1));
-		ZealService::get_instance()->ui->AddListItems(lst, tgas);
+		//Zeal::EqUI::ListWnd* lst = cmb->CmbListWnd;
+		//if (!lst)
+		//{
+		//	Zeal::EqGame::print_chat("Couldn't find the list wnd");
+		//	return;
+		//}
+		ZealService::get_instance()->ui->AddListItems(cmb, tgas);
+		
 		return;
 
 	}
@@ -700,7 +698,8 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddGeneric([this]() { load_ini(); callback_initui(); }, callback_type::InitUI);
-	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CharacterSelect);
+	//zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CharacterSelect);
+	//zeal->callbacks->AddGeneric([this]() { Zeal::EqGame::set_target(0); }, callback_type::CleanUI);
 
 	zeal->commands_hook->Add("/loadtextures", {}, "",
 		[this](std::vector<std::string>& args) {

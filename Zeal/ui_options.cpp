@@ -350,21 +350,28 @@ void ui_options::CleanUI()
 	isReady = false;
 	if (wnd)
 	{
+		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_TargetRingTexture_Combobox");
+		if (cmb)
+		{
+			cmb->CmbListWnd->SelectedIndex = -1;
+			cmb->DeleteAll();
+		}
 		wnd->Deconstruct();
 		wnd = nullptr;
 	}
-	//if (wnd)
-	//	wnd->IsVisible = false;
-	//if (wnd)
-	//{
-	//	..wnd->Deconstruct();
-	//	//delete wnd;
-	//}
 }
 void ui_options::Deactivate()
 {
 	if (wnd)
+	{
 		wnd->show(0, 0);
+		Zeal::EqUI::ComboWnd* cmb =  (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_TargetRingTexture_Combobox");
+		if (cmb)
+		{
+			cmb->CmbListWnd->SelectedIndex = -1;
+			cmb->DeleteAll();
+		}
+	}
 }
 
 ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr)

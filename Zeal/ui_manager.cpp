@@ -125,6 +125,14 @@ void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::s
 		row++;
 	}
 }
+void ui_manager::AddListItems(Zeal::EqUI::ComboWnd* wnd, const std::vector<std::string> data)
+{
+
+	for (auto & current_row : data)
+	{
+		wnd->InsertChoice(current_row);
+	}
+}
 void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>>data)
 {
 

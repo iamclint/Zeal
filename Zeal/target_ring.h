@@ -66,7 +66,7 @@ private:
 	void reset_render_states();
 
 
-	IDirect3DTexture8* targetRingTexture;
+	IDirect3DTexture8* targetRingTexture=nullptr;
 
 };
 
