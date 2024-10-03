@@ -350,6 +350,7 @@ void ui_options::CleanUI()
 	isReady = false;
 	if (wnd)
 	{
+		wnd->show(0, 0);
 		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_TargetRingTexture_Combobox");
 		if (cmb)
 		{

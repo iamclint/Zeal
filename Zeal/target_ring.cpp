@@ -679,8 +679,18 @@ void TargetRing::options_opened()
 		//	Zeal::EqGame::print_chat("Couldn't find the list wnd");
 		//	return;
 		//}
+		int sel_index = -1;
+		for (int i = 0; i < tgas.size(); i++)
+		{
+			if (Zeal::String::compare_insensitive(tgas[i], texture_name))
+			{
+				sel_index = i;
+				break;
+			}
+		}
+
 		ZealService::get_instance()->ui->AddListItems(cmb, tgas);
-		
+		cmb->SetChoice(sel_index);
 		return;
 
 	}
@@ -688,6 +698,7 @@ void TargetRing::options_opened()
 
 void TargetRing::callback_initui()
 {
+	Zeal::EqGame::print_debug("Target Ring init");
 	load_texture(texture_name);
 }
 
@@ -699,7 +710,7 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddGeneric([this]() { load_ini(); callback_initui(); }, callback_type::InitUI);
 	//zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CharacterSelect);
-	//zeal->callbacks->AddGeneric([this]() { Zeal::EqGame::set_target(0); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CleanUI);
 
 	zeal->commands_hook->Add("/loadtextures", {}, "",
 		[this](std::vector<std::string>& args) {

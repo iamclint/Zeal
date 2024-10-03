@@ -338,6 +338,10 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const ComboWnd*, CXSTR)>(0x5A1750)(this, data);
 			}
+			void SetChoice(int index)
+			{
+				reinterpret_cast<void(__thiscall*)(const ComboWnd*, int)>(0x5A1860)(this, index);
+			}
 		};
 		struct ListWnd : EQWND
 		{

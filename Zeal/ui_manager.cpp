@@ -6,7 +6,8 @@
 #include <algorithm>
 Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name, LPVOID Deconstructor)
 {
-	Zeal::EqUI::EQWND* wnd = new Zeal::EqUI::EQWND;
+	Zeal::EqUI::EQWND* wnd = (Zeal::EqUI::EQWND*)HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(Zeal::EqUI::EQWND));
+	mem::set((int)wnd, 0, sizeof(Zeal::EqUI::EQWND));
 	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name)>(0x56e2b0)(wnd, 0, Zeal::EqUI::CXSTR(name));
 	//reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::EQWND*, Zeal::EqUI::EQWND*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(wnd, 0, Zeal::EqUI::CXSTR(name), -1, 0);
 	wnd->SetupCustomVTable();
