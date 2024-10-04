@@ -229,6 +229,8 @@ void __fastcall OutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR ms
 	std::string msg_data(multiByteSize, '\0');
 	WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, msg_data.data(), multiByteSize, NULL, NULL);
 	zeal->callbacks->invoke_outputtext(wnd, msg_data, channel);
+	if (!wnd)
+		wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[0];
 	zeal->hooks->hook_map["AddOutputText"]->original(OutputText)(wnd, u, msg, channel);
 }
 
