@@ -233,7 +233,7 @@ void Binds::add_binds()
 	add_bind(225, "Auto Fire", "AutoFire", key_category::Commands, [this](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
-			ZealService::get_instance()->autofire->SetAutoFire(!ZealService::get_instance()->autofire->autofire);
+			ZealService::get_instance()->autofire->SetAutoFire(!ZealService::get_instance()->autofire->autofire, true);
 		}
 		});
 	add_bind(226, "Target Nearest NPC Corpse", "TargetNPCCorpse", key_category::Target, [](int key_down) {
