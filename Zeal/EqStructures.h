@@ -98,6 +98,7 @@
 #define USERCOLOR_ECHO_CHAT_8           0xFF +  67 //  67 - chat 8 echo
 #define USERCOLOR_ECHO_CHAT_9           0xFF +  68 //  68 - chat 9 echo
 #define USERCOLOR_ECHO_CHAT_10          0xFF +  69 //  69 - chat 10 echo
+#define USERCOLOR_ECHO_AUTOSPLIT        0xFF +  73 
 
 constexpr WORD kInvalidSpellId = 0xffff; // spell_id used when not casting or empty spell gem
 
