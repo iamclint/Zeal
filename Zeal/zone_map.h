@@ -10,6 +10,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <windows.h>
+
 
 class ZoneMap
 {
@@ -35,6 +37,7 @@ public:
 	// Setting update_default stores to the ini. All trigger a ui_options update.
 	bool is_enabled() const { return enabled; }
 	void set_enabled(bool enable, bool update_default = false);
+	void set_external_enable(bool enabled, bool update_default = false);
 	void set_show_group(bool enable, bool update_default = true);
 	void set_show_group_labels(bool enable, bool update_default = true);
 	void set_show_raid(bool enable, bool update_default = true);
@@ -53,6 +56,7 @@ public:
 	bool set_marker_size(int new_size_percent, bool update_default = true);
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
 
+	bool is_external_enabled() const { return external_enabled; }
 	bool is_show_group_enabled() const { return map_show_group; }
 	bool is_show_group_labels_enabled() const { return map_show_group_labels; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
@@ -113,6 +117,7 @@ private:
 	// Rect and sizes are in fractions of screen dimensions(0.f to 1.f).
 	bool parse_command(const std::vector<std::string>& args);
 	bool parse_shortcuts(const std::vector<std::string>& args);
+	void parse_external(const std::vector<std::string>& args);
 	void parse_rect(const std::vector<std::string>& args);
 	void parse_size(const std::vector<std::string>& args);
 	void parse_alignment(const std::vector<std::string>& args);
@@ -138,6 +143,7 @@ private:
 
 	void callback_zone();
 	void callback_render();
+	void callback_dx_reset();
 
 	// The following methods execute as part of callback_render().
 	void render_release_resources();
@@ -163,6 +169,7 @@ private:
 	float scale_pixels_to_model(float pixels) const;
 	Vec3 transform_model_to_world(const Vec3& model) const;
 	Vec3 transform_model_to_screen(const Vec3& model) const;
+	D3DCOLOR get_background_color() const;
 
 	const ZoneMapData* get_zone_map(int zone_id);
 	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
@@ -170,6 +177,7 @@ private:
 	void assemble_zone_map(const char* zone_name, CustomMapData& map_data);
 
 	bool enabled = false;
+	bool external_enabled = false;  // External map window enable and sizes.
 	bool map_show_group = false;
 	bool map_show_group_labels = false;
 	bool map_show_raid = false;
@@ -192,8 +200,8 @@ private:
 	std::unordered_map<int, std::unique_ptr<CustomMapData>> map_data_cache;
 
 	D3DVIEWPORT8 viewport = {};  // On-screen coordinates of viewport.
-	DWORD render_target_width = 0;  // Full game window (ignores /viewport).
-	DWORD render_target_height = 0;
+	LONG max_viewport_width = 0;  // Full game window (ignores /viewport) or screen size (external).
+	LONG max_viewport_height = 0;
 	D3DXMATRIX mat_model2world;  // Map model data to viewport centered pixel data.
 	float zoom_factor = 1.f;
 	float map_rect_top = kDefaultRectTop;
@@ -215,6 +223,29 @@ private:
 	IDirect3DVertexBuffer8* position_vertex_buffer = nullptr;
 	IDirect3DVertexBuffer8* marker_vertex_buffer = nullptr;
 	ID3DXFont* label_font = nullptr;
+
+	// External window support
+	static constexpr wchar_t kExternalWindowClassName[] = L"ZealMapWindowClass";
+	static constexpr wchar_t kExernalWindowTitle[] = L"Zeal Map";
+
+	static LRESULT CALLBACK static_external_window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	LRESULT CALLBACK external_window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	void process_external_window_messages();
+	bool create_external_window();
+	bool show_external_window();
+	void hide_external_window();
+	void synchronize_external_window();
+	void destroy_external_window();
+	bool initialize_d3d_external_window();
+	void release_d3d_external_window();
+	RECT calc_external_window_client_rect();
+
+	HINSTANCE external_hinstance = nullptr;
+	HWND external_hwnd = nullptr;
+	LPDIRECT3D8 external_d3d = nullptr; // the pointer to our Direct3D interface
+	LPDIRECT3DDEVICE8 external_d3ddev = nullptr; // the pointer to the device class
+	int external_monitor_top_offset = 0;  // Virtual screen offsets of ext window monitor.
+	int external_monitor_left_offset = 0;
 };
 
 
