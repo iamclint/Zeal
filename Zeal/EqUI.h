@@ -71,6 +71,9 @@ namespace Zeal
 			/*00F0*/ LPVOID  SetVScrollPos; 
 			/*00F4*/ LPVOID  SetAttributesFromSidl; 
 			/*00F8*/ LPVOID  DefineImages; 
+			/*00FC*/ LPVOID  OnReloadSidl;
+			/*0100*/ LPVOID  LoadIniInfo;
+			/*0104*/ LPVOID  StoreIniInfo;
 		};
 		struct ItemDisplayVtable
 		{
@@ -126,8 +129,13 @@ namespace Zeal
 			}
 			void FreeRep()
 			{
-				reinterpret_cast<void(__thiscall*)(const CXSTR*, pCXSTR*)>(0x575DC0)(this, Data);
+				if (Data)
+					reinterpret_cast<void(__thiscall*)(const CXSTR*, pCXSTR*)>(0x575DC0)(this, Data);
 			}
+			//~CXSTR()
+			//{
+			//	FreeRep();
+			//}
 			pCXSTR* Data;
 		};
 
@@ -170,6 +178,10 @@ namespace Zeal
 		struct BasicWnd
 		{
 			//BasicWnd() {};
+			void Deconstruct()
+			{
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, BYTE)>(vtbl->Deconstructor)(this, 1);
+			}
 			void SetFocus()
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(0x572290)(this);
@@ -283,6 +295,7 @@ namespace Zeal
 		};
 		struct EQWND : BasicWnd
 		{
+			~EQWND() {};
 			EQWND() {};
 		
 			/*0x114*/   DWORD   Selector;
@@ -320,6 +333,14 @@ namespace Zeal
 			void DeleteAll()
 			{
 				reinterpret_cast<int(__thiscall*)(const ComboWnd*)>(0x5a18e0)(this);
+			}
+			void InsertChoice(CXSTR data)
+			{
+				reinterpret_cast<void(__thiscall*)(const ComboWnd*, CXSTR)>(0x5A1750)(this, data);
+			}
+			void SetChoice(int index)
+			{
+				reinterpret_cast<void(__thiscall*)(const ComboWnd*, int)>(0x5A1860)(this, index);
 			}
 		};
 		struct ListWnd : EQWND

@@ -232,6 +232,7 @@ ___
 - Toggle through map backgrounds
 - Toggle through map label modes
 - Toggle up or down through visible map levels
+- Toggle map visibility of raid members
 ___
 ### UI
 - **Gauge EqType's**
@@ -320,19 +321,27 @@ toggle visible levels).  The /map commands include extra options like poi search
   - `/map off` - Turns map off
 
 #### Map size, position, and alignment
-The map is drawn to fit within rectangular limits view defined by a top left corner,
-a height, and a width. The zones have different aspect ratios, so some zones will scale
-to fill the height and others the width.  The alignment setting controls where
-the map goes when it is height constrained (top left, top center, top right).
+The map is drawn to fit within a rectangular viewport defined by a top left corner,
+a height, and a width specified as a percentage of the game window dimensions. The
+map viewport is relative to the game window and independent of the game /viewport,
+so the map can be placed anywhere in the game window.
+
+The easiest method for adjusting the map size is through the Zeal Map options
+tab sliders, but convenient toggling between map sizes (say small to large) is
+possible by setting up macros with /map size commands.
+
+The zones have different aspect ratios, so some zones will scale to fill the height
+and others the width.  The map alignment setting (top left, top center, top right)
+controls where the map is drawn when it is height constrained.
 
 * UI options sliders for top, left, height, and width and a combobox for alignment
 * Command examples:
-  - `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of screen dimensions
-  - `/map alignment center` aligns the aspect ratio constrained map to the top center of the window
+  - `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of game window dimensions
+  - `/map alignment center` aligns the aspect ratio constrained map to the top center of the viewport
 
 #### Map background
 The map supports four different options for the map background for contrast enhancement:
-clear (0) , dark (1), light (2), or tan (3).  Additionally, it supports alpha transparency.
+clear (0), dark (1), light (2), or tan (3).  Additionally, it supports alpha transparency.
 
 * UI options combo box for map background and slider for setting alpha as a percent
 * Key bind: "Toggle Map Background" - toggles through the four settings
@@ -342,8 +351,10 @@ clear (0) , dark (1), light (2), or tan (3).  Additionally, it supports alpha tr
 
 #### Map zoom
 The default 100% map scale makes the entire zone visible sized to the height or width constraint.
-In zoom, the map draws all available data that fits within the rectangular viewport. The 
-view re-centers when the position marker is within 20% of an edge and moving towards that edge.
+In zoom, the map draws all available data that fits within the rectangular viewport. The zoom
+algorithm works to maximize the visible map closest to the player. Map edges will be pinned
+to a viewport edge until the user moves at least half the viewport away, and then the map
+background will scroll with the player centered in the viewport.
 
 * UI options slider
 * Key bind: "Toggle Map Zoom" - toggles through 100%, 200%, 400%, 800% zoom
@@ -362,6 +373,7 @@ in the options tab and instead use the key bind to situationally toggle it on an
 * Key bind: "Toggle Show Raid" - Toggles visibility of raid members
 * Command examples:
   - `/map show_group` toggles the group member markers on and off
+  - `/map show_group labels` toggles numeric (F2-F6) group member labels (FPS hit)
   - `/map show_raid` toggles the raid member markers on and off
 
 #### Showing map levels
