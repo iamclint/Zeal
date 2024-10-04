@@ -199,11 +199,11 @@ void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
     ZealService::get_instance()->hooks->hook_map["Deactivate"]->original(Deactivate)(cman, u);
 }
 
-void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, BYTE channel)
+void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel)
 {
     for (auto& filter : Extended_ChannelMaps)
     {
-        if (filter.isHandled(channel+0x100, msg))
+        if (filter.isHandled(channel, msg))
             wnd = filter.windowHandle;
     }
     isDamage = false;
@@ -221,15 +221,23 @@ void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, BYTE 
 //        return match[1].str(); 
 //    return "";
 //}
+void __fastcall PrintSplit(int t, int unused, const char* data, short color_index, bool u)
+{
+    ZealService::get_instance()->hooks->hook_map["PrintSplit"]->original(PrintSplit)(t, unused, data, USERCOLOR_MONEY_SPLIT, u);
+}
 
+void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_index, bool u)
+{
+    ZealService::get_instance()->hooks->hook_map["PrintAutoSplit"]->original(PrintAutoSplit)(t, unused, data, USERCOLOR_ECHO_AUTOSPLIT, u);
+}
 
 chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 {
-    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal) { isDamage = true; damageData = { source, target, type, spell_id, damage, heal }; });
+    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { if (output_text) { isDamage = true; damageData = { source, target, type, spell_id, damage, heal }; } });
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short color, std::string data) { return color == USERCOLOR_RANDOM; }));
     Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short color, std::string data) { return color == USERCOLOR_LOOT; }));
-    Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short color, std::string data) { return color == USERCOLOR_MONEY_SPLIT; }));
-    Extended_ChannelMaps.push_back(CustomFilter("MyPet", 0x10003, [this, zeal](short color, std::string data)
+    Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short color, std::string data) { return color == USERCOLOR_MONEY_SPLIT || color == USERCOLOR_ECHO_AUTOSPLIT; }));
+    Extended_ChannelMaps.push_back(CustomFilter("My Pet", 0x10003, [this, zeal](short color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
                 return true;
@@ -237,9 +245,16 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
                 return true;
             return false;
         }));
+    Extended_ChannelMaps.push_back(CustomFilter("Other Pets", 0x10004, [this, zeal](short color, std::string data)
+        {
+            if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
+                return true;
+            if (isDamage && damageData.target && damageData.target->PetOwnerSpawnId && damageData.target->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
+                return true;
+            return false;
+        }));
 
-
-    zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, byte channel) { this->AddOutputText(wnd, msg, channel); });
+    zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel) { this->AddOutputText(wnd, msg, channel); });
 
     zeal->hooks->Add("CChatManager", 0x4100e2, CChatManager, hook_type_detour);
     zeal->hooks->Add("Deactivate", 0x410871, Deactivate, hook_type_detour);
@@ -248,6 +263,8 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("SetChannelMap", 0x4113F1, SetChannelMap, hook_type_detour);
     zeal->hooks->Add("ClearChannelMap", 0x41140C, ClearChannelMap, hook_type_detour);
     zeal->hooks->Add("ClearChannelMaps", 0x411638, ClearChannelMaps, hook_type_detour);
+    zeal->hooks->Add("PrintSplit", 0x54755b, PrintSplit, hook_type_replace_call); //fix up money split
+    zeal->hooks->Add("PrintAutoSplit", 0x4FB477, PrintAutoSplit, hook_type_replace_call); //fix up money split
     //zeal->hooks->Add("ColorToChannelMap", 0x411173, ColorToChannelMap, hook_type_replace_call);
 
     //ChatWindow::WndNotification Conditional Patch

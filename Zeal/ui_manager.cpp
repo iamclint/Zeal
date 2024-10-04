@@ -4,6 +4,20 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
+Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name, LPVOID Deconstructor)
+{
+	Zeal::EqUI::EQWND* wnd = (Zeal::EqUI::EQWND*)HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(Zeal::EqUI::EQWND));
+	mem::set((int)wnd, 0, sizeof(Zeal::EqUI::EQWND));
+	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name)>(0x56e2b0)(wnd, 0, Zeal::EqUI::CXSTR(name));
+	//reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::EQWND*, Zeal::EqUI::EQWND*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(wnd, 0, Zeal::EqUI::CXSTR(name), -1, 0);
+	wnd->SetupCustomVTable();
+	wnd->CreateChildren();
+	if (Deconstructor)
+		wnd->vtbl->Deconstructor = Deconstructor;
+	return wnd;
+}
+
+
 static int __fastcall CheckboxClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
@@ -19,8 +33,8 @@ static void __fastcall SetSliderValue_hook(Zeal::EqUI::SliderWnd* pWnd, int unus
 
 	if (value < 0)
 		value = 0;
-	if (value > 100)
-		value = 100;
+	if (value > pWnd->max_val)
+		value = pWnd->max_val;
 	if (ui->slider_callbacks.count(pWnd) > 0)
 		ui->slider_callbacks[pWnd](pWnd, value);
 }
@@ -47,7 +61,7 @@ void ui_manager::AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name
 	}
 }
 
-void ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback)
+void ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback, int max_val)
 {
 	if (wnd)
 	{
@@ -56,7 +70,7 @@ void ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, 
 		{
 			slider_callbacks[btn] = callback;
 			slider_names[name] = btn;
-			btn->max_val = 100;
+			btn->max_val = max_val;
 		}
 	}
 }
@@ -112,6 +126,14 @@ void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::s
 		row++;
 	}
 }
+void ui_manager::AddListItems(Zeal::EqUI::ComboWnd* wnd, const std::vector<std::string> data)
+{
+
+	for (auto & current_row : data)
+	{
+		wnd->InsertChoice(current_row);
+	}
+}
 void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>>data)
 {
 
@@ -151,7 +173,8 @@ void ui_manager::SetComboValue(std::string name, int value)
 {
 	if (combo_names.count(name) > 0)
 	{
-		ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name]->FirstChildWnd, 0, value);
+		//	ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name]->FirstChildWnd, 0, value); //this is crashing since firstchildwnd is null, may have to maintain the combo windows ourselves?
+		ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(combo_names[name]->CmbListWnd, 0, value);
 	}
 }
 
