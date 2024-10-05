@@ -367,6 +367,43 @@ namespace Zeal
 			/* 0x00EC */ struct _EQDAGCHILDREN* Children;
 			/* ...... */
 		};
+				typedef struct _EQARGBCOLOR {
+			union {
+				struct {
+					BYTE B;
+					BYTE G;
+					BYTE R;
+					BYTE A;
+				};
+				DWORD ARGB;
+			};
+			_EQARGBCOLOR(BYTE _R, BYTE _G, BYTE _B, BYTE _A) : A(_A), R(_R), G(_G), B(_B) {};
+			_EQARGBCOLOR(DWORD _ARGB) : ARGB(_ARGB) {};
+			_EQARGBCOLOR() : A{}, R{}, G{}, B{} {};
+
+		} EQARGBCOLOR;
+		typedef struct _EQSTRINGSPRITE
+		{
+			/* 0x0000 */ DWORD Unknown0000;
+			/* 0x0004 */ DWORD Unknown0004;
+			/* 0x0008 */ DWORD Unknown0008;
+			/* 0x000C */ DWORD Unknown000C;
+			/* 0x0010 */ DWORD Unknown0010;
+			/* 0x0014 */ PVOID Unknown0014;
+			/* 0x0018 */ PCHAR Text;
+			/* 0x001C */ DWORD TextLength;
+			/* 0x0020 */ DWORD Unknown0020;
+			/* 0x0024 */ DWORD MaxScaleFactor1;
+			/* 0x0028 */ FLOAT MaxScaleFactor2;
+			/* 0x002C */ FLOAT MaxScaleFactor3;
+			/* 0x0030 */ DWORD IsYonClipEnabled;
+			/* 0x0034 */ DWORD YonClipDistance;
+			/* 0x0038 */ FLOAT Unknown0038;
+			/* 0x003C */ DWORD Width;
+			/* 0x0040 */ DWORD Height;
+			/* 0x0044 */ FLOAT Unknown0044;
+			/* 0x0048 */ EQARGBCOLOR Color;
+		} EQSTRINGSPRITE, * PEQSTRINGSPRITE;
 		struct ActorInfo
 		{
 			//UINT ModifyAttackSpeed()

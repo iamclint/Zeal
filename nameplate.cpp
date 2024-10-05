@@ -4,7 +4,7 @@
 #include "string_util.h"
 
 bool nameplatecolorsEnabled = true;
-bool nameplatconcolorsEnabled = true;
+bool nameplateconcolorsEnabled = true;
 
 struct CachedNameData
 {
@@ -87,7 +87,7 @@ int __fastcall SetNameSpriteTint(void* this_ptr, void* not_used, Zeal::EqStructu
 			}
 			break;
 		case 1: //NPC
-			if (nameplatconcolorsEnabled) {
+			if (nameplateconcolorsEnabled) {
 				if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
 					return result;
 				if (spawn != Zeal::EqGame::get_self()) //All NPC entities
@@ -114,10 +114,10 @@ void NamePlate::colors_set_enabled(bool _enabled)
 
 void NamePlate::con_colors_set_enabled(bool _enabled)
 {
-	_enabled = !nameplatconcolorsEnabled;
+	_enabled = !nameplateconcolorsEnabled;
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateConColors", _enabled);
 	Zeal::EqGame::print_chat("NameplateConColors are %s", _enabled ? "Enabled" : "Disabled");
-	nameplatconcolorsEnabled = !nameplatconcolorsEnabled;
+	nameplateconcolorsEnabled = !nameplateconcolorsEnabled;
 }
 
 NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
