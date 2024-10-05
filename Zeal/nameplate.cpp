@@ -4,6 +4,7 @@
 #include "string_util.h"
 
 bool nameplatecolorsEnabled = true;
+bool nameplatconcolorsEnabled = true;
 
 struct CachedNameData
 {
@@ -85,6 +86,12 @@ int __fastcall SetNameSpriteTint(void* this_ptr, void* not_used, Zeal::EqStructu
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFFFF8000; //AFK - Orange	
 			break;
 		case 1: //NPC
+			if (nameplatconcolorsEnabled) {
+				if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+					return result;
+				if (spawn != Zeal::EqGame::get_self()) //All NPC entities
+					spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Zeal::EqGame::GetLevelCon(spawn); //Level Con Color for NPCs
+			}
 			break;
 		case 2: //NPC Corpse
 			break;
@@ -97,12 +104,20 @@ int __fastcall SetNameSpriteTint(void* this_ptr, void* not_used, Zeal::EqStructu
 	return result;
 }
 
-void NamePlate::set_enabled(bool _enabled)
+void NamePlate::colors_set_enabled(bool _enabled)
 {
 	_enabled = !nameplatecolorsEnabled;
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateColors", _enabled);
-	nameplatecolorsEnabled = !nameplatecolorsEnabled;
 	Zeal::EqGame::print_chat("NameplateColors are %s", _enabled ? "Enabled" : "Disabled");
+	nameplatecolorsEnabled = !nameplatecolorsEnabled;
+}
+
+void NamePlate::con_colors_set_enabled(bool _enabled)
+{
+	_enabled = !nameplatconcolorsEnabled;
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateConColors", _enabled);
+	Zeal::EqGame::print_chat("NameplateConColors are %s", _enabled ? "Enabled" : "Disabled");
+	nameplatconcolorsEnabled = !nameplatconcolorsEnabled;
 }
 
 NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
@@ -117,10 +132,19 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 		ini->setValue<bool>("Zeal", "NameplateColors", false);
 	if (ini->exists("Zeal", "NameplateColors"))
 		nameplatecolorsEnabled = ini->getValue<bool>("Zeal", "NameplateColors");
+	if (!ini->exists("Zeal", "NameplateConColors"))
+		ini->setValue<bool>("Zeal", "NameplateConColors", false);
+	if (ini->exists("Zeal", "NameplateConColors"))
+		nameplatecolorsEnabled = ini->getValue<bool>("Zeal", "NameplateColors");
 
 	zeal->commands_hook->Add("/nameplatecolors", {}, "Toggles Nameplate Colors",
 		[this](std::vector<std::string>& args) {
-			set_enabled(!ZealService::get_instance()->nameplate->is_enabled());
+			colors_set_enabled(!ZealService::get_instance()->nameplate->colors_is_enabled());
+			return true;
+		});
+	zeal->commands_hook->Add("/nameplateconcolors", {}, "Toggles Nameplate Colors",
+		[this](std::vector<std::string>& args) {
+			con_colors_set_enabled(!ZealService::get_instance()->nameplate->con_colors_is_enabled());
 			return true;
 		});
 }
