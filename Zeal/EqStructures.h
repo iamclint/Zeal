@@ -367,7 +367,7 @@ namespace Zeal
 			/* 0x00EC */ struct _EQDAGCHILDREN* Children;
 			/* ...... */
 		};
-		struct _EQARGBCOLOR {
+		typedef struct _EQARGBCOLOR {
 			union {
 				struct {
 					BYTE B;
@@ -381,7 +381,7 @@ namespace Zeal
 			_EQARGBCOLOR(DWORD _ARGB) : ARGB(_ARGB) {};
 			_EQARGBCOLOR() : A{}, R{}, G{}, B{} {};
 
-		};
+		} EQARGBCOLOR;
 		typedef struct _EQSTRINGSPRITE
 		{
 			/* 0x0000 */ DWORD Unknown0000;
@@ -402,7 +402,7 @@ namespace Zeal
 			/* 0x003C */ DWORD Width;
 			/* 0x0040 */ DWORD Height;
 			/* 0x0044 */ FLOAT Unknown0044;
-			/* 0x0048 */ Zeal::EqStructures::_EQARGBCOLOR Color;
+			/* 0x0048 */ EQARGBCOLOR Color;
 		} EQSTRINGSPRITE, * PEQSTRINGSPRITE;
 		struct ActorInfo
 		{
