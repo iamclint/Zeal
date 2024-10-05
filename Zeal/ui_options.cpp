@@ -106,8 +106,9 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->chat_hook->set_classes(wnd->Checked); });
-	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_MapShowRaid", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_raid(wnd->Checked); });
-	ui->AddCheckboxCallback(Zeal::EqGame::Windows->Options, "Zeal_NameplateColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->colors_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_MapShowRaid", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_raid(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->colors_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateConColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->con_colors_set_enabled(wnd->Checked); });
 	
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
 	ui->AddComboCallback(wnd, "Zeal_Timestamps_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->set_timestamp(value); });
@@ -319,28 +320,6 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetLabelValue("Zeal_TargetRingSegments_Value", "%i", ZealService::get_instance()->target_ring->get_segments());
 	ui->SetLabelValue("Zeal_TargetRingRotation_Value", "%.2f", ZealService::get_instance()->target_ring->get_rotation_speed());
 	ui->SetLabelValue("Zeal_TargetRingSize_Value", "%.2f", ZealService::get_instance()->target_ring->get_size());
-	
-	////since the textures are dynamic we need to scan for the current texture
-	//int texture_index = 0;
-	//Zeal::EqUI::ListWnd* t = ui->combo_names["Zeal_TargetRingTexture_Combobox"]->CmbListWnd;
-	//if (t)
-	//{
-	//	for (int i = 0; i < t->ItemCount; i++)
-	//	{
-	//		Zeal::EqUI::CXSTR current_item;
-	//		t->GetItemText(&current_item, i, 0);
-	//		if (current_item.Data)
-	//		{
-	//			std::string data = current_item.Data->Text;
-	//			if (Zeal::String::compare_insensitive(data, ZealService::get_instance()->target_ring->get_texture()))
-	//			{
-	//				ui->SetComboValue("Zeal_TargetRingTexture_Combobox", i);
-	//				break;
-	//			}
-	//		}
-	//	}
-	//}
-	
 }
 void ui_options::UpdateOptionsMap()
 {
