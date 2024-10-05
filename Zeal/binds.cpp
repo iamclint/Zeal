@@ -295,7 +295,7 @@ void Binds::add_binds()
 				!ZealService::get_instance()->zone_map->is_show_raid_enabled(), false);
 		}
 		});
-	add_bind(235, "Toggle Nameplate Colors", "ToggleNameplateColors", key_category::Target, [this](int key_down) {
+			add_bind(235, "Toggle Nameplate Colors", "ToggleNameplateColors", key_category::Target, [this](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 			ZealService::get_instance()->nameplate->colors_set_enabled(!ZealService::get_instance()->nameplate->colors_is_enabled());
 		});

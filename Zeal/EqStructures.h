@@ -367,7 +367,7 @@ namespace Zeal
 			/* 0x00EC */ struct _EQDAGCHILDREN* Children;
 			/* ...... */
 		};
-		typedef struct _EQARGBCOLOR {
+				typedef struct _EQARGBCOLOR {
 			union {
 				struct {
 					BYTE B;
