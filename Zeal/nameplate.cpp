@@ -135,7 +135,7 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 	if (!ini->exists("Zeal", "NameplateConColors"))
 		ini->setValue<bool>("Zeal", "NameplateConColors", false);
 	if (ini->exists("Zeal", "NameplateConColors"))
-		nameplatecolorsEnabled = ini->getValue<bool>("Zeal", "NameplateConColors");
+		nameplateconcolorsEnabled = ini->getValue<bool>("Zeal", "NameplateConColors");
 
 	zeal->commands_hook->Add("/nameplatecolors", {}, "Toggles Nameplate Colors",
 		[this](std::vector<std::string>& args) {
