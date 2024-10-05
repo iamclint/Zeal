@@ -30,17 +30,19 @@ guide above if your `Zeal.asi` file keeps disappearing.
 
 A summary of the process is below:
 1. Ensure that sound is enabled in the game (the volume level can be set to zero).
-  - Check that `Sound=TRUE` in the eqclient.ini in your root Everquest directory.
+  - Check that `Sound=TRUE` in the `eqclient.ini` in your root Everquest directory.
 2. [Download](https://github.com/iamclint/Zeal/releases) the latest Zeal
-   release zip file (`zeal_v#.#.#_*.zip`) from the "Assets" section.
+   release zip file (`zeal_v#.#.#_*.zip`) from the `Assets` section.
   - Ignore the Source code files. See troubleshooting if your browser complains.
 3. Quit Everquest and extract the `Zeal.asi` from the zip file to your root
    Everquest install directory.
   - The `Zeal.pdb` file is a symbol file only needed by developers for debugging
     and can be ignored.
-4. Extract the `EQUI_Options.xml` to the `uifiles/default` directory
-   or to your active custom UI skin directory (like `uifiles/duxaui`).
-  - Some functionality is only accessible through the updated options UI.
+4. Extract the `uifiles/zeal` folder contents from the zip file and copy to your
+    root Everquest install directory (as `uifiles/zeal`).
+  - The files in `uifiles/zeal` override `uifiles/default` and `uifiles/<your_skin>`
+  - The Zeal uifiles includes Zeal specific options, including some functionality
+    that is only accessible through the Zeal options window (opens with EQ options)
 5. Recommended: Install a UI skin modified with the extra Zeal UI functionality
    such as mana gauges, experience per hour, loot all / link buttons, etc.
   - If the UI is not updated, there will be some XML error complaints that can be ignored
@@ -50,7 +52,8 @@ A summary of the process is below:
   - If the folder is present and includes the ZealCrashSender.exe, a crash log
     can be automatically submitted for debugging.
 7. Test Zeal installation in game by typing "/zeal version" and "/help zeal".
-8. Configure Zeal using the new Zeal tabs in EQ options and assign new key binds.
+8. Configure Zeal using the new Zeal options window and assign new key binds.
+  - The Zeal options window opens in parallel to the EQ options window (Alt-o)
 
 ### Compatible UI's
 - https://github.com/NilliP/NillipussUI_1080p
@@ -299,13 +302,13 @@ all zones through Planes of Power. The map is drawn into the game's DirectX view
 as part of the rendering sequence and is currently not 'clickable'.
 
 The map is controlled through three interfaces:
-* Dedicated EQ options window tab (requires `EQUI_Options.xml`, see Installation notes above)
-* Key binds for frequent map actions (configure in Options->Keyboard->UI)
+* Dedicated Zeal options window tab (requires `zeal\uifiles`, see Installation notes above)
+* Key binds for frequent map actions (configure in EQ Options->Keyboard->UI)
 * The /map command
 
 The default map settings are stored in the EQClient.ini file of the root Everquest directory.
-The defaults are updated when adjusting settings in the EQ options tab. The key binds and
-/map commands are temporary changes unless the `/map save_ini` command is used.
+The defaults are updated when adjusting settings in the Zeal options map tab. The key binds and
+/map commands create temporary changes unless the `/map save_ini` command is used.
 
 It is recommended to use the Options tab to adjust the basic map settings to the preferred
 defaults (size, position, background, marker sizes) and then use the keybinds for more
@@ -313,7 +316,7 @@ frequent map adjustments (on/off, toggle zoom, toggle backgrounds, toggle labels
 toggle visible levels).  The /map commands include extra options like poi search.
 
 #### Enabling the map
-* UI options checkbox
+* Zeal options checkbox
 * Key bind: "Toggle Map" - Toggles map on and off
 * Command examples:
   - `/map` - Toggles map on and off
@@ -334,7 +337,7 @@ The zones have different aspect ratios, so some zones will scale to fill the hei
 and others the width.  The map alignment setting (top left, top center, top right)
 controls where the map is drawn when it is height constrained.
 
-* UI options sliders for top, left, height, and width and a combobox for alignment
+* Zeal options sliders for top, left, height, and width and a combobox for alignment
 * Command examples:
   - `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of game window dimensions
   - `/map alignment center` aligns the aspect ratio constrained map to the top center of the viewport
@@ -343,7 +346,7 @@ controls where the map is drawn when it is height constrained.
 The map supports four different options for the map background for contrast enhancement:
 clear (0), dark (1), light (2), or tan (3).  Additionally, it supports alpha transparency.
 
-* UI options combo box for map background and slider for setting alpha as a percent
+* Zeal options combo box for map background and slider for setting alpha as a percent
 * Key bind: "Toggle Map Background" - toggles through the four settings
 * Command examples:
   - `/map background 1` sets the background to dark with no change to alpha
@@ -356,7 +359,7 @@ algorithm works to maximize the visible map closest to the player. Map edges wil
 to a viewport edge until the user moves at least half the viewport away, and then the map
 background will scroll with the player centered in the viewport.
 
-* UI options slider
+* Zeal options slider
 * Key bind: "Toggle Map Zoom" - toggles through 100%, 200%, 400%, 800% zoom
 * Command examples:
   - `/map zoom 200` sets map scaling to 200% (2x)
@@ -369,7 +372,7 @@ markers are simple fixed triangles with varying color.  Since there are a high n
 of potential raid members, it is recommended to not use the persistent Show Raid checkbox
 in the options tab and instead use the key bind to situationally toggle it on and off.
 
-* UI options checkbox to enable / disable (one each for group and raid)
+* Zeal options checkbox to enable / disable (one each for group and raid)
 * Key bind: "Toggle Show Raid" - Toggles visibility of raid members
 * Command examples:
   - `/map show_group` toggles the group member markers on and off
@@ -389,7 +392,7 @@ the zones are properly colored, but it does work well in some of the 3-D overlap
 #### Position marker
 The map supports adding a position marker to easier identification of target coordinates.
 
-* UI options slider to adjust the marker size
+* Zeal options slider to adjust the marker size
 * Command examples:
   - `/map marker 1100 -500` sets a map marker at /loc of 1100, -500
   - `/map 1100 -500` is a shortcut for the command above to set a marker at 1100, -500
