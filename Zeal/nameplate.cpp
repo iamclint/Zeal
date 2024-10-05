@@ -66,7 +66,9 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 						raidMember->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF000000; //Raid Member-Black
 				}
 			}
-			if (spawn->GuildId == Zeal::EqGame::get_self()->GuildId) //Guild Member
+			if (spawn->GuildId == 0xFFFF) //If not in a Guild - keep default color
+				return result;
+			else if (spawn->GuildId == Zeal::EqGame::get_self()->GuildId) //Guild Member
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF00FF80; //Guild Member-Greenish Blue
 			if (groupmembers) {
 				for (int i = 0; i < maxGroupMembers; ++i) //Group Member loop
