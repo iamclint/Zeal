@@ -69,7 +69,7 @@ bool TellWindows::HandleKeyPress(int key, bool down, int modifier)
     Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
     if (IsTellWindow(wnd))
     {
-        if (key == 0xf && down)
+        if (key == 0xf && down) //tab and shift tab to cycle through tell windows
         {
             Zeal::EqUI::ChatWnd* focus_wnd = nullptr;
             if (modifier==1)
