@@ -18,7 +18,7 @@ void ui_group::InitUI()
 }
 void ui_group::swap(UINT index1, UINT index2)
 {
-	if (index1 < 6 && index2 < 6)
+	if (index1 < 5 && index2 < 5)
 	{
 		std::pair<std::string, Zeal::EqStructures::Entity*> Ent1 = std::make_pair(nameArray[index1], ptrArray[index1]);
 		std::pair<std::string, Zeal::EqStructures::Entity*> Ent2 = std::make_pair(nameArray[index2], ptrArray[index2]);
