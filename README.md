@@ -69,7 +69,12 @@ A summary of the process is below:
 
 ### Commands
 ___
-- `/cc`
+- `/sortgroup`
+  - **Arguments:** ``
+  - **Example:** `/sq` `/sq 1 2`
+  - **Description:** sorts your current group members in the ui  using /sq 1 2 will swap players 1 and 2 in your group on your ui.
+
+- - `/cc`
   - **Arguments:** ``
   - **Example:** `/cc`
   - **Description:** toggles classic classes in who and other areas.

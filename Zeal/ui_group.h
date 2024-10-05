@@ -8,6 +8,7 @@ public:
 	ui_group(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_group();
 	void sort();
+	void swap(UINT index1, UINT index2);
 private:
 	void InitUI();
 	ui_manager* ui;

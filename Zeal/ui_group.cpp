@@ -3,6 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
+#include "string_util.h"
 #include <algorithm>
 #include <cctype>
 using NameArrayType = char[0x40];
@@ -15,7 +16,24 @@ void ui_group::InitUI()
 {
 
 }
+void ui_group::swap(UINT index1, UINT index2)
+{
+	if (index1 < 6 && index2 < 6)
+	{
+		std::pair<std::string, Zeal::EqStructures::Entity*> Ent1 = std::make_pair(nameArray[index1], ptrArray[index1]);
+		std::pair<std::string, Zeal::EqStructures::Entity*> Ent2 = std::make_pair(nameArray[index2], ptrArray[index2]);
 
+		//move the strings
+		mem::copy((DWORD)(nameArray[index1]), (DWORD)Ent2.first.c_str(), Ent2.first.length()+1); //+1 don't forget string terminator
+		mem::copy((DWORD)(nameArray[index2]), (DWORD)Ent1.first.c_str(), Ent1.first.length()+1);
+		ptrArray[index1] = Ent2.second;
+		ptrArray[index2] = Ent1.second;
+	}
+	else
+	{
+		Zeal::EqGame::print_chat("Error moving group members: %i to %i", index1, index2);
+	}
+}
 void ui_group::sort()
 {
 	std::vector<std::pair<std::string, Zeal::EqStructures::Entity*>> group_members_sorted;
@@ -58,10 +76,15 @@ ui_group::ui_group(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
 	ui = mgr;
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
-	zeal->commands_hook->Add("/sortgroup", {"/sg"}, "",
+	zeal->commands_hook->Add("/sortgroup", {"/sg"}, "Sort your group members example usages: /sg or /sg 1 2 where /sg alpha sorts the group and /sg 1 2 switches players 1 and 2 in your group window ",
 		[this](std::vector<std::string>& args) 
 		{
-			sort();
+			int index1 = 0;
+			int index2 = 0;
+			if (args.size() > 2 && Zeal::String::tryParse(args[1], &index1) && Zeal::String::tryParse(args[2], &index2))
+				swap(index1-1, index2-1); //makes this easier for end users so /sortgroup 1 2 will swap players 1 and 2 in your group
+			else
+				sort();
 			return true;
 		});
 	if (Zeal::EqGame::is_in_game()) InitUI();
