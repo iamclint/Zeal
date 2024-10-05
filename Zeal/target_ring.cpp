@@ -29,212 +29,6 @@ struct Vertex {
 };
 
 
-#define CON_WHITE D3DCOLOR_ARGB(0x88, 0xf0, 0xf0, 0xf0)
-#define CON_RED D3DCOLOR_ARGB(0x88, 0xf0, 0x0, 0x0)
-#define CON_BLUE D3DCOLOR_ARGB(0x88, 0x0, 0x0, 0xf0)
-#define CON_YELLOW D3DCOLOR_ARGB(0x88, 0xf0, 0xf0, 0x0)
-#define CON_LIGHTBLUE D3DCOLOR_ARGB(0x88, 0x0, 0xf0, 0xf0)
-#define CON_GREEN D3DCOLOR_ARGB(0x88, 0x0, 0xf0, 0x0)
-
-DWORD GetLevelCon(Zeal::EqStructures::Entity* ent) {
-	if (!ent || !Zeal::EqGame::get_self())
-		return 0;
-	int mylevel = Zeal::EqGame::get_self()->Level;
-	short diff = ent->Level - mylevel;
-	DWORD conlevel = 0;
-
-	if (diff == 0)
-		return CON_WHITE;
-	else if (diff >= 1 && diff <= 2)
-		return CON_YELLOW;
-	else if (diff >= 3)
-		return CON_RED;
-
-	if (mylevel <= 7)
-	{
-		if (diff <= -4)
-			conlevel = CON_GREEN;
-		else
-			conlevel = CON_BLUE;// Zeal::EqGame::get_user_color(70);
-	}
-	else if (mylevel <= 8)
-	{
-		if (diff <= -5)
-			conlevel = CON_GREEN;
-		else if (diff <= -4)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 12)
-	{
-		if (diff <= -6)
-			conlevel = CON_GREEN;
-		else if (diff <= -4)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 16)
-	{
-		if (diff <= -7)
-			conlevel = CON_GREEN;
-		else if (diff <= -5)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 20)
-	{
-		if (diff <= -8)
-			conlevel = CON_GREEN;
-		else if (diff <= -6)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 24)
-	{
-		if (diff <= -9)
-			conlevel = CON_GREEN;
-		else if (diff <= -7)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 28)
-	{
-		if (diff <= -10)
-			conlevel = CON_GREEN;
-		else if (diff <= -8)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 30)
-	{
-		if (diff <= -11)
-			conlevel = CON_GREEN;
-		else if (diff <= -9)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 32)
-	{
-		if (diff <= -12)
-			conlevel = CON_GREEN;
-		else if (diff <= -9)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 36)
-	{
-		if (diff <= -13)
-			conlevel = CON_GREEN;
-		else if (diff <= -10)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 40)
-	{
-		if (diff <= -14)
-			conlevel = CON_GREEN;
-		else if (diff <= -11)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 44)
-	{
-		if (diff <= -16)
-			conlevel = CON_GREEN;
-		else if (diff <= -12)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 48)
-	{
-		if (diff <= -17)
-			conlevel = CON_GREEN;
-		else if (diff <= -13)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 52)
-	{
-		if (diff <= -18)
-
-			conlevel = CON_GREEN;
-		else if (diff <= -14)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 54)
-	{
-		if (diff <= -19)
-
-			conlevel = CON_GREEN;
-		else if (diff <= -15)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 56)
-	{
-		if (diff <= -20)
-
-			conlevel = CON_GREEN;
-		else if (diff <= -15)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 60)
-	{
-		if (diff <= -21)
-			conlevel = CON_GREEN;
-		else if (diff <= -16)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 61)
-	{
-		if (diff <= -19)
-			conlevel = CON_GREEN;
-		else if (diff <= -14)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 62)
-	{
-		if (diff <= -17)
-			conlevel = CON_GREEN;
-		else if (diff <= -12)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else
-	{
-		if (diff <= -16)
-			conlevel = CON_GREEN;
-		else if (diff <= -11)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-
-	return conlevel;
-}
-
 
 RenderState::RenderState(IDirect3DDevice8* device, DWORD state, DxStateType_ type)
 	: state(state), type(type)
@@ -458,7 +252,7 @@ void TargetRing::callback_render() {
 	ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
 
 	// ### Target Ring Color ###
-	DWORD originalColor = GetLevelCon(target);
+	DWORD originalColor = Zeal::EqGame::GetLevelCon(target);
 	// Max Red, Green, and Blue by default
 	DWORD Color = originalColor;
 		/*Color = D3DCOLOR_ARGB(0xFF,
@@ -590,9 +384,20 @@ void TargetRing::set_segments(int segments)
 }
 void TargetRing::set_texture(std::string name)
 {
-	texture_name = name;
-	load_texture(name);
-	save_ini();
+	if (name != "None" && name.length())
+	{
+		texture_name = name;
+		load_texture(name);
+		save_ini();
+	}
+	else
+	{
+		texture_name = "";
+		if (targetRingTexture)
+			targetRingTexture->Release();
+		targetRingTexture = nullptr;
+		save_ini();
+	}
 }
 void TargetRing::set_size(float size)
 {
@@ -698,7 +503,6 @@ void TargetRing::options_opened()
 
 void TargetRing::callback_initui()
 {
-	Zeal::EqGame::print_debug("Target Ring init");
 	load_texture(texture_name);
 }
 
@@ -712,7 +516,7 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 	//zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CharacterSelect);
 	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CleanUI);
 
-	zeal->commands_hook->Add("/loadtextures", {}, "",
+	/*zeal->commands_hook->Add("/loadtextures", {}, "",
 		[this](std::vector<std::string>& args) {
 
 			std::vector<std::string> tgas = GetTGAFiles("uifiles/zeal/targetrings");
@@ -738,7 +542,7 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 				
 			}
 			return true;
-		});
+		})*/;
 	zeal->commands_hook->Add("/targetring", {}, "Toggles target ring",
 		[this](std::vector<std::string>& args) {
 

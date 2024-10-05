@@ -33,10 +33,26 @@ int GetSensitivityForSlider(float* value)
 //	return 0;
 //}
 //most of the options window xml was put together by nillipus
+
+void PrintUIError()
+{
+	Zeal::EqGame::print_chat("Warning: The zeal ui files are not in place, cannot load zeal options!");
+}
+
 void ui_options::InitUI()
 {
 	if (!wnd)
-		wnd = ui->CreateSidlScreenWnd("ZealOptions", 0);
+	{
+		if (std::filesystem::exists("./uifiles/zeal/EQUI_ZealOptions.xml"))
+		{
+			wnd = ui->CreateSidlScreenWnd("ZealOptions", 0);
+		}
+		else
+		{
+			PrintUIError();
+			return;
+		}
+	}
 	InitGeneral();
 	InitCamera();
 	InitMap();
@@ -72,6 +88,11 @@ float ScaleSliderToFloat(int ivalue, float fmin, float fmax, Zeal::EqUI::SliderW
 
 void ui_options::InitGeneral()
 {
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 	/*add callbacks when the buttons are pressed in the options window*/
 	ui->AddCheckboxCallback(wnd, "Zeal_HideCorpse", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->set_hide_looted(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_Cam", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->set_smoothing(wnd->Checked); });
@@ -190,12 +211,19 @@ void ui_options::InitTargetRing()
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingForward", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->set_rotation_match(wnd->Checked); });
 
 	ui->AddComboCallback(wnd, "Zeal_TargetRingTexture_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
-		Zeal::EqUI::CXSTR texture_name;
-		wnd->CmbListWnd->GetItemText(&texture_name, value, 0);
-		if (texture_name.Data)
+		if (value > 0)
 		{
-			ZealService::get_instance()->target_ring->set_texture(texture_name.Data->Text);
-			texture_name.FreeRep();
+			Zeal::EqUI::CXSTR texture_name;
+			wnd->CmbListWnd->GetItemText(&texture_name, value, 0);
+			if (texture_name.Data)
+			{
+				ZealService::get_instance()->target_ring->set_texture(texture_name.Data->Text);
+				texture_name.FreeRep();
+			}
+		}
+		else
+		{
+			ZealService::get_instance()->target_ring->set_texture("");
 		}
 	});
 	ui->AddSliderCallback(wnd, "Zeal_TargetRingFill_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
@@ -226,6 +254,11 @@ void ui_options::UpdateOptions()
 {
 	if (!isReady)
 		return;
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 
 	UpdateOptionsCamera();
 	UpdateOptionsGeneral();
