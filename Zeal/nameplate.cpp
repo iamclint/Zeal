@@ -68,7 +68,6 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 			}
 			if (spawn->GuildId == Zeal::EqGame::get_self()->GuildId) //Guild Member
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF00FF80; //Guild Member-Greenish Blue
-			//spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF80FF80; //Guild Member-White Green
 			if (groupmembers) {
 				for (int i = 0; i < maxGroupMembers; ++i) //Group Member loop
 				{
@@ -81,7 +80,9 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 			if (spawn->IsLinkDead == 1) //LinkDead
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFFFF0000; //LinkDead - Red
 			else if (spawn->IsAwayFromKeyboard == 1) //AFK
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFFFF8000; //AFK - Orange	
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFFFF8000; //AFK - Orange
+			else if (spawn->ActorInfo->IsLookingForGroup == 1) //LFG
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF80FF80; //LFG-White Green
 		}
 		break;
 	case 1: //NPC
