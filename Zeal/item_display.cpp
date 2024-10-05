@@ -59,17 +59,15 @@ void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, Zeal::EqStr
 char* build_token_string_PARAM(char* buffer, int stringID, char* string1, char* string2, int u1, int u2, int u3, int u4, int u5, int u6, int u7)
 {
 	Zeal::EqStructures::_EQITEMINFO* item;
-
 	__asm mov item, esi
+	int item_level = item->Common.CastingLevel; 
 
 	if (strcmp(string1, "Haste") == 0)
 	{
 		if (strcmp(string2, "(Worn)") == 0)
 		{
-			int haste_percentage = item->Common.CastingLevel + 1;
-			char haste[24];
-			sprintf_s(haste, 24, "Haste: %d%%%%", haste_percentage);
-			return ZealService::get_instance()->hooks->hook_map["ModifyHaste"]->original(build_token_string_PARAM)(buffer, stringID, haste, 0, 0, 0, 0, 0, 0, 0, 0);
+			sprintf_s(buffer, 16, "Haste: %+d%%", item_level+1);
+			return buffer;
 		}
 	}
 	return ZealService::get_instance()->hooks->hook_map["ModifyHaste"]->original(build_token_string_PARAM)(buffer, stringID, string1, string2, 0, 0, 0, 0, 0, 0, 0);
