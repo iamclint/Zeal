@@ -53,8 +53,6 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 			Zeal::EqStructures::RaidMember* raidMembers = reinterpret_cast<Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
 			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
 				return;
-			if (spawn-> == 1) //LinkDead
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFFFF0000; //LinkDead - Red
 			if (raidMembers) {
 				for (int i = 0; i < maxRaidMembers; ++i) //Raid Member loop
 				{
