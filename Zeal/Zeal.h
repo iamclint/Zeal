@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-#define ZEAL_VERSION "0.4.9"
+#define ZEAL_VERSION "0.5.0"
 #ifndef ZEAL_BUILD_VERSION  // Set by github actions
 #define ZEAL_BUILD_VERSION "UNOFFICIAL"  // Local build
 #endif
