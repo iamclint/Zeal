@@ -12,6 +12,7 @@ public:
 	void UpdateOptionsTargetRing();
 	void UpdateOptionsCamera();
 	void UpdateOptionsGeneral();
+	void InitColors();
 	void InitGeneral();
 	void InitMap();
 	void InitCamera();

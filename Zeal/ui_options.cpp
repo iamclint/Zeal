@@ -67,10 +67,12 @@ void ui_options::InitUI()
 			return;
 		}
 	}
+
 	InitGeneral();
 	InitCamera();
 	InitMap();
 	InitTargetRing();
+	InitColors();
 
 	isReady = true;
 	/*set the current states*/
@@ -99,7 +101,21 @@ float ScaleSliderToFloat(int ivalue, float fmin, float fmax, Zeal::EqUI::SliderW
 	// Map the normalized value to the float range [fmin, fmax]
 	return fmin + normalized * (fmax - fmin);
 }
+void ui_options::InitColors()
+{
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 
+
+	for (int i = 0; i < 100; i++)
+	{
+		ui->AddButtonCallback(wnd, "Zeal_Color" + std::to_string(i), [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::Windows->ColorPicker->Activate(wnd, wnd->TextColor.ARGB); });
+	}
+
+}
 void ui_options::InitGeneral()
 {
 	if (!wnd)
