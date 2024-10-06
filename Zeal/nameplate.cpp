@@ -44,6 +44,7 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	if (!spawn->ActorInfo) { return; }
 	if (!spawn->ActorInfo->DagHeadPoint) { return; }
 	if (!spawn->ActorInfo->DagHeadPoint->StringSprite) { return; }
+	ui_options* options = ZealService::get_instance()->ui->options.get();
 	switch (spawn->Type) {
 	case 0: //Players
 		if (nameplateColors) {
@@ -63,27 +64,27 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 					if (!raidMember)
 						continue;
 					if (spawn == raidMember)
-						raidMember->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF000000; //Raid Member-Black
+						raidMember->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(4); //0xFF000000; //Raid Member-Black
 				}
 			}			
 			//If not in a Guild - keep default color
 			if (spawn->GuildId != 0xFFFF && spawn->GuildId == Zeal::EqGame::get_self()->GuildId) //Guild Member
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF00FF80; //Guild Member-Greenish Blue
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(3); //0xFF00FF80; //Guild Member-Greenish Blue
 			if (groupmembers) {
 				for (int i = 0; i < maxGroupMembers; ++i) //Group Member loop
 				{
 					Zeal::EqStructures::Entity* groupmember = groupmembers[i];
 					if (spawn == groupmember)
-						spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0x0500FF32; //Group Member-Light Green 
+						spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(5);// 0x0500FF32; //Group Member-Light Green 
 					continue;
 				}
 			}
 			if (spawn->IsLinkDead == 1) //LinkDead
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFFFF0000; //LinkDead - Red
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(2); // 0xFFFF0000; //LinkDead - Red
 			else if (spawn->IsAwayFromKeyboard == 1) //AFK
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFFFF8000; //AFK - Orange
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(0);// 0xFFFF8000; //AFK - Orange
 			else if (spawn->ActorInfo->IsLookingForGroup == 1) //LFG
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF80FF80; //LFG-White Green
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(1); // 0xFF80FF80; //LFG-White Green
 		}
 		break;
 	case 1: //NPC

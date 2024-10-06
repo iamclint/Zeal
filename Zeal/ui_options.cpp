@@ -47,9 +47,35 @@ int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI
 		if (message == 0x1E && ui->clicked_button)
 		{
 			ui->clicked_button->TextColor.ARGB = data;
+			ui->options->SaveColors();
 		}
 	}
 	return reinterpret_cast<int (__thiscall*)(Zeal::EqUI::BasicWnd * wnd, Zeal::EqUI::BasicWnd * sender, int message, int data)>(0x56e920)(wnd, sender, message, data);
+}
+
+void ui_options::SaveColors()
+{
+	IO_ini* ini = ZealService::get_instance()->ini.get();
+	for (auto& [index, btn] : color_buttons)
+	{
+		ini->setValue("ZealColors", "Color" + std::to_string(index), std::to_string(btn->TextColor.ARGB));
+	}
+}
+
+DWORD ui_options::GetColor(int index)
+{
+	auto it = color_buttons.find(index);
+	return (it == color_buttons.end()) ? 0xFFFFFFFF : it->second->TextColor.ARGB;
+}
+
+void ui_options::LoadColors()
+{
+	IO_ini* ini = ZealService::get_instance()->ini.get();
+	for (auto& [index, btn] : color_buttons)
+	{
+		if (ini->exists("ZealColors", "Color" + std::to_string(index)))
+			btn->TextColor.ARGB = ini->getValue<DWORD>("ZealColors", "Color" + std::to_string(index));
+	}
 }
 
 void ui_options::InitUI()
@@ -109,12 +135,13 @@ void ui_options::InitColors()
 		return;
 	}
 
-
 	for (int i = 0; i < 100; i++)
 	{
-		ui->AddButtonCallback(wnd, "Zeal_Color" + std::to_string(i), [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::Windows->ColorPicker->Activate(wnd, wnd->TextColor.ARGB); });
+		Zeal::EqUI::BasicWnd* btn = ui->AddButtonCallback(wnd, "Zeal_Color" + std::to_string(i), [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::Windows->ColorPicker->Activate(wnd, wnd->TextColor.ARGB); });
+		if (btn)
+			color_buttons[i] = btn;
 	}
-
+	LoadColors();
 }
 void ui_options::InitGeneral()
 {
@@ -122,12 +149,6 @@ void ui_options::InitGeneral()
 	{
 		PrintUIError();
 		return;
-	}
-
-
-	for (int i = 0; i < 100; i++)
-	{
-		ui->AddButtonCallback(wnd, "Zeal_Color" + std::to_string(i), [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::Windows->ColorPicker->Activate(wnd, wnd->TextColor.ARGB); });
 	}
 
 	/*add callbacks when the buttons are pressed in the options window*/

@@ -31,10 +31,10 @@ public:
 	void SetSliderValue(std::string name, float value);
 	void SetComboValue(std::string name, int value);
 	void SetChecked(std::string name, bool checked);
-	void AddButtonCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback);
-	void AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback);
-	void AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback, int max_val=100);
-	void AddComboCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback);
+	Zeal::EqUI::BasicWnd* AddButtonCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback);
+	Zeal::EqUI::BasicWnd* AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback);
+	Zeal::EqUI::BasicWnd* AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback, int max_val=100);
+	Zeal::EqUI::BasicWnd* AddComboCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback);
 	void AddLabel(Zeal::EqUI::BasicWnd* wnd, std::string name);
 	void AddListItems(Zeal::EqUI::ComboWnd* wnd, const std::vector<std::string> data);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>> data);

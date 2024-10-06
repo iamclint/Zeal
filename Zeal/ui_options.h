@@ -17,6 +17,9 @@ public:
 	void InitMap();
 	void InitCamera();
 	void InitTargetRing();
+	void SaveColors();
+	void LoadColors();
+	DWORD GetColor(int index);
 	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_options();
 private:
@@ -26,5 +29,7 @@ private:
 	void RenderUI();
 	void Deactivate();
 	void LoadSettings(class IO_ini* ini);
+
+	std::unordered_map<int, Zeal::EqUI::BasicWnd*> color_buttons;
 	ui_manager* ui;
 };
