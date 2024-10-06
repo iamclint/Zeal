@@ -233,7 +233,7 @@ void Binds::add_binds()
 	add_bind(225, "Auto Fire", "AutoFire", key_category::Commands, [this](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
-			ZealService::get_instance()->autofire->SetAutoFire(!ZealService::get_instance()->autofire->autofire);
+			ZealService::get_instance()->autofire->SetAutoFire(!ZealService::get_instance()->autofire->autofire, true);
 		}
 		});
 	add_bind(226, "Target Nearest NPC Corpse", "TargetNPCCorpse", key_category::Target, [](int key_down) {
@@ -294,6 +294,14 @@ void Binds::add_binds()
 			ZealService::get_instance()->zone_map->set_show_raid(
 				!ZealService::get_instance()->zone_map->is_show_raid_enabled(), false);
 		}
+		});
+			add_bind(235, "Toggle Nameplate Colors", "ToggleNameplateColors", key_category::Target, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			ZealService::get_instance()->nameplate->colors_set_enabled(!ZealService::get_instance()->nameplate->colors_is_enabled());
+		});
+	add_bind(236, "Toggle Nameplate Con Colors", "ToggleNameplateConColors", key_category::Target, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			ZealService::get_instance()->nameplate->con_colors_set_enabled(!ZealService::get_instance()->nameplate->con_colors_is_enabled());
 		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{

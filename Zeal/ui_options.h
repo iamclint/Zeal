@@ -6,13 +6,24 @@
 class ui_options
 {
 public:
+	Zeal::EqUI::EQWND* wnd = nullptr;
 	void UpdateOptions();
-	void UpdateOptionsMapOnly();
+	void UpdateOptionsMap();
+	void UpdateOptionsTargetRing();
+	void UpdateOptionsCamera();
+	void UpdateOptionsGeneral();
+	void InitGeneral();
+	void InitMap();
+	void InitCamera();
+	void InitTargetRing();
 	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_options();
 private:
+	bool isReady = false;
 	void InitUI();
 	void CleanUI();
+	void RenderUI();
+	void Deactivate();
 	void LoadSettings(class IO_ini* ini);
 	ui_manager* ui;
 };

@@ -14,7 +14,7 @@ public:
 	~TellWindows();
 	void SetEnabled(bool val);
 	Zeal::EqUI::ChatWnd* FindTellWnd(std::string& name);
-	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, byte channel);
+	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel);
 	bool enabled = false;
 	
 private:

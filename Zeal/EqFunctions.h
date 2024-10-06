@@ -4,6 +4,13 @@
 #include "EqUI.h"
 #include <cstdarg>
 
+#define CON_WHITE D3DCOLOR_ARGB(0x88, 0xf0, 0xf0, 0xf0)
+#define CON_RED D3DCOLOR_ARGB(0x88, 0xf0, 0x0, 0x0)
+#define CON_BLUE D3DCOLOR_ARGB(0x88, 0x0, 0x0, 0xf0)
+#define CON_YELLOW D3DCOLOR_ARGB(0x88, 0xf0, 0xf0, 0x0)
+#define CON_LIGHTBLUE D3DCOLOR_ARGB(0x88, 0x0, 0xf0, 0xf0)
+#define CON_GREEN D3DCOLOR_ARGB(0x88, 0x0, 0xf0, 0x0)
+
 enum Stance
 {
 	Stand = 0x64,
@@ -82,6 +89,7 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+		DWORD GetLevelCon(Zeal::EqStructures::Entity* ent);
 		float CalcCombatRange(Zeal::EqStructures::Entity* entity1, Zeal::EqStructures::Entity* entity2);
 		float CalcZOffset(Zeal::EqStructures::Entity* ent);
 		float CalcBoundingRadius(Zeal::EqStructures::Entity* ent);

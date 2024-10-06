@@ -16,11 +16,15 @@ void EntityManager::Remove(struct Zeal::EqStructures::Entity* ent)
 }
 
 Zeal::EqStructures::Entity* EntityManager::Get(std::string  name) const {
+	if (!Zeal::EqGame::is_in_game())
+		return nullptr;
 	auto it = entity_map.find(name);
 	return (it == entity_map.end()) ? nullptr : it->second;
 }
 Zeal::EqStructures::Entity* EntityManager::Get(WORD id) const
 {
+	if (!Zeal::EqGame::is_in_game())
+		return nullptr;
 	auto it = entity_id_map.find(id);
 	return (it == entity_id_map.end()) ? nullptr : it->second;
 }

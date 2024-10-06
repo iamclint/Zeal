@@ -104,17 +104,19 @@ void AutoFire::Main()
 //    return ZealService::get_instance()->hooks->hook_map["DoAttack"]->original(DoAttack)(player, unused, type, p2, target);
 //}
 
-void AutoFire::SetAutoFire(bool enabled)
+void AutoFire::SetAutoFire(bool enabled, bool do_print)
 {
     if (autofire && !enabled)
     {
-        Zeal::EqGame::print_chat(USERCOLOR_ECHO_SHOUT, "Autofire disabled");
+        if (do_print)
+            Zeal::EqGame::print_chat(USERCOLOR_ECHO_SHOUT, "Autofire disabled");
         Zeal::EqGame::SetMusicSelection(2, false);
     }
     else if (enabled)
     {
         Zeal::EqGame::do_autoattack(false);
-        Zeal::EqGame::print_chat(USERCOLOR_ECHO_SHOUT, "Autofire enabled.");
+        if (do_print)
+            Zeal::EqGame::print_chat(USERCOLOR_ECHO_SHOUT, "Autofire enabled.");
         if (!(*(bool*)0x61d25c)) //combat music disabled flag
             Zeal::EqGame::SetMusicSelection(2, true);
     }
@@ -141,7 +143,7 @@ AutoFire::AutoFire(ZealService* zeal, IO_ini* ini)
     //}, callback_type::SendMessage_);
     zeal->commands_hook->Add("/autofire", { "/af" }, "Toggles autofire for your ranged ability.",
         [this](std::vector<std::string>& args) {
-            SetAutoFire(!autofire);
+            SetAutoFire(!autofire, true);
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
 }

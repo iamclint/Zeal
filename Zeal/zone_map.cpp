@@ -7,16 +7,42 @@
 #include <fstream>
 #include <string>
 
+// Possible enhancements:
+// - Support 'windowed mode' (drag and drop, resizing)
+// - Look into intermittent z-depth clipping due to walls or heads/faces
+// - DrawText is extremely slow and could use optimization
+
+// Implementation notes:
+//
+// Coordinate systems:
+//  - The EQ game world coordinate system has "x" as up and "y" as left on the screen.
+//  - The map data has the same scale as the game world but "x" is right and "y" is down.
+//  - The output screen (post viewport transformation) has "x" as right and "y" as down.
+//  - Since the map data matches the output screen and it is more intuitive to use, the
+//    EQ game world coordinates (Position, location values) are translated to it when
+//    used by flipping and negating (polarity) the y and x values.
+//    - Variables called "position" or "loc" are typically in EQ coordinates (unconverted)
+//  - The map world coordinate system is pixel scaled and viewport centered (see below)
+//
+// DirectX pipeline:
+//  - The map size variables (map_rect_*) are used to calculate the viewport, which is
+//    the on-screen draw window (clips to within it and has the screen coordinates)
+//  - When using transformed vertices (RHW), the values are final screen x,y coordinates
+//    (not relative to viewport offsets)
+//  - When using the 3D rendering pipeline, there are four vertex transformations:
+//     - world: map data in "model" space to zoomed and centered pixel world space
+//       - scales and offsets map data coordinates to pixel scale with the (0,0)
+//         region in the center of the viewport
+//     - view: use identity (combined into the world matrix)
+//     - projection: ortho that just pre-warps by 2/width and 2/height for viewport
+//     - viewport: fixed transformation to fill viewport
+//       - Maps input +1 and -1 x and y scales to viewport width/2 and height/2
+//       - Maps 0,0 to the center of the viewport
+
+
 namespace {
 
-// Possible enhancements:
-// - Current design was intended as a static background map with minimal use of modifying
-//   the D3D matrices or use of D3D clip planes, which is suboptimal for the always_center_align
-//   type of operation which requires frequent full map reloads
-// - Support 'windowed mode' (drag and drop, resizing)
-// - Support rendering outside of viewport
-// - Look into intermittent z-depth clipping due to walls or heads/faces
-
+// Constants used in DirectX resource allocation.
 static constexpr int kBackgroundCount = 2;  // Two triangles in split mode.
 static constexpr int kBackgroundVertices = 3 + (kBackgroundCount - 1);  // Two triangles using split.
 static constexpr int kMarkerCount = 4;  // Four triangles.
@@ -28,7 +54,7 @@ static constexpr int kMaxDynamicLabels = 10;
 static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositionVertices
                                             * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers);
 
-static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
 // Group member position support.
 using GroupNameArrayType = char[0x40];
@@ -36,10 +62,6 @@ using GroupEntityPtrArrayType = Zeal::EqStructures::Entity*;
 
 GroupEntityPtrArrayType* groupEntityPtrs = reinterpret_cast<GroupEntityPtrArrayType*>(0x7913F8);
 GroupNameArrayType* groupNames = reinterpret_cast<GroupNameArrayType*>(0x7912B5);
-
-struct TwoPoints {
-    float x0, y0, x1, y1;  // Either line segment end or rect TL BR.
-};
 
 // Convenience class for stashing the active D3D render state before modifying
 // a list of parameters.
@@ -107,98 +129,9 @@ private:
     std::vector<Pair> stored_pairs;
 };
 
-
-// Implements Cohen-Sutherland clipping (with +y towards bottom).
-// https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
-
-typedef int OutCode;
-
-static constexpr int INSIDE = 0b0000;
-static constexpr int LEFT = 0b0001;
-static constexpr int RIGHT = 0b0010;
-static constexpr int TOP = 0b0100;
-static constexpr int BOTTOM = 0b1000;
-
-// Returns the bit code for the point (x, y) relative to the clip rectangle.
-OutCode compute_outcode(const TwoPoints& clip_rect, double x, double y)
-{
-    OutCode code = INSIDE;  // initialised as being inside of clip window
-
-    if (x < clip_rect.x0)           // to the left of clip window
-        code |= LEFT;
-    else if (x > clip_rect.x1)      // to the right of clip window
-        code |= RIGHT;
-    if (y < clip_rect.y0)           // above the clip window
-        code |= TOP;
-    else if (y > clip_rect.y1)      // below the clip window
-        code |= BOTTOM;
-
-    return code;
-}
-
-// Returns true if the line parameter is visible (after clipping).
-bool clip_line_segment(const TwoPoints& clip_rect, TwoPoints& line) {
-    // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
-    OutCode outcode0 = compute_outcode(clip_rect, line.x0, line.y0);
-    OutCode outcode1 = compute_outcode(clip_rect, line.x1, line.y1);
-    bool accept = false;
-
-    while (true) {
-        if (!(outcode0 | outcode1)) {
-            return true;  // Bitwise OR is 0: Both points inside window. Done.
-        }
-        else if (outcode0 & outcode1) {
-            return false;  // Points share an outside zone, so both outside. Done.
-        }
-        else {
-            // Calculate the line segment to clip outside point to edge intersection.
-            // At least one endpoint is outside the clip rectangle; pick it.
-            OutCode outcodeOut = outcode1 > outcode0 ? outcode1 : outcode0;
-
-            float x = (outcodeOut == outcode0) ? line.x1 : line.x0;  // Satisfy compiler.
-            float y = (outcodeOut == outcode0) ? line.y1 : line.x0;
-
-            // Now find the intersection point;
-            // use formulas:
-            //   slope = (y1 - y0) / (x1 - x0)
-            //   x = x0 + (1 / slope) * (ym - y0), where ym is ymin or ymax
-            //   y = y0 + slope * (xm - x0), where xm is xmin or xmax
-            // No need to worry about divide-by-zero because, in each case, the
-            // outcode bit being tested guarantees the denominator is non-zero
-            if (outcodeOut & BOTTOM) {           // point is below the clip window
-                x = line.x0 + (line.x1 - line.x0) * (clip_rect.y1 - line.y0) / (line.y1 - line.y0);
-                y = clip_rect.y1;
-            }
-            else if (outcodeOut & TOP) { // point is above the clip window
-                x = line.x0 + (line.x1 - line.x0) * (clip_rect.y0 - line.y0) / (line.y1 - line.y0);
-                y = clip_rect.y0;
-            }
-            else if (outcodeOut & RIGHT) {  // point is to the right of clip window
-                y = line.y0 + (line.y1 - line.y0) * (clip_rect.x1 - line.x0) / (line.x1 - line.x0);
-                x = clip_rect.x1;
-            }
-            else if (outcodeOut & LEFT) {   // point is to the left of clip window
-                y = line.y0 + (line.y1 - line.y0) * (clip_rect.x0 - line.x0) / (line.x1 - line.x0);
-                x = clip_rect.x0;
-            }
-
-            // Now we move outside point to intersection point to clip
-            // and get ready for next pass.
-            if (outcodeOut == outcode0) {
-                line.x0 = x;
-                line.y0 = y;
-                outcode0 = compute_outcode(clip_rect, line.x0, line.y0);
-            }
-            else {
-                line.x1 = x;
-                line.y1 = y;
-                outcode1 = compute_outcode(clip_rect, line.x1, line.y1);
-            }
-        }
-    }
-}
 }  // namespace
 
+// Releases the manually managed DirectX related resources.
 void ZoneMap::render_release_resources() {
     if (line_vertex_buffer) {
         line_vertex_buffer->Release();
@@ -218,6 +151,7 @@ void ZoneMap::render_release_resources() {
     }
 }
 
+// Use the map_rect values and render target to configure the viewport rectangle.
 void ZoneMap::render_update_viewport(IDirect3DDevice8& device) {
     // Use a 'custom' viewport for the map so that it ignores the games /viewport
     // settings and can draw outside of it. The rect/size scalefactors are relative
@@ -244,128 +178,121 @@ void ZoneMap::render_update_viewport(IDirect3DDevice8& device) {
         .MinZ = 0.0f, .MaxZ = 1.0f };
 }
 
-void ZoneMap::render_load_map() {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-    if (!device || !Zeal::EqGame::get_self())
-        return;
+// Sets the primary mat_model2world matrix and x,y clip limits in model space.
+void ZoneMap::render_update_transforms(const ZoneMapData& zone_map_data) {
 
-    render_release_resources();  // Forces update of all graphics.
+    // Set the default 100% zoom scale factor (model to screen) so that the zone
+    // map data fits within the viewport. The map will be constrained by either
+    // the height or width depending on aspect ratio.
 
-    const ZoneMapData* zone_map_data = get_zone_map(zone_id);
-    if (!zone_map_data) {
-        return;
-    }
+    // Reduce the viewport width and height by 1 as extra padding for the edge lines.
+    const float viewport_width = static_cast<float>(viewport.Width - 1);
+    const float viewport_height = static_cast<float>(viewport.Height - 1);
+    const float rect_left = -viewport_width * 0.5f;
+    const float rect_right = +viewport_width * 0.5f;
+    const float rect_top = -viewport_height * 0.5f;
+    const float rect_bottom = +viewport_height * 0.5f;
 
-    // In some Zoom transitions, we lock the position on the screen, so calculate the current
-    // position in screen coordinate using the existing scales and offsets.
-    // Translate loc (world) coordinates to screen coordinates. Note that the game
-    // world coordinates are negated (polarity flipped) to match the map data.
+    const float kPadding = 1.f;  // Small map data padding to prevent edge clipping.
+    const float map_width = (zone_map_data.max_x - zone_map_data.min_x + 2 * kPadding);
+    const float map_height = (zone_map_data.max_y - zone_map_data.min_y + 2 * kPadding);
+    const float scale_factor_x = (rect_right - rect_left) / map_width;
+    const float scale_factor_y = (rect_bottom - rect_top) / map_height;
+    const float scale_factor = min(scale_factor_x, scale_factor_y) * zoom_factor;
+
     const Vec3 position = Zeal::EqGame::get_self()->Position;
     const float position_y = -position.x; // Note position is y,x,z.
+    const bool full_height = map_height * scale_factor < viewport_height;
+    const bool align_top = full_height ||
+        (position_y - zone_map_data.min_y) * scale_factor < viewport_height * 0.5f;
+    const bool align_bottom = (zone_map_data.max_y - position_y) * scale_factor < viewport_height * 0.5f;
+
+    float offset_y = 0;
+    if (align_top && !always_align_to_center)
+        offset_y = rect_top - (zone_map_data.min_y - kPadding) * scale_factor;
+    else if (align_bottom && !always_align_to_center)
+        offset_y = rect_bottom - (zone_map_data.max_y + kPadding) * scale_factor;
+    else {
+        float screen_position_y = (rect_bottom + rect_top) * 0.5;
+        offset_y = screen_position_y - position_y * scale_factor;
+    }
+
     const float position_x = -position.y;
-    float screen_position_y = position_y * scale_factor + offset_y;
-    float screen_position_x = position_x * scale_factor + offset_x;
+    const bool full_width = map_width * scale_factor < viewport_width;
+    const bool align_left = full_width ? (map_alignment_state == AlignmentType::kLeft) :
+                (position_x - zone_map_data.min_x) * scale_factor < viewport_width * 0.5f;
+    const bool align_right = full_width ? (map_alignment_state == AlignmentType::kRight) :
+                (zone_map_data.max_x - position_x) * scale_factor < viewport_width * 0.5f;
+    const bool center_on_position_x = always_align_to_center || 
+                    (!full_width && !align_left && !align_right);
 
-    // Notes on scaling the map_data world coordinates to map screen window coordinates.
-    //   The map data coordinate system is in the game world scale but negated y and x values.
-    //     map_data: +y = south, +x = east.  game location: +y = north, +x = east.
-    //   The map_data polarity is consistent with the screen coordinate system for North = up.
-    //   window_x[i] = (map_x[i] - min(map_x)) * window_size_x/map_size_x + window_x_offset
-    //   window_x[i] = map_x[i] * scale_factor + offset where
-    //     scale_factor = window_size_x/map_size_x and offset = window_x_offset - min(map_x)*scale_factor.
-    render_update_viewport(*device);
-    const float rect_left = static_cast<float>(viewport.X);
-    const float rect_right = rect_left + viewport.Width - 1;
-    const float rect_top = static_cast<float>(viewport.Y);
-    const float rect_bottom = rect_top + viewport.Height - 1;
-
-    const float kPadding = 1.f;  // Small padding to prevent any clipping of edge lines.
-    float rect_delta_x = rect_right - rect_left;
-    float rect_delta_y = rect_bottom - rect_top;
-    float scale_factor_x = rect_delta_x / (zone_map_data->max_x - zone_map_data->min_x + 2*kPadding);
-    float scale_factor_y = rect_delta_y / (zone_map_data->max_y - zone_map_data->min_y + 2*kPadding);
-    scale_factor = min(scale_factor_x, scale_factor_y);  // Preserve aspect ratio.
-    scale_factor *= zoom_factor;  // Apply scale factor.
-
-    // Calculate the initial offset based on alignment of the full map data.
-    offset_y = rect_top - zone_map_data->min_y * scale_factor + kPadding;
-    if (map_alignment_state == AlignmentType::kRight)
-        offset_x = rect_right - zone_map_data->max_x * scale_factor - kPadding;
-    else if (map_alignment_state == AlignmentType::kCenter)
-        offset_x = (rect_right + rect_left) * 0.5 -
-        (zone_map_data->max_x + zone_map_data->min_x) * 0.5f * scale_factor;
-    else  // Default left alignment.
-        offset_x = rect_left - zone_map_data->min_x * scale_factor + kPadding;
-
-    bool align_to_center = always_align_to_center;
-    if (!align_to_center && zoom_factor > 1.f) {
-        // Initially set offset so the screen position doesn't change and then
-        // perform the check to see if it needs to recenter.
+    float offset_x = 0;
+    if (center_on_position_x) {
+        float screen_position_x = (rect_left + rect_right) * 0.5;
         offset_x = screen_position_x - position_x * scale_factor;
-        offset_y = screen_position_y - position_y * scale_factor;
-        align_to_center = render_check_for_zoom_recenter();
     }
+    else if (align_left)
+        offset_x = rect_left - (zone_map_data.min_x - kPadding) * scale_factor;
+    else if (align_right)
+        offset_x = rect_right - (zone_map_data.max_x + kPadding) * scale_factor;
+    else
+        offset_x = -(zone_map_data.max_x + zone_map_data.min_x) * 0.5f * scale_factor;
 
-    if (align_to_center) {
-        screen_position_x = (rect_left + rect_right) * 0.5;
-        screen_position_y = (rect_bottom + rect_top) * 0.5;
-        offset_x = screen_position_x - position_x * scale_factor;
-        offset_y = screen_position_y - position_y * scale_factor;
-    }
+    D3DXMATRIX mat_scale;
+    D3DXMatrixScaling(&mat_scale, scale_factor, scale_factor, 1.f);
+    D3DXMATRIX mat_offset;
+    D3DXMatrixTranslation(&mat_offset, offset_x, offset_y, 0.0f);
+    mat_model2world = mat_scale * mat_offset;
 
-    // Clip the background (and lines) to the available map data. Add a padding of 1.
-    clip_rect_left = min(rect_right,
-        max(rect_left, zone_map_data->min_x * scale_factor + offset_x - kPadding));
-    clip_rect_right = max(clip_rect_left,
-        min(rect_right, zone_map_data->max_x * scale_factor + offset_x + kPadding));
-    clip_rect_top = min(rect_bottom,
-        max(rect_top, zone_map_data->min_y * scale_factor + offset_y - kPadding));
-    clip_rect_bottom = max(clip_rect_top,
-        min(rect_bottom, zone_map_data->max_y * scale_factor + offset_y + kPadding));
+    // Back-calculate and store the clip limits in model space.
+    clip_min_x = max(static_cast<float>(zone_map_data.min_x),
+                        (-viewport_width * 0.5f - offset_x) / scale_factor);
+    clip_max_x = min(static_cast<float>(zone_map_data.max_x),
+                        (+viewport_width * 0.5f - offset_x) / scale_factor);
+    clip_min_y = max(static_cast<float>(zone_map_data.min_y),
+                        (-viewport_height * 0.5f - offset_y) / scale_factor);
+    clip_max_y = min(static_cast<float>(zone_map_data.max_y),
+                        (+viewport_height * 0.5f - offset_y) / scale_factor);
+}
 
-    const int kMaxLineCount = zone_map_data->num_lines;  // Allocate a buffer assuming all visible.
+// Populates the "static" per zone line_vertex_buffer and labels list. Also allocates the
+// position_vertex_buffer (worst-case sized).
+void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_map_data) {
+    render_release_resources();  // Forces update of all graphics.
+
+    const int kMaxLineCount = zone_map_data.num_lines;  // Allocate a buffer assuming all visible.
     std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(kMaxLineCount * 2);
 
     bool z_filtering = (map_level_zone_id == zone_id);
-    int level_id = z_filtering ? zone_map_data->levels[map_level_index].level_id : kZoneMapInvalidLevelId;
-    clip_max_z = z_filtering ? zone_map_data->levels[map_level_index].max_z : zone_map_data->max_z;
+    int level_id = z_filtering ? zone_map_data.levels[map_level_index].level_id : kZoneMapInvalidLevelId;
+    clip_max_z = z_filtering ? zone_map_data.levels[map_level_index].max_z : zone_map_data.max_z;
     clip_max_z += 10;  // Pad up for player height and other labels.
-    clip_min_z = z_filtering ? zone_map_data->levels[map_level_index].min_z : zone_map_data->min_z;
-    const TwoPoints clip_rect = { .x0 = clip_rect_left, .y0 = clip_rect_top, .x1 = clip_rect_right, .y1 = clip_rect_bottom };
+    clip_min_z = z_filtering ? zone_map_data.levels[map_level_index].min_z : zone_map_data.min_z;
     line_count = 0;  // Tracks number of visible (after clipping) lines.
     for (int i = 0; i < kMaxLineCount; ++i) {
         if (z_filtering) {
-            if (zone_map_data->lines[i].level_id == kZoneMapInvalidLevelId) {
+            if (zone_map_data.lines[i].level_id == kZoneMapInvalidLevelId) {
                 // Filter all unknown lines based on z height range.
-                int line_max_z = max(zone_map_data->lines[i].z0, zone_map_data->lines[i].z1);
-                int line_min_z = min(zone_map_data->lines[i].z0, zone_map_data->lines[i].z1);
+                int line_max_z = max(zone_map_data.lines[i].z0, zone_map_data.lines[i].z1);
+                int line_min_z = min(zone_map_data.lines[i].z0, zone_map_data.lines[i].z1);
                 if (line_max_z < clip_min_z || line_min_z > clip_max_z)
                     continue; // Skip if line does not cross level.
-            } else if (zone_map_data->lines[i].level_id != level_id)
+            } else if (zone_map_data.lines[i].level_id != level_id)
                     continue;  // Skip display of all other map levels.
         }
-        TwoPoints line = { zone_map_data->lines[i].x0 * scale_factor + offset_x,
-                            zone_map_data->lines[i].y0 * scale_factor + offset_y,
-                            zone_map_data->lines[i].x1 * scale_factor + offset_x,
-                            zone_map_data->lines[i].y1 * scale_factor + offset_y
-        };
-        if (!clip_line_segment(clip_rect, line))
-            continue;
 
-        auto color = D3DCOLOR_XRGB(zone_map_data->lines[i].red, zone_map_data->lines[i].green, zone_map_data->lines[i].blue);
+        auto color = D3DCOLOR_XRGB(zone_map_data.lines[i].red, zone_map_data.lines[i].green, zone_map_data.lines[i].blue);
         if (color == D3DCOLOR_XRGB(0, 0, 0)) {
             color = D3DCOLOR_XRGB(64, 64, 64);  // Increase visibility of black lines.
         }
 
-        line_vertices[2 * line_count].x = line.x0;
-        line_vertices[2 * line_count].y = line.y0;
+        line_vertices[2 * line_count].x = zone_map_data.lines[i].x0;
+        line_vertices[2 * line_count].y = zone_map_data.lines[i].y0;
         line_vertices[2 * line_count].z = 0.5f;
-        line_vertices[2 * line_count].rhw = 1.f;
         line_vertices[2 * line_count].color = color;
-        line_vertices[2 * line_count + 1].x = line.x1;
-        line_vertices[2 * line_count + 1].y = line.y1;
+        line_vertices[2 * line_count + 1].x = zone_map_data.lines[i].x1;
+        line_vertices[2 * line_count + 1].y = zone_map_data.lines[i].y1;
         line_vertices[2 * line_count + 1].z = 0.5f;
-        line_vertices[2 * line_count + 1].rhw = 1.f;
         line_vertices[2 * line_count + 1].color = color;
         line_count++;
     }
@@ -379,17 +306,22 @@ void ZoneMap::render_load_map() {
     else if (map_background_state == BackgroundType::kTan) {
         background_color = D3DCOLOR_ARGB(alpha, 240, 180, 140);  // Tan.
     }
+
     MapVertex background_vertices[kBackgroundVertices] = {
-        { clip_rect_left, clip_rect_top, 0.5f, 1.f, background_color },  // x, y, z, rhw, color
-        { clip_rect_right, clip_rect_top, 0.5f, 1.f, background_color },
-        { clip_rect_left, clip_rect_bottom, 0.5f, 1.f, background_color },
-        { clip_rect_right, clip_rect_bottom, 0.5f, 1.f, background_color },
+        {  static_cast<float>(zone_map_data.min_x), static_cast<float>(zone_map_data.min_y),
+                0.5f, background_color },  // x, y, z,color
+        {  static_cast<float>(zone_map_data.max_x), static_cast<float>(zone_map_data.min_y),
+                0.5f, background_color },
+        {  static_cast<float>(zone_map_data.min_x), static_cast<float>(zone_map_data.max_y),
+                0.5f, background_color },
+        {  static_cast<float>(zone_map_data.max_x), static_cast<float>(zone_map_data.max_y),
+                0.5f, background_color },
     };
 
     const int line_buffer_size = sizeof(MapVertex) * line_count * 2;
     const int background_buffer_size = sizeof(MapVertex) * kBackgroundVertices;
     // Create a Vertex buffer and copy the map line segments over.
-    if (FAILED(device->CreateVertexBuffer(line_buffer_size + background_buffer_size,
+    if (FAILED(device.CreateVertexBuffer(line_buffer_size + background_buffer_size,
         D3DUSAGE_WRITEONLY,
         kMapVertexFvfCode,
         D3DPOOL_MANAGED,
@@ -408,7 +340,7 @@ void ZoneMap::render_load_map() {
     line_vertex_buffer->Unlock();
 
     // Create a worst-case sized Vertex buffer for live position updates.
-    if (FAILED(device->CreateVertexBuffer(kPositionBufferSize,
+    if (FAILED(device.CreateVertexBuffer(kPositionBufferSize,
         D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC,
         kMapVertexFvfCode,
         D3DPOOL_DEFAULT,
@@ -416,18 +348,21 @@ void ZoneMap::render_load_map() {
         return;
     }
 
-    render_load_labels(*zone_map_data);
+    render_load_labels(device, zone_map_data);
 }
 
-void ZoneMap::render_load_labels(const ZoneMapData& zone_map_data) {
+// Loads the POI labels from the ZoneMapData with some level-based filtering.
+void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zone_map_data) {
     labels_list.clear();
 
     // Sneak in the current Level filter setting as another label.
     if (map_level_zone_id == zone_id) {
+        const float indent_x = scale_pixels_to_model(15);
+        const float indent_y = scale_pixels_to_model(10);
         snprintf(map_level_label_string, sizeof(map_level_label_string), "Level: %i", map_level_index);
         map_level_label_string[sizeof(map_level_label_string) - 1] = 0;
-        map_level_label.x = static_cast<int16_t>((clip_rect_left - offset_x + 25) / scale_factor);
-        map_level_label.y = static_cast<int16_t>((clip_rect_top - offset_y + 15) / scale_factor);
+        map_level_label.x = static_cast<int16_t>(clip_min_x + indent_x);
+        map_level_label.y = static_cast<int16_t>(clip_min_y + indent_y);
         map_level_label.z = clip_min_z;
         map_level_label.red = 255;
         map_level_label.green = 255;
@@ -447,13 +382,6 @@ void ZoneMap::render_load_labels(const ZoneMapData& zone_map_data) {
         // First do a quick vertical z-axis check.
         if (label.z < clip_min_z || label.z > clip_max_z)
             continue;  // Not on visible level, skip it.
-
-        // Then check if the label is visible on the clipped map rect.
-        float label_x = label.x * scale_factor + offset_x;
-        float label_y = label.y * scale_factor + offset_y;
-        if ((label_x < clip_rect_left) || (label_x > clip_rect_right) ||
-            (label_y < clip_rect_top) || (label_y > clip_rect_bottom))
-            continue;  // Off-screen, skip the label.
 
         // Then filter if required (kOff bailed out above and kAll doesn't need it).
         if (map_labels_mode == LabelsMode::kSummary) {
@@ -481,14 +409,11 @@ void ZoneMap::render_load_labels(const ZoneMapData& zone_map_data) {
         dynamic_labels_list.clear();
 
     if (!labels_list.empty() || !dynamic_labels_list.empty())
-        render_load_font();
+        render_load_font(device);
 }
 
-void ZoneMap::render_load_font() {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-    if (!device)
-        return;
-
+// Loads a default fault for render-time writing of text to screen.
+void ZoneMap::render_load_font(IDirect3DDevice8& device) {
     if (label_font) {
         label_font->Release();
         label_font = nullptr;
@@ -509,56 +434,32 @@ void ZoneMap::render_load_font() {
             DEFAULT_PITCH,// lfPitchAndFamily
             L"Arial"// lfFaceName[LF_FACESIZE]
     };
-    HRESULT hr = D3DXCreateFontIndirect(device, &log_font, &label_font);
+    HRESULT hr = D3DXCreateFontIndirect(&device, &log_font, &label_font);
     if (FAILED(hr))
         label_font = nullptr;  // Just in case.
 }
 
-void ZoneMap::render_map()
+// Primary render callback that executes all components.
+void ZoneMap::render_map(IDirect3DDevice8& device)
 {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-    if (!device || !line_vertex_buffer)
+    if (!line_vertex_buffer)
         return;
 
+    // Stash the current viewport and set to the map's viewport.
     D3DVIEWPORT8 original_viewport;
-    device->GetViewport(&original_viewport);  // Stash viewport (game /viewport).
-    device->SetViewport(&viewport);  // Allows drawing map outside of /viewport region.
+    device.GetViewport(&original_viewport);
+    device.SetViewport(&viewport);
 
-    device->SetTexture(0, NULL);  // Ensure no texture is bound
-    device->SetVertexShader(kMapVertexFvfCode);
-
-    if (map_background_state != BackgroundType::kClear)
-        render_background();  // Background supports alpha blending which needs pipeline.
-
-    if (line_count) {
-        device->SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
-        device->DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices, line_count);
-    }
-
-    if (marker_vertex_buffer) {
-        device->SetStreamSource(0, marker_vertex_buffer, sizeof(MapVertex));
-        device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, kMarkerCount);
-    }
-
-    render_labels();
-
-    render_positions();
-    device->SetViewport(&original_viewport);
-}
-
-void ZoneMap::render_background() {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-
-    // Enable alpha blending for the background
+    // Configure for 2D drawing with alpha blending ready but disabled.
     std::vector<RenderStateStash::Pair> render_pairs;
     render_pairs.push_back({ D3DRS_CULLMODE, D3DCULL_NONE });
-    render_pairs.push_back({ D3DRS_ALPHABLENDENABLE, TRUE });
+    render_pairs.push_back({ D3DRS_ALPHABLENDENABLE, FALSE });
     render_pairs.push_back({ D3DRS_SRCBLEND, D3DBLEND_SRCALPHA });
     render_pairs.push_back({ D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA });
-    render_pairs.push_back({ D3DRS_ZENABLE, TRUE });
-    render_pairs.push_back({ D3DRS_ZWRITEENABLE, TRUE });  // Enable depth writing
+    render_pairs.push_back({ D3DRS_ZENABLE, FALSE });  // Rely on render order.
+    render_pairs.push_back({ D3DRS_ZWRITEENABLE, FALSE });
     render_pairs.push_back({ D3DRS_LIGHTING, FALSE });  // Disable lighting
-    RenderStateStash render_state(device);
+    RenderStateStash render_state(&device);
     render_state.store_and_modify(render_pairs);
 
     // Set texture stage states to avoid any unexpected texturing
@@ -567,21 +468,79 @@ void ZoneMap::render_background() {
     texture_pairs.push_back({ D3DTSS_COLORARG1, D3DTA_DIFFUSE });
     texture_pairs.push_back({ D3DTSS_ALPHAOP, D3DTOP_SELECTARG1 });
     texture_pairs.push_back({ D3DTSS_ALPHAARG1, D3DTA_DIFFUSE });
-    TextureStateStash texture_state(device);
+    TextureStateStash texture_state(&device);
     texture_state.store_and_modify(texture_pairs);
 
-    // Background vertices are stored at the start of the line_vertex_buffer.
-    device->SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
-    device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, kBackgroundCount);
+    D3DMATRIX projection_original, world_original, view_original;
+    device.GetTransform(D3DTS_WORLD, &world_original);
+    device.GetTransform(D3DTS_VIEW, &view_original);
+    device.GetTransform(D3DTS_PROJECTION, &projection_original);
 
+    // Bypass the view (handled by world).
+    D3DXMATRIX mat_view;
+    D3DXMatrixIdentity(&mat_view);
+
+    // The output of the projection matrix goes into the viewport transformation,
+    // which expects input values scaled to +/- 1 for x and y. We use an orthogonal
+    // matrix to just pre-scale the pixel-scale vertices to the viewport input
+    // range.  We also perform an extra y-flip here.
+    D3DXMATRIX mat_project;
+    D3DXMatrixOrthoLH(&mat_project, static_cast<float>(viewport.Width),
+        -static_cast<float>(viewport.Height), 0.f, 100.f);  // Z may need tweaking.
+
+    device.SetTransform(D3DTS_WORLD, &mat_model2world);
+    device.SetTransform(D3DTS_VIEW, &mat_view);
+    device.SetTransform(D3DTS_PROJECTION, &mat_project);
+
+    device.SetTexture(0, NULL);  // Ensure no texture is bound
+    device.SetVertexShader(kMapVertexFvfCode);
+
+    if (map_background_state != BackgroundType::kClear)
+        render_background(device);
+
+    if (line_count) {
+        device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
+        device.DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices, line_count);
+    }
+
+    if (marker_vertex_buffer) {
+        device.SetStreamSource(0, marker_vertex_buffer, sizeof(MapVertex));
+        device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, kMarkerCount);
+    }
+
+    render_labels();
+
+    render_positions(device);
+
+    device.SetTransform(D3DTS_PROJECTION, &projection_original);
+    device.SetTransform(D3DTS_WORLD, &world_original);
+    device.SetTransform(D3DTS_VIEW, &view_original);
     render_state.restore_state();
     texture_state.restore_state();
+    device.SetViewport(&original_viewport);
 }
 
+// Handles the rendering of the map background tinting.
+void ZoneMap::render_background(IDirect3DDevice8& device) {
+    // Enable alpha blending for the background
+    std::vector<RenderStateStash::Pair> render_pairs;
+    render_pairs.push_back({ D3DRS_ALPHABLENDENABLE, TRUE });
+    RenderStateStash render_state(&device);
+    render_state.store_and_modify(render_pairs);
+
+    // Background vertices are stored at the start of the line_vertex_buffer.
+    device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
+    device.DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, kBackgroundCount);
+
+    render_state.restore_state();
+}
+
+// Handles the rendering of the labels_list and dynamic_labels_list.
 void ZoneMap::render_labels() {
     if (!label_font || (labels_list.empty() && dynamic_labels_list.empty()))
         return;
 
+    label_font->Begin();  // Minor 10% performance improvement with Begin/End.
     for (const ZoneMapLabel* label : labels_list)
         render_label_text(label->label, label->y, label->x, D3DCOLOR_XRGB(label->red, label->green, label->blue));
 
@@ -595,10 +554,21 @@ void ZoneMap::render_labels() {
             it = dynamic_labels_list.erase(it);  // Drop timed out labels.
         }
     }
+    label_font->End();
 }
 
+// Handles writing a text label at map coordinates y and x to the screen.
+void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOLOR font_color) {
 
-void ZoneMap::render_label_text(const char * label, int y, int x, D3DCOLOR font_color) {
+   // Then check if the label is visible on the clipped map rect.
+    // Text rendering is slow. Perform some manual clipping to skip processing
+    // if the label is off screen.
+    const float xf = static_cast<float>(map_x);
+    const float yf = static_cast<float>(map_y);
+    if ((xf < clip_min_x) || (xf > clip_max_x) ||
+        (yf < clip_min_y) || (yf > clip_max_y))
+        return;
+    
     const int view_left = viewport.X;
     const int view_top = viewport.Y;
     const int view_right = viewport.X + viewport.Width - 1;
@@ -609,16 +579,7 @@ void ZoneMap::render_label_text(const char * label, int y, int x, D3DCOLOR font_
         font_color = D3DCOLOR_XRGB(192, 192, 192);  // Flip to light grey.
 
     // Calculate and clip the on-screen coordinate position of the text.
-    const int kHalfHeight = 25;  // Centered so just has to be sufficiently large.
-    const int kHalfWidth = 60;
-    int label_x = static_cast<int>(x * scale_factor + offset_x + 0.5f);
-    int label_y = static_cast<int>(y * scale_factor + offset_y + 0.5f);
-    RECT text_rect = { .left = label_x - kHalfWidth, .top = label_y - kHalfHeight,
-                    .right = label_x + kHalfWidth, .bottom = label_y + kHalfHeight };
-    text_rect.left = max(view_left, min(view_right, text_rect.left));
-    text_rect.right = max(view_left, min(view_right, text_rect.right));
-    text_rect.top = max(view_top, min(view_bottom, text_rect.top));
-    text_rect.bottom = max(view_top, min(view_bottom, text_rect.bottom));
+    const int kHalfHeight = 10;  // Centered so just has to be sufficiently large.
     int length = strlen(label);
     if (length > 20) {
         length = 20;  // Truncate it to 20.
@@ -627,12 +588,24 @@ void ZoneMap::render_label_text(const char * label, int y, int x, D3DCOLOR font_
                 length = i;  // Truncates and breaks loop.
         }
     }
+    const int half_width = length * 3 + 5;  // Approximate size for centering.
+
+    Vec3 label_screen = transform_model_to_screen(Vec3(xf, yf, 0));
+    int label_x = static_cast<int>(label_screen[0] + 0.5f);
+    int label_y = static_cast<int>(label_screen[1] + 0.5f);
+    RECT text_rect = { .left = label_x - half_width, .top = label_y - kHalfHeight,
+                    .right = label_x + half_width, .bottom = label_y + kHalfHeight };
+
+    text_rect.left = max(view_left, min(view_right - 2 * half_width, text_rect.left));
+    text_rect.right = min(view_right, max(view_left + 2 * half_width, text_rect.right));
+    text_rect.top = max(view_top, min(view_bottom - 2 * kHalfHeight, text_rect.top));
+    text_rect.bottom = min(view_bottom, max(view_top + 2 * kHalfHeight, text_rect.bottom));
 
     label_font->DrawTextA(label, length, &text_rect, DT_VCENTER | DT_CENTER | DT_SINGLELINE, font_color);
 }
 
-
-void ZoneMap::add_position_marker_vertices(float screen_y, float screen_x, float heading, float size,
+// Adds vertices to mark a position at the map coordinates.
+void ZoneMap::add_position_marker_vertices(float map_y, float map_x, float heading, float size,
                                     D3DCOLOR color, std::vector<MapVertex>& vertices) const {
 
     // Heading: 0 = N = -y, 128 = W = -x, 256 = S = +y, 384 = E = +x.
@@ -654,33 +627,23 @@ void ZoneMap::add_position_marker_vertices(float screen_y, float screen_x, float
     Vec3 symbol[kPositionVertices] = { vertex0, vertex1, vertex3,
         vertex0, vertex3, vertex2 };
 
-    // Allow the position marker to exceed the rect limits by size but must stay on screen.
-    const int view_left = viewport.X;
-    const int view_top = viewport.Y;
-    const int view_right = viewport.X + viewport.Width - 1;
-    const int view_bottom = viewport.Y + viewport.Height - 1;
-    const float clip_left = max(clip_rect_left - size, view_left);
-    const float clip_top = max(clip_rect_top - size, view_top);
-    const float clip_right = min(clip_rect_right + size, view_right);
-    const float clip_bottom = min(clip_rect_bottom + size, view_bottom);
     for (int i = 0; i < kPositionVertices; ++i) {
         vertices.push_back(MapVertex{
-                .x = max(clip_left, min(clip_right, symbol[i].x + screen_x)),
-                .y = max(clip_top, min(clip_bottom, symbol[i].y + screen_y)),
+                .x = symbol[i].x + map_x,
+                .y = symbol[i].y + map_y,
                 .z = 0.5f,
-                .rhw = 1.f,
                 .color = color
             });
     }
 }
 
+// Goes through group member list adding their position vertices if enabled.
 void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertices) const {
     if (!map_show_group)
         return;
 
     const float kShrinkFactor = 0.8f;  // Make group members 20% smaller.
-    float size = position_size * min(render_target_width, render_target_height) * kShrinkFactor;
-    size = max(5.f, size);  // Constrain so it remains visible.
+    const float size = convert_size_fraction_to_model(position_size * kShrinkFactor);
 
     const D3DCOLOR kGroupColorLut[EQ_NUM_GROUP_MEMBERS] = {
         D3DCOLOR_XRGB(255, 0, 0),  // Red
@@ -695,23 +658,24 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
         if ((strlen(groupNames[i]) == 0) || !member)
             continue;  // Not a valid group member (or member = nullptr when out of zone).
 
-        float screen_y = -member->Position.x * scale_factor + offset_y;  // Position is y,x,z.
-        float screen_x = -member->Position.y * scale_factor + offset_x;
-        add_position_marker_vertices(screen_y, screen_x, member->Heading, size,
+        // Position is y,x,z.
+        add_position_marker_vertices(-member->Position.x, -member->Position.y, member->Heading, size,
             kGroupColorLut[i], vertices);
     }
 }
 
-void ZoneMap::render_group_member_labels() {
+// Adds a label for each group member if enabled.
+void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
     if (!map_show_group_labels)
         return;
 
     if (!label_font) {
-        render_load_font();
+        render_load_font(device);
         if (!label_font)
             return;
     }
 
+    // label_font->Begin(); // TODO: Check if this improves performance.
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
         if ((strlen(groupNames[i]) == 0) || !member)
@@ -723,9 +687,11 @@ void ZoneMap::render_group_member_labels() {
         const char label[] = { static_cast<uint8_t>(i) + '2', 0};
         render_label_text(label,-loc_y, -loc_x, D3DCOLOR_XRGB(255, 255, 255));
     }
+    // label_font->End();
 }
 
-void ZoneMap::add_raid_marker_vertices(float screen_y, float screen_x, float size,
+// Adds simple position markers for raid members.
+void ZoneMap::add_raid_marker_vertices(const Vec3& position, float size,
     D3DCOLOR color, std::vector<MapVertex>& vertices) const {
 
     // Add a simple equilateral triangle centered at the position pointing up.
@@ -737,25 +703,17 @@ void ZoneMap::add_raid_marker_vertices(float screen_y, float screen_x, float siz
     Vec3 symbol[kRaidPositionVertices] = { vertex0, vertex1, vertex2};
 
     // Allow the position marker to exceed the rect limits by size but must stay on screen.
-    const int view_left = viewport.X;
-    const int view_top = viewport.Y;
-    const int view_right = viewport.X + viewport.Width - 1;
-    const int view_bottom = viewport.Y + viewport.Height - 1;
-    const float clip_left = max(clip_rect_left - size, view_left);
-    const float clip_top = max(clip_rect_top - size, view_top);
-    const float clip_right = min(clip_rect_right + size, view_right);
-    const float clip_bottom = min(clip_rect_bottom + size, view_bottom);
     for (int i = 0; i < kRaidPositionVertices; ++i) {
         vertices.push_back(MapVertex{
-                .x = max(clip_left, min(clip_right, symbol[i].x + screen_x)),
-                .y = max(clip_top, min(clip_bottom, symbol[i].y + screen_y)),
+                .x = symbol[i].x + -position.y,  // Note y,x,z and negation.
+                .y = symbol[i].y + -position.x,
                 .z = 0.5f,
-                .rhw = 1.f,
                 .color = color
             });
     }
 }
 
+// Goes through raid member list adding their position vertices if enabled.
 void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices) const {
     if (!map_show_raid)
         return;
@@ -765,8 +723,7 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
     if (!entity_manager || !self)
         return;
 
-    float size = position_size * min(render_target_width, render_target_height);
-    size = max(5.f, size);  // Constrain so it remains visible.
+    const float size = convert_size_fraction_to_model(position_size);
 
     // TODO: Review color coding to be more distinct. Possibly by class.
     const DWORD kUngrouped = 0xffffffff;
@@ -800,17 +757,15 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
         auto color = member.IsGroupLeader ? kColorLeader :
             (member.GroupNumber == kUngrouped ? kColorUngrouped :
                 D3DCOLOR_XRGB(224, 224, 128 + member.GroupNumber * 8));
-        float screen_y = -entity->Position.x * scale_factor + offset_y;  // Position is y,x,z.
-        float screen_x = -entity->Position.y * scale_factor + offset_x;
-        add_raid_marker_vertices(screen_y, screen_x, size, color, vertices);
+        // Position is y,x,z.
+        add_raid_marker_vertices(entity->Position, size, color, vertices);
     }
 }
 
-
-void ZoneMap::render_positions() {
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+// Handles updating and rendering of self, group, and raid positions.
+void ZoneMap::render_positions(IDirect3DDevice8& device) {
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (!position_vertex_buffer || !self || !device) {
+    if (!position_vertex_buffer || !self) {
         return;
     }
 
@@ -821,22 +776,17 @@ void ZoneMap::render_positions() {
 
     int other_triangle_vertices = position_vertices.size();
 
-    // Translate loc (world) coordinates to screen coordinates. Note that the game
-    // world coordinates are negated (polarity flipped) to match the map data.
-    Vec3 position = self->Position;
-    float screen_y = -position.x * scale_factor + offset_y;  // Note position is y,x,z.
-    float screen_x = -position.y * scale_factor + offset_x;
-
-    float size = position_size * min(render_target_width, render_target_height);
-    size = max(5.f, size);  // Constrain so it remains visible.
+    const float size = convert_size_fraction_to_model(position_size);
 
     // Use default cursor color if levels not active or within the z clipping range.
+    Vec3 position = self->Position;
     bool use_default_color = (map_level_zone_id != zone_id) ||
                 (position.z >= clip_min_z && position.z <= clip_max_z);
     auto color = use_default_color ? D3DCOLOR_XRGB(250, 250, 51) : // Lemon yellow
         D3DCOLOR_XRGB(195, 176, 145); // Lemon khaki.
 
-    add_position_marker_vertices(screen_y, screen_x, self->Heading, size,
+    // Note the x and y swap along with polarity flip.
+    add_position_marker_vertices(-position.x, -position.y, self->Heading, size,
         color, position_vertices);
 
     int copy_size = position_vertices.size() * sizeof(position_vertices[0]);
@@ -852,79 +802,69 @@ void ZoneMap::render_positions() {
     memcpy(data, position_vertices.data(), copy_size);
     position_vertex_buffer->Unlock();
 
-    device->SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
+    device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
 
     // First draw the "other" (raid, group) markers.
     int other_triangle_count = other_triangle_vertices / 3; // D3DPT_TRIANGLELIST
     if (other_triangle_count)
-        device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, other_triangle_count);
+        device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, other_triangle_count);
 
     // Then draw the group labels (on top of markers but below self marker).
-    render_group_member_labels();
+    render_group_member_labels(device);
 
     // And finally draw the self marker. Three vertices per triangle in D3DPT_TRIANGLELIST.
     int self_triangle_count = position_vertices.size() / 3 - other_triangle_count;
-    device->DrawPrimitive(D3DPT_TRIANGLELIST, other_triangle_vertices, self_triangle_count);
+    device.DrawPrimitive(D3DPT_TRIANGLELIST, other_triangle_vertices, self_triangle_count);
 }
 
-bool ZoneMap::render_check_for_zoom_recenter() {
-    if (always_align_to_center)
-        return true;
-
-    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (zone_id == kInvalidZoneId || zoom_factor <= 1.f || !self)
-        return false;
-
-    // Trigger a re-centering in zoom if:
-    // (1) the marker position is within 20% of an edge and that edge isn't already
-    //    at the maximum of the map data and there is movement in that direction
-    // (2) or recenter if the screen x,y is outside the clip_rect (fallback case)
-    float delta_y = -self->MovementSpeedY;  // World direction is negated.
-    float delta_x = -self->MovementSpeedX;
-
-    // Translate loc (world) coordinates to screen coordinates. Note that the game
-    // world coordinates are negated (polarity flipped) to match the map data.
-    float screen_y = -self->Position.x * scale_factor + offset_y;  // Note position is y,x,z.
-    float screen_x = -self->Position.y * scale_factor + offset_x;
-
-    const ZoneMapData* zone_map_data = get_zone_map(zone_id);
-    float vertical_limit = (clip_rect_bottom - clip_rect_top) * 0.20f;
-    float map_top = zone_map_data->min_y * scale_factor + offset_y;
-    bool trigger = ((delta_y < 0) && (screen_y - clip_rect_top < vertical_limit) &&
-        (clip_rect_top > map_top)) || (screen_y < clip_rect_top);
-    float map_bottom = zone_map_data->max_y * scale_factor + offset_y;
-    trigger = trigger || ((delta_y > 0) && (clip_rect_bottom - screen_y < vertical_limit) &&
-        (clip_rect_bottom < map_bottom)) || (screen_y > clip_rect_bottom);
-    float horizontal_limit = (clip_rect_right - clip_rect_left) * 0.20f;
-    float map_left = zone_map_data->min_x * scale_factor + offset_x;
-    trigger = trigger || ((delta_x < 0) && (screen_x - clip_rect_left < horizontal_limit) &&
-        (clip_rect_left > map_left)) || (screen_x < clip_rect_left);
-    float map_right = zone_map_data->max_x * scale_factor + offset_x;
-    trigger = trigger || ((delta_x > 0) && (clip_rect_right - screen_x < horizontal_limit) &&
-        (clip_rect_right < map_right)) || (screen_x > clip_rect_right);
-
-    return trigger;
+// Translate from pixels scale to model (EQ game & map) scale.
+float ZoneMap::scale_pixels_to_model(float pixels) const {
+    return pixels / mat_model2world(0, 0);  // Assuming isotropic scale_factor.
 }
 
-void ZoneMap::render_update_marker_buffer() {
+// Translate a fraction of the screen size to model (map data) coordinates.
+float ZoneMap::convert_size_fraction_to_model(float size_fraction) const {
+    // Clamp to at least 5 screen pixels so it is visible.
+    float size = max(5.f, size_fraction * min(render_target_width, render_target_height));
+    return scale_pixels_to_model(size);
+}
+
+// Perform a software (manual) vertex transformation from model (map data) to world.
+Vec3 ZoneMap::transform_model_to_world(const Vec3& model) const {
+    const float w = 1.0f;  // Needed for translation.
+    return Vec3(
+        mat_model2world(0, 0) * model[0] + mat_model2world(1, 0) * model[1]
+            + mat_model2world(2, 0) * model[2] + mat_model2world(3, 0) * w,
+        mat_model2world(0, 1) * model[0] + mat_model2world(1, 1) * model[1]
+            + mat_model2world(2, 1) * model[2] + mat_model2world(3, 1) * w,
+        mat_model2world(0, 2) * model[0] + mat_model2world(1, 2) * model[1]
+            + mat_model2world(2, 2) * model[2] + mat_model2world(3, 2) * w
+        );
+}
+
+// Perform a software (manual) vertex transformation from model (map data) to absolute screen.
+Vec3 ZoneMap::transform_model_to_screen(const Vec3& model) const {
+    Vec3 screen = transform_model_to_world(model);
+
+    screen[0] += static_cast<float>(viewport.X + viewport.Width * 0.5f);
+    screen[1] += static_cast<float>(viewport.Y + viewport.Height * 0.5f);
+    return screen;
+}
+
+// Updates the marker vertices if enabled. 
+void ZoneMap::render_update_marker_buffer(IDirect3DDevice8& device) {
     if (marker_vertex_buffer) {  // Release any resources (should be redundant).
         marker_vertex_buffer->Release();
         marker_vertex_buffer = nullptr;
     }
 
-    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
-    if (!device || !line_vertex_buffer)
+    if (!line_vertex_buffer)
         return;
 
-    // Translate loc (world) coordinates to screen coordinates. Note that the game
-    // world coordinates are negated (polarity flipped) to match the map data.
-    float screen_y = -marker_y * scale_factor + offset_y;
-    float screen_x = -marker_x * scale_factor + offset_x;
-
     // Generate the vertices for four triangles that makeup the target.
-    // Calculate the individual triangle 'size' in screen resolution.
-    float size = max(5.f, marker_size * min(render_target_width, render_target_height) * 0.5f);
-    float short_size = size * 0.25f;
+    // Calculate the individual triangle 'size' in world scale.
+    const float size = convert_size_fraction_to_model(marker_size * 0.5f);
+    const float short_size = size * 0.25f;
     const int kNumVertices = kMarkerCount * 3;  // Separate triangles with 3 vertices (CW direction).
     Vec3 marker[kNumVertices] = {{0, 0, 0}, {short_size, size, 0}, {-short_size, size, 0},
                                     {0, 0, 0}, {-short_size, -size, 0}, {short_size, -size, 0},
@@ -932,28 +872,17 @@ void ZoneMap::render_update_marker_buffer() {
                                     {0, 0, 0}, {-size, short_size, 0}, {-size, -short_size, 0}
     };
 
-    // Skip drawing the marker if the center is off the map.
-    if ((screen_x <= clip_rect_left) || (screen_x >= clip_rect_right) ||
-        (screen_y <= clip_rect_top) || (screen_y >= clip_rect_bottom))
-        return;
-
-    // Add vertices constraining to fit within the valid screen.
-    const int view_left = viewport.X;
-    const int view_top = viewport.Y;
-    const int view_right = viewport.X + viewport.Width - 1;
-    const int view_bottom = viewport.Y + viewport.Height - 1;
     MapVertex marker_vertices[kNumVertices];
     for (int i = 0; i < kNumVertices; ++i) {
-        marker_vertices[i].x = max(view_left, min(view_right, marker[i].x + screen_x));
-        marker_vertices[i].y = max(view_top, min(view_bottom, marker[i].y + screen_y));
+        marker_vertices[i].x = marker[i].x + marker_x,
+        marker_vertices[i].y = marker[i].y + marker_y,
         marker_vertices[i].z = 0.5f;
-        marker_vertices[i].rhw = 1.f;
         marker_vertices[i].color = D3DCOLOR_XRGB(255, 0, 0);
     }
 
     // Create a Vertex buffer and copy the triangle vertices.
     int marker_buffer_size = sizeof(MapVertex) * kNumVertices;
-    if (FAILED(device->CreateVertexBuffer(marker_buffer_size,
+    if (FAILED(device.CreateVertexBuffer(marker_buffer_size,
         D3DUSAGE_WRITEONLY,
         kMapVertexFvfCode,
         D3DPOOL_MANAGED,
@@ -971,35 +900,51 @@ void ZoneMap::render_update_marker_buffer() {
     marker_vertex_buffer->Unlock();
 }
 
+// System callback to execute the map rendering.
 void ZoneMap::callback_render()
 {
-    if (!enabled || !Zeal::EqGame::is_in_game() || !Zeal::EqGame::get_self())
+    if (!enabled || !Zeal::EqGame::is_in_game())
         return;
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (zone_id != self->ZoneId || (always_align_to_center && self->MovementSpeed > 0) 
-        || render_check_for_zoom_recenter()) {
-        zone_id = self->ZoneId;
-        render_load_map();
+    IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+    if (!self || !device)
+        return;
+
+    const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
+    if (!zone_map_data) {
+        return;
     }
+
+    if (zone_id != self->ZoneId) {
+        zone_id = self->ZoneId;
+        render_load_map(*device, *zone_map_data);
+    }
+
+    render_update_viewport(*device);  // Updates size and position of output viewport.
+    render_update_transforms(*zone_map_data);  // Updates scaling, offsets, and clipping.
 
     // Add the marker if it is empty and this is the right zone.
     if (zone_id != kInvalidZoneId && marker_zone_id == zone_id
         && marker_vertex_buffer == nullptr) {
-        render_update_marker_buffer();
+        render_update_marker_buffer(*device);
     }
 
-    render_map();
+    render_map(*device);
 }
 
 
-void ZoneMap::add_dynamic_label(const std::string& label_text, int loc_y, int loc_x,
-    unsigned int duration_ms, D3DCOLOR font_color) {
+void ZoneMap::add_dynamic_label(const std::string& label_text,
+                    int loc_y, int loc_x, unsigned int duration_ms, D3DCOLOR font_color) {
     if (label_text.empty() || zone_id == kInvalidZoneId)
         return;
 
-    if (label_font == nullptr)
-        render_load_font();
+    if (label_font == nullptr) {
+        IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+        if (!device)
+            return;
+        render_load_font(*device);
+    }
 
     if (dynamic_labels_zone_id != zone_id) {
         dynamic_labels_list.clear();
@@ -1188,7 +1133,6 @@ void ZoneMap::set_enabled(bool _enabled, bool update_default)
 void ZoneMap::set_show_group(bool enable, bool update_default) {
     if (map_show_group != enable) {
         map_show_group = enable;
-        zone_id = kInvalidZoneId;  // Triggers reload.
     }
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
@@ -1200,7 +1144,6 @@ void ZoneMap::set_show_group(bool enable, bool update_default) {
 void ZoneMap::set_show_group_labels(bool enable, bool update_default) {
     if (map_show_group_labels != enable) {
         map_show_group_labels = enable;
-        zone_id = kInvalidZoneId;  // Triggers reload.
     }
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
@@ -1212,7 +1155,6 @@ void ZoneMap::set_show_group_labels(bool enable, bool update_default) {
 void ZoneMap::set_show_raid(bool enable, bool update_default) {
     if (map_show_raid != enable) {
         map_show_raid = enable;
-        zone_id = kInvalidZoneId;  // Triggers reload.
     }
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
@@ -1226,7 +1168,7 @@ void ZoneMap::toggle_background() {
     if (map_background_state > BackgroundType::kLast) {
         map_background_state = BackgroundType::kFirst;
     }
-    zone_id = kInvalidZoneId;  // Triggers reload.
+    zone_id = kInvalidZoneId;  // Triggers reload with updated background color.
     update_ui_options();
 }
 
@@ -1235,7 +1177,7 @@ void ZoneMap::toggle_labels() {
     if (map_labels_mode > LabelsMode::kLast) {
         map_labels_mode = LabelsMode::kFirst;
     }
-    zone_id = kInvalidZoneId;  // Triggers reload.
+    zone_id = kInvalidZoneId;  // Triggers reload which includes updating labels.
     update_ui_options();
 }
 
@@ -1248,7 +1190,7 @@ bool ZoneMap::set_background(int new_state_in, bool update_default) {
     }
 
     map_background_state = new_state;
-    zone_id = kInvalidZoneId;  // Triggers reload.
+    zone_id = kInvalidZoneId;  // Triggers reload with updated background color.
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<int>("Zeal", "MapBackgroundState", new_state);
@@ -1259,7 +1201,7 @@ bool ZoneMap::set_background(int new_state_in, bool update_default) {
 
 bool ZoneMap::set_background_alpha(int percent, bool update_default) {
     map_background_alpha = max(0, min(1.f, percent / 100.f));
-    zone_id = kInvalidZoneId;  // Triggers reload.
+    zone_id = kInvalidZoneId;  // Triggers reload with updated background color.
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
@@ -1273,7 +1215,6 @@ bool ZoneMap::set_alignment(int alignment_in, bool update_default) {
     alignment = max(AlignmentType::kFirst, min(AlignmentType::kLast, alignment));
 
     map_alignment_state = alignment;
-    zone_id = kInvalidZoneId;  // Triggers reload.
 
     set_zoom(100);  // Reset zoom on an alignment change to avoid confusion and corner cases.
 
@@ -1289,7 +1230,7 @@ bool ZoneMap::set_labels_mode(int mode_in, bool update_default) {
     mode = max(LabelsMode::kFirst, min(LabelsMode::kLast, mode));
 
     map_labels_mode = mode;
-    zone_id = kInvalidZoneId;  // Triggers reload.
+    zone_id = kInvalidZoneId;  // Triggers reload which includes updating labels.
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<int>("Zeal", "MapLabelsMode", mode);
@@ -1331,9 +1272,7 @@ bool ZoneMap::set_position_size(int new_size_percent, bool update_default) {
 
 bool ZoneMap::set_marker_size(int new_size_percent, bool update_default) {
     marker_size = max(0.01f, min(kMaxMarkerSize, new_size_percent / 100.f * kMaxMarkerSize));
-    int zone_id = marker_zone_id;  // Save across clear.
-    clear_marker();  // Release any resources (also triggers update).
-    marker_zone_id = zone_id;
+    clear_marker(false);  // Release resources but keep validity state to trigger an update.
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<float>("Zeal", "MapMarkerSize", marker_size);
 
@@ -1341,8 +1280,9 @@ bool ZoneMap::set_marker_size(int new_size_percent, bool update_default) {
     return true;  // Just clamp and report success.
 }
 
-void ZoneMap::clear_marker() {
-    marker_zone_id = kInvalidZoneId;
+void ZoneMap::clear_marker(bool invalidate_zone_id) {
+    if (invalidate_zone_id)
+        marker_zone_id = kInvalidZoneId;
     if (marker_vertex_buffer) {
         marker_vertex_buffer->Release();
         marker_vertex_buffer = nullptr;
@@ -1356,8 +1296,8 @@ void ZoneMap::set_marker(int y, int x) {
     if (!self)
         return;
     marker_zone_id = self->ZoneId;
-    marker_x = x;
-    marker_y = y;
+    marker_x = -x;  // Negate game coordinates to model.
+    marker_y = -y;
 }
 
 void ZoneMap::toggle_zoom() {
@@ -1373,13 +1313,13 @@ void ZoneMap::toggle_zoom() {
             break;
         }
     }
-    zone_id = kInvalidZoneId;  // Triggers reload (including marker).
+    clear_marker(false);  // Marker size is dependent on scale_factor.
     zoom_factor = new_zoom_factor;
     update_ui_options();
 }
 
 bool ZoneMap::set_zoom(int zoom_percent) {
-    zone_id = kInvalidZoneId;  // Triggers reload (including marker).
+    clear_marker(false);  // Marker size is dependent on scale_factor.
     zoom_factor = zoom_percent * 0.01f;
     zoom_factor = min(100.f, max(1.f, zoom_factor));
 
@@ -1483,7 +1423,7 @@ void ZoneMap::save_ini()
 void ZoneMap::update_ui_options() {
     if (ZealService::get_instance() && ZealService::get_instance()->ui
                     && ZealService::get_instance()->ui->options)
-       ZealService::get_instance()->ui->options->UpdateOptionsMapOnly();
+       ZealService::get_instance()->ui->options->UpdateOptionsMap();
 }
 
 bool ZoneMap::set_map_top(int top_percent, bool update_default, bool preserve_height) {
@@ -1576,7 +1516,7 @@ void ZoneMap::parse_size(const std::vector<std::string>& args) {
 
     if ((tlhw.size() != 4) || !set_map_rect(tlhw[0] / 100.f, tlhw[1] / 100.f,
         (tlhw[0] + tlhw[2]) / 100.f,    // Convert height to bottom (top + height).
-        (tlhw[1] + tlhw[3]) / 100.f), false)   // And width to right (left + width).
+        (tlhw[1] + tlhw[3]) / 100.f, false))   // And width to right (left + width).
     {
         Zeal::EqGame::print_chat("Usage: /map size <top> <left> <height> <width> (percent of screen dimensions)");
         Zeal::EqGame::print_chat("Example: /map size 10 20 40 45");
@@ -1875,22 +1815,32 @@ void ZoneMap::parse_poi(const std::vector<std::string>& args) {
     }
 }
 
+void print_matrix(const D3DMATRIX& matrix, const char* name) {
+    Zeal::EqGame::print_chat(name);
+    for (int i = 0; i < 4; ++i) {
+        Zeal::EqGame::print_chat("[%i]: %f, %f, %f, %f", i, matrix.m[i][0], matrix.m[i][1], matrix.m[i][2], matrix.m[i][3]);
+    }
+}
+
 void ZoneMap::dump() {
     Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), align: %i, labels:%i, zone: %i",
                             enabled, map_background_state, map_background_alpha, map_alignment_state, map_labels_mode, zone_id);
-    Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i, num_labels: %i", marker_zone_id, marker_y, marker_x, labels_list.size());
+    Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i, num_labels: %i",
+                            marker_zone_id, marker_y, marker_x, labels_list.size());
     Zeal::EqGame::print_chat("view: t: %i, l: %i, h: %i, w: %i, Render H: %i, W: %i", 
         viewport.Y, viewport.X, viewport.Height, viewport.Width, render_target_height, render_target_width);
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
-    Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_rect_top, clip_rect_left, clip_rect_bottom, clip_rect_right);
+    Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_min_y, clip_min_x, clip_max_y, clip_max_x);
     Zeal::EqGame::print_chat("level: zone: %i, index: %i, z_max: %i, z_min: %i", map_level_zone_id, map_level_index, clip_max_z, clip_min_z);
     Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, show_group: %i, %i, show_raid: %i",
         position_size, marker_size, map_show_group, map_show_group_labels, map_show_raid);
-    Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f", scale_factor, offset_y, offset_x, zoom_factor);
+    Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f",
+        mat_model2world(0,0), mat_model2world(3,1), mat_model2world(3, 0), zoom_factor);
     Zeal::EqGame::print_chat("dyn_labels_size: %i, dyn_labels_zone_id: %i, data_mode: %i, data_cache: %i", 
         dynamic_labels_list.size(), dynamic_labels_zone_id, map_data_mode, map_data_cache.size());
     Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i, font: %i", line_count,
         line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr, label_font != nullptr);
+    //print_matrix(mat_model2world, "Model to World");  // Redundant with scale_factor and offsets.
 }
 
 bool ZoneMap::parse_command(const std::vector<std::string>& args) {

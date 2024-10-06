@@ -92,7 +92,7 @@ bool Melody::start(const std::vector<int>& new_songs)
     return true;
 }
 
-void Melody::end()
+void Melody::end(bool do_print)
 {
     if (songs.size())
     {
@@ -101,7 +101,8 @@ void Melody::end()
         retry_count = 0;
         casting_melody_spell_id = kInvalidSpellId;
         use_item_index = -1;
-        Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Your melody has ended.");
+        if (do_print)
+            Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Your melody has ended.");
     }
 }
 
@@ -121,7 +122,7 @@ void Melody::handle_stop_cast_callback(BYTE reason, WORD spell_id)
     // Terminate melody on stop except for missed note (part of reason == 3) rewind attempts.
     if (reason != 3 || !songs.size())
     {
-        end();
+        end(true);
         return;
     }
 
@@ -168,7 +169,7 @@ void Melody::tick()
         (self->StandingState == Stance::Sit) || (char_info->StunnedState) ||
         (retry_count > RETRY_COUNT_END_LIMIT))
     {
-        end();
+        end(true);
         return;
     }
 
@@ -247,7 +248,7 @@ Melody::Melody(ZealService* zeal, IO_ini* ini)
     zeal->commands_hook->Add("/melody", {"/mel"}, "Bard only, auto cycles 5 songs of your choice.",
         [this](std::vector<std::string>& args) {
 
-            end();  //any active melodies are always terminated
+            end(true);  //any active melodies are always terminated
 
             if (!Zeal::EqGame::get_char_info() || Zeal::EqGame::get_char_info()->Class != Zeal::EqEnums::ClassTypes::Bard)
             {
