@@ -52,21 +52,20 @@ void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, Zeal::EqStr
 {
 	ZealService* zeal = ZealService::get_instance();
 	wnd = zeal->item_displays->get_available_window(item);
+	zeal->item_displays->current_item = item;
 	zeal->hooks->hook_map["SetItem"]->original(SetItem)(wnd, unused, item, show);
 	wnd->IconBtn->ZLayer = wnd->ZLayer;
 	wnd->Activate();
 }
 char* build_token_string_PARAM(char* buffer, int stringID, char* string1, char* string2, int u1, int u2, int u3, int u4, int u5, int u6, int u7)
 {
-	Zeal::EqStructures::_EQITEMINFO* item;
-	__asm mov item, esi
-	int item_level = item->Common.CastingLevel; 
-
 	if (strcmp(string1, "Haste") == 0)
 	{
 		if (strcmp(string2, "(Worn)") == 0)
 		{
-			sprintf_s(buffer, 16, "Haste: %+d%%", item_level+1);
+			ZealService* zeal = ZealService::get_instance();
+			Zeal::EqStructures::_EQITEMINFO* item = zeal->item_displays->current_item;
+			sprintf_s(buffer, 16, "Haste: %+d%%", item->Common.CastingLevel+1);
 			return buffer;
 		}
 	}
