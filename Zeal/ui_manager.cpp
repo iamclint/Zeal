@@ -4,7 +4,7 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
-Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name, LPVOID Deconstructor)
+Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name)
 {
 	Zeal::EqUI::EQWND* wnd = (Zeal::EqUI::EQWND*)HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(Zeal::EqUI::EQWND));
 	mem::set((int)wnd, 0, sizeof(Zeal::EqUI::EQWND));
@@ -12,12 +12,19 @@ Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name, LPVO
 	//reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::EQWND*, Zeal::EqUI::EQWND*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(wnd, 0, Zeal::EqUI::CXSTR(name), -1, 0);
 	wnd->SetupCustomVTable();
 	wnd->CreateChildren();
-	if (Deconstructor)
-		wnd->vtbl->Deconstructor = Deconstructor;
 	return wnd;
 }
-
-
+static int __fastcall ButtonClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
+{
+	ui_manager* ui = ZealService::get_instance()->ui.get();
+	int rval = ZealService::get_instance()->hooks->hook_map["ButtonClick"]->original(ButtonClick_hook)(pWnd, unused, pt, flag);
+	if (ui->button_callbacks.count(pWnd) > 0)
+	{
+		ui->clicked_button = pWnd;
+		ui->button_callbacks[pWnd](pWnd);
+	}
+	return rval;
+}
 static int __fastcall CheckboxClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
@@ -48,6 +55,18 @@ static void __fastcall SetComboValue_hook(Zeal::EqUI::BasicWnd* pWnd, int unused
 		ui->combo_callbacks[pWnd->ParentWnd](pWnd->ParentWnd, value);
 }
 
+void ui_manager::AddButtonCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
+{
+	if (wnd)
+	{
+		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name);
+		if (btn)
+		{
+			button_callbacks[btn] = callback;
+			button_names[name] = btn;
+		}
+	}
+}
 void ui_manager::AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
 {
 	if (wnd)
@@ -245,6 +264,7 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	group = std::make_shared<ui_group>(zeal, ini, this);
 
 //	zeal->hooks->Add("CreateXWndFromTemplate", 0x59bc40, CreateXWndFromTemplate_hook, hook_type_detour);
+	zeal->hooks->Add("ButtonClick", 0x5951E0, ButtonClick_hook, hook_type_detour);
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour);
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);

@@ -39,13 +39,27 @@ void PrintUIError()
 	Zeal::EqGame::print_chat("Warning: The zeal ui files are not in place, cannot load zeal options!");
 }
 
+int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI::BasicWnd* sender, int message, int data)
+{
+	ui_manager* ui = ZealService::get_instance()->ui.get();
+	if (Zeal::EqGame::Windows && sender == (Zeal::EqUI::BasicWnd*)Zeal::EqGame::Windows->ColorPicker)
+	{
+		if (message == 0x1E && ui->clicked_button)
+		{
+			ui->clicked_button->TextColor.ARGB = data;
+		}
+	}
+	return reinterpret_cast<int (__thiscall*)(Zeal::EqUI::BasicWnd * wnd, Zeal::EqUI::BasicWnd * sender, int message, int data)>(0x56e920)(wnd, sender, message, data);
+}
+
 void ui_options::InitUI()
 {
 	if (!wnd)
 	{
 		if (std::filesystem::exists("./uifiles/zeal/EQUI_ZealOptions.xml"))
 		{
-			wnd = ui->CreateSidlScreenWnd("ZealOptions", 0);
+			wnd = ui->CreateSidlScreenWnd("ZealOptions");
+			wnd->vtbl->WndNotification = WndNotification;
 		}
 		else
 		{
@@ -93,6 +107,13 @@ void ui_options::InitGeneral()
 		PrintUIError();
 		return;
 	}
+
+
+	for (int i = 0; i < 100; i++)
+	{
+		ui->AddButtonCallback(wnd, "Zeal_Color" + std::to_string(i), [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::Windows->ColorPicker->Activate(wnd, wnd->TextColor.ARGB); });
+	}
+
 	/*add callbacks when the buttons are pressed in the options window*/
 	ui->AddCheckboxCallback(wnd, "Zeal_HideCorpse", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->set_hide_looted(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_Cam", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->set_smoothing(wnd->Checked); });

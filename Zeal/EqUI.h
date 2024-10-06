@@ -488,6 +488,17 @@ namespace Zeal
 			/*0x134*/ EditWnd* unk;
 			/*0x138*/ EditWnd* edit;
 		};
+		struct ColorPickerWnd : public EQWND
+		{
+			void Activate(BasicWnd* wnd, DWORD color)
+			{
+				reinterpret_cast<void(__thiscall*)(const ColorPickerWnd*, BasicWnd*, DWORD)>(0x414F2A)(this, wnd, color);
+			};
+			void SetCurrentcolor(DWORD color)
+			{
+				reinterpret_cast<void(__thiscall*)(const ColorPickerWnd*, DWORD)>(0x414F87)(this, color);
+			};
+		};
 		struct EQKey
 		{
 			/* 0x0000 */ UINT32 code;
@@ -801,7 +812,7 @@ namespace Zeal
 			EQWND* Breath;  // 0x63D620
 			EQWND* Target;  // 0x63D624
 			HotButton* HotButton;  // 0x63D628
-			EQWND* ColorPicker;  // 0x63D62C
+			ColorPickerWnd* ColorPicker;  // 0x63D62C
 			EQWND* Player;  // 0x63D630
 			EQWND* Options;  // 0x63D634
 			EQWND* BuffWindowNORMAL;  // 0x63D638
