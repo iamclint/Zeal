@@ -135,7 +135,7 @@ void FloatingDamage::callback_deferred()
 									color = Zeal::EqGame::get_user_color(24); //npc being hit
 							}
 							if (dmg.heal > 0)
-								color = 0x00FF00FF;
+								color = 0xFFFF00FF;
 							fnt->DrawWrappedText(dmg.str_dmg.c_str(), Zeal::EqUI::CXRect(screen_pos.x + dmg.y_offset, screen_pos.y + dmg.x_offset, screen_pos.x + 150, screen_pos.y + 150), Zeal::EqUI::CXRect(0, 0, screen_size.x*2, screen_size.y*2), ModifyAlpha(color, dmg.opacity), 1, 0);
 						}
 					}
@@ -163,8 +163,9 @@ void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStru
 		if (target)
 		{
 			bool is_me = false;
-			if (source && source == Zeal::EqGame::get_controlled())
+			if (source && source->SpawnId == Zeal::EqGame::get_controlled()->SpawnId)
 				is_me = true;
+
 			damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal));
 		}
 	}

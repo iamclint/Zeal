@@ -7,6 +7,14 @@ void EntityManager::Add(struct Zeal::EqStructures::Entity* ent)
 {
 	entity_map[ent->Name] = ent;
 	entity_id_map[ent->SpawnId] = ent;
+
+	Zeal::EqStructures::Entity* self = Get(0);
+	if (self && self->SpawnId != 0)
+	{
+		entity_id_map[self->SpawnId] = self;
+		entity_id_map.erase(0);
+	}
+
 }
 
 void EntityManager::Remove(struct Zeal::EqStructures::Entity* ent)
