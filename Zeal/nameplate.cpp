@@ -50,7 +50,7 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 		if (nameplateColors) {
 			Zeal::EqStructures::EQARGBCOLOR LDcolor = options->GetColor(2); //0xFFFF0000; //LinkDead - Red
 			Zeal::EqStructures::EQARGBCOLOR AFKcolor = options->GetColor(0); //0xFFFF8000; //AFK - Orange
-			Zeal::EqStructures::EQARGBCOLOR LFGcolor =  options->GetColor(1); //0xFFFFFF80; //LFG - White Yellow
+			Zeal::EqStructures::EQARGBCOLOR LFGcolor =  options->GetColor(1); //0x00CFFF00; //LFG - Yellow
 			Zeal::EqStructures::EQARGBCOLOR Groupcolor = options->GetColor(5); //0x0500FF32; //Group Member - Light Green
 			Zeal::EqStructures::EQARGBCOLOR Raidcolor =  options->GetColor(4); //0xFFFFFFFF; //Raid Member - White Light Purple
 			Zeal::EqStructures::EQARGBCOLOR Guildcolor = options->GetColor(3); //0x0000FFFF; //Guild Member - Cyan
