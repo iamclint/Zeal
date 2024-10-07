@@ -6,6 +6,7 @@
 #include "string_util.h"
 #include <Windows.h>
 #include <thread>
+#include <zone_map.h>
 
 
 
@@ -169,6 +170,11 @@ void named_pipe::main_loop()
 {
 	if (!pipe_handles.size()) //nothing is connected don't waste the cpu time getting values
 		return;
+
+	// Group member position support.
+	using GroupNameArrayType = char[0x40];
+	using GroupEntityPtrArrayType = Zeal::EqStructures::Entity*;
+
 	static auto last_output = GetTickCount64();
 	if (GetTickCount64() - last_output > pipe_delay && pipe_delay>0)
 	{
@@ -178,11 +184,16 @@ void named_pipe::main_loop()
 			
 			Zeal::EqUI::ListWnd* RaidList = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Raid->GetChildItem("RAID_PlayerList");
 			Zeal::EqUI::ListWnd* RaidListNonGrouped = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Raid->GetChildItem("RAID_NotInGroupPlayerList");
+
+			auto entity_manager = ZealService::get_instance()->entity_manager.get();  // Short-term ptr.
+			//const Zeal::EqStructures::RaidMember* raidMembers = reinterpret_cast<const Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
+
 			if (RaidList)
 			{
 				nlohmann::json raid_array = nlohmann::json::array();
 				for (int i = 0; i < RaidList->ItemCount; i++)
 				{
+					nlohmann::json raid_data = nlohmann::json::object();
 					Zeal::EqUI::CXSTR _grp;
 					Zeal::EqUI::CXSTR _name;
 					Zeal::EqUI::CXSTR _lvl;
@@ -193,7 +204,21 @@ void named_pipe::main_loop()
 					RaidList->GetItemText(&_lvl, i, 2);
 					RaidList->GetItemText(&_class, i, 3);
 					RaidList->GetItemText(&_rank, i, 4);
-					raid_array.push_back({ {"group", _grp.Data->Text},{"name", _name.Data->Text},{"level", _lvl.Data->Text},{"class", _class.Data->Text},{"rank", _rank.Data->Text} });
+
+					auto entity = entity_manager->Get(_name.Data->Text);
+					if (entity) {
+						raid_data["loc"] = entity->Position.toJson();
+						raid_data["heading"] = entity->Heading;
+					}
+
+					raid_data["group"] = _grp.Data->Text;
+					raid_data["name"] = _name.Data->Text;
+					raid_data["level"] = _lvl.Data->Text;
+					raid_data["class"] = _class.Data->Text;
+					raid_data["rank"] = _rank.Data->Text;
+
+					raid_array.push_back(raid_data);
+
 					if (_grp.Data)
 						_grp.FreeRep();
 					if (_name.Data)
@@ -207,6 +232,7 @@ void named_pipe::main_loop()
 				}
 				for (int i = 0; i < RaidListNonGrouped->ItemCount; i++)
 				{
+					nlohmann::json raid_data = nlohmann::json::object();
 					Zeal::EqUI::CXSTR _grp;
 					Zeal::EqUI::CXSTR _name;
 					Zeal::EqUI::CXSTR _lvl;
@@ -217,7 +243,20 @@ void named_pipe::main_loop()
 					RaidListNonGrouped->GetItemText(&_lvl, i, 2);
 					RaidListNonGrouped->GetItemText(&_class, i, 3);
 					RaidListNonGrouped->GetItemText(&_rank, i, 4);
-					raid_array.push_back({ {"group", "0"},{"name", _name.Data->Text},{"level", _lvl.Data->Text},{"class", _class.Data->Text},{"rank", _rank.Data->Text} });
+
+					auto entity = entity_manager->Get(_name.Data->Text);
+					if (entity) {
+						raid_data["loc"] = entity->Position.toJson();
+						raid_data["heading"] = entity->Heading;
+					}
+
+					raid_data["group"] = "0";
+					raid_data["name"] = _name.Data->Text;
+					raid_data["level"] = _lvl.Data->Text;
+					raid_data["class"] = _class.Data->Text;
+					raid_data["rank"] = _rank.Data->Text;
+
+					raid_array.push_back(raid_data);
 					if (_grp.Data)
 						_grp.FreeRep();
 					if (_name.Data)
@@ -233,7 +272,30 @@ void named_pipe::main_loop()
 			}
 		}
 		
+		nlohmann::json group_array = nlohmann::json::array();
 		nlohmann::json label_array = nlohmann::json::array();
+
+		GroupEntityPtrArrayType* groupEntityPtrs = reinterpret_cast<GroupEntityPtrArrayType*>(0x7913F8);
+		GroupNameArrayType* groupNames = reinterpret_cast<GroupNameArrayType*>(0x7912B5);
+
+		for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; i++)
+		{
+			Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
+			if ((strlen(groupNames[i]) > 0) && member)
+			{
+				nlohmann::json group_data = nlohmann::json::object();
+				group_data["name"] = groupNames[i];
+				group_data["loc"] = member->Position.toJson();
+				group_data["heading"] = member->Heading;
+
+				group_array.push_back(group_data);
+			}
+			else
+			{
+				continue;
+			}
+		}
+
 		for (auto& [id, name] : LabelNames)
 		{
 			nlohmann::json meta_data = nlohmann::json::object();
@@ -269,6 +331,7 @@ void named_pipe::main_loop()
 
 		write(label_array.dump(), pipe_data_type::label);
 		write(gauge_array.dump(), pipe_data_type::gauge);
+		write(group_array.dump(), pipe_data_type::group);
 
 		if (Zeal::EqGame::get_self())
 		{
