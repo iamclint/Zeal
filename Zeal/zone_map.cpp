@@ -159,8 +159,10 @@ void ZoneMap::render_update_viewport(IDirect3DDevice8& device) {
     IDirect3DSurface8* surface;
     device.GetRenderTarget(&surface);
     D3DSURFACE_DESC description;
-    if (surface)
+    if (surface) {
         surface->GetDesc(&description);
+        surface->Release();  // Decrements a reference counter.
+    }
     else {
         description.Width = 320;  // "safe" fallback values.
         description.Height = 320;
