@@ -48,43 +48,110 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	switch (spawn->Type) {
 	case 0: //Players
 		if (nameplateColors) {
-			int maxGroupMembers = 5;
-			int maxRaidMembers = 72;
+			Zeal::EqStructures::EQARGBCOLOR LDcolor = options->GetColor(2); //0xFFFF0000; //LinkDead - Red
+			Zeal::EqStructures::EQARGBCOLOR AFKcolor = options->GetColor(0); //0xFFFF8000; //AFK - Orange
+			Zeal::EqStructures::EQARGBCOLOR LFGcolor =  options->GetColor(1); //0xFFFFFF80; //LFG - White Yellow
+			Zeal::EqStructures::EQARGBCOLOR Groupcolor = options->GetColor(5); //0x0500FF32; //Group Member - Light Green
+			Zeal::EqStructures::EQARGBCOLOR Raidcolor =  options->GetColor(4); //0xFFFFFFFF; //Raid Member - White Light Purple
+			Zeal::EqStructures::EQARGBCOLOR Guildcolor = options->GetColor(3); //0x0000FFFF; //Guild Member - Cyan
+			//int maxGroupMembers = 5;
+			//int maxRaidMembers = 72;
+			uint8_t isInGroup = *(uint8_t*)0x7912B0;
+			uint8_t groupSize = *(uint8_t*)0x7912B0 + *(uint8_t*)0x7912B1 + *(uint8_t*)0x7912B2 + *(uint8_t*)0x7912B3 + *(uint8_t*)0x7912B4;
+			uint16_t raidSize = *(uint16_t*)0x794F9C;
+			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 			Zeal::EqStructures::Entity** groupmembers = reinterpret_cast<Zeal::EqStructures::Entity**>(Zeal::EqGame::GroupList);
 			Zeal::EqStructures::RaidMember* raidMembers = reinterpret_cast<Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
-			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+
+			if (spawn->IsLinkDead == 1) { //LinkDead
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = LDcolor;
 				return;
-			if (raidMembers) {
-				for (int i = 0; i < maxRaidMembers; ++i) //Raid Member loop
-				{
-					Zeal::EqStructures::RaidMember member = raidMembers[i];
-					if ((member.GroupNumber == 0xFFFFFFFE) || (strlen(member.Name) == 0) || (strcmp(member.Name, Zeal::EqGame::get_self()->Name) == 0))
-						continue;
-					Zeal::EqStructures::Entity* raidMember = ZealService::get_instance()->entity_manager->Get(member.Name);
-					if (!raidMember)
-						continue;
-					if (spawn == raidMember)
-						raidMember->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(4); //0xFF000000; //Raid Member-Black
-				}
-			}			
-			//If not in a Guild - keep default color
-			if (spawn->GuildId != 0xFFFF && spawn->GuildId == Zeal::EqGame::get_self()->GuildId) //Guild Member
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(3); //0xFF00FF80; //Guild Member-Greenish Blue
+			}
+			else if (spawn->IsAwayFromKeyboard == 1) {//AFK
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = AFKcolor;
+				return;
+			}
+			else if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+				return;
+			else if (spawn->ActorInfo->IsLookingForGroup == 1) { //LFG
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = LFGcolor;
+				return;
+			}
 			if (groupmembers) {
-				for (int i = 0; i < maxGroupMembers; ++i) //Group Member loop
-				{
-					Zeal::EqStructures::Entity* groupmember = groupmembers[i];
-					if (spawn == groupmember)
-						spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(5);// 0x0500FF32; //Group Member-Light Green 
-					continue;
+				switch (isInGroup) {
+					case 0:
+						break;
+					case 1:
+						for (int i = 0; i < groupSize; ++i) //Group Member loop
+						{
+							Zeal::EqStructures::Entity* groupmember = groupmembers[i];
+							if (spawn == Zeal::EqGame::get_self()) {
+								self->ActorInfo->DagHeadPoint->StringSprite->Color = Groupcolor;
+								return;
+							}
+							else if (spawn != Zeal::EqGame::get_self()) {
+								if (spawn == groupmember) {
+									spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Groupcolor;
+									return;
+								}
+								else if (spawn != groupmember) {
+									if (raidSize > 1) { //RaidMember
+										for (int i = 0; i < raidSize; ++i) //Raid Member loop
+										{
+											Zeal::EqStructures::RaidMember member = raidMembers[i];
+											if ((member.GroupNumber == 0xFFFFFFFF - 1) || (strlen(member.Name) == 0) || (strcmp(member.Name, Zeal::EqGame::get_self()->Name) == 0))
+												continue;
+											Zeal::EqStructures::Entity* raidMember = ZealService::get_instance()->entity_manager->Get(member.Name);
+											if (!raidMember)
+												continue;
+											if (spawn == raidMember)
+												raidMember->ActorInfo->DagHeadPoint->StringSprite->Color = Raidcolor;
+										}
+									}
+									else if (spawn->GuildId == 0xFFFF || spawn->GuildId != Zeal::EqGame::get_self()->GuildId) { 
+										//Separates those Not in a Guild or different Guild than Player
+									}
+									else if (spawn->GuildId == Zeal::EqGame::get_self()->GuildId) {//Guild Member
+										spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Guildcolor;
+									}
+									return;
+								}
+							}
+						}
+						break;
 				}
 			}
-			if (spawn->IsLinkDead == 1) //LinkDead
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(2); // 0xFFFF0000; //LinkDead - Red
-			else if (spawn->IsAwayFromKeyboard == 1) //AFK
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(0);// 0xFFFF8000; //AFK - Orange
-			else if (spawn->ActorInfo->IsLookingForGroup == 1) //LFG
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = options->GetColor(1); // 0xFF80FF80; //LFG-White Green
+			if (raidMembers) {
+				if (raidSize == 1)
+					break;
+				if (raidSize > 1)
+				{
+					for (int i = 0; i < raidSize; ++i) //Raid Member loop
+					{
+						Zeal::EqStructures::RaidMember member = raidMembers[i];
+						if ((member.GroupNumber == 0xFFFFFFFF - 1) || (strlen(member.Name) == 0) || (strcmp(member.Name, Zeal::EqGame::get_self()->Name) == 0))
+							continue;
+						Zeal::EqStructures::Entity* raidMember = ZealService::get_instance()->entity_manager->Get(member.Name);
+						if (!raidMember)
+							continue;
+						if (spawn == raidMember) {
+							//self->ActorInfo->DagHeadPoint->StringSprite->Color = Raidcolor;
+							raidMember->ActorInfo->DagHeadPoint->StringSprite->Color = Raidcolor;
+							return;
+						}
+						else if (spawn == self) {
+							self->ActorInfo->DagHeadPoint->StringSprite->Color = Raidcolor;
+							return;
+						}
+					}
+				}
+			}			
+			//If not in a Guild - keep default color  //If spawn is same Guild as Player
+			if (spawn->GuildId != 0xFFFF && spawn->GuildId == Zeal::EqGame::get_self()->GuildId) {//Guild Member
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Guildcolor;
+				return;
+			}
+			return;
 		}
 		break;
 	case 1: //NPC
