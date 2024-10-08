@@ -43,7 +43,7 @@
     <Filter Include="Header Files\ui">
       <UniqueIdentifier>{e6269d11-8017-478b-a57d-95243aa4ca06}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\ui\other">
+    <Filter Include="Source Files\other">
       <UniqueIdentifier>{49dbe278-85aa-4b42-9831-fd53aef2022c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -273,10 +273,10 @@
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="experience.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="cycle_target.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="raid.cpp">
       <Filter>Source Files\hooks</Filter>
@@ -288,10 +288,10 @@
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="outputfile.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="buff_timers.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="spellsets.cpp">
       <Filter>Source Files\hooks</Filter>
@@ -300,13 +300,13 @@
       <Filter>Source Files\helpers</Filter>
     </ClCompile>
     <ClCompile Include="alarm.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="player_movement.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="netstat.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="item_display.cpp">
       <Filter>Source Files\hooks</Filter>
@@ -342,7 +342,7 @@
       <Filter>Source Files\ui</Filter>
     </ClCompile>
     <ClCompile Include="named_pipe.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="physics.cpp">
       <Filter>Source Files\hooks</Filter>
@@ -357,10 +357,10 @@
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="target_ring.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="crash_handler.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="directx.cpp">
       <Filter>Source Files\hooks</Filter>
@@ -381,16 +381,16 @@
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="zone_map.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="zone_map_data.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="ui_group.cpp">
       <Filter>Source Files\ui</Filter>
     </ClCompile>
     <ClCompile Include="EntityManager.cpp">
-      <Filter>Source Files\ui\other</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
     <ClCompile Include="chatfilter.cpp">
       <Filter>Source Files\hooks</Filter>
