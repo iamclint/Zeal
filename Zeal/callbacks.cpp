@@ -203,10 +203,12 @@ int __fastcall AddDeferred(int t, int u)
 
 
 
-Zeal::EqStructures::Entity* __fastcall EQPlayer(Zeal::EqStructures::Entity* ent_buffer, int unused, Zeal::EqStructures::Entity* unk_cpy, BYTE Gender, WORD Race, BYTE Class, const char* Name)
+Zeal::EqStructures::Entity* __fastcall EQPlayer(Zeal::EqStructures::Entity* ent_buffer, int unused, Zeal::EqStructures::Entity* ent_cpy, BYTE Gender, WORD Race, BYTE Class, const char* Name)
 {
 	ZealService* zeal = ZealService::get_instance();
-	Zeal::EqStructures::Entity* ret_ent = zeal->hooks->hook_map["EQPlayer"]->original(EQPlayer)(ent_buffer, unused, unk_cpy, Gender, Race, Class, Name);
+	if (ent_cpy)
+		zeal->callbacks->invoke_player(ent_buffer, callback_type::EntityDespawn);
+	Zeal::EqStructures::Entity* ret_ent = zeal->hooks->hook_map["EQPlayer"]->original(EQPlayer)(ent_buffer, unused, ent_cpy, Gender, Race, Class, Name);
 	if (ret_ent)
 		zeal->callbacks->invoke_player(ret_ent, callback_type::EntitySpawn);
 	return ret_ent;
