@@ -288,7 +288,7 @@ void Binds::add_binds()
 			ZealService::get_instance()->zone_map->toggle_level_down();
 		}
 		});
-	add_bind(234, "Toggle Show Raid", "ToggleShowRaid", key_category::UI, [this](int key_down) {
+	add_bind(234, "Toggle Map Show Raid", "ToggleMapShowRaid", key_category::UI, [this](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 		{
 			ZealService::get_instance()->zone_map->set_show_raid(
