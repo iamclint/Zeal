@@ -261,6 +261,11 @@ void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* 
 {
 	ZealService::get_instance()->callbacks->invoke_ReportSuccessfulHit(dmg, heal, output_text);
 	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, heal);
+	chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
+	if (cf)
+	{
+		cf->isDamage = false;
+	}
 }
 
 void DeactivateMainUI()
