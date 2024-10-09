@@ -93,6 +93,37 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+  <!-- Zeal Map External Window Enable-->
+  <Button item="Zeal_MapExternalWindow">
+    <ScreenID>Zeal_MapExternalWindow</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>312</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Shows map in an external window</TooltipReference>
+    <Text>External Window</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <!-- Zeal Map Left -->
   <Label item="Zeal_MapLeft_Label">
     <ScreenID>Zeal_MapLeft_Label</ScreenID>
@@ -636,7 +667,7 @@
     <ScreenID>Zeal_MapKeyBinds_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
-      <X>10</X>
+      <X>197</X>
       <Y>312</Y>
     </Location>
     <Size>
@@ -723,6 +754,7 @@
     <Pieces>Zeal_Map</Pieces>
     <Pieces>Zeal_MapShowGroup</Pieces>
     <Pieces>Zeal_MapShowRaid</Pieces>
+    <Pieces>Zeal_MapExternalWindow</Pieces>
     <Pieces>Zeal_MapLeft_Label</Pieces>
     <Pieces>Zeal_MapLeft_Slider</Pieces>
     <Pieces>Zeal_MapLeft_Value</Pieces>

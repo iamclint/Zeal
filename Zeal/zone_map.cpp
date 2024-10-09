@@ -14,9 +14,6 @@
 // - External map window issues:
 //   - window message queue is not working and so not supporting window
 //     resizing or things like window panning or scroll wheel zooming
-//   - not cleanly supporting DPI or default other monitors
-//   - Workaround: eqgame.exe -> Properties -> Compatibility ->
-//         Change high DPI settings -> High DPI scaling override -> By application
 
 // Implementation notes:
 //
@@ -939,7 +936,7 @@ RECT ZoneMap::calc_external_window_client_rect() {
         MONITORINFO monitor_info = { 0 };
         monitor_info.cbSize = sizeof(monitor_info);
         if (GetMonitorInfoA(hmonitor, &monitor_info)) {
-            // TODO: Support DPI scaling properly for clean rendering w/out override.
+            // Note: Ignoring DPI scaling. Use application override (see README).
             max_viewport_width = monitor_info.rcMonitor.right - monitor_info.rcMonitor.left;
             max_viewport_height = monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top;
         }

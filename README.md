@@ -20,6 +20,25 @@ from the repo using github actions, providing full transparency on the contents.
 - Unique npc naming for better parsing
 
 ### Installation
+#### The easy way
+1. [Download](https://github.com/iamclint/Zeal/releases) the latest Zeal
+   - Scroll down past the list of changes to the `Assets` section and download the `zeal_v#.#.#_*.zip` file
+   - Ignore the `Source code` files
+2. Quit Everquest and extract the zip file contents into your EQ game root directory
+   - Key required files are the `zeal.asi` and the `uifiles/zeal` folder
+3. Recommended: Install a UI skin modified with the extra Zeal UI functionality
+   such as mana gauges, experience per hour, loot all / link buttons, etc.
+   - If the UI is not updated, there will be some XML error complaints that can be ignored
+   - Check the list below, the Quarm discord `#ui-discussion` channel, or the Quarm guide
+    link below for compatible UI's
+4. Test Zeal installation in game by typing "/zeal version" and "/help zeal".
+5. Configure Zeal using the new Zeal options window and assign new key binds.
+   - The Zeal options window opens in parallel to the EQ options window (Alt-o)
+
+#### If that doesn't work
+Ensure that sound is enabled in the game (the volume level can be set to zero).
+   - Check that `Sound=TRUE` in the `eqclient.ini` in your root Everquest directory
+
 A comprehensive guide, including troubleshooting, can be found at
 https://quarm.guide/install-guides under "Installing Zeal" or a
 simplified checklist under "Checklist for Installing Zeal".
@@ -28,32 +47,13 @@ Note that the method Zeal uses to inject itself into the client can trigger the
 heuristics of anti-virus scanners to label it as malware. See trouble-shooting
 guide above if your `Zeal.asi` file keeps disappearing.
 
-A summary of the process is below:
-1. Ensure that sound is enabled in the game (the volume level can be set to zero).
-  - Check that `Sound=TRUE` in the `eqclient.ini` in your root Everquest directory.
-2. [Download](https://github.com/iamclint/Zeal/releases) the latest Zeal
-   release zip file (`zeal_v#.#.#_*.zip`) from the `Assets` section.
-  - Ignore the Source code files. See troubleshooting if your browser complains.
-3. Quit Everquest and extract the `Zeal.asi` from the zip file to your root
-   Everquest install directory.
-  - The `Zeal.pdb` file is a symbol file only needed by developers for debugging
-    and can be ignored.
-4. Extract the `uifiles/zeal` folder contents from the zip file and copy to your
-    root Everquest install directory (as `uifiles/zeal`).
-  - The files in `uifiles/zeal` override `uifiles/default` and `uifiles/<your_skin>`
-  - The Zeal uifiles includes Zeal specific options, including some functionality
-    that is only accessible through the Zeal options window (opens with EQ options)
-5. Recommended: Install a UI skin modified with the extra Zeal UI functionality
-   such as mana gauges, experience per hour, loot all / link buttons, etc.
-  - If the UI is not updated, there will be some XML error complaints that can be ignored
-  - Check the list below, the Quarm discord `#ui-discussion` channel, or the Quarm guide
-    link above for compatible UI's
-6. Optional: Extract the `crashes` folder to your Everquest root directory.
-  - If the folder is present and includes the ZealCrashSender.exe, a crash log
-    can be automatically submitted for debugging.
-7. Test Zeal installation in game by typing "/zeal version" and "/help zeal".
-8. Configure Zeal using the new Zeal options window and assign new key binds.
-  - The Zeal options window opens in parallel to the EQ options window (Alt-o)
+#### Description of zip file contents
+1. `Zeal_README.md`: A copy of this readme file
+2. `Zeal.asi`: Executable code that is loaded when EQ sound is enabled
+3. `Zeal.pdb`: Symbol debug file for the `zeal.asi`. Developer use only.
+4. `uifiles/zeal`: Folder with Zeal specific UI modifications (options, new features)
+   - The files in `uifiles/zeal` override `uifiles/default` and `uifiles/<your_skin>`
+5. `crashes/`: Folder with optional crash reporter that will send any captured crash zip logs for review 
 
 ### Compatible UI's
 - https://github.com/NilliP/NillipussUI_1080p
@@ -322,7 +322,7 @@ toggle visible levels).  The /map commands include extra options like poi search
 
 #### Enabling the map
 * Zeal options checkbox
-* Key bind: "Toggle Map" - Toggles map on and off
+* Key bind: "Toggle Map" - Toggles map on and off (recommend 'm')
 * Command examples:
   - `/map` - Toggles map on and off
   - `/map on` - Turns map on
@@ -356,6 +356,26 @@ clear (0), dark (1), light (2), or tan (3).  Additionally, it supports alpha tra
 * Command examples:
   - `/map background 1` sets the background to dark with no change to alpha
   - `/map background 2 40` sets the background to light with 40% alpha
+
+#### External map window (Beta)
+The map has simple support for opening an external window outside of the EQ client window.
+This window can be dragged with the title bar and positioned as desired, but it is only resizable
+using the height and width Zeal map options sliders. The top and left sliders are ignored
+in external window mode. It does not accept any inputs and the map content is controlled
+with the normal map key binds. Also note that if external window mode is set in options,
+the map will not automatically open when the game starts. Use the map enable to open and
+close the window (recommend using the keybind 'm').
+
+* Zeal options checkbox
+* Command examples:
+  - `/map external` - Toggles map between internal overlay and external window
+  - `/map save_ini` - Required to make the external map window position persistent
+
+If the map content looks pixelated, the monitor may be set to a DPI scaling greater than 100%.
+Note that the EQ application itself does not properly handle this. To workaround, set the 
+Windows override to tell the OS that the application will handle scaling:
+  * Right click on eqgame.exe:
+    - Properties -> Compatibility -> Change high DPI settings -> High DPI scaling override -> By application
 
 #### Map zoom
 The default 100% map scale makes the entire zone visible sized to the height or width constraint.
