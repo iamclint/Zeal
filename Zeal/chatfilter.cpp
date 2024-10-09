@@ -206,7 +206,7 @@ void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short
         if (filter.isHandled(channel, msg))
             wnd = filter.windowHandle;
     }
-    isDamage = false;
+    //isDamage = false;
 }
 
 //std::string GetNameDamage(std::string& data)
