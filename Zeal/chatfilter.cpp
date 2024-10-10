@@ -231,23 +231,9 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
     ZealService::get_instance()->hooks->hook_map["PrintAutoSplit"]->original(PrintAutoSplit)(t, unused, data, USERCOLOR_ECHO_AUTOSPLIT, u);
 }
 
-void __declspec(naked) handle_no_print()
-{
-    ZealService::get_instance()->chatfilter_hook->isDamage = false;
-    DWORD orig_jmp;
-    orig_jmp = 0x52AD13;
-    __asm
-    {
-        jmp orig_jmp
-    }
-}
 
 chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 {
-    DWORD noprint_jump = 0x52A8C1;
-    DWORD relative_address = (DWORD)handle_no_print - (noprint_jump + 0x6);
-    mem::write<DWORD>(0x52A8C3, relative_address);
-
     zeal->hooks->Add("DamageOutputText", 0x52A8C1, CChatManager, hook_type_replace_call);
     zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { if (output_text) { isDamage = true; damageData = { source, target, type, spell_id, damage, heal }; } });
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short color, std::string data) { return color == USERCOLOR_RANDOM; }));
