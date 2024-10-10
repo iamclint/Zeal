@@ -180,6 +180,11 @@ void ui_options::InitGeneral()
 }
 void ui_options::InitCamera()
 {
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 	ui->AddCheckboxCallback(wnd, "Zeal_UseOldSens", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->camera_mods->set_old_sens(wnd->Checked); });
 	ui->AddSliderCallback(wnd, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->set_pan_delay(value * 4);
@@ -220,6 +225,11 @@ void ui_options::InitCamera()
 }
 void ui_options::InitMap()
 {
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 	ui->AddCheckboxCallback(wnd, "Zeal_Map", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_enabled(wnd->Checked, true); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapExternalWindow", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_external_enable(wnd->Checked, true); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapShowGroup", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_group(wnd->Checked); });
@@ -263,6 +273,11 @@ void ui_options::InitMap()
 }
 void ui_options::InitTargetRing()
 {
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 	ui->AddLabel(wnd, "Zeal_TargetRingFill_Value");
 	ui->AddLabel(wnd, "Zeal_TargetRingSize_Value");
 	ui->AddLabel(wnd, "Zeal_TargetRingRotation_Value");
@@ -331,6 +346,11 @@ void ui_options::UpdateOptions()
 
 void ui_options::UpdateOptionsGeneral()
 {
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 	ui->SetComboValue("Zeal_Timestamps_Combobox", ZealService::get_instance()->chat_hook->TimeStampsStyle);
 	ui->SetSliderValue("Zeal_HoverTimeout_Slider", ZealService::get_instance()->tooltips->hover_timeout > 0 ? ZealService::get_instance()->tooltips->hover_timeout / 5 : 0);
 	ui->SetLabelValue("Zeal_HoverTimeout_Value", "%d ms", ZealService::get_instance()->tooltips->hover_timeout);
@@ -350,6 +370,11 @@ void ui_options::UpdateOptionsGeneral()
 }
 void ui_options::UpdateOptionsCamera()
 {
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 	ui->SetSliderValue("Zeal_PanDelaySlider", ZealService::get_instance()->camera_mods->pan_delay > 0.f ? ZealService::get_instance()->camera_mods->pan_delay / 4 : 0.f);
 	ui->SetSliderValue("Zeal_ThirdPersonSlider_Y", GetSensitivityForSlider(&ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd));
 	ui->SetSliderValue("Zeal_ThirdPersonSlider_X", GetSensitivityForSlider(&ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd));
@@ -367,6 +392,11 @@ void ui_options::UpdateOptionsCamera()
 }
 void ui_options::UpdateOptionsTargetRing()
 {
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 	ui->SetChecked("Zeal_TargetRing", ZealService::get_instance()->target_ring->get_enabled());
 	ui->SetChecked("Zeal_TargetRingAttackIndicator", ZealService::get_instance()->target_ring->get_indicator());
 	ui->SetChecked("Zeal_TargetRingForward", ZealService::get_instance()->target_ring->get_rotation_match());
@@ -381,6 +411,11 @@ void ui_options::UpdateOptionsTargetRing()
 }
 void ui_options::UpdateOptionsMap()
 {
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
 	ui->SetChecked("Zeal_Map", ZealService::get_instance()->zone_map->is_enabled());
 	ui->SetChecked("Zeal_MapExternalWindow", ZealService::get_instance()->zone_map->is_external_enabled());
 	ui->SetChecked("Zeal_MapShowGroup", ZealService::get_instance()->zone_map->is_show_group_enabled());
