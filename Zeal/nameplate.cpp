@@ -14,12 +14,12 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	case 0: //Players
 		if (nameplateColors) 
 		{
-			Zeal::EqStructures::EQARGBCOLOR LDcolor = options->GetColor(2); //0xFFFF0000; //LinkDead - Red
-			Zeal::EqStructures::EQARGBCOLOR AFKcolor = options->GetColor(0); //0xFFFF8000; //AFK - Orange
-			Zeal::EqStructures::EQARGBCOLOR LFGcolor = options->GetColor(1); //0x00CFFF00; //LFG - Yellow
-			Zeal::EqStructures::EQARGBCOLOR Groupcolor = options->GetColor(5); //0x0500FF32; //Group Member - Light Green
-			Zeal::EqStructures::EQARGBCOLOR Raidcolor = options->GetColor(4); //0xFFFFFFFF; //Raid Member - White Light Purple
-			Zeal::EqStructures::EQARGBCOLOR Guildcolor = options->GetColor(3); //0x0000FFFF; //Guild Member - Cyan
+			Zeal::EqStructures::EQARGBCOLOR LDcolor = options->GetColor(2); //0xFFFF0000; //LinkDead color Default - Red
+			Zeal::EqStructures::EQARGBCOLOR AFKcolor = options->GetColor(0); //0xFFFF8000; //AFK color Default - Orange
+			Zeal::EqStructures::EQARGBCOLOR LFGcolor = options->GetColor(1); //0xFFCFFF00; //LFG color Default - Yellow
+			Zeal::EqStructures::EQARGBCOLOR Groupcolor = options->GetColor(5); //0xFF00FF32; //Group Member color Default - Light Green
+			Zeal::EqStructures::EQARGBCOLOR Raidcolor = options->GetColor(4); //0xFFFFFFFF; //Raid Member color Default - White Light Purple
+			Zeal::EqStructures::EQARGBCOLOR Guildcolor = options->GetColor(3); //0xFFFF8080; //Guild Member color Default- White Red
 			uint8_t isInGroup = *(uint8_t*)0x7912B0;
 			uint16_t raidSize = *(uint16_t*)0x794F9C;
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
