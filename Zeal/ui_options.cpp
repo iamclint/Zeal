@@ -75,6 +75,15 @@ void ui_options::LoadColors()
 	{
 		if (ini->exists("ZealColors", "Color" + std::to_string(index)))
 			btn->TextColor.ARGB = ini->getValue<DWORD>("ZealColors", "Color" + std::to_string(index));
+		if (!ini->exists("ZealColors", "Color" + std::to_string(index))) //Adds default Nameplate colors for new users
+		{
+			color_buttons[0]->TextColor.ARGB = 0xFFFF8000; //AFK - Orange
+			color_buttons[1]->TextColor.ARGB = 0xFFCFFF00; //LFG - Yellow
+			color_buttons[2]->TextColor.ARGB = 0xFFFF0000; //LinkDead - Red
+			color_buttons[3]->TextColor.ARGB = 0xFFFF8080; //Guild Member - White Red
+			color_buttons[4]->TextColor.ARGB = 0xFFFFFFFF; //Raid Member - White Light Purple
+			color_buttons[5]->TextColor.ARGB = 0xFF00FF32; //Group Member - Light Green
+		}
 	}
 }
 
