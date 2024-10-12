@@ -10,16 +10,22 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	if (!spawn->ActorInfo->DagHeadPoint) { return; }
 	if (!spawn->ActorInfo->DagHeadPoint->StringSprite) { return; }
 	ui_options* options = ZealService::get_instance()->ui->options.get();
+	Zeal::EqStructures::EQARGBCOLOR LDcolor = options->GetColor(2); //0xFFFF0000; //LinkDead - Red
+	Zeal::EqStructures::EQARGBCOLOR AFKcolor = options->GetColor(0); //0xFFFF8000; //AFK - Orange
+	Zeal::EqStructures::EQARGBCOLOR PVPcolor = options->GetColor(6); //0xFFFF0000; //PVP - Red
+	Zeal::EqStructures::EQARGBCOLOR LFGcolor = options->GetColor(1); //0xFFCFFF00; //LFG - Yellow
+	Zeal::EqStructures::EQARGBCOLOR Groupcolor = options->GetColor(5); //0xFF00FF32; //Group Member - Light Green
+	Zeal::EqStructures::EQARGBCOLOR Raidcolor = options->GetColor(4); //0xFFFFFFFF; //Raid Member - White Light Purple
+	Zeal::EqStructures::EQARGBCOLOR Rolecolor = options->GetColor(7); //0xFF85489C; //Roleplay - Purple
+	Zeal::EqStructures::EQARGBCOLOR MyGuildcolor = options->GetColor(3); //0xFFFF8080; //MyGuild Member - White Red
+	Zeal::EqStructures::EQARGBCOLOR OtherGuildscolor = options->GetColor(8); //0xFFFFFF80; //OtherGuild Member - White Yellow
+	Zeal::EqStructures::EQARGBCOLOR Adventurercolor = options->GetColor(9); //0xFF3D6BDC; //Not in Guild Member - Default Blue
+	Zeal::EqStructures::EQARGBCOLOR NpcCorpsecolor = options->GetColor(10); //0xFF000000; //Npc Corpse - Black
+	Zeal::EqStructures::EQARGBCOLOR PlayersCorpsecolor = options->GetColor(11); //0xFFFFFFFF; //Players Corpse - White Light Purple
 	switch (spawn->Type) {
 	case 0: //Players
 		if (nameplateColors) 
 		{
-			Zeal::EqStructures::EQARGBCOLOR LDcolor = options->GetColor(2); //0xFFFF0000; //LinkDead - Red
-			Zeal::EqStructures::EQARGBCOLOR AFKcolor = options->GetColor(0); //0xFFFF8000; //AFK - Orange
-			Zeal::EqStructures::EQARGBCOLOR LFGcolor = options->GetColor(1); //0x00CFFF00; //LFG - Yellow
-			Zeal::EqStructures::EQARGBCOLOR Groupcolor = options->GetColor(5); //0x0500FF32; //Group Member - Light Green
-			Zeal::EqStructures::EQARGBCOLOR Raidcolor = options->GetColor(4); //0xFFFFFFFF; //Raid Member - White Light Purple
-			Zeal::EqStructures::EQARGBCOLOR Guildcolor = options->GetColor(3); //0x0000FFFF; //Guild Member - Cyan
 			uint8_t isInGroup = *(uint8_t*)0x7912B0;
 			uint16_t raidSize = *(uint16_t*)0x794F9C;
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
@@ -36,6 +42,11 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 
 			if (spawn->IsAwayFromKeyboard == 1) {//AFK
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = AFKcolor;
+				return;
+			}
+
+			if (spawn->IsPlayerKill == 1){//PVP
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = PVPcolor;
 				return;
 			}
 
@@ -85,11 +96,27 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 				}
 			}
 
-			//If not in a Guild - keep default color  //If spawn is same Guild as Player
-			if (spawn->GuildId != 0xFFFF && spawn->GuildId == Zeal::EqGame::get_self()->GuildId) {//Guild Member
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Guildcolor;
+			if (spawn->AnonymousState == 2) {//Roleplay
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Rolecolor;
 				return;
 			}
+
+			//If spawn is same Guild as Player
+			if (spawn->GuildId == Zeal::EqGame::get_self()->GuildId && spawn->GuildId != 0xFFFF) {//MyGuild Member
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = MyGuildcolor;
+				return;
+			}
+			//If spawn is in different Guild than Player
+			if (spawn->GuildId != Zeal::EqGame::get_self()->GuildId && spawn->GuildId != 0xFFFF) {//OtherGuild Member
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = OtherGuildscolor;
+				return;
+			}
+			//If not in a Guild - Adventurer has default color
+			if (spawn->GuildId == 0xFFFF) { //Not in Guild Adventurer   
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Adventurercolor;
+				return;
+			}
+
 		}
 		break;
 	case 1: //NPC
@@ -101,8 +128,16 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 		}
 		break;
 	case 2: //NPC Corpse
+		if (nameplateColors) {
+			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = NpcCorpsecolor;
+			return;
+		}
 		break;
 	case 3: //Player Corpse
+		if (nameplateColors) {
+			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = PlayersCorpsecolor;
+			return;
+		}
 		break;
 	default:
 		break;
@@ -113,9 +148,10 @@ int __fastcall SetNameSpriteTint(void* this_ptr, void* not_used, Zeal::EqStructu
 {	
 	int result = ZealService::get_instance()->hooks->hook_map["SetNameSpriteTint"]->original(SetNameSpriteTint)(this_ptr, not_used, spawn);
 	ZealService::get_instance()->nameplate->HandleTint(spawn);
+	if (ZealService::get_instance()->nameplate->nameplateColors && Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT && Zeal::EqGame::get_self())
+		Zeal::EqGame::get_self()->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF00FF32; //Green indication Namecolors on at Character Select
 	return result;
 }
-
 void NamePlate::colors_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateColors", _enabled);
