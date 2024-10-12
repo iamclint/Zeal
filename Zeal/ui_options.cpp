@@ -83,6 +83,12 @@ void ui_options::LoadColors()
 			color_buttons[3]->TextColor.ARGB = 0xFFFF8080; //Guild Member - White Red
 			color_buttons[4]->TextColor.ARGB = 0xFFFFFFFF; //Raid Member - White Light Purple
 			color_buttons[5]->TextColor.ARGB = 0xFF00FF32; //Group Member - Light Green
+			color_buttons[6]->TextColor.ARGB = 0xFFFF0000; //PVP - Red
+			color_buttons[7]->TextColor.ARGB = 0xFF85489C; //Roleplay - Purple
+			color_buttons[8]->TextColor.ARGB = 0xFFFFFF80; //OtherGuild Member - White Yellow
+			color_buttons[9]->TextColor.ARGB = 0xFF3D6BDC; //Not in Guild Member - Default Blue
+			color_buttons[10]->TextColor.ARGB = 0xFF000000; //Npc Corpse - Black
+			color_buttons[11]->TextColor.ARGB = 0xFFFFFFFF; //Players Corpse - White Light Purple
 		}
 	}
 }
