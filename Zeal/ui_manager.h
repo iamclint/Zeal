@@ -14,15 +14,17 @@ class ui_manager
 {
 public:
 	static constexpr const char* ui_path = "uifiles\\zeal\\";
-	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*)>> checkbox_callbacks;
-	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> checkbox_names;
-	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*)>> button_callbacks;
-	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> button_names;
-	std::unordered_map<Zeal::EqUI::SliderWnd*, std::function<void(Zeal::EqUI::SliderWnd*, int)>> slider_callbacks;
-	std::unordered_map<std::string, Zeal::EqUI::SliderWnd*> slider_names;
-	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*, int)>> combo_callbacks;
-	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> combo_names;
-	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> label_names;
+
+
+	Zeal::EqUI::SliderWnd* GetSlider(std::string name);
+	Zeal::EqUI::BasicWnd* GetCheckbox(std::string name);
+	Zeal::EqUI::BasicWnd* GetButton(std::string name);
+	Zeal::EqUI::BasicWnd* GetCombo(std::string name);
+	std::function<void(Zeal::EqUI::SliderWnd*, int)> GetSliderCallback(Zeal::EqUI::SliderWnd* wnd);
+	std::function<void(Zeal::EqUI::BasicWnd*, int)> GetComboCallback(Zeal::EqUI::BasicWnd* wnd);
+	std::function<void(Zeal::EqUI::BasicWnd*)> GetButtonCallback(Zeal::EqUI::BasicWnd* wnd);
+	std::function<void(Zeal::EqUI::BasicWnd*)> GetCheckboxCallback(Zeal::EqUI::BasicWnd* wnd);
+
 	Zeal::EqUI::BasicWnd* clicked_button = nullptr;
 	std::unordered_map<Zeal::EqUI::BasicWnd*, std::unordered_map<std::string, Zeal::EqUI::BasicWnd*>> WindowChildren;
 	Zeal::EqUI::BasicWnd* GetChild(Zeal::EqUI::BasicWnd* parent, std::string name);
@@ -40,6 +42,7 @@ public:
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>> data);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::string> data);
 	Zeal::EqUI::EQWND* CreateSidlScreenWnd(const std::string& name);
+	void LoadSidl(const std::string& path1, const std::string& path2, const std::string& filename);
 	ui_manager(class ZealService* zeal, class IO_ini* ini);
 
 	std::shared_ptr<ui_options> options = nullptr;
@@ -50,6 +53,16 @@ public:
 	std::shared_ptr<ui_hotbutton> hotbutton = nullptr;
 	std::shared_ptr<ui_group> group = nullptr;
 private:
+	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> checkbox_names;
+	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> button_names;
+	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*)>> checkbox_callbacks;
+	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*)>> button_callbacks;
+	std::unordered_map<Zeal::EqUI::SliderWnd*, std::function<void(Zeal::EqUI::SliderWnd*, int)>> slider_callbacks;
+	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*, int)>> combo_callbacks;
+	std::unordered_map<std::string, Zeal::EqUI::SliderWnd*> slider_names;
+	
+	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> combo_names;
+	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> label_names;
 	void CleanUI();
 	void init_ui();
 	
