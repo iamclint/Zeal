@@ -54,7 +54,7 @@
     </ButtonDrawTemplate>
   </Button>
   
-  <Button item="Zeal_Color0">
+ <Button item="Zeal_Color0">
     <ScreenID>Zeal_Color0</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
@@ -156,7 +156,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>3 - Guild</Text>
+    <Text>3 - MyGuild</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -228,6 +228,180 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+  <Button item="Zeal_Color6">
+    <ScreenID>Zeal_Color6</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>98</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>false</Style_Checkbox>
+    <Text>6 - PVP</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+  <Button item="Zeal_Color7">
+    <ScreenID>Zeal_Color7</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>200</X>
+      <Y>98</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>false</Style_Checkbox>
+    <Text>7 - Roleplay</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+   <Button item="Zeal_Color8">
+    <ScreenID>Zeal_Color8</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>120</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>false</Style_Checkbox>
+    <Text>8 - OtherGuilds</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+  <Button item="Zeal_Color9">
+    <ScreenID>Zeal_Color9</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>200</X>
+      <Y>120</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>false</Style_Checkbox>
+    <Text>9 - DefaultAdventurer</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+    <Button item="Zeal_Color10">
+    <ScreenID>Zeal_Color10</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>142</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>false</Style_Checkbox>
+    <Text>10 - NpcCorpse</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+      <Button item="Zeal_Color11">
+    <ScreenID>Zeal_Color11</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>200</X>
+      <Y>142</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>false</Style_Checkbox>
+    <Text>11 - PlayersCorpse</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <Page item="Tab_Colors">
 	<ScreenID>Tab_Colors</ScreenID>
 	 <RelativePosition>true</RelativePosition>
@@ -254,6 +428,12 @@
 	<Pieces>Zeal_Color3</Pieces>
 	<Pieces>Zeal_Color4</Pieces>
 	<Pieces>Zeal_Color5</Pieces>
+	<Pieces>Zeal_Color6</Pieces>
+	<Pieces>Zeal_Color7</Pieces>
+	<Pieces>Zeal_Color8</Pieces>
+	<Pieces>Zeal_Color9</Pieces>
+	<Pieces>Zeal_Color10</Pieces>
+	<Pieces>Zeal_Color11</Pieces>
 	<Pieces>Section_Nameplate</Pieces>
 	<Pieces>Zeal_BtnDivider</Pieces>
 
