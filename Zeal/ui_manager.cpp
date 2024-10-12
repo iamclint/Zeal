@@ -18,10 +18,11 @@ static int __fastcall ButtonClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, Z
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
 	int rval = ZealService::get_instance()->hooks->hook_map["ButtonClick"]->original(ButtonClick_hook)(pWnd, unused, pt, flag);
-	if (ui->button_callbacks.count(pWnd) > 0)
+	auto cb = ui->GetButtonCallback(pWnd);
+	if (cb)
 	{
 		ui->clicked_button = pWnd;
-		ui->button_callbacks[pWnd](pWnd);
+		cb(pWnd);
 	}
 	return rval;
 }
@@ -29,8 +30,11 @@ static int __fastcall CheckboxClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused,
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
 	int rval = ZealService::get_instance()->hooks->hook_map["CheckboxClick"]->original(CheckboxClick_hook)(pWnd, unused, pt, flag);
-	if (ui->checkbox_callbacks.count(pWnd) > 0)
-		ui->checkbox_callbacks[pWnd](pWnd);
+
+	auto cb = ui->GetCheckboxCallback(pWnd);
+	if (cb)
+		cb(pWnd);
+
 	return rval;
 }
 static void __fastcall SetSliderValue_hook(Zeal::EqUI::SliderWnd* pWnd, int unused, int value)
@@ -42,17 +46,22 @@ static void __fastcall SetSliderValue_hook(Zeal::EqUI::SliderWnd* pWnd, int unus
 		value = 0;
 	if (value > pWnd->max_val)
 		value = pWnd->max_val;
-	if (ui->slider_callbacks.count(pWnd) > 0)
-		ui->slider_callbacks[pWnd](pWnd, value);
+
+	auto cb = ui->GetSliderCallback(pWnd);
+	if (cb)
+		cb(pWnd, value);
 }
 static void __fastcall SetComboValue_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, int value)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
 	ZealService::get_instance()->hooks->hook_map["SetComboValue"]->original(SetComboValue_hook)(pWnd, unused, value);
-	if (ui->combo_callbacks.count(pWnd) > 0)
-		ui->combo_callbacks[pWnd](pWnd, value);
-	else if (ui->combo_callbacks.count(pWnd->ParentWnd) > 0)
-		ui->combo_callbacks[pWnd->ParentWnd](pWnd->ParentWnd, value);
+
+	auto cb = ui->GetComboCallback(pWnd);
+	auto cb_parent = ui->GetComboCallback(pWnd->ParentWnd);
+	if (cb)
+		cb(pWnd, value);
+	else if (cb_parent)
+		cb_parent(pWnd->ParentWnd, value);
 }
 
 Zeal::EqUI::BasicWnd* ui_manager::AddButtonCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
@@ -206,6 +215,56 @@ void ui_manager::SetComboValue(std::string name, int value)
 }
 
 
+Zeal::EqUI::SliderWnd* ui_manager::GetSlider(std::string name)
+{
+	if (slider_names.count(name))
+		return slider_names[name];
+	return nullptr;
+}
+Zeal::EqUI::BasicWnd* ui_manager::GetCheckbox(std::string name)
+{
+	if (checkbox_names.count(name))
+		return checkbox_names[name];
+	return nullptr;
+}
+Zeal::EqUI::BasicWnd* ui_manager::GetButton(std::string name)
+{
+	if (button_names.count(name))
+		return button_names[name];
+	return nullptr;
+}
+Zeal::EqUI::BasicWnd* ui_manager::GetCombo(std::string name)
+{
+	if (combo_names.count(name))
+		return combo_names[name];
+	return nullptr;
+}
+
+std::function<void(Zeal::EqUI::SliderWnd*, int)> ui_manager::GetSliderCallback(Zeal::EqUI::SliderWnd* wnd)
+{
+	if (slider_callbacks.count(wnd))
+		return slider_callbacks[wnd];
+	return nullptr;
+}
+std::function<void(Zeal::EqUI::BasicWnd*, int)> ui_manager::GetComboCallback(Zeal::EqUI::BasicWnd* wnd)
+{
+	if (combo_callbacks.count(wnd))
+		return combo_callbacks[wnd];
+	return nullptr;
+}
+std::function<void(Zeal::EqUI::BasicWnd*)> ui_manager::GetButtonCallback(Zeal::EqUI::BasicWnd* wnd)
+{
+	if (button_callbacks.count(wnd))
+		return button_callbacks[wnd];
+	return nullptr;
+}
+std::function<void(Zeal::EqUI::BasicWnd*)> ui_manager::GetCheckboxCallback(Zeal::EqUI::BasicWnd* wnd)
+{
+	if (checkbox_callbacks.count(wnd))
+		return checkbox_callbacks[wnd];
+	return nullptr;
+}
+
 void ui_manager::CleanUI()
 {
 	Zeal::EqGame::print_debug("Clean UI UIMANAGER");
@@ -235,15 +294,24 @@ void ui_manager::init_ui()
 //		ui->WindowChildren[parent][control_template->Item->Text] = rval;
 //	return rval;
 //}
-
-void __fastcall LoadSidl(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
+void ui_manager::LoadSidl(const std::string& path1, const std::string& path2, const std::string& filename)
+{
+	Zeal::EqUI::CXSTR p1 = Zeal::EqUI::CXSTR(path1);
+	Zeal::EqUI::CXSTR p2 = Zeal::EqUI::CXSTR(path2);
+	Zeal::EqUI::CXSTR fn = Zeal::EqUI::CXSTR(filename);
+	reinterpret_cast<void (__thiscall*)(int, Zeal::EqUI::CXSTR, Zeal::EqUI::CXSTR, Zeal::EqUI::CXSTR)>(0x58d640)(0x5EADFC, p1, p2, fn);
+	fn.FreeRep();
+	p1.FreeRep();
+	p2.FreeRep();
+}
+void __fastcall LoadSidlHk(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
 	std::string file = ui_manager::ui_path + std::string(filename.Data->Text);
 	if (std::filesystem::exists(file))
 		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
 	
-	ZealService::get_instance()->hooks->hook_map["LoadSidl"]->original(LoadSidl)(t, unused, path1, path2, filename);
+	ZealService::get_instance()->hooks->hook_map["LoadSidl"]->original(LoadSidlHk)(t, unused, path1, path2, filename);
 }
 
 int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
@@ -276,7 +344,7 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour);
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);
-	zeal->hooks->Add("LoadSidl", 0x5992c0, LoadSidl, hook_type_detour);
+	zeal->hooks->Add("LoadSidl", 0x5992c0, LoadSidlHk, hook_type_detour);
 	zeal->hooks->Add("XMLRead", 0x58D640, XMLRead, hook_type_detour);
 
 
