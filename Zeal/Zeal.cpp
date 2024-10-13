@@ -89,10 +89,11 @@ void ZealService::configuration_check()
 		{
 			std::wstring deprecated_warning = L"The deprecated Zeal 'EQUI.xml' file has been detected at the following location:\n" +
 				deprecated_filepath.wstring() + L"\n" + L"Zeal will not function properly unless this file is removed.";
+				MessageBox(NULL, deprecated_warning.c_str(), L"Zeal deprecated file", MB_OK | MB_ICONEXCLAMATION);
 		}
 		else
 		{
-			std::wstring missing_files;
+			std::wstring missing_files =  L"";
 			for (std::string file : xml_files)
 			{
 				std::filesystem::path this_file = zeal_ui / file;
