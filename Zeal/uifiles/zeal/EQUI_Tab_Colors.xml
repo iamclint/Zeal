@@ -402,6 +402,35 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+<Button item="Zeal_Color12">
+    <ScreenID>Zeal_Color12</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>164</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>false</Style_Checkbox>
+    <Text>12 - Blue Con for NPCs</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <Page item="Tab_Colors">
 	<ScreenID>Tab_Colors</ScreenID>
 	 <RelativePosition>true</RelativePosition>
@@ -434,6 +463,7 @@
 	<Pieces>Zeal_Color9</Pieces>
 	<Pieces>Zeal_Color10</Pieces>
 	<Pieces>Zeal_Color11</Pieces>
+	<Pieces>Zeal_Color12</Pieces>
 	<Pieces>Section_Nameplate</Pieces>
 	<Pieces>Zeal_BtnDivider</Pieces>
 
