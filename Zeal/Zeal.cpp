@@ -74,26 +74,37 @@ void ZealService::configuration_check()
 	"EQUI_Tab_TargetRing.xml",
 	"EQUI_ZealOptions.xml"};
 
+	std::string deprecated_ui_file = "EQUI.xml";
+
 	bool filepathExists = std::filesystem::is_directory(zeal_ui);
 	if (not filepathExists)
 	{
-		std::wstring rtfm = L"The directory 'zeal' is missing from the EQ uifiles directory.\nZeal will not function properly.";
-		MessageBox(NULL, rtfm.c_str(), L"Zeal installation error", MB_OK | MB_ICONEXCLAMATION);
+		std::wstring missing = L"The directory 'zeal' is missing from the EQ uifiles directory.\nZeal will not function properly!";
+		MessageBox(NULL, missing.c_str(), L"Zeal installation error", MB_OK | MB_ICONEXCLAMATION);
 	}
 	else
 	{
-		std::wstring missing_files;
-		for (std::string file : xml_files)
+		std::filesystem::path deprecated_filepath = zeal_ui / deprecated_ui_file;
+		if (std::filesystem::exists(deprecated_filepath))
 		{
-			std::filesystem::path this_file = zeal_ui / file;
-
-			if (not std::filesystem::exists(this_file))
-				missing_files += this_file.wstring() + L"\n";
+			std::wstring deprecated_warning = L"The deprecated Zeal 'EQUI.xml' file has been detected at the following location:\n" +
+				deprecated_filepath.wstring() + L"\n" + L"Zeal will not function properly unless this file is removed.";
 		}
-		if (missing_files.length() > 0)
+		else
 		{
-			missing_files = L"The following files are missing from your 'zeal\\uifiles' directory: " + missing_files + L"\nZeal may not function properly.";
-			MessageBox(NULL, missing_files.c_str(), L"Zeal installation error", MB_OK | MB_ICONEXCLAMATION);
+			std::wstring missing_files;
+			for (std::string file : xml_files)
+			{
+				std::filesystem::path this_file = zeal_ui / file;
+
+				if (not std::filesystem::exists(this_file))
+					missing_files += this_file.wstring() + L"\n";
+			}
+			if (missing_files.length() > 0)
+			{
+				missing_files = L"The following files are missing from your 'zeal\\uifiles' directory:\n" + missing_files + L"\nZeal may not function properly!";
+				MessageBox(NULL, missing_files.c_str(), L"Zeal installation error", MB_OK | MB_ICONEXCLAMATION);
+			}
 		}
 	}
 }
