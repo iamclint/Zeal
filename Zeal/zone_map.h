@@ -23,7 +23,7 @@ public:
 
 	struct AlignmentType { enum e : int { kLeft = 0, kCenter, kRight, kFirst = kLeft, kLast = kRight }; };
 	struct BackgroundType { enum e : int { kClear = 0, kDark, kLight, kTan, kFirst = kClear, kLast = kTan }; };
-	struct LabelsMode { enum e : int { kOff = 0, kSummary, kAll, kFirst = kOff, kLast = kAll }; };
+	struct LabelsMode { enum e : int { kOff = 0, kSummary, kAll, kMarkerOnly, kFirst = kOff, kLast = kMarkerOnly }; };
 	struct MapDataMode { enum e : int { kInternal = 0, kBoth, kExternal, kFirst = kInternal, kLast = kExternal }; };
 
 	static constexpr float kMaxPositionSize = 0.05f;  // In fraction of screen size.

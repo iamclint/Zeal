@@ -570,8 +570,10 @@ void ZoneMap::render_labels() {
         return;
 
     label_font->Begin();  // Minor 10% performance improvement with Begin/End.
-    for (const ZoneMapLabel* label : labels_list)
-        render_label_text(label->label, label->y, label->x, D3DCOLOR_XRGB(label->red, label->green, label->blue));
+    for (const ZoneMapLabel* label : labels_list) {
+        const char* text_label = (map_labels_mode == LabelsMode::kMarkerOnly) ? "+" : label->label;
+        render_label_text(text_label, label->y, label->x, D3DCOLOR_XRGB(label->red, label->green, label->blue));
+    }
 
     ULONGLONG timestamp = GetTickCount64();
     for (auto it = dynamic_labels_list.begin(); it != dynamic_labels_list.end();) {
@@ -1742,10 +1744,12 @@ void ZoneMap::parse_labels(const std::vector<std::string>& args) {
             labels = LabelsMode::kSummary;
         else if (args[2] == "all")
             labels = LabelsMode::kAll;
+        else if (args[2] == "marker")
+            labels = LabelsMode::kMarkerOnly;
     }
 
     if ((labels < LabelsMode::kFirst) || !set_labels_mode(labels, false)) {
-        Zeal::EqGame::print_chat("Usage: /map labels off,summary,all");
+        Zeal::EqGame::print_chat("Usage: /map labels off,summary,all,marker");
     }
 }
 

@@ -661,6 +661,7 @@
     <Choices>Off (no penalty)</Choices>
     <Choices>Summary (some)</Choices>
     <Choices>All (significant)</Choices>
+    <Choices>Marker only (some)</Choices>
   </Combobox>
   <!-- Zeal Map Keybinds Reminder -->
   <Label item="Zeal_MapKeyBinds_Label">
