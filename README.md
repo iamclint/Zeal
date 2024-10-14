@@ -297,7 +297,7 @@ ___
 8. After the green checkmark appears, go back to the main workspace and verify the content of the new release tag.
 
 #### Local builds
-Build in 32bit x86 mode using Microsoft Visual Studio 2022 (free Community edition works)
+Build in `Release` `x86` (32bit) mode using Microsoft Visual Studio 2022 (free Community edition works)
 
 
 ### In-game Map
@@ -438,7 +438,7 @@ for the labels can have a significant framerate impact (use keybind to toggle on
   - `/map poi butcherblock` performs a text search of the poi list for butcherblock, reports 
      any matches, and drops a marker on the first one
   - `/map butcherblock` shortcut for above (does not work for terms that match other commands)
-  - `/map labels summary` enables the summary labels (other options are `off` or `all`)
+  - `/map labels summary` enables the summary labels (other options are `off`, `all`, or `marker`)
 
 #### Map data source
 The map has simple support for external map data files. The map data_mode can be set to `internal`,
