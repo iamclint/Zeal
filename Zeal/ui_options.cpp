@@ -89,6 +89,10 @@ void ui_options::LoadColors()
 			color_buttons[9]->TextColor.ARGB = 0xFF3D6BDC; //Not in Guild Member - Default Blue
 			color_buttons[10]->TextColor.ARGB = 0xFF000000; //Npc Corpse - Black
 			color_buttons[11]->TextColor.ARGB = 0xFFFFFFFF; //Players Corpse - White Light Purple
+			if (ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
+				color_buttons[12]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options menu
+			if (!ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
+				color_buttons[12]->TextColor.ARGB = 0xFF0040FF; //BlueCon - Default DarkBlue is ligher than CON_BLUE for new users
 		}
 	}
 }

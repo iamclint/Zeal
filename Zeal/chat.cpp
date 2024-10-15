@@ -89,9 +89,10 @@ std::string replaceUnderscores(const std::smatch& match) {
 
 UINT32  __fastcall GetRGBAFromIndex(int t, int u, USHORT index)
 {
+    ui_options* options = ZealService::get_instance()->ui->options.get();
     chat* c = ZealService::get_instance()->chat_hook.get();
     if ((index == 4 || index == 0x10) && c->UseBlueCon)
-        index = 325;
+        return options->GetColor(12); //index = 325; No longer need to change index with new Zeal Color button
     return ZealService::get_instance()->hooks->hook_map["GetRGBAFromIndex"]->original(GetRGBAFromIndex)(t, u, index);
 }
 
