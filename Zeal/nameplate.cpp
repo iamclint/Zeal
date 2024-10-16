@@ -197,6 +197,7 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 		//zeal->hooks->Add("DeferCachedNameTagTextW", (DWORD)eqfx + 0x70A00, DeferCachedNameTagTextW, hook_type_detour);
 
 	zeal->hooks->Add("SetNameSpriteTint", 0x4B114D, SetNameSpriteTint, hook_type_detour);
+	zeal->hooks->Add("SetNameSpriteState", 0x4B0BD9, SetNameSpriteState, hook_type_detour);
 	
 	if (!ini->exists("Zeal", "NameplateColors")) 
 		ini->setValue<bool>("Zeal", "NameplateColors", false);
