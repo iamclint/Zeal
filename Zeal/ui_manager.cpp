@@ -282,7 +282,7 @@ void ui_manager::AddXmlInclude(const std::string& name)
 {
 	XMLIncludes.push_back(name);
 }
-void ui_manager::WriteTemporaryUI(const std::string& file_path)
+void ui_manager::WriteTemporaryUI(const std::string& file_path, std::string ui_path)
 {
 	if (!file_path.empty())
 	{
@@ -315,7 +315,7 @@ void ui_manager::WriteTemporaryUI(const std::string& file_path)
 			}
 			infile.close();
 
-			std::filesystem::path new_file_path = "uifiles\\zeal\\EQUI_Zeal.xml";
+			std::filesystem::path new_file_path = ui_path + "EQUI_Zeal.xml";
 			std::ofstream outfile(new_file_path);
 			if (outfile)
 			{
@@ -328,7 +328,7 @@ void ui_manager::WriteTemporaryUI(const std::string& file_path)
 
 void ui_manager::RemoveTemporaryUI(const std::string& file_path)
 {
-	std::filesystem::path new_file_path = "uifiles\\zeal\\EQUI_Zeal.xml";
+	std::filesystem::path new_file_path = file_path + "EQUI_Zeal.xml";
 	if (std::filesystem::exists(new_file_path))
 	{
 		std::filesystem::remove(new_file_path);
@@ -350,13 +350,13 @@ void __fastcall LoadSidlHk(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::E
 		else  if (std::filesystem::exists(default_file))
 			file_path = default_file;
 
-		ui->WriteTemporaryUI(file_path);
+		ui->WriteTemporaryUI(file_path, path1);
 		filename = Zeal::EqUI::CXSTR("EQUI_Zeal.xml");
 	}
 	ZealService::get_instance()->hooks->hook_map["LoadSidl"]->original(LoadSidlHk)(t, unused, path1, path2, filename);
 
 	if (str_filename == "EQUI.xml" && !file_path.empty())
-		ui->RemoveTemporaryUI(file_path);
+		ui->RemoveTemporaryUI(path1);
 }
 
 int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)

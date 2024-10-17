@@ -42,7 +42,7 @@ public:
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>> data);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::string> data);
 	Zeal::EqUI::EQWND* CreateSidlScreenWnd(const std::string& name);
-	void WriteTemporaryUI(const std::string& file_path);
+	void WriteTemporaryUI(const std::string& file_path, std::string ui_path);
 	void RemoveTemporaryUI(const std::string& file_path);
 	void AddXmlInclude(const std::string& name);
 	ui_manager(class ZealService* zeal, class IO_ini* ini);
