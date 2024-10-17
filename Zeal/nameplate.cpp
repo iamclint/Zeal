@@ -157,6 +157,23 @@ int __fastcall SetNameSpriteTint(void* this_ptr, void* not_used, Zeal::EqStructu
 		Zeal::EqGame::get_self()->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF00FF32; //Green indication Namecolors on at Character Select
 	return result;
 }
+
+char* trim_name(char* spawnName)
+{
+	return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, char* spawnName)>(0x537D39)(*(int*)0x809478, spawnName);
+}
+
+int __fastcall SetNameSpriteState(void* this_ptr, void* not_used, Zeal::EqStructures::Entity* spawn, bool show)
+{
+	int result = ZealService::get_instance()->hooks->hook_map["SetNameSpriteState"]->original(SetNameSpriteState)(this_ptr, not_used, spawn, show);
+	DWORD fontTexture = *(DWORD*)(*(DWORD*)0x7F9510 + 0x2E08); //get the font texture
+	if ((spawn->Type == 2 || spawn->Type == 3) && spawn->Race == 60) { //Skeleton Corpse - Nameplate fix
+		reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, spawn->ActorInfo->DagHeadPoint, fontTexture, trim_name(spawn->Name));
+		SetNameSpriteTint(this_ptr, not_used, spawn);
+	}
+	return result;
+}
+
 void NamePlate::colors_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateColors", _enabled);
@@ -180,6 +197,7 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 		//zeal->hooks->Add("DeferCachedNameTagTextW", (DWORD)eqfx + 0x70A00, DeferCachedNameTagTextW, hook_type_detour);
 
 	zeal->hooks->Add("SetNameSpriteTint", 0x4B114D, SetNameSpriteTint, hook_type_detour);
+	zeal->hooks->Add("SetNameSpriteState", 0x4B0BD9, SetNameSpriteState, hook_type_detour);
 	
 	if (!ini->exists("Zeal", "NameplateColors")) 
 		ini->setValue<bool>("Zeal", "NameplateColors", false);
