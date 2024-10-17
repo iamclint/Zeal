@@ -132,6 +132,17 @@ namespace Zeal
 				if (Data)
 					reinterpret_cast<void(__thiscall*)(const CXSTR*, pCXSTR*)>(0x575DC0)(this, Data);
 			}
+			char* CastToCharPtr() const
+			{
+				return reinterpret_cast<char*(__thiscall*)(const CXSTR*)>(0x577E80)(this);
+			}
+			operator std::string() const {
+				const char* result = CastToCharPtr();
+				if (result)
+					return std::string(result);
+				else
+					return "";
+			}
 			//~CXSTR()
 			//{
 			//	FreeRep();
@@ -186,6 +197,12 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(0x572290)(this);
 			}
+			
+			void BringToFront()
+			{
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, int)>(0x573a80)(this, 1);
+			}
+
 			void SetupCustomVTable()
 			{
 				BaseVTable* newtbl = new BaseVTable();
