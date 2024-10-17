@@ -422,68 +422,7 @@
     </ButtonDrawTemplate>
   </Button>
   <!-- end -->
-    <!-- Zeal Nameplates -->
-  <Button item="Zeal_NameplateColors">
-    <ScreenID>Zeal_NameplateColors</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>266</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Adds custom coloring to raid, group, afk and ld</TooltipReference>
-    <Text>Player Name colors</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-    <Button item="Zeal_NameplateConColors">
-    <ScreenID>Zeal_NameplateConColors</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>288</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Renders npc names in the color of your con</TooltipReference>
-    <Text>Name Con Colors</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  
+    
   <Page item="Tab_General">
     <ScreenID>Tab_General</ScreenID>
     <RelativePosition>true</RelativePosition>
@@ -522,8 +461,6 @@
     <Pieces>Zeal_RaidEscapeLock</Pieces>
     <Pieces>Zeal_ClassicClasses</Pieces>
     <Pieces>Zeal_TellWindows</Pieces>
-	<Pieces>Zeal_NameplateColors</Pieces>
-	<Pieces>Zeal_NameplateConColors</Pieces>
     <Pieces>Zeal_Timestamps_Combobox</Pieces>
     <Location>
       <X>0</X>
