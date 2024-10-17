@@ -89,10 +89,15 @@ void ui_options::LoadColors()
 			color_buttons[9]->TextColor.ARGB = 0xFF3D6BDC; //Not in Guild Member - Default Blue
 			color_buttons[10]->TextColor.ARGB = 0xFF000000; //Npc Corpse - Black
 			color_buttons[11]->TextColor.ARGB = 0xFFFFFFFF; //Players Corpse - White Light Purple
+			color_buttons[12]->TextColor.ARGB = CON_GREEN; //GreenCon
+			color_buttons[13]->TextColor.ARGB = CON_LIGHTBLUE; //LightBlueCon
 			if (ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
-				color_buttons[12]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options menu
+				color_buttons[14]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options menu
 			if (!ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
-				color_buttons[12]->TextColor.ARGB = 0xFF0040FF; //BlueCon - Default DarkBlue is ligher than CON_BLUE for new users
+				color_buttons[14]->TextColor.ARGB = 0xFF0040FF; //BlueCon - Default DarkBlue is ligher than CON_BLUE for new users
+			color_buttons[15]->TextColor.ARGB = CON_WHITE; //WhiteCon
+			color_buttons[16]->TextColor.ARGB = CON_YELLOW; //YellowCon
+			color_buttons[17]->TextColor.ARGB = CON_RED; //RedCon
 		}
 	}
 }
@@ -119,6 +124,7 @@ void ui_options::InitUI()
 	InitMap();
 	InitTargetRing();
 	InitColors();
+	InitNameplate();
 
 	isReady = true;
 	/*set the current states*/
@@ -188,9 +194,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->chat_hook->set_classes(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_NameplateColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->colors_set_enabled(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_NameplateConColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->con_colors_set_enabled(wnd->Checked); });
-	
+
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
 	ui->AddComboCallback(wnd, "Zeal_Timestamps_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->set_timestamp(value); });
 	ui->AddSliderCallback(wnd, "Zeal_HoverTimeout_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
@@ -351,6 +355,20 @@ void ui_options::InitTargetRing()
 
 }
 
+void ui_options::InitNameplate()
+{
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->colors_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateConColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->con_colors_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->self_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateX", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->x_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateRaidPets", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->raidpets_set_enabled(wnd->Checked); });
+}
+
 void ui_options::UpdateOptions()
 {
 	if (!isReady)
@@ -364,6 +382,7 @@ void ui_options::UpdateOptions()
 	UpdateOptionsCamera();
 	UpdateOptionsGeneral();
 	UpdateOptionsTargetRing();
+	UpdateOptionsNameplate();
 	UpdateOptionsMap();
 
 }
@@ -389,8 +408,6 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_AltContainerTooltips", ZealService::get_instance()->tooltips->all_containers);
 	ui->SetChecked("Zeal_SpellbookAutoStand", ZealService::get_instance()->movement->spellbook_autostand);
 	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled);
-	ui->SetChecked("Zeal_NameplateColors", ZealService::get_instance()->nameplate->nameplateColors);
-	ui->SetChecked("Zeal_NameplateConColors", ZealService::get_instance()->nameplate->nameplateconColors);
 }
 void ui_options::UpdateOptionsCamera()
 {
@@ -433,6 +450,21 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetLabelValue("Zeal_TargetRingRotation_Value", "%.2f", ZealService::get_instance()->target_ring->get_rotation_speed());
 	ui->SetLabelValue("Zeal_TargetRingSize_Value", "%.2f", ZealService::get_instance()->target_ring->get_size());
 }
+
+void ui_options::UpdateOptionsNameplate()
+{
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
+	ui->SetChecked("Zeal_NameplateColors", ZealService::get_instance()->nameplate->nameplateColors);
+	ui->SetChecked("Zeal_NameplateConColors", ZealService::get_instance()->nameplate->nameplateconColors);
+	ui->SetChecked("Zeal_NameplateSelf", ZealService::get_instance()->nameplate->nameplateSelf);
+	ui->SetChecked("Zeal_NameplateX", ZealService::get_instance()->nameplate->nameplateX);
+	ui->SetChecked("Zeal_NameplateRaidpets", ZealService::get_instance()->nameplate->nameplateRaidPets);
+}
+
 void ui_options::UpdateOptionsMap()
 {
 	if (!wnd)
