@@ -10,6 +10,7 @@ public:
 	void UpdateOptions();
 	void UpdateOptionsMap();
 	void UpdateOptionsTargetRing();
+	void UpdateOptionsNameplate();
 	void UpdateOptionsCamera();
 	void UpdateOptionsGeneral();
 	void InitColors();
@@ -17,6 +18,7 @@ public:
 	void InitMap();
 	void InitCamera();
 	void InitTargetRing();
+	void InitNameplate();
 	void SaveColors();
 	void LoadColors();
 	DWORD GetColor(int index);
