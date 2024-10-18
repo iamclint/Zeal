@@ -398,10 +398,13 @@ of potential raid members, it is recommended to not use the persistent Show Raid
 in the options tab and instead use the key bind to situationally toggle it on and off.
 
 * Zeal options checkbox to enable / disable (one each for group and raid)
-* Key bind: "Toggle Show Raid" - Toggles visibility of raid members
+* Key bind: "Toggle Map Show Raid" - Toggles visibility of raid members
+* Key bind: "Flash Map Member Names" - Displays names of group and raid members while held (if visible)
 * Command examples:
   - `/map show_group` toggles the group member markers on and off
-  - `/map show_group labels` toggles numeric (F2-F6) group member labels (FPS hit)
+  - `/map show_group labels_off` disables group member labels
+  - `/map show_group numbers` enables numeric (F2-F6) group member labels (FPS hit)
+  - `/map show_group names` enables shortened group member names (FPS hit)
   - `/map show_raid` toggles the raid member markers on and off
 
 #### Showing map levels
