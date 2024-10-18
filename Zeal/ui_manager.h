@@ -42,7 +42,9 @@ public:
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>> data);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::string> data);
 	Zeal::EqUI::EQWND* CreateSidlScreenWnd(const std::string& name);
-	void LoadSidl(const std::string& path1, const std::string& path2, const std::string& filename);
+	void WriteTemporaryUI(const std::string& file_path, std::string ui_path);
+	void RemoveTemporaryUI(const std::string& file_path);
+	void AddXmlInclude(const std::string& name);
 	ui_manager(class ZealService* zeal, class IO_ini* ini);
 
 	std::shared_ptr<ui_options> options = nullptr;
@@ -53,6 +55,7 @@ public:
 	std::shared_ptr<ui_hotbutton> hotbutton = nullptr;
 	std::shared_ptr<ui_group> group = nullptr;
 private:
+	std::vector<std::string> XMLIncludes;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> checkbox_names;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> button_names;
 	std::unordered_map<Zeal::EqUI::BasicWnd*, std::function<void(Zeal::EqUI::BasicWnd*)>> checkbox_callbacks;

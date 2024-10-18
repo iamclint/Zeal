@@ -277,47 +277,93 @@ void ui_manager::CleanUI()
 	label_names.clear();
 }
 
-void ui_manager::init_ui()
-{
 
-}
-//Zeal::EqUI::BasicWnd* ui_manager::GetChild(Zeal::EqUI::BasicWnd* parent, std::string name) 
-//{
-//	return WindowChildren[parent][name];
-//}
-//
-//static Zeal::EqUI::BasicWnd* __fastcall CreateXWndFromTemplate_hook(int sidlmgr, int unused, Zeal::EqUI::BasicWnd* parent, Zeal::EqUI::ControlTemplate* control_template)
-//{
-//	Zeal::EqUI::BasicWnd* rval = ZealService::get_instance()->hooks->hook_map["CreateXWndFromTemplate"]->original(CreateXWndFromTemplate_hook)(sidlmgr, unused, parent, control_template);
-//	ui_manager* ui = ZealService::get_instance()->ui.get();
-//	if (control_template && control_template->Item)
-//		ui->WindowChildren[parent][control_template->Item->Text] = rval;
-//	return rval;
-//}
-void ui_manager::LoadSidl(const std::string& path1, const std::string& path2, const std::string& filename)
+void ui_manager::AddXmlInclude(const std::string& name)
 {
-	Zeal::EqUI::CXSTR p1 = Zeal::EqUI::CXSTR(path1);
-	Zeal::EqUI::CXSTR p2 = Zeal::EqUI::CXSTR(path2);
-	Zeal::EqUI::CXSTR fn = Zeal::EqUI::CXSTR(filename);
-	reinterpret_cast<void (__thiscall*)(int, Zeal::EqUI::CXSTR, Zeal::EqUI::CXSTR, Zeal::EqUI::CXSTR)>(0x58d640)(0x5EADFC, p1, p2, fn);
-	fn.FreeRep();
-	p1.FreeRep();
-	p2.FreeRep();
+	XMLIncludes.push_back(name);
+}
+void ui_manager::WriteTemporaryUI(const std::string& file_path, std::string ui_path)
+{
+	if (!file_path.empty())
+	{
+		std::ifstream infile(file_path);
+		std::stringstream buffer;
+		std::string line;
+		bool compositeFound = false;
+		std::string modifiedContent;
+
+		if (infile)
+		{
+			// Read file line by line
+			while (std::getline(infile, line))
+			{
+				// Search for the closing </composite> tag (case insensitive)
+				std::string loweredLine = line;
+				std::transform(loweredLine.begin(), loweredLine.end(), loweredLine.begin(), ::tolower);
+
+				if (!compositeFound && loweredLine.find("</composite>") != std::string::npos)
+				{
+					compositeFound = true;
+
+					for (auto& file : XMLIncludes)
+					// Add the new lines before the closing tag
+					modifiedContent += "        <Include>" +  file + "</Include>\n";
+				}
+
+				// Add the current line to the buffer
+				modifiedContent += line + "\n";
+			}
+			infile.close();
+
+			std::filesystem::path new_file_path = ui_path + "EQUI_Zeal.xml";
+			std::ofstream outfile(new_file_path);
+			if (outfile)
+			{
+				outfile << modifiedContent;
+				outfile.close();
+			}
+		}
+	}
+}
+
+void ui_manager::RemoveTemporaryUI(const std::string& file_path)
+{
+	std::filesystem::path new_file_path = file_path + "EQUI_Zeal.xml";
+	if (std::filesystem::exists(new_file_path))
+	{
+		std::filesystem::remove(new_file_path);
+	}
 }
 void __fastcall LoadSidlHk(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
-	std::string file = ui_manager::ui_path + std::string(filename.Data->Text);
-	if (std::filesystem::exists(file))
-		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
-	
+	std::string str_filename = filename;
+	std::string zeal_file = ui_manager::ui_path + str_filename;
+
+	std::string ui_file = static_cast<std::string>(path1) + str_filename;
+	std::string default_file = static_cast<std::string>(path2) + str_filename;
+	std::string file_path = "";
+	if (str_filename == "EQUI.xml")
+	{
+		if (std::filesystem::exists(ui_file))
+			file_path = ui_file;
+		else  if (std::filesystem::exists(default_file))
+			file_path = default_file;
+
+		ui->WriteTemporaryUI(file_path, path1);
+		filename = Zeal::EqUI::CXSTR("EQUI_Zeal.xml");
+	}
 	ZealService::get_instance()->hooks->hook_map["LoadSidl"]->original(LoadSidlHk)(t, unused, path1, path2, filename);
+
+	if (str_filename == "EQUI.xml" && !file_path.empty())
+		ui->RemoveTemporaryUI(path1);
 }
 
 int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
-	std::string file = ui_manager::ui_path + std::string(filename.Data->Text);
+	std::string str_filename = filename;
+	std::string file = ui_manager::ui_path + str_filename;
 	if (std::filesystem::exists(file))
 		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
 	else
@@ -325,11 +371,24 @@ int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI:
 
 	return ZealService::get_instance()->hooks->hook_map["XMLRead"]->original(XMLRead)(t, unused, path1, path2, filename);
 }
+int __fastcall XMLReadNoValidate(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
+{
+	ui_manager* ui = ZealService::get_instance()->ui.get();
+	std::string str_filename = filename;
+	std::string file = ui_manager::ui_path + str_filename;
+	if (std::filesystem::exists(file))
+		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
+	else
+		path1 = Zeal::EqUI::CXSTR((char*)0x63D3C0);
+
+	return ZealService::get_instance()->hooks->hook_map["XMLReadNoValidate"]->original(XMLReadNoValidate)(t, unused, path1, path2, filename);
+}
+
 
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
-	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
+	//zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
 
 	bank = std::make_shared<ui_bank>(zeal, ini, this);
 	options = std::make_shared<ui_options>(zeal, ini, this);
@@ -346,7 +405,8 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("SetComboValue", 0x579af0, SetComboValue_hook, hook_type_detour);
 	zeal->hooks->Add("LoadSidl", 0x5992c0, LoadSidlHk, hook_type_detour);
 	zeal->hooks->Add("XMLRead", 0x58D640, XMLRead, hook_type_detour);
-
+	zeal->hooks->Add("XMLReadNoValidate", 0x58DA10, XMLReadNoValidate, hook_type_detour);
+	
 
 	zeal->commands_hook->Add("/sortskill", {}, "",
 		[this](std::vector<std::string>& args) {

@@ -108,7 +108,6 @@ void ui_options::InitUI()
 	{
 		if (std::filesystem::exists("./uifiles/zeal/EQUI_ZealOptions.xml"))
 		{
-		//	ui->LoadSidl("uifiles\\zeal\\", "uifiles\\default\\", "EQUI_ZealOptions.xml");
 			wnd = ui->CreateSidlScreenWnd("ZealOptions");
 			wnd->vtbl->WndNotification = WndNotification;
 		}
@@ -550,6 +549,7 @@ ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { RenderUI(); }, callback_type::RenderUI);
 	zeal->callbacks->AddGeneric([this]() { Deactivate(); }, callback_type::DeactivateUI);
+	ui->AddXmlInclude("EQUI_ZealOptions.xml");
 	//if (Zeal::EqGame::is_in_game()) InitUI();
 }
 ui_options::~ui_options()
