@@ -22,9 +22,9 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	Zeal::EqStructures::EQARGBCOLOR Adventurercolor = options->GetColor(9); //0xFF3D6BDC; //Not in Guild Member - Default Blue
 	Zeal::EqStructures::EQARGBCOLOR NpcCorpsecolor = options->GetColor(10); //0xFF000000; //Npc Corpse - Black
 	Zeal::EqStructures::EQARGBCOLOR PlayersCorpsecolor = options->GetColor(11); //0xFFFFFFFF; //Players Corpse - White Light Purple
-	Zeal::EqStructures::EQARGBCOLOR BlueConcolor = options->GetColor(12); //BlueCon - Default DarkBlue is ligher than CON_BLUE
-	Zeal::EqStructures::EQARGBCOLOR GreenConcolor = options->GetColor(13); //CON_GREEN
-	Zeal::EqStructures::EQARGBCOLOR LightBlueConcolor = options->GetColor(14); //CON_LIGHTBLUE
+	Zeal::EqStructures::EQARGBCOLOR BlueConcolor = options->GetColor(14); //BlueCon - Default DarkBlue is ligher than CON_BLUE
+	Zeal::EqStructures::EQARGBCOLOR GreenConcolor = options->GetColor(12); //CON_GREEN
+	Zeal::EqStructures::EQARGBCOLOR LightBlueConcolor = options->GetColor(13); //CON_LIGHTBLUE
 	Zeal::EqStructures::EQARGBCOLOR WhiteConcolor = options->GetColor(15); //CON_WHITE
 	Zeal::EqStructures::EQARGBCOLOR YellowConcolor = options->GetColor(16); //CON_YELLOW
 	Zeal::EqStructures::EQARGBCOLOR RedConcolor = options->GetColor(17); //CON_RED
@@ -327,22 +327,22 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 			colors_set_enabled(!ZealService::get_instance()->nameplate->colors_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplateconcolors", {}, "Toggles Nameplate Colors",
+	zeal->commands_hook->Add("/nameplateconcolors", {}, "Toggles Nameplate Con Colors",
 		[this](std::vector<std::string>& args) {
 			con_colors_set_enabled(!ZealService::get_instance()->nameplate->con_colors_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplateself", {}, "Toggles Nameplate Colors",
+	zeal->commands_hook->Add("/nameplateself", {}, "Toggles Nameplate Self",
 		[this](std::vector<std::string>& args) {
 			colors_set_enabled(!ZealService::get_instance()->nameplate->self_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplatex", {}, "Toggles Nameplate Colors",
+	zeal->commands_hook->Add("/nameplatex", {}, "Toggles Nameplate Self as X",
 		[this](std::vector<std::string>& args) {
 			con_colors_set_enabled(!ZealService::get_instance()->nameplate->x_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplateraidpets", {}, "Toggles Nameplate Colors",
+	zeal->commands_hook->Add("/nameplateraidpets", {}, "Toggles Nameplate for Raid Pets",
 		[this](std::vector<std::string>& args) {
 			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
 			return true;
