@@ -25,6 +25,7 @@ public:
 	struct BackgroundType { enum e : int { kClear = 0, kDark, kLight, kTan, kFirst = kClear, kLast = kTan }; };
 	struct LabelsMode { enum e : int { kOff = 0, kSummary, kAll, kMarkerOnly, kFirst = kOff, kLast = kMarkerOnly }; };
 	struct MapDataMode { enum e : int { kInternal = 0, kBoth, kExternal, kFirst = kInternal, kLast = kExternal }; };
+	struct GroupLabelsMode { enum e : int { kOff = 0, kNumbers, kNames, kFirst = kOff, kLast = kNames }; };
 
 	static constexpr float kMaxPositionSize = 0.05f;  // In fraction of screen size.
 	static constexpr float kMaxMarkerSize = 0.05f;
@@ -39,13 +40,14 @@ public:
 	void set_enabled(bool enable, bool update_default = false);
 	void set_external_enable(bool enabled, bool update_default = false);
 	void set_show_group(bool enable, bool update_default = true);
-	void set_show_group_labels(bool enable, bool update_default = true);
 	void set_show_raid(bool enable, bool update_default = true);
+	void set_show_all_names_override(bool flag);  // Override to enable showing group and raid names.
 	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
 	bool set_background_alpha(int percent, bool update_default = true);
 	bool set_alignment(int new_state, bool update_default = true); // [left, center, right]
 	bool set_labels_mode(int new_mode, bool update_default = true);  // [off, summary, all]
+	bool set_group_labels_mode(int new_mode, bool update_default = true);
 	bool set_map_top(int top_percent, bool update_default = true, bool preserve_height = true);
 	bool set_map_left(int left_percent, bool update_default = true, bool preserve_width = true);
 	bool set_map_bottom(int bottom_percent, bool update_default = true);
@@ -58,13 +60,13 @@ public:
 
 	bool is_external_enabled() const { return external_enabled; }
 	bool is_show_group_enabled() const { return map_show_group; }
-	bool is_show_group_labels_enabled() const { return map_show_group_labels; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
 	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
 	int get_background() const { return static_cast<int>(map_background_state); }
 	int get_background_alpha() const { return static_cast<int>(map_background_alpha * 100 + 0.5f); }
 	int get_alignment() const { return static_cast<int>(map_alignment_state); }
 	int get_labels_mode() const { return static_cast<int>(map_labels_mode); }
+	int get_group_labels_mode() const { return static_cast<int>(map_group_labels_mode); }
 	int get_map_top() const { return static_cast<int>(map_rect_top * 100 + 0.5f); }
 	int get_map_left() const { return static_cast<int>(map_rect_left * 100 + 0.5f); }
 	int get_map_bottom() const { return static_cast<int>(map_rect_bottom * 100 + 0.5f); }
@@ -156,6 +158,7 @@ private:
 	void render_background(IDirect3DDevice8& device);
 	void render_positions(IDirect3DDevice8& device);
 	void render_group_member_labels(IDirect3DDevice8& device);
+	void render_raid_member_labels(IDirect3DDevice8& device);
 	void render_update_marker_buffer(IDirect3DDevice8& device);
 	void render_labels();
 	void render_label_text(const char* label, int map_y, int map_x, D3DCOLOR font_color);
@@ -179,12 +182,13 @@ private:
 	bool enabled = false;
 	bool external_enabled = false;  // External map window enable and sizes.
 	bool map_show_group = false;
-	bool map_show_group_labels = false;
 	bool map_show_raid = false;
+	bool map_show_all_names_override = false;  // Meant as a temporary override to flash names.
 	BackgroundType::e map_background_state = BackgroundType::kClear;
 	float map_background_alpha = kDefaultBackgroundAlpha;
 	AlignmentType::e map_alignment_state = AlignmentType::kFirst;
 	LabelsMode::e map_labels_mode = LabelsMode::kOff;
+	GroupLabelsMode::e map_group_labels_mode = GroupLabelsMode::kOff;
 	MapDataMode::e map_data_mode = MapDataMode::kInternal;
 	int zone_id = kInvalidZoneId;
 	int marker_zone_id = kInvalidZoneId;
