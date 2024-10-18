@@ -327,22 +327,22 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 			colors_set_enabled(!ZealService::get_instance()->nameplate->colors_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplateconcolors", {}, "Toggles Nameplate Colors",
+	zeal->commands_hook->Add("/nameplateconcolors", {}, "Toggles Nameplate Con Colors",
 		[this](std::vector<std::string>& args) {
 			con_colors_set_enabled(!ZealService::get_instance()->nameplate->con_colors_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplateself", {}, "Toggles Nameplate Colors",
+	zeal->commands_hook->Add("/nameplateself", {}, "Toggles Nameplate Self",
 		[this](std::vector<std::string>& args) {
 			colors_set_enabled(!ZealService::get_instance()->nameplate->self_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplatex", {}, "Toggles Nameplate Colors",
+	zeal->commands_hook->Add("/nameplatex", {}, "Toggles Nameplate Self as X",
 		[this](std::vector<std::string>& args) {
 			con_colors_set_enabled(!ZealService::get_instance()->nameplate->x_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplateraidpets", {}, "Toggles Nameplate Colors",
+	zeal->commands_hook->Add("/nameplateraidpets", {}, "Toggles Nameplate for Raid Pets",
 		[this](std::vector<std::string>& args) {
 			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
 			return true;
