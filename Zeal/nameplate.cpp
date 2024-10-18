@@ -22,9 +22,9 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	Zeal::EqStructures::EQARGBCOLOR Adventurercolor = options->GetColor(9); //0xFF3D6BDC; //Not in Guild Member - Default Blue
 	Zeal::EqStructures::EQARGBCOLOR NpcCorpsecolor = options->GetColor(10); //0xFF000000; //Npc Corpse - Black
 	Zeal::EqStructures::EQARGBCOLOR PlayersCorpsecolor = options->GetColor(11); //0xFFFFFFFF; //Players Corpse - White Light Purple
-	Zeal::EqStructures::EQARGBCOLOR BlueConcolor = options->GetColor(12); //BlueCon - Default DarkBlue is ligher than CON_BLUE
-	Zeal::EqStructures::EQARGBCOLOR GreenConcolor = options->GetColor(13); //CON_GREEN
-	Zeal::EqStructures::EQARGBCOLOR LightBlueConcolor = options->GetColor(14); //CON_LIGHTBLUE
+	Zeal::EqStructures::EQARGBCOLOR BlueConcolor = options->GetColor(14); //BlueCon - Default DarkBlue is ligher than CON_BLUE
+	Zeal::EqStructures::EQARGBCOLOR GreenConcolor = options->GetColor(12); //CON_GREEN
+	Zeal::EqStructures::EQARGBCOLOR LightBlueConcolor = options->GetColor(13); //CON_LIGHTBLUE
 	Zeal::EqStructures::EQARGBCOLOR WhiteConcolor = options->GetColor(15); //CON_WHITE
 	Zeal::EqStructures::EQARGBCOLOR YellowConcolor = options->GetColor(16); //CON_YELLOW
 	Zeal::EqStructures::EQARGBCOLOR RedConcolor = options->GetColor(17); //CON_RED
