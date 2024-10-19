@@ -344,15 +344,19 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
 
 void __fastcall DoPercentConvert(int* t, int u, char* data, int u2)
 {
-    std::string str_data = data;
-    if (str_data.find('%', 0) == std::string::npos) //if there isn't any % just early out
-        return;
-    if (Zeal::EqGame::is_in_game())
+    if (data)
     {
-        ZealService::get_instance()->chat_hook->DoPercentReplacements(str_data);
-        size_t new_len = str_data.length();
-        strncpy_s(data, new_len+1, str_data.c_str(), new_len);
-        data[new_len] = '\0';
+        std::string str_data = data;
+        if (str_data.find('%', 0) == std::string::npos) //if there isn't any % just early out
+            return;
+        if (Zeal::EqGame::is_in_game())
+        {
+            ZealService::get_instance()->chat_hook->DoPercentReplacements(str_data);
+            size_t new_len = str_data.length();
+            //strncpy_s(data, new_len+1, str_data.c_str(), new_len);
+            memmove(data, str_data.c_str(), new_len);
+            data[new_len] = '\0';
+        }
     }
     ZealService::get_instance()->hooks->hook_map["DoPercentConvert"]->original(DoPercentConvert)(t, u, data, u2);
 }
