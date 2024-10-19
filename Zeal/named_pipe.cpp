@@ -416,12 +416,12 @@ bool WriteDataWithRetry(HANDLE h, const std::string& data, OVERLAPPED* pData, LP
 				if (errorCode != 232) //the pipe is being closed -- when closing the other end abruptly
 				{
 					if (errorMsg) {
-						Zeal::EqGame::print_chat_hook("WriteFileEx failed on attempt %i with error %u: %s", attempt + 1, errorCode, errorMsg);
-						Zeal::EqGame::print_chat_hook("Parameters [%i] [%s] [%i] [%i]", h, data.c_str(), data.length(), pData);
+						Zeal::EqGame::print_chat("WriteFileEx failed on attempt %i with error %u: %s", attempt + 1, errorCode, errorMsg);
+						Zeal::EqGame::print_chat("Parameters [%i] [%s] [%i] [%i]", h, data.c_str(), data.length(), pData);
 						LocalFree(errorMsg); // Free the buffer allocated by FormatMessage
 					}
 					else {
-						Zeal::EqGame::print_chat_hook("WriteFileEx failed on attempt %i with error %u", attempt + 1, errorCode);
+						Zeal::EqGame::print_chat("WriteFileEx failed on attempt %i with error %u", attempt + 1, errorCode);
 					}
 				}
 

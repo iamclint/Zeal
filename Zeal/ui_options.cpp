@@ -71,34 +71,56 @@ DWORD ui_options::GetColor(int index)
 void ui_options::LoadColors()
 {
 	IO_ini* ini = ZealService::get_instance()->ini.get();
+
+	if (!ini->exists("ZealColors", "Color0")) //Adds default Nameplate colors for new users
+	{
+		if (color_buttons.count(0))
+			color_buttons[0]->TextColor.ARGB = 0xFFFF8000; //AFK - Orange
+		if (color_buttons.count(1))
+			color_buttons[1]->TextColor.ARGB = 0xFFCFFF00; //LFG - Yellow
+		if (color_buttons.count(2))
+			color_buttons[2]->TextColor.ARGB = 0xFFFF0000; //LinkDead - Red
+		if (color_buttons.count(3))
+			color_buttons[3]->TextColor.ARGB = 0xFFFF8080; //Guild Member - White Red
+		if (color_buttons.count(4))
+			color_buttons[4]->TextColor.ARGB = 0xFFFFFFFF; //Raid Member - White Light Purple
+		if (color_buttons.count(5))
+			color_buttons[5]->TextColor.ARGB = 0xFF00FF32; //Group Member - Light Green
+		if (color_buttons.count(6))
+			color_buttons[6]->TextColor.ARGB = 0xFFFF0000; //PVP - Red
+		if (color_buttons.count(7))
+			color_buttons[7]->TextColor.ARGB = 0xFF85489C; //Roleplay - Purple
+		if (color_buttons.count(8))
+			color_buttons[8]->TextColor.ARGB = 0xFFFFFF80; //OtherGuild Member - White Yellow
+		if (color_buttons.count(9))
+			color_buttons[9]->TextColor.ARGB = 0xFF3D6BDC; //Not in Guild Member - Default Blue
+		if (color_buttons.count(10))
+			color_buttons[10]->TextColor.ARGB = 0xFF000000; //Npc Corpse - Black
+		if (color_buttons.count(11))
+			color_buttons[11]->TextColor.ARGB = 0xFFFFFFFF; //Players Corpse - White Light Purple
+		if (color_buttons.count(12))
+			color_buttons[12]->TextColor.ARGB = CON_GREEN; //GreenCon
+		if (color_buttons.count(13))
+			color_buttons[13]->TextColor.ARGB = CON_LIGHTBLUE; //LightBlueCon
+		if (color_buttons.count(14))
+		{
+			if (ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
+				color_buttons[14]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options menu
+			else
+				color_buttons[14]->TextColor.ARGB = 0xFF0040FF; //BlueCon - Default DarkBlue is ligher than CON_BLUE for new users
+		}
+		if (color_buttons.count(15))
+			color_buttons[15]->TextColor.ARGB = CON_WHITE; //WhiteCon
+		if (color_buttons.count(16))
+			color_buttons[16]->TextColor.ARGB = CON_YELLOW; //YellowCon
+		if (color_buttons.count(17))
+			color_buttons[17]->TextColor.ARGB = CON_RED; //RedCon
+	}
+
 	for (auto& [index, btn] : color_buttons)
 	{
 		if (ini->exists("ZealColors", "Color" + std::to_string(index)))
 			btn->TextColor.ARGB = ini->getValue<DWORD>("ZealColors", "Color" + std::to_string(index));
-		if (!ini->exists("ZealColors", "Color" + std::to_string(index))) //Adds default Nameplate colors for new users
-		{
-			color_buttons[0]->TextColor.ARGB = 0xFFFF8000; //AFK - Orange
-			color_buttons[1]->TextColor.ARGB = 0xFFCFFF00; //LFG - Yellow
-			color_buttons[2]->TextColor.ARGB = 0xFFFF0000; //LinkDead - Red
-			color_buttons[3]->TextColor.ARGB = 0xFFFF8080; //Guild Member - White Red
-			color_buttons[4]->TextColor.ARGB = 0xFFFFFFFF; //Raid Member - White Light Purple
-			color_buttons[5]->TextColor.ARGB = 0xFF00FF32; //Group Member - Light Green
-			color_buttons[6]->TextColor.ARGB = 0xFFFF0000; //PVP - Red
-			color_buttons[7]->TextColor.ARGB = 0xFF85489C; //Roleplay - Purple
-			color_buttons[8]->TextColor.ARGB = 0xFFFFFF80; //OtherGuild Member - White Yellow
-			color_buttons[9]->TextColor.ARGB = 0xFF3D6BDC; //Not in Guild Member - Default Blue
-			color_buttons[10]->TextColor.ARGB = 0xFF000000; //Npc Corpse - Black
-			color_buttons[11]->TextColor.ARGB = 0xFFFFFFFF; //Players Corpse - White Light Purple
-			color_buttons[12]->TextColor.ARGB = CON_GREEN; //GreenCon
-			color_buttons[13]->TextColor.ARGB = CON_LIGHTBLUE; //LightBlueCon
-			if (ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
-				color_buttons[14]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options menu
-			if (!ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
-				color_buttons[14]->TextColor.ARGB = 0xFF0040FF; //BlueCon - Default DarkBlue is ligher than CON_BLUE for new users
-			color_buttons[15]->TextColor.ARGB = CON_WHITE; //WhiteCon
-			color_buttons[16]->TextColor.ARGB = CON_YELLOW; //YellowCon
-			color_buttons[17]->TextColor.ARGB = CON_RED; //RedCon
-		}
 	}
 }
 

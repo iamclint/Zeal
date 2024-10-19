@@ -89,6 +89,7 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+		static std::vector<std::string> print_buffer;
 		DWORD GetLevelCon(Zeal::EqStructures::Entity* ent);
 		float CalcCombatRange(Zeal::EqStructures::Entity* entity1, Zeal::EqStructures::Entity* entity2);
 		float CalcZOffset(Zeal::EqStructures::Entity* ent);

@@ -1319,45 +1319,55 @@ namespace Zeal
 				mem::copy(0x4f828b, orig, 13);
 			}
 		}
+
+		
+
 		void print_chat(std::string data)
 		{
 			if (!is_in_game())
+			{
+				print_buffer.push_back(data);
 				return;
+			}
 			std::vector<std::string> vd = splitStringByNewLine(data);
 			for (auto& d : vd)
 				EqGameInternal::print_chat(*(int*)0x809478, 0, d.c_str(), 0, true);
 		}
 		void print_chat(const char* format, ...)
 		{
-			if (!is_in_game())
-				return;
+
 			va_list argptr;
 			char buffer[512];
 			va_start(argptr, format);
 			//printf()
 			vsnprintf(buffer, 511, format, argptr);
 			va_end(argptr);
+			if (!is_in_game())
+			{
+				print_buffer.push_back(buffer);
+				return;
+			}			
 			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 0, true);
 		}
 		void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u) {};
+
 		void print_chat_hook(const char* format, ...)
 		{
-			if (!is_in_game())
-				return;
 			va_list argptr;
 			char buffer[512];
 			va_start(argptr, format);
 			//printf()
 			vsnprintf(buffer, 511, format, argptr);
 			va_end(argptr);
-
+			if (!is_in_game())
+			{
+				print_buffer.push_back(buffer);
+				return;
+			}
 			ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(*(int*)0x809478, 0, buffer, 0, true);
 		}
 		void print_debug(const char* format, ...)
 		{
-			if (!is_in_game())
-				return;
-
 			va_list argptr;
 			char buffer[512];
 			char buffer_with_newline[514]; // Additional space for the newline and null terminator
@@ -1373,14 +1383,17 @@ namespace Zeal
 		}
 		void print_chat(short color, const char* format, ...)
 		{
-			if (!is_in_game())
-				return;
 			va_list argptr;
 			char buffer[512];
 			va_start(argptr, format);
 			//printf()
 			vsnprintf(buffer, 511, format, argptr);
 			va_end(argptr);
+			if (!is_in_game())
+			{
+				print_buffer.push_back(buffer);
+				return;
+			}
 			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, color, true);
 
 		}

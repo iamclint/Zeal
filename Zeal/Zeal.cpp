@@ -55,6 +55,15 @@ ZealService::ZealService()
 	target_ring = std::make_shared<TargetRing>(this, ini.get());
 	zone_map = std::make_shared<ZoneMap>(this, ini.get());
 	
+	callbacks->AddGeneric([this]() {
+		if (Zeal::EqGame::is_in_game() && Zeal::EqGame::print_buffer.size())
+		{
+			for (auto& str : Zeal::EqGame::print_buffer)
+				Zeal::EqGame::print_chat("buffer: " + str);
+			Zeal::EqGame::print_buffer.clear();
+		}
+		
+	});
 	this->basic_binds();
 	
 	configuration_check();
@@ -66,7 +75,6 @@ void ZealService::configuration_check()
 	zeal_ui /= "uifiles\\zeal";
 
 	std::string xml_files[] = {"EQUI_GuildManagementWnd.xml",
-	"EQUI_OptionsWindow.xml",
 	"EQUI_Tab_Cam.xml",
 	"EQUI_Tab_Colors.xml",
 	"EQUI_Tab_General.xml",
