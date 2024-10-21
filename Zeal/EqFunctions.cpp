@@ -1397,6 +1397,25 @@ namespace Zeal
 			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, color, true);
 
 		}
+
+		void print_chat_wnd(Zeal::EqUI::ChatWnd* wnd, short color, const char* format, ...)
+		{
+			va_list argptr;
+			char buffer[512];
+			va_start(argptr, format);
+			//printf()
+			vsnprintf(buffer, 511, format, argptr);
+			va_end(argptr);
+			if (!is_in_game())
+			{
+				print_buffer.push_back(buffer);
+				return;
+			}
+			//eal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR msg, short channel)
+			Zeal::EqUI::CXSTR cxBuff = Zeal::EqUI::CXSTR(buffer);
+			reinterpret_cast<void(__thiscall*)(Zeal::EqUI::ChatWnd*, Zeal::EqUI::CXSTR msg, short channel)>(ZealService::get_instance()->hooks->hook_map["AddOutputText"]->address)(wnd, cxBuff, color);
+			cxBuff.FreeRep();
+		}
 		int get_gamestate()
 		{
 			if (get_eq())
@@ -1489,6 +1508,10 @@ namespace Zeal
 			if (!target)
 				print_chat(get_string(0x3057)); //you no longer have a target
 			*(Zeal::EqStructures::Entity**)Zeal::EqGame::Target = target;
+		}
+		void do_target(const char* name)
+		{
+			reinterpret_cast<void(__cdecl*)(int, const char*)>(0x4FD9A7)(0, name);
 		}
 		Zeal::EqStructures::Entity* get_entity_list()
 		{
