@@ -14,13 +14,13 @@ public:
 	~TellWindows();
 	void SetEnabled(bool val);
 	Zeal::EqUI::ChatWnd* FindTellWnd(std::string& name);
-	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel);
+	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, short channel);
 	bool enabled = false;
 	
 private:
 	Zeal::EqUI::ChatWnd* FindPreviousTellWnd();
 	Zeal::EqUI::ChatWnd* FindNextTellWnd();
-	
+	std::unordered_map<std::string, std::vector<std::pair<short, std::string>>> tell_cache;
 	void CleanUI();
 	void LoadUI();
 };

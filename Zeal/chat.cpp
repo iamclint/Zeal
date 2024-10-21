@@ -80,6 +80,7 @@ std::string generateTimestampedString(const std::string& message, bool longform 
     }
     return oss.str();
 }
+
 // Function to replace underscores with spaces in a word
 std::string replaceUnderscores(const std::smatch& match) {
     std::string word = match[1].str(); // Get the word part
@@ -405,6 +406,7 @@ void chat::set_input_color(Zeal::EqUI::ARGBCOLOR col)
 }
 
 
+
 chat::chat(ZealService* zeal, IO_ini* ini)
 {
     //zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {
@@ -517,6 +519,7 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("DoPercentConvert", 0x538110, DoPercentConvert, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("PrintChat", 0x537f99, PrintChat, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("EditWndHandleKey", 0x5A3010, EditWndHandleKey, hook_type_detour); //this makes more sense than the hook I had previously
+    
 
 
     //My function for getting instruction length was failing on this function, couldn't be bothered to look into it too deeply atm so just replaced all the calls to it
