@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <XML ID="EQInterfaceDefinitionLanguage">
-  <Composite>
-	<Include>EQUI_ZealOptions.xml</Include>
-  </Composite>
   <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
   
   <Button item="CopyOfButton">
