@@ -309,6 +309,18 @@ void Binds::add_binds()
 			ZealService::get_instance()->zone_map->set_show_all_names_override(key_down ? true : false);
 		}
 		});
+	add_bind(238, "Toggle Nameplate Self", "ToggleNameplateSelf", key_category::Target, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			ZealService::get_instance()->nameplate->self_set_enabled(!ZealService::get_instance()->nameplate->self_is_enabled());
+		});
+	add_bind(239, "Toggle Nameplate Self as X", "ToggleNameplateX", key_category::Target, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			ZealService::get_instance()->nameplate->x_set_enabled(!ZealService::get_instance()->nameplate->x_is_enabled());
+		});
+	add_bind(240, "Toggle Nameplate Raid Pets", "ToggleNameplateRaidPets", key_category::Target, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			ZealService::get_instance()->nameplate->raidpets_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)

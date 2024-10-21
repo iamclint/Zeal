@@ -13,7 +13,7 @@ from the repo using github actions, providing full transparency on the contents.
 - Camera motion improvements (major improvements to third person view)
 - Additional key binds (tab targeting, strafe, pet)
 - Additional commands (melody, useitem, autoinventory)
-- Additional ui support (new gauges, bag control, looting, spellsets, targetrings)
+- Additional ui support (new gauges, bag control, looting, spellsets, targetrings, nameplates)
 - Third party tool support (silent log messages, direct ZealPipes)
 - Integrated map (see In-game Map section below)
 - Various bug fixes
@@ -218,6 +218,21 @@ ___
 - `/alarm`
   - **Arguments:** `oldui`
   - **Description:** Re-opens the alarm window, if oldui is specified it allows for an alarm on it.
+
+- `/nameplatecolors`
+  - **Description:** toggles nameplate colors for players
+
+- `/nameplateconcolors`
+  - **Description:** toggles nameplate con colors for npcs
+
+- `/nameplateself`
+  - **Description:** toggles nameplate for self (on/off)
+
+- `/nameplatex`
+  - **Description:** toggles nameplate for self as X(on/off)
+
+- `/nameplateraidpets`
+  - **Description:** toggles nameplate for raid pets and your pet (on/off)
 ___
 ### Binds
 - Cycle through nearest NPCs
@@ -241,6 +256,11 @@ ___
 - Toggle through map label modes
 - Toggle up or down through visible map levels
 - Toggle map visibility of raid members
+- Toggle nameplate colors for players on/off
+- Toggle nameplate con colors for npcs on/off
+- Toggle nameplate for self on/off
+- Toggle nameplate for self as X on/off
+- Toggle nameplate for raid pets and your pet on/off
 ___
 ### UI
 - **Gauge EqType's**
@@ -299,6 +319,34 @@ ___
 #### Local builds
 Build in `Release` `x86` (32bit) mode using Microsoft Visual Studio 2022 (free Community edition works)
 
+### Nameplate Options
+#### Setup and configuration
+Zeal 5.0 and later includes options for players to adjust Player Nameplates and NPC Nameplates in game.
+In addition, Skeleton corpses now show a Nameplate. (Client Nameplate Bug Fix)
+Necromancers will now have an easier time finding their corpses.
+
+The nameplate is controlled through three interfaces:
+* Dedicated Zeal options window tab (requires `zeal\uifiles`, see Installation notes above)
+* Key binds for nameplate options (configure in EQ Options->Keyboard->Target)
+* The /nameplatecolors command
+* The /nameplateconcolors command
+* The /nameplateself command
+* The /nameplatex command
+* The /nameplateraidpets command
+
+#### Enabling Disabling Nameplate Options
+* The `/nameplatecolors` - Toggles Nameplate Colors for Players on and off
+* The `/nameplateconcolors` - Toggles Nameplate Con Colors for NPCs on and off
+* The `/nameplateself` - Toggles Player Nameplate on and off
+* The `/nameplatex` - Toggles Player Nameplate as X on and off
+* The `/nameplateraidpets` - Toggles NPC Raid Pets Nameplate on and off
+
+#### Changing the Color of Nameplates
+Zeal allows players to change the colors of the Nameplates of Players and NPCs in game.
+The Color Selector is available in the Zeal Colors Tab of the Zeal Options menu.
+The following Nameplate Colors can be changed to custom colors.
+* AFK, LFG, LD, MyGuild, Raid, Group, PVP, Roleplay, OtherGuilds, DefaultAdventurer
+* NPC Corpse, Player Corpse, GreenCon, LightBlueCon, BlueCon, WhiteCon, YellowCon, RedCon
 
 ### In-game Map
 #### Setup and configuration
@@ -466,4 +514,3 @@ P x, y, z, red, green, blue, ignored, label_string
 * Command examples:
   - `/map data_mode both` adds external zone map file data if present to internal maps
   - `/map data_mode external` uses external zone map files if present to replace internal maps
-

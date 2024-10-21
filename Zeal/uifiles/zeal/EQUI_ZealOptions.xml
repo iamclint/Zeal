@@ -6,6 +6,7 @@
 	<Include>EQUI_Tab_Cam.xml</Include>
 	<Include>EQUI_Tab_Map.xml</Include>
 	<Include>EQUI_Tab_TargetRing.xml</Include>
+	<Include>EQUI_Tab_Nameplate.xml</Include>
 </Composite>
 <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
   <TabBox item="ZealOptionsTabs">
@@ -22,6 +23,7 @@
     <Pages>Tab_Camera</Pages>
     <Pages>Tab_Map</Pages>
     <Pages>Tab_TargetRing</Pages>
+	<Pages>Tab_Nameplate</Pages>
 	<Pages>Tab_Colors</Pages>
   </TabBox>
   <Screen item="ZealOptions">
