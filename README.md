@@ -322,6 +322,8 @@ Build in `Release` `x86` (32bit) mode using Microsoft Visual Studio 2022 (free C
 ### Nameplate Options
 #### Setup and configuration
 Zeal 5.0 and later includes options for players to adjust Player Nameplates and NPC Nameplates in game.
+In addition, Skeleton corpses now show a Nameplate. (Client Nameplate Bug Fix)
+Necromancers will now have an easier time finding their corpses.
 
 The nameplate is controlled through three interfaces:
 * Dedicated Zeal options window tab (requires `zeal\uifiles`, see Installation notes above)
