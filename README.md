@@ -229,7 +229,7 @@ ___
   - **Description:** toggles nameplate for self (on/off)
 
 - `/nameplatex`
-  - **Description:** toggles nameplate for self as X(on/off)
+  - **Description:** toggles nameplate for self as X (on/off)
 
 - `/nameplateraidpets`
   - **Description:** toggles nameplate for raid pets and your pet (on/off)
@@ -328,23 +328,19 @@ Necromancers will now have an easier time finding their corpses.
 The nameplate is controlled through three interfaces:
 * Dedicated Zeal options window tab (requires `zeal\uifiles`, see Installation notes above)
 * Key binds for nameplate options (configure in EQ Options->Keyboard->Target)
-* The /nameplatecolors command
-* The /nameplateconcolors command
-* The /nameplateself command
-* The /nameplatex command
-* The /nameplateraidpets command
+* The five /nameplate commands listed below
 
 #### Enabling Disabling Nameplate Options
-* The `/nameplatecolors` - Toggles Nameplate Colors for Players on and off
-* The `/nameplateconcolors` - Toggles Nameplate Con Colors for NPCs on and off
-* The `/nameplateself` - Toggles Player Nameplate on and off
-* The `/nameplatex` - Toggles Player Nameplate as X on and off
-* The `/nameplateraidpets` - Toggles NPC Raid Pets Nameplate on and off
+* The `/nameplatecolors` command - Toggles Nameplate Colors for Players on and off
+* The `/nameplateconcolors` command - Toggles Nameplate Con Colors for NPCs on and off
+* The `/nameplateself` command - Toggles Player Nameplate on and off
+* The `/nameplatex` command - Toggles Player Nameplate as X on and off
+* The `/nameplateraidpets` command - Toggles NPC Raid Pets Nameplate on and off
 
 #### Changing the Color of Nameplates
 Zeal allows players to change the colors of the Nameplates of Players and NPCs in game.
 The Color Selector is available in the Zeal Colors Tab of the Zeal Options menu.
-The following Nameplate Colors can be changed to custom colors.
+The following 18 Nameplate Colors can be changed to custom colors.
 * AFK, LFG, LD, MyGuild, Raid, Group, PVP, Roleplay, OtherGuilds, DefaultAdventurer
 * NPC Corpse, Player Corpse, GreenCon, LightBlueCon, BlueCon, WhiteCon, YellowCon, RedCon
 
