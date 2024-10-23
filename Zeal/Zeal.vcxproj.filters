@@ -231,6 +231,9 @@
     <ClInclude Include="chatfilter.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="bitmap_font.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -394,6 +397,9 @@
     </ClCompile>
     <ClCompile Include="chatfilter.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="bitmap_font.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

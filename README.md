@@ -256,6 +256,7 @@ ___
 - Toggle through map label modes
 - Toggle up or down through visible map levels
 - Toggle map visibility of raid members
+- Press to display group and raid member labels
 - Toggle nameplate colors for players on/off
 - Toggle nameplate con colors for npcs on/off
 - Toggle nameplate for self on/off
@@ -345,6 +346,10 @@ The following 18 Nameplate Colors can be changed to custom colors.
 * NPC Corpse, Player Corpse, GreenCon, LightBlueCon, BlueCon, WhiteCon, YellowCon, RedCon
 
 ### In-game Map
+#### Map data source
+The map data was sourced from Brewall's maps: https://www.eqmaps.info/eq-map-files/ with minimal
+modifications (see README.md in zone_map_src). As a result there are some out of era points of interest.
+
 #### Setup and configuration
 Zeal 4.0 and later includes an integrated in-game map that contains the map data for
 all zones through Planes of Power. The map is drawn into the game's DirectX viewport
@@ -447,8 +452,8 @@ in the options tab and instead use the key bind to situationally toggle it on an
 * Command examples:
   - `/map show_group` toggles the group member markers on and off
   - `/map show_group labels_off` disables group member labels
-  - `/map show_group numbers` enables numeric (F2-F6) group member labels (FPS hit)
-  - `/map show_group names` enables shortened group member names (FPS hit)
+  - `/map show_group numbers` enables numeric (F2-F6) group member labels (uses nameplate colors)
+  - `/map show_group names` enables shortened group member names (uses nameplate colors)
   - `/map show_raid` toggles the raid member markers on and off
 
 #### Showing map levels
@@ -471,11 +476,21 @@ The map supports adding a position marker to easier identification of target coo
   - `/map marker` clears the marker
   - `/map 0` is a shortcut for clearing the marker
 
+#### Map font
+The map supports selecting a "spritefont" formatted bitmap font file. A few sizes of arial
+font are included with Zeal and are located in uifiles/zeal/fonts. See the zeal/bitmap_font.cpp
+file for notes on how to generate new fonts. The default font is `default.spritefont`, and
+this file can be overwritten (not recommended) or the command examples below can be used to
+select and set a specific file as the persistent font.
+
+* Command examples:
+  - `/map font arial_10` changes the current map font to Arial size 10
+  - `/map save_ini` saves all current map settings (including font) to eqclient.ini
+
 #### Map points of interest (poi), labels, and search
 The map supports listing the available points of interest and adding them as labels to the map.
-
-Note that DirectX rendering of text is slow and this is unoptimized, so using the all setting
-for the labels can have a significant framerate impact (use keybind to toggle on and off).
+Note that some maps have many points of interest, so the all setting for the labels can clutter
+up the map even in zoom. The keybind to toggle through the label modes is recommended.
 
 * UI combobox for setting the labels mode (off, summary, all)
 * Key bind: "Toggle Map Labels" - toggles through the labels modes
