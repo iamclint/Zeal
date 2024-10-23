@@ -78,7 +78,7 @@
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>true</Style_Checkbox>
     <TooltipReference>Toggle Self Nameplate</TooltipReference>
-    <Text>Player Name</Text>
+    <Text>Hide Player Name</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -108,7 +108,7 @@
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>true</Style_Checkbox>
     <TooltipReference>Render Self Nameplate as X</TooltipReference>
-    <Text>Player Name X</Text>
+    <Text>Show Player Name as X</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -138,7 +138,7 @@
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>true</Style_Checkbox>
     <TooltipReference>Toggle Raid Pet Nameplates</TooltipReference>
-    <Text>NPC Name Raid Pets</Text>
+    <Text>Hide Raid Pets Names</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
