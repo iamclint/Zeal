@@ -1,10 +1,8 @@
 //--------------------------------------------------------------------------------------
-// This file was inspired by DirectX 11 SpriteFont.h
-//
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-//
+// This file was inspired by DirectX 11 SpriteFont.h (MIT License)
 // http://go.microsoft.com/fwlink/?LinkId=248929
+//
+// This is a simplified and rewritten implementation targeting DirectX8.
 //--------------------------------------------------------------------------------------
 
 #pragma once
@@ -27,10 +25,12 @@ public:
     BitmapFont(BitmapFont&&) = delete;
     BitmapFont& operator= (BitmapFont&&) = delete;
 
+    // Returns true if a valid bitmap texture is ready for use by the GPU.
     bool is_valid() const { return texture != nullptr; }
 
-    // Primary interface for drawing text. Centers the string at position (pixel coordinates).
-    void queue_string(const char* text, const Vec2& position,
+    // Primary interface for drawing text. The position is in screen pixel coordinates
+    // and specifies the center (true) or the upper left (false).
+    void queue_string(const char* text, const Vec2& position, bool center = true,
         const D3DCOLOR color = D3DCOLOR_XRGB(255, 255, 255));
 
     // Utilities for adjusting the string position (sizes in screen pixels).

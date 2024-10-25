@@ -84,10 +84,6 @@ void ZoneMap::render_release_resources() {
         marker_vertex_buffer->Release();
         marker_vertex_buffer = nullptr;
     }
-    if (bitmap_font) {
-        bitmap_font->release();
-        bitmap_font.release();
-    }
 }
 
 // Use the map_rect values and render target to configure the viewport rectangle.
@@ -366,9 +362,9 @@ void ZoneMap::render_load_font(IDirect3DDevice8& device) {
     std::string full_filename = "uifiles/zeal/fonts/" + font_filename + ".spritefont";
     bitmap_font = std::make_unique<BitmapFont>(device, full_filename.c_str());
     if (bitmap_font->is_valid())
-        return;  
+        return;  // Font is ready, all done.
 
-    bitmap_font.release();
+    bitmap_font.reset();  // Null the bad font to disable attempts to use.
     font_filename = "";  // Clear to indicate invalid and do not retry.
     Zeal::EqGame::print_chat("Failed to load font file: %s", full_filename.c_str());
 }
@@ -500,6 +496,8 @@ void ZoneMap::render_labels(IDirect3DDevice8& device) {
 // Handles writing a text label at map coordinates y and x to the screen.
 void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOLOR font_color,
                                 LabelType label_type, Vec2 offset_pixels) {
+    if (!bitmap_font)  // Programming error if this happens but paranoid checking.
+        return;
 
    // Then check if the label is visible on the clipped map rect.
     // Text rendering is slow. Perform some manual clipping to skip processing
@@ -551,9 +549,9 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
         label_x = max(view_left + half_width, min(view_right - half_width, label_x));
         label_y = max(view_top + half_height, min(view_bottom - half_height, label_y));
     }
-    bitmap_font->queue_string(short_label, Vec2(label_x, label_y), font_color);
+    bitmap_font->queue_string(short_label, Vec2(label_x, label_y), true, font_color);
     if (label_type == LabelType::AddMarker)
-        bitmap_font->queue_string("+", Vec2(label_screen[0], label_screen[1]), font_color);
+        bitmap_font->queue_string("+", Vec2(label_screen[0], label_screen[1]), true, font_color);
 }
 
 // Adds vertices to mark a position at the map coordinates.
@@ -1896,10 +1894,9 @@ void ZoneMap::parse_zoom(const std::vector<std::string>& args) {
 
 void ZoneMap::parse_font(const std::vector<std::string>& args) {
     if (args.size() == 3) {
-        bitmap_font.release();
+        release_font();
         font_filename = std::string(args[2]);
         Zeal::EqGame::print_chat("Setting font to: %s", font_filename.c_str());
-        zone_id = kInvalidZoneId;  // Triggers reload of map.
         return;
     }
     Zeal::EqGame::print_chat("Usage: /map font <name> (uifiles/zeal/fonts/<name>.spritefont)");
@@ -2140,8 +2137,16 @@ void ZoneMap::callback_zone() {
     zoom_factor = 1.f;  // Reset for more consistent behavior.
 }
 
+void ZoneMap::release_font() {
+    if (bitmap_font) {
+        bitmap_font->release();  // Paranoid redundancy for destructor below.
+        bitmap_font.reset();
+    }
+}
+
 void ZoneMap::callback_dx_reset() {
     render_release_resources();
+    release_font();
     release_d3d_external_window();
     zone_id = kInvalidZoneId;  // Triggers reload of map.
 }
@@ -2161,6 +2166,7 @@ ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
 ZoneMap::~ZoneMap()
 {
     render_release_resources();
+    release_font();
     release_d3d_external_window();
     destroy_external_window();
 }

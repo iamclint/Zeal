@@ -246,6 +246,7 @@ private:
 	void destroy_external_window();
 	bool initialize_d3d_external_window();
 	void release_d3d_external_window();
+	void release_font();
 	RECT calc_external_window_client_rect();
 
 	HINSTANCE external_hinstance = nullptr;

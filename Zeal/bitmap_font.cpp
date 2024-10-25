@@ -1,10 +1,8 @@
 //--------------------------------------------------------------------------------------
-// This file was inspired by DirectX 11 SpriteFont.cpp
-//
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-//
+// This file was inspired by DirectX 11 SpriteFont.cpp (MIT License)
 // http://go.microsoft.com/fwlink/?LinkId=248929
+//
+// This is a simplified and rewritten implementation targeting DirectX8.
 //--------------------------------------------------------------------------------------
 
 // Generation of new font files:
@@ -183,7 +181,7 @@ void BitmapFont::release() {
     if (index_buffer)
         index_buffer->Release();
     index_buffer = nullptr;
-    vertices.release();
+    vertices.reset();
     glyph_queue.clear();
 }
 
@@ -285,9 +283,13 @@ void BitmapFont::for_each_glyph(const char* text, TAction action) const
 }
 
 // Public interface that queues a string for later rendering in the flush call.
-void BitmapFont::queue_string(const char* text, const Vec2& position, const D3DCOLOR color) {
-    Vec2 size = measure_string(text);
-    Vec2 upper_left = position - Vec2(0.5f * size.x, 0.5 * size.y);
+void BitmapFont::queue_string(const char* text, const Vec2& position, bool center,
+                             const D3DCOLOR color) {
+    Vec2 upper_left = position;
+    if (center) {
+        Vec2 size = measure_string(text);
+        upper_left -= Vec2(0.5f * size.x, 0.5 * size.y);
+    }
     upper_left.x = std::round(upper_left.x);  // Starts need to be grid aligned for clean rendering.
     upper_left.y = std::round(upper_left.y);
     for_each_glyph(text,
@@ -415,7 +417,7 @@ void BitmapFont::render_queue() {
         }
         batch_count = std::min(batch_count, empty_space_count);
 
-        for (size_t i = 0; i < batch_count; i++)
+        for (int i = 0; i < batch_count; i++)
             calculate_glyph_vertices(glyph_queue[read_index + i], &vertices[i * kNumGlyphVertices]);
 
         auto lock_type = (vertex_buffer_wr_index == 0) ? D3DLOCK_DISCARD : D3DLOCK_NOOVERWRITE;
@@ -424,12 +426,14 @@ void BitmapFont::render_queue() {
             release();
             return;
         }
-        memcpy(&data[vertex_buffer_wr_index * sizeof(GlyphVertex) * kNumGlyphVertices], vertices.get(), batch_count * sizeof(GlyphVertex) * kNumGlyphVertices);
+        memcpy(&data[vertex_buffer_wr_index * sizeof(GlyphVertex) * kNumGlyphVertices],
+            vertices.get(), batch_count * sizeof(GlyphVertex) * kNumGlyphVertices);
         vertex_buffer->Unlock();
 
         device.SetIndices(index_buffer, 0);
         device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertex_buffer_wr_index * kNumGlyphVertices,
-            batch_count * kNumGlyphVertices, vertex_buffer_wr_index * kNumGlyphIndices, batch_count * kNumGlyphTriangles);
+            batch_count * kNumGlyphVertices, vertex_buffer_wr_index * kNumGlyphIndices,
+            batch_count * kNumGlyphTriangles);
         read_index += batch_count;
         vertex_buffer_wr_index += batch_count;
     }
