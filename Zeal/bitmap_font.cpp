@@ -393,14 +393,9 @@ void BitmapFont::render_queue() {
     texture_state.store_and_modify({ D3DTSS_ALPHAARG1, D3DTA_TEXTURE });
     texture_state.store_and_modify({ D3DTSS_ALPHAARG2, D3DTA_DIFFUSE });
 
-    // Stash the general pipeline settings as well so this call is transparent.
+    // Stash the vertex shader state.  Note not storing texture, indices, or streamsource.
     DWORD old_fvf_code = 0;
-    IDirect3DVertexBuffer8* old_stream_source = nullptr;
-    UINT old_stride = 0;
-    IDirect3DBaseTexture8* old_texture = nullptr;
-    device.GetVertexShader(&old_fvf_code);
-    device.GetStreamSource(0, &old_stream_source, &old_stride);
-    device.GetTexture(0, &old_texture);
+    device.GetVertexShader(&old_fvf_code);  // Assuming this won't increment a reference count.
 
     device.SetVertexShader(kGlyphVertexFvfCode);
     device.SetTexture(0, texture);
@@ -439,9 +434,8 @@ void BitmapFont::render_queue() {
     }
 
     // Restore D3D state.
-    device.SetTexture(0, old_texture); 
-    device.SetStreamSource(0, old_stream_source, old_stride);
     device.SetVertexShader(old_fvf_code);
+    device.SetTexture(0, NULL);  // Ensure texture is no longer bound.
     texture_state.restore_state();
     render_state.restore_state();
 }

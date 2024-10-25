@@ -39,6 +39,7 @@ public:
     float get_line_spacing() const { return line_spacing; }
 
     // Renders any queued string content to the screen and clears the queue.
+    // Note that the D3D stream source, indices, and texture states are not preserved across this call.
     void flush_queue_to_screen();
 
     // Releases resources including DirectX. Must call on a DirectX reset / lost device.

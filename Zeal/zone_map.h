@@ -152,7 +152,7 @@ private:
 	void callback_dx_reset();
 
 	// The following methods execute as part of callback_render().
-	void render_release_resources();
+	void render_release_resources(bool release_font = true);
 	void render_update_viewport(IDirect3DDevice8& device);
 	void render_update_transforms(const ZoneMapData& zone_map_data);
 	void render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_map_data);

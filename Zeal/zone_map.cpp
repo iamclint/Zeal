@@ -71,7 +71,7 @@ GroupNameArrayType* groupNames = reinterpret_cast<GroupNameArrayType*>(0x7912B5)
 
 
 // Releases the manually managed DirectX related resources.
-void ZoneMap::render_release_resources() {
+void ZoneMap::render_release_resources(bool flush_font) {
     if (line_vertex_buffer) {
         line_vertex_buffer->Release();
         line_vertex_buffer = nullptr;
@@ -84,6 +84,8 @@ void ZoneMap::render_release_resources() {
         marker_vertex_buffer->Release();
         marker_vertex_buffer = nullptr;
     }
+    if (flush_font)
+        release_font();
 }
 
 // Use the map_rect values and render target to configure the viewport rectangle.
@@ -205,7 +207,7 @@ void ZoneMap::render_update_transforms(const ZoneMapData& zone_map_data) {
 // Populates the "static" per zone line_vertex_buffer and labels list. Also allocates the
 // position_vertex_buffer (worst-case sized).
 void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_map_data) {
-    render_release_resources();  // Forces update of all graphics.
+    render_release_resources(false);  // Forces update of all graphics but leave font.
 
     const int kMaxLineCount = zone_map_data.num_lines;  // Allocate a buffer assuming all visible.
     std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(kMaxLineCount * 2);
@@ -805,18 +807,20 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
     memcpy(data, position_vertices.data(), copy_size);
     position_vertex_buffer->Unlock();
 
-    device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
 
     // First draw the "other" (raid, group) markers.
     int other_triangle_count = other_triangle_vertices / 3; // D3DPT_TRIANGLELIST
-    if (other_triangle_count)
+    if (other_triangle_count) {
+        device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
         device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, other_triangle_count);
+    }
 
     // Then draw the raid and group labels (on top of markers but below self marker).
     render_raid_member_labels(device);
     render_group_member_labels(device);
 
     // And finally draw the self marker. Three vertices per triangle in D3DPT_TRIANGLELIST.
+    device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
     int self_triangle_count = position_vertices.size() / 3 - other_triangle_count;
     device.DrawPrimitive(D3DPT_TRIANGLELIST, other_triangle_vertices, self_triangle_count);
 }
@@ -1234,7 +1238,7 @@ void ZoneMap::assemble_zone_map(const char* zone_name, CustomMapData& map_data) 
 
 void ZoneMap::set_enabled(bool _enabled, bool update_default) {
     if (!_enabled) {
-        render_release_resources();
+        render_release_resources();  // Also flush font for now.
         zone_id = kInvalidZoneId;  // Triggers update when re-enabled.
         hide_external_window();
     }
@@ -1637,7 +1641,7 @@ bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, boo
     map_rect_bottom = bottom;
     map_rect_right = right;
 
-    render_release_resources();  // Invalidate buffers.
+    render_release_resources(false);  // Invalidate buffers but leave font (slewing map size).
     zone_id = kInvalidZoneId;  // Triggers reload.
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini) {
@@ -2146,7 +2150,6 @@ void ZoneMap::release_font() {
 
 void ZoneMap::callback_dx_reset() {
     render_release_resources();
-    release_font();
     release_d3d_external_window();
     zone_id = kInvalidZoneId;  // Triggers reload of map.
 }
@@ -2166,7 +2169,6 @@ ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
 ZoneMap::~ZoneMap()
 {
     render_release_resources();
-    release_font();
     release_d3d_external_window();
     destroy_external_window();
 }
