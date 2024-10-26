@@ -479,9 +479,9 @@ The map supports adding a position marker to easier identification of target coo
 #### Map font
 The map supports selecting a "spritefont" formatted bitmap font file. A few sizes of arial
 font are included with Zeal and are located in uifiles/zeal/fonts. See the zeal/bitmap_font.cpp
-file for notes on how to generate new fonts. The default font is `default.spritefont`, and
-this file can be overwritten (not recommended) or the command examples below can be used to
-select and set a specific file as the persistent font.
+file for notes on how to generate new fonts. The default font is embedded in the code and can
+be selected with the font name `default`. The command examples below demonstrate how to select
+a font and how the current font can be made a persistent setting using the `save_ini` command.
 
 * Command examples:
   - `/map font arial_10` changes the current map font to Arial size 10

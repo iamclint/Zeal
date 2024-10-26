@@ -39,7 +39,8 @@ public:
     float get_line_spacing() const { return line_spacing; }
 
     // Renders any queued string content to the screen and clears the queue.
-    // Note that the D3D stream source, indices, and texture states are not preserved across this call.
+    // Note that the D3D stream source, indices, vertex shader, and texture states
+    // are not preserved across this call.
     void flush_queue_to_screen();
 
     // Releases resources including DirectX. Must call on a DirectX reset / lost device.
@@ -64,10 +65,11 @@ private:
     };
 
     // Vertices allow texturing and color modulation.
-    static constexpr DWORD kGlyphVertexFvfCode = (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
     struct GlyphVertex {
+        static constexpr DWORD kGlyphVertexFvfCode = (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+
         float x, y, z, rhw;  // Transformed position coordinates and rhw.
-        D3DCOLOR color;      // Optional color (0 for white).
+        D3DCOLOR color;      // Color (modulates font color which is typically white).
         float u, v;          // Texture coordinates from D3DFVF_TEX1.
     };
 

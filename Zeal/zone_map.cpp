@@ -5,6 +5,7 @@
 #include "string_util.h"
 #include "zone_map_data.h"
 #include "bitmap_font.h"
+#include "default_spritefont.h"
 #include <fstream>
 #include <string>
 
@@ -361,14 +362,25 @@ void ZoneMap::render_load_font(IDirect3DDevice8& device) {
     if (font_filename.empty())  // Used to signal error state below.
         return;
 
-    std::string full_filename = "uifiles/zeal/fonts/" + font_filename + ".spritefont";
-    bitmap_font = std::make_unique<BitmapFont>(device, full_filename.c_str());
-    if (bitmap_font->is_valid())
-        return;  // Font is ready, all done.
+    if (font_filename != "default") {
+        std::string full_filename = "uifiles/zeal/fonts/" + font_filename + ".spritefont";
+        bitmap_font = std::make_unique<BitmapFont>(device, full_filename.c_str());
+        if (bitmap_font->is_valid())
+            return;  // Font is ready, all done.
 
-    bitmap_font.reset();  // Null the bad font to disable attempts to use.
-    font_filename = "";  // Clear to indicate invalid and do not retry.
-    Zeal::EqGame::print_chat("Failed to load font file: %s", full_filename.c_str());
+        Zeal::EqGame::print_chat("Failed to load font file: %s", full_filename.c_str());
+        bitmap_font.reset();  // Release the invalid font.
+        font_filename = "default";  // Set back to the default (handled below).
+    }
+
+    // Initialize with the embedded default font.
+    bitmap_font = std::make_unique<BitmapFont>(device,
+                std::span<const uint8_t>(default_spritefont, default_spritefont_len));
+    if (!bitmap_font->is_valid()) {
+        bitmap_font.reset();  // Release and null the bad font to disable attempts to use.
+        font_filename = "";  // Clear to indicate invalid and do not auto-retry.
+        Zeal::EqGame::print_chat("Error initializing default font");
+    }
 }
 
 // Primary render callback that executes all components.
@@ -493,6 +505,7 @@ void ZoneMap::render_labels(IDirect3DDevice8& device) {
         }
     }
     bitmap_font->flush_queue_to_screen();  // Flush to screen.
+    device.SetVertexShader(kMapVertexFvfCode);  // Restore assumed shader.
 }
 
 // Handles writing a text label at map coordinates y and x to the screen.
@@ -652,6 +665,7 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         render_label_text(label,-loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
     bitmap_font->flush_queue_to_screen();
+    device.SetVertexShader(kMapVertexFvfCode);  // Restore assumed shader.
 }
 
 // Adds a label for each raid member if enabled.
@@ -693,6 +707,7 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
         render_label_text(label, -loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
     bitmap_font->flush_queue_to_screen();
+    device.SetVertexShader(kMapVertexFvfCode);  // Restore assumed shader.
 }
 
 // Adds simple position markers for raid members.
