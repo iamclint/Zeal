@@ -4,13 +4,13 @@
 #include "EqAddresses.h"
 #include "string_util.h"
 #include "zone_map_data.h"
+#include "bitmap_font.h"
 #include <fstream>
 #include <string>
 
 
 // Possible enhancements:
 // - Look into intermittent z-depth clipping due to walls or heads/faces
-// - DrawText is extremely slow and could use optimization
 // - External map window issues:
 //   - window message queue is not working and so not supporting window
 //     resizing or things like window panning or scroll wheel zooming
@@ -66,77 +66,12 @@ using GroupEntityPtrArrayType = Zeal::EqStructures::Entity*;
 GroupEntityPtrArrayType* groupEntityPtrs = reinterpret_cast<GroupEntityPtrArrayType*>(0x7913F8);
 GroupNameArrayType* groupNames = reinterpret_cast<GroupNameArrayType*>(0x7912B5);
 
-// Convenience class for stashing the active D3D render state before modifying
-// a list of parameters.
-class RenderStateStash {
-public:
-    struct Pair {
-        D3DRENDERSTATETYPE state_type;
-        DWORD value;
-    };
-
-    RenderStateStash(IDirect3DDevice8* device_) {
-        device = device_;
-    }
-
-    // Processes list of pairs stashing current state and modifying to new state.
-    void store_and_modify(const std::vector<Pair>& pairs) {
-        for (const auto& pair : pairs) {
-            DWORD value;
-            device->GetRenderState(pair.state_type, &value);
-            stored_pairs.push_back({ pair.state_type, value });
-            device->SetRenderState(pair.state_type, pair.value);
-        }
-    }
-
-    // Copies the stashed state back.
-    void restore_state() {
-        for (const auto& pair : stored_pairs)
-            device->SetRenderState(pair.state_type, pair.value);
-    }
-
-private:
-    IDirect3DDevice8* device;
-    std::vector<Pair> stored_pairs;
-};
-
-class TextureStateStash {
-public:
-    struct Pair {
-        D3DTEXTURESTAGESTATETYPE state_type;
-        DWORD value;
-    };
-
-    TextureStateStash(IDirect3DDevice8* device_) {
-        device = device_;
-    }
-
-    // Processes list of pairs stashing current state and modifying to new state.
-    void store_and_modify(const std::vector<Pair>& pairs) {
-        for (const auto& pair : pairs) {
-            DWORD value;
-            device->GetTextureStageState(0, pair.state_type, &value);
-            stored_pairs.push_back({ pair.state_type, value });
-            device->SetTextureStageState(0, pair.state_type, pair.value);
-        }
-    }
-
-    // Copies the stashed state back.
-    void restore_state() {
-        for (const auto& pair : stored_pairs)
-            device->SetTextureStageState(0, pair.state_type, pair.value);
-    }
-
-private:
-    IDirect3DDevice8* device;
-    std::vector<Pair> stored_pairs;
-};
 
 }  // namespace
 
 
 // Releases the manually managed DirectX related resources.
-void ZoneMap::render_release_resources() {
+void ZoneMap::render_release_resources(bool flush_font) {
     if (line_vertex_buffer) {
         line_vertex_buffer->Release();
         line_vertex_buffer = nullptr;
@@ -149,10 +84,8 @@ void ZoneMap::render_release_resources() {
         marker_vertex_buffer->Release();
         marker_vertex_buffer = nullptr;
     }
-    if (label_font) {
-        label_font->Release();
-        label_font = nullptr;
-    }
+    if (flush_font)
+        release_font();
 }
 
 // Use the map_rect values and render target to configure the viewport rectangle.
@@ -274,7 +207,7 @@ void ZoneMap::render_update_transforms(const ZoneMapData& zone_map_data) {
 // Populates the "static" per zone line_vertex_buffer and labels list. Also allocates the
 // position_vertex_buffer (worst-case sized).
 void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_map_data) {
-    render_release_resources();  // Forces update of all graphics.
+    render_release_resources(false);  // Forces update of all graphics but leave font.
 
     const int kMaxLineCount = zone_map_data.num_lines;  // Allocate a buffer assuming all visible.
     std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(kMaxLineCount * 2);
@@ -382,22 +315,6 @@ D3DCOLOR ZoneMap::get_background_color() const {
 void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zone_map_data) {
     labels_list.clear();
 
-    // Sneak in the current Level filter setting as another label.
-    if (map_level_zone_id == zone_id) {
-        const float indent_x = scale_pixels_to_model(15);
-        const float indent_y = scale_pixels_to_model(10);
-        snprintf(map_level_label_string, sizeof(map_level_label_string), "Level: %i", map_level_index);
-        map_level_label_string[sizeof(map_level_label_string) - 1] = 0;
-        map_level_label.x = static_cast<int16_t>(clip_min_x + indent_x);
-        map_level_label.y = static_cast<int16_t>(clip_min_y + indent_y);
-        map_level_label.z = clip_min_z;
-        map_level_label.red = 255;
-        map_level_label.green = 255;
-        map_level_label.blue = 255;
-        map_level_label.label = map_level_label_string;
-        labels_list.push_back(&map_level_label);
-    }
-
     int num_labels_to_scan = zone_map_data.num_labels;
     if (map_labels_mode == LabelsMode::kOff)
         num_labels_to_scan = 0;  // Disable the scan below.
@@ -434,35 +351,24 @@ void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zo
 
     if (dynamic_labels_zone_id != zone_id)
         dynamic_labels_list.clear();
-
-    if (!labels_list.empty() || !dynamic_labels_list.empty())
-        render_load_font(device);
 }
 
-// Loads a default fault for render-time writing of text to screen.
+// Loads the bitmap font for real-time text rendering to screen.
 void ZoneMap::render_load_font(IDirect3DDevice8& device) {
-    if (label_font)
+    if (bitmap_font)
         return;
 
-    LOGFONT log_font = {
-            14, //height
-            0,  //width
-            0,  // lfEscapement
-            0,  //lfOrientation
-            FW_NORMAL, // lfWeight
-            FALSE, // lfItalic
-            FALSE, // lfUnderline
-            FALSE, // lfStrikeOut
-            DEFAULT_CHARSET, // lfCharSet
-            OUT_DEFAULT_PRECIS, //lfOutPrecision
-            CLIP_DEFAULT_PRECIS, // lfClipPrecision
-            ANTIALIASED_QUALITY,// lfQuality
-            DEFAULT_PITCH,// lfPitchAndFamily
-            L"Arial"// lfFaceName[LF_FACESIZE]
-    };
-    HRESULT hr = D3DXCreateFontIndirect(&device, &log_font, &label_font);
-    if (FAILED(hr))
-        label_font = nullptr;  // Just in case.
+    if (font_filename.empty())  // Used to signal error state below.
+        return;
+
+    std::string full_filename = "uifiles/zeal/fonts/" + font_filename + ".spritefont";
+    bitmap_font = std::make_unique<BitmapFont>(device, full_filename.c_str());
+    if (bitmap_font->is_valid())
+        return;  // Font is ready, all done.
+
+    bitmap_font.reset();  // Null the bad font to disable attempts to use.
+    font_filename = "";  // Clear to indicate invalid and do not retry.
+    Zeal::EqGame::print_chat("Failed to load font file: %s", full_filename.c_str());
 }
 
 // Primary render callback that executes all components.
@@ -477,25 +383,14 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
     device.SetViewport(&viewport);
 
     // Configure for 2D drawing with alpha blending ready but disabled.
-    std::vector<RenderStateStash::Pair> render_pairs;
-    render_pairs.push_back({ D3DRS_CULLMODE, D3DCULL_NONE });
-    render_pairs.push_back({ D3DRS_ALPHABLENDENABLE, FALSE });
-    render_pairs.push_back({ D3DRS_SRCBLEND, D3DBLEND_SRCALPHA });
-    render_pairs.push_back({ D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA });
-    render_pairs.push_back({ D3DRS_ZENABLE, FALSE });  // Rely on render order.
-    render_pairs.push_back({ D3DRS_ZWRITEENABLE, FALSE });
-    render_pairs.push_back({ D3DRS_LIGHTING, FALSE });  // Disable lighting
-    RenderStateStash render_state(&device);
-    render_state.store_and_modify(render_pairs);
-
-    // Set texture stage states to avoid any unexpected texturing
-    std::vector<TextureStateStash::Pair> texture_pairs;
-    texture_pairs.push_back({ D3DTSS_COLOROP, D3DTOP_SELECTARG1 });
-    texture_pairs.push_back({ D3DTSS_COLORARG1, D3DTA_DIFFUSE });
-    texture_pairs.push_back({ D3DTSS_ALPHAOP, D3DTOP_SELECTARG1 });
-    texture_pairs.push_back({ D3DTSS_ALPHAARG1, D3DTA_DIFFUSE });
-    TextureStateStash texture_state(&device);
-    texture_state.store_and_modify(texture_pairs);
+    D3DRenderStateStash render_state(device);
+    render_state.store_and_modify({ D3DRS_CULLMODE, D3DCULL_NONE });
+    render_state.store_and_modify({ D3DRS_ALPHABLENDENABLE, FALSE });
+    render_state.store_and_modify({ D3DRS_SRCBLEND, D3DBLEND_SRCALPHA });
+    render_state.store_and_modify({ D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA });
+    render_state.store_and_modify({ D3DRS_ZENABLE, FALSE });  // Rely on render order.
+    render_state.store_and_modify({ D3DRS_ZWRITEENABLE, FALSE });
+    render_state.store_and_modify({ D3DRS_LIGHTING, FALSE });  // Disable lighting
 
     D3DMATRIX projection_original, world_original, view_original;
     device.GetTransform(D3DTS_WORLD, &world_original);
@@ -534,7 +429,7 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
         device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, kMarkerCount);
     }
 
-    render_labels();
+    render_labels(device);
 
     render_positions(device);
 
@@ -542,17 +437,14 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
     device.SetTransform(D3DTS_WORLD, &world_original);
     device.SetTransform(D3DTS_VIEW, &view_original);
     render_state.restore_state();
-    texture_state.restore_state();
     device.SetViewport(&original_viewport);
 }
 
 // Handles the rendering of the map background tinting.
 void ZoneMap::render_background(IDirect3DDevice8& device) {
     // Enable alpha blending for the background
-    std::vector<RenderStateStash::Pair> render_pairs;
-    render_pairs.push_back({ D3DRS_ALPHABLENDENABLE, TRUE });
-    RenderStateStash render_state(&device);
-    render_state.store_and_modify(render_pairs);
+    D3DRenderStateStash render_state(device);
+    render_state.store_and_modify({ D3DRS_ALPHABLENDENABLE, TRUE });
 
     // Background vertices are stored at the start of the line_vertex_buffer.
     device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
@@ -562,34 +454,52 @@ void ZoneMap::render_background(IDirect3DDevice8& device) {
 }
 
 // Handles the rendering of the labels_list and dynamic_labels_list.
-void ZoneMap::render_labels() {
-    if (labels_list.empty() && dynamic_labels_list.empty())
+void ZoneMap::render_labels(IDirect3DDevice8& device) {
+    bool add_level_label = (map_level_zone_id == zone_id);
+    if (!add_level_label && labels_list.empty() && dynamic_labels_list.empty())
         return;
 
-    if (!label_font)
+    render_load_font(device);
+    if (!bitmap_font)
         return;
 
-    label_font->Begin();  // Minor 10% performance improvement with Begin/End.
+    if (add_level_label) {
+        char level_label_string[20];
+        snprintf(level_label_string, sizeof(level_label_string), "Level: %i", map_level_index);
+        level_label_string[sizeof(level_label_string) - 1] = 0;  // Ensure null-terminated.
+        Vec2 level_size = bitmap_font->measure_string(level_label_string);
+        const float indent_x = scale_pixels_to_model(5 + 0.5f * level_size.x);
+        const float indent_y = scale_pixels_to_model(5 + 0.5f * level_size.y);
+        render_label_text(level_label_string, static_cast<int16_t>(clip_min_y + indent_y),
+            static_cast<int16_t>(clip_min_x + indent_x), D3DCOLOR_XRGB(255, 255, 255));
+    }
+
     for (const ZoneMapLabel* label : labels_list) {
-        const char* text_label = (map_labels_mode == LabelsMode::kMarkerOnly) ? "+" : label->label;
-        render_label_text(text_label, label->y, label->x, D3DCOLOR_XRGB(label->red, label->green, label->blue));
+        bool marker_only = (map_labels_mode == LabelsMode::kMarkerOnly);
+        const char* text_label = marker_only ? "+" : label->label;
+        render_label_text(text_label, label->y, label->x,
+            D3DCOLOR_XRGB(label->red, label->green, label->blue),
+            marker_only ? LabelType::Normal : LabelType::AddMarker);
     }
 
     ULONGLONG timestamp = GetTickCount64();
     for (auto it = dynamic_labels_list.begin(); it != dynamic_labels_list.end();) {
         if (it->timeout == 0 || it->timeout >= timestamp) {
-            render_label_text(it->label.c_str(), -it->loc_y, -it->loc_x, it->color);
+            render_label_text(it->label.c_str(), -it->loc_y, -it->loc_x, it->color, LabelType::AddMarker);
             it++;
         }
         else {
             it = dynamic_labels_list.erase(it);  // Drop timed out labels.
         }
     }
-    label_font->End();
+    bitmap_font->flush_queue_to_screen();  // Flush to screen.
 }
 
 // Handles writing a text label at map coordinates y and x to the screen.
-void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOLOR font_color) {
+void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOLOR font_color,
+                                LabelType label_type, Vec2 offset_pixels) {
+    if (!bitmap_font)  // Programming error if this happens but paranoid checking.
+        return;
 
    // Then check if the label is visible on the clipped map rect.
     // Text rendering is slow. Perform some manual clipping to skip processing
@@ -619,20 +529,31 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
                 length = i;  // Truncates and breaks loop.
         }
     }
-    const int half_width = length * 3 + 5;  // Approximate size for centering.
+    char short_label[21];
+    memcpy(short_label, label, length);
+    short_label[length] = 0;
 
     Vec3 label_screen = transform_model_to_screen(Vec3(xf, yf, 0));
-    int label_x = static_cast<int>(label_screen[0] + 0.5f);
-    int label_y = static_cast<int>(label_screen[1] + 0.5f);
-    RECT text_rect = { .left = label_x - half_width, .top = label_y - kHalfHeight,
-                    .right = label_x + half_width, .bottom = label_y + kHalfHeight };
 
-    text_rect.left = max(view_left, min(view_right - 2 * half_width, text_rect.left));
-    text_rect.right = min(view_right, max(view_left + 2 * half_width, text_rect.right));
-    text_rect.top = max(view_top, min(view_bottom - 2 * kHalfHeight, text_rect.top));
-    text_rect.bottom = min(view_bottom, max(view_top + 2 * kHalfHeight, text_rect.bottom));
-
-    label_font->DrawTextA(label, length, &text_rect, DT_VCENTER | DT_CENTER | DT_SINGLELINE, font_color);
+    // Calculate center position that keeps the label within the viewport.
+    float label_x = label_screen[0];
+    float label_y = label_screen[1];
+    if (label_type == LabelType::AddMarker)
+        label_y -= bitmap_font->get_line_spacing() * 0.5f;  // '+' is half-sized.
+    else if (label_type == LabelType::PositionLabel) {
+        label_x += offset_pixels.x;
+        label_y += offset_pixels.y;
+    }
+    if (label_type != LabelType::Normal) {
+        Vec2 size = bitmap_font->measure_string(short_label);
+        const float half_width = size.x * 0.5f;
+        const float half_height = size.y * 0.5f;
+        label_x = max(view_left + half_width, min(view_right - half_width, label_x));
+        label_y = max(view_top + half_height, min(view_bottom - half_height, label_y));
+    }
+    bitmap_font->queue_string(short_label, Vec2(label_x, label_y), true, font_color);
+    if (label_type == LabelType::AddMarker)
+        bitmap_font->queue_string("+", Vec2(label_screen[0], label_screen[1]), true, font_color);
 }
 
 // Adds vertices to mark a position at the map coordinates.
@@ -702,10 +623,17 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         return;
 
     render_load_font(device);
-    if (!label_font)
+    if (!bitmap_font)
         return;
 
-    // label_font->Begin(); // TODO: Check if this improves performance.
+    float offset_y = max(5.f, position_size * min(max_viewport_width, max_viewport_height));
+    Vec2 offset_pixels = { 0, -offset_y };
+
+    D3DCOLOR color = D3DCOLOR_XRGB(255, 255, 255);
+    if (ZealService::get_instance()->ui && ZealService::get_instance()->ui->options
+        && ZealService::get_instance()->ui->options.get())
+        color = ZealService::get_instance()->ui->options.get()->GetColor(5);  // GroupColor
+
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
         if ((strlen(groupNames[i]) == 0) || !member)
@@ -721,9 +649,9 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         else
             for (int j = 0; j < kShortNameLength; ++j)
                 label[j] = groupNames[i][j];
-        render_label_text(label,-loc_y, -loc_x, D3DCOLOR_XRGB(255, 255, 255));
+        render_label_text(label,-loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
-    // label_font->End();
+    bitmap_font->flush_queue_to_screen();
 }
 
 // Adds a label for each raid member if enabled.
@@ -733,8 +661,16 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
 
     render_load_font(device);
     auto entity_manager = ZealService::get_instance()->entity_manager.get();  // Short-term ptr.
-    if (!label_font || !entity_manager)
+    if (!bitmap_font || !entity_manager)
         return;
+
+    float offset_y = max(5.f, position_size * min(max_viewport_width, max_viewport_height));
+    Vec2 offset_pixels = { 0, -offset_y };
+
+    D3DCOLOR color = D3DCOLOR_XRGB(240, 240, 240);
+    if (ZealService::get_instance()->ui && ZealService::get_instance()->ui->options
+        && ZealService::get_instance()->ui->options.get())
+        color = ZealService::get_instance()->ui->options.get()->GetColor(4);  // Raidcolor
 
     const Zeal::EqStructures::RaidMember* raidMembers =
         reinterpret_cast<const Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
@@ -754,8 +690,9 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
         char label[kShortNameLength + 1] = { 0 };  // Null-terminate.
         for (int j = 0; j < kShortNameLength; ++j)
             label[j] = entity->Name[j];
-        render_label_text(label, -loc_y, -loc_x, D3DCOLOR_XRGB(240, 240, 240));
+        render_label_text(label, -loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
+    bitmap_font->flush_queue_to_screen();
 }
 
 // Adds simple position markers for raid members.
@@ -870,18 +807,20 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
     memcpy(data, position_vertices.data(), copy_size);
     position_vertex_buffer->Unlock();
 
-    device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
 
     // First draw the "other" (raid, group) markers.
     int other_triangle_count = other_triangle_vertices / 3; // D3DPT_TRIANGLELIST
-    if (other_triangle_count)
+    if (other_triangle_count) {
+        device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
         device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, other_triangle_count);
+    }
 
     // Then draw the raid and group labels (on top of markers but below self marker).
     render_raid_member_labels(device);
     render_group_member_labels(device);
 
     // And finally draw the self marker. Three vertices per triangle in D3DPT_TRIANGLELIST.
+    device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
     int self_triangle_count = position_vertices.size() / 3 - other_triangle_count;
     device.DrawPrimitive(D3DPT_TRIANGLELIST, other_triangle_vertices, self_triangle_count);
 }
@@ -1299,7 +1238,7 @@ void ZoneMap::assemble_zone_map(const char* zone_name, CustomMapData& map_data) 
 
 void ZoneMap::set_enabled(bool _enabled, bool update_default) {
     if (!_enabled) {
-        render_release_resources();
+        render_release_resources();  // Also flush font for now.
         zone_id = kInvalidZoneId;  // Triggers update when re-enabled.
         hide_external_window();
     }
@@ -1577,6 +1516,8 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<float>("Zeal", "MapPositionSize", kDefaultPositionSize);
     if (!ini->exists("Zeal", "MapMarkerSize"))
         ini->setValue<float>("Zeal", "MapMarkerSize", kDefaultMarkerSize);
+    if (!ini->exists("Zeal", "MapFontFilename"))
+        ini->setValue<std::string>("Zeal", "MapFontFilename", std::string("default"));
 
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
     enabled = ini->getValue<bool>("Zeal", "MapEnabled");
@@ -1600,6 +1541,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_rect_right = ini->getValue<float>("Zeal", "MapRectRight");
     position_size = ini->getValue<float>("Zeal", "MapPositionSize");
     marker_size = ini->getValue<float>("Zeal", "MapMarkerSize");
+    font_filename = ini->getValue<std::string>("Zeal", "MapFontFilename");
 
     // Sanity clamp ini values.
     map_data_mode = max(MapDataMode::kFirst, min(MapDataMode::kLast, map_data_mode));
@@ -1645,6 +1587,8 @@ void ZoneMap::save_ini()
     ini->setValue<float>("Zeal", "MapRectRight", map_rect_right);
     ini->setValue<float>("Zeal", "MapPositionSize", position_size);
     ini->setValue<float>("Zeal", "MapMarkerSize", marker_size); 
+    ini->setValue<std::string>("Zeal", "MapFontFilename",
+                        font_filename.empty() ? std::string("default") : font_filename);
 }
 
 void ZoneMap::update_ui_options() {
@@ -1697,7 +1641,7 @@ bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, boo
     map_rect_bottom = bottom;
     map_rect_right = right;
 
-    render_release_resources();  // Invalidate buffers.
+    render_release_resources(false);  // Invalidate buffers but leave font (slewing map size).
     zone_id = kInvalidZoneId;  // Triggers reload.
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini) {
@@ -1952,6 +1896,16 @@ void ZoneMap::parse_zoom(const std::vector<std::string>& args) {
         Zeal::EqGame::print_chat( "Usage: /map zoom <percent> (<= 100 disables)");
 }
 
+void ZoneMap::parse_font(const std::vector<std::string>& args) {
+    if (args.size() == 3) {
+        release_font();
+        font_filename = std::string(args[2]);
+        Zeal::EqGame::print_chat("Setting font to: %s", font_filename.c_str());
+        return;
+    }
+    Zeal::EqGame::print_chat("Usage: /map font <name> (uifiles/zeal/fonts/<name>.spritefont)");
+}
+
 void ZoneMap::toggle_level_up() {
     set_level(map_level_index + 1);
 }
@@ -2083,8 +2037,9 @@ void ZoneMap::dump() {
         mat_model2world(0,0), mat_model2world(3,1), mat_model2world(3, 0), zoom_factor);
     Zeal::EqGame::print_chat("dyn_labels_size: %i, dyn_labels_zone_id: %i, data_mode: %i, data_cache: %i", 
         dynamic_labels_list.size(), dynamic_labels_zone_id, map_data_mode, map_data_cache.size());
-    Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i, font: %i", line_count,
-        line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr, label_font != nullptr);
+    Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i, font: %i (%s)", line_count,
+        line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr,
+        bitmap_font != nullptr, font_filename.c_str());
     Zeal::EqGame::print_chat("external_monitor_left_offset: %i, monitor_left_offset: %i, monitor_top_offset: %i",
         external_enabled, external_monitor_left_offset, external_monitor_top_offset);
     Zeal::EqGame::print_chat("hinstance: 0x%08x, hwnd: 0x%08x, d3d: 0x%08x, d3ddev: 0x%08x",
@@ -2159,6 +2114,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
         Zeal::EqGame::print_chat("Saving current map settings");
         save_ini();
     }
+    else if (args[1] == "font") {
+        parse_font(args);
+    }
     else if (args[1] == "always_center") {
         always_align_to_center = !always_align_to_center;  // Experimental option.
     }
@@ -2181,6 +2139,13 @@ void ZoneMap::callback_zone() {
     map_level_zone_id = kInvalidZoneId;
     map_level_index = 0;
     zoom_factor = 1.f;  // Reset for more consistent behavior.
+}
+
+void ZoneMap::release_font() {
+    if (bitmap_font) {
+        bitmap_font->release();  // Paranoid redundancy for destructor below.
+        bitmap_font.reset();
+    }
 }
 
 void ZoneMap::callback_dx_reset() {

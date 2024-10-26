@@ -629,7 +629,7 @@
       <CX>150</CX>
       <CY>14</CY>
     </Size>
-    <Text>Labels (FPS penalty)</Text>
+    <Text>Labels</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -658,10 +658,10 @@
     <ListHeight>70</ListHeight>
     <Button>BDT_Combo</Button>
     <Style_Border>true</Style_Border>
-    <Choices>Off (no penalty)</Choices>
-    <Choices>Summary (some)</Choices>
-    <Choices>All (significant)</Choices>
-    <Choices>Marker only (some)</Choices>
+    <Choices>Off</Choices>
+    <Choices>Summary</Choices>
+    <Choices>All</Choices>
+    <Choices>Marker only</Choices>
   </Combobox>
   <!-- Zeal Map Keybinds Reminder -->
   <Label item="Zeal_MapKeyBinds_Label">

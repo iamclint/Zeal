@@ -26,9 +26,9 @@ public:
 	inline bool operator == (const Vec2& v) const { return x == v.x && y == v.y; }
 	inline bool operator != (const Vec2& v) const { return x != v.x && y != v.y; }
 	inline Vec2& operator += (const Vec2& v) { this->x += v.x; this->y += v.y; return *this; }
-	inline Vec2& operator -= (const Vec2& v) { this->x += v.x; this->y += v.y; return *this; }
+	inline Vec2& operator -= (const Vec2& v) { this->x -= v.x; this->y -= v.y; return *this; }
 	inline Vec2& operator *= (const Vec2& v) { this->x *= v.x, this->y *= v.y; return *this; }
-	inline Vec2& operator /= (const Vec2& v) { this->x += v.x; this->y += v.y; return *this; }
+	inline Vec2& operator /= (const Vec2& v) { this->x /= v.x; this->y /= v.y; return *this; }
 	inline float& operator [] (int index) { float f = FLT_MIN; if (index == 0) return x;  if (index == 1) return y; return f; }
 	const float& operator [] (int index) const { if (index == 0) return x;  if (index == 1) return y; return FLT_MIN; }
 	//ImVec2 toImVec2() const { return ImVec2(x, y); }

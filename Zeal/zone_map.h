@@ -6,6 +6,7 @@
 #include "directx.h"
 #include "vectors.h"
 #include "zone_map_data.h"
+#include "bitmap_font.h"
 #include <list>
 #include <string>
 #include <unordered_map>
@@ -89,6 +90,8 @@ public:
 		unsigned int duration_ms = 0, D3DCOLOR font_color = D3DCOLOR_XRGB(250, 250, 51));
 
 private:
+	enum class LabelType { Normal, AddMarker, PositionLabel };
+
 	// DynamicLabels are added using add_label() and are in addition to the static map data labels.
 	struct DynamicLabel {
 		std::string label;  // Label to display.
@@ -131,6 +134,7 @@ private:
 	void parse_map_data_mode(const std::vector<std::string>& args);
 	void parse_show_group(const std::vector<std::string>& args);
 	void parse_show_raid(const std::vector<std::string>& args);
+	void parse_font(const std::vector<std::string>& args);
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
 	void set_marker(int y, int x);
@@ -148,7 +152,7 @@ private:
 	void callback_dx_reset();
 
 	// The following methods execute as part of callback_render().
-	void render_release_resources();
+	void render_release_resources(bool release_font = true);
 	void render_update_viewport(IDirect3DDevice8& device);
 	void render_update_transforms(const ZoneMapData& zone_map_data);
 	void render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_map_data);
@@ -160,8 +164,9 @@ private:
 	void render_group_member_labels(IDirect3DDevice8& device);
 	void render_raid_member_labels(IDirect3DDevice8& device);
 	void render_update_marker_buffer(IDirect3DDevice8& device);
-	void render_labels();
-	void render_label_text(const char* label, int map_y, int map_x, D3DCOLOR font_color);
+	void render_labels(IDirect3DDevice8& device);
+	void render_label_text(const char* label, int map_y, int map_x, D3DCOLOR font_color,
+		LabelType label_type = LabelType::Normal, Vec2 offset_pixels = { 0,0 });
 	void add_position_marker_vertices(float map_y, float map_x, float heading, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 	void add_group_member_position_vertices(std::vector<MapVertex>& vertices) const;
@@ -197,8 +202,6 @@ private:
 	int marker_y = 0;
 	int map_level_zone_id = kInvalidZoneId;
 	int map_level_index = 0;
-	ZoneMapLabel map_level_label;
-	char map_level_label_string[20];
 	int dynamic_labels_zone_id = kInvalidZoneId;
 	std::vector<DynamicLabel> dynamic_labels_list;  // Optional temporary labels.
 	std::unordered_map<int, std::unique_ptr<CustomMapData>> map_data_cache;
@@ -226,7 +229,8 @@ private:
 	IDirect3DVertexBuffer8* line_vertex_buffer = nullptr;
 	IDirect3DVertexBuffer8* position_vertex_buffer = nullptr;
 	IDirect3DVertexBuffer8* marker_vertex_buffer = nullptr;
-	ID3DXFont* label_font = nullptr;
+	std::string font_filename;
+	std::unique_ptr<BitmapFont> bitmap_font;
 
 	// External window support
 	static constexpr wchar_t kExternalWindowClassName[] = L"ZealMapWindowClass";
@@ -242,6 +246,7 @@ private:
 	void destroy_external_window();
 	bool initialize_d3d_external_window();
 	void release_d3d_external_window();
+	void release_font();
 	RECT calc_external_window_client_rect();
 
 	HINSTANCE external_hinstance = nullptr;
