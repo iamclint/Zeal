@@ -316,6 +316,7 @@ void ui_manager::WriteTemporaryUI(const std::string& file_path, std::string ui_p
 			infile.close();
 
 			std::filesystem::path new_file_path = ui_path + "EQUI_Zeal.xml";
+			std::filesystem::create_directories(new_file_path.parent_path());
 			std::ofstream outfile(new_file_path);
 			if (outfile)
 			{
@@ -337,6 +338,7 @@ void ui_manager::RemoveTemporaryUI(const std::string& file_path)
 void __fastcall LoadSidlHk(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
+	ui->included_files.clear();
 	std::string str_filename = filename;
 	std::string zeal_file = ui_manager::ui_path + str_filename;
 
@@ -358,7 +360,36 @@ void __fastcall LoadSidlHk(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::E
 	if (str_filename == "EQUI.xml" && !file_path.empty())
 		ui->RemoveTemporaryUI(path1);
 }
-
+bool ui_manager::AlreadyLoadedXml(std::string name)
+{
+	std::string lName = name;
+	std::transform(lName.begin(), lName.end(), lName.begin(), ::tolower);
+	bool exists = std::find(included_files.begin(), included_files.end(), lName) != included_files.end();
+	if (!exists)
+		included_files.push_back(lName);
+	else
+	{
+		CreateTmpXML();
+		MessageBoxA(NULL, name.c_str(), "Duplicate xml", 0);
+	}
+	return exists;
+}
+void ui_manager::CreateTmpXML()
+{
+	std::filesystem::path new_file_path = ui_manager::ui_path + std::string("EQUI_TMP.xml");
+	if (std::filesystem::exists(new_file_path))
+		std::filesystem::remove(new_file_path);
+	std::filesystem::create_directories(new_file_path.parent_path());
+	std::ofstream outfile(new_file_path);
+	if (outfile)
+	{
+		outfile << "<?xml version=\"1.0\" encoding=\"us-ascii\"?>" << std::endl;
+		outfile << "<XML ID=\"EQInterfaceDefinitionLanguage\">" << std::endl;
+		outfile << "<Schema xmlns=\"EverQuestData\" xmlns:dt=\"EverQuestDataTypes\" />" << std::endl;
+		outfile << "</XML>" << std::endl;
+		outfile.close();
+	}
+}
 int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
@@ -368,6 +399,12 @@ int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI:
 		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
 	else
 		path1 = Zeal::EqUI::CXSTR((char*)0x63D3C0);
+
+	if (ui->AlreadyLoadedXml(filename))
+	{
+		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
+		filename = "EQUI_TMP.xml";
+	}
 
 	return ZealService::get_instance()->hooks->hook_map["XMLRead"]->original(XMLRead)(t, unused, path1, path2, filename);
 }
@@ -380,6 +417,12 @@ int __fastcall XMLReadNoValidate(void* t, int unused, Zeal::EqUI::CXSTR path1, Z
 		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
 	else
 		path1 = Zeal::EqUI::CXSTR((char*)0x63D3C0);
+
+	if (ui->AlreadyLoadedXml(filename))
+	{
+		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
+		filename = "EQUI_TMP.xml";
+	}
 
 	return ZealService::get_instance()->hooks->hook_map["XMLReadNoValidate"]->original(XMLReadNoValidate)(t, unused, path1, path2, filename);
 }

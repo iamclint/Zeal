@@ -46,7 +46,7 @@ public:
 	void RemoveTemporaryUI(const std::string& file_path);
 	void AddXmlInclude(const std::string& name);
 	ui_manager(class ZealService* zeal, class IO_ini* ini);
-
+	bool AlreadyLoadedXml(std::string name);
 	std::shared_ptr<ui_options> options = nullptr;
 	std::shared_ptr<ui_bank> bank = nullptr;
 	std::shared_ptr<ui_loot> loot = nullptr;
@@ -54,6 +54,9 @@ public:
 	std::shared_ptr<ui_raid> raid = nullptr;
 	std::shared_ptr<ui_hotbutton> hotbutton = nullptr;
 	std::shared_ptr<ui_group> group = nullptr;
+	std::vector<std::string> included_files;
+	void CreateTmpXML();
+	void DeleteTmpXML();
 private:
 	std::vector<std::string> XMLIncludes;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> checkbox_names;
@@ -66,6 +69,7 @@ private:
 	
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> combo_names;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> label_names;
+	
 	void CleanUI();
 	void init_ui();
 	
