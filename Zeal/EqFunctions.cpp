@@ -1326,7 +1326,7 @@ namespace Zeal
 		{
 			if (!is_in_game())
 			{
-				print_buffer.push_back(data);
+				ZealService::get_instance()->print_buffer.push_back(data);
 				return;
 			}
 			std::vector<std::string> vd = splitStringByNewLine(data);
@@ -1344,7 +1344,7 @@ namespace Zeal
 			va_end(argptr);
 			if (!is_in_game())
 			{
-				print_buffer.push_back(buffer);
+				ZealService::get_instance()->print_buffer.push_back(buffer);
 				return;
 			}			
 			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 0, true);
@@ -1361,7 +1361,7 @@ namespace Zeal
 			va_end(argptr);
 			if (!is_in_game())
 			{
-				print_buffer.push_back(buffer);
+				ZealService::get_instance()->print_buffer.push_back(buffer);
 				return;
 			}
 			ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(*(int*)0x809478, 0, buffer, 0, true);
@@ -1391,7 +1391,7 @@ namespace Zeal
 			va_end(argptr);
 			if (!is_in_game())
 			{
-				print_buffer.push_back(buffer);
+				ZealService::get_instance()->print_buffer.push_back(buffer);
 				return;
 			}
 			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, color, true);
@@ -1408,7 +1408,7 @@ namespace Zeal
 			va_end(argptr);
 			if (!is_in_game())
 			{
-				print_buffer.push_back(buffer);
+				ZealService::get_instance()->print_buffer.push_back(buffer);
 				return;
 			}
 			//eal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR msg, short channel)

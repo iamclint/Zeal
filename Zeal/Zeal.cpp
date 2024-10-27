@@ -56,11 +56,11 @@ ZealService::ZealService()
 	zone_map = std::make_shared<ZoneMap>(this, ini.get());
 	
 	callbacks->AddGeneric([this]() {
-		if (Zeal::EqGame::is_in_game() && Zeal::EqGame::print_buffer.size())
+		if (Zeal::EqGame::is_in_game() && print_buffer.size())
 		{
-			for (auto& str : Zeal::EqGame::print_buffer)
-				Zeal::EqGame::print_chat("buffer: " + str);
-			Zeal::EqGame::print_buffer.clear();
+			for (auto& str : print_buffer)
+				Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal: %s", str.c_str());
+			print_buffer.clear();
 		}
 		
 	});

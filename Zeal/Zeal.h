@@ -49,6 +49,8 @@ public:
 	std::shared_ptr<patches> game_patches = nullptr;
 	std::shared_ptr<EntityManager> entity_manager = nullptr;
 	
+
+	std::vector<std::string> print_buffer;
 	ZealService();
 	~ZealService();
 	static ZealService* ptr_service;

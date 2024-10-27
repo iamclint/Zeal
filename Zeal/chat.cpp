@@ -345,21 +345,36 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
 
 void __fastcall DoPercentConvert(int* t, int u, char* data, int u2)
 {
-    if (data)
-    {
-        std::string str_data = data;
-        if (str_data.find('%', 0) == std::string::npos) //if there isn't any % just early out
+    if (!data || !ZealService::get_instance()) 
+        return;  // Early exit if data is null or ZealService instance is invalid
+
+    std::string str_data = data;
+
+    // Check if there's a '%' character; if not, exit early
+    if (str_data.find('%') == std::string::npos) {
+        return;
+    }
+
+    if (Zeal::EqGame::is_in_game()) {
+        try {
+            auto chat_hook = ZealService::get_instance()->chat_hook;
+            if (chat_hook) {
+                chat_hook->DoPercentReplacements(str_data);
+                size_t new_len = str_data.length();
+                std::memcpy(data, str_data.c_str(), new_len);
+                data[new_len] = '\0';  // Ensure null-termination
+            }
+        }
+        catch (const std::exception& e) {
+            Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Error in DoPercentConvert: %s",e.what());
             return;
-        if (Zeal::EqGame::is_in_game())
-        {
-            ZealService::get_instance()->chat_hook->DoPercentReplacements(str_data);
-            size_t new_len = str_data.length();
-            //strncpy_s(data, new_len+1, str_data.c_str(), new_len);
-            memmove(data, str_data.c_str(), new_len);
-            data[new_len] = '\0';
         }
     }
-    ZealService::get_instance()->hooks->hook_map["DoPercentConvert"]->original(DoPercentConvert)(t, u, data, u2);
+
+    // Call original function using the stored hook
+    if (auto hook = ZealService::get_instance()->hooks->hook_map["DoPercentConvert"]) {
+        hook->original(DoPercentConvert)(t, u, data, u2);
+    }
 }
 void chat::DoPercentReplacements(std::string& str_data)
 {
