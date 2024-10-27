@@ -164,6 +164,7 @@
     <ClInclude Include="bitmap_font.h" />
     <ClInclude Include="chatfilter.h" />
     <ClInclude Include="crash_handler.h" />
+    <ClInclude Include="default_spritefont.h" />
     <ClInclude Include="directx.h" />
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="floating_damage.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="bitmap_font.cpp" />
     <ClCompile Include="chatfilter.cpp" />
     <ClCompile Include="crash_handler.cpp" />
+    <ClCompile Include="default_spritefont.cpp" />
     <ClCompile Include="directx.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="EqPackets.h" />

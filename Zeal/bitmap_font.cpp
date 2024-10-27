@@ -123,7 +123,7 @@ BitmapFont::BitmapFont(IDirect3DDevice8& device, std::span<const uint8_t> data_s
     default_character = (file_default_character < kNumGlyphs) ? file_default_character : '\0';
     for (int i = 0; i < kNumGlyphs; ++i) {
         if (glyph_table[i].character == '\0')  // Uninitialized.
-            glyph_table[0] = glyph_table[default_character];
+            glyph_table[i] = glyph_table[default_character];
     }
 
     // Read the texture data.
@@ -231,7 +231,7 @@ void BitmapFont::create_texture(uint32_t width, uint32_t height,
     }
 
     // Note: This uses rows, not height, and stride to copy over the data assuming this
-    // is properly packed DXT2 data.
+    // is properly packed DXT2 data. We checked above that 4 * rows = height and stride <= pitch.
     uint8_t* texture_data = reinterpret_cast<uint8_t*>(locked_rect.pBits);
     for (int y = 0; y < rows; ++y)
         memcpy(&texture_data[y * locked_rect.Pitch], &data[y * stride], stride);
@@ -253,8 +253,7 @@ void BitmapFont::for_each_glyph(const char* text, TAction action) const
     float x = 0;
     float y = 0;
 
-    for (; *text; text++)
-    {
+    for (; *text; text++) {
         const char character = *text;
 
         switch (character)
@@ -352,8 +351,9 @@ void BitmapFont::flush_queue_to_screen() {
 
     if (!vertex_buffer) {
         if (FAILED(device.CreateVertexBuffer(
-            kVertexBufferMaxBatchCount * kNumGlyphVertices * sizeof(GlyphVertex),
-            D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, kGlyphVertexFvfCode, D3DPOOL_DEFAULT, &vertex_buffer))) {
+                kVertexBufferMaxBatchCount * kNumGlyphVertices * sizeof(GlyphVertex),
+                D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, GlyphVertex::kGlyphVertexFvfCode,
+                D3DPOOL_DEFAULT, &vertex_buffer))) {
             vertex_buffer = nullptr;  // Ensure nullptr.
             release();  // Disable future attempts.
             return;
@@ -393,11 +393,8 @@ void BitmapFont::render_queue() {
     texture_state.store_and_modify({ D3DTSS_ALPHAARG1, D3DTA_TEXTURE });
     texture_state.store_and_modify({ D3DTSS_ALPHAARG2, D3DTA_DIFFUSE });
 
-    // Stash the vertex shader state.  Note not storing texture, indices, or streamsource.
-    DWORD old_fvf_code = 0;
-    device.GetVertexShader(&old_fvf_code);  // Assuming this won't increment a reference count.
-
-    device.SetVertexShader(kGlyphVertexFvfCode);
+    // Note: Not preserving shader, texture, source, or indices to avoid reference counting.
+    device.SetVertexShader(GlyphVertex::kGlyphVertexFvfCode);
     device.SetTexture(0, texture);
     device.SetStreamSource(0, vertex_buffer, sizeof(GlyphVertex));
 
@@ -411,30 +408,34 @@ void BitmapFont::render_queue() {
             empty_space_count = kVertexBufferMaxBatchCount;
         }
         batch_count = std::min(batch_count, empty_space_count);
+        assert(batch_count > 0);
 
         for (int i = 0; i < batch_count; i++)
             calculate_glyph_vertices(glyph_queue[read_index + i], &vertices[i * kNumGlyphVertices]);
 
         auto lock_type = (vertex_buffer_wr_index == 0) ? D3DLOCK_DISCARD : D3DLOCK_NOOVERWRITE;
-        BYTE* data = nullptr;
-        if (FAILED(vertex_buffer->Lock(0,0, &data, lock_type))) {
+        const int start_vertex_index = vertex_buffer_wr_index * kNumGlyphVertices;
+        const int num_batch_vertices = batch_count * kNumGlyphVertices;
+        const int start_offset_bytes = start_vertex_index * sizeof(GlyphVertex);
+        const int copy_size = num_batch_vertices * sizeof(GlyphVertex);
+        BYTE* buffer = nullptr;
+        if (FAILED(vertex_buffer->Lock(start_offset_bytes, copy_size, &buffer, lock_type))) {
             release();
             return;
         }
-        memcpy(&data[vertex_buffer_wr_index * sizeof(GlyphVertex) * kNumGlyphVertices],
-            vertices.get(), batch_count * sizeof(GlyphVertex) * kNumGlyphVertices);
+        memcpy(buffer, vertices.get(), copy_size);
         vertex_buffer->Unlock();
 
         device.SetIndices(index_buffer, 0);
-        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertex_buffer_wr_index * kNumGlyphVertices,
-            batch_count * kNumGlyphVertices, vertex_buffer_wr_index * kNumGlyphIndices,
+        device.DrawIndexedPrimitive(D3DPT_TRIANGLELIST, start_vertex_index,
+            num_batch_vertices, vertex_buffer_wr_index * kNumGlyphIndices,
             batch_count * kNumGlyphTriangles);
         read_index += batch_count;
         vertex_buffer_wr_index += batch_count;
     }
 
     // Restore D3D state.
-    device.SetVertexShader(old_fvf_code);
+    device.SetIndices(NULL, 0);  // Ensure index_buffer is no longer bound.
     device.SetTexture(0, NULL);  // Ensure texture is no longer bound.
     texture_state.restore_state();
     render_state.restore_state();
@@ -446,6 +447,8 @@ bool BitmapFont::create_index_buffer() {
         return true;
 
     static_assert(kVertexBufferMaxBatchCount * kNumGlyphVertices < 0x7fff, "Exceeds 16-bit index");
+    static_assert(kNumGlyphIndices == 6);  // Assumed below.
+    static_assert(kNumGlyphVertices == 4);  // Assumed below.
 
     if (FAILED(device.CreateIndexBuffer(
         kVertexBufferMaxBatchCount * kNumGlyphIndices * sizeof(int16_t),
