@@ -136,6 +136,10 @@ namespace Zeal
 			{
 				return reinterpret_cast<char*(__thiscall*)(const CXSTR*)>(0x577E80)(this);
 			}
+			void Append(const std::string data)
+			{
+				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x577310)(this, data.c_str());
+			}
 			operator std::string() const {
 				const char* result = CastToCharPtr();
 				if (result)
@@ -334,6 +338,12 @@ namespace Zeal
 			/*0x131*/	BYTE    Unknown0x131; /* CTextureAnimation */
 			/*0x132*/	BYTE    Unknown0x132; /* CTextureAnimation */
 			/*0x133*/	BYTE    Unknown0x133; /* CTextureAnimation */
+		};
+		struct CharSelect : EQWND
+		{
+			/*0x134*/	BYTE    Unk[0x3C];
+			/*0x170*/   BYTE    Rotate;
+			/*0x171*/   BYTE    Explore;
 		};
 		struct RaidWnd : EQWND
 		{
@@ -808,7 +818,7 @@ namespace Zeal
 			CContextMenuManager* ContextMenuManager;  // 0x63D5CC
 			CChatManager* ChatManager;  // 0x63D5D0
 			EQWND* uknownWnd1;  // 0x63D5D4
-			EQWND* CharacterSelect;  // 0x63D5D8
+			CharSelect* CharacterSelect;  // 0x63D5D8
 			EQWND* FacePick;  // 0x63D5DC
 			ItemDisplayWnd* ItemWnd;  // 0x63D5E0
 			EQWND* Note;  // 0x63D5E4

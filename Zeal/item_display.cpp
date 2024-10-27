@@ -48,12 +48,29 @@ Zeal::EqUI::ItemDisplayWnd* ItemDisplay::get_available_window(Zeal::EqStructures
 	}
 	return windows.back();
 }
+
+std::string CopperToAll(unsigned long long copper) {
+	unsigned long long platinum = copper / 1000;
+	unsigned long long gold = (copper % 1000) / 100;
+	unsigned long long silver = (copper % 100) / 10;
+	unsigned long long remainingCopper = copper % 10;
+
+	std::ostringstream result;
+	result << platinum << "p " << gold << "g " << silver << "s " << remainingCopper << "c";
+
+	return result.str();
+}
+
 void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, Zeal::EqStructures::_EQITEMINFO* item, bool show)
 {
 	ZealService* zeal = ZealService::get_instance();
 	wnd = zeal->item_displays->get_available_window(item);
 	zeal->item_displays->current_item = item;
 	zeal->hooks->hook_map["SetItem"]->original(SetItem)(wnd, unused, item, show);
+	if (item->NoDrop!=0)
+		wnd->DisplayText.Append("Value: " + CopperToAll(item->Cost) + "<BR>");
+		//wnd->DisplayText.Append("<BR><c \"#FFFF00\">" + CopperToAll(item->Cost) + "</c>");
+
 	wnd->IconBtn->ZLayer = wnd->ZLayer;
 	wnd->Activate();
 }

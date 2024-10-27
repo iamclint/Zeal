@@ -442,7 +442,11 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	hotbutton = std::make_shared<ui_hotbutton>(zeal, ini, this);
 	group = std::make_shared<ui_group>(zeal, ini, this);
 
-//	zeal->hooks->Add("CreateXWndFromTemplate", 0x59bc40, CreateXWndFromTemplate_hook, hook_type_detour);
+
+	mem::write<BYTE>(0x40f07a, 0); //disable rotation by default
+	mem::write<BYTE>(0x40f07d, 0xEB); //make rotate not checked by default
+
+	//zeal->hooks->Add("InitCharSelectSettings", 0x53c234, InitCharSelectSettings, hook_type_replace_call);
 	zeal->hooks->Add("ButtonClick", 0x5951E0, ButtonClick_hook, hook_type_detour);
 	zeal->hooks->Add("CheckboxClick", 0x5c3480, CheckboxClick_hook, hook_type_detour);
 	zeal->hooks->Add("SetSliderValue", 0x5a6c70, SetSliderValue_hook, hook_type_detour);

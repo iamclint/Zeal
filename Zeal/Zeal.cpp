@@ -64,6 +64,7 @@ ZealService::ZealService()
 		}
 		
 	});
+
 	this->basic_binds();
 	
 	configuration_check();
