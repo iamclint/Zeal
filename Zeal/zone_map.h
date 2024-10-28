@@ -106,6 +106,12 @@ private:
 		D3DCOLOR color = 0;
 	};
 
+	struct Marker {
+		int loc_y = 0;
+		int loc_x = 0;
+		std::string label;
+	};
+
 	struct CustomMapData {
 		std::vector<ZoneMapLine> lines;  // Contains heap memory for zone_map_data.
 		std::vector<ZoneMapLabel> labels;
@@ -146,8 +152,8 @@ private:
 	void parse_font(const std::vector<std::string>& args);
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
-	void set_marker(int y, int x);
-	void clear_marker(bool invalidate_zone_id = true);
+	void set_marker(int y, int x, const char* label = nullptr);
+	void clear_markers(bool erase_list = true);
 	bool set_map_rect(float top, float left, float bottom, float right, bool update_default = false);
 	bool set_level(int level);  // Set to 0 to show all levels.
 	void update_ui_options();
@@ -170,6 +176,7 @@ private:
 	void render_map(IDirect3DDevice8& device);
 	void render_background(IDirect3DDevice8& device);
 	void render_grid(IDirect3DDevice8& device);
+	void render_markers(IDirect3DDevice8& device);
 	void render_positions(IDirect3DDevice8& device);
 	void render_group_member_labels(IDirect3DDevice8& device);
 	void render_raid_member_labels(IDirect3DDevice8& device);
@@ -210,10 +217,8 @@ private:
 	GroupLabelsMode::e map_group_labels_mode = GroupLabelsMode::kOff;
 	MapDataMode::e map_data_mode = MapDataMode::kInternal;
 	int zone_id = kInvalidZoneId;
-	int marker_zone_id = kInvalidZoneId;
+	std::vector<Marker> markers_list;
 	bool always_align_to_center = false;
-	int marker_x = 0;
-	int marker_y = 0;
 	int map_level_zone_id = kInvalidZoneId;
 	int map_level_index = 0;
 	int dynamic_labels_zone_id = kInvalidZoneId;

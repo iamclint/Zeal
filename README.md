@@ -476,15 +476,19 @@ the zones are properly colored, but it does work well in some of the 3-D overlap
   - `/map level 0` shows default of all levels
   - `/map level 2` shows the current zone's level 2 data
 
-#### Position marker
-The map supports adding a position marker to easier identification of target coordinates.
+#### Position markers
+The map supports adding position markers for easier identification of target coordinates. The
+markers have a label centered above them, with the default set to the marker loc values. There
+is no set limit to the number of markers. See how to clear them below.
 
 * Zeal options slider to adjust the marker size
 * Command examples:
-  - `/map marker 1100 -500` sets a map marker at /loc of 1100, -500
+  - `/map marker 1100 -500` adds a map marker at /loc of 1100, -500 labeled "(1100, -500)"
   - `/map 1100 -500` is a shortcut for the command above to set a marker at 1100, -500
-  - `/map marker` clears the marker
-  - `/map 0` is a shortcut for clearing the marker
+  - `/map marker -300 200 camp` adds a map marker at /loc of -300, 200 labeled "camp"
+  - `/map marker` clears all markers
+  - `/map 0` is a shortcut for clearing all markers
+  - `/map marker size 40` sets the marker size to "40%"
 
 #### Map font
 The map supports selecting a "spritefont" formatted bitmap font file. A few sizes of arial
@@ -506,9 +510,9 @@ up the map even in zoom. The keybind to toggle through the label modes is recomm
 * Key bind: "Toggle Map Labels" - toggles through the labels modes
 * Command examples:
   - `/map poi` lists the available poi's, including their indices
-  - `/map poi 4` drops a marker on index [4] of the `/map poi` list
+  - `/map poi 4` adds a marker on index [4] of the `/map poi` list
   - `/map poi butcherblock` performs a text search of the poi list for butcherblock, reports 
-     any matches, and drops a marker on the first one
+     any matches, and adds a marker on the first one
   - `/map butcherblock` shortcut for above (does not work for terms that match other commands)
   - `/map labels summary` enables the summary labels (other options are `off`, `all`, or `marker`)
 
