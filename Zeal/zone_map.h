@@ -45,6 +45,7 @@ public:
 	void set_show_all_names_override(bool flag);  // Override to enable showing group and raid names.
 	void set_show_grid(bool enable, bool update_default = true);
 	bool set_grid_pitch(int new_pitch, bool update_default = true);
+	bool set_name_length(int new_length, bool update_default = true);
 	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
 	bool set_background_alpha(int percent, bool update_default = true);
@@ -115,6 +116,8 @@ private:
 
 	static constexpr int kInvalidZoneId = 0;
 	static constexpr int kDefaultGridPitch = 1000;
+	static constexpr int kDefaultNameLength = 5;
+	static constexpr int kMaxNameLength = 20;  // Name buffer is >= 30.
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
 	static constexpr float kDefaultRectTop = 0.1f;
 	static constexpr float kDefaultRectLeft = 0.1f;
@@ -196,6 +199,7 @@ private:
 	bool external_enabled = false;  // External map window enable and sizes.
 	bool map_show_grid = false;
 	int map_grid_pitch = kDefaultGridPitch;  // Pitch when grid is visible.
+	int map_name_length = kDefaultNameLength;  // Number of characters in name labels.
 	bool map_show_group = false;
 	bool map_show_raid = false;
 	bool map_show_all_names_override = false;  // Meant as a temporary override to flash names.

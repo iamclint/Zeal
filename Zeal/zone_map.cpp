@@ -721,6 +721,7 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         && ZealService::get_instance()->ui->options.get())
         color = ZealService::get_instance()->ui->options.get()->GetColor(5);  // GroupColor
 
+    const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
         if ((strlen(groupNames[i]) == 0) || !member)
@@ -729,12 +730,11 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         // Writes the character name or group number (F2 - F6) centered at the character position.
         int loc_y = static_cast<int>(member->Position.x + 0.5f);  // Position is y,x,z.
         int loc_x = static_cast<int>(member->Position.y + 0.5f);  // Also need to negate it below.
-        constexpr int kShortNameLength = 5;  // Just show the first 3 letters of the name.
-        char label[kShortNameLength + 1] = { 0 };  // Null-terminate.
+        char label[kMaxNameLength + 1] = { 0 };  // Ensure null-terminated.
         if (!map_show_all_names_override && map_group_labels_mode == GroupLabelsMode::kNumbers)
             label[0] = static_cast<uint8_t>(i) + '2';
         else
-            for (int j = 0; j < kShortNameLength; ++j)
+            for (int j = 0; j < short_name_length; ++j)
                 label[j] = groupNames[i][j];
         render_label_text(label,-loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
@@ -764,6 +764,7 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
         reinterpret_cast<const Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
 
     // Just add a label for members, including self, since this is intended to be for transient use.
+    const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
     for (int i = 0; i < kRaidMaxMembers; ++i) {
         const auto& member = raidMembers[i];
         if (strlen(member.Name) == 0)
@@ -774,9 +775,8 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
 
         int loc_y = static_cast<int>(entity->Position.x + 0.5f);  // Position is y,x,z.
         int loc_x = static_cast<int>(entity->Position.y + 0.5f);  // Also need to negate it below.
-        constexpr int kShortNameLength = 5;  // Just show the first 3 letters of the name.
-        char label[kShortNameLength + 1] = { 0 };  // Null-terminate.
-        for (int j = 0; j < kShortNameLength; ++j)
+        char label[kMaxNameLength + 1] = { 0 };  // Null-terminate.
+        for (int j = 0; j < short_name_length; ++j)
             label[j] = entity->Name[j];
         render_label_text(label, -loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
@@ -1414,6 +1414,19 @@ bool ZoneMap::set_grid_pitch(int new_pitch, bool update_default) {
     return true;
 }
 
+bool ZoneMap::set_name_length(int new_length, bool update_default) {
+    if (new_length < 3 || new_length > kMaxNameLength) {
+        Zeal::EqGame::print_chat("Invalid name length (restricted to 3 to %i)", kMaxNameLength);
+        return false;
+    }
+    map_name_length = new_length;
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapNameLength", map_name_length);
+
+    update_ui_options();
+    return true;
+}
 
 void ZoneMap::toggle_background() {
     map_background_state = BackgroundType::e(static_cast<int>(map_background_state) + 1);
@@ -1612,6 +1625,8 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<bool>("Zeal", "MapShowGrid", false);
     if (!ini->exists("Zeal", "MapGridPitch"))
         ini->setValue<int>("Zeal", "MapGridPitch", kDefaultGridPitch);
+    if (!ini->exists("Zeal", "MapNameLength"))
+        ini->setValue<int>("Zeal", "MapNameLength", map_name_length);
     if (!ini->exists("Zeal", "MapDataMode"))
         ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(MapDataMode::kInternal));
     if (!ini->exists("Zeal", "MapBackgroundState"))
@@ -1651,6 +1666,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_show_raid = ini->getValue<bool>("Zeal", "MapShowRaid");
     map_show_grid = ini->getValue<bool>("Zeal", "MapShowGrid");
     map_grid_pitch = ini->getValue<int>("Zeal", "MapGridPitch");
+    map_name_length = ini->getValue<int>("Zeal", "MapNameLength");
     map_data_mode = MapDataMode::e(ini->getValue<int>("Zeal", "MapDataMode"));
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
     map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
@@ -1667,6 +1683,7 @@ void ZoneMap::load_ini(IO_ini* ini)
 
     // Sanity clamp ini values.
     map_grid_pitch = max(100, min(2000, map_grid_pitch));
+    map_name_length = max(3, min(kMaxNameLength, map_name_length));
     map_data_mode = max(MapDataMode::kFirst, min(MapDataMode::kLast, map_data_mode));
     map_background_state = max(BackgroundType::kFirst, min(BackgroundType::kLast, map_background_state));
     map_background_alpha = max(0, min(1.f, map_background_alpha));
@@ -1700,6 +1717,7 @@ void ZoneMap::save_ini()
     ini->setValue<bool>("Zeal", "MapShowRaid", map_show_raid);
     ini->setValue<bool>("Zeal", "MapShowGrid", map_show_grid);
     ini->setValue<int>("Zeal", "MapGridPitch", map_grid_pitch);
+    ini->setValue<int>("Zeal", "MapNameLength", map_name_length);
     ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(map_data_mode));
     ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
     ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
@@ -1887,6 +1905,7 @@ void ZoneMap::parse_map_data_mode(const std::vector<std::string>& args) {
 }
 
 void ZoneMap::parse_show_group(const std::vector<std::string>& args) {
+    int length = 0;
     if (args.size() == 2) {
         set_show_group(!is_show_group_enabled(), false);
         Zeal::EqGame::print_chat("Showing group members is %s", is_show_group_enabled() ? "ON" : "OFF");
@@ -1903,8 +1922,13 @@ void ZoneMap::parse_show_group(const std::vector<std::string>& args) {
         set_group_labels_mode(GroupLabelsMode::kNames, false);
         Zeal::EqGame::print_chat("Showing group member labels as names");
     }
+    else if (args.size() == 4 && args[2] == "length" && Zeal::String::tryParse(args[3], &length)
+             && set_name_length(length, false)) {
+        Zeal::EqGame::print_chat("Setting map name label length to: %i", length);
+    }
     else {
         Zeal::EqGame::print_chat("Usage: /map show_group (toggles on/off), /map show_group [labels_off, numbers, names]");
+        Zeal::EqGame::print_chat("Usage: /map show_group length <value (3 to 20)>");
     }
 }
 

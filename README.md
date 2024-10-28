@@ -463,6 +463,7 @@ in the options tab and instead use the key bind to situationally toggle it on an
   - `/map show_group labels_off` disables group member labels
   - `/map show_group numbers` enables numeric (F2-F6) group member labels (uses nameplate colors)
   - `/map show_group names` enables shortened group member names (uses nameplate colors)
+  - `/map show_group length 8` sets the shortened length of group and raid member names to 8
   - `/map show_raid` toggles the raid member markers on and off
 
 #### Showing map levels
