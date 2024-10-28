@@ -262,10 +262,15 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
                 0.5f, background_color },
     };
 
+    auto grid_vertices = calculate_grid_vertices(zone_map_data);
+    grid_line_count = grid_vertices.size() / 2;
+
     const int line_buffer_size = sizeof(MapVertex) * line_count * 2;
     const int background_buffer_size = sizeof(MapVertex) * kBackgroundVertices;
-    // Create a Vertex buffer and copy the map line segments over.
-    if (FAILED(device.CreateVertexBuffer(line_buffer_size + background_buffer_size,
+    const int grid_buffer_size = sizeof(MapVertex) * grid_line_count * 2;
+    // Create a Vertex buffer and copy the map line, background, and grid segments over.
+    if (FAILED(
+        device.CreateVertexBuffer(line_buffer_size + background_buffer_size + grid_buffer_size,
         D3DUSAGE_WRITEONLY,
         kMapVertexFvfCode,
         D3DPOOL_MANAGED,
@@ -281,6 +286,8 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
     }
     memcpy(data, background_vertices, background_buffer_size);
     memcpy(data + background_buffer_size, (const void*)line_vertices.get(), line_buffer_size);
+    memcpy(data + background_buffer_size + line_buffer_size, (const void*)grid_vertices.data(),
+            grid_buffer_size);
     line_vertex_buffer->Unlock();
 
     // Create a worst-case sized Vertex buffer for live position updates.
@@ -294,6 +301,61 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
 
     render_load_labels(device, zone_map_data);
 }
+
+std::vector<ZoneMap::MapVertex> ZoneMap::calculate_grid_vertices(
+                                            const ZoneMapData& zone_map_data) const {
+    const auto grid_color = (map_background_state == BackgroundType::kDark) ||
+        (map_background_state == BackgroundType::kClear && !external_enabled) ?
+        D3DCOLOR_XRGB(85, 90, 96) : D3DCOLOR_XRGB(48, 48, 48);
+    const auto axis_color = D3DCOLOR_XRGB(0xfd, 0xa1, 0x72);  // Cantaloupe orange
+
+    // Create the background grid with horizontal and vertical lines aligned to pitch.
+    const int grid_x_ceil = (zone_map_data.min_x < 0) ? 0 : map_grid_pitch - 1;
+    const int grid_x_min =
+        ((zone_map_data.min_x + grid_x_ceil) / map_grid_pitch) * map_grid_pitch;
+    const int grid_x_count = (zone_map_data.max_x - grid_x_min) / map_grid_pitch + 1;
+    const int grid_y_ceil = (zone_map_data.min_y < 0) ? 0 : map_grid_pitch - 1;
+    const int grid_y_min =
+        ((zone_map_data.min_y + grid_y_ceil) / map_grid_pitch) * map_grid_pitch;
+    const int grid_y_count = (zone_map_data.max_y - grid_y_min) / map_grid_pitch + 1;
+
+    std::vector<ZoneMap::MapVertex> vertices;
+    vertices.reserve(grid_x_count + grid_y_count);
+
+    // Add vertical lines.
+    for (int i = 0; i < grid_x_count; ++i) {
+        float x = static_cast<float>(grid_x_min + i * map_grid_pitch);
+        auto color = (x == 0) ? axis_color : grid_color;
+        vertices.push_back({
+            .x = x,
+            .y = static_cast<float>(zone_map_data.min_y),
+            .z = 0.5f,
+            .color = color });
+        vertices.push_back({
+            .x = x,
+            .y = static_cast<float>(zone_map_data.max_y),
+            .z = 0.5f,
+            .color = color });
+    }
+
+    // Add horizontal lines
+    for (int i = 0; i < grid_y_count; ++i) {
+        float y = static_cast<float>(grid_y_min + i * map_grid_pitch);
+        auto color = (y == 0) ? axis_color : grid_color;
+        vertices.push_back({
+            .x = static_cast<float>(zone_map_data.min_x),
+            .y = y,
+            .z = 0.5f,
+            .color = color });
+        vertices.push_back({
+            .x = static_cast<float>(zone_map_data.max_x),
+            .y = y,
+            .z = 0.5f,
+            .color = color });
+    }
+    return vertices;
+}
+
 
 D3DCOLOR ZoneMap::get_background_color() const {
     // Alpha doesn't do much in external_enabled window mode, so set opaque.
@@ -431,6 +493,9 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
     if (map_background_state != BackgroundType::kClear && !external_enabled)
         render_background(device);
 
+    if (map_show_grid)
+        render_grid(device);
+
     if (line_count) {
         device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
         device.DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices, line_count);
@@ -463,6 +528,15 @@ void ZoneMap::render_background(IDirect3DDevice8& device) {
     device.DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, kBackgroundCount);
 
     render_state.restore_state();
+}
+
+void ZoneMap::render_grid(IDirect3DDevice8& device) {
+    if (!grid_line_count)
+        return;
+
+    // Grid lines are stored at the end of the line_vertex_buffer.
+    device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
+    device.DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices + line_count * 2, grid_line_count);
 }
 
 // Handles the rendering of the labels_list and dynamic_labels_list.
@@ -1314,6 +1388,33 @@ void ZoneMap::set_show_all_names_override(bool flag) {
     map_show_all_names_override = flag;
 }
 
+void ZoneMap::set_show_grid(bool enable, bool update_default) {
+    map_show_grid = enable;
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapShowGrid", map_show_grid);
+
+    update_ui_options();
+}
+
+bool ZoneMap::set_grid_pitch(int new_pitch, bool update_default) {
+    if (new_pitch < 100 || new_pitch > 2000) {
+        Zeal::EqGame::print_chat("Invalid grid pitch (restricted to 100 to 2000)");
+        return false;
+    }
+    map_grid_pitch = new_pitch;
+    zone_id = kInvalidZoneId;  // Triggers reload with modified pitch.
+    if (!map_show_grid)
+        set_show_grid(true, false);  // Turn on the grid if off.
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapGridPitch", map_grid_pitch);
+
+    update_ui_options();
+    return true;
+}
+
+
 void ZoneMap::toggle_background() {
     map_background_state = BackgroundType::e(static_cast<int>(map_background_state) + 1);
     if (map_background_state > BackgroundType::kLast) {
@@ -1507,6 +1608,10 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<bool>("Zeal", "MapShowGroup", true);
     if (!ini->exists("Zeal", "MapShowRaid"))
         ini->setValue<bool>("Zeal", "MapShowRaid", false);
+    if (!ini->exists("Zeal", "MapShowGrid"))
+        ini->setValue<bool>("Zeal", "MapShowGrid", false);
+    if (!ini->exists("Zeal", "MapGridPitch"))
+        ini->setValue<int>("Zeal", "MapGridPitch", kDefaultGridPitch);
     if (!ini->exists("Zeal", "MapDataMode"))
         ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(MapDataMode::kInternal));
     if (!ini->exists("Zeal", "MapBackgroundState"))
@@ -1544,6 +1649,8 @@ void ZoneMap::load_ini(IO_ini* ini)
     external_monitor_top_offset = ini->getValue<int>("Zeal", "MapExternalTopOffset");
     map_show_group = ini->getValue<bool>("Zeal", "MapShowGroup");
     map_show_raid = ini->getValue<bool>("Zeal", "MapShowRaid");
+    map_show_grid = ini->getValue<bool>("Zeal", "MapShowGrid");
+    map_grid_pitch = ini->getValue<int>("Zeal", "MapGridPitch");
     map_data_mode = MapDataMode::e(ini->getValue<int>("Zeal", "MapDataMode"));
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
     map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
@@ -1559,6 +1666,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     font_filename = ini->getValue<std::string>("Zeal", "MapFontFilename");
 
     // Sanity clamp ini values.
+    map_grid_pitch = max(100, min(2000, map_grid_pitch));
     map_data_mode = max(MapDataMode::kFirst, min(MapDataMode::kLast, map_data_mode));
     map_background_state = max(BackgroundType::kFirst, min(BackgroundType::kLast, map_background_state));
     map_background_alpha = max(0, min(1.f, map_background_alpha));
@@ -1590,6 +1698,8 @@ void ZoneMap::save_ini()
     ini->setValue<int>("Zeal", "MapExternalTopOffset", external_monitor_top_offset);
     ini->setValue<bool>("Zeal", "MapShowGroup", map_show_group);
     ini->setValue<bool>("Zeal", "MapShowRaid", map_show_raid);
+    ini->setValue<bool>("Zeal", "MapShowGrid", map_show_grid);
+    ini->setValue<int>("Zeal", "MapGridPitch", map_grid_pitch);
     ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(map_data_mode));
     ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
     ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
@@ -1911,6 +2021,15 @@ void ZoneMap::parse_zoom(const std::vector<std::string>& args) {
         Zeal::EqGame::print_chat( "Usage: /map zoom <percent> (<= 100 disables)");
 }
 
+void ZoneMap::parse_grid(const std::vector<std::string>& args) {
+    int grid_pitch = 0;
+    if (args.size() == 2) {
+        set_show_grid(!map_show_grid, false);
+    } else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &grid_pitch) ||
+                                            !set_grid_pitch(grid_pitch, false))
+        Zeal::EqGame::print_chat("Usage: /map grid [pitch] (blank pitch toggles)");
+}
+
 void ZoneMap::parse_font(const std::vector<std::string>& args) {
     if (args.size() == 3) {
         release_font();
@@ -2037,8 +2156,9 @@ void print_matrix(const D3DMATRIX& matrix, const char* name) {
 }
 
 void ZoneMap::dump() {
-    Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), align: %i, labels:%i, zone: %i",
-                            enabled, map_background_state, map_background_alpha, map_alignment_state, map_labels_mode, zone_id);
+    Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), grid: %i, align: %i, labels:%i, zone: %i",
+                            enabled, map_background_state, map_background_alpha, map_show_grid,
+                            map_alignment_state, map_labels_mode, zone_id);
     Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i, num_labels: %i",
                             marker_zone_id, marker_y, marker_x, labels_list.size());
     Zeal::EqGame::print_chat("view: t: %i, l: %i, h: %i, w: %i, Max H: %i, W: %i", 
@@ -2052,8 +2172,8 @@ void ZoneMap::dump() {
         mat_model2world(0,0), mat_model2world(3,1), mat_model2world(3, 0), zoom_factor);
     Zeal::EqGame::print_chat("dyn_labels_size: %i, dyn_labels_zone_id: %i, data_mode: %i, data_cache: %i", 
         dynamic_labels_list.size(), dynamic_labels_zone_id, map_data_mode, map_data_cache.size());
-    Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i, font: %i (%s)", line_count,
-        line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr,
+    Zeal::EqGame::print_chat("line_count: %i, grid: %i, line: %i, position: %i, marker: %i, font: %i (%s)", line_count,
+        grid_line_count, line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr,
         bitmap_font != nullptr, font_filename.c_str());
     Zeal::EqGame::print_chat("external_monitor_left_offset: %i, monitor_left_offset: %i, monitor_top_offset: %i",
         external_enabled, external_monitor_left_offset, external_monitor_top_offset);
@@ -2128,6 +2248,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "save_ini") {
         Zeal::EqGame::print_chat("Saving current map settings");
         save_ini();
+    }
+    else if (args[1] == "grid") {
+        parse_grid(args);
     }
     else if (args[1] == "font") {
         parse_font(args);

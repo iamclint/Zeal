@@ -43,6 +43,8 @@ public:
 	void set_show_group(bool enable, bool update_default = true);
 	void set_show_raid(bool enable, bool update_default = true);
 	void set_show_all_names_override(bool flag);  // Override to enable showing group and raid names.
+	void set_show_grid(bool enable, bool update_default = true);
+	bool set_grid_pitch(int new_pitch, bool update_default = true);
 	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
 	bool set_background_alpha(int percent, bool update_default = true);
@@ -62,6 +64,8 @@ public:
 	bool is_external_enabled() const { return external_enabled; }
 	bool is_show_group_enabled() const { return map_show_group; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
+	bool is_show_grid_enabled() const { return map_show_grid; }
+	int get_grid_pitch() const { return map_grid_pitch; }
 	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
 	int get_background() const { return static_cast<int>(map_background_state); }
 	int get_background_alpha() const { return static_cast<int>(map_background_alpha * 100 + 0.5f); }
@@ -110,6 +114,7 @@ private:
 	};
 
 	static constexpr int kInvalidZoneId = 0;
+	static constexpr int kDefaultGridPitch = 1000;
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
 	static constexpr float kDefaultRectTop = 0.1f;
 	static constexpr float kDefaultRectLeft = 0.1f;
@@ -134,6 +139,7 @@ private:
 	void parse_map_data_mode(const std::vector<std::string>& args);
 	void parse_show_group(const std::vector<std::string>& args);
 	void parse_show_raid(const std::vector<std::string>& args);
+	void parse_grid(const std::vector<std::string>& args);
 	void parse_font(const std::vector<std::string>& args);
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
@@ -160,6 +166,7 @@ private:
 	void render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zone_map_data);
 	void render_map(IDirect3DDevice8& device);
 	void render_background(IDirect3DDevice8& device);
+	void render_grid(IDirect3DDevice8& device);
 	void render_positions(IDirect3DDevice8& device);
 	void render_group_member_labels(IDirect3DDevice8& device);
 	void render_raid_member_labels(IDirect3DDevice8& device);
@@ -167,6 +174,7 @@ private:
 	void render_labels(IDirect3DDevice8& device);
 	void render_label_text(const char* label, int map_y, int map_x, D3DCOLOR font_color,
 		LabelType label_type = LabelType::Normal, Vec2 offset_pixels = { 0,0 });
+	std::vector<ZoneMap::MapVertex> calculate_grid_vertices(const ZoneMapData& zone_map_data) const;
 	void add_position_marker_vertices(float map_y, float map_x, float heading, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 	void add_group_member_position_vertices(std::vector<MapVertex>& vertices) const;
@@ -186,6 +194,8 @@ private:
 
 	bool enabled = false;
 	bool external_enabled = false;  // External map window enable and sizes.
+	bool map_show_grid = false;
+	int map_grid_pitch = kDefaultGridPitch;  // Pitch when grid is visible.
 	bool map_show_group = false;
 	bool map_show_raid = false;
 	bool map_show_all_names_override = false;  // Meant as a temporary override to flash names.
@@ -226,6 +236,7 @@ private:
 
 	std::vector<const ZoneMapLabel*> labels_list;  // List of pointers to visible map labels.
 	int line_count = 0;  // # of primitives in line buffer.
+	int grid_line_count;  // # of primitives at end of line buffer.
 	IDirect3DVertexBuffer8* line_vertex_buffer = nullptr;
 	IDirect3DVertexBuffer8* position_vertex_buffer = nullptr;
 	IDirect3DVertexBuffer8* marker_vertex_buffer = nullptr;

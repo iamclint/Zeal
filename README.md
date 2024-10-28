@@ -438,6 +438,15 @@ background will scroll with the player centered in the viewport.
 * Command examples:
   - `/map zoom 200` sets map scaling to 200% (2x)
 
+#### Map grid
+A simple background grid aligned at a selectable pitch is available. The x == 0 and y == 0 axes
+are colored orange.
+
+* Command examples:
+  - `/map grid` toggles grid on and off
+  - `/map grid 500` sets the grid pitch to 500 loc units (lines at multiples of 500)
+  - `/map save_ini` saves the currently set grid enable and pitch as defaults
+
 #### Showing group and raid members
 The map supports showing the live position of other group and raid members. The group
 member markers are slighly shrunken player position markers and colored in this order
