@@ -345,6 +345,26 @@ The following 18 Nameplate Colors can be changed to custom colors.
 * AFK, LFG, LD, MyGuild, Raid, Group, PVP, Roleplay, OtherGuilds, DefaultAdventurer
 * NPC Corpse, Player Corpse, GreenCon, LightBlueCon, BlueCon, WhiteCon, YellowCon, RedCon
 
+#### Default Colors of Nameplates when using Nameplate Colors system
+* 1 - AFK - Orange                   
+* 2 - LFG - Yellow                   
+* 3 - LD - Red                       
+* 4 - MyGuild - White Red            
+* 5 - Raid - White Light Purple   
+* 6 - Group - Light Green           
+* 7 - PVP - Red              
+* 8 - Roleplay - Purple       
+* 9 - OtherGuilds - White Yellow    
+* 10 - DefaultAdventurer - Default Blue
+* 11 - Npc Corpse - Black
+* 12 - Players Corpse - White Light Purple
+* 13 - Green Con NPCs - CON_GREEN
+* 14 - LightBlue Con NPCs - CON_LIGHTBLUE
+* 15 - Blue Con NPCs - Default DarkBlue is lighter than CON_BLUE
+* 16 - White Con NPCs - CON_WHITE
+* 17 - Yellow Con NPCs - CON_YELLOW
+* 18 - Red Con NPCs- CON_RED
+
 ### In-game Map
 #### Map data source
 The map data was sourced from Brewall's maps: https://www.eqmaps.info/eq-map-files/ with minimal

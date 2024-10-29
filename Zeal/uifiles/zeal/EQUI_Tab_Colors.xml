@@ -39,7 +39,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>0 - AFK</Text>
+    <Text>-</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -69,7 +69,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>0 - AFK</Text>
+    <Text>1 - AFK</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -98,7 +98,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>1 - LFG</Text>
+    <Text>2 - LFG</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -127,7 +127,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>2 - LD</Text>
+    <Text>3 - LD</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -156,7 +156,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>3 - MyGuild</Text>
+    <Text>4 - MyGuild</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -185,7 +185,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>4 - Raid</Text>
+    <Text>5 - Raid</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -214,7 +214,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>5 - Group</Text>
+    <Text>6 - Group</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -243,7 +243,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>6 - PVP</Text>
+    <Text>7 - PVP</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -272,7 +272,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>7 - Roleplay</Text>
+    <Text>8 - Roleplay</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -301,7 +301,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>8 - OtherGuilds</Text>
+    <Text>9 - OtherGuilds</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -330,7 +330,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>9 - DefaultAdventurer</Text>
+    <Text>10 - DefaultAdventurer</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -359,7 +359,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>10 - NpcCorpse</Text>
+    <Text>11 - NpcCorpse</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -388,7 +388,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>11 - PlayersCorpse</Text>
+    <Text>12 - PlayersCorpse</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -417,7 +417,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>12 - Green Con - NPCs</Text>
+    <Text>13 - Green Con - NPCs</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -446,7 +446,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>13 - LightBlue Con-NPCs</Text>
+    <Text>14 - LightBlue Con-NPCs</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -475,7 +475,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>14 - Blue Con - NPCS</Text>
+    <Text>15 - Blue Con - NPCS</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -504,7 +504,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>15 - White Con - NPCs</Text>
+    <Text>16 - White Con - NPCs</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -533,7 +533,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>16 - Yellow Con - NPCs</Text>
+    <Text>17 - Yellow Con - NPCs</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -562,7 +562,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>17 - Red Con - NPCs</Text>
+    <Text>18 - Red Con - NPCs</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>

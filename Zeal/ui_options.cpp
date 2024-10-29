@@ -72,47 +72,98 @@ void ui_options::LoadColors()
 {
 	IO_ini* ini = ZealService::get_instance()->ini.get();
 
-	if (!ini->exists("ZealColors", "Color0")) //Adds default Nameplate colors for new users
+	if (!ini->exists("ZealColors", "Color0")) //Adds default Nameplate Color to Button1  for new users
 	{
 		if (color_buttons.count(0))
 			color_buttons[0]->TextColor.ARGB = 0xFFFF8000; //AFK - Orange
+	}
+	if (!ini->exists("ZealColors", "Color1")) //Adds default Nameplate Color to Button2 for new users
+	{
 		if (color_buttons.count(1))
 			color_buttons[1]->TextColor.ARGB = 0xFFCFFF00; //LFG - Yellow
+	}
+	if (!ini->exists("ZealColors", "Color2")) //Adds default Nameplate Color to Button3 for new users
+	{
 		if (color_buttons.count(2))
 			color_buttons[2]->TextColor.ARGB = 0xFFFF0000; //LinkDead - Red
+	}
+	if (!ini->exists("ZealColors", "Color3")) //Adds default Nameplate Color to Button4 for new users
+	{
 		if (color_buttons.count(3))
 			color_buttons[3]->TextColor.ARGB = 0xFFFF8080; //Guild Member - White Red
+	}
+	if (!ini->exists("ZealColors", "Color4")) //Adds default Nameplate Color to Button5 for new users
+	{
 		if (color_buttons.count(4))
 			color_buttons[4]->TextColor.ARGB = 0xFFFFFFFF; //Raid Member - White Light Purple
+	}
+	if (!ini->exists("ZealColors", "Color5")) //Adds default Nameplate Color to Button6 for new users
+	{
 		if (color_buttons.count(5))
 			color_buttons[5]->TextColor.ARGB = 0xFF00FF32; //Group Member - Light Green
+	}
+	if (!ini->exists("ZealColors", "Color6")) //Adds default Nameplate Color to Button7 for new users
+	{
 		if (color_buttons.count(6))
 			color_buttons[6]->TextColor.ARGB = 0xFFFF0000; //PVP - Red
+	}
+	if (!ini->exists("ZealColors", "Color7")) //Adds default Nameplate Color to Button8 for new users
+	{
 		if (color_buttons.count(7))
 			color_buttons[7]->TextColor.ARGB = 0xFF85489C; //Roleplay - Purple
+	}
+	if (!ini->exists("ZealColors", "Color8")) //Adds default Nameplate Color to Button9 for new users
+	{
 		if (color_buttons.count(8))
 			color_buttons[8]->TextColor.ARGB = 0xFFFFFF80; //OtherGuild Member - White Yellow
+	}
+	if (!ini->exists("ZealColors", "Color9")) //Adds default Nameplate Color to Button10 for new users
+	{
 		if (color_buttons.count(9))
-			color_buttons[9]->TextColor.ARGB = 0xFF3D6BDC; //Not in Guild Member - Default Blue
+			color_buttons[9]->TextColor.ARGB = 0xFF3D6BDC; //DefaultAdventurer - Default Blue
+	}
+	if (!ini->exists("ZealColors", "Color10")) //Adds default Nameplate Color to Button11 for new users
+	{
 		if (color_buttons.count(10))
 			color_buttons[10]->TextColor.ARGB = 0xFF000000; //Npc Corpse - Black
+	}
+	if (!ini->exists("ZealColors", "Color11")) //Adds default Nameplate Color to Button12 for new users
+	{
 		if (color_buttons.count(11))
 			color_buttons[11]->TextColor.ARGB = 0xFFFFFFFF; //Players Corpse - White Light Purple
+	}
+	if (!ini->exists("ZealColors", "Color12")) //Adds default Nameplate Color to Button13 for new users
+	{
 		if (color_buttons.count(12))
 			color_buttons[12]->TextColor.ARGB = CON_GREEN; //GreenCon
+	}
+	if (!ini->exists("ZealColors", "Color13")) //Adds default Nameplate Color to Button14 for new users
+	{
 		if (color_buttons.count(13))
 			color_buttons[13]->TextColor.ARGB = CON_LIGHTBLUE; //LightBlueCon
+	}
+	if (!ini->exists("ZealColors", "Color14")) //Adds default Nameplate Color to Button15 for new users
+	{
 		if (color_buttons.count(14))
 		{
 			if (ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
-				color_buttons[14]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options menu
+				color_buttons[14]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options menu as Nameplate Color Button15
 			else
-				color_buttons[14]->TextColor.ARGB = 0xFF0040FF; //BlueCon - Default DarkBlue is ligher than CON_BLUE for new users
+				color_buttons[14]->TextColor.ARGB = 0xFF0040FF; //BlueCon - Default DarkBlue is lighter than CON_BLUE as Nameplate Color Button15 for new users
 		}
+	}
+	if (!ini->exists("ZealColors", "Color15")) //Adds default Nameplate Color to Button16 for new users
+	{
 		if (color_buttons.count(15))
 			color_buttons[15]->TextColor.ARGB = CON_WHITE; //WhiteCon
+	}
+	if (!ini->exists("ZealColors", "Color16")) //Adds default Nameplate Color to Button17 for new users
+	{
 		if (color_buttons.count(16))
 			color_buttons[16]->TextColor.ARGB = CON_YELLOW; //YellowCon
+	}
+	if (!ini->exists("ZealColors", "Color17")) //Adds default Nameplate Color to Button18 for new users
+	{
 		if (color_buttons.count(17))
 			color_buttons[17]->TextColor.ARGB = CON_RED; //RedCon
 	}
