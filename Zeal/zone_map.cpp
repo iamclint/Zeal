@@ -320,7 +320,7 @@ std::vector<ZoneMap::MapVertex> ZoneMap::calculate_grid_vertices(
     const int grid_y_count = (zone_map_data.max_y - grid_y_min) / map_grid_pitch + 1;
 
     std::vector<ZoneMap::MapVertex> vertices;
-    vertices.reserve(grid_x_count + grid_y_count);
+    vertices.reserve(max(0, grid_x_count + grid_y_count));
 
     // Add vertical lines.
     for (int i = 0; i < grid_x_count; ++i) {
@@ -615,7 +615,7 @@ void ZoneMap::render_labels(IDirect3DDevice8& device) {
 // Handles writing a text label at map coordinates y and x to the screen.
 void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOLOR font_color,
                                 LabelType label_type, Vec2 offset_pixels) {
-    if (!bitmap_font)  // Programming error if this happens but paranoid checking.
+    if (!bitmap_font || !label || !(*label))  // Defensive programming and empty string check.
         return;
 
    // Then check if the label is visible on the clipped map rect.
@@ -637,15 +637,16 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
         font_color = D3DCOLOR_XRGB(192, 192, 192);  // Flip to light grey.
 
     // Calculate and clip the on-screen coordinate position of the text.
+    const int kMaxLabelLength = 20;
     int length = strlen(label);
-    if (length > 20) {
-        length = 20;  // Truncate it to 20.
+    if (length > kMaxLabelLength) {
+        length = kMaxLabelLength;  // Truncate it.
         for (int i = 1; i < length - 1; ++i) {
             if (label[i] == '_' && label[i + 1] == '(')  // Extra info in () to drop.
                 length = i;  // Truncates and breaks loop.
         }
     }
-    char short_label[21];
+    char short_label[kMaxLabelLength + 1];
     memcpy(short_label, label, length);
     short_label[length] = 0;
 
@@ -723,8 +724,8 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
 
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
-        if ((strlen(groupNames[i]) == 0) || !member)
-            continue;  // Not a valid group member (or member = nullptr when out of zone).
+        if ((strlen(groupNames[i]) == 0) || !member || member->Type != Zeal::EqEnums::EntityTypes::Player)
+            continue;  // Not a valid group member, out of zone (nullptr), or corpse.
 
         // Position is y,x,z.
         add_position_marker_vertices(-member->Position.x, -member->Position.y, member->Heading, size,
@@ -753,8 +754,8 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
     const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
-        if ((strlen(groupNames[i]) == 0) || !member)
-            continue;  // Not a valid group member (or member = nullptr when out of zone).
+        if ((strlen(groupNames[i]) == 0) || !member || member->Type != Zeal::EqEnums::EntityTypes::Player)
+            continue;  // Not a valid group member, out of zone (nullptr), or corpse.
 
         // Writes the character name or group number (F2 - F6) centered at the character position.
         int loc_y = static_cast<int>(member->Position.x + 0.5f);  // Position is y,x,z.
@@ -799,8 +800,8 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
         if (strlen(member.Name) == 0)
             continue;
         auto entity = entity_manager->Get(member.Name);
-        if (!entity)
-            continue;  // Could be out of zone.
+        if (!entity || entity->Type != Zeal::EqEnums::EntityTypes::Player)
+            continue;  // Could be out of zone or a corpse.
 
         int loc_y = static_cast<int>(entity->Position.x + 0.5f);  // Position is y,x,z.
         int loc_x = static_cast<int>(entity->Position.y + 0.5f);  // Also need to negate it below.
@@ -874,8 +875,8 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
             || (strcmp(member.Name, self->Name) == 0))
             continue;  // In same group or no raid member or it is self.
         auto entity = entity_manager->Get(member.Name);
-        if (!entity)
-            continue;  // Could be out of zone.
+        if (!entity || entity->Type != Zeal::EqEnums::EntityTypes::Player)
+            continue;  // Could be out of zone or a corpse.
 
         auto color = member.IsGroupLeader ? kColorLeader :
             (member.GroupNumber == kUngrouped ? kColorUngrouped :
@@ -2317,8 +2318,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
         dump();
     }
     else if (!parse_shortcuts(args)) {
-        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level|show_group|save_ini]");
-        Zeal::EqGame::print_chat("Beta: /map [data_mode|always_center]");
+        Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level|]");
+        Zeal::EqGame::print_chat("Usage: /map [show_group|show_raid|save_ini|grid|font]");
+        Zeal::EqGame::print_chat("Beta: /map [external|data_mode|always_center]");
         Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
     }
@@ -2344,7 +2346,7 @@ void ZoneMap::release_font() {
 void ZoneMap::callback_dx_reset() {
     render_release_resources();
     release_d3d_external_window();
-    zone_id = kInvalidZoneId;  // Triggers reload of map.
+    set_enabled(false, false);  // Turn off the map to be safe.
 }
 
 ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)

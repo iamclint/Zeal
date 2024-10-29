@@ -253,7 +253,8 @@ void BitmapFont::for_each_glyph(const char* text, TAction action) const
     float x = 0;
     float y = 0;
 
-    for (; *text; text++) {
+    int length_limit = 100;  // Limit text strings to 100 characters.
+    for (; *text && length_limit--; text++) {
         const char character = *text;
 
         switch (character)
@@ -284,6 +285,9 @@ void BitmapFont::for_each_glyph(const char* text, TAction action) const
 // Public interface that queues a string for later rendering in the flush call.
 void BitmapFont::queue_string(const char* text, const Vec2& position, bool center,
                              const D3DCOLOR color) {
+    if (!text || !(*text))
+        return;  // Skip nullptr or empty strings.
+
     Vec2 upper_left = position;
     if (center) {
         Vec2 size = measure_string(text);
@@ -301,6 +305,8 @@ void BitmapFont::queue_string(const char* text, const Vec2& position, bool cente
 Vec2 BitmapFont::measure_string(const char* text) const
 {
     Vec2 result{ 0, 0 };
+    if (!text || !(*text))
+        return result;  // Skip nullptr or empty strings.
 
     for_each_glyph(text,
         [&](Glyph const* glyph, float x, float y) {
@@ -314,6 +320,9 @@ Vec2 BitmapFont::measure_string(const char* text) const
 
 // Returns the bounding box around the string.
 RECT BitmapFont::measure_draw_rect(const char* text, const Vec2& position) const {
+    if (!text || !(*text))
+        return { 0, 0, 0, 0 };  // Skip nullptr or empty strings.
+
     RECT result = { LONG_MAX, LONG_MAX, 0, 0 };
 
     for_each_glyph(text,
@@ -400,15 +409,16 @@ void BitmapFont::render_queue() {
 
     int read_index = 0;
     while (read_index < glyph_queue.size()) {
-        int batch_count = glyph_queue.size() - read_index;
+        const int glyphs_left_count = glyph_queue.size() - read_index;
         int empty_space_count = kVertexBufferMaxBatchCount - vertex_buffer_wr_index;
 
-        if ((batch_count > empty_space_count) && (empty_space_count < kVertexBufferMinBatchCount)) {
+        if ((glyphs_left_count > empty_space_count) && (empty_space_count < kVertexBufferMinBatchCount)) {
             vertex_buffer_wr_index = 0;  // Out of room, so wrap back to start.
             empty_space_count = kVertexBufferMaxBatchCount;
         }
-        batch_count = std::min(batch_count, empty_space_count);
-        assert(batch_count > 0);
+        const int batch_count = std::min(glyphs_left_count, empty_space_count);
+        if (batch_count < 1)
+            break;  // Shouldn't happen, but if it does, just abort processing glyphs.
 
         for (int i = 0; i < batch_count; i++)
             calculate_glyph_vertices(glyph_queue[read_index + i], &vertices[i * kNumGlyphVertices]);
