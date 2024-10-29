@@ -39,7 +39,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>1 - AFK</Text>
+    <Text>-</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -69,7 +69,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>2 - AFK</Text>
+    <Text>1 - AFK</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
