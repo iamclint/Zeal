@@ -458,6 +458,15 @@ background will scroll with the player centered in the viewport.
 * Command examples:
   - `/map zoom 200` sets map scaling to 200% (2x)
 
+#### Map grid
+A simple background grid aligned at a selectable pitch is available. The x == 0 and y == 0 axes
+are colored orange.
+
+* Command examples:
+  - `/map grid` toggles grid on and off
+  - `/map grid 500` sets the grid pitch to 500 loc units (lines at multiples of 500)
+  - `/map save_ini` saves the currently set grid enable and pitch as defaults
+
 #### Showing group and raid members
 The map supports showing the live position of other group and raid members. The group
 member markers are slighly shrunken player position markers and colored in this order
@@ -474,6 +483,7 @@ in the options tab and instead use the key bind to situationally toggle it on an
   - `/map show_group labels_off` disables group member labels
   - `/map show_group numbers` enables numeric (F2-F6) group member labels (uses nameplate colors)
   - `/map show_group names` enables shortened group member names (uses nameplate colors)
+  - `/map show_group length 8` sets the shortened length of group and raid member names to 8
   - `/map show_raid` toggles the raid member markers on and off
 
 #### Showing map levels
@@ -486,15 +496,19 @@ the zones are properly colored, but it does work well in some of the 3-D overlap
   - `/map level 0` shows default of all levels
   - `/map level 2` shows the current zone's level 2 data
 
-#### Position marker
-The map supports adding a position marker to easier identification of target coordinates.
+#### Position markers
+The map supports adding position markers for easier identification of target coordinates. The
+markers have a label centered above them, with the default set to the marker loc values. There
+is no set limit to the number of markers. See how to clear them below.
 
 * Zeal options slider to adjust the marker size
 * Command examples:
-  - `/map marker 1100 -500` sets a map marker at /loc of 1100, -500
+  - `/map marker 1100 -500` adds a map marker at /loc of 1100, -500 labeled "(1100, -500)"
   - `/map 1100 -500` is a shortcut for the command above to set a marker at 1100, -500
-  - `/map marker` clears the marker
-  - `/map 0` is a shortcut for clearing the marker
+  - `/map marker -300 200 camp` adds a map marker at /loc of -300, 200 labeled "camp"
+  - `/map marker` clears all markers
+  - `/map 0` is a shortcut for clearing all markers
+  - `/map marker size 40` sets the marker size to "40%"
 
 #### Map font
 The map supports selecting a "spritefont" formatted bitmap font file. A few sizes of arial
@@ -516,9 +530,9 @@ up the map even in zoom. The keybind to toggle through the label modes is recomm
 * Key bind: "Toggle Map Labels" - toggles through the labels modes
 * Command examples:
   - `/map poi` lists the available poi's, including their indices
-  - `/map poi 4` drops a marker on index [4] of the `/map poi` list
+  - `/map poi 4` adds a marker on index [4] of the `/map poi` list
   - `/map poi butcherblock` performs a text search of the poi list for butcherblock, reports 
-     any matches, and drops a marker on the first one
+     any matches, and adds a marker on the first one
   - `/map butcherblock` shortcut for above (does not work for terms that match other commands)
   - `/map labels summary` enables the summary labels (other options are `off`, `all`, or `marker`)
 

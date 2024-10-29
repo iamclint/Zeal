@@ -49,7 +49,7 @@ namespace {
 // Constants used in DirectX resource allocation.
 static constexpr int kBackgroundCount = 2;  // Two triangles in split mode.
 static constexpr int kBackgroundVertices = 3 + (kBackgroundCount - 1);  // Two triangles using split.
-static constexpr int kMarkerCount = 4;  // Four triangles.
+static constexpr int kMarkerCount = 4;  // Four triangles per marker.
 static constexpr int kPositionCount = 2;  // Two triangles.
 static constexpr int kPositionVertices = kPositionCount * 3; // Fixed triangle list.
 static constexpr int kRaidMaxMembers = 72;
@@ -262,10 +262,15 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
                 0.5f, background_color },
     };
 
+    auto grid_vertices = calculate_grid_vertices(zone_map_data);
+    grid_line_count = grid_vertices.size() / 2;
+
     const int line_buffer_size = sizeof(MapVertex) * line_count * 2;
     const int background_buffer_size = sizeof(MapVertex) * kBackgroundVertices;
-    // Create a Vertex buffer and copy the map line segments over.
-    if (FAILED(device.CreateVertexBuffer(line_buffer_size + background_buffer_size,
+    const int grid_buffer_size = sizeof(MapVertex) * grid_line_count * 2;
+    // Create a Vertex buffer and copy the map line, background, and grid segments over.
+    if (FAILED(
+        device.CreateVertexBuffer(line_buffer_size + background_buffer_size + grid_buffer_size,
         D3DUSAGE_WRITEONLY,
         kMapVertexFvfCode,
         D3DPOOL_MANAGED,
@@ -281,6 +286,8 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
     }
     memcpy(data, background_vertices, background_buffer_size);
     memcpy(data + background_buffer_size, (const void*)line_vertices.get(), line_buffer_size);
+    memcpy(data + background_buffer_size + line_buffer_size, (const void*)grid_vertices.data(),
+            grid_buffer_size);
     line_vertex_buffer->Unlock();
 
     // Create a worst-case sized Vertex buffer for live position updates.
@@ -294,6 +301,61 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
 
     render_load_labels(device, zone_map_data);
 }
+
+std::vector<ZoneMap::MapVertex> ZoneMap::calculate_grid_vertices(
+                                            const ZoneMapData& zone_map_data) const {
+    const auto grid_color = (map_background_state == BackgroundType::kDark) ||
+        (map_background_state == BackgroundType::kClear && !external_enabled) ?
+        D3DCOLOR_XRGB(85, 90, 96) : D3DCOLOR_XRGB(48, 48, 48);
+    const auto axis_color = D3DCOLOR_XRGB(0xfd, 0xa1, 0x72);  // Cantaloupe orange
+
+    // Create the background grid with horizontal and vertical lines aligned to pitch.
+    const int grid_x_ceil = (zone_map_data.min_x < 0) ? 0 : map_grid_pitch - 1;
+    const int grid_x_min =
+        ((zone_map_data.min_x + grid_x_ceil) / map_grid_pitch) * map_grid_pitch;
+    const int grid_x_count = (zone_map_data.max_x - grid_x_min) / map_grid_pitch + 1;
+    const int grid_y_ceil = (zone_map_data.min_y < 0) ? 0 : map_grid_pitch - 1;
+    const int grid_y_min =
+        ((zone_map_data.min_y + grid_y_ceil) / map_grid_pitch) * map_grid_pitch;
+    const int grid_y_count = (zone_map_data.max_y - grid_y_min) / map_grid_pitch + 1;
+
+    std::vector<ZoneMap::MapVertex> vertices;
+    vertices.reserve(grid_x_count + grid_y_count);
+
+    // Add vertical lines.
+    for (int i = 0; i < grid_x_count; ++i) {
+        float x = static_cast<float>(grid_x_min + i * map_grid_pitch);
+        auto color = (x == 0) ? axis_color : grid_color;
+        vertices.push_back({
+            .x = x,
+            .y = static_cast<float>(zone_map_data.min_y),
+            .z = 0.5f,
+            .color = color });
+        vertices.push_back({
+            .x = x,
+            .y = static_cast<float>(zone_map_data.max_y),
+            .z = 0.5f,
+            .color = color });
+    }
+
+    // Add horizontal lines
+    for (int i = 0; i < grid_y_count; ++i) {
+        float y = static_cast<float>(grid_y_min + i * map_grid_pitch);
+        auto color = (y == 0) ? axis_color : grid_color;
+        vertices.push_back({
+            .x = static_cast<float>(zone_map_data.min_x),
+            .y = y,
+            .z = 0.5f,
+            .color = color });
+        vertices.push_back({
+            .x = static_cast<float>(zone_map_data.max_x),
+            .y = y,
+            .z = 0.5f,
+            .color = color });
+    }
+    return vertices;
+}
+
 
 D3DCOLOR ZoneMap::get_background_color() const {
     // Alpha doesn't do much in external_enabled window mode, so set opaque.
@@ -431,15 +493,15 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
     if (map_background_state != BackgroundType::kClear && !external_enabled)
         render_background(device);
 
+    if (map_show_grid)
+        render_grid(device);
+
     if (line_count) {
         device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
         device.DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices, line_count);
     }
 
-    if (marker_vertex_buffer) {
-        device.SetStreamSource(0, marker_vertex_buffer, sizeof(MapVertex));
-        device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, kMarkerCount);
-    }
+    render_markers(device);
 
     render_labels(device);
 
@@ -463,6 +525,48 @@ void ZoneMap::render_background(IDirect3DDevice8& device) {
     device.DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, kBackgroundCount);
 
     render_state.restore_state();
+}
+
+void ZoneMap::render_grid(IDirect3DDevice8& device) {
+    if (!grid_line_count)
+        return;
+
+    // Grid lines are stored at the end of the line_vertex_buffer.
+    device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
+    device.DrawPrimitive(D3DPT_LINELIST, kBackgroundVertices + line_count * 2, grid_line_count);
+}
+
+void ZoneMap::render_markers(IDirect3DDevice8& device) {
+    if (markers_list.empty())
+        return;
+
+    // Buffer is cleared when the markers list changes.
+    if (marker_vertex_buffer == nullptr) {
+        render_update_marker_buffer(device);
+    }
+
+    if (marker_vertex_buffer == nullptr)
+        return;  // Failed to update above.
+
+    // Render the marker target triangles.
+    device.SetStreamSource(0, marker_vertex_buffer, sizeof(MapVertex));
+    device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, markers_list.size() * kMarkerCount);
+
+    // Add the text labels centered above the marker.
+    render_load_font(device);
+    if (!bitmap_font)
+        return;
+
+    float size = max(5.f, marker_size * 0.5f * min(max_viewport_width, max_viewport_height));
+    Vec2 offset_pixels = { 0, -(size + bitmap_font->get_line_spacing() * 0.5f) };
+    auto color = D3DCOLOR_XRGB(255, 0, 0);
+    for (const auto& marker : markers_list) {
+        render_label_text(marker.label.c_str(), -marker.loc_y, -marker.loc_x, color,
+            LabelType::PositionLabel, offset_pixels);
+    }
+
+    bitmap_font->flush_queue_to_screen();  // Flush to screen.
+    device.SetVertexShader(kMapVertexFvfCode);  // Restore assumed shader.
 }
 
 // Handles the rendering of the labels_list and dynamic_labels_list.
@@ -533,7 +637,6 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
         font_color = D3DCOLOR_XRGB(192, 192, 192);  // Flip to light grey.
 
     // Calculate and clip the on-screen coordinate position of the text.
-    const int kHalfHeight = 10;  // Centered so just has to be sufficiently large.
     int length = strlen(label);
     if (length > 20) {
         length = 20;  // Truncate it to 20.
@@ -647,6 +750,7 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         && ZealService::get_instance()->ui->options.get())
         color = ZealService::get_instance()->ui->options.get()->GetColor(5);  // GroupColor
 
+    const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
         if ((strlen(groupNames[i]) == 0) || !member)
@@ -655,12 +759,11 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         // Writes the character name or group number (F2 - F6) centered at the character position.
         int loc_y = static_cast<int>(member->Position.x + 0.5f);  // Position is y,x,z.
         int loc_x = static_cast<int>(member->Position.y + 0.5f);  // Also need to negate it below.
-        constexpr int kShortNameLength = 5;  // Just show the first 3 letters of the name.
-        char label[kShortNameLength + 1] = { 0 };  // Null-terminate.
+        char label[kMaxNameLength + 1] = { 0 };  // Ensure null-terminated.
         if (!map_show_all_names_override && map_group_labels_mode == GroupLabelsMode::kNumbers)
             label[0] = static_cast<uint8_t>(i) + '2';
         else
-            for (int j = 0; j < kShortNameLength; ++j)
+            for (int j = 0; j < short_name_length; ++j)
                 label[j] = groupNames[i][j];
         render_label_text(label,-loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
@@ -690,6 +793,7 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
         reinterpret_cast<const Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
 
     // Just add a label for members, including self, since this is intended to be for transient use.
+    const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
     for (int i = 0; i < kRaidMaxMembers; ++i) {
         const auto& member = raidMembers[i];
         if (strlen(member.Name) == 0)
@@ -700,9 +804,8 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
 
         int loc_y = static_cast<int>(entity->Position.x + 0.5f);  // Position is y,x,z.
         int loc_x = static_cast<int>(entity->Position.y + 0.5f);  // Also need to negate it below.
-        constexpr int kShortNameLength = 5;  // Just show the first 3 letters of the name.
-        char label[kShortNameLength + 1] = { 0 };  // Null-terminate.
-        for (int j = 0; j < kShortNameLength; ++j)
+        char label[kMaxNameLength + 1] = { 0 };  // Null-terminate.
+        for (int j = 0; j < short_name_length; ++j)
             label[j] = entity->Name[j];
         render_label_text(label, -loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
@@ -889,22 +992,25 @@ void ZoneMap::render_update_marker_buffer(IDirect3DDevice8& device) {
     const float size = convert_size_fraction_to_model(marker_size * 0.5f);
     const float short_size = size * 0.25f;
     const int kNumVertices = kMarkerCount * 3;  // Separate triangles with 3 vertices (CW direction).
-    Vec3 marker[kNumVertices] = {{0, 0, 0}, {short_size, size, 0}, {-short_size, size, 0},
+    Vec3 marker_symbol[kNumVertices] = {{0, 0, 0}, {short_size, size, 0}, {-short_size, size, 0},
                                     {0, 0, 0}, {-short_size, -size, 0}, {short_size, -size, 0},
                                     {0, 0, 0}, {size, -short_size, 0}, {size, short_size, 0},
                                     {0, 0, 0}, {-size, short_size, 0}, {-size, -short_size, 0}
     };
 
-    MapVertex marker_vertices[kNumVertices];
-    for (int i = 0; i < kNumVertices; ++i) {
-        marker_vertices[i].x = marker[i].x + marker_x,
-        marker_vertices[i].y = marker[i].y + marker_y,
-        marker_vertices[i].z = 0.5f;
-        marker_vertices[i].color = D3DCOLOR_XRGB(255, 0, 0);
+    std::vector<MapVertex> marker_vertices;
+    for (const auto& marker : markers_list) {
+        for (int i = 0; i < kNumVertices; ++i) {
+            marker_vertices.push_back({
+                .x = marker_symbol[i].x - marker.loc_x,  // Note negation world to map.
+                .y = marker_symbol[i].y - marker.loc_y,
+                .z = 0.5f,
+                .color = D3DCOLOR_XRGB(255, 0, 0) });
+        }
     }
 
     // Create a Vertex buffer and copy the triangle vertices.
-    int marker_buffer_size = sizeof(MapVertex) * kNumVertices;
+    int marker_buffer_size = sizeof(MapVertex) * marker_vertices.size();
     if (FAILED(device.CreateVertexBuffer(marker_buffer_size,
         D3DUSAGE_WRITEONLY,
         kMapVertexFvfCode,
@@ -919,7 +1025,7 @@ void ZoneMap::render_update_marker_buffer(IDirect3DDevice8& device) {
         marker_vertex_buffer = nullptr;
         return;
     }
-    memcpy(data, marker_vertices, marker_buffer_size);
+    memcpy(data, marker_vertices.data(), marker_buffer_size);
     marker_vertex_buffer->Unlock();
 }
 
@@ -1060,12 +1166,6 @@ void ZoneMap::callback_render() {
 
     render_update_viewport(*device);  // Updates size and position of output viewport.
     render_update_transforms(*zone_map_data);  // Updates scaling, offsets, and clipping.
-
-    // Add the marker if it is empty and this is the right zone.
-    if (zone_id != kInvalidZoneId && marker_zone_id == zone_id
-        && marker_vertex_buffer == nullptr) {
-        render_update_marker_buffer(*device);
-    }
 
     render_map(*device);
 
@@ -1314,6 +1414,46 @@ void ZoneMap::set_show_all_names_override(bool flag) {
     map_show_all_names_override = flag;
 }
 
+void ZoneMap::set_show_grid(bool enable, bool update_default) {
+    map_show_grid = enable;
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapShowGrid", map_show_grid);
+
+    update_ui_options();
+}
+
+bool ZoneMap::set_grid_pitch(int new_pitch, bool update_default) {
+    if (new_pitch < 100 || new_pitch > 2000) {
+        Zeal::EqGame::print_chat("Invalid grid pitch (restricted to 100 to 2000)");
+        return false;
+    }
+    map_grid_pitch = new_pitch;
+    zone_id = kInvalidZoneId;  // Triggers reload with modified pitch.
+    if (!map_show_grid)
+        set_show_grid(true, false);  // Turn on the grid if off.
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapGridPitch", map_grid_pitch);
+
+    update_ui_options();
+    return true;
+}
+
+bool ZoneMap::set_name_length(int new_length, bool update_default) {
+    if (new_length < 3 || new_length > kMaxNameLength) {
+        Zeal::EqGame::print_chat("Invalid name length (restricted to 3 to %i)", kMaxNameLength);
+        return false;
+    }
+    map_name_length = new_length;
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapNameLength", map_name_length);
+
+    update_ui_options();
+    return true;
+}
+
 void ZoneMap::toggle_background() {
     map_background_state = BackgroundType::e(static_cast<int>(map_background_state) + 1);
     if (map_background_state > BackgroundType::kLast) {
@@ -1416,7 +1556,7 @@ bool ZoneMap::set_map_data_mode(int mode_in, bool update_default) {
     map_data_cache.clear();  // Wipe cache clean.
     zone_id = kInvalidZoneId;  // Triggers reload.
     map_level_zone_id = kInvalidZoneId;  // Reset (may be out of date).
-    marker_zone_id = kInvalidZoneId;
+    clear_markers(true);
     dynamic_labels_zone_id = kInvalidZoneId;
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
@@ -1438,7 +1578,7 @@ bool ZoneMap::set_position_size(int new_size_percent, bool update_default) {
 
 bool ZoneMap::set_marker_size(int new_size_percent, bool update_default) {
     marker_size = max(0.01f, min(kMaxMarkerSize, new_size_percent / 100.f * kMaxMarkerSize));
-    clear_marker(false);  // Release resources but keep validity state to trigger an update.
+    clear_markers(false);  // Release resources but keep validity state to trigger an update.
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<float>("Zeal", "MapMarkerSize", marker_size);
 
@@ -1446,24 +1586,26 @@ bool ZoneMap::set_marker_size(int new_size_percent, bool update_default) {
     return true;  // Just clamp and report success.
 }
 
-void ZoneMap::clear_marker(bool invalidate_zone_id) {
-    if (invalidate_zone_id)
-        marker_zone_id = kInvalidZoneId;
+void ZoneMap::clear_markers(bool erase_list) {
+    if (erase_list)
+        markers_list.clear();
     if (marker_vertex_buffer) {
         marker_vertex_buffer->Release();
         marker_vertex_buffer = nullptr;
     }
 }
 
-void ZoneMap::set_marker(int y, int x) {
-    clear_marker();  // Release any resources (also triggers update).
+void ZoneMap::set_marker(int y, int x, const char* label) {
+    clear_markers(false);  // Reset visible markers but don't empty list.
 
-    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (!self)
-        return;
-    marker_zone_id = self->ZoneId;
-    marker_x = -x;  // Negate game coordinates to model.
-    marker_y = -y;
+    // Convert nullptr labels to position labels.
+    char loc_label[20];
+    if (!label) {
+        snprintf(loc_label, sizeof(loc_label), "(%i, %i)", y, x);
+        loc_label[sizeof(loc_label) - 1] = 0;
+        label = loc_label;
+    }
+    markers_list.push_back({ .loc_y = y, .loc_x = x, .label = std::string(label)});
 }
 
 void ZoneMap::toggle_zoom() {
@@ -1479,13 +1621,13 @@ void ZoneMap::toggle_zoom() {
             break;
         }
     }
-    clear_marker(false);  // Marker size is dependent on scale_factor.
+    clear_markers(false);  // Marker size is dependent on scale_factor.
     zoom_factor = new_zoom_factor;
     update_ui_options();
 }
 
 bool ZoneMap::set_zoom(int zoom_percent) {
-    clear_marker(false);  // Marker size is dependent on scale_factor.
+    clear_markers(false);  // Marker size is dependent on scale_factor.
     zoom_factor = zoom_percent * 0.01f;
     zoom_factor = min(100.f, max(1.f, zoom_factor));
 
@@ -1507,6 +1649,12 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<bool>("Zeal", "MapShowGroup", true);
     if (!ini->exists("Zeal", "MapShowRaid"))
         ini->setValue<bool>("Zeal", "MapShowRaid", false);
+    if (!ini->exists("Zeal", "MapShowGrid"))
+        ini->setValue<bool>("Zeal", "MapShowGrid", false);
+    if (!ini->exists("Zeal", "MapGridPitch"))
+        ini->setValue<int>("Zeal", "MapGridPitch", kDefaultGridPitch);
+    if (!ini->exists("Zeal", "MapNameLength"))
+        ini->setValue<int>("Zeal", "MapNameLength", map_name_length);
     if (!ini->exists("Zeal", "MapDataMode"))
         ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(MapDataMode::kInternal));
     if (!ini->exists("Zeal", "MapBackgroundState"))
@@ -1544,6 +1692,9 @@ void ZoneMap::load_ini(IO_ini* ini)
     external_monitor_top_offset = ini->getValue<int>("Zeal", "MapExternalTopOffset");
     map_show_group = ini->getValue<bool>("Zeal", "MapShowGroup");
     map_show_raid = ini->getValue<bool>("Zeal", "MapShowRaid");
+    map_show_grid = ini->getValue<bool>("Zeal", "MapShowGrid");
+    map_grid_pitch = ini->getValue<int>("Zeal", "MapGridPitch");
+    map_name_length = ini->getValue<int>("Zeal", "MapNameLength");
     map_data_mode = MapDataMode::e(ini->getValue<int>("Zeal", "MapDataMode"));
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
     map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
@@ -1559,6 +1710,8 @@ void ZoneMap::load_ini(IO_ini* ini)
     font_filename = ini->getValue<std::string>("Zeal", "MapFontFilename");
 
     // Sanity clamp ini values.
+    map_grid_pitch = max(100, min(2000, map_grid_pitch));
+    map_name_length = max(3, min(kMaxNameLength, map_name_length));
     map_data_mode = max(MapDataMode::kFirst, min(MapDataMode::kLast, map_data_mode));
     map_background_state = max(BackgroundType::kFirst, min(BackgroundType::kLast, map_background_state));
     map_background_alpha = max(0, min(1.f, map_background_alpha));
@@ -1590,6 +1743,9 @@ void ZoneMap::save_ini()
     ini->setValue<int>("Zeal", "MapExternalTopOffset", external_monitor_top_offset);
     ini->setValue<bool>("Zeal", "MapShowGroup", map_show_group);
     ini->setValue<bool>("Zeal", "MapShowRaid", map_show_raid);
+    ini->setValue<bool>("Zeal", "MapShowGrid", map_show_grid);
+    ini->setValue<int>("Zeal", "MapGridPitch", map_grid_pitch);
+    ini->setValue<int>("Zeal", "MapNameLength", map_name_length);
     ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(map_data_mode));
     ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
     ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
@@ -1777,6 +1933,7 @@ void ZoneMap::parse_map_data_mode(const std::vector<std::string>& args) {
 }
 
 void ZoneMap::parse_show_group(const std::vector<std::string>& args) {
+    int length = 0;
     if (args.size() == 2) {
         set_show_group(!is_show_group_enabled(), false);
         Zeal::EqGame::print_chat("Showing group members is %s", is_show_group_enabled() ? "ON" : "OFF");
@@ -1793,8 +1950,13 @@ void ZoneMap::parse_show_group(const std::vector<std::string>& args) {
         set_group_labels_mode(GroupLabelsMode::kNames, false);
         Zeal::EqGame::print_chat("Showing group member labels as names");
     }
+    else if (args.size() == 4 && args[2] == "length" && Zeal::String::tryParse(args[3], &length)
+             && set_name_length(length, false)) {
+        Zeal::EqGame::print_chat("Setting map name label length to: %i", length);
+    }
     else {
         Zeal::EqGame::print_chat("Usage: /map show_group (toggles on/off), /map show_group [labels_off, numbers, names]");
+        Zeal::EqGame::print_chat("Usage: /map show_group length <value (3 to 20)>");
     }
 }
 
@@ -1805,27 +1967,28 @@ void ZoneMap::parse_show_raid(const std::vector<std::string>& args) {
 
 void ZoneMap::parse_marker(const std::vector<std::string>& args) {
     if (args.size() <= 2) {
-        clear_marker();
+        clear_markers();  // Remove all markers from the list and screen.
         return;
     }
 
     int y = 0;
     int x = 0;
-    if (args.size() >= 4 && args.size() < 6 && Zeal::String::tryParse(args[2], &y) && Zeal::String::tryParse(args[3], &x)) {
-        if (args.size() == 5) {
-            int new_size = 0;
-            if (!Zeal::String::tryParse(args[4], &new_size) || new_size <= 0) {
-                clear_marker();
-                return;
-            }
+    if (args[2] == "size") {
+        int new_size = 0;
+        if (Zeal::String::tryParse(args[3], &new_size)) {
             set_marker_size(new_size, false);
+            return;
         }
-        set_marker(y, x);
+    }
+    else if (args.size() >= 4 && args.size() < 6 && Zeal::String::tryParse(args[2], &y) && Zeal::String::tryParse(args[3], &x)) {
+        const char* label = (args.size() == 5) ? args[4].c_str() : nullptr;
+        set_marker(y, x, label);
         set_enabled(true);
         return;
     }
 
-    Zeal::EqGame::print_chat("Usage: /map marker <y> <x> [size] (percent size: optional, 0 disables)");
+    Zeal::EqGame::print_chat("Usage: /map marker (clears all markers");
+    Zeal::EqGame::print_chat("Usage: /map marker <y> <x> [label] (label is optional)");
     Zeal::EqGame::print_chat("Example: /map marker 500 -1000 (drops a marker at loc 500, -1000)");
 }
 
@@ -1854,8 +2017,8 @@ bool ZoneMap::search_poi(const std::string& search_term) {
             if (match_count == 1) {
                 Zeal::EqGame::print_chat("Map poi search results for: %s:", search_term.c_str());
                 flag = "+";  // Flag the POI that was used for the marker.
-                // Note: Need to negate y and x to go from map data to world coordinates.
-                set_marker(-zone_map_data->labels[i].y, -zone_map_data->labels[i].x);
+                // Note: Need to negate y and x to go from map data to game world coordinates.
+                set_marker(-zone_map_data->labels[i].y, -zone_map_data->labels[i].x, label.label);
                 set_enabled(true);
             }
             Zeal::EqGame::print_chat("%s[%i]: (%i, %i): %s", flag, i, -label.y, -label.x, label.label);
@@ -1874,15 +2037,17 @@ bool ZoneMap::parse_shortcuts(const std::vector<std::string>& args) {
     int x = 0;
     if (args.size() == 2) {
         if (args[1] == "0") {
-            clear_marker();
+            clear_markers();
             return true;
         }
         if (args[1] != "help") {
             return search_poi(args[1]);
         }
     }
-    else if (args.size() == 3 && Zeal::String::tryParse(args[1], &y) && Zeal::String::tryParse(args[2], &x)) {
-        set_marker(y, x);
+    else if (args.size() >= 3 && args.size() <= 4 && Zeal::String::tryParse(args[1], &y)
+                && Zeal::String::tryParse(args[2], &x)) {
+        const char* label = (args.size() == 4) ? args[3].c_str() : nullptr;
+        set_marker(y, x, label);
         set_enabled(true);
         return true;
        }
@@ -1909,6 +2074,15 @@ void ZoneMap::parse_zoom(const std::vector<std::string>& args) {
     int zoom_percent = 0;
     if (args.size() != 3 || !Zeal::String::tryParse(args[2], &zoom_percent) || !set_zoom(zoom_percent))
         Zeal::EqGame::print_chat( "Usage: /map zoom <percent> (<= 100 disables)");
+}
+
+void ZoneMap::parse_grid(const std::vector<std::string>& args) {
+    int grid_pitch = 0;
+    if (args.size() == 2) {
+        set_show_grid(!map_show_grid, false);
+    } else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &grid_pitch) ||
+                                            !set_grid_pitch(grid_pitch, false))
+        Zeal::EqGame::print_chat("Usage: /map grid [pitch] (blank pitch toggles)");
 }
 
 void ZoneMap::parse_font(const std::vector<std::string>& args) {
@@ -2017,7 +2191,8 @@ void ZoneMap::parse_poi(const std::vector<std::string>& args) {
             Zeal::EqGame::print_chat("Invalid selection index");
             return;
         }
-        set_marker(-zone_map_data->labels[poi].y, -zone_map_data->labels[poi].x);
+        set_marker(-zone_map_data->labels[poi].y, -zone_map_data->labels[poi].x,
+                    zone_map_data->labels[poi].label);
         set_enabled(true);
     }
     else if (args.size() != 3 || !search_poi(args[2])) {
@@ -2037,10 +2212,10 @@ void print_matrix(const D3DMATRIX& matrix, const char* name) {
 }
 
 void ZoneMap::dump() {
-    Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), align: %i, labels:%i, zone: %i",
-                            enabled, map_background_state, map_background_alpha, map_alignment_state, map_labels_mode, zone_id);
-    Zeal::EqGame::print_chat("marker: zone: %i, y: %i, x: %i, num_labels: %i",
-                            marker_zone_id, marker_y, marker_x, labels_list.size());
+    Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), grid: %i, align: %i, labels:%i, zone: %i",
+                            enabled, map_background_state, map_background_alpha, map_show_grid,
+                            map_alignment_state, map_labels_mode, zone_id);
+    Zeal::EqGame::print_chat("num_markers: %i, num_labels: %i", markers_list.size(), labels_list.size());
     Zeal::EqGame::print_chat("view: t: %i, l: %i, h: %i, w: %i, Max H: %i, W: %i", 
         viewport.Y, viewport.X, viewport.Height, viewport.Width, max_viewport_height, max_viewport_width);
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
@@ -2052,8 +2227,8 @@ void ZoneMap::dump() {
         mat_model2world(0,0), mat_model2world(3,1), mat_model2world(3, 0), zoom_factor);
     Zeal::EqGame::print_chat("dyn_labels_size: %i, dyn_labels_zone_id: %i, data_mode: %i, data_cache: %i", 
         dynamic_labels_list.size(), dynamic_labels_zone_id, map_data_mode, map_data_cache.size());
-    Zeal::EqGame::print_chat("line_count: %i, line: %i, position: %i, marker: %i, font: %i (%s)", line_count,
-        line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr,
+    Zeal::EqGame::print_chat("line_count: %i, grid: %i, line: %i, position: %i, marker: %i, font: %i (%s)", line_count,
+        grid_line_count, line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr,
         bitmap_font != nullptr, font_filename.c_str());
     Zeal::EqGame::print_chat("external_monitor_left_offset: %i, monitor_left_offset: %i, monitor_top_offset: %i",
         external_enabled, external_monitor_left_offset, external_monitor_top_offset);
@@ -2129,6 +2304,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
         Zeal::EqGame::print_chat("Saving current map settings");
         save_ini();
     }
+    else if (args[1] == "grid") {
+        parse_grid(args);
+    }
     else if (args[1] == "font") {
         parse_font(args);
     }
@@ -2149,7 +2327,7 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
 
 void ZoneMap::callback_zone() {
     zone_id = kInvalidZoneId;
-    marker_zone_id = kInvalidZoneId;
+    markers_list.clear();
     dynamic_labels_zone_id = kInvalidZoneId;
     map_level_zone_id = kInvalidZoneId;
     map_level_index = 0;
