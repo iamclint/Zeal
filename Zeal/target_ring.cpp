@@ -410,7 +410,9 @@ void TargetRing::set_size(float size)
 
 void TargetRing::save_ini()
 {
-	std::string ini_name = ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+	std::string ini_name = ZealService::get_instance()->ui->GetUIIni();// ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+	if (!ini_name.length())
+		return;
 	IO_ini ini(ini_name);
 	ini.setValue<bool>("TargetRing", "Enabled", enabled);
 	ini.setValue<bool>("TargetRing", "AttackIndicator", attack_indicator);
@@ -424,7 +426,9 @@ void TargetRing::save_ini()
 
 void TargetRing::load_ini()
 {
-	std::string ini_name = ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+	std::string ini_name = ZealService::get_instance()->ui->GetUIIni();// ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+	if (!ini_name.length())
+		return;
 	IO_ini ini(ini_name);
 	if (!ini.exists("TargetRing", "Enabled"))
 		ini.setValue<bool>("TargetRing", "Enabled", false);

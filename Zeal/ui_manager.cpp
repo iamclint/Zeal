@@ -429,6 +429,17 @@ int __fastcall XMLReadNoValidate(void* t, int unused, Zeal::EqUI::CXSTR path1, Z
 }
 
 
+std::string ui_manager::GetUIIni()
+{
+	Zeal::EqStructures::EQCHARINFO* c = Zeal::EqGame::get_char_info();
+	if (c)
+	{
+		std::string char_name = c->Name;
+		return ".\\UI_" + char_name + "_pq.proj.ini";
+	}
+	return "";
+}
+
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);

@@ -273,7 +273,7 @@ void SpellSets::destroy_context_menus()
 void SpellSets::set_ini()
 {
     std::stringstream ss;
-    ss << ".\\" << Zeal::EqGame::get_self()->Name << "_spellsets.ini";
+    ss << ".\\" << Zeal::EqGame::get_char_info()->Name << "_spellsets.ini";
     ini->set(ss.str());
 }
 

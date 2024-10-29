@@ -14,7 +14,7 @@ class ui_manager
 {
 public:
 	static constexpr const char* ui_path = "uifiles\\zeal\\";
-
+	std::string GetUIIni();
 
 	Zeal::EqUI::SliderWnd* GetSlider(std::string name);
 	Zeal::EqUI::BasicWnd* GetCheckbox(std::string name);
