@@ -256,6 +256,7 @@ ___
 - Toggle through map label modes
 - Toggle up or down through visible map levels
 - Toggle map visibility of raid members
+- Toggle map visibility of grid lines
 - Press to display group and raid member labels
 - Toggle nameplate colors for players on/off
 - Toggle nameplate con colors for npcs on/off
@@ -462,10 +463,10 @@ background will scroll with the player centered in the viewport.
 A simple background grid aligned at a selectable pitch is available. The x == 0 and y == 0 axes
 are colored orange.
 
+* Zeal options checkbox (enable) and slider (pitch)
 * Command examples:
   - `/map grid` toggles grid on and off
   - `/map grid 500` sets the grid pitch to 500 loc units (lines at multiples of 500)
-  - `/map save_ini` saves the currently set grid enable and pitch as defaults
 
 #### Showing group and raid members
 The map supports showing the live position of other group and raid members. The group
@@ -475,7 +476,9 @@ markers are simple fixed triangles with varying color.  Since there are a high n
 of potential raid members, it is recommended to not use the persistent Show Raid checkbox
 in the options tab and instead use the key bind to situationally toggle it on and off.
 
-* Zeal options checkbox to enable / disable (one each for group and raid)
+* Zeal options combobox to select group members mode (off, marker, numbers, names)
+* Zeal checkbox to enable raid member visibility
+* Zeal slider to adjust name length
 * Key bind: "Toggle Map Show Raid" - Toggles visibility of raid members
 * Key bind: "Flash Map Member Names" - Displays names of group and raid members while held (if visible)
 * Command examples:
@@ -514,19 +517,18 @@ is no set limit to the number of markers. See how to clear them below.
 The map supports selecting a "spritefont" formatted bitmap font file. A few sizes of arial
 font are included with Zeal and are located in uifiles/zeal/fonts. See the zeal/bitmap_font.cpp
 file for notes on how to generate new fonts. The default font is embedded in the code and can
-be selected with the font name `default`. The command examples below demonstrate how to select
-a font and how the current font can be made a persistent setting using the `save_ini` command.
+be selected with the font name `default`.
 
+* Zeal options combobox to select from available fonts
 * Command examples:
   - `/map font arial_10` changes the current map font to Arial size 10
-  - `/map save_ini` saves all current map settings (including font) to eqclient.ini
 
 #### Map points of interest (poi), labels, and search
 The map supports listing the available points of interest and adding them as labels to the map.
 Note that some maps have many points of interest, so the all setting for the labels can clutter
 up the map even in zoom. The keybind to toggle through the label modes is recommended.
 
-* UI combobox for setting the labels mode (off, summary, all)
+* Zeal options combobox for setting the labels mode (off, summary, all)
 * Key bind: "Toggle Map Labels" - toggles through the labels modes
 * Command examples:
   - `/map poi` lists the available poi's, including their indices
@@ -556,6 +558,7 @@ L x0, y0, z0, x1, y1, z1, red, green, blue
 P x, y, z, red, green, blue, ignored, label_string
 ```
 
+* Zeal options combobox to set data mode
 * Command examples:
   - `/map data_mode both` adds external zone map file data if present to internal maps
   - `/map data_mode external` uses external zone map files if present to replace internal maps

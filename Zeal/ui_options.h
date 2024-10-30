@@ -27,10 +27,13 @@ public:
 private:
 	bool isReady = false;
 	void InitUI();
+	void UpdateDynamicUI();
 	void CleanUI();
+	void CleanDynamicUI();
 	void RenderUI();
 	void Deactivate();
 	void LoadSettings(class IO_ini* ini);
+	int FindComboIndex(std::string combobox, std::string text_value);
 
 	std::unordered_map<int, Zeal::EqUI::BasicWnd*> color_buttons;
 	ui_manager* ui;

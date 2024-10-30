@@ -332,11 +332,26 @@ void ui_options::InitMap()
 	}
 	ui->AddCheckboxCallback(wnd, "Zeal_Map", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_enabled(wnd->Checked, true); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapExternalWindow", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_external_enable(wnd->Checked, true); });
-	ui->AddCheckboxCallback(wnd, "Zeal_MapShowGroup", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_group(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapShowRaid", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_raid(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_MapShowGrid", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_grid(wnd->Checked); });
+	ui->AddComboCallback(wnd, "Zeal_MapShowGroup_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_show_group_mode(value); });
 	ui->AddComboCallback(wnd, "Zeal_MapBackground_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_background(value); });
 	ui->AddComboCallback(wnd, "Zeal_MapAlignment_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_alignment(value); });
 	ui->AddComboCallback(wnd, "Zeal_MapLabels_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_labels_mode(value); });
+	ui->AddComboCallback(wnd, "Zeal_MapDataMode_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_map_data_mode(value); });
+
+	ui->AddComboCallback(wnd, "Zeal_MapFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
+		std::string font_name("");
+		if (value > 0) {  // Note: Assuming first value is the default, which "" selects anyways.
+			Zeal::EqUI::CXSTR selected_name;
+			wnd->CmbListWnd->GetItemText(&selected_name, value, 0);
+			if (selected_name.Data) {
+				font_name = std::string(selected_name.Data->Text);
+				selected_name.FreeRep();
+			}
+		}
+    	ZealService::get_instance()->zone_map->set_font(font_name);
+		});
 
 	ui->AddSliderCallback(wnd, "Zeal_MapZoom_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_zoom(value * 15 + 100);  // Note scale and zoom offset.
@@ -362,6 +377,12 @@ void ui_options::InitMap()
 	ui->AddSliderCallback(wnd, "Zeal_MapBackgroundAlpha_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_background_alpha(value);
 		});
+	ui->AddSliderCallback(wnd, "Zeal_MapNamesLength_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		ZealService::get_instance()->zone_map->set_name_length(value * ZoneMap::kMaxNameLength / 100);
+		});
+	ui->AddSliderCallback(wnd, "Zeal_MapGridPitch_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		ZealService::get_instance()->zone_map->set_grid_pitch(value * ZoneMap::kMaxGridPitch / 100);
+		});
 	ui->AddLabel(wnd, "Zeal_MapZoom_Value");
 	ui->AddLabel(wnd, "Zeal_MapLeft_Value");
 	ui->AddLabel(wnd, "Zeal_MapWidth_Value");
@@ -370,6 +391,8 @@ void ui_options::InitMap()
 	ui->AddLabel(wnd, "Zeal_MapPositionSize_Value");
 	ui->AddLabel(wnd, "Zeal_MapMarkerSize_Value");
 	ui->AddLabel(wnd, "Zeal_MapBackgroundAlpha_Value");
+	ui->AddLabel(wnd, "Zeal_MapNamesLength_Value");
+	ui->AddLabel(wnd, "Zeal_MapGridPitch_Value");
 }
 void ui_options::InitTargetRing()
 {
@@ -546,11 +569,15 @@ void ui_options::UpdateOptionsMap()
 	}
 	ui->SetChecked("Zeal_Map", ZealService::get_instance()->zone_map->is_enabled());
 	ui->SetChecked("Zeal_MapExternalWindow", ZealService::get_instance()->zone_map->is_external_enabled());
-	ui->SetChecked("Zeal_MapShowGroup", ZealService::get_instance()->zone_map->is_show_group_enabled());
 	ui->SetChecked("Zeal_MapShowRaid", ZealService::get_instance()->zone_map->is_show_raid_enabled());
+	ui->SetChecked("Zeal_MapShowGrid", ZealService::get_instance()->zone_map->is_show_grid_enabled());
+	ui->SetComboValue("Zeal_MapShowGroup_Combobox", ZealService::get_instance()->zone_map->get_show_group_mode());
 	ui->SetComboValue("Zeal_MapBackground_Combobox", ZealService::get_instance()->zone_map->get_background());
 	ui->SetComboValue("Zeal_MapAlignment_Combobox", ZealService::get_instance()->zone_map->get_alignment());
 	ui->SetComboValue("Zeal_MapLabels_Combobox", ZealService::get_instance()->zone_map->get_labels_mode());
+	ui->SetComboValue("Zeal_MapDataMode_Combobox", ZealService::get_instance()->zone_map->get_map_data_mode());
+	ui->SetComboValue("Zeal_MapFont_Combobox",
+		FindComboIndex("Zeal_MapFont_Combobox", ZealService::get_instance()->zone_map->get_font()));
 	ui->SetSliderValue("Zeal_MapZoom_Slider", (ZealService::get_instance()->zone_map->get_zoom() - 100)/15);  // 100 to 1600%
 	ui->SetSliderValue("Zeal_MapLeft_Slider", ZealService::get_instance()->zone_map->get_map_left());
 	ui->SetSliderValue("Zeal_MapWidth_Slider", ZealService::get_instance()->zone_map->get_map_width());
@@ -559,6 +586,8 @@ void ui_options::UpdateOptionsMap()
 	ui->SetSliderValue("Zeal_MapPositionSize_Slider", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetSliderValue("Zeal_MapMarkerSize_Slider", ZealService::get_instance()->zone_map->get_marker_size());
 	ui->SetSliderValue("Zeal_MapBackgroundAlpha_Slider", ZealService::get_instance()->zone_map->get_background_alpha());
+	ui->SetSliderValue("Zeal_MapNamesLength_Slider", ZealService::get_instance()->zone_map->get_name_length() * 100 / ZoneMap::kMaxNameLength);
+	ui->SetSliderValue("Zeal_MapGridPitch_Slider", ZealService::get_instance()->zone_map->get_grid_pitch() * 100 / ZoneMap::kMaxGridPitch);
 	ui->SetLabelValue("Zeal_MapZoom_Value", "%i%%", ZealService::get_instance()->zone_map->get_zoom());
 	ui->SetLabelValue("Zeal_MapLeft_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_left());
 	ui->SetLabelValue("Zeal_MapWidth_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_width());
@@ -567,6 +596,8 @@ void ui_options::UpdateOptionsMap()
 	ui->SetLabelValue("Zeal_MapPositionSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetLabelValue("Zeal_MapMarkerSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_marker_size());
 	ui->SetLabelValue("Zeal_MapBackgroundAlpha_Value", "%i%%", ZealService::get_instance()->zone_map->get_background_alpha());
+	ui->SetLabelValue("Zeal_MapNamesLength_Value", "%i", ZealService::get_instance()->zone_map->get_name_length());
+	ui->SetLabelValue("Zeal_MapGridPitch_Value", "%i", ZealService::get_instance()->zone_map->get_grid_pitch());
 }
 
 void ui_options::RenderUI()
@@ -577,8 +608,63 @@ void ui_options::RenderUI()
 		wnd->IsVisible = Zeal::EqGame::Windows->Options->IsVisible;
 		if (!was_visible && wnd->IsVisible)
 		{
+			UpdateDynamicUI();
 			UpdateOptions();
-			ZealService::get_instance()->target_ring->options_opened();
+		}
+	}
+}
+
+int ui_options::FindComboIndex(std::string combobox, std::string text_value) {
+	if (!wnd)
+		return -1;
+
+	Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem(combobox.c_str());
+	if (!cmb)
+		return -1;
+
+	int value = 0;
+	for (int value = 0; value < 20; ++value) {
+		Zeal::EqUI::CXSTR selected_name;
+		cmb->CmbListWnd->GetItemText(&selected_name, value, 0);  // Assumption: value > rows is safe.
+		if (!selected_name.Data)
+			return -1;  // End of list.
+
+		std::string value_label = std::string(selected_name.Data->Text);
+		selected_name.FreeRep();
+		if (Zeal::String::compare_insensitive(value_label, text_value))
+			return value;
+	}
+	return -1;
+}
+
+void ui_options::UpdateDynamicUI() {
+	if (!wnd)
+		return;
+
+	ZealService::get_instance()->target_ring->options_opened();
+
+	Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_MapFont_Combobox");
+	if (cmb) {
+		std::vector<std::string> fonts = ZealService::get_instance()->zone_map->get_available_fonts();
+		cmb->DeleteAll();
+		ZealService::get_instance()->ui->AddListItems(cmb, fonts);
+
+		std::string current_font = ZealService::get_instance()->zone_map->get_font();
+		cmb->SetChoice(FindComboIndex("Zeal_MapFont_Combobox", current_font));
+	}
+}
+
+void ui_options::CleanDynamicUI() {
+	if (!wnd)
+		return;
+
+	std::vector<std::string> box_list = { "Zeal_TargetRingTexture_Combobox", "Zeal_MapFont_Combobox" };
+	for (const auto& box_name : box_list) {
+		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem(box_name.c_str());
+		if (cmb)
+		{
+			cmb->CmbListWnd->SelectedIndex = -1;
+			cmb->DeleteAll();
 		}
 	}
 }
@@ -591,12 +677,7 @@ void ui_options::CleanUI()
 	{
 		color_buttons.clear();
 		wnd->show(0, 0);
-		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_TargetRingTexture_Combobox");
-		if (cmb)
-		{
-			cmb->CmbListWnd->SelectedIndex = -1;
-			cmb->DeleteAll();
-		}
+		CleanDynamicUI();
 		wnd->Deconstruct();
 		wnd = nullptr;
 	}
@@ -606,12 +687,7 @@ void ui_options::Deactivate()
 	if (wnd)
 	{
 		wnd->show(0, 0);
-		Zeal::EqUI::ComboWnd* cmb =  (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_TargetRingTexture_Combobox");
-		if (cmb)
-		{
-			cmb->CmbListWnd->SelectedIndex = -1;
-			cmb->DeleteAll();
-		}
+		CleanDynamicUI();
 	}
 }
 

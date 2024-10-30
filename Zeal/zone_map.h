@@ -26,8 +26,10 @@ public:
 	struct BackgroundType { enum e : int { kClear = 0, kDark, kLight, kTan, kFirst = kClear, kLast = kTan }; };
 	struct LabelsMode { enum e : int { kOff = 0, kSummary, kAll, kMarkerOnly, kFirst = kOff, kLast = kMarkerOnly }; };
 	struct MapDataMode { enum e : int { kInternal = 0, kBoth, kExternal, kFirst = kInternal, kLast = kExternal }; };
-	struct GroupLabelsMode { enum e : int { kOff = 0, kNumbers, kNames, kFirst = kOff, kLast = kNames }; };
+	struct ShowGroupMode { enum e : int { kOff = 0, kMarkers, kNumbers, kNames, kFirst = kOff, kLast = kNames }; };
 
+	static constexpr int kMaxNameLength = 20;  // Name buffer is >= 30.
+	static constexpr int kMaxGridPitch = 2500;
 	static constexpr float kMaxPositionSize = 0.05f;  // In fraction of screen size.
 	static constexpr float kMaxMarkerSize = 0.05f;
 
@@ -40,7 +42,7 @@ public:
 	bool is_enabled() const { return enabled; }
 	void set_enabled(bool enable, bool update_default = false);
 	void set_external_enable(bool enabled, bool update_default = false);
-	void set_show_group(bool enable, bool update_default = true);
+	bool set_show_group_mode(int new_mode, bool update_default = true);
 	void set_show_raid(bool enable, bool update_default = true);
 	void set_show_all_names_override(bool flag);  // Override to enable showing group and raid names.
 	void set_show_grid(bool enable, bool update_default = true);
@@ -51,7 +53,6 @@ public:
 	bool set_background_alpha(int percent, bool update_default = true);
 	bool set_alignment(int new_state, bool update_default = true); // [left, center, right]
 	bool set_labels_mode(int new_mode, bool update_default = true);  // [off, summary, all]
-	bool set_group_labels_mode(int new_mode, bool update_default = true);
 	bool set_map_top(int top_percent, bool update_default = true, bool preserve_height = true);
 	bool set_map_left(int left_percent, bool update_default = true, bool preserve_width = true);
 	bool set_map_bottom(int bottom_percent, bool update_default = true);
@@ -61,18 +62,19 @@ public:
 	bool set_position_size(int new_size_percent, bool update_default = true);
 	bool set_marker_size(int new_size_percent, bool update_default = true);
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
+	bool set_font(std::string font_name, bool update_default = true);
 
 	bool is_external_enabled() const { return external_enabled; }
-	bool is_show_group_enabled() const { return map_show_group; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
 	bool is_show_grid_enabled() const { return map_show_grid; }
+	int get_show_group_mode() const { return map_show_group_mode; }
+	int get_name_length() const { return map_name_length; }
 	int get_grid_pitch() const { return map_grid_pitch; }
 	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
 	int get_background() const { return static_cast<int>(map_background_state); }
 	int get_background_alpha() const { return static_cast<int>(map_background_alpha * 100 + 0.5f); }
 	int get_alignment() const { return static_cast<int>(map_alignment_state); }
 	int get_labels_mode() const { return static_cast<int>(map_labels_mode); }
-	int get_group_labels_mode() const { return static_cast<int>(map_group_labels_mode); }
 	int get_map_top() const { return static_cast<int>(map_rect_top * 100 + 0.5f); }
 	int get_map_left() const { return static_cast<int>(map_rect_left * 100 + 0.5f); }
 	int get_map_bottom() const { return static_cast<int>(map_rect_bottom * 100 + 0.5f); }
@@ -82,6 +84,8 @@ public:
 	int get_position_size() const { return static_cast<int>(position_size / kMaxPositionSize * 100 + 0.5f); }
 	int get_marker_size() const { return static_cast<int>(marker_size / kMaxMarkerSize * 100 + 0.5f); }
 	int get_zoom() const { return static_cast<int>(zoom_factor * 100 + 0.5f); }
+	std::string get_font() const { return font_filename; }
+	std::vector<std::string> get_available_fonts() const;
 
 	void toggle_background();
 	void toggle_zoom();
@@ -123,7 +127,6 @@ private:
 	static constexpr int kInvalidZoneId = 0;
 	static constexpr int kDefaultGridPitch = 1000;
 	static constexpr int kDefaultNameLength = 5;
-	static constexpr int kMaxNameLength = 20;  // Name buffer is >= 30.
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
 	static constexpr float kDefaultRectTop = 0.1f;
 	static constexpr float kDefaultRectLeft = 0.1f;
@@ -207,14 +210,13 @@ private:
 	bool map_show_grid = false;
 	int map_grid_pitch = kDefaultGridPitch;  // Pitch when grid is visible.
 	int map_name_length = kDefaultNameLength;  // Number of characters in name labels.
-	bool map_show_group = false;
 	bool map_show_raid = false;
 	bool map_show_all_names_override = false;  // Meant as a temporary override to flash names.
 	BackgroundType::e map_background_state = BackgroundType::kClear;
 	float map_background_alpha = kDefaultBackgroundAlpha;
 	AlignmentType::e map_alignment_state = AlignmentType::kFirst;
 	LabelsMode::e map_labels_mode = LabelsMode::kOff;
-	GroupLabelsMode::e map_group_labels_mode = GroupLabelsMode::kOff;
+	ShowGroupMode::e map_show_group_mode = ShowGroupMode::kOff;
 	MapDataMode::e map_data_mode = MapDataMode::kInternal;
 	int zone_id = kInvalidZoneId;
 	std::vector<Marker> markers_list;
