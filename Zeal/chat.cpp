@@ -590,10 +590,6 @@ void chat::set_bluecon(bool val)
 {
     UseBlueCon = val;
     ZealService::get_instance()->ini->setValue<bool>("Zeal", "Bluecon", UseBlueCon);
-    if (UseBlueCon)
-        Zeal::EqGame::print_chat("Blue con color is now set to usercolor 70");
-    else
-        Zeal::EqGame::print_chat("Default blue con color.");
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
 chat::~chat()
