@@ -301,21 +301,22 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
                     move_caret(active_edit, caret_dir::right);
                     return 0;
                 }
-                case 0x2F: //v
+                case 0x2F: //v (paste)
                 {
                     std::string temp_text = StripSpecialCharacters(ReadFromClipboard());
-                    active_edit->InputText.Assure(temp_text.length()+active_edit->InputText.Data->Length, 0);
+                    active_edit->InputText.Assure(temp_text.length()+active_edit->InputText.Data->Length+1, 0);
 
                     active_edit->ReplaceSelection(temp_text.c_str(), false);
                     return 0;
                 }
-                case 0x1E: //a
+                case 0x1E: //a (select all)
                 {
                     active_edit->Caret_Start = 0;
                     active_edit->Caret_End = active_edit->GetInputLength();
                     return 0;
                 }
-                case 0x2E: //c
+                case 0x2D: //x (cut)
+                case 0x2E: //c (copy)
                 {
                     if (active_edit->Caret_End - active_edit->Caret_Start > 0)
                     {
@@ -335,6 +336,8 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
                         std::string highlighted_text(active_edit->InputText.Data->Text + new_caret_start, active_edit->InputText.Data->Text + new_caret_end + (highlighted_link_count * 9));
                         SetClipboardText(highlighted_text);
                     }
+                    if (key == 0x2D)
+                        active_edit->ReplaceSelection("", false);
                     return 0;
                 }
             }
