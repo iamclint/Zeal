@@ -301,12 +301,22 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
                     move_caret(active_edit, caret_dir::right);
                     return 0;
                 }
-                case 0x2F: //v (paste)
+                case 0x2F: //v (paste)//025595 Doljonijiarnimorinar
                 {
                     std::string temp_text = StripSpecialCharacters(ReadFromClipboard());
-                    active_edit->InputText.Assure(temp_text.length()+active_edit->InputText.Data->Length+1, 0);
+                    int links_in_paste = std::count(temp_text.begin(), temp_text.end(), '');
+                    if (links_in_paste > 0)
+                        links_in_paste /= 2;
 
-                    active_edit->ReplaceSelection(temp_text.c_str(), false);
+                    if (active_edit->item_link_count + links_in_paste < 10)
+                    {
+                        active_edit->InputText.Assure(temp_text.length() + active_edit->InputText.Data->Length + 1, 0);
+                        active_edit->ReplaceSelection(temp_text.c_str(), false);
+                    }
+                    else
+                    {
+                        Zeal::EqGame::print_chat_wnd(Zeal::EqGame::Windows->ChatManager->GetActiveChatWindow(), 0, "<c \"#FF0000\">Too many item links to paste</c>");
+                    }
                     return 0;
                 }
                 case 0x1E: //a (select all)
