@@ -64,11 +64,11 @@ static void __fastcall SetComboValue_hook(Zeal::EqUI::BasicWnd* pWnd, int unused
 		cb_parent(pWnd->ParentWnd, value);
 }
 
-Zeal::EqUI::BasicWnd* ui_manager::AddButtonCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
+Zeal::EqUI::BasicWnd* ui_manager::AddButtonCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback, bool log_errors)
 {
 	if (wnd)
 	{
-		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name);
+		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name, log_errors);
 		if (btn)
 		{
 			button_callbacks[btn] = callback;
@@ -78,11 +78,11 @@ Zeal::EqUI::BasicWnd* ui_manager::AddButtonCallback(Zeal::EqUI::BasicWnd* wnd, s
 	}
 	return nullptr;
 }
-Zeal::EqUI::BasicWnd* ui_manager::AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback)
+Zeal::EqUI::BasicWnd* ui_manager::AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*)> callback, bool log_errors)
 {
 	if (wnd)
 	{
-		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name);
+		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name, log_errors);
 		if (btn)
 		{
 			checkbox_callbacks[btn] = callback;
@@ -93,11 +93,11 @@ Zeal::EqUI::BasicWnd* ui_manager::AddCheckboxCallback(Zeal::EqUI::BasicWnd* wnd,
 	return nullptr;
 }
 
-Zeal::EqUI::BasicWnd* ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback, int max_val)
+Zeal::EqUI::BasicWnd* ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::SliderWnd*, int)> callback, int max_val, bool log_errors)
 {
 	if (wnd)
 	{
-		Zeal::EqUI::SliderWnd* btn = (Zeal::EqUI::SliderWnd*)wnd->GetChildItem(name);
+		Zeal::EqUI::SliderWnd* btn = (Zeal::EqUI::SliderWnd*)wnd->GetChildItem(name, log_errors);
 		if (btn)
 		{
 			slider_callbacks[btn] = callback;
@@ -109,11 +109,11 @@ Zeal::EqUI::BasicWnd* ui_manager::AddSliderCallback(Zeal::EqUI::BasicWnd* wnd, s
 	return nullptr;
 }
 
-Zeal::EqUI::BasicWnd* ui_manager::AddComboCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback)
+Zeal::EqUI::BasicWnd* ui_manager::AddComboCallback(Zeal::EqUI::BasicWnd* wnd, std::string name, std::function<void(Zeal::EqUI::BasicWnd*, int)> callback, bool log_errors)
 {
 	if (wnd)
 	{
-		Zeal::EqUI::BasicWnd* btn = (Zeal::EqUI::BasicWnd*)wnd->GetChildItem(name);
+		Zeal::EqUI::BasicWnd* btn = (Zeal::EqUI::BasicWnd*)wnd->GetChildItem(name, log_errors);
 		if (btn)
 		{
 			combo_callbacks[btn] = callback;
@@ -124,11 +124,11 @@ Zeal::EqUI::BasicWnd* ui_manager::AddComboCallback(Zeal::EqUI::BasicWnd* wnd, st
 	return nullptr;
 }
 
-void ui_manager::AddLabel(Zeal::EqUI::BasicWnd* wnd, std::string name)
+void ui_manager::AddLabel(Zeal::EqUI::BasicWnd* wnd, std::string name, bool log_errors)
 {
 	if (wnd)
 	{
-		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name);
+		Zeal::EqUI::BasicWnd* btn = wnd->GetChildItem(name, log_errors);
 		if (btn)
 		{
 			label_names[name] = btn;

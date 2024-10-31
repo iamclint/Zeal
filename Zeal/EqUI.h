@@ -218,9 +218,14 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*, bool, bool)>(0x572310)(this, unkown, visible);
 			}
-			BasicWnd* GetChildItem(CXSTR name)
+			BasicWnd* GetChildItem(CXSTR name, bool log_error = true)
 			{
-				return reinterpret_cast<BasicWnd*(__thiscall*)(const BasicWnd*, CXSTR)>(0x570320)(this, name);
+				if (!log_error)
+					mem::write<BYTE>(0x570378, 0xEB); //jump passed the ui error logging
+				BasicWnd* wnd =  reinterpret_cast<BasicWnd*(__thiscall*)(const BasicWnd*, CXSTR)>(0x570320)(this, name);
+				if (!log_error)
+					mem::write<BYTE>(0x570378, 0x75); //restore the ui error logging
+				return wnd;
 			}
 			void CreateChildren()
 			{
