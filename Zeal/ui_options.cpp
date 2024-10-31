@@ -239,7 +239,7 @@ void ui_options::InitColors()
 
 	for (int i = 0; i < 100; i++)
 	{
-		Zeal::EqUI::BasicWnd* btn = ui->AddButtonCallback(wnd, "Zeal_Color" + std::to_string(i), [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::Windows->ColorPicker->Activate(wnd, wnd->TextColor.ARGB); });
+		Zeal::EqUI::BasicWnd* btn = ui->AddButtonCallback(wnd, "Zeal_Color" + std::to_string(i), [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::Windows->ColorPicker->Activate(wnd, wnd->TextColor.ARGB); }, false);
 		if (btn)
 			color_buttons[i] = btn;
 	}
@@ -688,7 +688,7 @@ void ui_options::Deactivate()
 	{
 		wnd->show(0, 0);
 		CleanDynamicUI();
-	}
+  }
 }
 
 ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr)

@@ -22,12 +22,6 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	Zeal::EqStructures::EQARGBCOLOR Adventurercolor = options->GetColor(9); //0xFF3D6BDC; //Not in Guild Member - Default Blue
 	Zeal::EqStructures::EQARGBCOLOR NpcCorpsecolor = options->GetColor(10); //0xFF000000; //Npc Corpse - Black
 	Zeal::EqStructures::EQARGBCOLOR PlayersCorpsecolor = options->GetColor(11); //0xFFFFFFFF; //Players Corpse - White Light Purple
-	Zeal::EqStructures::EQARGBCOLOR BlueConcolor = options->GetColor(14); //BlueCon - Default DarkBlue is ligher than CON_BLUE
-	Zeal::EqStructures::EQARGBCOLOR GreenConcolor = options->GetColor(12); //CON_GREEN
-	Zeal::EqStructures::EQARGBCOLOR LightBlueConcolor = options->GetColor(13); //CON_LIGHTBLUE
-	Zeal::EqStructures::EQARGBCOLOR WhiteConcolor = options->GetColor(15); //CON_WHITE
-	Zeal::EqStructures::EQARGBCOLOR YellowConcolor = options->GetColor(16); //CON_YELLOW
-	Zeal::EqStructures::EQARGBCOLOR RedConcolor = options->GetColor(17); //CON_RED
 	switch (spawn->Type) {
 	case 0: //Players
 		if (nameplateColors) 
@@ -129,30 +123,6 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 		if (nameplateconColors) {
 			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
 				return;
-			if (Zeal::EqGame::GetLevelCon(spawn) == CON_GREEN) { //Changes NPC Green Con to user selected Color
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = GreenConcolor;
-				return;
-			}
-			if (Zeal::EqGame::GetLevelCon(spawn) == CON_LIGHTBLUE) { //Changes NPC Light Blue Con to user selected Color
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = LightBlueConcolor;
-				return;
-			}
-			if (Zeal::EqGame::GetLevelCon(spawn) == CON_BLUE){ //Changes NPC DarkBlue Con to user selected Color
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = BlueConcolor;
-				return;
-			}
-			if (Zeal::EqGame::GetLevelCon(spawn) == CON_WHITE) { //Changes NPC White Con to user selected Color
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = WhiteConcolor;
-				return;
-			}
-			if (Zeal::EqGame::GetLevelCon(spawn) == CON_YELLOW) { //Changes NPC Yellow Con to user selected Color
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = YellowConcolor;
-				return;
-			}
-			if (Zeal::EqGame::GetLevelCon(spawn) == CON_RED) { //Changes NPC Red Con to user selected Color
-				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = RedConcolor;
-				return;
-			}
 			if (spawn != Zeal::EqGame::get_self()) //All NPC entities
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Zeal::EqGame::GetLevelCon(spawn); //Level Con Color for NPCs
 		}

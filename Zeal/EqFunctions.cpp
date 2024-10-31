@@ -1413,7 +1413,7 @@ namespace Zeal
 			}
 			//eal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR msg, short channel)
 			Zeal::EqUI::CXSTR cxBuff = Zeal::EqUI::CXSTR(buffer);
-			reinterpret_cast<void(__thiscall*)(Zeal::EqUI::ChatWnd*, Zeal::EqUI::CXSTR msg, short channel)>(ZealService::get_instance()->hooks->hook_map["AddOutputText"]->address)(wnd, cxBuff, color);
+			reinterpret_cast<void(__thiscall*)(Zeal::EqUI::ChatWnd*, Zeal::EqUI::CXSTR msg, short channel)>(ZealService::get_instance()->hooks->hook_map["AddOutputText"]->trampoline)(wnd, cxBuff, color);
 			cxBuff.FreeRep();
 		}
 		int get_gamestate()
