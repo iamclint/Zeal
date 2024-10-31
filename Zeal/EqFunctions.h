@@ -4,12 +4,12 @@
 #include "EqUI.h"
 #include <cstdarg>
 
-#define CON_WHITE D3DCOLOR_ARGB(0x88, 0xf0, 0xf0, 0xf0)
-#define CON_RED D3DCOLOR_ARGB(0x88, 0xf0, 0x0, 0x0)
-#define CON_BLUE ZealService::get_instance()->ui->options->GetColor(14)// D3DCOLOR_ARGB(0x88, 0x0, 0x0, 0xf0)
-#define CON_YELLOW D3DCOLOR_ARGB(0x88, 0xf0, 0xf0, 0x0)
-#define CON_LIGHTBLUE D3DCOLOR_ARGB(0x88, 0x0, 0xf0, 0xf0)
-#define CON_GREEN D3DCOLOR_ARGB(0x88, 0x0, 0xf0, 0x0)
+#define CON_WHITE ZealService::get_instance()->ui->options->GetColor(15) //D3DCOLOR_ARGB(0x88, 0xf0, 0xf0, 0xf0)
+#define CON_RED ZealService::get_instance()->ui->options->GetColor(17) //D3DCOLOR_ARGB(0x88, 0xf0, 0x0, 0x0)
+#define CON_BLUE ZealService::get_instance()->ui->options->GetColor(14)//D3DCOLOR_ARGB(0xff, 0x0, 0x40, 0xf0) Slightly lighter by default
+#define CON_YELLOW ZealService::get_instance()->ui->options->GetColor(16) //D3DCOLOR_ARGB(0x88, 0xf0, 0xf0, 0x0)
+#define CON_LIGHTBLUE ZealService::get_instance()->ui->options->GetColor(13) //D3DCOLOR_ARGB(0x88, 0x0, 0xf0, 0xf0)
+#define CON_GREEN ZealService::get_instance()->ui->options->GetColor(12) //D3DCOLOR_ARGB(0x88, 0x0, 0xf0, 0x0)
 
 enum Stance
 {
