@@ -321,6 +321,11 @@ void Binds::add_binds()
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 			ZealService::get_instance()->nameplate->raidpets_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
 		});
+	add_bind(241, "Toggle Map Grid Lines", "ToggleMapGridLines", key_category::UI, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck()) 
+			ZealService::get_instance()->zone_map->set_show_grid(
+				!ZealService::get_instance()->zone_map->is_show_grid_enabled(), false);
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)
