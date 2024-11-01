@@ -418,8 +418,12 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				}
 			return false;
 		});
-
-	Add("/help", { "/hel" }, "Adds zeal to the help list.",
+		Add("/lead", {}, "Print current group leader", [this, zeal](std::vector<std::string>& args) {
+			const char* leader = Zeal::EqGame::GroupLeaderName;
+			Zeal::EqGame::print_chat("Group leader: %s", *leader ? leader : "Not in a group");
+			return true;
+			});
+		Add("/help", { "/hel" }, "Adds zeal to the help list.",
 		[this](std::vector<std::string>& args) {
 			if (args.size() == 1)
 			{
