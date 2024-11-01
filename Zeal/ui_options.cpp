@@ -135,37 +135,37 @@ void ui_options::LoadColors()
 	if (!ini->exists("ZealColors", "Color12")) //Adds default Nameplate Color to Button13 for new users
 	{
 		if (color_buttons.count(12))
-			color_buttons[12]->TextColor.ARGB = CON_GREEN; //GreenCon
+			color_buttons[12]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0x0, 0xf0, 0x0); //CON_GREEN
 	}
 	if (!ini->exists("ZealColors", "Color13")) //Adds default Nameplate Color to Button14 for new users
 	{
 		if (color_buttons.count(13))
-			color_buttons[13]->TextColor.ARGB = CON_LIGHTBLUE; //LightBlueCon
+			color_buttons[13]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0x0, 0xf0, 0xf0);//CON_LIGHTBLUE
 	}
 	if (!ini->exists("ZealColors", "Color14")) //Adds default Nameplate Color to Button15 for new users
 	{
 		if (color_buttons.count(14))
 		{
 			if (ZealService::get_instance()->ini->getValue<bool>("Zeal", "Bluecon"))
-				color_buttons[14]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options menu as Nameplate Color Button15
+				color_buttons[14]->TextColor.ARGB = Zeal::EqGame::get_user_color(70); //BlueCon - Keeps original BlueCon if set from old Options, Color #70
 			else
-				color_buttons[14]->TextColor.ARGB = 0xFF0040FF; //BlueCon - Default DarkBlue is lighter than CON_BLUE as Nameplate Color Button15 for new users
+				color_buttons[14]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0x0, 0x40, 0xf0); //Default DarkBlue is lighter than CON_BLUE as Nameplate Color Button15 for new users
 		}
 	}
 	if (!ini->exists("ZealColors", "Color15")) //Adds default Nameplate Color to Button16 for new users
 	{
 		if (color_buttons.count(15))
-			color_buttons[15]->TextColor.ARGB = CON_WHITE; //WhiteCon
+			color_buttons[15]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0);//CON_WHITE
 	}
 	if (!ini->exists("ZealColors", "Color16")) //Adds default Nameplate Color to Button17 for new users
 	{
 		if (color_buttons.count(16))
-			color_buttons[16]->TextColor.ARGB = CON_YELLOW; //YellowCon
+			color_buttons[16]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0x0); //CON_YELLOW
 	}
 	if (!ini->exists("ZealColors", "Color17")) //Adds default Nameplate Color to Button18 for new users
 	{
 		if (color_buttons.count(17))
-			color_buttons[17]->TextColor.ARGB = CON_RED; //RedCon
+			color_buttons[17]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0x0, 0x0); //CON_RED
 	}
 
 	for (auto& [index, btn] : color_buttons)
