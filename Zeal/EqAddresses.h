@@ -18,6 +18,7 @@ namespace Zeal
 		static EqStructures::Entity* EntListPtr = (Zeal::EqStructures::Entity*)0x7f9498;
 		static EqStructures::CameraInfo* CameraInfo = (Zeal::EqStructures::CameraInfo*)0x63B928;
 		static EqStructures::Entity* GroupList = (Zeal::EqStructures::Entity*)0x7913F8;
+		static char* GroupLeaderName = (char*)(0x0079140c);  // Empty string is ungrouped.
 		static EqStructures::ViewActor* ViewActor = (EqStructures::ViewActor*)0x63D6C0;
 		static EqStructures::KeyboardModifiers* KeyMods = (EqStructures::KeyboardModifiers*)0x799738;
 		static EqUI::pInstWindows* Windows = (EqUI::pInstWindows*)0x63D5CC;

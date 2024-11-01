@@ -124,6 +124,9 @@ ___
   - **Example:** `/fov 65`
   - **Description:** changes your field of view with a value between 45 and 90.
 
+- `/lead`
+  - **Description:** prints out your current group leader.
+
 - `/melody`
   - **Arguments:** `song gem #'s (maximum of 5)`
   - **Aliases:** `/mel`
