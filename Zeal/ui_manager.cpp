@@ -452,7 +452,7 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	raid = std::make_shared<ui_raid>(zeal, ini, this);
 	hotbutton = std::make_shared<ui_hotbutton>(zeal, ini, this);
 	group = std::make_shared<ui_group>(zeal, ini, this);
-
+	inputDialog = std::make_shared<ui_inputdialog>(zeal, ini, this);
 
 	mem::write<BYTE>(0x40f07a, 0); //disable rotation by default
 	mem::write<BYTE>(0x40f07d, 0xEB); //make rotate not checked by default

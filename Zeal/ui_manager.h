@@ -6,6 +6,7 @@
 #include "ui_raid.h"
 #include "ui_hotbutton.h"
 #include "ui_group.h"
+#include "ui_inputdialog.h"
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
@@ -54,6 +55,7 @@ public:
 	std::shared_ptr<ui_raid> raid = nullptr;
 	std::shared_ptr<ui_hotbutton> hotbutton = nullptr;
 	std::shared_ptr<ui_group> group = nullptr;
+	std::shared_ptr<ui_inputdialog> inputDialog = nullptr;
 	std::vector<std::string> included_files;
 	void CreateTmpXML();
 	void DeleteTmpXML();

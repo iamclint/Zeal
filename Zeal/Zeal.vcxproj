@@ -169,6 +169,7 @@
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="floating_damage.h" />
     <ClInclude Include="ui_group.h" />
+    <ClInclude Include="ui_inputdialog.h" />
     <ClInclude Include="zone_map.h" />
     <ClInclude Include="miniz.h" />
     <ClInclude Include="named_pipe.h" />
@@ -235,6 +236,7 @@
     <ClCompile Include="EqPackets.h" />
     <ClCompile Include="floating_damage.cpp" />
     <ClCompile Include="ui_group.cpp" />
+    <ClCompile Include="ui_inputdialog.cpp" />
     <ClCompile Include="zone_map.cpp" />
     <ClCompile Include="miniz.c" />
     <ClCompile Include="named_pipe.cpp" />

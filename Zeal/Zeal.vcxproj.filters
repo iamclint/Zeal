@@ -237,6 +237,9 @@
     <ClInclude Include="default_spritefont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ui_inputdialog.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -406,6 +409,9 @@
     </ClCompile>
     <ClCompile Include="default_spritefont.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_inputdialog.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
