@@ -129,12 +129,16 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 		break;
 	case 2: //NPC Corpse
 		if (nameplateColors) {
+			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+				return;
 			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = NpcCorpsecolor;
 			return;
 		}
 		break;
 	case 3: //Player Corpse
 		if (nameplateColors) {
+			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+				return;
 			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = PlayersCorpsecolor;
 			return;
 		}
