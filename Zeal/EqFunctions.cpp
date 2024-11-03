@@ -475,18 +475,134 @@ namespace Zeal
 			return false;
 		}
 
+		void print_group_leader()
+		{
+			const Zeal::EqStructures::GroupInfo* group_info = Zeal::EqGame::GroupInfo;
+			if (!group_info->is_in_group())
+				print_chat("You are not in a group.");
+			else if (strcmp(group_info->LeaderName, Zeal::EqGame::get_char_info()->Name) == 0)
+				print_chat("You are the group leader.");
+			else
+				print_chat("%s is the leader of your group.", group_info->LeaderName);
+		}
+
+		void print_raid_leaders(bool show_all_groups, bool show_open_groups)
+		{
+			Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+			if (!raid_info->is_in_raid()) {
+				print_chat("You are not in a raid.");
+				return;
+			}
+
+			DWORD group_number = get_raid_group_number();
+			std::string group_leader = get_raid_group_leader(group_number);
+			if (group_leader.empty())
+				print_group_leader();  // Not in a raid group, so fallback to report a normal group.
+			else 
+			{
+				if (strcmp(group_leader.c_str(), Zeal::EqGame::get_char_info()->Name) == 0)
+					print_chat("You are the leader of your raid group [%i].", group_number + 1);
+				else
+					print_chat("%s is the leader of your raid group [%i].",
+						group_leader.c_str(), group_number + 1);
+
+				const Zeal::EqStructures::GroupInfo* group_info = Zeal::EqGame::GroupInfo;
+				if (group_info->is_in_group() && strcmp(group_leader.c_str(), group_info->LeaderName))
+					print_chat("Mismatch: %s is the leader of your normal group.", group_info->LeaderName);
+			}
+
+			if (raid_info->IsLeader)
+				print_chat("You are the raid leader.");
+			else
+				print_chat("%s is the leader of your raid.", raid_info->LeaderName);
+
+			if (show_all_groups || show_open_groups) {
+				for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers / 6; i++)
+				{
+					int group_count = get_raid_group_count(i);
+					if (group_count == 0 && !show_all_groups)
+						continue;
+
+					group_leader = get_raid_group_leader(i);
+					if (group_count == 0)
+						print_chat("Group[%i]: Empty", i + 1);
+					else if (group_count < 6)
+						print_chat("Group[%i]: %s (%i slots open)", i + 1, group_leader.c_str(), 6 - group_count);
+					else if (show_all_groups)
+						print_chat("Group[%i]: %s (FULL)", i + 1, group_leader.c_str());
+				}
+				print_raid_ungrouped();
+			}
+		}
+
+		void print_raid_ungrouped()
+		{
+			Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+			if (!raid_info->is_in_raid()) {
+				print_chat("You are not in a raid.");
+				return;
+			}
+
+			bool zero_ungrouped = true;
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i)
+			{
+				const auto& member = raid_info->MemberList[i];
+				if (member.GroupNumber == Zeal::EqStructures::RaidMember::kRaidUngrouped
+					&& member.Name[0])
+				{
+					if (zero_ungrouped)
+						print_chat("There are ungrouped raid members:");
+					zero_ungrouped = false;
+					print_chat("  %s (%s %s)", member.Name, member.PlayerLevel, member.Class);
+				}
+			}
+			if (zero_ungrouped)
+				print_chat("All raid members are grouped.");
+		}
+
+		void dump_raid_state()
+		{
+			Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+			if (!raid_info->is_in_raid())
+			{
+				print_chat("You are not in a raid.");
+				return;
+			}
+
+			print_chat("Raid member count: %i", raid_info->MemberCount);
+			print_chat("Raid id: 0x%08x", raid_info->Id);
+			print_chat("Raid leader: %s", raid_info->LeaderName);
+			print_chat("Is raid leader: %i", raid_info->IsLeader);
+			print_chat("Raid loot type: %i", raid_info->LootType);
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxLooters; ++i)
+			{
+				if (raid_info->LooterNames[i][0])
+					print_chat("Looter[%i]: %s", i, raid_info->LooterNames[i]);
+			}
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i)
+			{
+				if (raid_info->MemberList[i].Name[0])
+				{
+					const Zeal::EqStructures::RaidMember& member = raid_info->MemberList[i];
+					print_chat("Member[%i]: %s, %s, %s, %i, %i, %i",
+						i, member.Name, member.PlayerLevel, member.Class, member.ClassValue,
+						member.IsGroupLeader, member.GroupNumber);
+				}
+			}
+		}
+
 		std::vector<Zeal::EqStructures::RaidMember*> get_raid_list()
 		{
-			short raid_size = *(short*)0x794F9C;
 			std::vector<Zeal::EqStructures::RaidMember*> raid_member_list;
 
-			if (raid_size <= 0) {
+			Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+			if (!raid_info->is_in_raid()) {
 				return raid_member_list;
 			}
 
-			for (int i = 0; i < 72; i++) // 12 groups x 6 members per group = 72 slots, sometimes gaps so need to check all
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; i++) // sometimes gaps so need to check all
 			{
-				Zeal::EqStructures::RaidMember* raid_member = (Zeal::EqStructures::RaidMember*)(RaidMemberList + (0x0000D0 * i));
+				Zeal::EqStructures::RaidMember* raid_member = &raid_info->MemberList[i];
 				if (raid_member->Name[0] != '\0') {
 					raid_member_list.push_back(raid_member);
 				}
@@ -495,6 +611,57 @@ namespace Zeal
 			return raid_member_list;
 		}
 
+		DWORD get_raid_group_number()
+		{
+			Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+			if (!raid_info->is_in_raid())
+				return Zeal::EqStructures::RaidMember::kRaidUngrouped;
+			const char* self_name = Zeal::EqGame::get_char_info()->Name;
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i)
+			{
+				if (strcmp(self_name, raid_info->MemberList[i].Name) == 0)
+					return raid_info->MemberList[i].GroupNumber;
+			}
+			return Zeal::EqStructures::RaidMember::kRaidUngrouped;
+		}
+
+		std::string get_raid_group_leader(DWORD group_number)
+		{
+			std::string group_leader("");
+			Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+			if (!raid_info->is_in_raid() || 
+				group_number >= Zeal::EqStructures::RaidInfo::kRaidMaxMembers / 6)
+				return group_leader;
+
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i)
+			{
+				if (raid_info->MemberList[i].GroupNumber == group_number && raid_info->MemberList[i].IsGroupLeader)
+				{
+					// The server/client can get out of sync, so warn if the state is goofy.
+					if (group_leader.empty())
+						group_leader = std::string(raid_info->MemberList[i].Name);
+					else
+						print_chat("Error: Extra raid group leader: %s", raid_info->MemberList[i].Name);
+				}
+			}
+			return group_leader;
+		}
+
+		int get_raid_group_count(DWORD group_number) 
+		{
+			Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+			if (!raid_info->is_in_raid() ||
+				group_number >= Zeal::EqStructures::RaidInfo::kRaidMaxMembers / 6)
+				return 0;
+
+			int group_count = 0;
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i)
+			{
+				if (raid_info->MemberList[i].GroupNumber == group_number && raid_info->MemberList[i].Name[0])
+					group_count++;
+			}
+			return min(6, group_count);
+		}
 
 		Vec3 get_view_actor_head_pos()
 		{

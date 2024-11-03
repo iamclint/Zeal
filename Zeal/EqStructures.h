@@ -777,18 +777,48 @@ namespace Zeal
 		{
 			char name[512][0x60];
 		};
+		struct GroupInfo
+		{
+			// Unlike RaidInfo this is not treated as a monolithic structure in the code
+			// but this is the memory layout for the variables below.
+			/* 0x0000 */ BYTE IsValidList[EQ_NUM_GROUP_MEMBERS];  // 1 = Valid group member, 0 = empty.
+		    /* 0x0005 */ CHAR Names[EQ_NUM_GROUP_MEMBERS][64];
+			/* 0x0145 */ CHAR Unknown0143[3];  // Alignment padding probably.
+			/* 0x0148 */ struct Entity* EntityList[EQ_NUM_GROUP_MEMBERS];
+			/* 0x015C */ CHAR LeaderName[64];  // Empty string is ungrouped.
+
+			bool is_in_group() const { return (LeaderName[0] != 0); }
+		};
 		struct RaidMember // starts at 0x791518, size 0x00D0
 		{			
+			static constexpr int kRaidUngrouped = 0xffffffff;
 			/* 0x0000 */ CHAR Name[64];
-			/* 0x0040 */ CHAR PlayerLevel[2];
-			/* 0x0042 */ BYTE Unknown0042[6];
-			/* 0x0048 */ CHAR Class[64];
-			/* 0x0088 */ BYTE Unknown0048[64];
-			/* 0x00C8 */ BYTE Unknown00C8; // always 2 ?
-			/* 0x00C9 */ BYTE Unknown00C9;
+			/* 0x0040 */ CHAR PlayerLevel[8];  // Level in text.
+			/* 0x0048 */ CHAR Class[64];       // Class text label.
+			/* 0x0088 */ BYTE Unknown0088[64];
+			/* 0x00C8 */ USHORT ClassValue;    // Binary enum value of Class
 			/* 0x00CA */ BYTE Unknown00CA;
 			/* 0x00CB */ BYTE IsGroupLeader; // 0: not leader 1: leader
 			/* 0x00CC */ DWORD GroupNumber; // FFFFFFFF if ungrouped
+		};
+		struct RaidInfo {
+			static constexpr int kRaidMaxMembers = 72;
+			static constexpr int kRaidMaxLooters = 9;  // Calculated from memset of 0x240 bytes.
+			/* 0x0000 */ CHAR Unknown0000[72];  // Set to 0 at reset.
+			/* 0x0048 */ RaidMember MemberList[kRaidMaxMembers];
+			/* 0x3ac8 */ DWORD Id;
+			/* 0x3acc */ DWORD MemberCount;    // # of raid members
+			/* 0x3ad0 */ CHAR LeaderName[64];  // Name of raid leader
+			/* 0x3b10 */ CHAR Unknown3B10[64];
+			/* 0x3b50 */ DWORD Unknown3B50;    // Set to 1 when empty, 4 when programmed?
+			/* 0x3b54 */ CHAR Unknown3B54;
+			/* 0x3b55 */ CHAR IsLeader;        // 1 = Leader of raid
+			/* 0x3b56 */ CHAR Unknown3B56[2];
+			/* 0x3b58 */ DWORD Unknown3B58;    // Set to 0xffffffff at reset.
+			/* 0x3b5c */ DWORD LootType;       // Raid loot 
+			/* 0x3b60 */ CHAR LooterNames[kRaidMaxLooters][64];  // See 0x240 cleared to zero.
+
+			bool is_in_raid() const { return (MemberCount > 0); }
 		};
 		struct MouseDelta
 		{

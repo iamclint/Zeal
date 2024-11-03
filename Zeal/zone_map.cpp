@@ -52,23 +52,16 @@ static constexpr int kBackgroundVertices = 3 + (kBackgroundCount - 1);  // Two t
 static constexpr int kMarkerCount = 4;  // Four triangles per marker.
 static constexpr int kPositionCount = 2;  // Two triangles.
 static constexpr int kPositionVertices = kPositionCount * 3; // Fixed triangle list.
-static constexpr int kRaidMaxMembers = 72;
+static constexpr int kRaidMaxMembers = Zeal::EqStructures::RaidInfo::kRaidMaxMembers;
 static constexpr int kRaidPositionVertices = 3; // Fixed triangle list with one triangle.
 static constexpr int kMaxDynamicLabels = 10;
 static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositionVertices
-                                            * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers);
+       * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers);
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
 static constexpr char kFontDirectoryPath[] = "uifiles/zeal/fonts";
 static constexpr char kFontFileExtension[] = ".spritefont";
-
-// Group member position support.
-using GroupNameArrayType = char[0x40];
-using GroupEntityPtrArrayType = Zeal::EqStructures::Entity*;
-
-GroupEntityPtrArrayType* groupEntityPtrs = reinterpret_cast<GroupEntityPtrArrayType*>(0x7913F8);
-GroupNameArrayType* groupNames = reinterpret_cast<GroupNameArrayType*>(0x7912B5);
 
 }  // namespace
 
@@ -738,9 +731,10 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
         D3DCOLOR_XRGB(104, 153, 255),  // Purple (violet)
     };
 
+    const auto* group_info = Zeal::EqGame::GroupInfo;
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
-        Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
-        if ((strlen(groupNames[i]) == 0) || !member || member->Type != Zeal::EqEnums::EntityTypes::Player)
+        Zeal::EqStructures::Entity* member = group_info->EntityList[i];
+        if ((strlen(group_info->Names[i]) == 0) || !member || member->Type != Zeal::EqEnums::EntityTypes::Player)
             continue;  // Not a valid group member, out of zone (nullptr), or corpse.
 
         // Position is y,x,z.
@@ -767,10 +761,11 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         && ZealService::get_instance()->ui->options.get())
         color = ZealService::get_instance()->ui->options.get()->GetColor(5);  // GroupColor
 
+    const auto* group_info = Zeal::EqGame::GroupInfo;
     const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
-        Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
-        if ((strlen(groupNames[i]) == 0) || !member || member->Type != Zeal::EqEnums::EntityTypes::Player)
+        Zeal::EqStructures::Entity* member = group_info->EntityList[i];
+        if ((strlen(group_info->Names[i]) == 0) || !member || member->Type != Zeal::EqEnums::EntityTypes::Player)
             continue;  // Not a valid group member, out of zone (nullptr), or corpse.
 
         // Writes the character name or group number (F2 - F6) centered at the character position.
@@ -781,7 +776,7 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
             label[0] = static_cast<uint8_t>(i) + '2';
         else
             for (int j = 0; j < short_name_length; ++j)
-                label[j] = groupNames[i][j];
+                label[j] = group_info->Names[i][j];
         render_label_text(label,-loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
     }
     bitmap_font->flush_queue_to_screen();
@@ -806,13 +801,12 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
         && ZealService::get_instance()->ui->options.get())
         color = ZealService::get_instance()->ui->options.get()->GetColor(4);  // Raidcolor
 
-    const Zeal::EqStructures::RaidMember* raidMembers =
-        reinterpret_cast<const Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
+    const Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
 
     // Just add a label for members, including self, since this is intended to be for transient use.
     const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
     for (int i = 0; i < kRaidMaxMembers; ++i) {
-        const auto& member = raidMembers[i];
+        const auto& member = raid_info->MemberList[i];
         if (strlen(member.Name) == 0)
             continue;
         auto entity = entity_manager->Get(member.Name);
@@ -866,27 +860,27 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
     const float size = convert_size_fraction_to_model(position_size);
 
     // TODO: Review color coding to be more distinct. Possibly by class.
-    const DWORD kUngrouped = 0xffffffff;
+    const DWORD kUngrouped = Zeal::EqStructures::RaidMember::kRaidUngrouped;
     const D3DCOLOR kColorLeader = D3DCOLOR_XRGB(255, 153, 153);
     const D3DCOLOR kColorUngrouped = D3DCOLOR_XRGB(240, 240, 240);
 
-    const Zeal::EqStructures::RaidMember* raidMembers =
-        reinterpret_cast<const Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
+    const Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
 
     // Disable the markers for the same group if show_group is active.
     DWORD self_group_number = kUngrouped - 1;  // Unique default number.
     if (map_show_group_mode != ShowGroupMode::kOff) {
         // Consider optimizing this with a cache if there's a way to detect raid member changes.
         for (int i = 0; i < kRaidMaxMembers; ++i) {
-            if (strcmp(raidMembers[i].Name, self->Name) == 0) {
-                if (raidMembers[i].GroupNumber != kUngrouped)
-                    self_group_number = raidMembers[i].GroupNumber;
+            const auto& member = raid_info->MemberList[i];
+            if (strcmp(member.Name, self->Name) == 0) {
+                if (member.GroupNumber != kUngrouped)
+                    self_group_number = member.GroupNumber;
                 break;
             }
         }
     }
     for (int i = 0; i < kRaidMaxMembers; ++i) {
-        const auto& member = raidMembers[i];
+        const auto& member = raid_info->MemberList[i];
         if ((member.GroupNumber == self_group_number) || (strlen(member.Name) == 0)
             || (strcmp(member.Name, self->Name) == 0))
             continue;  // In same group or no raid member or it is self.

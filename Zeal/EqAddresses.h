@@ -17,8 +17,8 @@ namespace Zeal
 		static EqStructures::Entity* Active_Corpse = (Zeal::EqStructures::Entity*)0x7f9500;
 		static EqStructures::Entity* EntListPtr = (Zeal::EqStructures::Entity*)0x7f9498;
 		static EqStructures::CameraInfo* CameraInfo = (Zeal::EqStructures::CameraInfo*)0x63B928;
-		static EqStructures::Entity* GroupList = (Zeal::EqStructures::Entity*)0x7913F8;
-		static char* GroupLeaderName = (char*)(0x0079140c);  // Empty string is ungrouped.
+		static EqStructures::GroupInfo* GroupInfo = (Zeal::EqStructures::GroupInfo*)0x007912B0;
+		static EqStructures::RaidInfo* RaidInfo = (EqStructures::RaidInfo*)0x7914D0;
 		static EqStructures::ViewActor* ViewActor = (EqStructures::ViewActor*)0x63D6C0;
 		static EqStructures::KeyboardModifiers* KeyMods = (EqStructures::KeyboardModifiers*)0x799738;
 		static EqUI::pInstWindows* Windows = (EqUI::pInstWindows*)0x63D5CC;
@@ -43,8 +43,7 @@ namespace Zeal
 		static int max_pitch = 0x5e86d0;
 		static EqStructures::KeyboardInput* KeyInput = (EqStructures::KeyboardInput*)0x7ce058;
 		static char* in_game = (char*)0x798550;
-		static int RaidMemberList = 0x791518;
-		
+
 		//Vec3* camera_position = *(Vec3**)0x9c08128;
 	}
 }

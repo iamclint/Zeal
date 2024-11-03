@@ -171,120 +171,52 @@ void named_pipe::main_loop()
 	if (!pipe_handles.size()) //nothing is connected don't waste the cpu time getting values
 		return;
 
-	// Group member position support.
-	using GroupNameArrayType = char[0x40];
-	using GroupEntityPtrArrayType = Zeal::EqStructures::Entity*;
-
 	static auto last_output = GetTickCount64();
 	if (GetTickCount64() - last_output > pipe_delay && pipe_delay>0)
 	{
-
-		short raid_size = *(short*)0x794F9C;
-		if (raid_size > 0)
+		const auto* raid_info = Zeal::EqGame::RaidInfo;
+		if (raid_info->is_in_raid())
 		{
-			Zeal::EqUI::ListWnd* RaidList = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Raid->GetChildItem("RAID_PlayerList");
-			Zeal::EqUI::ListWnd* RaidListNonGrouped = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Raid->GetChildItem("RAID_NotInGroupPlayerList");
-
-			auto entity_manager = ZealService::get_instance()->entity_manager.get();  // Short-term ptr.
+			const auto entity_manager = ZealService::get_instance()->entity_manager.get();  // Short-term ptr.
 			nlohmann::json raid_array = nlohmann::json::array();
-			for (int i = 0; i < RaidList->ItemCount; i++)
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; i++)
 			{
+				const Zeal::EqStructures::RaidMember& member = raid_info->MemberList[i];
+				if (member.Name[0] == 0)
+					continue;  // Empty slot.
+
 				nlohmann::json raid_data = nlohmann::json::object();
-				Zeal::EqUI::CXSTR _grp;
-				Zeal::EqUI::CXSTR _name;
-				Zeal::EqUI::CXSTR _lvl;
-				Zeal::EqUI::CXSTR _class;
-				Zeal::EqUI::CXSTR _rank;
 
-				RaidList->GetItemText(&_grp, i, 0);
-				RaidList->GetItemText(&_name, i, 1);
-				RaidList->GetItemText(&_lvl, i, 2);
-				RaidList->GetItemText(&_class, i, 3);
-				RaidList->GetItemText(&_rank, i, 4);
-
-				if (strlen(_name.Data->Text) == 0 || strlen(_class.Data->Text) == 0) {
-					continue;
-				}
-
-				auto entity = entity_manager->Get(_name.Data->Text);
+				const auto& entity = entity_manager->Get(member.Name);
 				if (entity) {
 					raid_data["loc"] = entity->Position.toJson();
 					raid_data["heading"] = entity->Heading;
 				}
 
-				raid_data["group"] = _grp.Data->Text;
-				raid_data["name"] = _name.Data->Text;
-				raid_data["level"] = _lvl.Data->Text;
-				raid_data["class"] = _class.Data->Text;
-				raid_data["rank"] = _rank.Data->Text;
+				raid_data["group"] = (member.GroupNumber == Zeal::EqStructures::RaidMember::kRaidUngrouped)
+										? "0" : std::to_string(member.GroupNumber + 1);
+				raid_data["name"] = member.Name;
+				raid_data["level"] = member.PlayerLevel;
+				raid_data["class"] = member.Class;
+				raid_data["rank"] = (strcmp(member.Name, raid_info->LeaderName) == 0) ? "Raid Leader" :
+									member.IsGroupLeader ? "Group Leader" : "";
 
 				raid_array.push_back(raid_data);
-
-				if (_grp.Data)
-					_grp.FreeRep();
-				if (_name.Data)
-					_name.FreeRep();
-				if (_lvl.Data)
-					_lvl.FreeRep();
-				if (_class.Data)
-					_class.FreeRep();
-				if (_rank.Data)
-					_rank.FreeRep();
-			}
-			for (int i = 0; i < RaidListNonGrouped->ItemCount; i++)
-			{
-				nlohmann::json raid_data = nlohmann::json::object();
-				Zeal::EqUI::CXSTR _grp;
-				Zeal::EqUI::CXSTR _name;
-				Zeal::EqUI::CXSTR _lvl;
-				Zeal::EqUI::CXSTR _class;
-				Zeal::EqUI::CXSTR _rank;
-				RaidListNonGrouped->GetItemText(&_grp, i, 0);
-				RaidListNonGrouped->GetItemText(&_name, i, 1);
-				RaidListNonGrouped->GetItemText(&_lvl, i, 2);
-				RaidListNonGrouped->GetItemText(&_class, i, 3);
-				RaidListNonGrouped->GetItemText(&_rank, i, 4);
-
-				auto entity = entity_manager->Get(_name.Data->Text);
-				if (entity) {
-					raid_data["loc"] = entity->Position.toJson();
-					raid_data["heading"] = entity->Heading;
-				}
-
-				raid_data["group"] = "0";
-				raid_data["name"] = _name.Data->Text;
-				raid_data["level"] = _lvl.Data->Text;
-				raid_data["class"] = _class.Data->Text;
-				raid_data["rank"] = _rank.Data->Text;
-
-				raid_array.push_back(raid_data);
-				if (_grp.Data)
-					_grp.FreeRep();
-				if (_name.Data)
-					_name.FreeRep();
-				if (_lvl.Data)
-					_lvl.FreeRep();
-				if (_class.Data)
-					_class.FreeRep();
-				if (_rank.Data)
-					_rank.FreeRep();
 			}
 			write(raid_array.dump(), pipe_data_type::raid);
 		}
 		
-		uint8_t isInGroup = *(uint8_t*)0x7912B0;
-		if (isInGroup) {
+		const auto* group_info = Zeal::EqGame::GroupInfo;
+		if (group_info->is_in_group()) {
 			nlohmann::json group_array = nlohmann::json::array();
-			GroupEntityPtrArrayType* groupEntityPtrs = reinterpret_cast<GroupEntityPtrArrayType*>(0x7913F8);
-			GroupNameArrayType* groupNames = reinterpret_cast<GroupNameArrayType*>(0x7912B5);
 
 			for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; i++)
 			{
-				Zeal::EqStructures::Entity* member = groupEntityPtrs[i];
-				if ((strlen(groupNames[i]) > 0) && member)
+				Zeal::EqStructures::Entity* member = group_info->EntityList[i];
+				if ((strlen(group_info->Names[i]) > 0) && member)
 				{
 					nlohmann::json group_data = nlohmann::json::object();
-					group_data["name"] = groupNames[i];
+					group_data["name"] = group_info->Names[i];
 					group_data["loc"] = member->Position.toJson();
 					group_data["heading"] = member->Heading;
 
