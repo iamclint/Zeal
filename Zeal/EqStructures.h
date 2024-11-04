@@ -216,6 +216,17 @@ namespace Zeal
 
 		};
 
+		enum ItemEffect {
+			ItemEffectCombatProc = 0,
+			ItemEffectClick,
+			ItemEffectWorn,
+			ItemEffectExpendable,
+			ItemEffectEquipClick,
+			ItemEffectClick2, //5		//name unknown
+			ItemEffectFocus,
+			ItemEffectScroll,
+			ItemEffectCount
+		};
 
 	}
 	namespace EqStructures
