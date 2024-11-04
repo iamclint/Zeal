@@ -23,7 +23,7 @@ void ui_inputdialog::hide()
 	wnd->show(0, 0);
 	wnd->IsVisible = false;
 }
-bool ui_inputdialog::show(const std::string& title, const std::string& message, const std::string& button1_name, const std::string button2_name, InputDialogCallback button1_callback, InputDialogCallback button2_callback)
+bool ui_inputdialog::show(const std::string& title, const std::string& message, const std::string& button1_name, const std::string button2_name, InputDialogCallback button1_callback, InputDialogCallback button2_callback, bool show_input_field)
 {
 	if (!wnd || wnd->IsVisible)
 		return false;
@@ -36,6 +36,7 @@ bool ui_inputdialog::show(const std::string& title, const std::string& message, 
 		label->Text = message;
 	if (wnd)
 		wnd->Text = title;
+	input->IsVisible = show_input_field;
 	wnd->show(0, 1);
 	wnd->IsVisible = true;
 	if (input)

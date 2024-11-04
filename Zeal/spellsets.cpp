@@ -163,7 +163,13 @@ static int __fastcall SpellSetRButtonUp(Zeal::EqUI::EQWND* pWnd, int unused, Zea
 }
 static int __stdcall SpellSetMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
 {
-    ZealService::get_instance()->spell_sets->load(ZealService::get_instance()->spell_sets->spellset_map[(int)data]);
+    int msg_data = (int)data;
+    if (msg_data == 0x21000)
+        ZealService::get_instance()->ui->inputDialog->show("Spell Set", "Save spell set as:", "Save", "Cancel", [](std::string msg) { ZealService::get_instance()->spell_sets->save(msg); }, nullptr, true);
+    else if (msg_data>=0x22000)
+        ZealService::get_instance()->ui->inputDialog->show("Spell Set", "Delete " + ZealService::get_instance()->spell_sets->spellset_map[msg_data - 0x02000] + "?", "Yes", "No", [msg_data](std::string msg) { ZealService::get_instance()->spell_sets->remove(ZealService::get_instance()->spell_sets->spellset_map[msg_data - 0x02000]); }, nullptr, false);
+    else
+        ZealService::get_instance()->spell_sets->load(ZealService::get_instance()->spell_sets->spellset_map[msg_data]);
     return 1;
 }
 static int __stdcall SpellSetDeleteMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
@@ -277,6 +283,18 @@ void SpellSets::set_ini()
     ini->set(ss.str());
 }
 
+Zeal::EqUI::ContextMenu* InitializeMenu(void* notificationFunc = nullptr) {
+    auto menu = new Zeal::EqUI::ContextMenu(0, 0, { 100, 100, 100, 100 });
+    menu->HasChildren = true;
+    menu->HasSiblings = true;
+    menu->Unknown0x015 = 0;
+    menu->Unknown0x016 = 0;
+    menu->Unknown0x017 = 0;
+    menu->fnTable->basic.WndNotification = notificationFunc;
+    return menu;
+}
+
+
 void SpellSets::create_context_menus(bool force)
 {
     if (!Zeal::EqGame::is_new_ui()) { return; } // prevent callback crashing oldui
@@ -317,55 +335,51 @@ void SpellSets::create_context_menus(bool force)
             SpellCategory[category][subcategory].push_back(md);
         }
         if (!menu)
-            menu = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
-        menu->HasChildren = 1;
-        menu->HasSiblings = 1;
-        menu->Unknown0x015 = 0;
-        menu->Unknown0x016 = 0;
-        menu->Unknown0x017 = 0;
-        menu->fnTable->basic.WndNotification = SpellsMenuNotification;
+            menu = InitializeMenu(SpellsMenuNotification);
+            
         for (auto& [cat, sub] : SpellCategory)
         {
-            Zeal::EqUI::ContextMenu* SubCategoryMenu = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
+            Zeal::EqUI::ContextMenu* SpellSubCategory = InitializeMenu();
             for (auto& [subcat, spells] : sub)
             {
-                Zeal::EqUI::ContextMenu* SpellMenu = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
-
+                Zeal::EqUI::ContextMenu* SpellMenu = InitializeMenu();
                 for (auto& sp : spells)
-                {
                     SpellMenu->AddMenuItem(sp.Name, 0x10000 + sp.ID);
-                }
                 int addedindex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(SpellMenu);
                 MenuMap[addedindex] = SpellMenu;
-                addedindex |= 0x80000000;
-                SubCategoryMenu->AddMenuItem(subcat, addedindex);
+                SpellSubCategory->AddMenuItem(subcat, addedindex, false, true);
             }
-            int addedindex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(SubCategoryMenu);
-            MenuMap[addedindex] = SubCategoryMenu;
-            addedindex |= 0x80000000;
-            menu->AddMenuItem(cat, addedindex);
+            int addedindex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(SpellSubCategory);
+            MenuMap[addedindex] = SpellSubCategory;
+            menu->AddMenuItem(cat, addedindex, false, true);
         }
         SpellMenuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(menu);
         MenuMap[SpellMenuIndex] = menu;
+
         if (!spellset_menu)
-            spellset_menu = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
-        spellset_menu->HasChildren = 1;
-        spellset_menu->fnTable->basic.WndNotification = SpellSetMenuNotification;
-        //spellset_menu->fnTable->basic.HandleRButtonUp = SpellSetRButtonUp;
-        //spellset_menu->fnTable->basic.Deactivate = SpellSetDeactivate;
+            spellset_menu = InitializeMenu(SpellSetMenuNotification);
+
         spellsets.clear();
         spellsets = ini->getSectionNames();
         std::sort(spellsets.begin(), spellsets.end());
+ 
         int header_index = spellset_menu->AddMenuItem("Spell Sets", 0x30000, false);
         spellset_menu->EnableLine(header_index, false);
         //spellset_menu->SetItemColor(header_index, { 255,255,255,255 });
-        spellset_menu->AddSeparator();
         for (int i = 0; auto & s : spellsets)
         {
+            Zeal::EqUI::ContextMenu* SubCategoryMenu = InitializeMenu();
+            SubCategoryMenu->AddMenuItem("Load", 0x20000 + i);
+            SubCategoryMenu->AddMenuItem("Delete", 0x22000 + i);
+            int subcat = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(SubCategoryMenu);
+            spellset_menu->AddMenuItem(s, subcat, false, true);
+            //int index = SubCategoryMenu->AddMenuItem(s, 0x20000 + i);
             spellset_map[0x20000 + i] = s;
-            spellset_menu->AddMenuItem(s, 0x20000 + i);
+            MenuMap[subcat] = SubCategoryMenu;
             i++;
         }
+        spellset_menu->AddSeparator();
+        spellset_menu->AddMenuItem("Save New", 0x21000);
         SpellSetMenuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(spellset_menu);
         MenuMap[SpellSetMenuIndex] = spellset_menu;
 
