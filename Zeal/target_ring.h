@@ -21,6 +21,29 @@ struct RenderState
 	RenderState() = default;
 };
 
+struct BaseVertex {
+	float x, y, z;  // Position coordinates
+	BaseVertex() = default;
+	BaseVertex(float x, float y, float z) : x(x), y(y), z(z) {}
+};
+struct TexturedVertex : public BaseVertex {
+	float u, v;     // Texture coordinates
+	D3DCOLOR color; // Color for solid vertices
+	TexturedVertex() = default;
+	TexturedVertex(float x, float y, float z, float u, float v)
+		: BaseVertex(x, y, z), u(u), v(v) {}
+};
+
+struct SolidVertex : public BaseVertex {
+	D3DCOLOR color; // Color for solid vertices
+	SolidVertex() = default;
+	SolidVertex(const TexturedVertex& tv) { x = tv.x; y = tv.y, z = tv.z, color = tv.color; }
+	SolidVertex(const TexturedVertex& tv, float _z) { x = tv.x; y = tv.y, z = _z, color = tv.color; }
+	SolidVertex(float x, float y, float z, D3DCOLOR color)
+		: BaseVertex(x, y, z), color(color) {}
+};
+
+
 class TargetRing
 {
 public:
@@ -51,6 +74,7 @@ public:
 	std::string get_texture();
 	
 private:
+	void drawVertices(Vec3 pos, DWORD vertex_count, IDirect3DTexture8* texture, D3DXMATRIX worldMatrix, SolidVertex* solid_vertices, TexturedVertex* texture_vertices);
 	float inner_percent=0.50f;
 	bool enabled = false;
 	bool attack_indicator = false;

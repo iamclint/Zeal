@@ -588,8 +588,8 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, bool)>(0x579f90)(this, index, toggle);
 			}
-			int AddMenuItem(CXSTR data, int index, bool disp_activated=false) const {
-				return reinterpret_cast<int(__thiscall*)(const ContextMenu*, CXSTR, int, bool)>(0x417910)(this, data, index, disp_activated);
+			int AddMenuItem(CXSTR data, int index, bool disp_activated=false, bool has_children = false) const {
+				return reinterpret_cast<int(__thiscall*)(const ContextMenu*, CXSTR, int, bool)>(0x417910)(this, data, has_children ? index | 0x80000000 : index, disp_activated);
 			}
 			void SetItemColor(int index, ARGBCOLOR color)
 			{

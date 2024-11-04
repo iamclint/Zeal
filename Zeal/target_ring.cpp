@@ -9,24 +9,6 @@
 #include <algorithm>
 #define NUM_VERTICES 4
 
-struct TextureVertex {
-	float x, y, z;  // Position coordinates
-	float u, v;     // Texture coordinates
-	D3DCOLOR color; // Optional color (0 for white)
-};
-
-struct Vertex {
-	float x, y, z;  // Position coordinates
-	//float u, v;     // Texture coordinates
-	D3DCOLOR color; // Optional color (0 for white)
-	Vertex(const TextureVertex& vert) {
-		x = vert.x;
-		y = vert.y;
-		z = vert.z;
-		color = vert.color;
-	}
-	Vertex() : x(0), y(0), z(0), color(0xFFFFFFFF) {};
-};
 
 
 
@@ -71,6 +53,7 @@ void TargetRing::setup_render_states()
 	device->SetRenderState(D3DRS_ZENABLE, TRUE);
 	device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	device->SetRenderState(D3DRS_LIGHTING, FALSE);
+
 	// Set texture stage states
 	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
@@ -157,89 +140,230 @@ LPDIRECT3DVERTEXBUFFER8 CreateVertexBuffer(LPDIRECT3DDEVICE8 d3dDevice, VertexTy
 	return vertexBuffer;
 }
 
-void TargetRing::render_ring(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle) {
+//// Collide with world to get terrain height (this looks great on slopes but steep drop offs and walls are terrible)
+//Zeal::EqGame::collide_with_world({ pos.x + outerRadiusVertex.x, pos.y + outerRadiusVertex.y, pos.z + (size * 2) },
+//	{ pos.x + outerRadiusVertex.x, pos.y + outerRadiusVertex.y, pos.z - (size * 2) },
+//	outerTerrainHeight);
+//Zeal::EqGame::collide_with_world({ pos.x + innerRadiusVertex.x, pos.y + innerRadiusVertex.y, pos.z + (size * 2) },
+//	{ pos.x + innerRadiusVertex.x, pos.y + innerRadiusVertex.y, pos.z - (size * 2) },
+//	innerTerrainHeight);
+
+//void TargetRing::render_ring_section(IDirect3DDevice8* device, TextureVertex* vertices, int vertexCount, IDirect3DTexture8* texture) {
+//			D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z + zOffset);
+//			device->SetTransform(D3DTS_WORLD, &worldMatrix);
+//	
+//			device->SetTexture(0, 0);
+//			device->SetStreamSource(0, solidVertexBuffer, sizeof(Vertex));
+//			device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+//			device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, vertex_count - 2);
+//	
+//			if (texture) {
+//				// Render the texture
+//				LPDIRECT3DVERTEXBUFFER8 texturedVertexBuffer = CreateVertexBuffer(device, texture_vertices, vertex_count, D3DFVF_XYZ | D3DFVF_TEX1);
+//				device->SetTexture(0, texture);
+//				device->SetStreamSource(0, texturedVertexBuffer, sizeof(TextureVertex));
+//				device->SetVertexShader(D3DFVF_XYZ | D3DFVF_TEX1);
+//				device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, vertex_count - 2);
+//				texturedVertexBuffer->Release();
+//			}
+//}
+//void TargetRing::render_cylinder(IDirect3DDevice8* device, Vec3 pos, float radius, float topZ, float bottomZ, DWORD color) {
+//	// Create cylinder vertices based on the radius and Z positions
+//	const int cylinderSegments = num_segments; // You can adjust the number of segments as needed
+//	Vertex* cylinderVertices = new Vertex[cylinderSegments * 2 + 2]; // Top and bottom
+//
+//	for (int i = 0; i <= cylinderSegments; ++i) {
+//		float angle = (i * 2.0f * D3DX_PI) / cylinderSegments;
+//
+//		// Top circle vertices
+//		cylinderVertices[i].x = radius * cosf(angle);
+//		cylinderVertices[i].y = radius * sinf(angle);
+//		cylinderVertices[i].z = topZ; // Position at top
+//
+//		// Bottom circle vertices
+//		cylinderVertices[i + cylinderSegments + 1].x = radius * cosf(angle);
+//		cylinderVertices[i + cylinderSegments + 1].y = radius * sinf(angle);
+//		cylinderVertices[i + cylinderSegments + 1].z = bottomZ; // Position at bottom
+//
+//		// Set color
+//		cylinderVertices[i].color = color;
+//		cylinderVertices[i + cylinderSegments + 1].color = color;
+//	}
+//
+//	// Render cylinder using triangle strips
+//	// Use a similar approach as the render_ring_section function to create a vertex buffer and draw the cylinder
+//	// ...
+//
+//	delete[] cylinderVertices;
+//}
+
+//void TargetRing::render_ring(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle) {
+//	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+//	if (!device)
+//		return;
+//
+//	const float innerRadius = std::clamp(size - (size * inner_percent), 0.f, 100.f);
+//	const float outerRadius = size;
+//	const float angleStep = 2.0f * static_cast<float>(M_PI) / num_segments;  // Angle step for ring segments
+//
+//	// Create vertices for the upper and lower rings
+//	TextureVertex* upperRingVertices = new TextureVertex[num_segments + 1];
+//	TextureVertex* lowerRingVertices = new TextureVertex[num_segments + 1];
+//	float ringThickness = 0.5f;
+//	for (int i = 0; i <= num_segments; ++i) {
+//		float angle = (i * angleStep) + rotationAngle;
+//
+//		// Upper ring vertices
+//		upperRingVertices[i].x = outerRadius * cosf(angle);
+//		upperRingVertices[i].y = outerRadius * sinf(angle);
+//		upperRingVertices[i].z = pos.z + ringThickness; // Position the upper ring above
+//		upperRingVertices[i].color = color;
+//		upperRingVertices[i].u = 1.0f; // Set texture coordinates as needed
+//		upperRingVertices[i].v = 1.0f - (float)i / (float)num_segments;
+//
+//		// Lower ring vertices
+//		lowerRingVertices[i].x = outerRadius * cosf(angle);
+//		lowerRingVertices[i].y = outerRadius * sinf(angle);
+//		lowerRingVertices[i].z = pos.z - ringThickness; // Position the lower ring below
+//		lowerRingVertices[i].color = color;
+//		lowerRingVertices[i].u = 1.0f; // Set texture coordinates as needed
+//		lowerRingVertices[i].v = 1.0f - (float)i / (float)num_segments;
+//	}
+//	setup_render_states();
+//
+//	// Render the upper ring
+//	render_ring_section(device, upperRingVertices, num_segments + 1, texture);
+//
+//	// Render the lower ring
+//	render_ring_section(device, lowerRingVertices, num_segments + 1, texture);
+//
+//	// Render the outer cylinder
+//	render_cylinder(device, pos, outerRadius, pos.z + ringThickness, pos.z - ringThickness, color);
+//
+//	// Render the inner cylinder
+//	render_cylinder(device, pos, innerRadius, pos.z + ringThickness, pos.z - ringThickness, color);
+//
+//	// Clean up
+//	delete[] upperRingVertices;
+//	delete[] lowerRingVertices;
+//}
+void TargetRing::drawVertices(Vec3 pos, DWORD vertex_count, IDirect3DTexture8* texture, D3DXMATRIX worldMatrix, SolidVertex* solid_vertices, TexturedVertex* texture_vertices)
+{
 	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
 	if (!device)
 		return;
+	LPDIRECT3DVERTEXBUFFER8 solidVertexBuffer = CreateVertexBuffer(device, solid_vertices, vertex_count, D3DFVF_XYZ | D3DFVF_DIFFUSE);
+	D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
+	device->SetTransform(D3DTS_WORLD, &worldMatrix);
 
-	const float innerRadius = std::clamp(size - (size * inner_percent), 0.f, 100.f);
-	const float outerRadius = size;
+	device->SetTexture(0, 0);
+	device->SetStreamSource(0, solidVertexBuffer, sizeof(SolidVertex));
+	device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+	device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, vertex_count - 2);
+	solidVertexBuffer->Release();
+	if (texture) {
+		LPDIRECT3DVERTEXBUFFER8 texturedVertexBuffer = CreateVertexBuffer(device, texture_vertices, vertex_count, D3DFVF_XYZ | D3DFVF_TEX1);
+		device->SetTexture(0, texture);
+		device->SetStreamSource(0, texturedVertexBuffer, sizeof(TexturedVertex));
+		device->SetVertexShader(D3DFVF_XYZ | D3DFVF_TEX1);
+		device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, vertex_count - 2);
+		texturedVertexBuffer->Release();
+	}
+}
+void generate_vertices(SolidVertex* ringVertices, SolidVertex* outer_cylinderVertices, SolidVertex* inner_cylinderVertices, TexturedVertex* textureVertices, int num_segments, float radius, float inner_percent, float rotationAngle, DWORD color, float height)
+{
+	float transparency = 0.3f;  // 50% transparency
+	BYTE alpha = static_cast<BYTE>(transparency * 255);  // Convert to alpha byte
+	DWORD newColor = (color & 0x00FFFFFF) | (alpha << 24);  // Apply alpha
+
+	const float innerRadius = std::clamp(radius - (radius * inner_percent), 0.f, 100.f);
+	const float outerRadius = radius;
 	const float angleStep = 2.0f * static_cast<float>(M_PI) / num_segments;  // Fixed truncation warning
 	int vertexIndex = 0;
-
-
-	TextureVertex* texture_vertices = new TextureVertex[num_segments * 2 + 2];
-	Vertex* solid_vertices = new Vertex[num_segments * 2 + 2];
-	Vec3 outerTerrainHeight, innerTerrainHeight;
+	int cylinderIndex = 0;
+	int cylinderIndex2 = 0;
 	for (int i = 0; i <= num_segments; ++i) {
 		float angle = (i * angleStep) + rotationAngle;
 		Vec2 outerRadiusVertex = { outerRadius * cosf(angle), outerRadius * sinf(angle) };
 		Vec2 innerRadiusVertex = { innerRadius * cosf(angle), innerRadius * sinf(angle) };
 
-		//// Collide with world to get terrain height (this looks great on slopes but steep drop offs and walls are terrible)
-		//Zeal::EqGame::collide_with_world({ pos.x + outerRadiusVertex.x, pos.y + outerRadiusVertex.y, pos.z + (size * 2) },
-		//	{ pos.x + outerRadiusVertex.x, pos.y + outerRadiusVertex.y, pos.z - (size * 2) },
-		//	outerTerrainHeight);
-		//Zeal::EqGame::collide_with_world({ pos.x + innerRadiusVertex.x, pos.y + innerRadiusVertex.y, pos.z + (size * 2) },
-		//	{ pos.x + innerRadiusVertex.x, pos.y + innerRadiusVertex.y, pos.z - (size * 2) },
-		//	innerTerrainHeight);
-
 		// Outer circle vertices
-		texture_vertices[vertexIndex].x = outerRadiusVertex.x;
-		texture_vertices[vertexIndex].y = outerRadiusVertex.y;
-		texture_vertices[vertexIndex].z = 1.f;// outerTerrainHeight.z - pos.z;
-		texture_vertices[vertexIndex].color = color;
-		texture_vertices[vertexIndex].u = 1.0f;
-		texture_vertices[vertexIndex].v = 1.0f - (float)i / (float)num_segments;
-		solid_vertices[vertexIndex] = Vertex(texture_vertices[vertexIndex]);
+		textureVertices[vertexIndex].x = outerRadiusVertex.x;
+		textureVertices[vertexIndex].y = outerRadiusVertex.y;
+		textureVertices[vertexIndex].z = 0.f;// outerTerrainHeight.z - pos.z;
+		textureVertices[vertexIndex].color = newColor;
+		textureVertices[vertexIndex].u = 1.0f;
+		textureVertices[vertexIndex].v = 1.0f - (float)i / (float)num_segments;
+		ringVertices[vertexIndex] = SolidVertex(textureVertices[vertexIndex]);
+		outer_cylinderVertices[cylinderIndex++] = SolidVertex(textureVertices[vertexIndex], height);
+		outer_cylinderVertices[cylinderIndex++] = SolidVertex(textureVertices[vertexIndex], 0);
 		vertexIndex++;
 
 		// Inner circle vertices
-		texture_vertices[vertexIndex].x = innerRadiusVertex.x;
-		texture_vertices[vertexIndex].y = innerRadiusVertex.y;
-		texture_vertices[vertexIndex].z = 1.f;// innerTerrainHeight.z - pos.z;
-		texture_vertices[vertexIndex].color = color;
-		texture_vertices[vertexIndex].u = 0.0f;
-		texture_vertices[vertexIndex].v = 1.0f - (float)i / (float)num_segments;
-		solid_vertices[vertexIndex] = Vertex(texture_vertices[vertexIndex]);
+		textureVertices[vertexIndex].x = innerRadiusVertex.x;
+		textureVertices[vertexIndex].y = innerRadiusVertex.y;
+		textureVertices[vertexIndex].z = 0.f;// innerTerrainHeight.z - pos.z;
+		textureVertices[vertexIndex].color = newColor;
+		textureVertices[vertexIndex].u = 0.0f;
+		textureVertices[vertexIndex].v = 1.0f - (float)i / (float)num_segments;
+		ringVertices[vertexIndex] = SolidVertex(textureVertices[vertexIndex]);
+		inner_cylinderVertices[cylinderIndex2++] = SolidVertex(textureVertices[vertexIndex], height);
+		inner_cylinderVertices[cylinderIndex2++] = SolidVertex(textureVertices[vertexIndex], 0);
 		vertexIndex++;
 	}
-	DWORD vertex_count = num_segments * 2 + 2;
-	// Create vertex buffers
-	
-	LPDIRECT3DVERTEXBUFFER8 solidVertexBuffer = CreateVertexBuffer(device, solid_vertices, vertex_count, D3DFVF_XYZ | D3DFVF_DIFFUSE);
+}
 
-	// Store and set render states
-	setup_render_states();
-	
-	D3DXMATRIX worldMatrix, originalWorldMatrix, rotationMatrix;
-	device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
-	D3DXMatrixTranslation(&worldMatrix, pos.x, pos.y, pos.z);
-	device->SetTransform(D3DTS_WORLD, &worldMatrix);
+void generate_cylinder_vertices(SolidVertex* solidVertices, int num_segments, float radius, float height, DWORD color) {
+	const float angleStep = 2.0f * D3DX_PI / num_segments;
+	int vertexIndex = 0;
 
-	// Render the ring
-	device->SetTexture(0, 0);
-	device->SetStreamSource(0, solidVertexBuffer, sizeof(Vertex));
-	device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-	device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, vertex_count - 2);
+	for (int i = 0; i <= num_segments; ++i) {
+		float angle = i * angleStep;
 
-	if (texture)
-	{
-		// Render the texture
-		LPDIRECT3DVERTEXBUFFER8 texturedVertexBuffer = CreateVertexBuffer(device, texture_vertices, vertex_count, D3DFVF_XYZ | D3DFVF_TEX1);
-		device->SetTexture(0, texture);
-		device->SetStreamSource(0, texturedVertexBuffer, sizeof(TextureVertex));
-		device->SetVertexShader(D3DFVF_XYZ | D3DFVF_TEX1);
-		device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, vertex_count - 2);
-		texturedVertexBuffer->Release();
+		// Calculate positions for the top and bottom vertices
+		float x = radius * cosf(angle);
+		float y = radius * sinf(angle);
+
+		// Top vertex
+		solidVertices[vertexIndex].x = x;
+		solidVertices[vertexIndex].y = y;
+		solidVertices[vertexIndex].z = height; // Top
+		solidVertices[vertexIndex].color = color;
+		vertexIndex++;
+
+		// Bottom vertex
+		solidVertices[vertexIndex].x = x;
+		solidVertices[vertexIndex].y = y;
+		solidVertices[vertexIndex].z = 0.0f; // Bottom
+		solidVertices[vertexIndex].color = color;
+		vertexIndex++;
 	}
-	// Restore the original world matrix and render states
+}
+
+void TargetRing::render_ring(Vec3 pos, float radius, DWORD color, IDirect3DTexture8* texture, float rotationAngle) {
+	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+	if (!device)
+		return;
+	D3DXMATRIX worldMatrix, originalWorldMatrix, rotationMatrix;
+	const float height = 0.3f;
+	const DWORD ring_vertex_count = num_segments * 2 + 2;
+	const DWORD cylinder_vertex_count = num_segments * 2 + 2;
+	TexturedVertex* texture_vertices = new TexturedVertex[ring_vertex_count];
+	SolidVertex* solid_vertices = new SolidVertex[ring_vertex_count];
+	SolidVertex* outer_cylinder_vertices = new SolidVertex[cylinder_vertex_count];
+	SolidVertex* inner_cylinder_vertices = new SolidVertex[cylinder_vertex_count];
+	generate_vertices(solid_vertices, outer_cylinder_vertices, inner_cylinder_vertices, texture_vertices, num_segments, radius, inner_percent, rotationAngle, color, height);
+	//generate_cylinder_vertices(solid_vertices, num_segments, size, height, color);
+	
+	setup_render_states();
+	device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
+	drawVertices({ pos.x, pos.y, pos.z + height }, ring_vertex_count, texture, worldMatrix, solid_vertices, texture_vertices);
+	drawVertices({ pos.x, pos.y, pos.z }, ring_vertex_count, nullptr, worldMatrix, solid_vertices, nullptr);
+	drawVertices({ pos.x, pos.y, pos.z }, cylinder_vertex_count, nullptr, worldMatrix, inner_cylinder_vertices, nullptr);
+	drawVertices({ pos.x, pos.y, pos.z }, cylinder_vertex_count, nullptr, worldMatrix, outer_cylinder_vertices, nullptr);
 	device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
 	reset_render_states();
-
-	// Release resources
-	solidVertexBuffer->Release();
-	delete[] texture_vertices;
+	//delete[] texture_vertices;
 	delete[] solid_vertices;
 }
 

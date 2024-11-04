@@ -190,6 +190,11 @@ void ZealService::basic_binds()
 
 	binds_hook->replace_cmd(0xC8, [this](int state) 
 	{
+		if (ZealService::get_instance()->ui->inputDialog->isVisible())
+		{
+			ZealService::get_instance()->ui->inputDialog->hide();
+			return true;
+		}
 		if (Zeal::EqGame::get_target())
 		{
 			Zeal::EqGame::set_target(0);
