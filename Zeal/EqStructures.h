@@ -294,7 +294,10 @@ namespace Zeal
 			/* 0x011A */ BYTE Unknown0123[10];
 			/* 0x0124 */ WORD SkillModId;
 			/* 0x0126 */ INT8 SkillModPercent;
-			/* ...... */
+			/* 0x0127 */ BYTE Unknown0127[59];
+			/* 0x0162 */ WORD BardType;   // Bard Skill Type (instrument type)
+			/* 0x0164 */ WORD BardValue;  // Bard Skill Amount (instrument modifier)
+			/* 0x0166 */ BYTE Unknown0166[18];  // Total item struct size looks like 0x178.
 		} EQITEMCOMMONINFO, * PEQITEMCOMMONINFO;
 		typedef struct _EQITEMCONTAINERINFO
 		{

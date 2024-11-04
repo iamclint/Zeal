@@ -98,6 +98,24 @@ void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_
 	wnd->Activate();
 }
 
+// Replaces a _mbscpy() call with a simple "copy" that appends the instrument modifier percentage.
+static char* ModifyInstrumentString(char* destination, char* source) {
+	const int kDestinationSize = 32;  // ASSUMED SAFE BUFFER SIZE
+	int modifier = 0;
+	ZealService* zeal = ZealService::get_instance();
+	if (zeal && zeal->item_displays && zeal->item_displays->current_item)
+	{
+		const auto& item = *zeal->item_displays->current_item;
+		if (item.Common.BardType != 0 && item.Common.BardValue > 10)
+			modifier = (item.Common.BardValue - 10) * 10;  // 18 = +80%, 24 = +140%
+	}
+	if (modifier)
+		snprintf(destination, kDestinationSize, "%s: %+d%%", source, modifier);
+	else
+		snprintf(destination, kDestinationSize, "%s", source);  // Null-terminated copy.
+	return destination;
+}
+
 void ItemDisplay::CleanUI()
 {
 		for (auto& w : windows)
@@ -114,6 +132,7 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 //	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
+	zeal->hooks->Add("ModifyInstrumentString", 0x423d0f, ModifyInstrumentString, hook_type_replace_call);
 	zeal->hooks->Add("ModifyHaste", 0x424a95, build_token_string_PARAM, hook_type_replace_call);
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
