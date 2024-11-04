@@ -1475,11 +1475,16 @@ namespace Zeal
 			}
 			if (item->Type != 0 || !item->Common.SpellId)
 			{
-				Zeal::EqGame::print_chat("item %s does not have a spell attached to it.", item->Name);
+				Zeal::EqGame::print_chat("Item %s does not have a spell attached to it.", item->Name);
 				return false;
 			}
-			if (item->Common.EffectType == 2) {
-				Zeal::EqGame::print_chat("item %s has a worn effect.", item->Name);
+			// List of checks copied from eqemu/zone/client_packet.cpp:
+			if ((item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectClick) &&
+				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectExpendable) &&
+				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectEquipClick) &&
+				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectClick2))
+			{
+				Zeal::EqGame::print_chat("Item %s does not have a click effect.", item->Name);
 				return false;
 			}
 			if (!self->ActorInfo || self->ActorInfo->CastingSpellId != kInvalidSpellId)
