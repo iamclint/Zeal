@@ -303,10 +303,11 @@ void Binds::add_binds()
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 			ZealService::get_instance()->nameplate->con_colors_set_enabled(!ZealService::get_instance()->nameplate->con_colors_is_enabled());
 		});
-	add_bind(237, "Flash Map Member Names", "FlashMapMemberNames", key_category::UI, [this](int key_down) {
-		if (!Zeal::EqGame::EqGameInternal::UI_ChatInputCheck()) {
-			// Set the override when the key is held down and release when it goes up.
-			ZealService::get_instance()->zone_map->set_show_all_names_override(key_down ? true : false);
+	add_bind(237, "Toggle Map Member Names", "FlashMapMemberNames", key_category::UI, [this](int key_down) {
+		// Left the short name as "Flash" to stay consistent with previous keybinds.
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck()) {
+			ZealService::get_instance()->zone_map->set_show_all_names_override(
+				!ZealService::get_instance()->zone_map->is_show_all_names_override());
 		}
 		});
 	add_bind(238, "Toggle Nameplate Self", "ToggleNameplateSelf", key_category::Target, [this](int key_down) {

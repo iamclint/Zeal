@@ -67,6 +67,7 @@ public:
 	bool is_external_enabled() const { return external_enabled; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
 	bool is_show_grid_enabled() const { return map_show_grid; }
+	bool is_show_all_names_override() const { return map_show_all_names_override;}
 	int get_show_group_mode() const { return map_show_group_mode; }
 	int get_name_length() const { return map_name_length; }
 	int get_grid_pitch() const { return map_grid_pitch; }
@@ -211,7 +212,7 @@ private:
 	int map_grid_pitch = kDefaultGridPitch;  // Pitch when grid is visible.
 	int map_name_length = kDefaultNameLength;  // Number of characters in name labels.
 	bool map_show_raid = false;
-	bool map_show_all_names_override = false;  // Meant as a temporary override to flash names.
+	bool map_show_all_names_override = false;  // Overrides modes to show names of all visible members.
 	BackgroundType::e map_background_state = BackgroundType::kClear;
 	float map_background_alpha = kDefaultBackgroundAlpha;
 	AlignmentType::e map_alignment_state = AlignmentType::kFirst;
