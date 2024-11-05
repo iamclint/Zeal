@@ -365,6 +365,9 @@ void TargetRing::render_ring(Vec3 pos, float radius, DWORD color, IDirect3DTextu
 	reset_render_states();
 	//delete[] texture_vertices;
 	delete[] solid_vertices;
+	delete[] outer_cylinder_vertices;
+	delete[] inner_cylinder_vertices;
+	delete[] texture_vertices;
 }
 
 void TargetRing::callback_render() {
