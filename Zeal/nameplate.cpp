@@ -149,8 +149,10 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 }
 
 int __fastcall SetNameSpriteTint(void* this_ptr, void* not_used, Zeal::EqStructures::Entity* spawn)
-{	
+{
 	int result = ZealService::get_instance()->hooks->hook_map["SetNameSpriteTint"]->original(SetNameSpriteTint)(this_ptr, not_used, spawn);
+	if (ZealService::get_instance()->nameplate->nameplateCharSelect == false && Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT)
+		return result;
 	ZealService::get_instance()->nameplate->HandleTint(spawn);
 	if (ZealService::get_instance()->nameplate->nameplateColors && Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT && Zeal::EqGame::get_self())
 		Zeal::EqGame::get_self()->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF00FF32; //Green indication Namecolors on at Character Select
@@ -229,6 +231,8 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 int __fastcall SetNameSpriteState(void* this_ptr, void* not_used, Zeal::EqStructures::Entity* spawn, bool show)
 {
 	int result = ZealService::get_instance()->hooks->hook_map["SetNameSpriteState"]->original(SetNameSpriteState)(this_ptr, not_used, spawn, show);
+	if (ZealService::get_instance()->nameplate->nameplateCharSelect == false && Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT && Zeal::EqGame::get_self())
+		return result;
 	ZealService::get_instance()->nameplate->HandleState(this_ptr, not_used, spawn);
 	return result;
 }
@@ -268,6 +272,13 @@ void NamePlate::raidpets_set_enabled(bool _enabled)
 	nameplateRaidPets = _enabled;
 }
 
+void NamePlate::charselect_set_enabled(bool _enabled)
+{
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateCharSelect", _enabled);
+	Zeal::EqGame::print_chat("Show Nameplate Options at Character Selection Screen is %s", _enabled ? "Enabled" : "Disabled");
+	nameplateCharSelect = _enabled;
+}
+
 NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 {
 	//HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
@@ -289,12 +300,15 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 		ini->setValue<bool>("Zeal", "NameplateX", false);
 	if (!ini->exists("Zeal", "NameplateRaidPets"))
 		ini->setValue<bool>("Zeal", "NameplateRaidPets", false);
+	if (!ini->exists("Zeal", "NameplateCharSelect"))
+		ini->setValue<bool>("Zeal", "NameplateCharSelect", false);
 
 	nameplateColors = ini->getValue<bool>("Zeal", "NameplateColors");
 	nameplateconColors = ini->getValue<bool>("Zeal", "NameplateConColors");
 	nameplateSelf = ini->getValue<bool>("Zeal", "NameplateSelf");
 	nameplateX = ini->getValue<bool>("Zeal", "NameplateX");
 	nameplateRaidPets = ini->getValue<bool>("Zeal", "NameplateRaidPets");
+	nameplateCharSelect = ini->getValue<bool>("Zeal", "NameplateCharSelect");
 
 	zeal->commands_hook->Add("/nameplatecolors", {}, "Toggles Nameplate Colors",
 		[this](std::vector<std::string>& args) {
@@ -317,6 +331,11 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 			return true;
 		});
 	zeal->commands_hook->Add("/nameplateraidpets", {}, "Toggles Nameplate for Raid Pets",
+		[this](std::vector<std::string>& args) {
+			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			return true;
+		});
+	zeal->commands_hook->Add("/nameplatecharselect", {}, "Toggles Nameplate Options Shown at Character Selection Screen",
 		[this](std::vector<std::string>& args) {
 			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
 			return true;
