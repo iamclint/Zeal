@@ -114,11 +114,19 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
-	Add("/corpsedrag", { "/drag"}, "Attempts to corpse drag your current target.",
+	Add("/corpsedrag", { "/drag"}, "Attempts to corpse drag your current target. Use /corpsedrag nearest to auto-target.",
 		[](std::vector<std::string>& args) {
-			if (args.size() == 1)
+			bool nearest = (args.size() == 2 && args[1] == "nearest");
+			if (args.size() == 1 || nearest)
 			{
-				if (Zeal::EqGame::get_target())
+				if (nearest)
+				{
+					auto* ent = ZealService::get_instance()->cycle_target->get_nearest_ent(250, Zeal::EqEnums::PlayerCorpse);
+					if (ent)
+						Zeal::EqGame::set_target(ent);
+				}
+
+				if (Zeal::EqGame::get_target() && (Zeal::EqGame::get_target()->Type == Zeal::EqEnums::PlayerCorpse))
 				{
 					Zeal::Packets::CorpseDrag_Struct tmp;
 					memset(&tmp, 0, sizeof(tmp));
@@ -126,6 +134,11 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					strcpy_s(tmp.DraggerName, 30, Zeal::EqGame::get_self()->Name);
 					Zeal::EqGame::send_message(Zeal::Packets::opcodes::CorpseDrag, (int*)&tmp, sizeof(tmp), 0);
 				}
+				else if (nearest)
+					Zeal::EqGame::print_chat("No corpse found nearby to drag.");
+				else
+					Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Need to target a corpse to /drag (or use /drag nearest)");
+
 				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 			}
 			return false;
@@ -142,6 +155,8 @@ ChatCommands::ChatCommands(ZealService* zeal)
 					strcpy_s(tmp.DraggerName, 30, Zeal::EqGame::get_self()->Name);
 					Zeal::EqGame::send_message(Zeal::Packets::opcodes::CorpseDrop, (int*)&tmp, sizeof(tmp), 0);
 				}
+				else
+					Zeal::EqGame::print_chat("Need to target a corpse to /drop (or use /drop all)");
 				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 			}
 			else if (Zeal::String::compare_insensitive(args[1], "all"))

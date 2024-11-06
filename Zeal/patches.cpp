@@ -22,6 +22,19 @@ void __fastcall GetZoneInfoFromNetwork(int* t, int unused, char* p1)
 	}
 }
 
+// Base client is tagging other players that die as Type = 2 (NPCCorpse) while tagging a self death
+// as Type = 3. Upon camping and rejoining, other player corpses are tagged as Type = 3, so this
+// looks like a client bug to patch (impacts corpse nameplates and targeting).
+static void __fastcall ProcessDeath(uint32_t passthruECX, uint32_t unusedEDX,
+	Zeal::EqStructures::DeathStruct* death_struct)
+{
+	auto* ent = ZealService::get_instance()->entity_manager->Get(death_struct->spawn_id);
+	bool player_death = (ent != nullptr && ent->Type == Zeal::EqEnums::Player);
+	ZealService::get_instance()->hooks->hook_map["ProcessDeath"]->original(ProcessDeath)(passthruECX, unusedEDX, death_struct);
+	if (player_death && ent->Type == Zeal::EqEnums::NPCCorpse)
+		ent->Type = Zeal::EqEnums::PlayerCorpse;
+}
+
 void patches::fonts() //this was a test function and I later found out these aren't even used
 {
 	//const char* driverName = "DISPLAY";
@@ -73,6 +86,8 @@ patches::patches()
 	mem::write<BYTE>(0x4A14CF, 0xEB); //don't print Your XML files are not compatible with current EverQuest files, certain windows may not perform correctly.  Use "/loadskin Default 1" to load the EverQuest default skin.
 
 	ZealService::get_instance()->hooks->Add("GetZoneInfoFromNetwork", 0x53D026, GetZoneInfoFromNetwork, hook_type_detour);
+
+	ZealService::get_instance()->hooks->Add("ProcessDeath", 0x00528E16, ProcessDeath, hook_type_detour);
 
 	//fonts();
 	//*(int*)0x809458 =

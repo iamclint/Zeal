@@ -913,5 +913,20 @@ namespace Zeal
 			const char* localized_name;
 			int fn;
 		};
+		struct DeathStruct
+		{
+			/*000*/	uint16_t spawn_id;
+			/*002*/	uint16_t killer_id;
+			/*004*/	uint16_t corpseid;
+			/*006*/	uint8_t spawn_level;
+			/*007*/	uint8_t unknown007;
+			/*008*/	int16_t spell_id;
+			/*010*/	uint8_t attack_skill;
+			/*011*/	uint8_t unknown011;
+			/*012*/	int32_t damage;
+			/*016*/	uint8_t is_PC;
+			/*017*/	uint8_t unknown015[3];
+			/*020*/
+		};
 	}
 }
