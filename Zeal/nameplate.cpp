@@ -22,7 +22,7 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	Zeal::EqStructures::EQARGBCOLOR Adventurercolor = options->GetColor(9); //0xFF3D6BDC; //Not in Guild Member - Default Blue
 	Zeal::EqStructures::EQARGBCOLOR NpcCorpsecolor = options->GetColor(10); //0xFF000000; //Npc Corpse - Black
 	Zeal::EqStructures::EQARGBCOLOR PlayersCorpsecolor = options->GetColor(11); //0xFFFFFFFF; //Players Corpse - White Light Purple
-	Zeal::EqStructures::EQARGBCOLOR Targetcolor = options->GetColor(18); //0xFFFFFFFF; //Players Corpse - White Light Purple
+	Zeal::EqStructures::EQARGBCOLOR Targetcolor = options->GetColor(18); //(0xFFFF80FF); //Target Pink Default
 	if (nameplateTargetColor) {
 		if (spawn == Zeal::EqGame::get_target()) {
 			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Targetcolor;
