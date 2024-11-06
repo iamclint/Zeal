@@ -6,11 +6,7 @@
 #include "string_util.h"
 #include <algorithm>
 #include <cctype>
-using NameArrayType = char[0x40];
-using PtrArrayType = Zeal::EqStructures::Entity*;
 
-PtrArrayType* ptrArray = reinterpret_cast<PtrArrayType*>(0x7913F8);
-NameArrayType* nameArray = reinterpret_cast<NameArrayType*>(0x7912B5);
 
 void ui_group::InitUI()
 {
@@ -18,16 +14,17 @@ void ui_group::InitUI()
 }
 void ui_group::swap(UINT index1, UINT index2)
 {
+	auto* group_info = Zeal::EqGame::GroupInfo;
 	if (index1 < 5 && index2 < 5)
 	{
-		std::pair<std::string, Zeal::EqStructures::Entity*> Ent1 = std::make_pair(nameArray[index1], ptrArray[index1]);
-		std::pair<std::string, Zeal::EqStructures::Entity*> Ent2 = std::make_pair(nameArray[index2], ptrArray[index2]);
+		std::pair<std::string, Zeal::EqStructures::Entity*> Ent1 = std::make_pair(group_info->Names[index1], group_info->EntityList[index1]);
+		std::pair<std::string, Zeal::EqStructures::Entity*> Ent2 = std::make_pair(group_info->Names[index2], group_info->EntityList[index2]);
 
 		//move the strings
-		mem::copy((DWORD)(nameArray[index1]), (DWORD)Ent2.first.c_str(), Ent2.first.length()+1); //+1 don't forget string terminator
-		mem::copy((DWORD)(nameArray[index2]), (DWORD)Ent1.first.c_str(), Ent1.first.length()+1);
-		ptrArray[index1] = Ent2.second;
-		ptrArray[index2] = Ent1.second;
+		mem::copy((DWORD)(group_info->Names[index1]), (DWORD)Ent2.first.c_str(), Ent2.first.length()+1); //+1 don't forget string terminator
+		mem::copy((DWORD)(group_info->Names[index2]), (DWORD)Ent1.first.c_str(), Ent1.first.length()+1);
+		group_info->EntityList[index1] = Ent2.second;
+		group_info->EntityList[index2] = Ent1.second;
 	}
 	else
 	{
@@ -36,11 +33,12 @@ void ui_group::swap(UINT index1, UINT index2)
 }
 void ui_group::sort()
 {
+	auto* group_info = Zeal::EqGame::GroupInfo;
 	std::vector<std::pair<std::string, Zeal::EqStructures::Entity*>> group_members_sorted;
 	for (int i = 0; i < 5; i++)
 	{
-		std::pair<std::string, Zeal::EqStructures::Entity*> ent_pair = std::make_pair(nameArray[i], ptrArray[i]);
-		group_members_sorted.push_back({ nameArray[i], ptrArray[i]});
+		std::pair<std::string, Zeal::EqStructures::Entity*> ent_pair = std::make_pair(group_info->Names[i], group_info->EntityList[i]);
+		group_members_sorted.push_back({ group_info->Names[i], group_info->EntityList[i]});
 	}
 	std::sort(group_members_sorted.begin(), group_members_sorted.end(),
 		[](const std::pair<std::string, Zeal::EqStructures::Entity*>& a, const std::pair<std::string, Zeal::EqStructures::Entity*>& b) {
@@ -61,11 +59,11 @@ void ui_group::sort()
 
 			return lower_a < lower_b; 
 		});
-	mem::set(0x7913F8, 0, 20);//erase the pointer array 4 bytes * 5 members = 20 bytes
-	mem::set(0x7912B5, 0, 320);//erase the entire name array 64 characters * 5 members = 320 bytes
+	mem::set((uint32_t)group_info->EntityList, 0, sizeof(group_info->EntityList));//erase the pointer array
+	mem::set((uint32_t)group_info->Names, 0, sizeof(group_info->Names));//erase the pointer array
 	for (int i = 0; i < group_members_sorted.size(); ++i) {
-		mem::copy((DWORD)(nameArray[i]), (DWORD)group_members_sorted[i].first.c_str(), group_members_sorted[i].first.length());
-		ptrArray[i] = group_members_sorted[i].second;
+		mem::copy((DWORD)(group_info->Names[i]), (DWORD)group_members_sorted[i].first.c_str(), group_members_sorted[i].first.length());
+		group_info->EntityList[i] = group_members_sorted[i].second;
 	}
 }
 ui_group::~ui_group()

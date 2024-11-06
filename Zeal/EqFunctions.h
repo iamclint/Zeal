@@ -164,6 +164,13 @@ namespace Zeal
 		int get_region_from_pos(Vec3* pos);
 		EqUI::CXWndManager* get_wnd_manager();
 		std::vector<Zeal::EqStructures::RaidMember*> get_raid_list();
+		DWORD get_raid_group_number();
+		int get_raid_group_count(DWORD group_number);
+		std::string get_raid_group_leader(DWORD group_number);
+		void print_group_leader();
+		void print_raid_leaders(bool show_all_groups = false, bool show_open_groups = false);
+		void print_raid_ungrouped();
+		void dump_raid_state();
 		std::string generateTimestamp();
 		bool use_item(int item_index);
 	}

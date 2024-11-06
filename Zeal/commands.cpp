@@ -433,9 +433,21 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				}
 			return false;
 		});
-		Add("/lead", {}, "Print current group leader", [this, zeal](std::vector<std::string>& args) {
-			const char* leader = Zeal::EqGame::GroupLeaderName;
-			Zeal::EqGame::print_chat("Group leader: %s", *leader ? leader : "Not in a group");
+		Add("/lead", {}, "Print current group and raid leaders", [this, zeal](std::vector<std::string>& args) {
+			Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+
+			if (raid_info->is_in_raid())
+			{
+				bool show_all = (args.size() == 2 && args[1] == "all");
+				bool show_open = (args.size() == 2 && args[1] == "open");
+				Zeal::EqGame::print_raid_leaders(show_all, show_open);
+			}
+			else
+				Zeal::EqGame::print_group_leader();
+
+			if (args.size() == 2 && args[1] == "dump")
+				Zeal::EqGame::dump_raid_state();
+
 			return true;
 			});
 		Add("/help", { "/hel" }, "Adds zeal to the help list.",

@@ -26,11 +26,11 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	case 0: //Players
 		if (nameplateColors) 
 		{
-			uint8_t isInGroup = *(uint8_t*)0x7912B0;
-			uint16_t raidSize = *(uint16_t*)0x794F9C;
+			uint8_t isInGroup = Zeal::EqGame::GroupInfo->is_in_group();
+			auto raidSize = Zeal::EqGame::RaidInfo->MemberCount;
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-			Zeal::EqStructures::Entity** groupmembers = reinterpret_cast<Zeal::EqStructures::Entity**>(Zeal::EqGame::GroupList);
-			Zeal::EqStructures::RaidMember* raidMembers = reinterpret_cast<Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
+			Zeal::EqStructures::Entity** groupmembers = reinterpret_cast<Zeal::EqStructures::Entity**>(Zeal::EqGame::GroupInfo->EntityList);
+			const Zeal::EqStructures::RaidMember* raidMembers = &(Zeal::EqGame::RaidInfo->MemberList[0]);
 
 			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
 				return;
@@ -80,9 +80,9 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 					self->ActorInfo->DagHeadPoint->StringSprite->Color = Raidcolor;
 					return;
 				}
-				for (int i = 0; i < 72; ++i) //Raid Member loop
+				for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i) //Raid Member loop
 				{
-					Zeal::EqStructures::RaidMember member = raidMembers[i];
+					const Zeal::EqStructures::RaidMember& member = raidMembers[i];
 					if ((member.GroupNumber == 0xFFFFFFFF - 1) || (strlen(member.Name) == 0) || (strcmp(member.Name, Zeal::EqGame::get_self()->Name) == 0))
 						continue;
 					Zeal::EqStructures::Entity* raidMember = ZealService::get_instance()->entity_manager->Get(member.Name);
@@ -169,7 +169,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 	if (!spawn->ActorInfo->DagHeadPoint) { return; }
 	if (!spawn->ActorInfo->DagHeadPoint->StringSprite) { return; }
 	DWORD fontTexture = *(DWORD*)(*(DWORD*)0x7F9510 + 0x2E08); //get the font texture
-	Zeal::EqStructures::RaidMember* raidMembers = reinterpret_cast<Zeal::EqStructures::RaidMember*>(Zeal::EqGame::RaidMemberList);
+	const Zeal::EqStructures::RaidMember* raidMembers = &(Zeal::EqGame::RaidInfo->MemberList[0]);
 	if (spawn == Zeal::EqGame::get_self())
 	{
 		if (nameplateSelf)
@@ -202,9 +202,9 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 			SetNameSpriteTint(this_ptr, not_used, spawn);
 			return;
 		}
-		for (int i = 0; i < 72; ++i) //Raid Member loop
+		for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i) //Raid Member loop
 		{
-			Zeal::EqStructures::RaidMember member = raidMembers[i];
+			const Zeal::EqStructures::RaidMember& member = raidMembers[i];
 			if ((member.GroupNumber == 0xFFFFFFFF - 1) || (strlen(member.Name) == 0) || (strcmp(member.Name, Zeal::EqGame::get_self()->Name) == 0))
 				continue;
 			Zeal::EqStructures::Entity* raidMember = ZealService::get_instance()->entity_manager->Get(member.Name);
