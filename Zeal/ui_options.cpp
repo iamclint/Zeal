@@ -462,6 +462,7 @@ void ui_options::InitNameplate()
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->self_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateX", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->x_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateRaidPets", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->raidpets_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateCharSelect", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->charselect_set_enabled(wnd->Checked); });
 }
 
 void ui_options::UpdateOptions()
@@ -558,6 +559,7 @@ void ui_options::UpdateOptionsNameplate()
 	ui->SetChecked("Zeal_NameplateSelf", ZealService::get_instance()->nameplate->nameplateSelf);
 	ui->SetChecked("Zeal_NameplateX", ZealService::get_instance()->nameplate->nameplateX);
 	ui->SetChecked("Zeal_NameplateRaidpets", ZealService::get_instance()->nameplate->nameplateRaidPets);
+	ui->SetChecked("Zeal_NameplateCharSelect", ZealService::get_instance()->nameplate->nameplateCharSelect);
 }
 
 void ui_options::UpdateOptionsMap()
