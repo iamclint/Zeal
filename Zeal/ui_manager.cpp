@@ -391,42 +391,12 @@ void ui_manager::CreateTmpXML()
 		outfile.close();
 	}
 }
-void ui_manager::CreateTestXML()
-{
-	std::filesystem::path new_file_path = ui_manager::ui_path + std::string("EQUI_ZealTest.xml");
-	if (std::filesystem::exists(new_file_path))
-		std::filesystem::remove(new_file_path);
-	std::filesystem::create_directories(new_file_path.parent_path());
-	std::ofstream outfile(new_file_path);
-	if (outfile)
-	{
-		UIContainer container;
-		UIScreen* screen = new UIScreen("Code_Generated_Screen");
-		UIButton* btn = new UIButton("Code_Generated_Button");
-		btn->text = "Some button text";
-		btn->size = { 150, 24 };
-		btn->location = { 0, 0 };
-		btn->relativePosition = true;
-		btn->styleCheckbox = false;
-		screen->size = { 400, 150 };
-		screen->text = "Some Very Special Window";
-		screen->titlebar = true;
-		screen->minimizebox = true;
-		screen->closebox = true;
-		screen->sizable = false;
-		screen->Elements.push_back(btn);
-		container.Elements.push_back(btn);
-		container.Elements.push_back(screen);
-		outfile << container.toXML();
-		outfile.close();
-	}
-}
+
 int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
 	std::string str_filename = filename;
 	std::string file = ui_manager::ui_path + str_filename;
-	//ui->CreateTestXML();
 	if (std::filesystem::exists(file))
 		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
 	else
@@ -496,7 +466,6 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("LoadSidl", 0x5992c0, LoadSidlHk, hook_type_detour);
 	zeal->hooks->Add("XMLRead", 0x58D640, XMLRead, hook_type_detour);
 	zeal->hooks->Add("XMLReadNoValidate", 0x58DA10, XMLReadNoValidate, hook_type_detour);
-	//AddXmlInclude("EQUI_ZealTest.xml");
 
 	zeal->commands_hook->Add("/sortskill", {}, "",
 		[this](std::vector<std::string>& args) {
