@@ -229,10 +229,10 @@ void TellWindows::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, sho
                 tell_window = ZealService::get_instance()->tells->FindTellWnd(name);
                 wnd = tell_window;
 
-                if (wnd && tell_cache.count(name))
+                if (wnd && hist_enabled && tell_cache.count(name))
                 {
                     for (auto& [color, hist_msg] : tell_cache[name])
-                        Zeal::EqGame::print_chat_wnd(wnd, color, hist_msg.c_str());
+                        Zeal::EqGame::print_chat_wnd(wnd, color, "<c \"#666666\">%s</c>", hist_msg.c_str());
                 }
             }
             else 
@@ -240,7 +240,8 @@ void TellWindows::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, sho
                 wnd = tell_window;
                 RestoreWindowState(wnd);
             }
-            tell_cache[name].push_back(std::make_pair(channel, msg));
+            if (hist_enabled)
+                tell_cache[name].push_back(std::make_pair(channel, msg));
         }
     }
 }
@@ -278,13 +279,23 @@ void TellWindows::SetEnabled(bool val)
         ZealService::get_instance()->ini->setValue<bool>(Zeal::EqGame::get_char_info()->Name, "TellWindows", val);
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
+void TellWindows::SetHist(bool val)
+{
+    hist_enabled = val;
+    if (Zeal::EqGame::get_char_info() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>(Zeal::EqGame::get_char_info()->Name, "TellWindowsHist", val);
+    ZealService::get_instance()->ui->options->UpdateOptions();
+}
 
 void TellWindows::LoadUI()
 {
     IO_ini* ini = ZealService::get_instance()->ini.get();
     if (!ini->exists(Zeal::EqGame::get_char_info()->Name, "TellWindows"))
         ini->setValue<bool>(Zeal::EqGame::get_char_info()->Name, "TellWindows", false);
+    if (!ini->exists(Zeal::EqGame::get_char_info()->Name, "TellWindowsHist"))
+        ini->setValue<bool>(Zeal::EqGame::get_char_info()->Name, "TellWindowsHist", true);
     enabled = ini->getValue<bool>(Zeal::EqGame::get_char_info()->Name, "TellWindows");
+    hist_enabled = ini->getValue<bool>(Zeal::EqGame::get_char_info()->Name, "TellWindowsHist");
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
 

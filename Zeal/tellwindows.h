@@ -13,10 +13,11 @@ public:
 	TellWindows(class ZealService* zeal, class IO_ini* ini);
 	~TellWindows();
 	void SetEnabled(bool val);
+	void SetHist(bool val);
 	Zeal::EqUI::ChatWnd* FindTellWnd(std::string& name);
 	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, short channel);
 	bool enabled = false;
-	
+	bool hist_enabled = true;
 private:
 	Zeal::EqUI::ChatWnd* FindPreviousTellWnd();
 	Zeal::EqUI::ChatWnd* FindNextTellWnd();

@@ -183,6 +183,8 @@ void ui_options::InitUI()
 		{
 			wnd = ui->CreateSidlScreenWnd("ZealOptions");
 			wnd->vtbl->WndNotification = WndNotification;
+
+			//ui->CreateSidlScreenWnd("Code_Generated_Screen")->IsVisible = true;
 		}
 		else
 		{
@@ -252,29 +254,22 @@ void ui_options::InitGeneral()
 		PrintUIError();
 		return;
 	}
-
 	/*add callbacks when the buttons are pressed in the options window*/
-	ui->AddCheckboxCallback(wnd, "Zeal_HideCorpse", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->set_hide_looted(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_Cam", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->set_smoothing(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_BlueCon", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_bluecon(wnd->Checked); });
-	//ui->AddCheckboxCallback(wnd, "Zeal_Timestamp", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_timestamp(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_Input", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_input(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_Escape", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ini->setValue<bool>("Zeal", "Escape", wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_RaidEscapeLock", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ini->setValue<bool>("Zeal", "EscapeRaidLock", wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_ShowHelm", [](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::print_chat("Show helm toggle"); });
-	ui->AddCheckboxCallback(wnd, "Zeal_AltContainerTooltips", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tooltips->set_alt_all_containers(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->chat_hook->set_classes(wnd->Checked); });
-
-	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
-	ui->AddComboCallback(wnd, "Zeal_Timestamps_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->set_timestamp(value); });
-	ui->AddSliderCallback(wnd, "Zeal_HoverTimeout_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		int val = value * 5;
-		ZealService::get_instance()->tooltips->set_timer(val);
-		ui->SetLabelValue("Zeal_HoverTimeout_Value", "%i ms", val);
-		});
-
+	ui->AddCheckboxCallback(wnd, "Zeal_HideCorpse",				[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->set_hide_looted(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_Cam",					[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->set_smoothing(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_BlueCon",				[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_bluecon(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_Input",					[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_input(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_Escape",					[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ini->setValue<bool>("Zeal", "Escape", wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_RaidEscapeLock",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ini->setValue<bool>("Zeal", "EscapeRaidLock", wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_ShowHelm",				[](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::print_chat("Show helm toggle"); });
+	ui->AddCheckboxCallback(wnd, "Zeal_AltContainerTooltips",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tooltips->set_alt_all_containers(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_classes(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_TellWindowsHist",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetHist(wnd->Checked); });
+	ui->AddComboCallback(wnd,	 "Zeal_Timestamps_Combobox",	[](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->set_timestamp(value); });
+	ui->AddSliderCallback(wnd,	 "Zeal_HoverTimeout_Slider",	[this](Zeal::EqUI::SliderWnd* wnd, int value) {	int val = value * 5; ZealService::get_instance()->tooltips->set_timer(val); ui->SetLabelValue("Zeal_HoverTimeout_Value", "%i ms", val); });
 	ui->AddLabel(wnd, "Zeal_HoverTimeout_Value");
 	ui->AddLabel(wnd, "Zeal_VersionValue");
 }
@@ -494,6 +489,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetLabelValue("Zeal_HoverTimeout_Value", "%d ms", ZealService::get_instance()->tooltips->hover_timeout);
 	ui->SetChecked("Zeal_HideCorpse", ZealService::get_instance()->looting_hook->hide_looted);
 	ui->SetChecked("Zeal_TellWindows", ZealService::get_instance()->tells->enabled);
+	ui->SetChecked("Zeal_TellWindowsHist", ZealService::get_instance()->tells->hist_enabled);
 	ui->SetChecked("Zeal_ClassicClasses", ZealService::get_instance()->chat_hook->UseClassicClassNames);
 	ui->SetLabelValue("Zeal_VersionValue", "%s (%s)", ZEAL_VERSION, ZEAL_BUILD_VERSION);
 	ui->SetChecked("Zeal_BlueCon", ZealService::get_instance()->chat_hook->UseBlueCon);
