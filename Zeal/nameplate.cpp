@@ -41,9 +41,6 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 			Zeal::EqStructures::Entity** groupmembers = reinterpret_cast<Zeal::EqStructures::Entity**>(Zeal::EqGame::GroupInfo->EntityList);
 			const Zeal::EqStructures::RaidMember* raidMembers = &(Zeal::EqGame::RaidInfo->MemberList[0]);
 
-			//if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
-			//	return;
-
 			if (spawn->IsLinkDead == 1) { //LinkDead
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = LDcolor;
 				return;
@@ -130,24 +127,18 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 		break;
 	case Zeal::EqEnums::EntityTypes::NPC: //NPC
 		if (nameplateconColors) {
-			//if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
-			//	return;
 			if (spawn != Zeal::EqGame::get_self()) //All NPC entities
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Zeal::EqGame::GetLevelCon(spawn); //Level Con Color for NPCs
 		}
 		break;
 	case Zeal::EqEnums::EntityTypes::NPCCorpse: //NPC Corpse
 		if (nameplateColors) {
-			//if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
-			//	return;
 			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = NpcCorpsecolor;
 			return;
 		}
 		break;
 	case Zeal::EqEnums::EntityTypes::PlayerCorpse: //Player Corpse
 		if (nameplateColors) {
-			//if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
-			//	return;
 			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = PlayersCorpsecolor;
 			return;
 		}
@@ -167,18 +158,6 @@ int __fastcall SetNameSpriteTint(void* this_ptr, void* not_used, Zeal::EqStructu
 		Zeal::EqGame::get_self()->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF00FF32; //Green indication Namecolors on at Character Select
 	return result;
 }
-
-//char* trim_name(char* spawnName)
-//{
-//	return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, char* spawnName)>(0x537D39)(*(int*)0x809478, spawnName);
-//}
-
-//char* GetNameFromGuildId(int guildId)
-//{
-//	if (guildId == 0xFFFF)
-//		return (char*)"";
-//	return (Zeal::EqGame::guild_names->Guild[guildId].Name);
-//}
 
 void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::Entity* spawn)
 {
