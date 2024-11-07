@@ -22,6 +22,15 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	Zeal::EqStructures::EQARGBCOLOR Adventurercolor = options->GetColor(9); //0xFF3D6BDC; //Not in Guild Member - Default Blue
 	Zeal::EqStructures::EQARGBCOLOR NpcCorpsecolor = options->GetColor(10); //0xFF000000; //Npc Corpse - Black
 	Zeal::EqStructures::EQARGBCOLOR PlayersCorpsecolor = options->GetColor(11); //0xFFFFFFFF; //Players Corpse - White Light Purple
+	Zeal::EqStructures::EQARGBCOLOR Targetcolor = options->GetColor(18); //0xFFFFFFFF; //Players Corpse - White Light Purple
+	if (nameplateTargetColor) {
+		if (spawn == Zeal::EqGame::get_target()) {
+			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Targetcolor;
+			return;
+		}
+	}
+	if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+		return;
 	switch (spawn->Type) {
 	case 0: //Players
 		if (nameplateColors) 
@@ -32,8 +41,8 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 			Zeal::EqStructures::Entity** groupmembers = reinterpret_cast<Zeal::EqStructures::Entity**>(Zeal::EqGame::GroupInfo->EntityList);
 			const Zeal::EqStructures::RaidMember* raidMembers = &(Zeal::EqGame::RaidInfo->MemberList[0]);
 
-			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
-				return;
+			//if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+			//	return;
 
 			if (spawn->IsLinkDead == 1) { //LinkDead
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = LDcolor;
@@ -121,24 +130,24 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 		break;
 	case 1: //NPC
 		if (nameplateconColors) {
-			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
-				return;
+			//if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+			//	return;
 			if (spawn != Zeal::EqGame::get_self()) //All NPC entities
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Zeal::EqGame::GetLevelCon(spawn); //Level Con Color for NPCs
 		}
 		break;
 	case 2: //NPC Corpse
 		if (nameplateColors) {
-			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
-				return;
+			//if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+			//	return;
 			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = NpcCorpsecolor;
 			return;
 		}
 		break;
 	case 3: //Player Corpse
 		if (nameplateColors) {
-			if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
-				return;
+			//if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+			//	return;
 			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = PlayersCorpsecolor;
 			return;
 		}
@@ -149,8 +158,10 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 }
 
 int __fastcall SetNameSpriteTint(void* this_ptr, void* not_used, Zeal::EqStructures::Entity* spawn)
-{	
+{
 	int result = ZealService::get_instance()->hooks->hook_map["SetNameSpriteTint"]->original(SetNameSpriteTint)(this_ptr, not_used, spawn);
+	if (ZealService::get_instance()->nameplate->nameplateCharSelect == false && Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT)
+		return result;
 	ZealService::get_instance()->nameplate->HandleTint(spawn);
 	if (ZealService::get_instance()->nameplate->nameplateColors && Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT && Zeal::EqGame::get_self())
 		Zeal::EqGame::get_self()->ActorInfo->DagHeadPoint->StringSprite->Color = 0xFF00FF32; //Green indication Namecolors on at Character Select
@@ -162,6 +173,13 @@ char* trim_name(char* spawnName)
 	return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, char* spawnName)>(0x537D39)(*(int*)0x809478, spawnName);
 }
 
+char* GetNameFromGuildId(int guildId)
+{
+	if (guildId == 0xFFFF)
+		return (char*)"";
+	return (Zeal::EqGame::guild_names->Guild[guildId].Name);
+}
+
 void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::Entity* spawn)
 {
 	if (!spawn) { return; }
@@ -170,6 +188,66 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 	if (!spawn->ActorInfo->DagHeadPoint->StringSprite) { return; }
 	DWORD fontTexture = *(DWORD*)(*(DWORD*)0x7F9510 + 0x2E08); //get the font texture
 	const Zeal::EqStructures::RaidMember* raidMembers = &(Zeal::EqGame::RaidInfo->MemberList[0]);
+	uint16_t showName = *(uint16_t*)0x7D01E4; // /showname command, 1 = first names, 2 = first/last names, 3 = first/last/guild names, 4 = everything
+	uint8_t showPCNames = *(uint8_t*)0x63D6C8; //Options -> Display -> Show PC Names, 0 = off, 1 = on
+	uint8_t showNPCNames = *(uint8_t*)0x63D6CC; //Options -> Display -> Show NPC Names, 0 = off, 1 = on
+	if (spawn == Zeal::EqGame::get_target()) {
+		char targetNameplate[30];
+		strncpy_s(targetNameplate, sizeof(targetNameplate), spawn->ActorInfo->DagHeadPoint->StringSprite->Text, _TRUNCATE);
+		int hpPercent = 0;
+		if (spawn->Type == Zeal::EqEnums::EntityTypes::Player) {
+			if (spawn->HpCurrent > 0 && spawn->HpMax > 0)
+				hpPercent = (spawn->HpCurrent * 100) / spawn->HpMax;
+		}
+		else {
+			hpPercent = spawn->HpCurrent;
+		}
+		if ((showName == 3 || showName == 4) && spawn->Type == 0) { //2 lines on Nameplate, Guild on 2nd line
+			if (nameplateTargetMarker && nameplateTargetHealth && spawn->GuildId != 0xFFFF) {
+				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s %i%%<\n<%s>", trim_name(spawn->CharInfo->Name), trim_name(spawn->CharInfo->LastName), hpPercent, GetNameFromGuildId(spawn->GuildId));
+				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
+				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
+				return;
+			}
+			if (nameplateTargetMarker && nameplateTargetHealth) {
+				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s %i%%<", trim_name(spawn->CharInfo->Name), trim_name(spawn->CharInfo->LastName), hpPercent);
+				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
+				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
+				return;
+			}
+			if (nameplateTargetMarker) {
+				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s<\n<%s>", trim_name(spawn->CharInfo->Name), trim_name(spawn->CharInfo->LastName), GetNameFromGuildId(spawn->GuildId));
+				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
+				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
+				return;
+			}
+			if (nameplateTargetHealth) {
+				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, "%s %s %i%%\n<%s>", trim_name(spawn->CharInfo->Name), trim_name(spawn->CharInfo->LastName), hpPercent, GetNameFromGuildId(spawn->GuildId));
+				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
+				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
+				return;
+			}
+		}
+		if (nameplateTargetMarker && nameplateTargetHealth) {
+			_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %i%%<", trim_name(targetNameplate), hpPercent);
+			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
+			SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
+			return;
+		}
+		if (nameplateTargetMarker) {	
+			_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s<", trim_name(targetNameplate));
+			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
+			SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
+			return;
+		}
+		if (nameplateTargetHealth) {
+			_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, "%s %i%%", trim_name(targetNameplate), hpPercent);
+			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
+			SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
+			return;
+		}
+	}
+
 	if (spawn == Zeal::EqGame::get_self())
 	{
 		if (nameplateSelf)
@@ -229,6 +307,8 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 int __fastcall SetNameSpriteState(void* this_ptr, void* not_used, Zeal::EqStructures::Entity* spawn, bool show)
 {
 	int result = ZealService::get_instance()->hooks->hook_map["SetNameSpriteState"]->original(SetNameSpriteState)(this_ptr, not_used, spawn, show);
+	if (ZealService::get_instance()->nameplate->nameplateCharSelect == false && Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT && Zeal::EqGame::get_self())
+		return result;
 	ZealService::get_instance()->nameplate->HandleState(this_ptr, not_used, spawn);
 	return result;
 }
@@ -268,6 +348,34 @@ void NamePlate::raidpets_set_enabled(bool _enabled)
 	nameplateRaidPets = _enabled;
 }
 
+void NamePlate::charselect_set_enabled(bool _enabled)
+{
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateCharSelect", _enabled);
+	Zeal::EqGame::print_chat("Show Nameplate Options at Character Selection Screen is %s", _enabled ? "Enabled" : "Disabled");
+	nameplateCharSelect = _enabled;
+}
+
+void NamePlate::target_color_set_enabled(bool _enabled)
+{
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateTargetColor", _enabled);
+	Zeal::EqGame::print_chat("Target Nameplate Color is %s", _enabled ? "Enabled" : "Disabled");
+	nameplateTargetColor = _enabled;
+}
+
+void NamePlate::target_marker_set_enabled(bool _enabled)
+{
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateTargetMarker", _enabled);
+	Zeal::EqGame::print_chat("Target Nameplate Marker is %s", _enabled ? "Enabled" : "Disabled");
+	nameplateTargetMarker = _enabled;
+}
+
+void NamePlate::target_health_set_enabled(bool _enabled)
+{
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateTargetHealth", _enabled);
+	Zeal::EqGame::print_chat("Target Nameplate Health is %s", _enabled ? "Enabled" : "Disabled");
+	nameplateTargetHealth = _enabled;
+}
+
 NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 {
 	//HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
@@ -289,12 +397,24 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 		ini->setValue<bool>("Zeal", "NameplateX", false);
 	if (!ini->exists("Zeal", "NameplateRaidPets"))
 		ini->setValue<bool>("Zeal", "NameplateRaidPets", false);
+	if (!ini->exists("Zeal", "NameplateCharSelect"))
+		ini->setValue<bool>("Zeal", "NameplateCharSelect", false);
+	if (!ini->exists("Zeal", "NameplateTargetColor"))
+		ini->setValue<bool>("Zeal", "NameplateTargetColor", false);
+	if (!ini->exists("Zeal", "NameplateTargetMarker"))
+		ini->setValue<bool>("Zeal", "NameplateTargetMarker", false);
+	if (!ini->exists("Zeal", "NameplateTargetHealth"))
+		ini->setValue<bool>("Zeal", "NameplateTargetHealth", false);
 
 	nameplateColors = ini->getValue<bool>("Zeal", "NameplateColors");
 	nameplateconColors = ini->getValue<bool>("Zeal", "NameplateConColors");
 	nameplateSelf = ini->getValue<bool>("Zeal", "NameplateSelf");
 	nameplateX = ini->getValue<bool>("Zeal", "NameplateX");
 	nameplateRaidPets = ini->getValue<bool>("Zeal", "NameplateRaidPets");
+	nameplateCharSelect = ini->getValue<bool>("Zeal", "NameplateCharSelect");
+	nameplateTargetColor = ini->getValue<bool>("Zeal", "NameplateTargetColor");
+	nameplateTargetMarker = ini->getValue<bool>("Zeal", "NameplateTargetMarker");
+	nameplateTargetHealth = ini->getValue<bool>("Zeal", "NameplateTargetHealth");
 
 	zeal->commands_hook->Add("/nameplatecolors", {}, "Toggles Nameplate Colors",
 		[this](std::vector<std::string>& args) {
@@ -317,6 +437,26 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 			return true;
 		});
 	zeal->commands_hook->Add("/nameplateraidpets", {}, "Toggles Nameplate for Raid Pets",
+		[this](std::vector<std::string>& args) {
+			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			return true;
+		});
+	zeal->commands_hook->Add("/nameplatecharselect", {}, "Toggles Nameplate Options Shown at Character Selection Screen",
+		[this](std::vector<std::string>& args) {
+			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			return true;
+		});
+	zeal->commands_hook->Add("/nameplatetargetcolor", {}, "Toggles Target Nameplate Color",
+		[this](std::vector<std::string>& args) {
+			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			return true;
+		});
+	zeal->commands_hook->Add("/nameplatetargetmarker", {}, "Toggles Target Nameplate Marker",
+		[this](std::vector<std::string>& args) {
+			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			return true;
+		});
+	zeal->commands_hook->Add("/nameplatetargethealth", {}, "Toggles Target Nameplate Health",
 		[this](std::vector<std::string>& args) {
 			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
 			return true;
