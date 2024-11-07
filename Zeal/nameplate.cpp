@@ -193,6 +193,30 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 			}
 		}
 	}
+	if (nameplateRaidPets)
+	{
+		if (spawn->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
+		{
+			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, spawn->ActorInfo->DagHeadPoint, fontTexture, (char*)"");
+			SetNameSpriteTint(this_ptr, not_used, spawn);
+			return;
+		}
+		for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i) //Raid Member loop
+		{
+			const Zeal::EqStructures::RaidMember& member = raidMembers[i];
+			if ((member.GroupNumber == 0xFFFFFFFF - 1) || (strlen(member.Name) == 0) || (strcmp(member.Name, Zeal::EqGame::get_self()->Name) == 0))
+				continue;
+			Zeal::EqStructures::Entity* raidMember = ZealService::get_instance()->entity_manager->Get(member.Name);
+			if (!raidMember)
+				continue;
+			if (spawn->PetOwnerSpawnId == raidMember->SpawnId)
+			{
+				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, spawn->ActorInfo->DagHeadPoint, fontTexture, (char*)"");
+				SetNameSpriteTint(this_ptr, not_used, spawn);
+				return;
+			}
+		}
+	}
 	if (spawn == Zeal::EqGame::get_target()) {
 		char targetNameplate[50];
 		strncpy_s(targetNameplate, sizeof(targetNameplate), spawn->ActorInfo->DagHeadPoint->StringSprite->Text, _TRUNCATE);
@@ -274,30 +298,6 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
 			SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
 			return;
-		}
-	}
-	if (nameplateRaidPets)
-	{
-		if (spawn->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
-		{
-			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, spawn->ActorInfo->DagHeadPoint, fontTexture, (char*)"");
-			SetNameSpriteTint(this_ptr, not_used, spawn);
-			return;
-		}
-		for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i) //Raid Member loop
-		{
-			const Zeal::EqStructures::RaidMember& member = raidMembers[i];
-			if ((member.GroupNumber == 0xFFFFFFFF - 1) || (strlen(member.Name) == 0) || (strcmp(member.Name, Zeal::EqGame::get_self()->Name) == 0))
-				continue;
-			Zeal::EqStructures::Entity* raidMember = ZealService::get_instance()->entity_manager->Get(member.Name);
-			if (!raidMember)
-				continue;
-			if (spawn->PetOwnerSpawnId == raidMember->SpawnId)
-			{
-				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, spawn->ActorInfo->DagHeadPoint, fontTexture, (char*)"");
-				SetNameSpriteTint(this_ptr, not_used, spawn);
-				return;
-			}
 		}
 	}
 	if ((spawn->Type == Zeal::EqEnums::EntityTypes::NPCCorpse || spawn->Type == Zeal::EqEnums::EntityTypes::PlayerCorpse) && spawn->Race == 60) { //Skeleton Corpse - Nameplate fix
