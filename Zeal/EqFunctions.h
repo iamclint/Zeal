@@ -90,7 +90,7 @@ namespace Zeal
 			bool spellbook_window_open();
 		}
 		DWORD GetLevelCon(Zeal::EqStructures::Entity* ent);
-		const char* title_name(BYTE class_id, int aa_rank, BYTE gender_id);
+		const char* get_aa_title_name(BYTE class_id, int aa_rank, BYTE gender_id);
 		float CalcCombatRange(Zeal::EqStructures::Entity* entity1, Zeal::EqStructures::Entity* entity2);
 		float CalcZOffset(Zeal::EqStructures::Entity* ent);
 		float CalcBoundingRadius(Zeal::EqStructures::Entity* ent);
