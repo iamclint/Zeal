@@ -204,25 +204,25 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		}
 		if (showName == 4 && spawn->Type == Zeal::EqEnums::EntityTypes::Player) { //2 lines on Nameplate, Guild on 2nd line, "AA_Title First_Name Last_Name \n <Guild>"
 			if (nameplateTargetMarker && nameplateTargetHealth && spawn->GuildId != 0xFFFF) {
-				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s %s %i%%<\n<%s>", (char*)Zeal::EqGame::title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName), hpPercent, Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
+				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s %s %i%%<\n<%s>", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName), hpPercent, Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
 				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
 				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
 				return;
 			}
 			if (nameplateTargetMarker && nameplateTargetHealth) {
-				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s %s %i%%<", (char*)Zeal::EqGame::title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName), hpPercent);
+				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s %s %i%%<", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName), hpPercent);
 				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
 				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
 				return;
 			}
 			if (nameplateTargetMarker) {
-				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s %s<\n<%s>", (char*)Zeal::EqGame::title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName), Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
+				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %s %s<\n<%s>", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName), Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
 				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
 				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
 				return;
 			}
 			if (nameplateTargetHealth) {
-				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, "%s %s %s %i%%\n<%s>", (char*)Zeal::EqGame::title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName), hpPercent, Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
+				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, "%s %s %s %i%%\n<%s>", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName), hpPercent, Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
 				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
 				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
 				return;
