@@ -167,6 +167,11 @@ void ui_options::LoadColors()
 		if (color_buttons.count(17))
 			color_buttons[17]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0x0, 0x0); //CON_RED
 	}
+	if (!ini->exists("ZealColors", "Color18")) //Adds default Nameplate Color to Button18 for new users
+	{
+		if (color_buttons.count(18))
+			color_buttons[18]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xff, 0x80, 0xff); //Target Pink Default
+	}
 
 	for (auto& [index, btn] : color_buttons)
 	{
@@ -462,6 +467,10 @@ void ui_options::InitNameplate()
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->self_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateX", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->x_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateRaidPets", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->raidpets_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateCharSelect", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->charselect_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetColor", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->target_color_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetMarker", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->target_marker_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetHealth", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->target_health_set_enabled(wnd->Checked); });
 }
 
 void ui_options::UpdateOptions()
@@ -558,6 +567,10 @@ void ui_options::UpdateOptionsNameplate()
 	ui->SetChecked("Zeal_NameplateSelf", ZealService::get_instance()->nameplate->nameplateSelf);
 	ui->SetChecked("Zeal_NameplateX", ZealService::get_instance()->nameplate->nameplateX);
 	ui->SetChecked("Zeal_NameplateRaidpets", ZealService::get_instance()->nameplate->nameplateRaidPets);
+	ui->SetChecked("Zeal_NameplateCharSelect", ZealService::get_instance()->nameplate->nameplateCharSelect);
+	ui->SetChecked("Zeal_NameplateTargetColor", ZealService::get_instance()->nameplate->nameplateTargetColor);
+	ui->SetChecked("Zeal_NameplateTargetMarker", ZealService::get_instance()->nameplate->nameplateTargetMarker);
+	ui->SetChecked("Zeal_NameplateTargetHealth", ZealService::get_instance()->nameplate->nameplateTargetHealth);
 }
 
 void ui_options::UpdateOptionsMap()

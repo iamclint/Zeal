@@ -773,9 +773,20 @@ namespace Zeal
 			/* 0x0164 */ DWORD Unknown0164;
 			/* 0x0168 */
 		};
-		struct GuildName
+		struct GuildInfo
 		{
-			char name[512][0x60];
+			/* 0x0000 */ CHAR Name[32];
+			/* 0x0032 */ BYTE Unknown0032[64];
+		};
+		struct GuildName
+		{			
+			union
+			{
+				char name[512][0x60];
+				struct {
+					struct GuildInfo Guild[512];
+				};
+			};
 		};
 		struct GroupInfo
 		{
