@@ -1775,7 +1775,7 @@ namespace Zeal
 				EqGameInternal::CXStr_PrintString(str, buffer);
 		}
 
-		const char* title_name(BYTE class_id, int aa_rank, BYTE gender_id)
+		const char* get_aa_title_name(BYTE class_id, int aa_rank, BYTE gender_id)
 		{
 			const char* title_name = "";
 			switch (class_id)
