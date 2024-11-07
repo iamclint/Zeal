@@ -1781,9 +1781,9 @@ namespace Zeal
 			switch (class_id)
 			{
 			case Zeal::EqEnums::ClassTypes::Warrior:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Veteran";
@@ -1791,9 +1791,9 @@ namespace Zeal
 					title_name = "Marshall";	
 				break;
 			case Zeal::EqEnums::ClassTypes::Cleric:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Venerable";
@@ -1801,49 +1801,49 @@ namespace Zeal
 					title_name = "Exarch";
 				break;
 			case Zeal::EqEnums::ClassTypes::Paladin:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
-				if (aa_rank == 2 && gender_id == 1)
+				if (aa_rank == 2 && gender_id == 0)
 					title_name = "Sir";
-				if (aa_rank == 2 && gender_id == 2)
+				if (aa_rank == 2 && gender_id == 1)
 					title_name = "Lady";
-				if (aa_rank == 3 && gender_id == 1)
+				if (aa_rank == 3 && gender_id == 0)
 					title_name = "Duke";
-				if (aa_rank == 3 && gender_id == 2)
+				if (aa_rank == 3 && gender_id == 1)
 					title_name = "Duchess";
 				break;
 			case Zeal::EqEnums::ClassTypes::Ranger:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Veteran";
-				if (aa_rank == 3 && gender_id == 1)
+				if (aa_rank == 3 && gender_id == 0)
 					title_name = "Hunter";
-				if (aa_rank == 3 && gender_id == 2)
+				if (aa_rank == 3 && gender_id == 1)
 					title_name = "Huntress";
 				break;
 			case Zeal::EqEnums::ClassTypes::Shadowknight:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
-				if (aa_rank == 2 && gender_id == 1)
+				if (aa_rank == 2 && gender_id == 0)
 					title_name = "Sir";
-				if (aa_rank == 2 && gender_id == 2)
+				if (aa_rank == 2 && gender_id == 1)
 					title_name = "Lady";
-				if (aa_rank == 3 && gender_id == 1)
+				if (aa_rank == 3 && gender_id == 0)
 					title_name = "Duke";
-				if (aa_rank == 3 && gender_id == 2)
+				if (aa_rank == 3 && gender_id == 1)
 					title_name = "Duchess";
 				break;
 			case Zeal::EqEnums::ClassTypes::Druid:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Venerable";
@@ -1851,33 +1851,33 @@ namespace Zeal
 					title_name = "Elder";
 				break;
 			case Zeal::EqEnums::ClassTypes::Monk:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
-				if (aa_rank == 2 && gender_id == 1)
+				if (aa_rank == 2 && gender_id == 0)
 					title_name = "Brother";
-				if (aa_rank == 2 && gender_id == 2)
+				if (aa_rank == 2 && gender_id == 1)
 					title_name = "Sister";
 				if (aa_rank == 3)
 					title_name = "Sensei";
 				break;
 			case Zeal::EqEnums::ClassTypes::Bard:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Veteran";
-				if (aa_rank == 3 && gender_id == 1)
+				if (aa_rank == 3 && gender_id == 0)
 					title_name = "Impresario";
-				if (aa_rank == 3 && gender_id == 2)
+				if (aa_rank == 3 && gender_id == 1)
 					title_name = "Muse";
 				break;
 			case Zeal::EqEnums::ClassTypes::Rogue:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Veteran";
@@ -1885,9 +1885,9 @@ namespace Zeal
 					title_name = "Marauder";
 				break;
 			case Zeal::EqEnums::ClassTypes::Shaman:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Venerable";
@@ -1895,9 +1895,9 @@ namespace Zeal
 					title_name = "Elder";
 				break;
 			case Zeal::EqEnums::ClassTypes::Necromancer:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Sage";
@@ -1905,45 +1905,45 @@ namespace Zeal
 					title_name = "Lich";
 				break;
 			case Zeal::EqEnums::ClassTypes::Wizard:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
-				if (aa_rank == 2 && gender_id == 1)
+				if (aa_rank == 2 && gender_id == 0)
 					title_name = "Master";
-				if (aa_rank == 2 && gender_id == 2)
+				if (aa_rank == 2 && gender_id == 1)
 					title_name = "Mistress";
 				if (aa_rank == 3)
 					title_name = "Sage";
 				break;
 			case Zeal::EqEnums::ClassTypes::Magician:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
-				if (aa_rank == 2 && gender_id == 1)
+				if (aa_rank == 2 && gender_id == 0)
 					title_name = "Master";
-				if (aa_rank == 2 && gender_id == 2)
+				if (aa_rank == 2 && gender_id == 1)
 					title_name = "Mistress";
 				if (aa_rank == 3)
 					title_name = "Sage";
 				break;
 			case Zeal::EqEnums::ClassTypes::Enchanter:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
-				if (aa_rank == 2 && gender_id == 1)
+				if (aa_rank == 2 && gender_id == 0)
 					title_name = "Master";
-				if (aa_rank == 2 && gender_id == 2)
+				if (aa_rank == 2 && gender_id == 1)
 					title_name = "Mistress";
 				if (aa_rank == 3)
 					title_name = "Sage";
 				break;
 			case Zeal::EqEnums::ClassTypes::Beastlord:
-				if (aa_rank == 1 && gender_id == 1)
+				if (aa_rank == 1 && gender_id == 0)
 					title_name = "Barron";
-				if (aa_rank == 1 && gender_id == 2)
+				if (aa_rank == 1 && gender_id == 1)
 					title_name = "Barroness";
 				if (aa_rank == 2)
 					title_name = "Venerable";
