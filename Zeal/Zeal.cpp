@@ -72,20 +72,21 @@ ZealService::ZealService()
 
 void ZealService::configuration_check()
 {
-	std::filesystem::path zeal_ui = std::filesystem::current_path();
-	zeal_ui /= "uifiles\\zeal";
+	std::filesystem::path zeal_ui_path = std::filesystem::current_path() /  "uifiles\\zeal";
 
 	std::string xml_files[] = {"EQUI_GuildManagementWnd.xml",
+	"EQUI_OptionsWindow.xml",
 	"EQUI_Tab_Cam.xml",
 	"EQUI_Tab_Colors.xml",
 	"EQUI_Tab_General.xml",
 	"EQUI_Tab_Map.xml",
+	"EQUI_Tab_Nameplate.xml",
 	"EQUI_Tab_TargetRing.xml",
 	"EQUI_ZealOptions.xml"};
 
 	std::string deprecated_ui_file = "EQUI.xml";
 
-	bool filepathExists = std::filesystem::is_directory(zeal_ui);
+	bool filepathExists = std::filesystem::is_directory(zeal_ui_path);
 	if (not filepathExists)
 	{
 		std::wstring missing = L"The directory 'zeal' is missing from the EQ uifiles directory.\nZeal will not function properly!";
@@ -93,7 +94,7 @@ void ZealService::configuration_check()
 	}
 	else
 	{
-		std::filesystem::path deprecated_filepath = zeal_ui / deprecated_ui_file;
+		std::filesystem::path deprecated_filepath = zeal_ui_path / deprecated_ui_file;
 		if (std::filesystem::exists(deprecated_filepath))
 		{
 			std::wstring deprecated_warning = L"The deprecated Zeal 'EQUI.xml' file has been detected at the following location:\n" +
@@ -105,7 +106,7 @@ void ZealService::configuration_check()
 			std::wstring missing_files =  L"";
 			for (std::string file : xml_files)
 			{
-				std::filesystem::path this_file = zeal_ui / file;
+				std::filesystem::path this_file = zeal_ui_path / file;
 
 				if (not std::filesystem::exists(this_file))
 					missing_files += this_file.wstring() + L"\n";
