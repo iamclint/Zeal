@@ -461,6 +461,8 @@ namespace Zeal
 		}
 		char* trim_name(char* name)
 		{
+			if (name == NULL)
+				return (char*)"";
 			return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, char* spawnName)>(0x537D39)(*(int*)0x809478, name);
 		}
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown)
