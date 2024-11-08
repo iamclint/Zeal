@@ -344,21 +344,21 @@ void NamePlate::con_colors_set_enabled(bool _enabled)
 void NamePlate::self_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateSelf", _enabled);
-	Zeal::EqGame::print_chat("Nameplate for Self is %s", _enabled ? "Disabled" : "Enabled");
+	Zeal::EqGame::print_chat("Hidden Nameplate for Self is %s", _enabled ? "Enabled" : "Disabled");
 	nameplateSelf = _enabled;
 }
 
 void NamePlate::x_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateX", _enabled);
-	Zeal::EqGame::print_chat("Nameplate for Self set to X is %s", _enabled ? "Enabled" : "Disabled");
+	Zeal::EqGame::print_chat("Show Nameplate for Self set to X is %s", _enabled ? "Enabled" : "Disabled");
 	nameplateX = _enabled;
 }
 
 void NamePlate::raidpets_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateRaidPets", _enabled);
-	Zeal::EqGame::print_chat("Nameplates for RaidPets are %s", _enabled ? "Disabled" : "Enabled");
+	Zeal::EqGame::print_chat("Hidden Nameplates for RaidPets are %s", _enabled ? "Disabled" : "Enabled");
 	nameplateRaidPets = _enabled;
 }
 
@@ -372,21 +372,21 @@ void NamePlate::charselect_set_enabled(bool _enabled)
 void NamePlate::target_color_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateTargetColor", _enabled);
-	Zeal::EqGame::print_chat("Target Nameplate Color is %s", _enabled ? "Enabled" : "Disabled");
+	Zeal::EqGame::print_chat("Show Target Nameplate Color is %s", _enabled ? "Enabled" : "Disabled");
 	nameplateTargetColor = _enabled;
 }
 
 void NamePlate::target_marker_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateTargetMarker", _enabled);
-	Zeal::EqGame::print_chat("Target Nameplate Marker is %s", _enabled ? "Enabled" : "Disabled");
+	Zeal::EqGame::print_chat("Show Target Nameplate Marker is %s", _enabled ? "Enabled" : "Disabled");
 	nameplateTargetMarker = _enabled;
 }
 
 void NamePlate::target_health_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateTargetHealth", _enabled);
-	Zeal::EqGame::print_chat("Target Nameplate Health is %s", _enabled ? "Enabled" : "Disabled");
+	Zeal::EqGame::print_chat("Show Target Nameplate Health is %s", _enabled ? "Enabled" : "Disabled");
 	nameplateTargetHealth = _enabled;
 }
 
