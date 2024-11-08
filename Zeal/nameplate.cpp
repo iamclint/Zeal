@@ -358,7 +358,7 @@ void NamePlate::x_set_enabled(bool _enabled)
 void NamePlate::raidpets_set_enabled(bool _enabled)
 {
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateRaidPets", _enabled);
-	Zeal::EqGame::print_chat("Hidden Nameplates for RaidPets are %s", _enabled ? "Disabled" : "Enabled");
+	Zeal::EqGame::print_chat("Hidden Nameplates for RaidPets are %s", _enabled ? "Enabled" : "Disabled");
 	nameplateRaidPets = _enabled;
 }
 
