@@ -235,16 +235,16 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 			if (spawn->GuildId != 0xFFFF)
 				_snprintf_s(targetGuildNameplate, sizeof(targetGuildNameplate), _TRUNCATE, "\n<%s>", Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
 			//AA Title and First and Last name in First Line of Nameplate
-			if (showName == 4 && spawn->CharInfo->LastName && spawn->AlternateAdvancementRank > 0) //AA titles in Nameplate, Luclin era or GMs with titles
+			if (showName == 4 && spawn->CharInfo->LastName && spawn->AlternateAdvancementRank > 0 && spawn->Gender != 2) //Illusions to Non-humanoid races remove AA_title, Gender = 2 means under illusion
 				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s %s %s", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName));
 			//AA Title and First name in First Line of Nameplate
-			if (showName == 4 && strcmp(spawn->CharInfo->LastName, "") == 0 && spawn->AlternateAdvancementRank > 0) //AA_Title and First name in Nameplate
+			if (showName == 4 && strcmp(spawn->CharInfo->LastName, "") == 0 && spawn->AlternateAdvancementRank > 0 && spawn->Gender != 2) //Illusions to Non-humanoid races remove AA_title, Gender = 2 means under illusion
 				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s %s", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name));
 			//First and Last name in First Line of Nameplate
-			if ((showName == 2 && spawn->CharInfo->LastName) || (showName == 3 && spawn->CharInfo->LastName) || (showName == 4 && spawn->CharInfo->LastName && spawn->AlternateAdvancementRank == 0))
+			if ((showName == 2 && spawn->CharInfo->LastName) || (showName == 3 && spawn->CharInfo->LastName) || (showName == 4 && spawn->CharInfo->LastName && (spawn->AlternateAdvancementRank == 0 || (spawn->AlternateAdvancementRank > 0 && spawn->Gender == 2))))
 				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s %s", Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName));
 			//First name only in First Line of Nameplate
-			if (showName == 1 || (showName == 2 && strcmp(spawn->CharInfo->LastName, "") == 0) || (showName == 3 && strcmp(spawn->CharInfo->LastName, "") == 0) || (showName == 4 && strcmp(spawn->CharInfo->LastName, "") == 0 && spawn->AlternateAdvancementRank == 0))
+			if (showName == 1 || (showName == 2 && strcmp(spawn->CharInfo->LastName, "") == 0) || (showName == 3 && strcmp(spawn->CharInfo->LastName, "") == 0) || (showName == 4 && strcmp(spawn->CharInfo->LastName, "") == 0 && (spawn->AlternateAdvancementRank == 0 || (spawn->AlternateAdvancementRank > 0 && spawn->Gender == 2))))
 				strncpy_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), Zeal::EqGame::trim_name(spawn->CharInfo->Name), _TRUNCATE);
 		}
 		else { //NPC Nameplate
