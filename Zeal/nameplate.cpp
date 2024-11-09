@@ -257,28 +257,8 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s", Zeal::EqGame::trim_name(spawn->Name));
 		}
 		//Below accounts for /showname 4, Two lines on Nameplate, Guild on 2nd line, "AA_Title First_Name Last_Name \n <Guild>"
-		if (showName == 4 && spawn->Type == Zeal::EqEnums::EntityTypes::Player && spawn->AlternateAdvancementRank > 0) { 
-			if (nameplateTargetMarker && nameplateTargetHealth && spawn->GuildId != 0xFFFF) {
-				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %i%%<%s", targetFirstLineNameplate, hpPercent, targetGuildNameplate);
-				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
-				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
-				return;
-			}
-			if (nameplateTargetMarker) {
-				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s<%s", targetFirstLineNameplate, targetGuildNameplate);
-				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
-				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
-				return;
-			}
-			if (nameplateTargetHealth) {
-				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, "%s %i%%%s", targetFirstLineNameplate, hpPercent, targetGuildNameplate);
-				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
-				SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_target());
-				return;
-			}
-		}
-		//Below accounts for /showname 3, Two lines on Nameplate, Guild on 2nd line, "First_Name Last_Name \n <Guild>"
-		if ((showName == 3 && spawn->Type == Zeal::EqEnums::EntityTypes::Player) || (showName == 4 && spawn->Type == Zeal::EqEnums::EntityTypes::Player && spawn->AlternateAdvancementRank == 0)) { 
+		//Below also accounts for /showname 3, Two lines on Nameplate, Guild on 2nd line, "First_Name Last_Name \n <Guild>"
+		if ((showName == 4 || showName == 3) && spawn->Type == Zeal::EqEnums::EntityTypes::Player) {// && spawn->AlternateAdvancementRank > 0) || (showName == 3 && spawn->Type == Zeal::EqEnums::EntityTypes::Player) || (showName == 4 && spawn->Type == Zeal::EqEnums::EntityTypes::Player && spawn->AlternateAdvancementRank == 0)) {
 			if (nameplateTargetMarker && nameplateTargetHealth) {
 				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %i%%<%s", targetFirstLineNameplate, hpPercent, targetGuildNameplate);
 				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
@@ -298,7 +278,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 				return;
 			}
 		}
-		//Below accounts for /showname 1 and /showname 2 with only one line on Nameplate, no Guild line.  "First_Name Last_name"
+		//Below accounts for /showname 1 and /showname 2 with only one line on Nameplate, no Guild line. "First_Name" and "First_Name Last_name"
 		if (nameplateTargetMarker && nameplateTargetHealth && (spawn->Type == Zeal::EqEnums::EntityTypes::Player || spawn->Type == Zeal::EqEnums::EntityTypes::NPC)) {
 			_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %i%%<", targetFirstLineNameplate, hpPercent);
 			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
