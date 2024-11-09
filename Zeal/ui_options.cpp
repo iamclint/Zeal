@@ -459,9 +459,9 @@ void ui_options::InitNameplate()
 	}
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->colors_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateConColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->con_colors_set_enabled(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_NameplateSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->self_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateHideSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->hide_self_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateX", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->x_set_enabled(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_NameplateRaidPets", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->raidpets_set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateHideRaidPets", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->hide_raidpets_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateCharSelect", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->charselect_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetColor", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->target_color_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetMarker", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->target_marker_set_enabled(wnd->Checked); });
@@ -560,9 +560,9 @@ void ui_options::UpdateOptionsNameplate()
 	}
 	ui->SetChecked("Zeal_NameplateColors", ZealService::get_instance()->nameplate->nameplateColors);
 	ui->SetChecked("Zeal_NameplateConColors", ZealService::get_instance()->nameplate->nameplateconColors);
-	ui->SetChecked("Zeal_NameplateSelf", ZealService::get_instance()->nameplate->nameplateSelf);
+	ui->SetChecked("Zeal_NameplateHideSelf", ZealService::get_instance()->nameplate->nameplateHideSelf);
 	ui->SetChecked("Zeal_NameplateX", ZealService::get_instance()->nameplate->nameplateX);
-	ui->SetChecked("Zeal_NameplateRaidpets", ZealService::get_instance()->nameplate->nameplateRaidPets);
+	ui->SetChecked("Zeal_NameplateHideRaidpets", ZealService::get_instance()->nameplate->nameplateHideRaidPets);
 	ui->SetChecked("Zeal_NameplateCharSelect", ZealService::get_instance()->nameplate->nameplateCharSelect);
 	ui->SetChecked("Zeal_NameplateTargetColor", ZealService::get_instance()->nameplate->nameplateTargetColor);
 	ui->SetChecked("Zeal_NameplateTargetMarker", ZealService::get_instance()->nameplate->nameplateTargetMarker);
