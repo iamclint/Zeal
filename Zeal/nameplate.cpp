@@ -170,7 +170,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 	uint16_t showName = *(uint16_t*)0x7D01E4; // /showname command, 1 = first names, 2 = first/last names, 3 = first/last/guild names, 4 = everything
 	uint8_t showPCNames = *(uint8_t*)0x63D6C8; //Options -> Display -> Show PC Names, 0 = off, 1 = on
 	uint8_t showNPCNames = *(uint8_t*)0x63D6CC; //Options -> Display -> Show NPC Names, 0 = off, 1 = on
-	if (spawn == Zeal::EqGame::get_self())
+	if (spawn == Zeal::EqGame::get_self() && (nameplateHideSelf || nameplateX))
 	{
 		if (nameplateHideSelf)
 		{
@@ -218,7 +218,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 			}
 		}
 	}
-	if (spawn == Zeal::EqGame::get_target()) {
+	if (spawn == Zeal::EqGame::get_target() && (nameplateTargetMarker || nameplateTargetHealth)) {
 		char targetNameplate[60];
 		char targetFirstLineNameplate[40];
 		char targetGuildNameplate[20];
