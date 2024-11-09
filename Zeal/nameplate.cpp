@@ -258,7 +258,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		}
 		//Below accounts for /showname 4, Two lines on Nameplate, Guild on 2nd line, "AA_Title First_Name Last_Name \n <Guild>"
 		//Below also accounts for /showname 3, Two lines on Nameplate, Guild on 2nd line, "First_Name Last_Name \n <Guild>"
-		if ((showName == 4 || showName == 3) && spawn->Type == Zeal::EqEnums::EntityTypes::Player) {// && spawn->AlternateAdvancementRank > 0) || (showName == 3 && spawn->Type == Zeal::EqEnums::EntityTypes::Player) || (showName == 4 && spawn->Type == Zeal::EqEnums::EntityTypes::Player && spawn->AlternateAdvancementRank == 0)) {
+		if ((showName == 4 || showName == 3) && spawn->Type == Zeal::EqEnums::EntityTypes::Player) {
 			if (nameplateTargetMarker && nameplateTargetHealth) {
 				_snprintf_s(targetNameplate, sizeof(targetNameplate), _TRUNCATE, ">%s %i%%<%s", targetFirstLineNameplate, hpPercent, targetGuildNameplate);
 				reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_target()->ActorInfo->DagHeadPoint, fontTexture, targetNameplate);
@@ -300,7 +300,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 	}
 	if (spawn->Race == 60) { //Race = 60 is Skeletons. Below is Skeleton Nameplate fix code
 		//Skeleton Feigned - Nameplate fix - Skeletons Feigned at their spawn point now show a Nameplate
-		if (spawn->StandingState != Zeal::EqEnums::Stance::Standing) { //Skeleton Feigned Death at Spawn Point Nameplate fix
+		if (spawn->Type == Zeal::EqEnums::EntityTypes::NPC && spawn->StandingState != Zeal::EqEnums::Stance::Standing) { //Skeleton Feigned Death at Spawn Point Nameplate fix
 			char skeletonNameplate[30];
 			_snprintf_s(skeletonNameplate, sizeof(skeletonNameplate), _TRUNCATE, "%s", Zeal::EqGame::trim_name(spawn->Name));
 			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO* dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, spawn->ActorInfo->DagHeadPoint, fontTexture, skeletonNameplate);
