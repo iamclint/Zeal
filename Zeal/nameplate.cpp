@@ -172,7 +172,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 	uint8_t showNPCNames = *(uint8_t*)0x63D6CC; //Options -> Display -> Show NPC Names, 0 = off, 1 = on
 	if (spawn == Zeal::EqGame::get_self())
 	{
-		if (nameplateSelf)
+		if (nameplateHideSelf)
 		{
 			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, Zeal::EqGame::get_self()->ActorInfo->DagHeadPoint, fontTexture, (char*)"");
 			SetNameSpriteTint(this_ptr, not_used, Zeal::EqGame::get_self());
@@ -194,7 +194,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 			}
 		}
 	}
-	if (nameplateRaidPets)
+	if (nameplateHideRaidPets)
 	{
 		if (spawn->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
 		{
@@ -359,11 +359,11 @@ void NamePlate::con_colors_set_enabled(bool _enabled)
 	nameplateconColors = _enabled;
 }
 
-void NamePlate::self_set_enabled(bool _enabled)
+void NamePlate::hide_self_set_enabled(bool _enabled)
 {
-	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateSelf", _enabled);
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateHideSelf", _enabled);
 	Zeal::EqGame::print_chat("Hidden Nameplate for Self is %s", _enabled ? "Enabled" : "Disabled");
-	nameplateSelf = _enabled;
+	nameplateHideSelf = _enabled;
 }
 
 void NamePlate::x_set_enabled(bool _enabled)
@@ -373,11 +373,11 @@ void NamePlate::x_set_enabled(bool _enabled)
 	nameplateX = _enabled;
 }
 
-void NamePlate::raidpets_set_enabled(bool _enabled)
+void NamePlate::hide_raidpets_set_enabled(bool _enabled)
 {
-	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateRaidPets", _enabled);
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "NameplateHideRaidPets", _enabled);
 	Zeal::EqGame::print_chat("Hidden Nameplates for RaidPets are %s", _enabled ? "Enabled" : "Disabled");
-	nameplateRaidPets = _enabled;
+	nameplateHideRaidPets = _enabled;
 }
 
 void NamePlate::charselect_set_enabled(bool _enabled)
@@ -423,12 +423,12 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 		ini->setValue<bool>("Zeal", "NameplateColors", false);
 	if (!ini->exists("Zeal", "NameplateConColors"))
 		ini->setValue<bool>("Zeal", "NameplateConColors", false);
-	if (!ini->exists("Zeal", "NameplateSelf"))
-		ini->setValue<bool>("Zeal", "NameplateSelf", false);
+	if (!ini->exists("Zeal", "NameplateHideSelf"))
+		ini->setValue<bool>("Zeal", "NameplateHideSelf", false);
 	if (!ini->exists("Zeal", "NameplateX"))
 		ini->setValue<bool>("Zeal", "NameplateX", false);
-	if (!ini->exists("Zeal", "NameplateRaidPets"))
-		ini->setValue<bool>("Zeal", "NameplateRaidPets", false);
+	if (!ini->exists("Zeal", "NameplateHideRaidPets"))
+		ini->setValue<bool>("Zeal", "NameplateHideRaidPets", false);
 	if (!ini->exists("Zeal", "NameplateCharSelect"))
 		ini->setValue<bool>("Zeal", "NameplateCharSelect", false);
 	if (!ini->exists("Zeal", "NameplateTargetColor"))
@@ -440,9 +440,9 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 
 	nameplateColors = ini->getValue<bool>("Zeal", "NameplateColors");
 	nameplateconColors = ini->getValue<bool>("Zeal", "NameplateConColors");
-	nameplateSelf = ini->getValue<bool>("Zeal", "NameplateSelf");
+	nameplateHideSelf = ini->getValue<bool>("Zeal", "NameplateHideSelf");
 	nameplateX = ini->getValue<bool>("Zeal", "NameplateX");
-	nameplateRaidPets = ini->getValue<bool>("Zeal", "NameplateRaidPets");
+	nameplateHideRaidPets = ini->getValue<bool>("Zeal", "NameplateHideRaidPets");
 	nameplateCharSelect = ini->getValue<bool>("Zeal", "NameplateCharSelect");
 	nameplateTargetColor = ini->getValue<bool>("Zeal", "NameplateTargetColor");
 	nameplateTargetMarker = ini->getValue<bool>("Zeal", "NameplateTargetMarker");
@@ -458,39 +458,39 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 			con_colors_set_enabled(!ZealService::get_instance()->nameplate->con_colors_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplateself", {}, "Toggles Nameplate Self",
+	zeal->commands_hook->Add("/nameplatehideself", {}, "Toggles Nameplate Self",
 		[this](std::vector<std::string>& args) {
-			colors_set_enabled(!ZealService::get_instance()->nameplate->self_is_enabled());
+			hide_self_set_enabled(!ZealService::get_instance()->nameplate->hide_self_is_enabled());
 			return true;
 		});
 	zeal->commands_hook->Add("/nameplatex", {}, "Toggles Nameplate Self as X",
 		[this](std::vector<std::string>& args) {
-			con_colors_set_enabled(!ZealService::get_instance()->nameplate->x_is_enabled());
+			x_set_enabled(!ZealService::get_instance()->nameplate->x_is_enabled());
 			return true;
 		});
-	zeal->commands_hook->Add("/nameplateraidpets", {}, "Toggles Nameplate for Raid Pets",
+	zeal->commands_hook->Add("/nameplatehideraidpets", {}, "Toggles Nameplate for Raid Pets",
 		[this](std::vector<std::string>& args) {
-			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			hide_raidpets_set_enabled(!ZealService::get_instance()->nameplate->hide_raidpets_is_enabled());
 			return true;
 		});
 	zeal->commands_hook->Add("/nameplatecharselect", {}, "Toggles Nameplate Options Shown at Character Selection Screen",
 		[this](std::vector<std::string>& args) {
-			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			charselect_set_enabled(!ZealService::get_instance()->nameplate->charselect_is_enabled());
 			return true;
 		});
 	zeal->commands_hook->Add("/nameplatetargetcolor", {}, "Toggles Target Nameplate Color",
 		[this](std::vector<std::string>& args) {
-			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			target_color_set_enabled(!ZealService::get_instance()->nameplate->target_color_is_enabled());
 			return true;
 		});
 	zeal->commands_hook->Add("/nameplatetargetmarker", {}, "Toggles Target Nameplate Marker",
 		[this](std::vector<std::string>& args) {
-			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			target_marker_set_enabled(!ZealService::get_instance()->nameplate->target_marker_is_enabled());
 			return true;
 		});
 	zeal->commands_hook->Add("/nameplatetargethealth", {}, "Toggles Target Nameplate Health",
 		[this](std::vector<std::string>& args) {
-			colors_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			target_health_set_enabled(!ZealService::get_instance()->nameplate->target_health_is_enabled());
 			return true;
 		});
 }
