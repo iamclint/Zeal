@@ -222,18 +222,14 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		char targetNameplate[60];
 		char targetFirstLineNameplate[40];
 		char targetGuildNameplate[20];
-		//strncpy_s(targetNameplate, sizeof(targetNameplate), spawn->ActorInfo->DagHeadPoint->StringSprite->Text, _TRUNCATE);
 		int hpPercent = 0;
-		if (spawn->Type == Zeal::EqEnums::EntityTypes::Player) { //PC Nameplate
-			//Get Percent Health of Player
-			if (spawn->HpCurrent > 0 && spawn->HpMax > 0)
-				hpPercent = (spawn->HpCurrent * 100) / spawn->HpMax;
-			//No Guild Nameplate for 2nd line
-			if (spawn->GuildId == 0xFFFF)
-				strncpy_s(targetGuildNameplate, sizeof(targetGuildNameplate), (char*)"", _TRUNCATE);
-			//Guild Nameplate for 2nd line
-			if (spawn->GuildId != 0xFFFF)
-				_snprintf_s(targetGuildNameplate, sizeof(targetGuildNameplate), _TRUNCATE, "\n<%s>", Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
+		if (spawn->HpCurrent > 0 && spawn->HpMax > 0) //Get Percent Health of Player
+			hpPercent = (spawn->HpCurrent * 100) / spawn->HpMax;
+		if (spawn->GuildId == 0xFFFF) //No Guild Nameplate for 2nd line
+			strncpy_s(targetGuildNameplate, sizeof(targetGuildNameplate), (char*)"", _TRUNCATE);
+		if (spawn->GuildId != 0xFFFF) //Guild Nameplate for 2nd line
+			_snprintf_s(targetGuildNameplate, sizeof(targetGuildNameplate), _TRUNCATE, "\n<%s>", Zeal::EqGame::get_guildName_from_guildId(spawn->GuildId));
+		if (spawn->Type == Zeal::EqEnums::EntityTypes::Player && spawn == Zeal::EqGame::get_self()) { //Self Nameplate
 			//AA Title and First and Last name in First Line of Nameplate
 			if (showName == 4 && spawn->CharInfo->LastName && spawn->AlternateAdvancementRank > 0 && spawn->Gender != 2) //Illusions to Non-humanoid races remove AA_title, Gender = 2 means under illusion
 				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s %s %s", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->CharInfo->Name), Zeal::EqGame::trim_name(spawn->CharInfo->LastName));
@@ -247,13 +243,26 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 			if (showName == 1 || (showName == 2 && strcmp(spawn->CharInfo->LastName, "") == 0) || (showName == 3 && strcmp(spawn->CharInfo->LastName, "") == 0) || (showName == 4 && strcmp(spawn->CharInfo->LastName, "") == 0 && (spawn->AlternateAdvancementRank == 0 || (spawn->AlternateAdvancementRank > 0 && spawn->Gender == 2))))
 				strncpy_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), Zeal::EqGame::trim_name(spawn->CharInfo->Name), _TRUNCATE);
 		}
-		else { //NPC Nameplate
-			//Get Percent Health of NPC
-			hpPercent = spawn->HpCurrent;
+		else if (spawn->Type == Zeal::EqEnums::EntityTypes::Player && spawn != Zeal::EqGame::get_self()) { //OtherPlayer Nameplate
+			//AA Title and First and Last name in First Line of Nameplate
+			if (showName == 4 && spawn->LastName && spawn->AlternateAdvancementRank > 0 && spawn->Gender != 2) //Illusions to Non-humanoid races remove AA_title, Gender = 2 means under illusion
+				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s %s %s", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->Name), Zeal::EqGame::trim_name(spawn->LastName));
+			//AA Title and First name in First Line of Nameplate
+			if (showName == 4 && strcmp(spawn->LastName, "") == 0 && spawn->AlternateAdvancementRank > 0 && spawn->Gender != 2) //Illusions to Non-humanoid races remove AA_title, Gender = 2 means under illusion
+				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s %s", (char*)Zeal::EqGame::get_aa_title_name(spawn->Class, spawn->AlternateAdvancementRank, spawn->Gender), Zeal::EqGame::trim_name(spawn->Name));
+			//First and Last name in First Line of Nameplate
+			if ((showName == 2 && spawn->LastName) || (showName == 3 && spawn->LastName) || (showName == 4 && spawn->LastName && (spawn->AlternateAdvancementRank == 0 || (spawn->AlternateAdvancementRank > 0 && spawn->Gender == 2))))
+				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s %s", Zeal::EqGame::trim_name(spawn->Name), Zeal::EqGame::trim_name(spawn->LastName));
+			//First name only in First Line of Nameplate
+			if (showName == 1 || (showName == 2 && strcmp(spawn->LastName, "") == 0) || (showName == 3 && strcmp(spawn->LastName, "") == 0) || (showName == 4 && strcmp(spawn->LastName, "") == 0 && (spawn->AlternateAdvancementRank == 0 || (spawn->AlternateAdvancementRank > 0 && spawn->Gender == 2))))
+				strncpy_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), Zeal::EqGame::trim_name(spawn->Name), _TRUNCATE);
+		}
+		else { //NPC Nameplate	
+			hpPercent = spawn->HpCurrent; //Get Percent Health of NPC
 			//Prevents broken string bug on Skeleton Nameplate, Allows Target Nameplate to play nice with Skeleton Nameplate fix code below
 			if (spawn->Type == 60 && spawn->StandingState == Zeal::EqEnums::Stance::Feigned) 
 				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), (size_t)-0, "%s", Zeal::EqGame::trim_name(spawn->Name));
-			else
+			else //All other NPCS Nameplate
 				_snprintf_s(targetFirstLineNameplate, sizeof(targetFirstLineNameplate), _TRUNCATE, "%s", Zeal::EqGame::trim_name(spawn->Name));
 		}
 		//Below accounts for /showname 4, Two lines on Nameplate, Guild on 2nd line, "AA_Title First_Name Last_Name \n <Guild>"
@@ -300,7 +309,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 	}
 	if (spawn->Race == 60) { //Race = 60 is Skeletons. Below is Skeleton Nameplate fix code
 		//Skeleton Feigned - Nameplate fix - Skeletons Feigned at their spawn point now show a Nameplate
-		if (spawn->Type == Zeal::EqEnums::EntityTypes::NPC && spawn->StandingState != Zeal::EqEnums::Stance::Standing) { //Skeleton Feigned Death at Spawn Point Nameplate fix
+		if (spawn->Type == Zeal::EqEnums::EntityTypes::NPC && spawn->StandingState != Zeal::EqEnums::Stance::Standing) {
 			char skeletonNameplate[30];
 			_snprintf_s(skeletonNameplate, sizeof(skeletonNameplate), _TRUNCATE, "%s", Zeal::EqGame::trim_name(spawn->Name));
 			reinterpret_cast<int(__thiscall*)(void* this_ptr, Zeal::EqStructures::EQDAGINFO* dag, int fontTexture, char* text)>(0x4B0AA8)(this_ptr, spawn->ActorInfo->DagHeadPoint, fontTexture, skeletonNameplate);
