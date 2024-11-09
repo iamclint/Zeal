@@ -312,7 +312,7 @@ void Binds::add_binds()
 		});
 	add_bind(238, "Toggle Nameplate Self", "ToggleNameplateSelf", key_category::Target, [this](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
-			ZealService::get_instance()->nameplate->self_set_enabled(!ZealService::get_instance()->nameplate->self_is_enabled());
+			ZealService::get_instance()->nameplate->hide_self_set_enabled(!ZealService::get_instance()->nameplate->hide_self_is_enabled());
 		});
 	add_bind(239, "Toggle Nameplate Self as X", "ToggleNameplateX", key_category::Target, [this](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
@@ -320,7 +320,7 @@ void Binds::add_binds()
 		});
 	add_bind(240, "Toggle Nameplate Raid Pets", "ToggleNameplateRaidPets", key_category::Target, [this](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
-			ZealService::get_instance()->nameplate->raidpets_set_enabled(!ZealService::get_instance()->nameplate->raidpets_is_enabled());
+			ZealService::get_instance()->nameplate->hide_raidpets_set_enabled(!ZealService::get_instance()->nameplate->hide_raidpets_is_enabled());
 		});
 	add_bind(241, "Toggle Map Grid Lines", "ToggleMapGridLines", key_category::UI, [this](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck()) 
