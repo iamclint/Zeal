@@ -459,11 +459,16 @@ namespace Zeal
 		{
 			return reinterpret_cast<char*(__thiscall*)(int everquest, char* name)>(0x537e4b)(*(int*)0x809478, name);
 		}
+		char* trim_name(char* name)
+		{
+			if (name == NULL)
+				return (char*)"";
+			return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, char* spawnName)>(0x537D39)(*(int*)0x809478, name);
+		}
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown)
 		{
 			reinterpret_cast<void(__cdecl*)(int* connection, UINT opcode, int* buffer, UINT size, int unknown)>(0x54e51a)((int*)0x7952fc, opcode, buffer, size, unknown);
 		}
-
 		bool is_view_actor_me()
 		{	
 			if (get_controlled() && get_controlled()->ActorInfo)
@@ -474,7 +479,12 @@ namespace Zeal
 			}
 			return false;
 		}
-
+		char* get_guildName_from_guildId(int guildId)
+		{
+			if (guildId == 0xFFFF)
+				return (char*)"";
+			return (Zeal::EqGame::guild_names->Guild[guildId].Name);
+		}
 		void print_group_leader()
 		{
 			const Zeal::EqStructures::GroupInfo* group_info = Zeal::EqGame::GroupInfo;
@@ -1765,6 +1775,188 @@ namespace Zeal
 				va_end(argptr);
 
 				EqGameInternal::CXStr_PrintString(str, buffer);
+		}
+
+		const char* get_aa_title_name(BYTE class_id, int aa_rank, BYTE gender_id)
+		{
+			const char* title_name = "";
+			switch (class_id)
+			{
+			case Zeal::EqEnums::ClassTypes::Warrior:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Veteran";
+				if (aa_rank == 3)
+					title_name = "Marshall";	
+				break;
+			case Zeal::EqEnums::ClassTypes::Cleric:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Venerable";
+				if (aa_rank == 3)
+					title_name = "Exarch";
+				break;
+			case Zeal::EqEnums::ClassTypes::Paladin:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2 && gender_id == 0)
+					title_name = "Sir";
+				if (aa_rank == 2 && gender_id == 1)
+					title_name = "Lady";
+				if (aa_rank == 3 && gender_id == 0)
+					title_name = "Duke";
+				if (aa_rank == 3 && gender_id == 1)
+					title_name = "Duchess";
+				break;
+			case Zeal::EqEnums::ClassTypes::Ranger:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Veteran";
+				if (aa_rank == 3 && gender_id == 0)
+					title_name = "Hunter";
+				if (aa_rank == 3 && gender_id == 1)
+					title_name = "Huntress";
+				break;
+			case Zeal::EqEnums::ClassTypes::Shadowknight:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2 && gender_id == 0)
+					title_name = "Sir";
+				if (aa_rank == 2 && gender_id == 1)
+					title_name = "Lady";
+				if (aa_rank == 3 && gender_id == 0)
+					title_name = "Duke";
+				if (aa_rank == 3 && gender_id == 1)
+					title_name = "Duchess";
+				break;
+			case Zeal::EqEnums::ClassTypes::Druid:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Venerable";
+				if (aa_rank == 3)
+					title_name = "Elder";
+				break;
+			case Zeal::EqEnums::ClassTypes::Monk:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2 && gender_id == 0)
+					title_name = "Brother";
+				if (aa_rank == 2 && gender_id == 1)
+					title_name = "Sister";
+				if (aa_rank == 3)
+					title_name = "Sensei";
+				break;
+			case Zeal::EqEnums::ClassTypes::Bard:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Veteran";
+				if (aa_rank == 3 && gender_id == 0)
+					title_name = "Impresario";
+				if (aa_rank == 3 && gender_id == 1)
+					title_name = "Muse";
+				break;
+			case Zeal::EqEnums::ClassTypes::Rogue:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Veteran";
+				if (aa_rank == 3)
+					title_name = "Marauder";
+				break;
+			case Zeal::EqEnums::ClassTypes::Shaman:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Venerable";
+				if (aa_rank == 3)
+					title_name = "Elder";
+				break;
+			case Zeal::EqEnums::ClassTypes::Necromancer:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Sage";
+				if (aa_rank == 3)
+					title_name = "Lich";
+				break;
+			case Zeal::EqEnums::ClassTypes::Wizard:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2 && gender_id == 0)
+					title_name = "Master";
+				if (aa_rank == 2 && gender_id == 1)
+					title_name = "Mistress";
+				if (aa_rank == 3)
+					title_name = "Sage";
+				break;
+			case Zeal::EqEnums::ClassTypes::Magician:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2 && gender_id == 0)
+					title_name = "Master";
+				if (aa_rank == 2 && gender_id == 1)
+					title_name = "Mistress";
+				if (aa_rank == 3)
+					title_name = "Sage";
+				break;
+			case Zeal::EqEnums::ClassTypes::Enchanter:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2 && gender_id == 0)
+					title_name = "Master";
+				if (aa_rank == 2 && gender_id == 1)
+					title_name = "Mistress";
+				if (aa_rank == 3)
+					title_name = "Sage";
+				break;
+			case Zeal::EqEnums::ClassTypes::Beastlord:
+				if (aa_rank == 1 && gender_id == 0)
+					title_name = "Barron";
+				if (aa_rank == 1 && gender_id == 1)
+					title_name = "Barroness";
+				if (aa_rank == 2)
+					title_name = "Venerable";
+				if (aa_rank == 3)
+					title_name = "Elder";
+				break;
+			default:
+				title_name = "";
+				break;
+			}
+			return title_name;
 		}
 
 		std::string class_name(int class_id)

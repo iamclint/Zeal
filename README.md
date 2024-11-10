@@ -236,6 +236,18 @@ ___
 
 - `/nameplateraidpets`
   - **Description:** toggles nameplate for raid pets and your pet (on/off)
+ 
+- `/nameplatecharselect`
+  - **Description:** toggles nameplate choices shown at character selection screen on and off (on/off)
+
+- `/nameplatetargetcolor`
+  - **Description:** toggles target nameplate color on and off (on/off)
+ 
+- `/nameplatetargetmarker`
+  - **Description:** toggles target nameplate marker on and off (on/off)
+ 
+- `/nameplatetargethealth`
+  - **Description:** toggles target nameplate health on and off (on/off)
 ___
 ### Binds
 - Cycle through nearest NPCs
@@ -266,6 +278,10 @@ ___
 - Toggle nameplate for self on/off
 - Toggle nameplate for self as X on/off
 - Toggle nameplate for raid pets and your pet on/off
+- Toggle nameplate choices that are shown at character selection screen on and off
+- Toggle target nameplate color on and off
+- Toggle target nameplate marker on and off
+- Toggle target nameplate health on and off
 ___
 ### UI
 - **Gauge EqType's**
@@ -341,13 +357,17 @@ The nameplate is controlled through three interfaces:
 * The `/nameplateself` command - Toggles Player Nameplate on and off
 * The `/nameplatex` command - Toggles Player Nameplate as X on and off
 * The `/nameplateraidpets` command - Toggles NPC Raid Pets Nameplate on and off
+* The `/nameplatecharselect` command - Toggles Nameplate Choices Shown at Character Selection Screen on and off
+* The `/nameplatetargetcolor` command - Toggles Target Nameplate Color on and off
+* The `/nameplatetargetmarker` command - Toggles Target Nameplate Marker on and off
+* The `/nameplatetargethealth` command - Toggles Target Nameplate Health on and off
 
 #### Changing the Color of Nameplates
 Zeal allows players to change the colors of the Nameplates of Players and NPCs in game.
 The Color Selector is available in the Zeal Colors Tab of the Zeal Options menu.
 The following 18 Nameplate Colors can be changed to custom colors.
 * AFK, LFG, LD, MyGuild, Raid, Group, PVP, Roleplay, OtherGuilds, DefaultAdventurer
-* NPC Corpse, Player Corpse, GreenCon, LightBlueCon, BlueCon, WhiteCon, YellowCon, RedCon
+* NPC Corpse, Player Corpse, GreenCon, LightBlueCon, BlueCon, WhiteCon, YellowCon, RedCon, Target Color
 
 #### Default Colors of Nameplates when using Nameplate Colors system
 * 1 - AFK - Orange                   
@@ -367,7 +387,8 @@ The following 18 Nameplate Colors can be changed to custom colors.
 * 15 - Blue Con NPCs - Default DarkBlue is lighter than CON_BLUE
 * 16 - White Con NPCs - CON_WHITE
 * 17 - Yellow Con NPCs - CON_YELLOW
-* 18 - Red Con NPCs- CON_RED
+* 18 - Red Con NPCs - CON_RED
+* 19 - Target Color - Default Pink
 
 ### In-game Map
 #### Map data source
