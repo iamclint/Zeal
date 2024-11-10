@@ -182,7 +182,6 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		if (nameplateHideSelf)
 		{
 			ChangeDagStringSprite(self->ActorInfo->DagHeadPoint, fontTexture, "");
-			SetNameSpriteTint(this_ptr, not_used, self);
 			return;
 		}
 		if (nameplateX)
@@ -206,7 +205,6 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		if (spawn->PetOwnerSpawnId == self->SpawnId)
 		{
 			ChangeDagStringSprite(spawn->ActorInfo->DagHeadPoint, fontTexture, "");
-			SetNameSpriteTint(this_ptr, not_used, spawn);
 			return;
 		}
 		for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i) //Raid Member loop
@@ -220,7 +218,6 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 			if (spawn->PetOwnerSpawnId == raidMember->SpawnId)
 			{
 				ChangeDagStringSprite(spawn->ActorInfo->DagHeadPoint, fontTexture, "");
-				SetNameSpriteTint(this_ptr, not_used, spawn);
 				return;
 			}
 		}
