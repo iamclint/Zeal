@@ -228,13 +228,13 @@ ___
 - `/nameplateconcolors`
   - **Description:** toggles nameplate con colors for npcs
 
-- `/nameplateself`
+- `/nameplatehideself`
   - **Description:** toggles nameplate for self (on/off)
 
 - `/nameplatex`
   - **Description:** toggles nameplate for self as X (on/off)
 
-- `/nameplateraidpets`
+- `/nameplatehideraidpets`
   - **Description:** toggles nameplate for raid pets and your pet (on/off)
  
 - `/nameplatecharselect`
@@ -343,7 +343,7 @@ Build in `Release` `x86` (32bit) mode using Microsoft Visual Studio 2022 (free C
 ### Nameplate Options
 #### Setup and configuration
 Zeal 5.0 and later includes options for players to adjust Player Nameplates and NPC Nameplates in game.
-In addition, Skeleton corpses now show a Nameplate. (Client Nameplate Bug Fix)
+In addition, Skeletons now show a Nameplate. (Client Skeleton Nameplate Bug Fix)
 Necromancers will now have an easier time finding their corpses.
 
 The nameplate is controlled through three interfaces:
@@ -354,9 +354,9 @@ The nameplate is controlled through three interfaces:
 #### Enabling Disabling Nameplate Options
 * The `/nameplatecolors` command - Toggles Nameplate Colors for Players on and off
 * The `/nameplateconcolors` command - Toggles Nameplate Con Colors for NPCs on and off
-* The `/nameplateself` command - Toggles Player Nameplate on and off
+* The `/nameplatehideself` command - Toggles Player Nameplate on and off
 * The `/nameplatex` command - Toggles Player Nameplate as X on and off
-* The `/nameplateraidpets` command - Toggles NPC Raid Pets Nameplate on and off
+* The `/nameplatehideraidpets` command - Toggles NPC Raid Pets Nameplate on and off
 * The `/nameplatecharselect` command - Toggles Nameplate Choices Shown at Character Selection Screen on and off
 * The `/nameplatetargetcolor` command - Toggles Target Nameplate Color on and off
 * The `/nameplatetargetmarker` command - Toggles Target Nameplate Marker on and off
@@ -365,7 +365,7 @@ The nameplate is controlled through three interfaces:
 #### Changing the Color of Nameplates
 Zeal allows players to change the colors of the Nameplates of Players and NPCs in game.
 The Color Selector is available in the Zeal Colors Tab of the Zeal Options menu.
-The following 18 Nameplate Colors can be changed to custom colors.
+The following 19 Nameplate Colors can be changed to custom colors.
 * AFK, LFG, LD, MyGuild, Raid, Group, PVP, Roleplay, OtherGuilds, DefaultAdventurer
 * NPC Corpse, Player Corpse, GreenCon, LightBlueCon, BlueCon, WhiteCon, YellowCon, RedCon, Target Color
 
