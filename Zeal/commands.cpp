@@ -35,7 +35,7 @@ void ChatCommands::print_commands()
 	Zeal::EqGame::print_chat(ss.str());
 }
 
-void __fastcall InterpretCommand(int c, int unused, int player, char* cmd)
+void __fastcall InterpretCommand(int c, int unused, Zeal::EqStructures::Entity* player, const char* cmd)
 {
 	ZealService* zeal = ZealService::get_instance();
 	std::string str_cmd = Zeal::String::trim_and_reduce_spaces(cmd);
@@ -91,6 +91,13 @@ ChatCommands::~ChatCommands()
 {
 
 }
+
+//call interpret command without hitting the detour, useful for aliasing default commands
+void ForwardCommand(std::string cmd)
+{
+	reinterpret_cast<bool(__thiscall*)(int cEverquest, Zeal::EqStructures::Entity* player, const char* cmd)>(ZealService::get_instance()->hooks->hook_map["commands"]->trampoline)(*(int*)0x809478, Zeal::EqGame::get_self(), cmd.c_str());
+}
+
 ChatCommands::ChatCommands(ZealService* zeal)
 {
 	Add("/crash", {}, "Tests a crash",
@@ -113,6 +120,11 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 			}
 			return false;
+		});
+	Add("/cls", { }, "Adds cls alias for clearchat.",
+		[](std::vector<std::string>& args) {
+			ForwardCommand("/clearchat");
+			return true;
 		});
 	Add("/corpsedrag", { "/drag"}, "Attempts to corpse drag your current target. Use /corpsedrag nearest to auto-target.",
 		[](std::vector<std::string>& args) {

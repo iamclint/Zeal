@@ -418,7 +418,7 @@ SpellSets::SpellSets(ZealService* zeal)
     // wrap it for now to prevent users form crashing themselves on oldui until functionality potentially gets added.
     if (Zeal::EqGame::is_new_ui())
     {
-        zeal->commands_hook->Add("/spellset", {}, "Load, save, delete or list your spellsets.",
+        zeal->commands_hook->Add("/spellset", {"/ss"}, "Load, save, delete or list your spellsets.",
             [this, zeal](std::vector<std::string>& args) {
                 if (args.size() < 3)
                 {

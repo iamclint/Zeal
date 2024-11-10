@@ -455,9 +455,11 @@ namespace Zeal
 		{
 			return get_view_actor()->Entity;
 		}
-		char* strip_name(char* name)
+		char* trim_name(const char* name)
 		{
-			return reinterpret_cast<char*(__thiscall*)(int everquest, char* name)>(0x537e4b)(*(int*)0x809478, name);
+			if (name == NULL)
+				return (char*)"";
+			return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, const char* spawnName)>(0x537D39)(*(int*)0x809478, name);
 		}
 		char* trim_name(char* name)
 		{

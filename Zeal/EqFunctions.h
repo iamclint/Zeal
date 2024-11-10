@@ -149,8 +149,8 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_entity_by_id(short id);
 		Zeal::EqStructures::Entity* get_entity_by_parent_id(short parent_id);
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown);
-		char* strip_name(char* name);
 		char* trim_name(char* name);
+		char* trim_name(const char* name);
 		char* get_guildName_from_guildId(int guildId);
 		char* get_string(UINT id);
 		//void set_camera_position(Vec3* pos);

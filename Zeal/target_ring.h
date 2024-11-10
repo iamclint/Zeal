@@ -72,6 +72,8 @@ public:
 	float get_size();
 	int get_segments();
 	std::string get_texture();
+	void setup_render_states();
+	void reset_render_states();
 	
 private:
 	void drawVertices(Vec3 pos, DWORD vertex_count, IDirect3DTexture8* texture, D3DXMATRIX worldMatrix, SolidVertex* solid_vertices, TexturedVertex* texture_vertices);
@@ -86,8 +88,7 @@ private:
 	std::vector<RenderState> render_states;
 	void save_ini();
 	void load_ini();
-	void setup_render_states();
-	void reset_render_states();
+
 
 
 	IDirect3DTexture8* targetRingTexture=nullptr;

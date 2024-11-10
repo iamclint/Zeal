@@ -939,7 +939,8 @@ namespace Zeal
 			/*0x0e4**/   CHAR* CastOnYou;
 			/*0x0e8**/   CHAR* CastOnAnother;
 			/*0x0ec**/   CHAR* WearOff;
-			/*0x0f0*/   BYTE	Unknown0x0f0[0x1c];
+			/*0x0f0*/   BYTE	Unknown0x0f0[0x18];
+			/*0x108**/   DWORD	Icon; //Icon index in spells tgas
 			/*0x10c**/   BYTE	ResistAdj;
 			/*0x10d*/   BYTE	Unknown0x10d[0xb];
 			/*0x114*/

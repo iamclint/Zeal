@@ -241,7 +241,19 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
 chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 {
     zeal->hooks->Add("DamageOutputText", 0x52A8C1, CChatManager, hook_type_replace_call);
-    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { if (output_text) { isDamage = true; damageData = { source, target, type, spell_id, damage, heal }; } });
+    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { 
+        if (output_text) { 
+            isDamage = true; 
+            damageData = { source, target, type, spell_id, damage, heal }; 
+        }
+        if (spell_id > 0 && damage > 0 && source != Zeal::EqGame::get_self() && target != Zeal::EqGame::get_self())
+        {
+            isDamage = true;
+            damageData = { source, target, type, spell_id, damage, heal };
+            if (source->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 1000 || target->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 1000)
+                Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::trim_name(source->Name), Zeal::EqGame::trim_name(target->Name), damage);
+        }
+     });
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short color, std::string data) { return color == USERCOLOR_RANDOM; }));
     Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short color, std::string data) { return color == USERCOLOR_LOOT; }));
     Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short color, std::string data) { return color == USERCOLOR_MONEY_SPLIT || color == USERCOLOR_ECHO_AUTOSPLIT; }));

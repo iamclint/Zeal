@@ -22,9 +22,6 @@
     <Filter Include="Source Files\helpers">
       <UniqueIdentifier>{62f5607d-ae22-4c41-a59c-1ab9e2dd53fa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\helpers">
-      <UniqueIdentifier>{527e20ee-c27c-458f-94eb-b5dffd5cee70}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\hooks">
       <UniqueIdentifier>{2a875da1-9bd1-4ad1-b132-3b7111729135}</UniqueIdentifier>
     </Filter>
@@ -46,6 +43,9 @@
     <Filter Include="Source Files\other">
       <UniqueIdentifier>{49dbe278-85aa-4b42-9831-fd53aef2022c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\everquest\helpers">
+      <UniqueIdentifier>{527e20ee-c27c-458f-94eb-b5dffd5cee70}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -61,7 +61,7 @@
       <Filter>Header Files\memory</Filter>
     </ClInclude>
     <ClInclude Include="vectors.h">
-      <Filter>Header Files\helpers</Filter>
+      <Filter>Header Files\everquest\helpers</Filter>
     </ClInclude>
     <ClInclude Include="camera_mods.h">
       <Filter>Header Files\hooks</Filter>
@@ -142,7 +142,7 @@
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
     <ClInclude Include="camera_math.h">
-      <Filter>Header Files\helpers</Filter>
+      <Filter>Header Files\everquest\helpers</Filter>
     </ClInclude>
     <ClInclude Include="ui_options.h">
       <Filter>Header Files\ui</Filter>
@@ -160,7 +160,7 @@
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
     <ClInclude Include="string_util.h">
-      <Filter>Header Files\helpers</Filter>
+      <Filter>Header Files\everquest\helpers</Filter>
     </ClInclude>
     <ClInclude Include="tooltip.h">
       <Filter>Header Files\hooks</Filter>

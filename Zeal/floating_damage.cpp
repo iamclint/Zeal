@@ -5,6 +5,35 @@
 #include "string_util.h"
 #include <cstdint>
 #include <random>
+
+template <typename VertexType>
+LPDIRECT3DVERTEXBUFFER8 CreateVertexBuffer(LPDIRECT3DDEVICE8 d3dDevice, VertexType* vertices, int vertexCount, DWORD fvf)
+{
+	LPDIRECT3DVERTEXBUFFER8 vertexBuffer = nullptr;
+
+	// Create the vertex buffer
+	HRESULT result = d3dDevice->CreateVertexBuffer(
+		vertexCount * sizeof(VertexType),   // Size of the buffer
+		D3DUSAGE_WRITEONLY,                 // Usage flags
+		fvf,                                // Flexible Vertex Format (FVF)
+		D3DPOOL_DEFAULT,                    // Memory pool to use
+		&vertexBuffer                       // Output vertex buffer
+	);
+
+	if (FAILED(result)) {
+		// Handle error
+		return nullptr;
+	}
+
+	// Lock the vertex buffer and copy the vertex data into it
+	void* pVertices;
+	vertexBuffer->Lock(0, vertexCount * sizeof(VertexType), (BYTE**)&pVertices, 0);
+	memcpy(pVertices, vertices, vertexCount * sizeof(VertexType));
+	vertexBuffer->Unlock();
+
+	return vertexBuffer;
+}
+
 int getRandomIntBetween(int min, int max) {
 	// Create a random device and a random engine
 	std::random_device rd;
@@ -16,7 +45,9 @@ int getRandomIntBetween(int min, int max) {
 	// Generate and return the random integer
 	return dis(gen);
 }
-void DamageData::tick()
+
+
+void DamageData::tick(int active_number_count)
 {
 	if (GetTickCount64() - start_time > 2500)
 	{
@@ -25,12 +56,16 @@ void DamageData::tick()
 	}
 	if (GetTickCount64() - last_tick >= 25)
 	{
-		y_offset -= 2;
-		opacity -= 0.02f;
+		float speed_offset = (float)active_number_count / 20.f;
+		float opacity_offset = (float)active_number_count / 200.f;
+		y_offset -= 2 + speed_offset;
+		opacity -= 0.01f + opacity_offset;
+		if (opacity < 0)
+			opacity = 0;
 		last_tick = GetTickCount64();
 	}
 }
-DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _heal)
+DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _heal, Zeal::EqStructures::SPELL* sp)
 {
 	is_spell = _is_spell;
 	is_my_damage = _is_my_damage_dealt;
@@ -41,11 +76,12 @@ DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _h
 	damage = dmg;
 	opacity = 1.0f;
 	y_offset = getRandomIntBetween(-20, 20);
-	x_offset = getRandomIntBetween(-20, 20);
+	x_offset = getRandomIntBetween(-40, 40);
 	needs_removed = false;
 	last_tick = GetTickCount64();
 	start_time = GetTickCount64();
 	heal = _heal;
+	spell = sp;
 }
 
 long FloatRGBAtoLong(float r, float g, float b, float a) {
@@ -84,6 +120,37 @@ long ModifyAlpha(long rgba, float newAlpha) {
 	return rgba;
 }
 
+int  FloatingDamage::get_active_damage_count(Zeal::EqStructures::Entity* ent)
+{
+	if (!damage_numbers.count(ent))
+		return 0;
+	return damage_numbers[ent].size();
+}
+
+void FloatingDamage::callback_render()
+{
+	if (!Zeal::EqGame::is_in_game())
+		return;
+	std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, false);
+	Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
+	for (auto& [target, dmg_vec] : damage_numbers)
+	{
+		for (auto& dmg : dmg_vec)
+		{
+			if (dmg.spell)
+			{
+				if (std::find(visible_ents.begin(), visible_ents.end(), target) != visible_ents.end() || target == Zeal::EqGame::get_self())
+				{
+					Vec2 screen_pos = { 0,0 };
+					if (ZealService::get_instance()->dx->WorldToScreen({ target->Position.x,target->Position.y,target->Position.z }, screen_pos))
+					{
+						draw_icon(dmg.spell->Icon, screen_pos.x + dmg.y_offset-5, screen_pos.y + dmg.x_offset - 28, dmg.opacity);
+					}
+				}
+			}
+		}
+	}
+}
 void FloatingDamage::callback_deferred()
 {
 	if (!Zeal::EqGame::is_in_game() || !enabled)
@@ -99,7 +166,7 @@ void FloatingDamage::callback_deferred()
 			{
 				for (auto& dmg : dmg_vec)
 				{
-					dmg.tick();
+					dmg.tick(get_active_damage_count(target));
 					if (std::find(visible_ents.begin(), visible_ents.end(), target) != visible_ents.end() || target == Zeal::EqGame::get_self())
 					{
 						Vec2 screen_pos = { 0,0 };
@@ -136,7 +203,7 @@ void FloatingDamage::callback_deferred()
 							}
 							if (dmg.heal > 0)
 								color = 0xFFFF00FF;
-							fnt->DrawWrappedText(dmg.str_dmg.c_str(), Zeal::EqUI::CXRect(screen_pos.x + dmg.y_offset, screen_pos.y + dmg.x_offset, screen_pos.x + 150, screen_pos.y + 150), Zeal::EqUI::CXRect(0, 0, screen_size.x*2, screen_size.y*2), ModifyAlpha(color, dmg.opacity), 1, 0);
+							fnt->DrawWrappedText(dmg.str_dmg.c_str(), Zeal::EqUI::CXRect(screen_pos.x + dmg.y_offset, screen_pos.y + dmg.x_offset, screen_pos.x + 150, screen_pos.y + 150), Zeal::EqUI::CXRect(0, 0, screen_size.x * 2, screen_size.y * 2), ModifyAlpha(color, dmg.opacity), 1, 0);
 						}
 					}
 				}
@@ -165,8 +232,14 @@ void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStru
 			bool is_me = false;
 			if (source && source->SpawnId == Zeal::EqGame::get_controlled()->SpawnId)
 				is_me = true;
+			Zeal::EqStructures::SPELL* sp_data = nullptr;
+			if (spell_id > 0)
+			{
+				sp_data = Zeal::EqGame::get_spell_mgr()->Spells[spell_id];
+//				Zeal::EqGame::print_chat("%s", sp_data->CastOnAnother);
+			}
 
-			damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal));
+			damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal, sp_data));
 		}
 	}
 }
@@ -177,14 +250,113 @@ void FloatingDamage::set_enabled(bool _enabled)
 	enabled = _enabled;
 }
 
+void FloatingDamage::draw_icon(int texture_index, float y, float x, float opacity)
+{
+	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+	DWORD sheet_index = texture_index / 100;
+	if (sheet_index > textures.size())
+		return;
+	IDirect3DTexture8* texture = textures.at(sheet_index);
+	texture_index = texture_index % 99;
+	const int image_size = 24;    // Width and height of each image in pixels
+	const int texture_grid_size = 10;  // 10x10 grid
+
+	// Calculate row and column based on index
+	int row = texture_index / texture_grid_size;
+	int column = texture_index % texture_grid_size;
+
+	// Calculate UV coordinates
+	float u_start = column * (image_size / 256.0f); // 240 is total width of texture
+	float v_start = row * (image_size / 256.0f);    // 240 is total height of texture
+	float u_end = u_start + (image_size / 256.0f);
+	float v_end = v_start + (image_size / 256.0f);
+
+	// Define the vertices for a textured quad
+	struct Vertex
+	{
+		float x, y, z, rhw;
+		DWORD color;
+		float u, v;
+	};
+		
+	DWORD color = D3DCOLOR_ARGB((int)(255.f*opacity), 255, 255, 255);
+
+	Vertex vertices[] =
+	{
+		{ x, y, 0.0f, 1.0f,color, u_start, v_start },
+		{ x + image_size, y, 0.0f, 1.0f,color, u_end, v_start },
+		{ x, y + image_size, 0.0f, 1.0f,color, u_start, v_end },
+		{ x + image_size, y + image_size, 0.0f, 1.0f,color, u_end, v_end }
+	};
+	ZealService::get_instance()->target_ring->setup_render_states();
+	device->SetTexture(0, texture);
+	device->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_TEX1 | D3DFVF_DIFFUSE);
+	device->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices, sizeof(Vertex));
+	ZealService::get_instance()->target_ring->reset_render_states();
+}
+
+IDirect3DTexture8* FloatingDamage::load_texture(std::string path)
+{
+	IDirect3DTexture8* texture=nullptr;
+	// Get the Direct3D device
+	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+	if (!device)
+	{
+		Zeal::EqGame::print_chat("Error: Failed to get Direct3D device.");
+		return nullptr;
+	}
+
+	// Create texture from file
+	HRESULT result = D3DXCreateTextureFromFileA(device, path.c_str(), &texture);
+	if (FAILED(result))
+	{
+		Zeal::EqGame::print_chat("Error: Failed to load texture file: " + path);
+		return nullptr;
+	}
+	return texture;
+}
+
+bool FloatingDamage::add_texture(std::string path)
+{
+	if (std::filesystem::exists(path))
+	{
+		//Zeal::EqGame::print_chat("Added texture: %s", path.c_str());
+		textures.push_back(load_texture(path));
+		return true;
+	}
+	return false;
+}
+
+void FloatingDamage::init_ui()
+{
+	textures.clear();
+	std::string current_ui = (char*)0x63D3C0;
+	std::string path = current_ui;
+	std::string default_path = "./UIFILES/default/";
+	for (int i = 1; i <= 3; i++)
+	{
+		std::stringstream filepath;
+		filepath << path << "gemicons0" << i << ".tga";
+		if (add_texture(filepath.str()))
+			continue;
+		filepath.clear();
+		filepath << default_path << "gemicons0" << i << ".tga";
+		if (!add_texture(filepath.str()))
+			Zeal::EqGame::print_chat("Texture not found: %s", filepath.str().c_str());
+	}
+}
+
 FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 {
+	
 	//mem::write<BYTE>(0x4A594B, 0x14);
 	if (!ini->exists("Zeal", "FloatingDamage"))
 		ini->setValue<bool>("Zeal", "FloatingDamage", true);
 	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
 	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::AddDeferred);
+	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { add_damage(source, target, damage, heal, spell_id); });
+	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
 	zeal->commands_hook->Add("/fcd", {}, "Toggles floating combat text or adjusts the font size with argument",
 		[this, ini](std::vector<std::string>& args) {
 			int new_size = 5;
