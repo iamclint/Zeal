@@ -26,7 +26,7 @@ void __fastcall GetZoneInfoFromNetwork(int* t, int unused, char* p1)
 // as Type = 3. Upon camping and rejoining, other player corpses are tagged as Type = 3, so this
 // looks like a client bug to patch (impacts corpse nameplates and targeting).
 static void __fastcall ProcessDeath(uint32_t passthruECX, uint32_t unusedEDX,
-	Zeal::EqStructures::DeathStruct* death_struct)
+	Zeal::Packets::Death_Struct* death_struct)
 {
 	auto* ent = ZealService::get_instance()->entity_manager->Get(death_struct->spawn_id);
 	bool player_death = (ent != nullptr && ent->Type == Zeal::EqEnums::Player);
