@@ -73,6 +73,8 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int)> GetFocusWnd = 0x5a07c0;
 			static mem::function<int __fastcall(int, int, int)> CXWndIsType = 0x571300;
 			static mem::function<int __fastcall(int, int, int, int)> CXWndShowContextMenu = 0x5A02F0;
+			static mem::function<char __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, int left, int top, int right, int bottom)> CXWndMoveAndInvalidate = 0x00573600;
+			static mem::function<Zeal::EqUI::CXRect* __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect* rect)> CXWndGetInnerRect = 0x005714b0;
 			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
 			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
 			static mem::function<int __fastcall(int, int)> ProcessControls = 0x53F337;

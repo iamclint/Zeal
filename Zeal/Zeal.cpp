@@ -82,6 +82,7 @@ void ZealService::configuration_check()
 	"EQUI_Tab_Map.xml",
 	"EQUI_Tab_Nameplate.xml",
 	"EQUI_Tab_TargetRing.xml",
+	"EQUI_ZealMap.xml",
 	"EQUI_ZealOptions.xml"};
 
 	std::string deprecated_ui_file = "EQUI.xml";
