@@ -75,8 +75,8 @@ DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _h
 		str_dmg = "+" + std::to_string(_heal);
 	damage = dmg;
 	opacity = 1.0f;
-	y_offset = getRandomIntBetween(-20, 20);
-	x_offset = getRandomIntBetween(-40, 40);
+	y_offset = static_cast<float>(getRandomIntBetween(-20, 20));
+	x_offset = static_cast<float>(getRandomIntBetween(-40, 40));
 	needs_removed = false;
 	last_tick = GetTickCount64();
 	start_time = GetTickCount64();
@@ -203,7 +203,9 @@ void FloatingDamage::callback_deferred()
 							}
 							if (dmg.heal > 0)
 								color = 0xFFFF00FF;
-							fnt->DrawWrappedText(dmg.str_dmg.c_str(), Zeal::EqUI::CXRect(screen_pos.x + dmg.y_offset, screen_pos.y + dmg.x_offset, screen_pos.x + 150, screen_pos.y + 150), Zeal::EqUI::CXRect(0, 0, screen_size.x * 2, screen_size.y * 2), ModifyAlpha(color, dmg.opacity), 1, 0);
+							fnt->DrawWrappedText(dmg.str_dmg.c_str(),
+								Zeal::EqUI::CXRect((int)(screen_pos.x + dmg.y_offset),(int)(screen_pos.y + dmg.x_offset), (int)(screen_pos.x + 150),
+									(int)(screen_pos.y + 150)), Zeal::EqUI::CXRect(0, 0, (int)(screen_size.x * 2), (int)(screen_size.y * 2)), ModifyAlpha(color, dmg.opacity), 1, 0);
 						}
 					}
 				}
@@ -304,6 +306,7 @@ void FloatingDamage::draw_icon(int texture_index, float y, float x, float opacit
 	device->SetTexture(0, texture);
 	device->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_TEX1 | D3DFVF_DIFFUSE);
 	device->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices, sizeof(Vertex));
+	device->SetTexture(0, NULL);  // Release reference to texture.
 	ZealService::get_instance()->target_ring->reset_render_states();
 }
 
@@ -401,4 +404,8 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 
 FloatingDamage::~FloatingDamage()
 {
+	for (auto& texture : textures)
+		if (texture)
+			texture->Release();
+	textures.clear();
 }

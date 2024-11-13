@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)$(ProjectName)\imgui-docking;$(SolutionDir)$(ProjectName);$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)$(Configuration)</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <TargetExt>.asi</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -168,6 +168,7 @@
     <ClInclude Include="directx.h" />
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="floating_damage.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="ui_group.h" />
     <ClInclude Include="ui_inputdialog.h" />
     <ClInclude Include="ZealSettings.h" />
@@ -208,7 +209,6 @@
     <ClInclude Include="camera_mods.h" />
     <ClInclude Include="InstructionLength.h" />
     <ClInclude Include="netstat.h" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="outputfile.h" />
     <ClInclude Include="raid.h" />
     <ClInclude Include="resource.h" />

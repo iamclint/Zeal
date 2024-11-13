@@ -445,6 +445,7 @@ void BitmapFont::render_queue() {
     }
 
     // Restore D3D state.
+    device.SetStreamSource(0, NULL, 0);  // Unbind vertex buffer.
     device.SetIndices(NULL, 0);  // Ensure index_buffer is no longer bound.
     device.SetTexture(0, NULL);  // Ensure texture is no longer bound.
     texture_state.restore_state();
