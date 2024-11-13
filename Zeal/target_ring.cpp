@@ -260,6 +260,7 @@ void TargetRing::drawVertices(Vec3 pos, DWORD vertex_count, IDirect3DTexture8* t
 	device->SetStreamSource(0, solidVertexBuffer, sizeof(SolidVertex));
 	device->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, vertex_count - 2);
+	device->SetStreamSource(0, NULL, 0);  // Unbind vertex buffer before Release.
 	solidVertexBuffer->Release();
 	if (texture) {
 		LPDIRECT3DVERTEXBUFFER8 texturedVertexBuffer = CreateVertexBuffer(device, texture_vertices, vertex_count, D3DFVF_XYZ | D3DFVF_TEX1);
@@ -267,6 +268,8 @@ void TargetRing::drawVertices(Vec3 pos, DWORD vertex_count, IDirect3DTexture8* t
 		device->SetStreamSource(0, texturedVertexBuffer, sizeof(TexturedVertex));
 		device->SetVertexShader(D3DFVF_XYZ | D3DFVF_TEX1);
 		device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, vertex_count - 2);
+		device->SetTexture(0, NULL);  // Release reference to texture.
+		device->SetStreamSource(0, NULL, 0);  // Unbind vertex buffer before Release.
 		texturedVertexBuffer->Release();
 	}
 }
@@ -426,9 +429,10 @@ void TargetRing::callback_render() {
 	if (targetRingTexture) {
 
 		// ### Rotate Target Ring ###
+		static constexpr float kMathPi = static_cast<float>(M_PI);
 		static float rotationAngle = 0.0f;
 		// Calculate the increment for a full rotation every 6 seconds
-		static const float rotationIncrement = (2.0f * M_PI) / (6.0f * 1000.0f); // radians per millisecond
+		static const float rotationIncrement = (2.0f * kMathPi) / (6.0f * 1000.0f); // radians per millisecond
 		// Update the rotation angle based on the elapsed time
 		static ULONGLONG lastRotationTime = GetTickCount64();
 		ULONGLONG currentRotationTime = GetTickCount64();
@@ -436,10 +440,10 @@ void TargetRing::callback_render() {
 		rotationAngle += (rotationIncrement * elapsedRotationTime) * rotation_speed;
 		lastRotationTime = currentRotationTime;
 		// Reset the rotation angle after a full rotation
-		if (rotationAngle >= 2.0f * M_PI) {
-			rotationAngle -= 2.0f * M_PI;
+		if (rotationAngle >= 2.0f * kMathPi) {
+			rotationAngle -= 2.0f * kMathPi;
 		}
-		float direction = static_cast<float>(target->Heading * M_PI / 256); 
+		float direction = static_cast<float>(target->Heading * kMathPi / 256);
 		// ### Render Target Ring ###
 		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size, Color, targetRingTexture, rotate_match_heading ? direction : rotationAngle);
 	}
@@ -729,4 +733,7 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 
 TargetRing::~TargetRing()
 {
+	if (targetRingTexture)
+		targetRingTexture->Release();
+	targetRingTexture = nullptr;
 }

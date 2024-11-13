@@ -67,7 +67,7 @@ void CallbackManager::AddCommand(std::function<bool(UINT, BOOL)> callback_functi
 	cmd_functions[type].push_back(callback_function);
 }
 
-void CallbackManager::AddOutputText(std::function<void(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, UINT channel)> callback_function)
+void CallbackManager::AddOutputText(std::function<void(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, short channel)> callback_function)
 {
 	output_text_functions.push_back(callback_function);
 }
@@ -139,7 +139,7 @@ void CallbackManager::invoke_player(Zeal::EqStructures::Entity* ent, callback_ty
 	for (auto& fn : player_spawn_functions[cb])
 		fn(ent);
 }
-void CallbackManager::invoke_outputtext(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, UINT channel)
+void CallbackManager::invoke_outputtext(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, short channel)
 {
 	for (auto& fn : output_text_functions)
 		fn(wnd, msg, channel);

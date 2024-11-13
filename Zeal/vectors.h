@@ -10,6 +10,7 @@ typedef vec_t vec3_t[3];
 typedef vec_t vec4_t[4];
 typedef vec_t vec5_t[5];
 
+static constexpr float kIndexError = FLT_MIN;  // Result for indexing errors.
 struct Vec2;
 struct Vec3;
 struct Vec4;
@@ -30,7 +31,7 @@ public:
 	inline Vec2& operator *= (const Vec2& v) { this->x *= v.x, this->y *= v.y; return *this; }
 	inline Vec2& operator /= (const Vec2& v) { this->x /= v.x; this->y /= v.y; return *this; }
 	inline float& operator [] (int index) { float f = FLT_MIN; if (index == 0) return x;  if (index == 1) return y; return f; }
-	const float& operator [] (int index) const { if (index == 0) return x;  if (index == 1) return y; return FLT_MIN; }
+	const float& operator [] (int index) const { if (index == 0) return x;  if (index == 1) return y; return kIndexError; }
 	//ImVec2 toImVec2() const { return ImVec2(x, y); }
 	inline double Length() { return sqrt(pow(x,2) + pow(y,2)); }
 	//static Vec2 toVec2(const ImVec2& v) { return Vec2(v.x, v.y); }
@@ -53,7 +54,7 @@ struct Vec3
 	inline bool operator == (const Vec3& v) { return x == v.x && y == v.y && z == v.z; }
 	inline bool operator != (const Vec3& v) { return x != v.x || y != v.y || z != v.z; }
 	inline float& operator [] (int index) { if (index == 0) return x;  if (index == 1) return y; if (index == 2) return z; return z; }
-	const float& operator [] (int index) const { if (index == 0) return x;  if (index == 1) return y; if (index == 2) return z; return FLT_MIN; }
+	const float& operator [] (int index) const { if (index == 0) return x;  if (index == 1) return y; if (index == 2) return z; return kIndexError; }
 	inline Vec3& operator += (const Vec3& v) { this->x += v.x; this->y += v.y; this->z += v.z; return *this; }
 	inline Vec3& operator -= (const Vec3& v) { this->x -= v.x; this->y -= v.y; this->z -= v.z; return *this; }
 	inline Vec3& operator *= (const Vec3& v) { this->x *= v.x; this->y *= v.y; this->z *= v.z; return *this; }
@@ -95,7 +96,7 @@ struct Vec4
 	inline bool operator == (const Vec4& v) { return x == v.x && y == v.y && z == v.z && w == v.w;	}
 	inline bool operator != (const Vec4& v) { return x != v.x || y != v.y || z != v.z || w != v.w; }
 	inline float& operator [] (int index) { if (index == 0) return x;  if (index == 1) return y; if (index == 2) return z; if (index == 3) return w; return w; }
-	const float& operator [] (int index) const { if (index == 0) return x;  if (index == 1) return y; if (index == 2) return z; if (index == 3) return w; return FLT_MIN; }
+	const float& operator [] (int index) const { if (index == 0) return x;  if (index == 1) return y; if (index == 2) return z; if (index == 3) return w; return kIndexError; }
 	inline Vec4& operator += (const Vec4& v) { this->x += v.x; this->y += v.y; this->z += v.z; this->w += v.w; return *this; }
 	inline Vec4& operator -= (const Vec4& v) { this->x -= v.x; this->y -= v.y; this->z -= v.z; this->w -= v.w; return *this; }
 	inline Vec4& operator *= (const Vec4& v) { this->x *= v.x; this->y *= v.y; this->z *= v.z; this->w *= v.w; return *this; }

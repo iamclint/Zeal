@@ -562,6 +562,7 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
 
     render_handle_cursor(device);
 
+    device.SetStreamSource(0, NULL, 0);  // Unbind final vertex buffer.
     device.SetTransform(D3DTS_PROJECTION, &projection_original);
     device.SetTransform(D3DTS_WORLD, &world_original);
     device.SetTransform(D3DTS_VIEW, &view_original);
