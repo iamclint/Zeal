@@ -579,7 +579,7 @@ void CameraMods::set_old_sens(bool enabled)
 void CameraMods::set_cam_lock(bool enabled)
 {
     cam_lock = enabled;
-    ZealService::get_instance()->ini->setValue<int>("Zeal", "CamLock", cam_lock);
+    ZealService::get_instance()->ini->setValue<bool>("Zeal", "CamLock", cam_lock);
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
 void CameraMods::set_pan_delay(int value_ms)
