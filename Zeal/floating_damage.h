@@ -30,13 +30,18 @@ public:
 	void callback_deferred();
 	void callback_render();
 	void set_enabled(bool enable);
+	void set_spells(bool enable);
+	void set_spellicons(bool enable);
 	bool enabled;
+	bool spell_icons;
+	bool spells;
 	void init_ui();
 	void draw_icon(int index, float x, float y, float opacity);
 	int get_active_damage_count(Zeal::EqStructures::Entity* ent);
 	FloatingDamage(class ZealService* zeal, class IO_ini* ini);
 	~FloatingDamage();
 private:
+
 	bool add_texture(std::string path);
 	std::vector<IDirect3DTexture8*> textures;
 	IDirect3DTexture8* load_texture(std::string path);

@@ -458,7 +458,7 @@
     <RelativePosition>true</RelativePosition>
     <!-- Pages are sized and positioned by their parent tab -->
     <Style_VScroll>true</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
+    <Style_HScroll>true</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <DrawTemplate>WDT_Def</DrawTemplate>
     <TabText>General</TabText>
@@ -484,7 +484,6 @@
     <Pieces>Zeal_HoverTimeout_Value</Pieces>
     <Pieces>Zeal_AltContainerTooltips</Pieces>
     <Pieces>Zeal_SpellbookAutoStand</Pieces>
-    <Pieces>Zeal_FloatingDamage</Pieces>
     <Pieces>Zeal_Timestamps_Label</Pieces>
     <Pieces>Zeal_VersionLabel</Pieces>
     <Pieces>Zeal_VersionValue</Pieces>

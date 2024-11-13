@@ -13,12 +13,14 @@ public:
 	void UpdateOptionsNameplate();
 	void UpdateOptionsCamera();
 	void UpdateOptionsGeneral();
+	void UpdateOptionsFloatingDamage();
 	void InitColors();
 	void InitGeneral();
 	void InitMap();
 	void InitCamera();
 	void InitTargetRing();
 	void InitNameplate();
+	void InitFloatingDamage();
 	void SaveColors();
 	void LoadColors();
 	DWORD GetColor(int index);

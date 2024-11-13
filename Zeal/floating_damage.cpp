@@ -129,7 +129,7 @@ int  FloatingDamage::get_active_damage_count(Zeal::EqStructures::Entity* ent)
 
 void FloatingDamage::callback_render()
 {
-	if (!Zeal::EqGame::is_in_game())
+	if (!Zeal::EqGame::is_in_game() || !spell_icons)
 		return;
 	std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, false);
 	Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
@@ -238,7 +238,8 @@ void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStru
 				sp_data = Zeal::EqGame::get_spell_mgr()->Spells[spell_id];
 //				Zeal::EqGame::print_chat("%s", sp_data->CastOnAnother);
 			}
-
+			if (spell_id > 0 && !spells)
+				return;
 			damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal, sp_data));
 		}
 	}
@@ -249,6 +250,17 @@ void FloatingDamage::set_enabled(bool _enabled)
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "FloatingDamage", _enabled);
 	enabled = _enabled;
 }
+void FloatingDamage::set_spells(bool _enabled)
+{
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "FloatingDamageSpells", _enabled);
+	spells = _enabled;
+}
+void FloatingDamage::set_spellicons(bool _enabled)
+{
+	ZealService::get_instance()->ini->setValue<bool>("Zeal", "FloatingDamageIcons", _enabled);
+	spell_icons = _enabled;
+}
+
 
 void FloatingDamage::draw_icon(int texture_index, float y, float x, float opacity)
 {
@@ -352,7 +364,13 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 	//mem::write<BYTE>(0x4A594B, 0x14);
 	if (!ini->exists("Zeal", "FloatingDamage"))
 		ini->setValue<bool>("Zeal", "FloatingDamage", true);
+	if (!ini->exists("Zeal", "FloatingDamageSpells"))
+		ini->setValue<bool>("Zeal", "FloatingDamageSpells", true);
+	if (!ini->exists("Zeal", "FloatingDamageIcons"))
+		ini->setValue<bool>("Zeal", "FloatingDamageIcons", true);
 	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
+	spells = ini->getValue<bool>("Zeal", "FloatingDamageSpells");
+	spell_icons = ini->getValue<bool>("Zeal", "FloatingDamageIcons");
 	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::AddDeferred);
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { add_damage(source, target, damage, heal, spell_id); });

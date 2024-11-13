@@ -43,7 +43,7 @@
 #include "crash_handler.h"
 #include "EntityManager.h"
 #include "patches.h"
-
 #include "Zeal.h" 
+#include "ZealSettings.h"
 
 extern HMODULE this_module;

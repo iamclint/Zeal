@@ -41,10 +41,12 @@ public:
 	void proc_rmousedown(int x, int y);
 	int pan_delay = 200;
 	float fov = 45;
+	bool cam_lock = true;
 	void set_pan_delay(int value_ms);
 	void set_fov(float fov);
 	void update_sensitivity();
 	void set_old_sens(bool enabled);
+	void set_cam_lock(bool enabled);
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:

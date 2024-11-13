@@ -358,9 +358,12 @@ void TargetRing::render_ring(Vec3 pos, float radius, DWORD color, IDirect3DTextu
 	setup_render_states();
 	device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
 	drawVertices({ pos.x, pos.y, pos.z + height }, ring_vertex_count, texture, worldMatrix, solid_vertices, texture_vertices);
-	drawVertices({ pos.x, pos.y, pos.z }, ring_vertex_count, nullptr, worldMatrix, solid_vertices, nullptr);
-	drawVertices({ pos.x, pos.y, pos.z }, cylinder_vertex_count, nullptr, worldMatrix, inner_cylinder_vertices, nullptr);
-	drawVertices({ pos.x, pos.y, pos.z }, cylinder_vertex_count, nullptr, worldMatrix, outer_cylinder_vertices, nullptr);
+	if (use_cone)
+	{
+		drawVertices({ pos.x, pos.y, pos.z }, ring_vertex_count, nullptr, worldMatrix, solid_vertices, nullptr);
+		drawVertices({ pos.x, pos.y, pos.z }, cylinder_vertex_count, nullptr, worldMatrix, inner_cylinder_vertices, nullptr);
+		drawVertices({ pos.x, pos.y, pos.z }, cylinder_vertex_count, nullptr, worldMatrix, outer_cylinder_vertices, nullptr);
+	}
 	device->SetTransform(D3DTS_WORLD, &originalWorldMatrix);
 	reset_render_states();
 	//delete[] texture_vertices;
@@ -394,10 +397,10 @@ void TargetRing::callback_render() {
 	// ### Auto Attack Indicator (fade/unfade target's color while autoattack turned on)###
 	if ((bool)(*(BYTE*)0x7f6ffe) && attack_indicator) // auto attack is enabled
 	{
-		if (currentTime - lastColorChanged >= 300) // Reset the timer every 300ms
+		if (currentTime - lastColorChanged >= (300.f * flash_speed)) // Reset the timer every 300ms
 			lastColorChanged = currentTime;
 
-		float elapsedTime = (currentTime - lastColorChanged) / 300.0f; // Get the time elapsed in the current cycle as a fraction
+		float elapsedTime = (currentTime - lastColorChanged) / (300.0f * flash_speed); // Get the time elapsed in the current cycle as a fraction
 		float fadeFactor;
 		if (elapsedTime < 0.5f)
 			fadeFactor = elapsedTime * 2; // Fade in during the first half of the cycle
@@ -466,6 +469,14 @@ float TargetRing::get_rotation_speed()
 {
 	return rotation_speed;
 }
+float TargetRing::get_flash_speed()
+{
+	return flash_speed;
+}
+bool TargetRing::get_cone()
+{
+	return use_cone;
+}
 float TargetRing::get_size()
 {
 	return outer_size;
@@ -504,6 +515,16 @@ void TargetRing::set_rotation_speed(float speed)
 void TargetRing::set_rotation_match(bool enable)
 {
 	rotate_match_heading = enable;
+	save_ini();
+}
+void TargetRing::set_cone(bool enable)
+{
+	use_cone = enable;
+	save_ini();
+}
+void TargetRing::set_flashspeed(float speed)
+{
+	flash_speed = speed;
 	save_ini();
 }
 void TargetRing::set_segments(int segments)
@@ -549,6 +570,8 @@ void TargetRing::save_ini()
 	ini.setValue<float>("TargetRing", "Size", outer_size);
 	ini.setValue<int>("TargetRing", "Segments", num_segments);
 	ini.setValue<std::string>("TargetRing", "Texture", texture_name);
+	ini.setValue<bool>("TargetRing", "Cone", use_cone);
+	ini.setValue<float>("TargetRing", "FlashSpeed", flash_speed);
 }
 
 void TargetRing::load_ini()
@@ -573,6 +596,13 @@ void TargetRing::load_ini()
 		ini.setValue<int>("TargetRing", "Segments", 128);
 	if (!ini.exists("TargetRing", "Texture"))
 		ini.setValue<std::string>("TargetRing", "Texture", "");
+	if (!ini.exists("TargetRing", "FlashSpeed"))
+		ini.setValue<float>("TargetRing", "FlashSpeed", 1);
+	if (!ini.exists("TargetRing", "Cone"))
+		ini.setValue<bool>("TargetRing", "Cone", true);
+
+	use_cone = ini.getValue<bool>("TargetRing", "Cone");
+	flash_speed = ini.getValue<float>("TargetRing", "FlashSpeed");
 	outer_size = ini.getValue<float>("TargetRing", "Size");
 	enabled = ini.getValue<bool>("TargetRing", "Enabled");
 	attack_indicator = ini.getValue<bool>("TargetRing", "AttackIndicator");

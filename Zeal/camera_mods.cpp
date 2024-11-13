@@ -382,6 +382,7 @@ void CameraMods::tick_key_move()
                     //    if (fabs(camera_math::angle_difference(zeal_cam_yaw, self->Heading)) > 20 && fps > 40)
                     //       self->Heading = zeal_cam_yaw;
                     //    else
+                        if (cam_lock)
                             zeal_cam_yaw = self->Heading;
                    // }
                 }
@@ -518,9 +519,11 @@ void CameraMods::load_settings(IO_ini* ini)
     if (!ini->exists("Zeal", "Fov"))
         ini->setValue<float>("Zeal", "Fov", fov);
     if (!ini->exists("Zeal", "OldSens"))
-        ini->setValue<float>("Zeal", "OldSens", use_old_sens);
-    
-    use_old_sens = ini->getValue<float>("Zeal", "OldSens");
+        ini->setValue<bool>("Zeal", "OldSens", use_old_sens);
+    if (!ini->exists("Zeal", "CamLock"))
+        ini->setValue<bool>("Zeal", "CamLock", true);
+    cam_lock = ini->getValue<bool>("Zeal", "CamLock");
+    use_old_sens = ini->getValue<bool>("Zeal", "OldSens");
     fov = ini->getValue<float>("Zeal", "Fov");
     enabled = ini->getValue<bool>("Zeal", "MouseSmoothing");
     user_sensitivity_x = ini->getValue<float>("Zeal", "MouseSensitivityX");
@@ -573,7 +576,12 @@ void CameraMods::set_old_sens(bool enabled)
     ZealService::get_instance()->ini->setValue<int>("Zeal", "OldSens", use_old_sens);
     ZealService::get_instance()->ui->options->UpdateOptions();
 }
-
+void CameraMods::set_cam_lock(bool enabled)
+{
+    cam_lock = enabled;
+    ZealService::get_instance()->ini->setValue<int>("Zeal", "CamLock", cam_lock);
+    ZealService::get_instance()->ui->options->UpdateOptions();
+}
 void CameraMods::set_pan_delay(int value_ms)
 {
    pan_delay = value_ms;

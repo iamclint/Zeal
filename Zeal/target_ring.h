@@ -54,6 +54,8 @@ public:
 	void set_indicator(bool enable);
 	void set_rotation_speed(float speed);
 	void set_rotation_match(bool enable);
+	void set_cone(bool enable);
+	void set_flashspeed(float speed);
 	void set_segments(int segments);
 	void set_texture(std::string name);
 	void set_size(float size);
@@ -71,10 +73,12 @@ public:
 	float get_rotation_speed();
 	float get_size();
 	int get_segments();
+	float get_flash_speed();
+	bool get_cone();
 	std::string get_texture();
 	void setup_render_states();
 	void reset_render_states();
-	
+
 private:
 	void drawVertices(Vec3 pos, DWORD vertex_count, IDirect3DTexture8* texture, D3DXMATRIX worldMatrix, SolidVertex* solid_vertices, TexturedVertex* texture_vertices);
 	float inner_percent=0.50f;
@@ -84,6 +88,8 @@ private:
 	bool rotate_match_heading = false;
 	float outer_size = 10.f;
 	int num_segments = 128;  // Adjust for smoothness of the ring
+	bool use_cone = true;
+	float flash_speed = 1.f;
 	std::string texture_name;
 	std::vector<RenderState> render_states;
 	void save_ini();

@@ -7,6 +7,7 @@
 	<Include>EQUI_Tab_Map.xml</Include>
 	<Include>EQUI_Tab_TargetRing.xml</Include>
 	<Include>EQUI_Tab_Nameplate.xml</Include>
+	<Include>EQUI_Tab_FloatingDamage.xml</Include>
 </Composite>
 <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
   <TabBox item="ZealOptionsTabs">
@@ -24,6 +25,7 @@
     <Pages>Tab_Map</Pages>
     <Pages>Tab_TargetRing</Pages>
 	<Pages>Tab_Nameplate</Pages>
+	<Pages>Tab_FloatingDamage</Pages>
 	<Pages>Tab_Colors</Pages>
   </TabBox>
   <Screen item="ZealOptions">
@@ -34,13 +36,14 @@
       <Y>10</Y>
     </Location>
     <Size>
-      <CX>480</CX>
+      <CX>540</CX>
       <CY>395</CY>
     </Size>
     <Text>Zeal Options</Text>
     <Style_VScroll>false</Style_VScroll>
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
+	<AutoStretch>true</AutoStretch>
     <TooltipReference />
     <DrawTemplate>WDT_Def</DrawTemplate>
     <Style_Titlebar>true</Style_Titlebar>

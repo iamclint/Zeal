@@ -240,6 +240,9 @@
     <ClInclude Include="ui_inputdialog.h">
       <Filter>Header Files\ui</Filter>
     </ClInclude>
+    <ClInclude Include="ZealSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -412,6 +415,9 @@
     </ClCompile>
     <ClCompile Include="ui_inputdialog.cpp">
       <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ZealSettings.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

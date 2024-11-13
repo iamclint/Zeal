@@ -250,7 +250,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
         {
             isDamage = true;
             damageData = { source, target, type, spell_id, damage, heal };
-            if (source->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 1000 || target->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 1000)
+            if (source->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500 || target->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500)
                 Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::trim_name(source->Name), Zeal::EqGame::trim_name(target->Name), damage);
         }
      });

@@ -204,6 +204,7 @@ void ui_options::InitUI()
 	InitTargetRing();
 	InitColors();
 	InitNameplate();
+	InitFloatingDamage();
 
 	isReady = true;
 	/*set the current states*/
@@ -269,7 +270,6 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_ShowHelm",				[](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::print_chat("Show helm toggle"); });
 	ui->AddCheckboxCallback(wnd, "Zeal_AltContainerTooltips",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tooltips->set_alt_all_containers(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_classes(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindowsHist",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetHist(wnd->Checked); });
@@ -278,6 +278,17 @@ void ui_options::InitGeneral()
 	ui->AddLabel(wnd, "Zeal_HoverTimeout_Value");
 	ui->AddLabel(wnd, "Zeal_VersionValue");
 }
+void ui_options::InitFloatingDamage()
+{
+	if (!wnd)
+	{
+		PrintUIError();
+		return;
+	}
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpells", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_spells(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpellIcons", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_spellicons(wnd->Checked); });
+}
 void ui_options::InitCamera()
 {
 	if (!wnd)
@@ -285,6 +296,7 @@ void ui_options::InitCamera()
 		PrintUIError();
 		return;
 	}
+	ui->AddCheckboxCallback(wnd, "Zeal_Cam_TurnLocked", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->set_cam_lock(wnd->Checked); } );
 	ui->AddCheckboxCallback(wnd, "Zeal_UseOldSens", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->camera_mods->set_old_sens(wnd->Checked); });
 	ui->AddSliderCallback(wnd, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->set_pan_delay(value * 4);
@@ -405,11 +417,13 @@ void ui_options::InitTargetRing()
 	ui->AddLabel(wnd, "Zeal_TargetRingSize_Value");
 	ui->AddLabel(wnd, "Zeal_TargetRingRotation_Value");
 	ui->AddLabel(wnd, "Zeal_TargetRingSegments_Value");
+	ui->AddLabel(wnd, "Zeal_TargetRingFlash_Value");
 
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRing", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingAttackIndicator", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->set_indicator(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingForward", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->set_rotation_match(wnd->Checked); });
-
+	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingCone", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->target_ring->set_cone(wnd->Checked); });
+	
 	ui->AddComboCallback(wnd, "Zeal_TargetRingTexture_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		if (value > 0)
 		{
@@ -425,6 +439,12 @@ void ui_options::InitTargetRing()
 		{
 			ZealService::get_instance()->target_ring->set_texture("");
 		}
+	});
+	
+	ui->AddSliderCallback(wnd, "Zeal_TargetRingFlash_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		float val = ScaleSliderToFloat(value, 0, 5, wnd);
+		ZealService::get_instance()->target_ring->set_flashspeed(val);
+		ui->SetLabelValue("Zeal_TargetRingFlash_Value", "%.2f", val);
 	});
 	ui->AddSliderCallback(wnd, "Zeal_TargetRingFill_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		float val = ScaleSliderToFloat(value, 0, 1, wnd);
@@ -483,7 +503,7 @@ void ui_options::UpdateOptions()
 	UpdateOptionsTargetRing();
 	UpdateOptionsNameplate();
 	UpdateOptionsMap();
-
+	UpdateOptionsFloatingDamage();
 }
 
 void ui_options::UpdateOptionsGeneral()
@@ -507,7 +527,6 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_Escape", ZealService::get_instance()->ini->getValue<bool>("Zeal", "Escape"));
 	ui->SetChecked("Zeal_AltContainerTooltips", ZealService::get_instance()->tooltips->all_containers);
 	ui->SetChecked("Zeal_SpellbookAutoStand", ZealService::get_instance()->movement->spellbook_autostand);
-	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled);
 }
 void ui_options::UpdateOptionsCamera()
 {
@@ -516,6 +535,7 @@ void ui_options::UpdateOptionsCamera()
 		PrintUIError();
 		return;
 	}
+	ui->SetChecked("Zeal_Cam_TurnLocked", ZealService::get_instance()->camera_mods->cam_lock);
 	ui->SetSliderValue("Zeal_PanDelaySlider", ZealService::get_instance()->camera_mods->pan_delay > 0.f ? ZealService::get_instance()->camera_mods->pan_delay / 4 : 0.f);
 	ui->SetSliderValue("Zeal_ThirdPersonSlider_Y", GetSensitivityForSlider(&ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd));
 	ui->SetSliderValue("Zeal_ThirdPersonSlider_X", GetSensitivityForSlider(&ZealService::get_instance()->camera_mods->user_sensitivity_x_3rd));
@@ -541,10 +561,13 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetChecked("Zeal_TargetRing", ZealService::get_instance()->target_ring->get_enabled());
 	ui->SetChecked("Zeal_TargetRingAttackIndicator", ZealService::get_instance()->target_ring->get_indicator());
 	ui->SetChecked("Zeal_TargetRingForward", ZealService::get_instance()->target_ring->get_rotation_match());
+	ui->SetChecked("Zeal_TargetRingCone", ZealService::get_instance()->target_ring->get_cone());
 	ui->SetSliderValue("Zeal_TargetRingFill_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->get_pct(), 0, 1, ui->GetSlider("Zeal_TargetRingFill_Slider")));
 	ui->SetSliderValue("Zeal_TargetRingSize_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->get_size(), 0, 20, ui->GetSlider("Zeal_TargetRingSize_Slider")));
 	ui->SetSliderValue("Zeal_TargetRingRotation_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->get_rotation_speed(), -1, 1, ui->GetSlider("Zeal_TargetRingSize_Slider")));
+	ui->SetSliderValue("Zeal_TargetRingFlash_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->get_flash_speed(), 1, 5, ui->GetSlider("Zeal_TargetRingFlash_Slider")));
 	ui->SetSliderValue("Zeal_TargetRingSegments_Slider", static_cast<int>(ZealService::get_instance()->target_ring->get_segments()));
+	ui->SetLabelValue("Zeal_TargetRingFlash_Value", "%.2f", ZealService::get_instance()->target_ring->get_flash_speed());
 	ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", ZealService::get_instance()->target_ring->get_pct());
 	ui->SetLabelValue("Zeal_TargetRingSegments_Value", "%i", ZealService::get_instance()->target_ring->get_segments());
 	ui->SetLabelValue("Zeal_TargetRingRotation_Value", "%.2f", ZealService::get_instance()->target_ring->get_rotation_speed());
@@ -567,6 +590,13 @@ void ui_options::UpdateOptionsNameplate()
 	ui->SetChecked("Zeal_NameplateTargetColor", ZealService::get_instance()->nameplate->nameplateTargetColor);
 	ui->SetChecked("Zeal_NameplateTargetMarker", ZealService::get_instance()->nameplate->nameplateTargetMarker);
 	ui->SetChecked("Zeal_NameplateTargetHealth", ZealService::get_instance()->nameplate->nameplateTargetHealth);
+}
+
+void ui_options::UpdateOptionsFloatingDamage()
+{
+	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled);
+	ui->SetChecked("Zeal_FloatingSpells", ZealService::get_instance()->floating_damage->spells);
+	ui->SetChecked("Zeal_FloatingSpellIcons", ZealService::get_instance()->floating_damage->spell_icons);
 }
 
 void ui_options::UpdateOptionsMap()
