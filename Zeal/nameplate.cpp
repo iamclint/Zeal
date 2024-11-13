@@ -10,6 +10,12 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	if (!spawn->ActorInfo->DagHeadPoint) { return; }
 	if (!spawn->ActorInfo->DagHeadPoint->StringSprite) { return; }
 	ui_options* options = ZealService::get_instance()->ui->options.get();
+	uint8_t isInGroup = Zeal::EqGame::GroupInfo->is_in_group();
+	auto raidSize = Zeal::EqGame::RaidInfo->MemberCount;
+	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+	Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
+	Zeal::EqStructures::Entity** groupmembers = reinterpret_cast<Zeal::EqStructures::Entity**>(Zeal::EqGame::GroupInfo->EntityList);
+	const Zeal::EqStructures::RaidMember* raidMembers = &(Zeal::EqGame::RaidInfo->MemberList[0]);
 	Zeal::EqStructures::EQARGBCOLOR LDcolor = options->GetColor(2); //0xFFFF0000; //LinkDead - Red
 	Zeal::EqStructures::EQARGBCOLOR AFKcolor = options->GetColor(0); //0xFFFF8000; //AFK - Orange
 	Zeal::EqStructures::EQARGBCOLOR PVPcolor = options->GetColor(6); //0xFFFF0000; //PVP - Red
@@ -22,25 +28,19 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 	Zeal::EqStructures::EQARGBCOLOR Adventurercolor = options->GetColor(9); //0xFF3D6BDC; //Not in Guild Member - Default Blue
 	Zeal::EqStructures::EQARGBCOLOR NpcCorpsecolor = options->GetColor(10); //0xFF000000; //Npc Corpse - Black
 	Zeal::EqStructures::EQARGBCOLOR PlayersCorpsecolor = options->GetColor(11); //0xFFFFFFFF; //Players Corpse - White Light Purple
-	Zeal::EqStructures::EQARGBCOLOR Targetcolor = options->GetColor(18); //0xFFFFFFFF; //Players Corpse - White Light Purple
+	Zeal::EqStructures::EQARGBCOLOR Targetcolor = options->GetColor(18); //0xFFFF80FF; //Target Color - Default Pink
 	if (nameplateTargetColor) {
-		if (spawn == Zeal::EqGame::get_target()) {
+		if (spawn == target) {
 			spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Targetcolor;
 			return;
 		}
 	}
-	if (spawn == Zeal::EqGame::get_target()) //Leave blinking indicator on target
+	if (spawn == target) //Leave blinking indicator on target
 		return;
 	switch (spawn->Type) {
 	case Zeal::EqEnums::EntityTypes::Player: //Players
 		if (nameplateColors) 
 		{
-			uint8_t isInGroup = Zeal::EqGame::GroupInfo->is_in_group();
-			auto raidSize = Zeal::EqGame::RaidInfo->MemberCount;
-			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-			Zeal::EqStructures::Entity** groupmembers = reinterpret_cast<Zeal::EqStructures::Entity**>(Zeal::EqGame::GroupInfo->EntityList);
-			const Zeal::EqStructures::RaidMember* raidMembers = &(Zeal::EqGame::RaidInfo->MemberList[0]);
-
 			if (spawn->IsLinkDead == 1) { //LinkDead
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = LDcolor;
 				return;
@@ -63,7 +63,7 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 
 			if (isInGroup)
 			{
-				if (self == spawn)
+				if (spawn == self)
 				{
 					self->ActorInfo->DagHeadPoint->StringSprite->Color = Groupcolor;
 					return;
@@ -71,17 +71,20 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 				for (int i = 0; i < 5; i++)
 				{
 					Zeal::EqStructures::Entity* groupmember = groupmembers[i];
-					if (groupmember == spawn)
+					if (spawn == groupmember)
 					{
-						spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Groupcolor;
+						if (!groupmember)
+							continue;
+						groupmember->ActorInfo->DagHeadPoint->StringSprite->Color = Groupcolor;
 						return;
 					}
+					continue;
 				}
 			}
 
 			if (raidSize > 1)  //RaidMember
 			{
-				if (self == spawn)
+				if (spawn == self)
 				{
 					self->ActorInfo->DagHeadPoint->StringSprite->Color = Raidcolor;
 					return;
@@ -124,11 +127,37 @@ void NamePlate::HandleTint(Zeal::EqStructures::Entity* spawn)
 			}
 
 		}
+		if (nameplateconColors) { //Con Colors for Players if Nameplate Colors system off, Nameplate Con Colors on
+			if (spawn != Zeal::EqGame::get_self()) {
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Zeal::EqGame::GetLevelCon(spawn);
+				return;
+			}
+		}
 		break;
 	case Zeal::EqEnums::EntityTypes::NPC: //NPC
+		if (nameplateColors && isInGroup)
+		{
+			if (spawn->PetOwnerSpawnId == self->SpawnId)//Self Pet
+			{
+				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Groupcolor;//Self Pet to Groupcolor
+				return;
+			}
+			for (int i = 0; i < 5; i++)//GroupMember Pet
+			{
+				Zeal::EqStructures::Entity* groupmember = groupmembers[i];
+				if (!groupmember)
+					continue;
+				if (spawn->PetOwnerSpawnId == groupmember->SpawnId)
+				{
+					spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Groupcolor;//GroupMember Pet to Groupcolor
+					return;
+				}
+			}
+		}
 		if (nameplateconColors) {
 			if (spawn != Zeal::EqGame::get_self()) //All NPC entities
 				spawn->ActorInfo->DagHeadPoint->StringSprite->Color = Zeal::EqGame::GetLevelCon(spawn); //Level Con Color for NPCs
+			return;
 		}
 		break;
 	case Zeal::EqEnums::EntityTypes::NPCCorpse: //NPC Corpse
