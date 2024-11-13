@@ -242,10 +242,10 @@ namespace Zeal
 
 			/* 0x0000 */ BaseVTable* vtbl;
 			/* 0x0004 */ DWORD MouseHoverTimer;
-			/* 0x0008 */ DWORD Unknown0008;
-			/* 0x000C */ DWORD Unknown000C;
-			/* 0x0010 */ BYTE Unknown0010;
-			/* 0x0011 */ BYTE Unknown0011;
+			/* 0x0008 */ DWORD FadeDelay;
+			/* 0x000C */ DWORD FadeDuration;
+			/* 0x0010 */ BYTE FadedAlpha;  // Alpha transparency value when faded
+			/* 0x0011 */ BYTE IsNotFaded;  // Set to 0 when faded, 1 when not faded
 			/* 0x0012 */ BYTE IsLocked;
 			/* 0x0013 */ BYTE Unknown0013;
 			/* 0x0014 */ PVOID Unknown0014;
@@ -275,8 +275,10 @@ namespace Zeal
 			/* 0x006C */ ARGBCOLOR ToolTipTextColor;
 			/* 0x006C */ BYTE Unknown0068[20];
 			/* 0x0084 */ CXSTR XmlToolTipText;
-			/* 0x0088 */ BYTE Unknown0088[22];
-			/* 0x009E */ BYTE AlphaTransparency;
+			/* 0x0088 */ BYTE Unknown0088[20];
+			/* 0x009C */ BYTE UnfadedAlpha;  // Alpha transparency value when active
+			/* 0x009D */ BYTE Unknown009d;
+			/* 0x009E */ BYTE AlphaTransparency;  // Current Alpha transparency
 			/* 0x009F */ BYTE Unknown009F;
 			/* 0x00A0 */ BYTE ZLayer;
 			/* 0x00A1 */ BYTE Unknown00A1[7];

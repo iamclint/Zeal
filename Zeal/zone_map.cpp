@@ -6,6 +6,8 @@
 #include "zone_map_data.h"
 #include "bitmap_font.h"
 #include "default_spritefont.h"
+#define DIRECTINPUT_VERSION 0x0800
+#include "dinput.h"
 #include <fstream>
 #include <string>
 
@@ -13,8 +15,16 @@
 // Possible enhancements:
 // - Look into intermittent z-depth clipping due to walls or heads/faces
 // - External map window issues:
-//   - window message queue is not working and so not supporting window
-//     resizing or things like window panning or scroll wheel zooming
+//   - Window message queue was not receiving expected window resize messages,
+//     so using fixed window sizes set by the options tab
+//   - Was unable to transfer focus to the main window for keyboard input, so using an internal
+//     command router for hotkeys. This does not allow typing chat messages currently.
+// - Interactive mode:
+//   - TAKP eqgame.exe code appears to ignore the mouse button even though callbacks exist
+//   - Ideally would render map into the window background at the proper time, but that
+//     requires more investigation around the deferred calls. As a result, the border can
+//     be on top while the map render is hidden behind other UI elements.
+
 
 // Implementation notes:
 //
@@ -121,6 +131,28 @@ void ZoneMap::render_update_viewport(IDirect3DDevice8& device) {
     viewport = D3DVIEWPORT8{ .X = rect_left, .Y = rect_top,
         .Width = rect_right - rect_left, .Height = rect_bottom - rect_top,
         .MinZ = 0.0f, .MaxZ = 1.0f };
+
+    ui_synchronize_window();
+}
+
+// Synchronize the UI window client rect with the viewport.
+void ZoneMap::ui_synchronize_window() {
+    if (external_enabled || !map_interactive_enabled)
+        return;
+
+    Zeal::EqUI::CXRect rect;
+    Zeal::EqGame::EqGameInternal::CXWndGetInnerRect(wnd, 0, &rect);
+    if (viewport.X == rect.Left && viewport.Y == rect.Top && viewport.Width == (rect.Right - rect.Left) &&
+            viewport.Height == rect.Bottom - rect.Top)
+        return;
+
+    // Add the border padding.
+    rect.Left = rect.Left - wnd->Location.Left;
+    rect.Top = rect.Top - wnd->Location.Top;
+    rect.Right = rect.Right - wnd->Location.Right;
+    rect.Bottom = rect.Bottom - wnd->Location.Bottom;
+    Zeal::EqGame::EqGameInternal::CXWndMoveAndInvalidate(wnd, 0, viewport.X - rect.Left, viewport.Y - rect.Top,
+        viewport.X + viewport.Width - rect.Right, viewport.Y + viewport.Height - rect.Bottom);
 }
 
 // Sets the primary mat_model2world matrix and x,y clip limits in model space.
@@ -165,11 +197,11 @@ void ZoneMap::render_update_transforms(const ZoneMapData& zone_map_data) {
     const float position_x = -position.y;
     const bool full_width = map_width * scale_factor < viewport_width;
     const bool align_left = full_width ? (map_alignment_state == AlignmentType::kLeft) :
-                (position_x - zone_map_data.min_x) * scale_factor < viewport_width * 0.5f;
+        (position_x - zone_map_data.min_x) * scale_factor < viewport_width * 0.5f;
     const bool align_right = full_width ? (map_alignment_state == AlignmentType::kRight) :
-                (zone_map_data.max_x - position_x) * scale_factor < viewport_width * 0.5f;
-    const bool center_on_position_x = always_align_to_center || 
-                    (!full_width && !align_left && !align_right);
+        (zone_map_data.max_x - position_x) * scale_factor < viewport_width * 0.5f;
+    const bool center_on_position_x = always_align_to_center ||
+        (!full_width && !align_left && !align_right);
 
     float offset_x = 0;
     if (center_on_position_x) {
@@ -183,11 +215,24 @@ void ZoneMap::render_update_transforms(const ZoneMapData& zone_map_data) {
     else
         offset_x = -(zone_map_data.max_x + zone_map_data.min_x) * 0.5f * scale_factor;
 
+    // If manual mode is enabled, overwrite all the calcs we just did.
+    if (!is_autocenter_enabled()) {
+        // Note the positions are swapped and negated in the calculation.
+        float manual_world_x = manual_screen_pt.x - static_cast<float>(viewport.X + viewport.Width * 0.5f);
+        float manual_world_y = manual_screen_pt.y - static_cast<float>(viewport.Y + viewport.Height * 0.5f);
+        offset_x = manual_world_x + manual_position.y * scale_factor;
+        offset_y = manual_world_y + manual_position.x * scale_factor;
+    }
+
     D3DXMATRIX mat_scale;
     D3DXMatrixScaling(&mat_scale, scale_factor, scale_factor, 1.f);
     D3DXMATRIX mat_offset;
     D3DXMatrixTranslation(&mat_offset, offset_x, offset_y, 0.0f);
     mat_model2world = mat_scale * mat_offset;
+
+    D3DXMatrixScaling(&mat_scale, 1.f/scale_factor, 1.f/scale_factor, 1.f);
+    D3DXMatrixTranslation(&mat_offset, -offset_x, -offset_y, 0.0f);
+    mat_world2model = mat_offset * mat_scale;
 
     // Back-calculate and store the clip limits in model space.
     clip_min_x = max(static_cast<float>(zone_map_data.min_x),
@@ -275,8 +320,7 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
 
     BYTE* data = nullptr;
     if (FAILED(line_vertex_buffer->Lock(0, 0, &data, D3DLOCK_DISCARD))) {
-        enabled = false;
-        render_release_resources();
+        set_enabled(false);  // Disable and release resources.
         return;
     }
     memcpy(data, background_vertices, background_buffer_size);
@@ -516,6 +560,8 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
 
     render_positions(device);
 
+    render_handle_cursor(device);
+
     device.SetTransform(D3DTS_PROJECTION, &projection_original);
     device.SetTransform(D3DTS_WORLD, &world_original);
     device.SetTransform(D3DTS_VIEW, &view_original);
@@ -680,6 +726,153 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
     bitmap_font->queue_string(short_label, Vec2(label_x, label_y), true, font_color);
     if (label_type == LabelType::AddMarker)
         bitmap_font->queue_string("+", Vec2(label_screen[0], label_screen[1]), true, font_color);
+}
+
+// Resets the mouse state to an idle state.
+void ZoneMap::reset_mouse() {
+    restore_cursor();
+    mouse_drag_enabled = false;
+}
+
+// Continuously track the mouse to keep position up to date and handle dragging.
+void ZoneMap::update_mouse() {
+    POINT new_mouse_pt =
+        POINT({ .x = *Zeal::EqGame::mouse_client_x, .y = *Zeal::EqGame::mouse_client_y });
+    if (external_enabled) {
+        POINT cursor;
+        GetCursorPos(&cursor);  // This returns absolute screen x, y.
+        POINT corner = { 0 };
+        ClientToScreen(external_hwnd, &corner);
+        new_mouse_pt.x = cursor.x - corner.x;  // Translate to client relative x, y.
+        new_mouse_pt.y = cursor.y - corner.y;  // (the viewport is client relative)
+    }
+
+    int delta_screen_x = new_mouse_pt.x - mouse_pt.x;
+    int delta_screen_y = new_mouse_pt.y - mouse_pt.y;
+    mouse_pt = new_mouse_pt;
+
+    // Clear state and ignore mouse if it is has left our viewport.
+    if (mouse_pt.x < viewport.X || mouse_pt.x >= (viewport.X + viewport.Width) ||
+        mouse_pt.y < viewport.Y || mouse_pt.y >= (viewport.Y + viewport.Height)) {
+        mouse_drag_enabled = false;
+        restore_cursor();
+        return;
+    }
+
+    bool lmb = external_enabled ? (GetAsyncKeyState(VK_LBUTTON) & 0x8000) : *Zeal::EqGame::is_left_mouse_down;
+    mouse_drag_enabled = mouse_drag_enabled && lmb;  // Reset when button is released.
+    if (mouse_drag_enabled) {
+        // Polish: Clamp these moves so the map can't be completely pushed off screen.
+        manual_position.x += scale_pixels_to_model(static_cast<float>(delta_screen_y));  // Swap x,y.
+        manual_position.y += scale_pixels_to_model(static_cast<float>(delta_screen_x));
+    }
+}
+
+
+void ZoneMap::render_handle_cursor(IDirect3DDevice8& device) {
+    if (!external_enabled && !map_interactive_enabled)
+        return;
+
+    auto xyz = transform_screen_to_model(static_cast<float>(mouse_pt.x), static_cast<float>(mouse_pt.y));
+
+    const int x = static_cast<int>(xyz[0] + 0.5f);
+    const int y = static_cast<int>(xyz[1] + 0.5f);
+    const float xf = static_cast<float>(x);
+    const float yf = static_cast<float>(y);
+    if (xf > clip_min_x && xf < clip_max_x && yf > clip_min_y && yf < clip_max_y)
+    {
+        if (!external_enabled)
+            hide_cursor();
+        char loc_cursor[20];
+        snprintf(loc_cursor, sizeof(loc_cursor), "(%i, %i)", -y, -x);
+        render_label_text(loc_cursor, y, x, D3DCOLOR_XRGB(240, 240, 128), LabelType::AddMarker);
+    }
+    else
+        restore_cursor();
+}
+
+void ZoneMap::hide_cursor() {
+    mem::write<byte>(0x53edef, 0xEB);
+    cursor_hidden = true;
+}
+
+void ZoneMap::restore_cursor() {
+    if (cursor_hidden) {
+        cursor_hidden = false;
+        mem::write<byte>(0x53edef, 0x75);
+    }
+}
+
+void ZoneMap::process_left_mouse_button_down(int16_t mouse_x, int16_t mouse_y) {
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if ((!map_interactive_enabled && !external_enabled) || !self || zone_id == kInvalidZoneId)
+        return;
+
+    manual_position = self->Position;
+    auto xyz = transform_model_to_screen(Vec3(-manual_position.y, -manual_position.x, manual_position.z));
+    manual_screen_pt = POINT({ .x = static_cast<int>(xyz.x), .y = static_cast<int>(xyz.y) });
+    mouse_drag_enabled = true;
+}
+
+void ZoneMap::process_right_mouse_button_down(int16_t mouse_x, int16_t mouse_y) {
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if ((!map_interactive_enabled && !external_enabled) || !self || zone_id == kInvalidZoneId)
+        return;
+
+    enable_autocenter();
+    mouse_drag_enabled = false;
+}
+
+void ZoneMap::process_wheel_mouse_button_down(int16_t mouse_x, int16_t mouse_y) {
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if ((!map_interactive_enabled && !external_enabled) || !self || zone_id == kInvalidZoneId)
+        return;
+
+    auto xyz = transform_screen_to_model(static_cast<float>(mouse_x), static_cast<float>(mouse_y));
+    const int x = static_cast<int>(xyz[0] + 0.5f);
+    const int y = static_cast<int>(xyz[1] + 0.5f);
+    set_marker(-y, -x, nullptr);  // Swap and negate x and y
+}
+
+
+void ZoneMap::process_mouse_wheel(int16_t mouse_delta, uint16_t flags, int16_t mouse_x, int16_t mouse_y) {
+    int mouse_steps = mouse_delta / 120;  // Mouse standard is 120/step.
+    float zoom_delta = max(0.5f, std::floorf(zoom_factor * 0.25)) * mouse_steps;
+    int zoom_percent = static_cast<int>((zoom_factor + zoom_delta) * 100);
+    set_zoom(zoom_percent);
+
+    // If zone data is available, perform a more advanced zoom to center the zoom at the mouse locs.
+    const ZoneMapData* zone_map_data = get_zone_map(zone_id);
+    if (!zone_map_data) {
+        return;
+    }
+
+    POINT corner_pt = { 0 };
+    if (external_enabled)
+        ClientToScreen(external_hwnd, &corner_pt);
+    POINT wheel_pt = { .x = mouse_x - corner_pt.x, .y = mouse_y - corner_pt.y };
+    auto xyz = transform_screen_to_model(static_cast<float>(wheel_pt.x), static_cast<float>(wheel_pt.y));
+
+    const int x = static_cast<int>(xyz[0] + 0.5f);
+    const int y = static_cast<int>(xyz[1] + 0.5f);
+    const float xf = static_cast<float>(x);
+    const float yf = static_cast<float>(y);
+    if ((xf < clip_min_x) || (xf > clip_max_x) || (yf < clip_min_y) || (yf > clip_max_y))
+        return;
+
+    manual_position = Vec3(-xyz[1], -xyz[0], xyz[2]);  // Swap and negate x and y
+    manual_screen_pt = wheel_pt;
+}
+
+
+void ZoneMap::enable_autocenter() {
+    // Auto-center is enabled by disabling manual mode with invalid values.
+    manual_screen_pt = POINT({ .x = kInvalidScreenValue, .y = kInvalidScreenValue });
+    manual_position = Vec3(0, 0, 0);
+}
+
+bool ZoneMap::is_autocenter_enabled() const {
+    return (manual_screen_pt.x == kInvalidScreenValue || manual_screen_pt.y == kInvalidScreenValue);
 }
 
 // Adds vertices to mark a position at the map coordinates.
@@ -859,7 +1052,7 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
 
     const float size = convert_size_fraction_to_model(position_size);
 
-    // TODO: Review color coding to be more distinct. Possibly by class.
+    // Polish item: Review color coding to be more distinct. Possibly by class.
     const DWORD kUngrouped = Zeal::EqStructures::RaidMember::kRaidUngrouped;
     const D3DCOLOR kColorLeader = D3DCOLOR_XRGB(255, 153, 153);
     const D3DCOLOR kColorUngrouped = D3DCOLOR_XRGB(240, 240, 240);
@@ -966,17 +1159,19 @@ float ZoneMap::convert_size_fraction_to_model(float size_fraction) const {
     return scale_pixels_to_model(size);
 }
 
-// Perform a software (manual) vertex transformation from model (map data) to world.
-Vec3 ZoneMap::transform_model_to_world(const Vec3& model) const {
+// Applies the transform matrix to a vector to produce an output vector.
+Vec3 ZoneMap::transform_matrix(const D3DXMATRIX& matrix, const Vec3& vec) const {
     const float w = 1.0f;  // Needed for translation.
     return Vec3(
-        mat_model2world(0, 0) * model[0] + mat_model2world(1, 0) * model[1]
-            + mat_model2world(2, 0) * model[2] + mat_model2world(3, 0) * w,
-        mat_model2world(0, 1) * model[0] + mat_model2world(1, 1) * model[1]
-            + mat_model2world(2, 1) * model[2] + mat_model2world(3, 1) * w,
-        mat_model2world(0, 2) * model[0] + mat_model2world(1, 2) * model[1]
-            + mat_model2world(2, 2) * model[2] + mat_model2world(3, 2) * w
-        );
+        matrix(0, 0) * vec[0] + matrix(1, 0) * vec[1] + matrix(2, 0) * vec[2] + matrix(3, 0) * w,
+        matrix(0, 1) * vec[0] + matrix(1, 1) * vec[1] + matrix(2, 1) * vec[2] + matrix(3, 1) * w,
+        matrix(0, 2) * vec[0] + matrix(1, 2) * vec[1] + matrix(2, 2) * vec[2] + matrix(3, 2) * w
+    );
+}
+
+// Perform a software (manual) vertex transformation from model (map data) to world.
+Vec3 ZoneMap::transform_model_to_world(const Vec3& model) const {
+    return transform_matrix(mat_model2world, model);
 }
 
 // Perform a software (manual) vertex transformation from model (map data) to absolute screen.
@@ -987,6 +1182,20 @@ Vec3 ZoneMap::transform_model_to_screen(const Vec3& model) const {
     screen[1] += static_cast<float>(viewport.Y + viewport.Height * 0.5f);
     return screen;
 }
+
+// Perform a software (manual) vertex transformation from world (pixels) to model (map data).
+Vec3 ZoneMap::transform_world_to_model(const Vec3& world) const {
+    return transform_matrix(mat_world2model, world);
+}
+
+// Perform a software (manual) vertex transformation from absolute screen to model (map data).
+Vec3 ZoneMap::transform_screen_to_model(float x, float y, float z) const {
+    float world_x = x - static_cast<float>(viewport.X + viewport.Width * 0.5f);
+    float world_y = y - static_cast<float>(viewport.Y + viewport.Height * 0.5f);
+
+    return transform_world_to_model(Vec3(world_x, world_y, z));
+}
+
 
 // Updates the marker vertices if enabled. 
 void ZoneMap::render_update_marker_buffer(IDirect3DDevice8& device) {
@@ -1146,10 +1355,11 @@ void ZoneMap::callback_render() {
     if (!enabled || !Zeal::EqGame::is_in_game())
         return;
 
-    // The external window message queue does not appear to be working.
+    // The external window message queue isn't reliable for resize messages.
     // The call below manages the external window (if active) and keeps the
     // D3D render objects in sync with the window size.
     synchronize_external_window();
+    update_mouse();  // Track mouse movement (dragging, button release).
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     IDirect3DDevice8* device = external_enabled ?
@@ -1367,6 +1577,8 @@ void ZoneMap::set_enabled(bool _enabled, bool update_default) {
         render_release_resources();  // Also flush font for now.
         zone_id = kInvalidZoneId;  // Triggers update when re-enabled.
         hide_external_window();
+        ui_hide();
+        restore_cursor();
     }
     else if (!enabled && external_enabled) {
         render_release_resources();  // Just in case cleanup.
@@ -1375,6 +1587,9 @@ void ZoneMap::set_enabled(bool _enabled, bool update_default) {
             Zeal::EqGame::print_chat("Falling back to internal map overlay");
             external_enabled = false;
         }
+    }
+    else if (!enabled && map_interactive_enabled) {
+        ui_show();
     }
     enabled = _enabled;
 
@@ -1412,6 +1627,21 @@ void ZoneMap::set_show_raid(bool enable, bool update_default) {
 
 void ZoneMap::set_show_all_names_override(bool flag) {
     map_show_all_names_override = flag;
+}
+
+void ZoneMap::set_interactive_enable(bool enable, bool update_default) {
+    map_interactive_enabled = enable;
+    if (map_interactive_enabled) {
+        if (!external_enabled)
+            ui_show();
+    }
+    else {
+        ui_hide();
+        enable_autocenter();
+        reset_mouse();
+    }
+
+    // Not currently supporting a persistent setting.
 }
 
 void ZoneMap::set_show_grid(bool enable, bool update_default) {
@@ -1626,7 +1856,12 @@ void ZoneMap::toggle_zoom() {
         }
     }
     clear_markers(false);  // Marker size is dependent on scale_factor.
+    if (!is_autocenter_enabled()) {  // Toggle back to auto-center at 1x zoom.
+        enable_autocenter();
+        zoom_factor = 1.f;
+    }
     zoom_factor = new_zoom_factor;
+    enable_autocenter(); 
     update_ui_options();
 }
 
@@ -1815,6 +2050,7 @@ bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, boo
 
     render_release_resources(false);  // Invalidate buffers but leave font (slewing map size).
     zone_id = kInvalidZoneId;  // Triggers reload.
+    enable_autocenter();  // Manual screen coordinates are invalid. Just flush.
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini) {
         ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectTop", top);
@@ -2238,6 +2474,8 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("line_count: %i, grid: %i, line: %i, position: %i, marker: %i, font: %i (%s)", line_count,
         grid_line_count, line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr,
         bitmap_font != nullptr, font_filename.c_str());
+    Zeal::EqGame::print_chat("interactive: %i, (%i, %i) = (%f, %f)", map_interactive_enabled,
+                    manual_screen_pt.x, manual_screen_pt.y, manual_position.x, manual_position.y);
     Zeal::EqGame::print_chat("external_monitor_left_offset: %i, monitor_left_offset: %i, monitor_top_offset: %i",
         external_enabled, external_monitor_left_offset, external_monitor_top_offset);
     Zeal::EqGame::print_chat("hinstance: 0x%08x, hwnd: 0x%08x, d3d: 0x%08x, d3ddev: 0x%08x",
@@ -2341,6 +2579,7 @@ void ZoneMap::callback_zone() {
     map_level_zone_id = kInvalidZoneId;
     map_level_index = 0;
     zoom_factor = 1.f;  // Reset for more consistent behavior.
+    enable_autocenter();
 }
 
 void ZoneMap::release_font() {
@@ -2356,6 +2595,122 @@ void ZoneMap::callback_dx_reset() {
     set_enabled(false, false);  // Turn off the map to be safe.
 }
 
+
+bool ZoneMap::ui_is_visible() const {
+    if (!wnd)
+        return false;
+    return wnd->IsVisible;
+}
+
+void ZoneMap::ui_hide()
+{
+    if (wnd) {
+        wnd->show(0, 0);
+        wnd->IsVisible = false;
+    }
+}
+
+bool ZoneMap::ui_show()
+{
+    if (!wnd || wnd->IsVisible)
+        return false;
+    wnd->show(0, 1);
+    wnd->IsVisible = true;
+    return true;
+}
+
+void ZoneMap::ui_clean()
+{
+    if (wnd)
+    {
+        wnd->show(0, 0);
+        wnd->Deconstruct();
+        wnd = nullptr;
+    }
+}
+void ZoneMap::ui_deactivate()
+{
+    ui_hide();
+}
+
+
+// Disable drawing a background (make it transparent).
+static int __fastcall DrawBackground(Zeal::EqUI::EQWND* wnd, int unusedEDX) {
+    return 0;
+}
+
+// Use the mouse scroll wheel event since it has undergone proper zlayer window filtering.
+static int __fastcall HandleWheelMove(Zeal::EqUI::EQWND* wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, int32_t scroll_delta, uint32_t unused4) {
+    ZealService* zeal = ZealService::get_instance();
+    if (zeal && zeal->zone_map)
+        zeal->zone_map->process_mouse_wheel(scroll_delta, 0x00, mouse_x, mouse_y);
+    return 0;
+}
+
+// Use the mouse left button down event since it has undergone proper zlayer window filtering.
+static int __fastcall HandleLButtonDown(Zeal::EqUI::EQWND* wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, uint32_t unused3) {
+    ZealService* zeal = ZealService::get_instance();
+    if (zeal && zeal->zone_map)
+        zeal->zone_map->process_left_mouse_button_down(mouse_x, mouse_y);
+    return 0;
+}
+
+// Use the mouse right button down event since it has undergone proper zlayer window filtering.
+static int __fastcall HandleRButtonDown(Zeal::EqUI::EQWND* wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, uint32_t unused3) {
+    ZealService* zeal = ZealService::get_instance();
+    if (zeal && zeal->zone_map)
+        zeal->zone_map->process_right_mouse_button_down(mouse_x, mouse_y);
+    return 0;
+}
+
+// Note: This callback does appear to be functional in the TAKP eqgame.exe code.
+static int __fastcall HandleWheelButtonDown(Zeal::EqUI::EQWND * wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, uint32_t unused3) {
+    ZealService* zeal = ZealService::get_instance();
+    if (zeal && zeal->zone_map)
+        zeal->zone_map->process_wheel_mouse_button_down(mouse_x, mouse_y);
+    return 0;
+}
+
+// Just suppress other mouse events since update_mouse() polling is more reliable.
+static int __fastcall DropMouseUpdate(Zeal::EqUI::EQWND* wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, uint32_t unused3) {
+    return 0;
+}
+
+void ZoneMap::ui_init()
+{
+    if (!wnd)
+    {
+        static const char* xml_file = "./uifiles/zeal/EQUI_ZealMap.xml";
+        if (std::filesystem::exists(xml_file))
+        {
+            wnd = ZealService::get_instance()->ui->CreateSidlScreenWnd("ZealMap");
+            wnd->IsLocked = true;
+            wnd->AlphaTransparency = 5;
+            wnd->FadeDelay = 1000;
+            wnd->FadeDuration = 350;
+            wnd->FadedAlpha = 0;
+            wnd->UnfadedAlpha = 255;
+            wnd->vtbl->DrawBackground = DrawBackground;
+            wnd->vtbl->HandleWheelMove = HandleWheelMove;
+            wnd->vtbl->HandleMouseMove = DropMouseUpdate;
+            wnd->vtbl->HandleLButtonDown = HandleLButtonDown;
+            wnd->vtbl->HandleLButtonUp = DropMouseUpdate;
+            wnd->vtbl->HandleLButtonHeld = DropMouseUpdate;
+            wnd->vtbl->HandleLButtonUpAfterHeld = DropMouseUpdate;
+            wnd->vtbl->HandleRButtonDown = HandleRButtonDown;
+            wnd->vtbl->HandleRButtonUp = DropMouseUpdate;
+            wnd->vtbl->HandleRButtonHeld = DropMouseUpdate;
+            wnd->vtbl->HandleRButtonUpAfterHeld = DropMouseUpdate;
+            wnd->vtbl->HandleWheelButtonDown = HandleWheelButtonDown;  // This is not obviously in-use by eqgame.exe code.
+        }
+        else
+        {
+            Zeal::EqGame::print_chat("Error: Failed to load %s", xml_file);
+            return;
+        }
+    }
+}
+
 ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
 {
     load_ini(ini);
@@ -2366,6 +2721,12 @@ ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
         [this](const std::vector<std::string>& args) {
             return parse_command(args);
         });
+
+    zeal->callbacks->AddGeneric([this]() { ui_clean(); }, callback_type::CleanUI);
+    zeal->callbacks->AddGeneric([this]() { ui_init(); }, callback_type::InitUI);
+    zeal->callbacks->AddGeneric([this]() { ui_deactivate(); }, callback_type::DeactivateUI);
+
+    zeal->ui->AddXmlInclude("EQUI_ZealMap.xml");
 }
 
 ZoneMap::~ZoneMap()
@@ -2397,14 +2758,105 @@ LRESULT CALLBACK ZoneMap::static_external_window_proc(HWND hwnd, UINT uMsg, WPAR
     }
 }
 
-// Window processing logic.
+// Translate Windows Virtual VK key codes to direct input.
+static uint32_t virtual_key_to_dik(uint32_t vk_key) {
+    static constexpr UINT kVtoSExceptions[][2] = {
+        {VK_UP,DIK_UP}, {VK_DOWN,DIK_DOWN}, {VK_LEFT,DIK_LEFT}, {VK_RIGHT,DIK_RIGHT},
+        {VK_INSERT,DIK_INSERT}, {VK_HOME,DIK_HOME}, {VK_PRIOR,DIK_PRIOR}, {VK_DELETE,DIK_DELETE},
+        {VK_END,DIK_END}, {VK_NEXT,DIK_NEXT}, {VK_LMENU,DIK_LMENU}, {VK_RMENU,DIK_RMENU},
+        {VK_LCONTROL,DIK_LCONTROL}, {VK_RCONTROL,DIK_RCONTROL}, {VK_DIVIDE,DIK_DIVIDE}
+    };
+
+    const int num_entries = sizeof(kVtoSExceptions) / sizeof(kVtoSExceptions[0]);
+    for (int i = 0; i < num_entries; i++) {
+        if (kVtoSExceptions[i][0] == vk_key)
+            return kVtoSExceptions[i][1];
+    }
+    return MapVirtualKey(vk_key, 0);
+}
+
+void process_key(uint32_t vk_key, bool key_down) {
+    ZealService* zeal = ZealService::get_instance();
+    if (!zeal)
+        return;
+
+    uint32_t key_code = virtual_key_to_dik(vk_key);
+    switch (key_code) {
+    case DIK_LCONTROL:
+    case DIK_RCONTROL:
+    case DIK_LSHIFT:
+    case DIK_RSHIFT:
+    case DIK_LMENU:
+    case DIK_RMENU:
+        return;  // Ignore
+    default:
+        break;
+    }
+
+    // The EqGame keeps track of all this internally, just poll similarly for external.
+    if (GetKeyState(VK_SHIFT) & 0x8000)
+        key_code = key_code | 0x10000000;
+    if (GetKeyState(VK_CONTROL) & 0x8000)
+        key_code = key_code | 0x20000000;
+    if (GetKeyState(VK_MENU) & 0x8000)
+        key_code = key_code | 0x40000000;
+
+    // TODO: Support the proper eqgame call for DIK_ESCAPE functionality (not a command).
+
+    // Translate the final key code into an index into the binds.
+    // Suppress some commands since we don't support typing into the chat bar from the other window.
+    const int kCommandSlashIndex = 130;
+    const int kCommandTellIndex = 13;
+    const int kCommandReplyIndex = 59;
+    const int kCommandChatHistoryUp = 79;
+    const int kCommandChatHistoryDown = 80;
+    const int first_index = 0;  // To be safer, could start this at 211 (first user bind). 
+    const int lut_size = 256;
+    const uint32_t* key_bind_pri = reinterpret_cast<const uint32_t*>(Zeal::EqGame::ptr_PrimaryKeyMap);
+    const uint32_t* key_bind_alt = reinterpret_cast<const uint32_t*>(Zeal::EqGame::ptr_AlternateKeyMap);
+    for (int i = first_index; i <= lut_size; ++i) {
+        if (i == kCommandSlashIndex || i == kCommandTellIndex || i == kCommandReplyIndex ||
+            i == kCommandChatHistoryUp || i == kCommandChatHistoryDown)
+            continue;  // Skip searching for these commands.
+        if (key_bind_pri[i] == key_code || key_bind_alt[i] == key_code)
+            Zeal::EqGame::execute_cmd(i, key_down, 0);
+    }
+}
+
+
+// Window processing logic.  Note that the primary game window is using DirectInput for the keyboard and mouse,
+// and trying to set the cooperative level of the keyboard failed to re-route input back to the game. Re-routing
+// WM key messages to the game wndproc doesn't work since it isn't DirectInput.
 LRESULT CALLBACK ZoneMap::external_window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
     switch (uMsg) {
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
         case WM_DPICHANGED:
             return 0;  // Ignore any resizing due to a monitor scale change.
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+            if ((lParam & 0x40000000) == 0)  // Only send if this is a transition.
+                process_key(wParam, true);
+            break;
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+                process_key(wParam, false);
+            break;
+        case WM_LBUTTONDOWN:
+            process_left_mouse_button_down(static_cast<int16_t>(lParam & 0xffff), static_cast<int16_t>(lParam >> 16));
+            break;
+        case WM_RBUTTONDOWN:
+            process_right_mouse_button_down(static_cast<int16_t>(lParam & 0xffff), static_cast<int16_t>(lParam >> 16));
+            break;
+        case WM_MBUTTONDOWN:
+            process_wheel_mouse_button_down(static_cast<int16_t>(lParam & 0xffff), static_cast<int16_t>(lParam >> 16));
+            break;
+        case WM_MOUSEWHEEL:
+            process_mouse_wheel(static_cast<int16_t>(wParam >> 16), wParam & 0xffff,
+                static_cast<int16_t>(lParam & 0xffff), static_cast<int16_t>(lParam >> 16));
+            return 0;  // Handled.
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }

@@ -483,6 +483,16 @@ background will scroll with the player centered in the viewport.
 * Command examples:
   - `/map zoom 200` sets map scaling to 200% (2x)
 
+#### Interactive mode
+The map supports drag panning and mouse wheel zoom in interactive mode. Interactive mode is always 
+enabled in external window mode, while a keybind toggle is used to toggle the internal overlay map
+in and out of interactive mode. When not in interactive mode, the internal overlay map is transparent
+to the mouse. When interactive mode is enabled, the map can be panned using a left mouse button drag
+and zoomed using the scroll wheel. Once panning starts, auto-center is disabled until a right mouse
+button click. The external window also supports a middle mouse button click to drop markers.
+
+* Key bind: "Toggle Map Interactive Mode" - toggles internal overlay between transparent and interactive
+
 #### Map grid
 A simple background grid aligned at a selectable pitch is available. The x == 0 and y == 0 axes
 are colored orange.

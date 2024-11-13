@@ -36,6 +36,8 @@ namespace Zeal
 		static EqStructures::Entity* _ControlledPlayer = (EqStructures::Entity*)0x7f94e0;
 		static int* Display = (int*)0x7F9510;
 		static EqStructures::Cam* camera = (EqStructures::Cam*)0x799688;// 0x7996C0;
+		static int16_t* mouse_client_x = (int16_t*)0x00798580;  // Mouse coordinates in client rect.
+		static int16_t* mouse_client_y = (int16_t*)0x00798582;  // Set to 32767 when invalid.
 		static bool* is_right_mouse_down = (bool*)0x7985ea;
 		static bool* is_left_mouse_down = (bool*)0x798614;
 		static int* mouse_hover_window = (int*)0x809DD8; //unsure

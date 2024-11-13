@@ -230,7 +230,12 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			else
 			{
-				Zeal::EqGame::print_chat("useitem requires an item slot between 0 and 29"); // Missing parameter to /useitem
+				Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "useitem requires an item slot between 0 and 29");
+				Zeal::EqGame::print_chat("0: Left ear, 1: Head, 2: Face, 3: Right Ear, 4: Neck, 5: Shoulders");
+				Zeal::EqGame::print_chat("6: Arms, 7: Back, 8: Left Wrist, 9: Right Wrist, 10: Ranged");
+				Zeal::EqGame::print_chat("11: Hands, 12: Primary, 13: Secondary, 14: Left Finger, 15: Right Finger");
+				Zeal::EqGame::print_chat("16: Chest, 17: Legs, 18: Feet, 19: Waist, 20: Ammo");
+				Zeal::EqGame::print_chat("Inventory: 22: Top Left, 25: Bottom left, 26: Top Right, 29: Bottom Right");
 			}
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		}

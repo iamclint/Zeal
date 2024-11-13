@@ -327,6 +327,11 @@ void Binds::add_binds()
 			ZealService::get_instance()->zone_map->set_show_grid(
 				!ZealService::get_instance()->zone_map->is_show_grid_enabled(), false);
 		});
+	add_bind(242, "Toggle Map Interactive Mode", "ToggleMapInteractiveMode", key_category::UI, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			 ZealService::get_instance()->zone_map->set_interactive_enable(
+				!ZealService::get_instance()->zone_map->is_interactive_enabled(), false);
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)

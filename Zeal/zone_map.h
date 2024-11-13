@@ -42,6 +42,7 @@ public:
 	bool is_enabled() const { return enabled; }
 	void set_enabled(bool enable, bool update_default = false);
 	void set_external_enable(bool enabled, bool update_default = false);
+	void set_interactive_enable(bool enable, bool update_default = true);
 	bool set_show_group_mode(int new_mode, bool update_default = true);
 	void set_show_raid(bool enable, bool update_default = true);
 	void set_show_all_names_override(bool flag);  // Override to enable showing group and raid names.
@@ -68,6 +69,7 @@ public:
 	bool is_show_raid_enabled() const { return map_show_raid; }
 	bool is_show_grid_enabled() const { return map_show_grid; }
 	bool is_show_all_names_override() const { return map_show_all_names_override;}
+	bool is_interactive_enabled() const { return map_interactive_enabled; }
 	int get_show_group_mode() const { return map_show_group_mode; }
 	int get_name_length() const { return map_name_length; }
 	int get_grid_pitch() const { return map_grid_pitch; }
@@ -99,6 +101,12 @@ public:
 	void add_dynamic_label(const std::string& label, int loc_y, int loc_x,
 		unsigned int duration_ms = 0, D3DCOLOR font_color = D3DCOLOR_XRGB(250, 250, 51));
 
+	// Private methods exposed for callback use only.
+	void process_mouse_wheel(int16_t mouse_delta, uint16_t flags, int16_t x, int16_t y);
+	void process_left_mouse_button_down(int16_t x, int16_t y);
+	void process_right_mouse_button_down(int16_t x, int16_t y);
+	void process_wheel_mouse_button_down(int16_t x, int16_t y);
+
 private:
 	enum class LabelType { Normal, AddMarker, PositionLabel };
 
@@ -126,6 +134,7 @@ private:
 	};
 
 	static constexpr int kInvalidZoneId = 0;
+	static constexpr int kInvalidScreenValue = 0x7fff;  // EQ game sets mouse abs to this when not focused.
 	static constexpr int kDefaultGridPitch = 1000;
 	static constexpr int kDefaultNameLength = 5;
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
@@ -188,6 +197,13 @@ private:
 	void render_labels(IDirect3DDevice8& device);
 	void render_label_text(const char* label, int map_y, int map_x, D3DCOLOR font_color,
 		LabelType label_type = LabelType::Normal, Vec2 offset_pixels = { 0,0 });
+	void render_handle_cursor(IDirect3DDevice8& device);
+	void enable_autocenter();
+	bool is_autocenter_enabled() const;
+	void update_mouse();
+	void reset_mouse();
+	void hide_cursor();
+	void restore_cursor();
 	std::vector<ZoneMap::MapVertex> calculate_grid_vertices(const ZoneMapData& zone_map_data) const;
 	void add_position_marker_vertices(float map_y, float map_x, float heading, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
@@ -197,8 +213,11 @@ private:
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 	float convert_size_fraction_to_model(float sizes_fraction) const;
 	float scale_pixels_to_model(float pixels) const;
+	Vec3 transform_matrix(const D3DXMATRIX& matrix, const Vec3& vec) const;
 	Vec3 transform_model_to_world(const Vec3& model) const;
 	Vec3 transform_model_to_screen(const Vec3& model) const;
+	Vec3 transform_world_to_model(const Vec3& world) const;
+	Vec3 transform_screen_to_model(float x, float y, float z = 1.f) const;
 	D3DCOLOR get_background_color() const;
 
 	const ZoneMapData* get_zone_map(int zone_id);
@@ -206,8 +225,18 @@ private:
 	bool add_map_data_from_file(const std::string& filename, CustomMapData& map_data);
 	void assemble_zone_map(const char* zone_name, CustomMapData& map_data);
 
+	// EQWND support methods
+	bool ui_is_visible() const;
+	void ui_hide();
+	bool ui_show();
+	void ui_clean();
+	void ui_deactivate();
+	void ui_init();
+	void ui_synchronize_window();
+
 	bool enabled = false;
 	bool external_enabled = false;  // External map window enable and sizes.
+	bool map_interactive_enabled = false;  // Supports some mouse/cursor operations.
 	bool map_show_grid = false;
 	int map_grid_pitch = kDefaultGridPitch;  // Pitch when grid is visible.
 	int map_name_length = kDefaultNameLength;  // Number of characters in name labels.
@@ -232,6 +261,7 @@ private:
 	LONG max_viewport_width = 0;  // Full game window (ignores /viewport) or screen size (external).
 	LONG max_viewport_height = 0;
 	D3DXMATRIX mat_model2world;  // Map model data to viewport centered pixel data.
+	D3DXMATRIX mat_world2model;  // Inverse viewport centered pixel back to map model data.
 	float zoom_factor = 1.f;
 	float map_rect_top = kDefaultRectTop;
 	float map_rect_left = kDefaultRectLeft;
@@ -245,6 +275,11 @@ private:
 	int clip_min_z = 0;
 	float position_size = kDefaultPositionSize;
 	float marker_size = kDefaultMarkerSize;
+	bool cursor_hidden = false;
+	Vec3 manual_position = Vec3(0, 0, 0);
+	POINT manual_screen_pt = POINT({ .x = kInvalidScreenValue, .y = kInvalidScreenValue });
+	POINT mouse_pt = POINT({ .x = kInvalidScreenValue, .y = kInvalidScreenValue });  // Latest mouse update.
+	bool mouse_drag_enabled = false;
 
 	std::vector<const ZoneMapLabel*> labels_list;  // List of pointers to visible map labels.
 	int line_count = 0;  // # of primitives in line buffer.
@@ -254,6 +289,9 @@ private:
 	IDirect3DVertexBuffer8* marker_vertex_buffer = nullptr;
 	std::string font_filename;
 	std::unique_ptr<BitmapFont> bitmap_font;
+
+	// Internal window support
+	Zeal::EqUI::EQWND* wnd = nullptr;
 
 	// External window support
 	static constexpr wchar_t kExternalWindowClassName[] = L"ZealMapWindowClass";
