@@ -241,16 +241,12 @@ void __fastcall serverPrintChat(int t, int unused, const char* data, short color
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     if (cf->isMyPetSay)
-    {
         color_index = USERCOLOR_UNUSED001;
-        cf->isMyPetSay = false;
-    }
     else if (cf->isPetMessage)
-    {
         color_index = USERCOLOR_UNUSED002;
-        cf->isPetMessage = false;
-    }
     ZealService::get_instance()->hooks->hook_map["serverPrintChat"]->original(serverPrintChat)(t, unused, data, color_index, u);
+    cf->isMyPetSay = false;
+    cf->isPetMessage = false;
 }
 
 char* __fastcall serverGetString(int stringtable, int unused, int string_id, bool* valid)
@@ -310,7 +306,10 @@ char* __fastcall serverGetString(int stringtable, int unused, int string_id, boo
         for (const int& i : pet_t2_strings)
         {
             if (t2_string_id == i)
+            {
                 cf->isPetMessage = true;
+                break;
+            }
         }
     }
     return ZealService::get_instance()->hooks->hook_map["serverGetString"]->original(serverGetString)(stringtable, unused, string_id, valid);
