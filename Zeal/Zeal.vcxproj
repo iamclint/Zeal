@@ -238,7 +238,6 @@
     <ClCompile Include="floating_damage.cpp" />
     <ClCompile Include="ui_group.cpp" />
     <ClCompile Include="ui_inputdialog.cpp" />
-    <ClCompile Include="ZealSettings.cpp" />
     <ClCompile Include="zone_map.cpp" />
     <ClCompile Include="miniz.c" />
     <ClCompile Include="named_pipe.cpp" />

@@ -259,9 +259,13 @@ void CallbackManager::AddReportSuccessfulHit(std::function<void(struct Zeal::EqS
 void CallbackManager::invoke_ReportSuccessfulHit(Zeal::Packets::Damage_Struct* dmg, int heal, char output_text)
 {
 	auto em = ZealService::get_instance()->entity_manager.get();
-	
-	for (auto& fn : ReportSuccessfulHit_functions)
-		fn(em->Get(dmg->source), em->Get(dmg->target), dmg->type, dmg->spellid, dmg->damage, heal, output_text);
+	Zeal::EqStructures::Entity* target = em->Get(dmg->target);
+	Zeal::EqStructures::Entity* source = em->Get(dmg->source);
+	if (target && source)
+	{
+		for (auto& fn : ReportSuccessfulHit_functions)
+			fn(source, target, dmg->type, dmg->spellid, dmg->damage, heal, output_text);
+	}
 }
 
 void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int heal)

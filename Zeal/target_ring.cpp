@@ -349,19 +349,19 @@ void TargetRing::render_ring(Vec3 pos, float radius, DWORD color, IDirect3DTextu
 		return;
 	D3DXMATRIX worldMatrix, originalWorldMatrix, rotationMatrix;
 	const float height = 0.3f;
-	const DWORD ring_vertex_count = num_segments * 2 + 2;
-	const DWORD cylinder_vertex_count = num_segments * 2 + 2;
+	const DWORD ring_vertex_count = num_segments.get() * 2 + 2;
+	const DWORD cylinder_vertex_count = num_segments.get() * 2 + 2;
 	TexturedVertex* texture_vertices = new TexturedVertex[ring_vertex_count];
 	SolidVertex* solid_vertices = new SolidVertex[ring_vertex_count];
 	SolidVertex* outer_cylinder_vertices = new SolidVertex[cylinder_vertex_count];
 	SolidVertex* inner_cylinder_vertices = new SolidVertex[cylinder_vertex_count];
-	generate_vertices(solid_vertices, outer_cylinder_vertices, inner_cylinder_vertices, texture_vertices, num_segments, radius, inner_percent, rotationAngle, color, height);
+	generate_vertices(solid_vertices, outer_cylinder_vertices, inner_cylinder_vertices, texture_vertices, num_segments.get(), radius, inner_percent.get(), rotationAngle, color, height);
 	//generate_cylinder_vertices(solid_vertices, num_segments, size, height, color);
 	
 	setup_render_states();
 	device->GetTransform(D3DTS_WORLD, &originalWorldMatrix);
 	drawVertices({ pos.x, pos.y, pos.z + height }, ring_vertex_count, texture, worldMatrix, solid_vertices, texture_vertices);
-	if (use_cone)
+	if (use_cone.get())
 	{
 		drawVertices({ pos.x, pos.y, pos.z }, ring_vertex_count, nullptr, worldMatrix, solid_vertices, nullptr);
 		drawVertices({ pos.x, pos.y, pos.z }, cylinder_vertex_count, nullptr, worldMatrix, inner_cylinder_vertices, nullptr);
@@ -377,7 +377,7 @@ void TargetRing::render_ring(Vec3 pos, float radius, DWORD color, IDirect3DTextu
 }
 
 void TargetRing::callback_render() {
-	if (!enabled)
+	if (!enabled.get())
 		return;
 	Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
 	if (!target || !target->ActorInfo || !target->ActorInfo->ViewActor_)
@@ -398,12 +398,12 @@ void TargetRing::callback_render() {
 	static ULONGLONG lastColorChanged = 0; // Store the last time the color was changed
 
 	// ### Auto Attack Indicator (fade/unfade target's color while autoattack turned on)###
-	if ((bool)(*(BYTE*)0x7f6ffe) && attack_indicator) // auto attack is enabled
+	if ((bool)(*(BYTE*)0x7f6ffe) && attack_indicator.get()) // auto attack is enabled
 	{
-		if (currentTime - lastColorChanged >= (300.f * flash_speed)) // Reset the timer every 300ms
+		if (currentTime - lastColorChanged >= (300.f * flash_speed.get())) // Reset the timer every 300ms
 			lastColorChanged = currentTime;
 
-		float elapsedTime = (currentTime - lastColorChanged) / (300.0f * flash_speed); // Get the time elapsed in the current cycle as a fraction
+		float elapsedTime = (currentTime - lastColorChanged) / (300.0f * flash_speed.get()); // Get the time elapsed in the current cycle as a fraction
 		float fadeFactor;
 		if (elapsedTime < 0.5f)
 			fadeFactor = elapsedTime * 2; // Fade in during the first half of the cycle
@@ -437,7 +437,7 @@ void TargetRing::callback_render() {
 		static ULONGLONG lastRotationTime = GetTickCount64();
 		ULONGLONG currentRotationTime = GetTickCount64();
 		ULONGLONG elapsedRotationTime = currentRotationTime - lastRotationTime;
-		rotationAngle += (rotationIncrement * elapsedRotationTime) * rotation_speed;
+		rotationAngle += (rotationIncrement * elapsedRotationTime) * rotation_speed.get();
 		lastRotationTime = currentRotationTime;
 		// Reset the rotation angle after a full rotation
 		if (rotationAngle >= 2.0f * kMathPi) {
@@ -445,176 +445,12 @@ void TargetRing::callback_render() {
 		}
 		float direction = static_cast<float>(target->Heading * kMathPi / 256);
 		// ### Render Target Ring ###
-		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size, Color, targetRingTexture, rotate_match_heading ? direction : rotationAngle);
+		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size.get(), Color, targetRingTexture, rotate_match_heading.get() ? direction : rotationAngle);
 	}
 	else
 	{
-		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size, Color, nullptr, rotate_match_heading ? target->Heading : 0);
+		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size.get(), Color, nullptr, rotate_match_heading.get() ? target->Heading : 0);
 	}
-}
-
-bool TargetRing::get_enabled()
-{
-	return enabled;
-}
-bool TargetRing::get_indicator()
-{
-	return attack_indicator;
-}
-bool TargetRing::get_rotation_match()
-{
-	return rotate_match_heading;
-}
-float TargetRing::get_pct()
-{
-	return inner_percent;
-}
-float TargetRing::get_rotation_speed()
-{
-	return rotation_speed;
-}
-float TargetRing::get_flash_speed()
-{
-	return flash_speed;
-}
-bool TargetRing::get_cone()
-{
-	return use_cone;
-}
-float TargetRing::get_size()
-{
-	return outer_size;
-}
-int TargetRing::get_segments()
-{
-	return num_segments;
-}
-std::string TargetRing::get_texture()
-{
-	return texture_name;
-}
-
-void TargetRing::set_enabled(bool _enabled)
-{
-	enabled = _enabled;
-	save_ini();
-	Zeal::EqGame::print_chat("Target ring is %s", enabled ? "Enabled" : "Disabled");
-}
-void TargetRing::set_pct(float pct)
-{
-	inner_percent = pct;
-	save_ini();
-}
-
-void TargetRing::set_indicator(bool enabled)
-{
-	attack_indicator = enabled;
-	save_ini();
-}
-void TargetRing::set_rotation_speed(float speed)
-{
-	rotation_speed = speed;
-	save_ini();
-}
-void TargetRing::set_rotation_match(bool enable)
-{
-	rotate_match_heading = enable;
-	save_ini();
-}
-void TargetRing::set_cone(bool enable)
-{
-	use_cone = enable;
-	save_ini();
-}
-void TargetRing::set_flashspeed(float speed)
-{
-	flash_speed = speed;
-	save_ini();
-}
-void TargetRing::set_segments(int segments)
-{
-	num_segments = segments;
-	save_ini();
-}
-void TargetRing::set_texture(std::string name)
-{
-	if (name != "None" && name.length())
-	{
-		texture_name = name;
-		load_texture(name);
-		save_ini();
-	}
-	else
-	{
-		texture_name = "";
-		if (targetRingTexture)
-			targetRingTexture->Release();
-		targetRingTexture = nullptr;
-		save_ini();
-	}
-}
-void TargetRing::set_size(float size)
-{
-	outer_size = size;
-	save_ini();
-}
-
-
-void TargetRing::save_ini()
-{
-	std::string ini_name = ZealService::get_instance()->ui->GetUIIni();// ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
-	if (!ini_name.length())
-		return;
-	IO_ini ini(ini_name);
-	ini.setValue<bool>("TargetRing", "Enabled", enabled);
-	ini.setValue<bool>("TargetRing", "AttackIndicator", attack_indicator);
-	ini.setValue<bool>("TargetRing", "MatchHeading", rotate_match_heading);
-	ini.setValue<float>("TargetRing", "InnerSize", inner_percent);
-	ini.setValue<float>("TargetRing", "RotateSpeed", rotation_speed);
-	ini.setValue<float>("TargetRing", "Size", outer_size);
-	ini.setValue<int>("TargetRing", "Segments", num_segments);
-	ini.setValue<std::string>("TargetRing", "Texture", texture_name);
-	ini.setValue<bool>("TargetRing", "Cone", use_cone);
-	ini.setValue<float>("TargetRing", "FlashSpeed", flash_speed);
-}
-
-void TargetRing::load_ini()
-{
-	std::string ini_name = ZealService::get_instance()->ui->GetUIIni();// ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
-	if (!ini_name.length())
-		return;
-	IO_ini ini(ini_name);
-	if (!ini.exists("TargetRing", "Enabled"))
-		ini.setValue<bool>("TargetRing", "Enabled", false);
-	if (!ini.exists("TargetRing", "InnerSize"))
-		ini.setValue<float>("TargetRing", "InnerSize", .5);
-	if (!ini.exists("TargetRing", "AttackIndicator"))
-		ini.setValue<bool>("TargetRing", "AttackIndicator", false);
-	if (!ini.exists("TargetRing", "MatchHeading"))
-		ini.setValue<bool>("TargetRing", "MatchHeading", false);
-	if (!ini.exists("TargetRing", "RotateSpeed"))
-		ini.setValue<float>("TargetRing", "RotateSpeed", 1.0f);
-	if (!ini.exists("TargetRing", "Size"))
-		ini.setValue<float>("TargetRing", "Size", 10.f);
-	if (!ini.exists("TargetRing", "Segments"))
-		ini.setValue<int>("TargetRing", "Segments", 128);
-	if (!ini.exists("TargetRing", "Texture"))
-		ini.setValue<std::string>("TargetRing", "Texture", "");
-	if (!ini.exists("TargetRing", "FlashSpeed"))
-		ini.setValue<float>("TargetRing", "FlashSpeed", 1);
-	if (!ini.exists("TargetRing", "Cone"))
-		ini.setValue<bool>("TargetRing", "Cone", true);
-
-	use_cone = ini.getValue<bool>("TargetRing", "Cone");
-	flash_speed = ini.getValue<float>("TargetRing", "FlashSpeed");
-	outer_size = ini.getValue<float>("TargetRing", "Size");
-	enabled = ini.getValue<bool>("TargetRing", "Enabled");
-	attack_indicator = ini.getValue<bool>("TargetRing", "AttackIndicator");
-	inner_percent = ini.getValue<float>("TargetRing", "InnerSize");
-	rotation_speed = ini.getValue<float>("TargetRing", "RotateSpeed");
-	rotate_match_heading = ini.getValue<bool>("TargetRing", "MatchHeading");
-	num_segments = ini.getValue<int>("TargetRing", "Segments");
-	texture_name = ini.getValue<std::string>("TargetRing", "Texture");
 }
 
 std::vector<std::string> GetTGAFiles(const std::string& directoryPath) {
@@ -654,7 +490,7 @@ void TargetRing::options_opened()
 		int sel_index = -1;
 		for (int i = 0; i < tgas.size(); i++)
 		{
-			if (Zeal::String::compare_insensitive(tgas[i], texture_name))
+			if (Zeal::String::compare_insensitive(tgas[i], texture_name.get()))
 			{
 				sel_index = i;
 				break;
@@ -670,7 +506,7 @@ void TargetRing::options_opened()
 
 void TargetRing::callback_initui()
 {
-	load_texture(texture_name);
+	load_texture(texture_name.get());
 }
 
 
@@ -679,9 +515,7 @@ void TargetRing::callback_initui()
 TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
-	zeal->callbacks->AddGeneric([this]() { load_ini(); callback_initui(); }, callback_type::InitUI);
-	//zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CharacterSelect);
-	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::InitUI);
 
 	/*zeal->commands_hook->Add("/loadtextures", {}, "",
 		[this](std::vector<std::string>& args) {
@@ -717,16 +551,16 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 			{
 				if (args[1] == "indicator")
 				{
-					set_indicator(!attack_indicator);
+					attack_indicator.toggle();
 					return true;
 				}
 				float pct = 0;
 				if (!Zeal::String::tryParse(args[1], &pct))
 					return true;
-				set_pct(pct);
+				inner_percent.set(pct);
 				return true;
 			}
-			set_enabled(!enabled);
+			enabled.toggle();
 			return true;
 		});
 }
