@@ -1743,6 +1743,21 @@ namespace Zeal
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::Self;
 		}
+		Zeal::EqStructures::Entity* get_pet()
+		{
+			Zeal::EqStructures::Entity* pet_entity = NULL;
+			Zeal::EqStructures::Entity* self = get_self();
+
+			if (self && self->ActorInfo)
+			{
+				int pet_position = self->ActorInfo->PetID;
+				if (pet_position)
+				{
+					pet_entity = Zeal::EqGame::get_entity_by_id(pet_position);
+				}
+			}
+			return pet_entity;
+		}
 		Zeal::EqStructures::Entity* get_controlled()
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::_ControlledPlayer;

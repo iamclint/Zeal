@@ -237,6 +237,84 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
     ZealService::get_instance()->hooks->hook_map["PrintAutoSplit"]->original(PrintAutoSplit)(t, unused, data, USERCOLOR_ECHO_AUTOSPLIT, u);
 }
 
+void __fastcall serverPrintChat(int t, int unused, const char* data, short color_index, bool u)
+{
+    chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
+    if (cf->isMyPetSay)
+        color_index = USERCOLOR_UNUSED001;
+    else if (cf->isPetMessage)
+        color_index = USERCOLOR_UNUSED002;
+    ZealService::get_instance()->hooks->hook_map["serverPrintChat"]->original(serverPrintChat)(t, unused, data, color_index, u);
+    cf->isMyPetSay = false;
+    cf->isPetMessage = false;
+}
+
+char* __fastcall serverGetString(int stringtable, int unused, int string_id, bool* valid)
+{   
+    char** args;
+    //Steal a reference to the previous EBP so we can grab the WorldMessage arguments
+    __asm
+    {
+        push edi
+        mov edi, [ebp]
+        lea edi, [edi - 0x348]
+        mov args, edi
+        pop edi
+    }
+
+    std::vector<int> pet_sayings{
+    555, //%1 tells you, 'I am unable to wake %2, master.'
+    5501 //%1 tells you, 'Attacking %2 Master.'
+    };
+
+    std::vector<int> pet_t2_strings{
+    1130, //Changing position, Master.
+    1131, //Sorry, Master..calming down.
+    1132, //Following you, Master.
+    1134, //Guarding with my life..oh splendid one.
+    1135, //As you wish, oh great one.
+    1136, //My leader is %3.
+    1139, //I beg forgiveness, Master.  That is not a legal target.
+    };
+
+    char* name = args[0];
+    char* t2_string = args[1];
+    chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
+
+    for (const int& i : pet_sayings)
+    {
+        if (string_id == i)
+            cf->isMyPetSay = true;
+    }
+
+    if (!cf->isMyPetSay)
+    {
+        Zeal::EqStructures::Entity* pet = Zeal::EqGame::get_pet();
+        if (pet)
+        {
+            char* pet_name = Zeal::EqGame::strip_name(pet->Name);
+            if (strcmp(name, pet_name) == 0)
+                cf->isMyPetSay = true;
+        }
+    }
+
+    //554, //%1 says '%T2'
+    //We need to check the next string to see if it's a pet phrase
+    if (string_id == 554)
+    {
+        int t2_string_id = std::stoi(t2_string);
+        for (const int& i : pet_t2_strings)
+        {
+            if (t2_string_id == i)
+            {
+                cf->isPetMessage = true;
+                break;
+            }
+        }
+    }
+    return ZealService::get_instance()->hooks->hook_map["serverGetString"]->original(serverGetString)(stringtable, unused, string_id, valid);
+}
+
 
 chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 {
@@ -257,7 +335,8 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short color, std::string data) { return color == USERCOLOR_RANDOM; }));
     Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short color, std::string data) { return color == USERCOLOR_LOOT; }));
     Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short color, std::string data) { return color == USERCOLOR_MONEY_SPLIT || color == USERCOLOR_ECHO_AUTOSPLIT; }));
-    Extended_ChannelMaps.push_back(CustomFilter("My Pet", 0x10003, [this, zeal](short color, std::string data)
+    Extended_ChannelMaps.push_back(CustomFilter("My Pet Say", 0x10003, [this, zeal](short color, std::string data) { return color == USERCOLOR_UNUSED001; }));
+    Extended_ChannelMaps.push_back(CustomFilter("My Pet Damage", 0x10004, [this, zeal](short color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
                 return true;
@@ -265,7 +344,8 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
                 return true;
             return false;
         }));
-    Extended_ChannelMaps.push_back(CustomFilter("Other Pets", 0x10004, [this, zeal](short color, std::string data)
+    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Say", 0x10005, [this, zeal](short color, std::string data) { return color == USERCOLOR_UNUSED002; }));
+    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Damage", 0x10006, [this, zeal](short color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
                 return true;
@@ -278,29 +358,22 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     
     zeal->hooks->Add("CChatManager", 0x4100e2, CChatManager, hook_type_detour);
     zeal->hooks->Add("Deactivate", 0x410871, Deactivate, hook_type_detour);
-	zeal->hooks->Add("AddMenu", 0x4120DD, AddMenu, hook_type_replace_call);
-	zeal->hooks->Add("GetChannelMap", 0x41161D, GetChannelMap, hook_type_detour);
+    zeal->hooks->Add("AddMenu", 0x4120DD, AddMenu, hook_type_replace_call);
+    zeal->hooks->Add("GetChannelMap", 0x41161D, GetChannelMap, hook_type_detour);
     zeal->hooks->Add("SetChannelMap", 0x4113F1, SetChannelMap, hook_type_detour);
     zeal->hooks->Add("ClearChannelMap", 0x41140C, ClearChannelMap, hook_type_detour);
     zeal->hooks->Add("ClearChannelMaps", 0x411638, ClearChannelMaps, hook_type_detour);
     zeal->hooks->Add("PrintSplit", 0x54755b, PrintSplit, hook_type_replace_call); //fix up money split
     zeal->hooks->Add("PrintAutoSplit", 0x4FB477, PrintAutoSplit, hook_type_replace_call); //fix up money split
     //zeal->hooks->Add("ColorToChannelMap", 0x411173, ColorToChannelMap, hook_type_replace_call);
+    zeal->hooks->Add("serverGetString", 0x4EE6C9, serverGetString, hook_type_replace_call);
+    zeal->hooks->Add("serverPrintChat", 0x4ee727, serverPrintChat, hook_type_replace_call);
 
     //ChatWindow::WndNotification Conditional Patch
     mem::write<byte[2]>(0x414117, { 0x8d, 0x05 });  //lea eax
-    mem::write<int>(0x414119, (int)FilterConditional); 
+    mem::write<int>(0x414119, (int)FilterConditional);
     mem::write<byte[2]>(0x41411D, { 0xFF, 0xE0 });  //jmp eax
     mem::write<byte[4]>(0x41411F, { 0x90, 0x90, 0x90, 0x90 });
-
-    //ChatManager::AddText replace direct dereference
-    //mem::write<byte>(0x411178, 0x50);    //push eax (ChannelMap)
-    //mem::write<byte>(0x411179, 0x56);    //push esi (this)
-    //mem::write<byte[2]>(0x41117A, { 0x8d, 0x05 }); //lea eax
-    //mem::write<int>(0x41117C, (int)SelectWindow);
-    //mem::write<byte[2]>(0x411180, { 0xFF, 0xD0 });  //call eax
-    //mem::write<byte[2]>(0x411182, { 0x89, 0xC6 });  //mov esi, eax
-    //mem::write<byte[3]>(0x411184, { 0x83, 0xFE, 0x00 }); //cmp esi, 0x0
 }
 
 chatfilter::~chatfilter()

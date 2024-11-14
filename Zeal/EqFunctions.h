@@ -145,6 +145,7 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_target();
 		Zeal::EqStructures::Entity* get_entity_list();
 		Zeal::EqStructures::Entity* get_self();
+		Zeal::EqStructures::Entity* get_pet();
 		Zeal::EqStructures::SPELLMGR* get_spell_mgr();
 		Zeal::EqStructures::Entity* get_controlled();
 		Zeal::EqStructures::CameraInfo* get_camera();
