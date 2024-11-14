@@ -42,6 +42,8 @@ class chatfilter
 	bool isExtendedCM(int channelMap, int applyOffset = 0);
 	bool isStandardCM(int channelMap, int applyOffset = 0);
 	bool isDamage=false;
+	bool isMyPetSay=false;
+	bool isPetMessage=false;
 	damage_data damageData;
 	~chatfilter();
 };
