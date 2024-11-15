@@ -275,9 +275,9 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		}
 	}
 	if (spawn == target && (nameplateTargetMarker || nameplateTargetHealth)) {
-		char targetNameplate[60];
+		char targetNameplate[70];
 		char targetFirstLineNameplate[40];
-		char targetGuildNameplate[20];
+		char targetGuildNameplate[30];
 		int hpPercent = 0;
 		if (spawn->Type == Zeal::EqEnums::EntityTypes::Player){//Target Player Nameplate
 			if (spawn->HpCurrent > 0 && spawn->HpMax > 0) //Get Percent Health of Player
