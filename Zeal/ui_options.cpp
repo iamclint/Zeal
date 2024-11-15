@@ -285,9 +285,9 @@ void ui_options::InitFloatingDamage()
 		PrintUIError();
 		return;
 	}
-	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_enabled(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpells", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_spells(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpellIcons", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->set_spellicons(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->enabled.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpells", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spells.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpellIcons", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spell_icons.set(wnd->Checked); });
 }
 void ui_options::InitCamera()
 {
@@ -594,9 +594,9 @@ void ui_options::UpdateOptionsNameplate()
 
 void ui_options::UpdateOptionsFloatingDamage()
 {
-	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled);
-	ui->SetChecked("Zeal_FloatingSpells", ZealService::get_instance()->floating_damage->spells);
-	ui->SetChecked("Zeal_FloatingSpellIcons", ZealService::get_instance()->floating_damage->spell_icons);
+	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled.get());
+	ui->SetChecked("Zeal_FloatingSpells", ZealService::get_instance()->floating_damage->spells.get());
+	ui->SetChecked("Zeal_FloatingSpellIcons", ZealService::get_instance()->floating_damage->spell_icons.get());
 }
 
 void ui_options::UpdateOptionsMap()

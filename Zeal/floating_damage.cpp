@@ -129,7 +129,7 @@ int  FloatingDamage::get_active_damage_count(Zeal::EqStructures::Entity* ent)
 
 void FloatingDamage::callback_render()
 {
-	if (!Zeal::EqGame::is_in_game() || !spell_icons)
+	if (!Zeal::EqGame::is_in_game() || !spell_icons.get())
 		return;
 	std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, false);
 	Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
@@ -153,7 +153,7 @@ void FloatingDamage::callback_render()
 }
 void FloatingDamage::callback_deferred()
 {
-	if (!Zeal::EqGame::is_in_game() || !enabled)
+	if (!Zeal::EqGame::is_in_game() || !enabled.get())
 		return;
 	if (Zeal::EqGame::get_wnd_manager())
 	{
@@ -225,7 +225,7 @@ void FloatingDamage::callback_deferred()
 
 void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, short dmg, int heal, short spell_id)
 {
-	if (!enabled)
+	if (!enabled.get())
 		return;
 	if ((int)dmg > 0 || heal>0)
 	{
@@ -240,27 +240,11 @@ void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStru
 				sp_data = Zeal::EqGame::get_spell_mgr()->Spells[spell_id];
 //				Zeal::EqGame::print_chat("%s", sp_data->CastOnAnother);
 			}
-			if (spell_id > 0 && !spells)
+			if (spell_id > 0 && !spells.get())
 				return;
 			damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal, sp_data));
 		}
 	}
-}
-
-void FloatingDamage::set_enabled(bool _enabled)
-{
-	ZealService::get_instance()->ini->setValue<bool>("Zeal", "FloatingDamage", _enabled);
-	enabled = _enabled;
-}
-void FloatingDamage::set_spells(bool _enabled)
-{
-	ZealService::get_instance()->ini->setValue<bool>("Zeal", "FloatingDamageSpells", _enabled);
-	spells = _enabled;
-}
-void FloatingDamage::set_spellicons(bool _enabled)
-{
-	ZealService::get_instance()->ini->setValue<bool>("Zeal", "FloatingDamageIcons", _enabled);
-	spell_icons = _enabled;
 }
 
 
@@ -391,8 +375,8 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 			}
 			else
 			{
-				set_enabled(!enabled);
-				Zeal::EqGame::print_chat("Floating combat text is %s", enabled ? "Enabled" : "Disabled");
+				enabled.toggle();
+				Zeal::EqGame::print_chat("Floating combat text is %s", enabled.get() ? "Enabled" : "Disabled");
 			}
 			return true;
 		});

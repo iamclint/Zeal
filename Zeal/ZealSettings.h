@@ -12,8 +12,8 @@ template <typename T>
 class ZealSetting
 {
 public:
-	void set(T val) { 
-		if (section.length() && key.length())
+	void set(T val, bool store = true) { 
+		if (store && section.length() && key.length())
 		{
 			std::string ini_name = ".\\eqclient.ini";
 			if (per_character)
@@ -29,9 +29,9 @@ public:
 		if (set_callback)
 			set_callback(value);
 	}
-	void toggle() 
+	void toggle(bool store = true)
 	{
-		set(!value);
+		set(!value, store);
 	}
 	T get() { return value; }
 	/*

@@ -5,6 +5,7 @@
 #include "EqStructures.h"
 #include "EqUI.h"
 #include "d3dx8/d3d8.h"
+#include "ZealSettings.h"
 struct DamageData
 {
 	ULONGLONG start_time;
@@ -29,12 +30,9 @@ public:
 	void add_damage(struct Zeal::EqStructures::Entity* source, struct  Zeal::EqStructures::Entity* target, short dmg, int heal, short spell_id);
 	void callback_deferred();
 	void callback_render();
-	void set_enabled(bool enable);
-	void set_spells(bool enable);
-	void set_spellicons(bool enable);
-	bool enabled;
-	bool spell_icons;
-	bool spells;
+	ZealSetting<bool> enabled = { true, "FloatingDamage", "Enabled", true };
+	ZealSetting<bool> spell_icons = { true, "FloatingDamage", "Icons", true };
+	ZealSetting<bool> spells = { true, "FloatingDamage", "Spells", true };
 	void init_ui();
 	void draw_icon(int index, float x, float y, float opacity);
 	int get_active_damage_count(Zeal::EqStructures::Entity* ent);
