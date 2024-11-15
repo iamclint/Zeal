@@ -292,7 +292,7 @@ char* __fastcall serverGetString(int stringtable, int unused, int string_id, boo
         Zeal::EqStructures::Entity* pet = Zeal::EqGame::get_pet();
         if (pet)
         {
-            char* pet_name = Zeal::EqGame::strip_name(pet->Name);
+            char* pet_name = Zeal::EqGame::trim_name(pet->Name);
             if (strcmp(name, pet_name) == 0)
                 cf->isMyPetSay = true;
         }
