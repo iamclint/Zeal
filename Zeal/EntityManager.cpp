@@ -85,6 +85,8 @@ static int report_missing_entities() {
 				++missing_count;
 				Zeal::EqGame::print_chat("MISSING: entity[%i]: %s", current->SpawnId, current->Name);
 			}
+			if (current != Zeal::EqGame::get_entity_by_id(current->SpawnId))
+				Zeal::EqGame::print_chat("IDARRAY MISMATCH: entity[%i]: %s", current->SpawnId, current->Name);
 		}
 		current = current->Next;
 	}
