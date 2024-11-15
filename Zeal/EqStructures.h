@@ -436,7 +436,7 @@ namespace Zeal
 			/* 0x0060 */ DWORD UnknownTimer3;
 			/* 0x0064 */ DWORD UnknownTimer4;
 			/* 0x0068 */ DWORD AttackTimer;
-			/* 0x006C */ DWORD Unknown006C;
+			/* 0x006C */ DWORD DeathTimer;
 			/* 0x0070 */ DWORD Unknown0070;
 			/* 0x0074 */ DWORD UnknownTimer5;
 			/* 0x0078 */ DWORD UnknownTimer6;

@@ -1713,16 +1713,9 @@ namespace Zeal
 
 		Zeal::EqStructures::Entity* get_entity_by_id(short id)
 		{
-			if (id == get_controlled()->SpawnId)
-				return get_controlled();
-			Zeal::EqStructures::Entity* current_ent = get_entity_list();
-			while (current_ent->Next)
-			{
-				if (current_ent->SpawnId == id)
-					return current_ent;
-				current_ent = current_ent->Next;
-			}
-			return 0;
+			if ((id < 0) || (id >= kEntityIdArraySize))
+				return nullptr;
+			return EntityIdArray[id];
 		}
 		Zeal::EqStructures::Entity* get_entity_by_parent_id(short parent_id)
 		{

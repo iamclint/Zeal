@@ -357,6 +357,11 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::print_chat(ss.str());
 				return true;
 			}
+			if (args.size() == 2 && args[1] == "check")  // Report state and do basic debug integrity checks.
+			{
+				ZealService::get_instance()->entity_manager.get()->Dump();
+				return true;
+			}
 			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "help"))
 			{
 				print_commands();

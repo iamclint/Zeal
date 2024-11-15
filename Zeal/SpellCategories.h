@@ -10,6 +10,7 @@ struct SpellCat
 	SpellCat(int cat, int subcat, std::string name = "") : Category(cat), SubCategory(subcat), NewName(name) {};
 };
 
+// Note: This function uses 141300 bytes of stack (assumed to be once during static initialization).
 SpellCat getSpellCategoryAndSubcategory(int spellID) {
     static const std::unordered_map<int, SpellCat> combinedMap = {
     {3, { 125, 64 } }, // Summon Corpse,

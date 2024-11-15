@@ -79,6 +79,7 @@ namespace Zeal
 			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
 			static mem::function<int __fastcall(int, int)> ProcessControls = 0x53F337;
 			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> ReplyTarget = 0x4ff62d;
+			static mem::function<Zeal::EqStructures::Entity* __cdecl(const char* name)> GetPlayerFromName = 0x005081db;  // Entity list traversal with name stricmp.
 		}
 		namespace Spells //some wrappers for simplifying
 		{
@@ -149,7 +150,7 @@ namespace Zeal
 		Zeal::EqStructures::SPELLMGR* get_spell_mgr();
 		Zeal::EqStructures::Entity* get_controlled();
 		Zeal::EqStructures::CameraInfo* get_camera();
-		Zeal::EqStructures::Entity* get_entity_by_id(short id);
+		Zeal::EqStructures::Entity* get_entity_by_id(short id);  // Returns nullptr if invalid id.
 		Zeal::EqStructures::Entity* get_entity_by_parent_id(short parent_id);
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown);
 		char* trim_name(char* name);
