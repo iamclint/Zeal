@@ -1,0 +1,46 @@
+# Build check on a pull request to master.
+
+name: Run a build check
+
+on:
+  pull_request:
+    branches:
+    - master
+
+env:
+  SOLUTION_FILE_PATH: ./Zeal.sln
+
+jobs:
+  build:
+    name: Build code
+    runs-on: windows-2022
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Parse the git short hash to embed in the build using a compiler define
+        id: parse_git
+        shell: bash
+        run: |
+          SHORT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          echo short_hash=$SHORT_HASH >> $GITHUB_OUTPUT
+
+      - name: Extract the ZEAL_VERSION from the source code to use as the tag for the release
+        id: zeal_version
+        shell: bash
+        env:
+          SED_PARAMS: 's/^[^"]*"\([^"]*\)".*/\1/'
+        run: |
+          ZEAL_VERSION=$(grep '#define ZEAL_VERSION' Zeal/Zeal.h | sed $SED_PARAMS)
+          echo version=v$ZEAL_VERSION >> $GITHUB_OUTPUT
+
+      - name: Build the Zeal solution using msbuild to find the path to VS Studio
+        env:
+          ZEAL_BUILD_VERSION: ${{ steps.parse_git.outputs.short_hash }} # Consider also appending a dirty flag.
+        run: |
+          msbuild /m /p:Configuration=Release /p:Platform=x86 /p:zeal_build_version=$env:ZEAL_BUILD_VERSION $env:SOLUTION_FILE_PATH
