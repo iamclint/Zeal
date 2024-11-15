@@ -78,10 +78,12 @@ void ZealService::configuration_check()
 	"EQUI_OptionsWindow.xml",
 	"EQUI_Tab_Cam.xml",
 	"EQUI_Tab_Colors.xml",
+	"EQUI_Tab_FloatingDamage",
 	"EQUI_Tab_General.xml",
 	"EQUI_Tab_Map.xml",
 	"EQUI_Tab_Nameplate.xml",
 	"EQUI_Tab_TargetRing.xml",
+	"EQUI_ZealInputDialog",
 	"EQUI_ZealMap.xml",
 	"EQUI_ZealOptions.xml"};
 
