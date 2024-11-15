@@ -2679,7 +2679,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>17 - Unused at this time</Text>
+    <Text>17 - My Pet Say</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -2737,7 +2737,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>19 - Unused at this time</Text>
+    <Text>19 - Other Pet Say</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
