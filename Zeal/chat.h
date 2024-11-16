@@ -2,25 +2,24 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
+#include "ZealSettings.h"
 
 class chat
 {
 public:
-	int TimeStampsStyle = 0;
-	bool UseBlueCon = false;
-	bool UseZealInput = false;
-	bool UseUniqueNames = false;
-	bool UseClassicClassNames = false;
-	void set_input_color(Zeal::EqUI::ARGBCOLOR col);
-	void set_bluecon(bool val);
-	void set_timestamp(int val);
-	void set_input(bool val);
+
+
+	ZealSetting<bool> UseClassicClassNames = { false, "Zeal", "ClassicClasses", false };
+	ZealSetting<bool> UseBlueCon = { true, "Zeal", "Bluecon", false };
+	ZealSetting<bool> UseZealInput = { true, "Zeal", "ZealInput", false };
+	ZealSetting<bool> UseUniqueNames = { false, "Zeal", "UniqueNames", false };
+	ZealSetting<int> TimeStampsStyle = { 0, "Zeal", "ChatTimestamps", false };
+
 	void set_classes(bool val);
 	void DoPercentReplacements(std::string& str_data);
 	chat(class ZealService* pHookWrapper, class IO_ini* ini);
 	~chat();
 private:
-	void LoadSettings(class IO_ini* ini);
 	void InitPercentReplacements();
 	std::vector<std::function<void(std::string& str_data)>> percent_replacements;
 };
