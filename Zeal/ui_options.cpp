@@ -278,7 +278,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_ShowHelm",				[](Zeal::EqUI::BasicWnd* wnd) { Zeal::EqGame::print_chat("Show helm toggle"); });
 	ui->AddCheckboxCallback(wnd, "Zeal_AltContainerTooltips",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tooltips->set_alt_all_containers(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->set_classes(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses",		    [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->chat_hook->UseClassicClassNames.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindowsHist",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetHist(wnd->Checked); });
 	ui->AddComboCallback(wnd,	 "Zeal_Timestamps_Combobox",	[](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->TimeStampsStyle.set(value); });

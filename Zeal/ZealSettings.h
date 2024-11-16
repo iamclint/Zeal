@@ -38,7 +38,7 @@ public:
 	*   save_per_character if true saves in player names ini rather than eqclient
 	*	read and write ini as well as a callback with new value
 	*/
-	ZealSetting(T default_value, const std::string& ini_section, const std::string& ini_key, bool save_per_character, std::function<void(T& value)> onset_callback)
+	ZealSetting(T default_value, const std::string& ini_section, const std::string& ini_key, bool save_per_character, std::function<void(T& value)> onset_callback, bool callback_on_init=false)
 	{
 		set_callback = onset_callback; 
 		value = default_value; 
@@ -46,9 +46,18 @@ public:
 		key = ini_key;
 		per_character = save_per_character;
 		if (save_per_character)
-			ZealService::get_instance()->callbacks->AddGeneric([this]() { init(); }, callback_type::InitUI);
+		{
+			needs_callback = callback_on_init;
+			ZealService::get_instance()->callbacks->AddGeneric([this]() { init(); if (needs_callback && set_callback) set_callback(value); needs_callback = false;  }, callback_type::InitUI);
+		}
 		else
+		{
 			init();
+			if (callback_on_init && set_callback)
+				set_callback(value);
+		}
+		
+			
 	}
 	//read and write ini
 	ZealSetting(T default_value, const std::string& ini_section, const std::string& ini_key, bool save_per_character)
@@ -58,7 +67,9 @@ public:
 		key = ini_key;
 		per_character = save_per_character;
 		if (save_per_character)
+		{
 			ZealService::get_instance()->callbacks->AddGeneric([this]() { init(); }, callback_type::InitUI);
+		}
 		else
 			init();
 	}
@@ -78,7 +89,8 @@ private:
 	T value;
 	std::string section;
 	std::string key;
-	bool per_character;
+	bool per_character = false;
+	bool needs_callback = false;
 	void init()
 	{
 		if (section.length() && key.length())
