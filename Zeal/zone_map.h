@@ -48,6 +48,7 @@ public:
 	void set_show_all_names_override(bool flag);  // Override to enable showing group and raid names.
 	void set_show_grid(bool enable, bool update_default = true);
 	bool set_grid_pitch(int new_pitch, bool update_default = true);
+	bool set_ring_radius(int new_radius, bool update_default = true);
 	bool set_name_length(int new_length, bool update_default = true);
 	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
@@ -162,6 +163,7 @@ private:
 	void parse_show_group(const std::vector<std::string>& args);
 	void parse_show_raid(const std::vector<std::string>& args);
 	void parse_grid(const std::vector<std::string>& args);
+	void parse_ring(const std::vector<std::string>& args);
 	void parse_font(const std::vector<std::string>& args);
 	void parse_poi(const std::vector<std::string>& args);
 	bool search_poi(const std::string& search);
@@ -211,6 +213,7 @@ private:
 	void add_raid_member_position_vertices(std::vector<MapVertex>& vertices) const;
 	void add_raid_marker_vertices(const Vec3& position_loc, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
+	void add_ring_vertices(std::vector<MapVertex>& vertices) const;
 	float convert_size_fraction_to_model(float sizes_fraction) const;
 	float scale_pixels_to_model(float pixels) const;
 	Vec3 transform_matrix(const D3DXMATRIX& matrix, const Vec3& vec) const;
@@ -239,6 +242,7 @@ private:
 	bool map_interactive_enabled = false;  // Supports some mouse/cursor operations.
 	bool map_show_grid = false;
 	int map_grid_pitch = kDefaultGridPitch;  // Pitch when grid is visible.
+	int map_ring_radius = 0;
 	int map_name_length = kDefaultNameLength;  // Number of characters in name labels.
 	bool map_show_raid = false;
 	bool map_show_all_names_override = false;  // Overrides modes to show names of all visible members.

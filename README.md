@@ -502,6 +502,16 @@ are colored orange.
   - `/map grid` toggles grid on and off
   - `/map grid 500` sets the grid pitch to 500 loc units (lines at multiples of 500)
 
+#### Map ring
+A simple distance ring around the current position is available. The distance can be auto-set
+based on the tracking skill for rangers, druids, and bards, so they can simply toggle the ring
+on and off with `/map ring`.
+
+* Command examples:
+  - `/map ring` if visible or a non-tracker, turns ring off
+  - `/map ring` if not visible, sets the ring at max tracking distance per skill level
+  - `/map ring 500` sets the ring around the player at a distance of 500 (all classes)
+
 #### Showing group and raid members
 The map supports showing the live position of other group and raid members. The group
 member markers are slighly shrunken player position markers and colored in this order

@@ -65,8 +65,10 @@ static constexpr int kPositionVertices = kPositionCount * 3; // Fixed triangle l
 static constexpr int kRaidMaxMembers = Zeal::EqStructures::RaidInfo::kRaidMaxMembers;
 static constexpr int kRaidPositionVertices = 3; // Fixed triangle list with one triangle.
 static constexpr int kMaxDynamicLabels = 10;
+static constexpr int kRingLineSegments = 72;  // Every 5 degrees.
+static constexpr int kRingVertices = kRingLineSegments + 1; // N + 1 for D3DPT_LINESTRIP
 static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositionVertices
-       * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers);
+       * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers + kRingVertices);
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
@@ -1090,6 +1092,34 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
     }
 }
 
+void ZoneMap::add_ring_vertices(std::vector<MapVertex>& vertices) const {
+    if (map_ring_radius <= 0 || !Zeal::EqGame::get_self())
+        return;
+
+    Vec3 position = Zeal::EqGame::get_self()->Position;
+
+    // Note: The vertices below are not getting clipped to the map area and
+    // are simply disappearing when out of the viewport.
+    // Generate kRingLineSegments + 1 vertices.
+    auto color = D3DCOLOR_XRGB(183, 225, 161);  // Light grey green.
+    const float angle_increment = static_cast<float>(2 * M_PI / kRingLineSegments);
+    float angle_rad = 0;
+    for (int i = 0; i <= kRingLineSegments; ++i) {
+        if (i == kRingLineSegments)
+            angle_rad = 0;  // Ensure it closes precisely with final line point.
+        float x0 = map_ring_radius * cosf(angle_rad);
+        float y0 = map_ring_radius * sinf(angle_rad);
+        vertices.push_back(MapVertex{
+            .x = x0 + -position.y,  // Note y,x,z and negation.
+            .y = y0 + -position.x,
+            .z = 0.5f,
+            .color = color
+            });
+        angle_rad += angle_increment;  // Advance to next point.
+    }
+}
+
+
 // Handles updating and rendering of self, group, and raid positions.
 void ZoneMap::render_positions(IDirect3DDevice8& device) {
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
@@ -1097,12 +1127,13 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
         return;
     }
 
-    // Populate a vector with D3DPT_TRIANGLELIST vertices.
+    // Populate a vector with D3DPT_LINESTRIP and D3DPT_TRIANGLELIST vertices.
     std::vector<MapVertex> position_vertices;
+    add_ring_vertices(position_vertices);
+    const int ring_vertex_count = position_vertices.size();
     add_raid_member_position_vertices(position_vertices);
     add_group_member_position_vertices(position_vertices);
-
-    int other_triangle_vertices = position_vertices.size();
+    const int member_vertex_count = position_vertices.size() - ring_vertex_count;
 
     const float size = convert_size_fraction_to_model(position_size);
 
@@ -1130,12 +1161,18 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
     memcpy(data, position_vertices.data(), copy_size);
     position_vertex_buffer->Unlock();
 
+    device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
 
-    // First draw the "other" (raid, group) markers.
-    int other_triangle_count = other_triangle_vertices / 3; // D3DPT_TRIANGLELIST
-    if (other_triangle_count) {
+    // First draw the distance ring if enabled.
+    if (ring_vertex_count) {
+        device.DrawPrimitive(D3DPT_LINESTRIP, 0, ring_vertex_count - 1);  // N - 1 strip lines.
+    }
+
+    // Then draw the "other" (raid, group) markers.
+    const int member_triangle_count = member_vertex_count / 3; // D3DPT_TRIANGLELIST
+    if (member_triangle_count) {
         device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
-        device.DrawPrimitive(D3DPT_TRIANGLELIST, 0, other_triangle_count);
+        device.DrawPrimitive(D3DPT_TRIANGLELIST, ring_vertex_count, member_triangle_count);
     }
 
     // Then draw the raid and group labels (on top of markers but below self marker).
@@ -1144,8 +1181,9 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
 
     // And finally draw the self marker. Three vertices per triangle in D3DPT_TRIANGLELIST.
     device.SetStreamSource(0, position_vertex_buffer, sizeof(MapVertex));
-    int self_triangle_count = position_vertices.size() / 3 - other_triangle_count;
-    device.DrawPrimitive(D3DPT_TRIANGLELIST, other_triangle_vertices, self_triangle_count);
+    const int other_vertex_count = ring_vertex_count + member_vertex_count;
+    const int self_triangle_count = (position_vertices.size() - other_vertex_count) / 3;
+    device.DrawPrimitive(D3DPT_TRIANGLELIST, other_vertex_count, self_triangle_count);
 }
 
 // Translate from pixels scale to model (EQ game & map) scale.
@@ -1665,6 +1703,40 @@ bool ZoneMap::set_grid_pitch(int new_pitch, bool update_default) {
         ZealService::get_instance()->ini->setValue<int>("Zeal", "MapGridPitch", map_grid_pitch);
 
     update_ui_options();
+    return true;
+}
+
+// Helper function to calculate tracking distance.
+static int get_tracking_distance() {
+    auto* char_info = Zeal::EqGame::get_char_info();
+    if (!char_info)
+        return 0;
+
+    // Assume non-tracking classes have zero skill.
+    const int kTrackingIndex = 53; // (0xc12 - 0xba8) / sizeof(WORD) in client code.
+    int skill_level = char_info->Skills[kTrackingIndex];
+    if (skill_level <= 0)
+        return 0;
+
+    // Formula from GenerateTrackingList in client:
+    return 500 + skill_level * 10 + max(0, (skill_level - 100)) * 10;
+}
+
+bool ZoneMap::set_ring_radius(int new_radius, bool update_default) {
+    if (new_radius <= 0) {
+        if (map_ring_radius > 0)
+            new_radius = 0;  // If already on, toggles off.
+        else
+            new_radius = get_tracking_distance();  // Auto-range if class supports.
+    } else
+        new_radius = max(10, min(10000, new_radius));  // Just clamp for now.
+
+    map_ring_radius = new_radius;
+
+    // Skip storing preferences for now.
+    // if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+    //    ZealService::get_instance()->ini->setValue<int>("Zeal", "MapGridPitch", map_grid_pitch);
+    // update_ui_options();
     return true;
 }
 
@@ -2325,6 +2397,17 @@ void ZoneMap::parse_grid(const std::vector<std::string>& args) {
         Zeal::EqGame::print_chat("Usage: /map grid [pitch] (blank pitch toggles)");
 }
 
+void ZoneMap::parse_ring(const std::vector<std::string>& args) {
+    int ring_radius = 0;
+    if (args.size() == 2) {
+        set_ring_radius(ring_radius, false);  // Toggles off or uses auto-range.
+    }
+    else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &ring_radius) ||
+        !set_ring_radius(ring_radius, false))
+        Zeal::EqGame::print_chat("Usage: /map ring [radius] (blank disables or uses calculated track range)");
+}
+
+
 void ZoneMap::parse_font(const std::vector<std::string>& args) {
     if (args.size() == 3) {
         set_font(args[2]);
@@ -2459,8 +2542,8 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), grid: %i, align: %i, labels:%i, zone: %i",
                             enabled, map_background_state, map_background_alpha, map_show_grid ? map_grid_pitch : 0,
                             map_alignment_state, map_labels_mode, zone_id);
-    Zeal::EqGame::print_chat("num_markers: %i, num_labels: %i, name_length: %i",
-            markers_list.size(), labels_list.size(), map_name_length);
+    Zeal::EqGame::print_chat("num_markers: %i, num_labels: %i, name_length: %i, ring: %i",
+            markers_list.size(), labels_list.size(), map_name_length, map_ring_radius);
     Zeal::EqGame::print_chat("view: t: %i, l: %i, h: %i, w: %i, Max H: %i, W: %i", 
         viewport.Y, viewport.X, viewport.Height, viewport.Width, max_viewport_height, max_viewport_width);
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
@@ -2554,6 +2637,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "grid") {
         parse_grid(args);
     }
+    else if (args[1] == "ring") {
+        parse_ring(args);
+    }
     else if (args[1] == "font") {
         parse_font(args);
     }
@@ -2565,7 +2651,7 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     }
     else if (!parse_shortcuts(args)) {
         Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level|]");
-        Zeal::EqGame::print_chat("Usage: /map [show_group|show_raid|save_ini|grid|font]");
+        Zeal::EqGame::print_chat("Usage: /map [show_group|show_raid|save_ini|grid|ring|font]");
         Zeal::EqGame::print_chat("Beta: /map [external|data_mode|always_center]");
         Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
@@ -2580,7 +2666,7 @@ void ZoneMap::callback_zone() {
     map_level_zone_id = kInvalidZoneId;
     map_level_index = 0;
     zoom_factor = 1.f;  // Reset for more consistent behavior.
-    enable_autocenter();
+    set_interactive_enable(false, false);  // Also reset for consistency.
 }
 
 void ZoneMap::release_font() {
