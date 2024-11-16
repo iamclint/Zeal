@@ -528,9 +528,8 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("GetRGBAFromIndex6", 0x438719, GetRGBAFromIndex, hook_type_replace_call);   
     InitPercentReplacements();
 }
-void chat::set_classes(bool val)
+void chat::set_classes()
 {
-    UseClassicClassNames.set(val);
     if (UseClassicClassNames.get())
     {
         mem::write<byte>(0x4bc090, 66); //this just changes the if statement to check if the player is > 65 rather than > 50
