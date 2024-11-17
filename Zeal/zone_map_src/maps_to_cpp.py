@@ -244,7 +244,8 @@ def export_single_zone_data(zone_name: str, zone_data: dict, fp):
     fp.write('};\n')
     fp.write(f'static const ZoneMapLabel {zone_name}_labels[] = {{')
     for label in zone_data['labels']:
-        fp.write(format_label(label) + ',')
+        if label[6] != "Succor" and label[6] != "succor":  # Succor is automatically added.
+            fp.write(format_label(label) + ',')
     fp.write('};\n')
     fp.write(f'static const ZoneMapLevel {zone_name}_levels[] = {{')
     sorted_level_ids = sorted(zone_data['levels'].keys())

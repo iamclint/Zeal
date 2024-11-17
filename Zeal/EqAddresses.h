@@ -27,6 +27,7 @@ namespace Zeal
 		// The client maintains a 5000 entry spawn_id to entity (EQPlayer) LUT for faster access to the linked list.
 		static constexpr int kEntityIdArraySize = 5000;
 		static EqStructures::Entity** EntityIdArray = (Zeal::EqStructures::Entity**)0x0078c47c;  // EQP_IDArray
+		static EqStructures::EQZONEINFO* ZoneInfo = (EqStructures::EQZONEINFO*)0x00798784;
 		//static EqStructures::SPELLMGR* SpellsMgr = (EqStructures::SPELLMGR*)0x805CB0;
 		
 		//static DWORD* ptr_LocalPC = (DWORD*)0x7F94E8;

@@ -415,6 +415,19 @@ D3DCOLOR ZoneMap::get_background_color() const {
     return background_color;
 }
 
+// Updates the succor_label with the current zone's safe coordinates.
+void ZoneMap::update_succor_label() {
+    static constexpr char kSuccorString[] = "Succor";
+    const auto* zone_info = Zeal::EqGame::ZoneInfo;
+    succor_label.x = -static_cast<int16_t>(zone_info->SafeCoordsX);  // Negate to map data.
+    succor_label.y = -static_cast<int16_t>(zone_info->SafeCoordsY);
+    succor_label.z = static_cast<int16_t>(zone_info->SafeCoordsZ);
+    succor_label.red = 0;
+    succor_label.green = 255;
+    succor_label.blue = 0;
+    succor_label.label = kSuccorString;
+}
+
 // Loads the POI labels from the ZoneMapData with some level-based filtering.
 void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zone_map_data) {
     labels_list.clear();
@@ -422,6 +435,11 @@ void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zo
     int num_labels_to_scan = zone_map_data.num_labels;
     if (map_labels_mode == LabelsMode::kOff)
         num_labels_to_scan = 0;  // Disable the scan below.
+    else {
+        // Always insert succor if labels are active.
+        update_succor_label();
+        labels_list.push_back(&succor_label);
+    }
 
     // Scan through POI's adding to the list if appropriate.
     for (int i = 0; i < num_labels_to_scan; ++i) {
@@ -440,13 +458,11 @@ void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zo
                 constexpr std::string_view ring_string{ "druid_ring" };
                 constexpr std::string_view portal_string{ "_portal" };
                 constexpr std::string_view spires_string{ "_spire" };
-                constexpr std::string_view succor_string{ "succor" };
                 std::transform(label_string.begin(), label_string.end(), label_string.begin(), ::tolower);
                 if (label_string.find(circle_string) == std::string::npos &&
                     label_string.find(ring_string) == std::string::npos &&
                     label_string.find(portal_string) == std::string::npos &&
-                    label_string.find(spires_string) == std::string::npos &&
-                    label_string.find(succor_string) == std::string::npos)
+                    label_string.find(spires_string) == std::string::npos)
                     continue;  // Skip label.
             }
         }
@@ -845,10 +861,8 @@ void ZoneMap::process_mouse_wheel(int16_t mouse_delta, uint16_t flags, int16_t m
     set_zoom(zoom_percent);
 
     // If zone data is available, perform a more advanced zoom to center the zoom at the mouse locs.
-    const ZoneMapData* zone_map_data = get_zone_map(zone_id);
-    if (!zone_map_data) {
+    if (zone_id == kInvalidZoneId)
         return;
-    }
 
     POINT corner_pt = { 0 };
     if (external_enabled)
@@ -1411,14 +1425,6 @@ void ZoneMap::callback_render() {
         return;
     }
 
-    // ZealMap is responsible for the updates when using the external d3d device.
-    if (external_enabled) {
-        auto background_color = get_background_color();
-        device->Clear(0, NULL, D3DCLEAR_TARGET, background_color, 1.0f, 0);
-        if (FAILED(device->BeginScene()))   // begins the 3D scene
-            return;
-    }
-
     if (zone_id != self->ZoneId) {
         zone_id = self->ZoneId;
         render_load_map(*device, *zone_map_data);
@@ -1426,6 +1432,14 @@ void ZoneMap::callback_render() {
 
     render_update_viewport(*device);  // Updates size and position of output viewport.
     render_update_transforms(*zone_map_data);  // Updates scaling, offsets, and clipping.
+
+    // ZealMap is responsible for the updates when using the external d3d device.
+    if (external_enabled) {
+        auto background_color = get_background_color();
+        device->Clear(0, NULL, D3DCLEAR_TARGET, background_color, 1.0f, 0);
+        if (FAILED(device->BeginScene()))   // begins the 3D scene
+            return;
+    }
 
     render_map(*device);
 
@@ -2310,7 +2324,7 @@ bool ZoneMap::search_poi(const std::string& search_term) {
         return false;  // Not handled here.
 
     const ZoneMapData* zone_map_data = get_zone_map(self->ZoneId);
-    if (!zone_map_data || zone_map_data->num_labels == 0) {
+    if (!zone_map_data || zone_map_data->num_labels < 0) {
         Zeal::EqGame::print_chat("No map POI data available for this zone");
         return false;
     }
@@ -2319,8 +2333,8 @@ bool ZoneMap::search_poi(const std::string& search_term) {
     std::string search_lower = search_term;
     std::transform(search_lower.begin(), search_lower.end(), search_lower.begin(), ::tolower);
     int match_count = 0;
-    for (int i = 0; i < zone_map_data->num_labels; ++i) {
-        const ZoneMapLabel& label = zone_map_data->labels[i];
+    for (int i = 0; i <= zone_map_data->num_labels; ++i) {
+        const ZoneMapLabel& label = (i == 0) ? succor_label : zone_map_data->labels[i - 1];
         std::string label_lower = std::string(label.label);
         std::transform(label_lower.begin(), label_lower.end(), label_lower.begin(), ::tolower);
         if (label_lower.find(search_lower) != std::string::npos) {
@@ -2330,7 +2344,7 @@ bool ZoneMap::search_poi(const std::string& search_term) {
                 Zeal::EqGame::print_chat("Map poi search results for: %s:", search_term.c_str());
                 flag = "+";  // Flag the POI that was used for the marker.
                 // Note: Need to negate y and x to go from map data to game world coordinates.
-                set_marker(-zone_map_data->labels[i].y, -zone_map_data->labels[i].x, label.label);
+                set_marker(-label.y, -label.x, label.label);
                 set_enabled(true);
             }
             Zeal::EqGame::print_chat("%s[%i]: (%i, %i): %s", flag, i, -label.y, -label.x, label.label);
@@ -2508,18 +2522,18 @@ void ZoneMap::parse_poi(const std::vector<std::string>& args) {
     int poi = 0;
     if (args.size() == 2) {
         Zeal::EqGame::print_chat("Map POI list for zone: %s", zone_map_data->name);
-        for (int i = 0; i < zone_map_data->num_labels; ++i) {
-            const ZoneMapLabel& label = zone_map_data->labels[i];
+        for (int i = 0; i <= zone_map_data->num_labels; ++i) {
+            const ZoneMapLabel& label = (i == 0) ? succor_label : zone_map_data->labels[i - 1];
             Zeal::EqGame::print_chat("[%i]: (%i, %i): %s", i, -label.y, -label.x, label.label);
         }
     }
     else if (args.size() == 3 && Zeal::String::tryParse(args[2], &poi, true)) {
-        if (poi < 0 || poi >= zone_map_data->num_labels) {
+        if (poi < 0 || poi > zone_map_data->num_labels) {
             Zeal::EqGame::print_chat("Invalid selection index");
             return;
         }
-        set_marker(-zone_map_data->labels[poi].y, -zone_map_data->labels[poi].x,
-                    zone_map_data->labels[poi].label);
+        const ZoneMapLabel& label = (poi == 0) ? succor_label : zone_map_data->labels[poi - 1];
+        set_marker(-label.y, -label.x, label.label);
         set_enabled(true);
     }
     else if (args.size() != 3 || !search_poi(args[2])) {
