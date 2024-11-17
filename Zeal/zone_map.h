@@ -222,6 +222,7 @@ private:
 	Vec3 transform_world_to_model(const Vec3& world) const;
 	Vec3 transform_screen_to_model(float x, float y, float z = 1.f) const;
 	D3DCOLOR get_background_color() const;
+	void update_succor_label();
 
 	const ZoneMapData* get_zone_map(int zone_id);
 	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
@@ -286,6 +287,7 @@ private:
 	bool mouse_drag_enabled = false;
 
 	std::vector<const ZoneMapLabel*> labels_list;  // List of pointers to visible map labels.
+	ZoneMapLabel succor_label;  // Auto-generated succor label for safe coordinates.
 	int line_count = 0;  // # of primitives in line buffer.
 	int grid_line_count;  // # of primitives at end of line buffer.
 	IDirect3DVertexBuffer8* line_vertex_buffer = nullptr;

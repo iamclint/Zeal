@@ -20,6 +20,7 @@ Support scripts and data files for producing the auto-generated zone_map_data.h 
   `python extract_zone_id_lut.csv`
 
 ## Generation of the zone_map_data.h and zone_map_data.cpp files
+* Note: "Succor" points of interest are filtered out and handled automatically in the code
 * Execute the script below from the zone_map_src directory and it by default uses the checked in
   input files and writes the output to the Zeal source directory (at ../)
   `python maps_to_cpp.py`

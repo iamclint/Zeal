@@ -539,6 +539,44 @@ namespace Zeal
 			/* 0x0008 */ WORD Unknown0008;
 			/* 0x000A */
 		};
+		struct EQZONEINFO
+		{
+			/* 0x0000 */ CHAR PlayerName[0x40];
+			/* 0x0040 */ CHAR ShortName[0x20];
+			/* 0x0060 */ CHAR LongName[0x80];
+			/* 0x00E0 */ BYTE Unknown00E0[150];
+			/* 0x0176 */ BYTE Type;
+			/* 0x0177 */ BYTE FogColorRed[4];    // Set to 0x0c if 0184 and 0194 set to 0.
+			/* 0x017B */ BYTE FogColorGreen[4];  // Set to 0x0c if 0184 and 0194 set to 0.
+			/* 0x017F */ BYTE FogColorBlue[4];   // Set to 0x0c if 0184 and 0194 set to 0.
+			/* 0x0183 */ BYTE Unknown0183;
+			/* 0x0184 */ FLOAT Unknown0184;  // Set to 500.0 if 0184 and 0194 set to 0.
+			/* 0x0188 */ FLOAT Unknown0188;
+			/* 0x018C */ FLOAT Unknown018C;
+			/* 0x0190 */ FLOAT Unknown0190;
+			/* 0x0194 */ FLOAT Unknown0194;  // Set to 600.0 if 0184 and 0194 set to 0.
+			/* 0x0198 */ FLOAT Unknown0198;
+			/* 0x019C */ FLOAT Unknown019C;
+			/* 0x01A0 */ FLOAT Unknown01A0;
+			/* 0x01A4 */ FLOAT Gravity;
+			/* 0x01A8 */ BYTE Unknown01A8;
+			/* 0x01A9 */ BYTE Unknown01A9;
+			/* 0x01AA */ BYTE Unknown01AA;
+			/* 0x01AB */ BYTE Unknown01AB;
+			/* 0x01AC */ BYTE Unknown01AC;
+			/* 0x01AD */ BYTE Unknown01AD[45];
+			/* 0x01DA */ BYTE SkyType;
+			/* 0x01DB */ BYTE Unknown01DB[9];
+			/* 0x01E4 */ FLOAT ExperienceMultiplier;
+			/* 0x01E8 */ FLOAT SafeCoordsY; // CDisplay::MoveLocalPlayerToSafeCoords
+			/* 0x01EC */ FLOAT SafeCoordsX;
+			/* 0x01F0 */ FLOAT SafeCoordsZ;
+			/* 0x01F4 */ FLOAT Unknown01F4;
+			/* 0x01F8 */ FLOAT Unknown01F8;
+			/* 0x01FC */ FLOAT MinClip; // draw distance (minimum Far Clip Plane), set to max(50, value).
+			/* 0x0200 */ FLOAT MaxClip; // draw distance (maximum Far Clip Plane), set to 4*(0x0194) if < 51 or 4*0x01fc
+			/* ...... */
+		};
 		struct EQCHARINFO
 		{
 			float encum_factor()
