@@ -535,9 +535,14 @@ in the options tab and instead use the key bind to situationally toggle it on an
 
 #### Showing map levels
 The map supports showing different levels based on the Brewall map color standards. Not all of
-the zones are properly colored, but it does work well in some of the 3-D overlapping zones.
+the zones are properly colored, but it does work well in some of the 3-D overlapping zones. It
+also supports a simplified auto z-level mode that shows map data within a z-level range of the
+player as fully opaque and further data at a faded alpha transparency level. The auto-mode
+is selectable using the toggle map level keybinds (see below).
 
+* Zeal slider to adjust the faded z-level alpha transparency value
 * Key bind: "Toggle Map Level Up", "Toggle Map Level Down" - toggles up or down the visible level
+  - The default index of 0 shows all levels and -1 = auto z-level.
 * Command examples:
   - `/map level` shows the current zone's map data level info
   - `/map level 0` shows default of all levels
