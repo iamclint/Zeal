@@ -133,13 +133,69 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>true</AlignRight>
   </Label>
+  <!-- Zeal Map Faded ZLevel Alpha -->
+  <Label item="Zeal_MapFadedZLevelAlpha_Label">
+    <ScreenID>Zeal_MapFadedZLevelAlpha_Label</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>142</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>14</CY>
+    </Size>
+    <Text>Faded Z-level alpha</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>false</AlignRight>
+  </Label>
+  <Slider item="Zeal_MapFadedZLevelAlpha_Slider">
+    <ScreenID>Zeal_MapFadedZLevelAlpha_Slider</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>162</Y>
+    </Location>
+    <Size>
+      <CX>100</CX>
+      <CY>16</CY>
+    </Size>
+    <SliderArt>SDT_DefSlider</SliderArt>
+  </Slider>
+  <Label item="Zeal_MapFadedZLevelAlpha_Value">
+    <ScreenID>Zeal_MapFadedZLevelAlpha_Value</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>110</X>
+      <Y>162</Y>
+    </Location>
+    <Size>
+      <CX>40</CX>
+      <CY>16</CY>
+    </Size>
+    <Text>0</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>true</AlignRight>
+  </Label>
   <!-- Zeal Map Alignment Combobox -->
   <Label item="Zeal_MapAlignment_Label">
     <ScreenID>Zeal_MapAlignment_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>142</Y>
+      <Y>184</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -160,7 +216,7 @@
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
       <X>10</X>
-      <Y>162</Y>
+      <Y>204</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -184,7 +240,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>197</Y>
+      <Y>239</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -205,7 +261,7 @@
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
       <X>10</X>
-      <Y>217</Y>
+      <Y>259</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -230,7 +286,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>252</Y>
+      <Y>294</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -251,7 +307,7 @@
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
       <X>10</X>
-      <Y>272</Y>
+      <Y>314</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -276,7 +332,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>307</Y>
+      <Y>349</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -307,7 +363,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>337</Y>
+      <Y>379</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -328,7 +384,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>357</Y>
+      <Y>399</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -341,7 +397,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>110</X>
-      <Y>357</Y>
+      <Y>399</Y>
     </Location>
     <Size>
       <CX>40</CX>
@@ -363,7 +419,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>380</Y>
+      <Y>422</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -394,7 +450,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>410</Y>
+      <Y>452</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -415,7 +471,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>430</Y>
+      <Y>472</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -428,7 +484,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>110</X>
-      <Y>430</Y>
+      <Y>472</Y>
     </Location>
     <Size>
       <CX>40</CX>
@@ -450,7 +506,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>455</Y>
+      <Y>497</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -1029,6 +1085,9 @@
     <Pieces>Zeal_MapBackgroundAlpha_Label</Pieces>
     <Pieces>Zeal_MapBackgroundAlpha_Slider</Pieces>
     <Pieces>Zeal_MapBackgroundAlpha_Value</Pieces>
+    <Pieces>Zeal_MapFadedZLevelAlpha_Label</Pieces>
+    <Pieces>Zeal_MapFadedZLevelAlpha_Slider</Pieces>
+    <Pieces>Zeal_MapFadedZLevelAlpha_Value</Pieces>
     <Pieces>Zeal_MapNamesLength_Label</Pieces>
     <Pieces>Zeal_MapNamesLength_Slider</Pieces>
     <Pieces>Zeal_MapNamesLength_Value</Pieces>

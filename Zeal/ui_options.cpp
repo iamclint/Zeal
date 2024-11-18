@@ -393,6 +393,9 @@ void ui_options::InitMap()
 	ui->AddSliderCallback(wnd, "Zeal_MapBackgroundAlpha_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_background_alpha(value);
 		});
+	ui->AddSliderCallback(wnd, "Zeal_MapFadedZLevelAlpha_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		ZealService::get_instance()->zone_map->set_faded_zlevel_alpha(value);
+		});
 	ui->AddSliderCallback(wnd, "Zeal_MapNamesLength_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_name_length(value * ZoneMap::kMaxNameLength / 100);
 		});
@@ -407,6 +410,7 @@ void ui_options::InitMap()
 	ui->AddLabel(wnd, "Zeal_MapPositionSize_Value");
 	ui->AddLabel(wnd, "Zeal_MapMarkerSize_Value");
 	ui->AddLabel(wnd, "Zeal_MapBackgroundAlpha_Value");
+	ui->AddLabel(wnd, "Zeal_MapFadedZLevelAlpha_Value");
 	ui->AddLabel(wnd, "Zeal_MapNamesLength_Value");
 	ui->AddLabel(wnd, "Zeal_MapGridPitch_Value");
 }
@@ -629,6 +633,7 @@ void ui_options::UpdateOptionsMap()
 	ui->SetSliderValue("Zeal_MapPositionSize_Slider", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetSliderValue("Zeal_MapMarkerSize_Slider", ZealService::get_instance()->zone_map->get_marker_size());
 	ui->SetSliderValue("Zeal_MapBackgroundAlpha_Slider", ZealService::get_instance()->zone_map->get_background_alpha());
+	ui->SetSliderValue("Zeal_MapFadedZLevelAlpha_Slider", ZealService::get_instance()->zone_map->get_faded_zlevel_alpha());
 	ui->SetSliderValue("Zeal_MapNamesLength_Slider", ZealService::get_instance()->zone_map->get_name_length() * 100 / ZoneMap::kMaxNameLength);
 	ui->SetSliderValue("Zeal_MapGridPitch_Slider", ZealService::get_instance()->zone_map->get_grid_pitch() * 100 / ZoneMap::kMaxGridPitch);
 	ui->SetLabelValue("Zeal_MapZoom_Value", "%i%%", ZealService::get_instance()->zone_map->get_zoom());
@@ -639,6 +644,7 @@ void ui_options::UpdateOptionsMap()
 	ui->SetLabelValue("Zeal_MapPositionSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetLabelValue("Zeal_MapMarkerSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_marker_size());
 	ui->SetLabelValue("Zeal_MapBackgroundAlpha_Value", "%i%%", ZealService::get_instance()->zone_map->get_background_alpha());
+	ui->SetLabelValue("Zeal_MapFadedZLevelAlpha_Value", "%i%%", ZealService::get_instance()->zone_map->get_faded_zlevel_alpha());
 	ui->SetLabelValue("Zeal_MapNamesLength_Value", "%i", ZealService::get_instance()->zone_map->get_name_length());
 	ui->SetLabelValue("Zeal_MapGridPitch_Value", "%i", ZealService::get_instance()->zone_map->get_grid_pitch());
 }

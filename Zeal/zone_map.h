@@ -53,6 +53,7 @@ public:
 	bool set_map_data_mode(int new_mode, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
 	bool set_background_alpha(int percent, bool update_default = true);
+	bool set_faded_zlevel_alpha(int percent, bool update_default = true);
 	bool set_alignment(int new_state, bool update_default = true); // [left, center, right]
 	bool set_labels_mode(int new_mode, bool update_default = true);  // [off, summary, all]
 	bool set_map_top(int top_percent, bool update_default = true, bool preserve_height = true);
@@ -77,6 +78,7 @@ public:
 	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
 	int get_background() const { return static_cast<int>(map_background_state); }
 	int get_background_alpha() const { return static_cast<int>(map_background_alpha * 100 + 0.5f); }
+	int get_faded_zlevel_alpha() const { return static_cast<int>(map_faded_zlevel_alpha * 100 + 0.5f); }
 	int get_alignment() const { return static_cast<int>(map_alignment_state); }
 	int get_labels_mode() const { return static_cast<int>(map_labels_mode); }
 	int get_map_top() const { return static_cast<int>(map_rect_top * 100 + 0.5f); }
@@ -136,9 +138,11 @@ private:
 
 	static constexpr int kInvalidZoneId = 0;
 	static constexpr int kInvalidScreenValue = 0x7fff;  // EQ game sets mouse abs to this when not focused.
+	static constexpr int kInvalidPositionValue = 0x7fff;
 	static constexpr int kDefaultGridPitch = 1000;
 	static constexpr int kDefaultNameLength = 5;
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
+	static constexpr float kDefaultFadedZLevelAlpha = 0.2f;
 	static constexpr float kDefaultRectTop = 0.1f;
 	static constexpr float kDefaultRectLeft = 0.1f;
 	static constexpr float kDefaultRectBottom = 0.4f;
@@ -222,7 +226,9 @@ private:
 	Vec3 transform_world_to_model(const Vec3& world) const;
 	Vec3 transform_screen_to_model(float x, float y, float z = 1.f) const;
 	D3DCOLOR get_background_color() const;
+	D3DCOLOR render_get_line_color_and_opacity(const ZoneMapLine& line, int position_z, int level_id) const;
 	void update_succor_label();
+	bool is_zlevel_change() const;
 
 	const ZoneMapData* get_zone_map(int zone_id);
 	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
@@ -249,6 +255,7 @@ private:
 	bool map_show_all_names_override = false;  // Overrides modes to show names of all visible members.
 	BackgroundType::e map_background_state = BackgroundType::kClear;
 	float map_background_alpha = kDefaultBackgroundAlpha;
+	float map_faded_zlevel_alpha = kDefaultFadedZLevelAlpha;
 	AlignmentType::e map_alignment_state = AlignmentType::kFirst;
 	LabelsMode::e map_labels_mode = LabelsMode::kOff;
 	ShowGroupMode::e map_show_group_mode = ShowGroupMode::kOff;
@@ -256,7 +263,6 @@ private:
 	int zone_id = kInvalidZoneId;
 	std::vector<Marker> markers_list;
 	bool always_align_to_center = false;
-	int map_level_zone_id = kInvalidZoneId;
 	int map_level_index = 0;
 	int dynamic_labels_zone_id = kInvalidZoneId;
 	std::vector<DynamicLabel> dynamic_labels_list;  // Optional temporary labels.
@@ -278,6 +284,7 @@ private:
 	float clip_min_y = 0;
 	int clip_max_z = 0;
 	int clip_min_z = 0;
+	int zlevel_position_z = kInvalidPositionValue;
 	float position_size = kDefaultPositionSize;
 	float marker_size = kDefaultMarkerSize;
 	bool cursor_hidden = false;

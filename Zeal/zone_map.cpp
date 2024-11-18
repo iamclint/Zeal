@@ -75,6 +75,8 @@ static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
 static constexpr char kFontDirectoryPath[] = "uifiles/zeal/fonts";
 static constexpr char kFontFileExtension[] = ".spritefont";
 
+static constexpr int kZLevelHeightScale = 15;  // Vertical height for z-level visibility.
+
 }  // namespace
 
 
@@ -247,47 +249,72 @@ void ZoneMap::render_update_transforms(const ZoneMapData& zone_map_data) {
                         (+viewport_height * 0.5f - offset_y) / scale_factor);
 }
 
-// Populates the "static" per zone line_vertex_buffer and labels list. Also allocates the
-// position_vertex_buffer (worst-case sized).
+
+// Select the line opacity and color
+D3DCOLOR ZoneMap::render_get_line_color_and_opacity(const ZoneMapLine& line, int position_z, int level_id) const {
+    uint8_t alpha = 255;
+    int line_max_z = max(line.z0, line.z1);
+    int line_min_z = min(line.z0, line.z1);
+
+    if (level_id != kZoneMapInvalidLevelId) {
+        if (line.level_id == kZoneMapInvalidLevelId) {
+            // Filter all unknown lines based on z height range.
+            if (line_max_z < clip_min_z || line_min_z > clip_max_z)
+                alpha = static_cast<uint8_t>(map_faded_zlevel_alpha * 255);
+        }
+        else if (line.level_id != level_id)
+            alpha = static_cast<uint8_t>(map_faded_zlevel_alpha * 255);
+    }
+    else if (position_z != kInvalidPositionValue) {
+        // Set alpha based on current position height.
+        uint8_t faded_alpha = static_cast<uint8_t>(map_faded_zlevel_alpha * 255);
+        int max_delta = max(line_max_z - position_z, position_z - line_max_z);  // Absolute value.
+        int min_delta = max(line_min_z - position_z, position_z - line_min_z);
+        int min_distance = min(max_delta, min_delta);
+        if (min_distance >= 2 * kZLevelHeightScale)
+            alpha = static_cast<uint8_t>(map_faded_zlevel_alpha * 255);
+        else if (min_distance > kZLevelHeightScale) {
+            float fraction = static_cast<float>(min_distance) / kZLevelHeightScale;  // value between 1.f and 2.f.
+            alpha = static_cast<uint8_t>((map_faded_zlevel_alpha + (1 - map_faded_zlevel_alpha) * (2 - fraction)) * 255);
+        }
+    }
+
+    auto color = D3DCOLOR_ARGB(alpha, line.red, line.green, line.blue);
+    if ((!external_enabled || map_background_state == BackgroundType::kDark) && 
+        line.red == 0 && line.green == 0 && line.blue == 0) {
+        color = D3DCOLOR_ARGB(alpha, 64, 64, 64);  // Increase visibility of black lines.
+    }
+
+    return color;
+}
+
+// Populates the "static" per zone line_vertex_buffer and labels list.
 void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_map_data) {
     render_release_resources(false);  // Forces update of all graphics but leave font.
 
-    const int kMaxLineCount = zone_map_data.num_lines;  // Allocate a buffer assuming all visible.
-    std::unique_ptr<MapVertex[]> line_vertices = std::make_unique<MapVertex[]>(kMaxLineCount * 2);
+    // Need position_z only in auto z-level fade mode (map_level_index == -1).
+    auto* self = Zeal::EqGame::get_self();
+    zlevel_position_z = (self && map_level_index == -1) ? static_cast<int>(self->Position.z) : kInvalidPositionValue;
+    int level_id = (map_level_index > 0) ? zone_map_data.levels[map_level_index].level_id : kZoneMapInvalidLevelId;
+    if (level_id == kZoneMapInvalidLevelId) {
+        bool no_z_fade = (zlevel_position_z == kInvalidPositionValue || zone_map_data.num_levels < 2);
+        clip_max_z = no_z_fade ? zone_map_data.max_z : zlevel_position_z + kZLevelHeightScale;
+        clip_min_z = no_z_fade ? zone_map_data.min_z : zlevel_position_z - kZLevelHeightScale;
+    }
+    else {
+        clip_max_z = zone_map_data.levels[map_level_index].max_z;
+        clip_max_z += 10;  // Pad up a bit more for player height and other labels.
+        clip_min_z = zone_map_data.levels[map_level_index].min_z;
+    }
 
-    bool z_filtering = (map_level_zone_id == zone_id);
-    int level_id = z_filtering ? zone_map_data.levels[map_level_index].level_id : kZoneMapInvalidLevelId;
-    clip_max_z = z_filtering ? zone_map_data.levels[map_level_index].max_z : zone_map_data.max_z;
-    clip_max_z += 10;  // Pad up for player height and other labels.
-    clip_min_z = z_filtering ? zone_map_data.levels[map_level_index].min_z : zone_map_data.min_z;
-    line_count = 0;  // Tracks number of visible (after clipping) lines.
-    for (int i = 0; i < kMaxLineCount; ++i) {
-        if (z_filtering) {
-            if (zone_map_data.lines[i].level_id == kZoneMapInvalidLevelId) {
-                // Filter all unknown lines based on z height range.
-                int line_max_z = max(zone_map_data.lines[i].z0, zone_map_data.lines[i].z1);
-                int line_min_z = min(zone_map_data.lines[i].z0, zone_map_data.lines[i].z1);
-                if (line_max_z < clip_min_z || line_min_z > clip_max_z)
-                    continue; // Skip if line does not cross level.
-            } else if (zone_map_data.lines[i].level_id != level_id)
-                    continue;  // Skip display of all other map levels.
-        }
-
-        auto color = D3DCOLOR_XRGB(zone_map_data.lines[i].red, zone_map_data.lines[i].green, zone_map_data.lines[i].blue);
-        if (color == D3DCOLOR_XRGB(0, 0, 0) &&
-            (!external_enabled || map_background_state == BackgroundType::kDark)) {
-            color = D3DCOLOR_XRGB(64, 64, 64);  // Increase visibility of black lines.
-        }
-
-        line_vertices[2 * line_count].x = zone_map_data.lines[i].x0;
-        line_vertices[2 * line_count].y = zone_map_data.lines[i].y0;
-        line_vertices[2 * line_count].z = 0.5f;
-        line_vertices[2 * line_count].color = color;
-        line_vertices[2 * line_count + 1].x = zone_map_data.lines[i].x1;
-        line_vertices[2 * line_count + 1].y = zone_map_data.lines[i].y1;
-        line_vertices[2 * line_count + 1].z = 0.5f;
-        line_vertices[2 * line_count + 1].color = color;
-        line_count++;
+    line_count = zone_map_data.num_lines;
+    std::vector<ZoneMap::MapVertex> line_vertices;
+    line_vertices.reserve(max(0, line_count * 2));
+    for (int i = 0; i < line_count; ++i) {
+        const ZoneMapLine& line = zone_map_data.lines[i];
+        auto color = render_get_line_color_and_opacity(line, zlevel_position_z, level_id);
+        line_vertices.push_back({ .x = static_cast<float>(line.x0), .y = static_cast<float>(line.y0), .z = 0.5f, .color = color });
+        line_vertices.push_back({ .x = static_cast<float>(line.x1), .y = static_cast<float>(line.y1), .z = 0.5f, .color = color });
     }
 
     // Create the background as two triangles using 4 vertices.
@@ -326,19 +353,10 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
         return;
     }
     memcpy(data, background_vertices, background_buffer_size);
-    memcpy(data + background_buffer_size, (const void*)line_vertices.get(), line_buffer_size);
+    memcpy(data + background_buffer_size, (const void*)line_vertices.data(), line_buffer_size);
     memcpy(data + background_buffer_size + line_buffer_size, (const void*)grid_vertices.data(),
             grid_buffer_size);
     line_vertex_buffer->Unlock();
-
-    // Create a worst-case sized Vertex buffer for live position updates.
-    if (FAILED(device.CreateVertexBuffer(kPositionBufferSize,
-        D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC,
-        kMapVertexFvfCode,
-        D3DPOOL_DEFAULT,
-        &position_vertex_buffer))) {
-        return;
-    }
 
     render_load_labels(device, zone_map_data);
 }
@@ -527,10 +545,10 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
     device.GetViewport(&original_viewport);
     device.SetViewport(&viewport);
 
-    // Configure for 2D drawing with alpha blending ready but disabled.
+    // Configure for 2D drawing with alpha blending.
     D3DRenderStateStash render_state(device);
     render_state.store_and_modify({ D3DRS_CULLMODE, D3DCULL_NONE });
-    render_state.store_and_modify({ D3DRS_ALPHABLENDENABLE, FALSE });
+    render_state.store_and_modify({ D3DRS_ALPHABLENDENABLE, TRUE });
     render_state.store_and_modify({ D3DRS_SRCBLEND, D3DBLEND_SRCALPHA });
     render_state.store_and_modify({ D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA });
     render_state.store_and_modify({ D3DRS_ZENABLE, FALSE });  // Rely on render order.
@@ -590,15 +608,9 @@ void ZoneMap::render_map(IDirect3DDevice8& device)
 
 // Handles the rendering of the map background tinting.
 void ZoneMap::render_background(IDirect3DDevice8& device) {
-    // Enable alpha blending for the background
-    D3DRenderStateStash render_state(device);
-    render_state.store_and_modify({ D3DRS_ALPHABLENDENABLE, TRUE });
-
     // Background vertices are stored at the start of the line_vertex_buffer.
     device.SetStreamSource(0, line_vertex_buffer, sizeof(MapVertex));
     device.DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, kBackgroundCount);
-
-    render_state.restore_state();
 }
 
 void ZoneMap::render_grid(IDirect3DDevice8& device) {
@@ -645,7 +657,7 @@ void ZoneMap::render_markers(IDirect3DDevice8& device) {
 
 // Handles the rendering of the labels_list and dynamic_labels_list.
 void ZoneMap::render_labels(IDirect3DDevice8& device) {
-    bool add_level_label = (map_level_zone_id == zone_id);
+    bool add_level_label = (map_level_index > 0);
     if (!add_level_label && labels_list.empty() && dynamic_labels_list.empty())
         return;
 
@@ -1133,12 +1145,22 @@ void ZoneMap::add_ring_vertices(std::vector<MapVertex>& vertices) const {
     }
 }
 
-
 // Handles updating and rendering of self, group, and raid positions.
 void ZoneMap::render_positions(IDirect3DDevice8& device) {
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-    if (!position_vertex_buffer || !self) {
+    if (!self)
         return;
+
+    // Create a worst-case sized Vertex buffer for live position updates.
+    if (!position_vertex_buffer) {
+        if (FAILED(device.CreateVertexBuffer(kPositionBufferSize,
+            D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC,
+            kMapVertexFvfCode,
+            D3DPOOL_DEFAULT,
+            &position_vertex_buffer))) {
+            position_vertex_buffer = nullptr;
+            return;
+        }
     }
 
     // Populate a vector with D3DPT_LINESTRIP and D3DPT_TRIANGLELIST vertices.
@@ -1153,7 +1175,7 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
 
     // Use default cursor color if levels not active or within the z clipping range.
     Vec3 position = self->Position;
-    bool use_default_color = (map_level_zone_id != zone_id) ||
+    bool use_default_color = (map_level_index <= 0) ||
                 (position.z >= clip_min_z && position.z <= clip_max_z);
     auto color = use_default_color ? D3DCOLOR_XRGB(250, 250, 51) : // Lemon yellow
         D3DCOLOR_XRGB(195, 176, 145); // Lemon khaki.
@@ -1400,6 +1422,18 @@ void ZoneMap::synchronize_external_window() {
     } 
 }
 
+// Returns true  if a map update is needed due to a z level change.
+bool ZoneMap::is_zlevel_change() const {
+    if (map_level_index != -1)
+        return false;  // Not in auto-mode.
+
+    auto* self = Zeal::EqGame::get_self();
+    if (!self)
+        return false;
+
+    int abs_delta_z = abs(static_cast<int>(self->Position.z) - zlevel_position_z);
+    return abs_delta_z > kZLevelHeightScale / 4;
+}
 
 // System callback to execute the map rendering.
 void ZoneMap::callback_render() {
@@ -1425,7 +1459,7 @@ void ZoneMap::callback_render() {
         return;
     }
 
-    if (zone_id != self->ZoneId) {
+    if (zone_id != self->ZoneId || is_zlevel_change()) {
         zone_id = self->ZoneId;
         render_load_map(*device, *zone_map_data);
     }
@@ -1824,6 +1858,17 @@ bool ZoneMap::set_background_alpha(int percent, bool update_default) {
     return true;
 }
 
+bool ZoneMap::set_faded_zlevel_alpha(int percent, bool update_default) {
+    map_faded_zlevel_alpha = max(0, min(1.f, percent / 100.f));
+    zone_id = kInvalidZoneId;  // Triggers reload with updated background color.
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapFadedZLevelAlpha", map_faded_zlevel_alpha);
+
+    update_ui_options();
+    return true;
+}
+
 bool ZoneMap::set_alignment(int alignment_in, bool update_default) {
     AlignmentType::e alignment{ alignment_in };
     alignment = max(AlignmentType::kFirst, min(AlignmentType::kLast, alignment));
@@ -1876,7 +1921,7 @@ bool ZoneMap::set_map_data_mode(int mode_in, bool update_default) {
     map_data_mode = mode;
     map_data_cache.clear();  // Wipe cache clean.
     zone_id = kInvalidZoneId;  // Triggers reload.
-    map_level_zone_id = kInvalidZoneId;  // Reset (may be out of date).
+    map_level_index = 0;  // Reset (may be out of date).
     clear_markers(true);
     dynamic_labels_zone_id = kInvalidZoneId;
 
@@ -1985,6 +2030,8 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(BackgroundType::kClear));
     if (!ini->exists("Zeal", "MapBackgroundAlpha"))
         ini->setValue<float>("Zeal", "MapBackgroundAlpha", kDefaultBackgroundAlpha);
+    if (!ini->exists("Zeal", "MapFadedZLevelAlpha"))
+        ini->setValue<float>("Zeal", "MapFadedZLevelAlpha", map_faded_zlevel_alpha);
     if (!ini->exists("Zeal", "MapAlignment"))
         ini->setValue<int>("Zeal", "MapAlignment", static_cast<int>(AlignmentType::kFirst));
     if (!ini->exists("Zeal", "MapLabelsMode"))
@@ -2021,6 +2068,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_data_mode = MapDataMode::e(ini->getValue<int>("Zeal", "MapDataMode"));
     map_background_state = BackgroundType::e(ini->getValue<int>("Zeal", "MapBackgroundState"));
     map_background_alpha = ini->getValue<float>("Zeal", "MapBackgroundAlpha");
+    map_faded_zlevel_alpha = ini->getValue<float>("Zeal", "MapFadedZLevelAlpha");
     map_alignment_state = AlignmentType::e(ini->getValue<int>("Zeal", "MapAlignment"));
     map_labels_mode = LabelsMode::e(ini->getValue<int>("Zeal", "MapLabelsMode"));
     map_show_group_mode = ShowGroupMode::e(ini->getValue<int>("Zeal", "MapShowGroupMode"));
@@ -2038,6 +2086,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_data_mode = max(MapDataMode::kFirst, min(MapDataMode::kLast, map_data_mode));
     map_background_state = max(BackgroundType::kFirst, min(BackgroundType::kLast, map_background_state));
     map_background_alpha = max(0, min(1.f, map_background_alpha));
+    map_faded_zlevel_alpha = max(0, min(1.f, map_faded_zlevel_alpha));
     map_alignment_state = max(AlignmentType::kFirst, min(AlignmentType::kLast, map_alignment_state));
     map_labels_mode = max(LabelsMode::kFirst, min(LabelsMode::kLast, map_labels_mode));
     map_show_group_mode = max(ShowGroupMode::kFirst, min(ShowGroupMode::kLast, map_show_group_mode));
@@ -2072,6 +2121,7 @@ void ZoneMap::save_ini()
     ini->setValue<int>("Zeal", "MapDataMode", static_cast<int>(map_data_mode));
     ini->setValue<int>("Zeal", "MapBackgroundState", static_cast<int>(map_background_state));
     ini->setValue<float>("Zeal", "MapBackgroundAlpha", map_background_alpha);
+    ini->setValue<float>("Zeal", "MapFadedZLevelAlpha", map_faded_zlevel_alpha);
     ini->setValue<int>("Zeal", "MapAlignment", static_cast<int>(map_alignment_state));
     ini->setValue<int>("Zeal", "MapLabelsMode", static_cast<int>(map_labels_mode));
     ini->setValue<int>("Zeal", "MapShowGroupMode", static_cast<int>(map_show_group_mode));
@@ -2444,6 +2494,7 @@ void ZoneMap::toggle_level_down() {
     set_level(map_level_index - 1);
 }
 
+// Set the visible level index.  0 = all levels, -1 = auto z-level, > 0 = specific level.
 bool ZoneMap::set_level(int level_index) {
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     if (!self)
@@ -2456,27 +2507,19 @@ bool ZoneMap::set_level(int level_index) {
     // Commit to making an update. Disable level filtering by default.
     int current_zone_id = zone_id;
     zone_id = kInvalidZoneId;  // Triggers refresh.
-    map_level_zone_id = kInvalidZoneId;
     map_level_index = 0;
 
     // Support wraparound of toggles up and down.
     if (level_index == zone_map_data->num_levels) {
-        level_index = 0;
+        level_index = -1;  // Auto-mode is level -1.
     }
-    else if (level_index == -1) {
+    else if (level_index == -2) {
         level_index = zone_map_data->num_levels - 1;
     }
 
-    // Index [0] is expected to be the leftover kZoneMapInvalidLevelId lines. Return
-    // success if that is correct.
-    if (level_index == 0)
-        return (zone_map_data->levels[level_index].level_id == kZoneMapInvalidLevelId);
-
-    if (level_index < 0 || level_index >= zone_map_data->num_levels ||
-        zone_map_data->levels[level_index].level_id == kZoneMapInvalidLevelId)
+    if (level_index < -1 || level_index >= zone_map_data->num_levels)
         return false;  // Ineligible index.
 
-    map_level_zone_id = current_zone_id;
     map_level_index = level_index;
     return true;
 }
@@ -2492,7 +2535,7 @@ void ZoneMap::parse_level(const std::vector<std::string>& args) {
         return;
     }
 
-    int level_index = 0;
+    int value = 0;
     if (args.size() == 2) {
         Zeal::EqGame::print_chat("Levels for zone: %s", zone_map_data->name);
         for (int i = 0; i < zone_map_data->num_levels; ++i) {
@@ -2501,8 +2544,10 @@ void ZoneMap::parse_level(const std::vector<std::string>& args) {
                 i, level.min_z, level.max_z, level.level_id);
         }
     }
-    else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &level_index) || !set_level(level_index))
-        Zeal::EqGame::print_chat("Usage: /map level <index> (set to 0 to show all levels)");
+    else if (args.size() == 4 && args[2] == "alpha" && Zeal::String::tryParse(args[3], &value))
+        set_faded_zlevel_alpha(value, false);
+    else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &value) || !set_level(value))
+        Zeal::EqGame::print_chat("Usage: /map level <index> (0: to show all levels, -1: auto z-level)");
 }
 
 
@@ -2562,7 +2607,8 @@ void ZoneMap::dump() {
         viewport.Y, viewport.X, viewport.Height, viewport.Width, max_viewport_height, max_viewport_width);
     Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_min_y, clip_min_x, clip_max_y, clip_max_x);
-    Zeal::EqGame::print_chat("level: zone: %i, index: %i, z_max: %i, z_min: %i", map_level_zone_id, map_level_index, clip_max_z, clip_min_z);
+    Zeal::EqGame::print_chat("level: index: %i, z_max: %i, z_min: %i, faded_alpha: %.2f",
+                                map_level_index, clip_max_z, clip_min_z, map_faded_zlevel_alpha);
     Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, show_group: %i, show_raid: %i",
         position_size, marker_size, static_cast<int>(map_show_group_mode), map_show_raid);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f",
@@ -2677,7 +2723,6 @@ void ZoneMap::callback_zone() {
     zone_id = kInvalidZoneId;
     markers_list.clear();
     dynamic_labels_zone_id = kInvalidZoneId;
-    map_level_zone_id = kInvalidZoneId;
     map_level_index = 0;
     zoom_factor = 1.f;  // Reset for more consistent behavior.
     set_interactive_enable(false, false);  // Also reset for consistency.
