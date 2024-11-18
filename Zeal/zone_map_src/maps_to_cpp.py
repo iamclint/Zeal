@@ -99,8 +99,10 @@ def parse_file(file: str) -> dict:
                     float(splits[3]), float(splits[4]), float(splits[5]),
                     int(splits[6]), int(splits[7]), int(splits[8]),))
         elif input_line[0] == 'P':
-            result['labels'].append((float(splits[0]), float(splits[1]), float(splits[2]), 
-                       int(splits[3]), int(splits[4]), int(splits[5]), splits[7].strip(),))
+            text_label = splits[7].strip()
+            if text_label not in ['Succor', 'succor']:  # Added automatically by map code.
+                result['labels'].append((float(splits[0]), float(splits[1]), float(splits[2]),
+                           int(splits[3]), int(splits[4]), int(splits[5]), text_label,))
         elif input_line.strip():
             print(f'Invalid line: {input_line}')
           
@@ -244,8 +246,7 @@ def export_single_zone_data(zone_name: str, zone_data: dict, fp):
     fp.write('};\n')
     fp.write(f'static const ZoneMapLabel {zone_name}_labels[] = {{')
     for label in zone_data['labels']:
-        if label[6] != "Succor" and label[6] != "succor":  # Succor is automatically added.
-            fp.write(format_label(label) + ',')
+        fp.write(format_label(label) + ',')
     fp.write('};\n')
     fp.write(f'static const ZoneMapLevel {zone_name}_levels[] = {{')
     sorted_level_ids = sorted(zone_data['levels'].keys())
