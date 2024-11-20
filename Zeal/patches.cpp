@@ -35,6 +35,23 @@ static void __fastcall ProcessDeath(uint32_t passthruECX, uint32_t unusedEDX,
 		ent->Type = Zeal::EqEnums::PlayerCorpse;
 }
 
+// There is a client startup crash issue where it looks like the CBreathWnd::OnProcessFrame or
+// EQ_3DView::DisplaySpells is calling CanIBreathe with a EQCHARINFO that has a null SpawnInfo entry.
+// The other path calling CanIBreathe protects against this.
+static int32_t __fastcall CanIBreathe(Zeal::EqStructures::EQCHARINFO* self_char_info, uint32_t unusedEDX)
+{
+	if (!self_char_info)
+		return 1;  // Not expected to happen, so just default to true, can breathe.
+
+	// Patch the crashing case (null SpawnInfo) here.
+	if (!self_char_info->SpawnInfo) {
+		self_char_info->IsSwimmingUnderwater = 0;  // Match the updating behavior of CanIBreathe with an assumption.
+		return 1;  // And just respond that yes can breathe (for now).
+	}
+
+	return ZealService::get_instance()->hooks->hook_map["CanIBreathe"]->original(CanIBreathe)(self_char_info, unusedEDX);
+}
+
 void patches::fonts() //this was a test function and I later found out these aren't even used
 {
 	//const char* driverName = "DISPLAY";
@@ -88,6 +105,7 @@ patches::patches()
 	ZealService::get_instance()->hooks->Add("GetZoneInfoFromNetwork", 0x53D026, GetZoneInfoFromNetwork, hook_type_detour);
 
 	ZealService::get_instance()->hooks->Add("ProcessDeath", 0x00528E16, ProcessDeath, hook_type_detour);
+	ZealService::get_instance()->hooks->Add("CanIBreathe", 0x004C0DAB, CanIBreathe, hook_type_detour);
 
 	//fonts();
 	//*(int*)0x809458 =
