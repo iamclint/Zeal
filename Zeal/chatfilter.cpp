@@ -147,7 +147,7 @@ int32_t __fastcall AddMenu(int this_, int u, Zeal::EqUI::ContextMenu* menu)
 
 void chatfilter::LoadSettings(Zeal::EqUI::CChatManager* cman)
 {
-    std::string ini_name = ZealService::get_instance()->ui->GetUIIni();// ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+    std::string ini_name = ZealService::get_instance()->ui->GetUIIni();
     if (ini_name.length())
     {
         IO_ini ui_ini(ini_name);
@@ -181,7 +181,7 @@ int __fastcall CChatManager(Zeal::EqUI::CChatManager* cman, int u)
 
 void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
 {
-    std::string ini_name = ZealService::get_instance()->ui->GetUIIni();// ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+    std::string ini_name = ZealService::get_instance()->ui->GetUIIni();
     if (ini_name.length())
     {
         IO_ini ui_ini(ini_name);
@@ -205,28 +205,15 @@ void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
     ZealService::get_instance()->hooks->hook_map["Deactivate"]->original(Deactivate)(cman, u);
 }
 
-void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel)
+void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel)
 {
     for (auto& filter : Extended_ChannelMaps)
     {
         if (filter.isHandled(channel, msg))
             wnd = filter.windowHandle;
     }
-    //isDamage = false;
 }
 
-//std::string GetNameDamage(std::string& data)
-//{
-//    std::string lower_msg = data;
-//    //std::transform(lower_msg.begin(), lower_msg.end(), lower_msg.begin(), ::tolower);
-//
-//    std::regex damage_pattern(R"((?:^|\]\s*)(\b\w+\b)+[\w\W]+(?:points of damage|but misses))");
-//    std::smatch match;
-//
-//    if (std::regex_search(lower_msg, match, damage_pattern))
-//        return match[1].str(); 
-//    return "";
-//}
 void __fastcall PrintSplit(int t, int unused, const char* data, short color_index, bool u)
 {
     ZealService::get_instance()->hooks->hook_map["PrintSplit"]->original(PrintSplit)(t, unused, data, USERCOLOR_MONEY_SPLIT, u);
@@ -241,9 +228,9 @@ void __fastcall serverPrintChat(int t, int unused, const char* data, short color
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
     if (cf->isMyPetSay)
-        color_index = USERCOLOR_UNUSED001;
+        color_index = CHANNEL_MYPETSAY;
     else if (cf->isPetMessage)
-        color_index = USERCOLOR_UNUSED002;
+        color_index = CHANNEL_OTHERPETSAY;
     ZealService::get_instance()->hooks->hook_map["serverPrintChat"]->original(serverPrintChat)(t, unused, data, color_index, u);
     cf->isMyPetSay = false;
     cf->isPetMessage = false;
@@ -332,20 +319,26 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
                 Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::trim_name(source->Name), Zeal::EqGame::trim_name(target->Name), damage);
         }
      });
-    Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short color, std::string data) { return color == USERCOLOR_RANDOM; }));
-    Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short color, std::string data) { return color == USERCOLOR_LOOT; }));
-    Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short color, std::string data) { return color == USERCOLOR_MONEY_SPLIT || color == USERCOLOR_ECHO_AUTOSPLIT; }));
-    Extended_ChannelMaps.push_back(CustomFilter("My Pet Say", 0x10003, [this, zeal](short color, std::string data) { return color == USERCOLOR_UNUSED001; }));
-    Extended_ChannelMaps.push_back(CustomFilter("My Pet Damage", 0x10004, [this, zeal](short color, std::string data)
+    Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short& color, std::string data) { return color == USERCOLOR_RANDOM; }));
+    Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short& color, std::string data) { return color == USERCOLOR_LOOT; }));
+    Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short& color, std::string data) { return color == USERCOLOR_MONEY_SPLIT || color == USERCOLOR_ECHO_AUTOSPLIT; }));
+    Extended_ChannelMaps.push_back(CustomFilter("My Pet Say", 0x10003, [this, zeal](short& color, std::string data) { return color == USERCOLOR_UNUSED001; }));
+    Extended_ChannelMaps.push_back(CustomFilter("My Pet Damage", 0x10004, [this, zeal](short& color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
+            {
+                color = CHANNEL_MYPETDMG;
                 return true;
+            }
             if (isDamage && damageData.target && damageData.target->PetOwnerSpawnId && damageData.target->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
+            {
+                color = CHANNEL_OTHERPETDMG;
                 return true;
+            }
             return false;
         }));
-    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Say", 0x10005, [this, zeal](short color, std::string data) { return color == USERCOLOR_UNUSED002; }));
-    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Damage", 0x10006, [this, zeal](short color, std::string data)
+    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Say", 0x10005, [this, zeal](short& color, std::string data) { return color == USERCOLOR_UNUSED002; }));
+    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Damage", 0x10006, [this, zeal](short& color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
                 return true;
@@ -354,7 +347,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
             return false;
         }));
 
-    zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short channel) { this->AddOutputText(wnd, msg, channel); });
+    zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel) { this->AddOutputText(wnd, msg, channel); });
     
     zeal->hooks->Add("CChatManager", 0x4100e2, CChatManager, hook_type_detour);
     zeal->hooks->Add("Deactivate", 0x410871, Deactivate, hook_type_detour);

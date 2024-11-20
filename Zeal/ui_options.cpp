@@ -180,6 +180,26 @@ void ui_options::LoadColors()
 		if (color_buttons.count(18))
 			color_buttons[18]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xff, 0x80, 0xff); //Target Pink Default
 	}
+	if (!ini->exists("ZealColors", "Color19")) //My Pet Damage
+	{
+		if (color_buttons.count(19))
+			color_buttons[19]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
+	}
+	if (!ini->exists("ZealColors", "Color20")) //Other Pet Damage
+	{
+		if (color_buttons.count(20))
+			color_buttons[20]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
+	}
+	if (!ini->exists("ZealColors", "Color21")) //My Pet Say
+	{
+		if (color_buttons.count(19))
+			color_buttons[21]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
+	}
+	if (!ini->exists("ZealColors", "Color22")) //Other Pet Say
+	{
+		if (color_buttons.count(20))
+			color_buttons[22]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
+	}
 
 	for (auto& [index, btn] : color_buttons)
 	{
