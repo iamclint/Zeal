@@ -455,17 +455,22 @@ namespace Zeal
 		{
 			return get_view_actor()->Entity;
 		}
-		char* trim_name(const char* name)
+		const char* trim_name(const char* name)  // aka trimName in eqmac.exe
 		{
+			// Returns a pointer to a modified name stored in a 64-entry global circular buffer. Increments buffer index.
+			// This function cleans the name (removes numbers, special characters) but retains any suffix.
+			// Use for cleaning up name's corpse123 => name's corpse.
 			if (name == NULL)
 				return (char*)"";
 			return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, const char* spawnName)>(0x537D39)(*(int*)0x809478, name);
 		}
-		char* trim_name(char* name)
+		const char* strip_name(const char* name)  // aka stripName in eqmac.exe
 		{
+			// Returns a pointer to a modified name stored in a 64-entry global circular buffer. Does not increment buffer index.
+			// Strips any numbers and any text after an apostrophe.  Use for name's corpse123 => name.
 			if (name == NULL)
-				return (char*)"";
-			return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, char* spawnName)>(0x537D39)(*(int*)0x809478, name);
+				return (const char*)"";
+			return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, const char* spawnName)>(0x537E4B)(*(int*)0x809478, name);
 		}
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown)
 		{
