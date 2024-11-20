@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <memory>
 #include "callbacks.h"
+#include "EqFunctions.h"
 //#include "Zeal.h"
 class IO_ini;
 class ZealService;
@@ -12,18 +13,13 @@ template <typename T>
 class ZealSetting
 {
 public:
+	static constexpr char kIniFilename[] = ".\\zeal.ini";
+
 	void set(T val, bool store = true) { 
 		if (store && section.length() && key.length())
 		{
-			std::string ini_name = ".\\eqclient.ini";
-			if (per_character)
-				ini_name = ZealService::get_instance()->ui->GetUIIni();
-			if (ini_name.length())
-			{
-				IO_ini ini(ini_name);
-				ini.setValue<T>(section, key, val);
-			}
-
+			IO_ini ini(kIniFilename);
+			ini.setValue<T>(get_section_name(), key, val);
 		}
 		value = val; 
 		if (set_callback)
@@ -34,6 +30,14 @@ public:
 		set(!value, store);
 	}
 	T get() { return value; }
+	std::string get_section_name() const {
+		if (!per_character)
+			return section;
+
+		Zeal::EqStructures::EQCHARINFO* c = Zeal::EqGame::get_char_info();
+		std::string suffix = (c) ? std::string(c->Name) : "Unknown";
+		return section + "_" + suffix;
+	}
 	/*
 	*   save_per_character if true saves in player names ini rather than eqclient
 	*	read and write ini as well as a callback with new value
@@ -95,15 +99,10 @@ private:
 	{
 		if (section.length() && key.length())
 		{
-			std::string ini_name = ".\\eqclient.ini";
-			if (per_character)
-				ini_name = ZealService::get_instance()->ui->GetUIIni();
-			if (ini_name.length())
-			{
-				IO_ini ini(ini_name);
-				if (ini.exists(section, key))
-					value = ini.getValue<T>(section, key);
-			}
+			IO_ini ini(kIniFilename);
+			std::string section_name = get_section_name();
+			if (ini.exists(section_name, key))
+				value = ini.getValue<T>(section_name, key);
 		}
 	}
 };

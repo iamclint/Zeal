@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <string>
 #include <map>
 #include <stdexcept>
@@ -16,7 +17,19 @@ class IO_ini {
 private:
     std::string filename;
 public:
-    IO_ini(const std::string& filename) : filename(filename) {   };
+    IO_ini(const std::string& filename, bool import_check = false) : filename(filename) {
+        static constexpr char kClientFilename[] = ".\\eqclient.ini";
+        if (import_check  && filename != std::string(kClientFilename) && !std::filesystem::exists(filename)) {
+            static constexpr int kMaxSectionSize = 32767;  // Maximum size for a section read.
+            auto buffer = std::make_unique<char[]>(kMaxSectionSize);
+            std::vector<std::string> sections = { "Zeal", "ZealColors" };
+            for (const auto& section : sections) {
+                int size = GetPrivateProfileSectionA(section.c_str(), buffer.get(), kMaxSectionSize, kClientFilename);
+                if (size)
+                    WritePrivateProfileSectionA(section.c_str(), buffer.get(), filename.c_str());
+            }
+        }
+    };
 
     void set(std::string path)
     {
