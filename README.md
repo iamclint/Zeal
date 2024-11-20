@@ -125,7 +125,8 @@ ___
   - **Description:** changes your field of view with a value between 45 and 90.
 
 - `/lead`
-  - **Description:** prints out your current group leader.
+  - **Arguments:** none, `open` (reports raid groups with open slots), `all` (lists all raid groups)
+  - **Description:** prints out your current group leader (and raid leader if in raid).
 
 - `/melody`
   - **Arguments:** `song gem #'s (maximum of 5)`
@@ -179,6 +180,16 @@ ___
 - `/autobank`
   - **Aliases:** `/autoba`, `/ab`
   - **Description:** Drops whatever is on your cursor into your bank. [requires you to be at a banker] (not fully functional atm)
+
+- `/corpsedrag`
+  - **Aliases:** `/drag`
+  - **Arguments:** none, `nearest` (auto-targets nearest corpse for dragging)
+  - **Description:** Attempts to corpse drag your current target. Use `/corpsedrag nearest` to auto-target.
+
+- `/corpsedrop`
+  - **Aliases:** `/drop`
+  - **Arguments:** none, `all` (drops all corpses)
+  - **Description:** Stop dragging your currently targeted corpse. To drop all use `/corpsedrop all`.
 
 - `/target`
   - **Aliases:** `/cleartarget`
@@ -270,8 +281,9 @@ ___
 - Toggle through map backgrounds
 - Toggle through map label modes
 - Toggle up or down through visible map levels
-- Toggle map visibility of raid members
+- Toggle map visibility of raid members and member names
 - Toggle map visibility of grid lines
+- Toggle map interactive mode (internal overlay)
 - Press to display group and raid member labels
 - Toggle nameplate colors for players on/off
 - Toggle nameplate con colors for npcs on/off
@@ -398,7 +410,7 @@ modifications (see README.md in zone_map_src). As a result there are some out of
 #### Setup and configuration
 Zeal 4.0 and later includes an integrated in-game map that contains the map data for
 all zones through Planes of Power. The map is drawn into the game's DirectX viewport
-as part of the rendering sequence and is currently not 'clickable'.
+as part of the rendering sequence and is by default not 'clickable' (see interactive mode below).
 
 The map is controlled through three interfaces:
 * Dedicated Zeal options window tab (requires `zeal\uifiles`, see Installation notes above)
@@ -451,11 +463,11 @@ clear (0), dark (1), light (2), or tan (3).  Additionally, it supports alpha tra
   - `/map background 1` sets the background to dark with no change to alpha
   - `/map background 2 40` sets the background to light with 40% alpha
 
-#### External map window (Beta)
+#### External map window
 The map has simple support for opening an external window outside of the EQ client window.
 This window can be dragged with the title bar and positioned as desired, but it is only resizable
 using the height and width Zeal map options sliders. The top and left sliders are ignored
-in external window mode. It does not accept any inputs and the map content is controlled
+in external window mode. See interactive mode for mouse inputs. The map content is controlled
 with the normal map key binds. Also note that if external window mode is set in options,
 the map will not automatically open when the game starts. Use the map enable to open and
 close the window (recommend using the keybind 'm').
@@ -535,9 +547,14 @@ in the options tab and instead use the key bind to situationally toggle it on an
 
 #### Showing map levels
 The map supports showing different levels based on the Brewall map color standards. Not all of
-the zones are properly colored, but it does work well in some of the 3-D overlapping zones.
+the zones are properly colored, but it does work well in some of the 3-D overlapping zones. It
+also supports a simplified auto z-level mode that shows map data within a z-level range of the
+player as fully opaque and further data at a faded alpha transparency level. The auto-mode
+is selectable using the toggle map level keybinds (see below).
 
+* Zeal slider to adjust the faded z-level alpha transparency value
 * Key bind: "Toggle Map Level Up", "Toggle Map Level Down" - toggles up or down the visible level
+  - The default index of 0 shows all levels and -1 = auto z-level.
 * Command examples:
   - `/map level` shows the current zone's map data level info
   - `/map level 0` shows default of all levels
