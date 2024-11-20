@@ -279,7 +279,7 @@ char* __fastcall serverGetString(int stringtable, int unused, int string_id, boo
         Zeal::EqStructures::Entity* pet = Zeal::EqGame::get_pet();
         if (pet)
         {
-            char* pet_name = Zeal::EqGame::trim_name(pet->Name);
+            char* pet_name = Zeal::EqGame::strip_name(pet->Name);
             if (strcmp(name, pet_name) == 0)
                 cf->isMyPetSay = true;
         }
@@ -316,7 +316,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
             isDamage = true;
             damageData = { source, target, type, spell_id, damage, heal };
             if (source->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500 || target->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500)
-                Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::trim_name(source->Name), Zeal::EqGame::trim_name(target->Name), damage);
+                Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::strip_name(source->Name), Zeal::EqGame::strip_name(target->Name), damage);
         }
      });
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short& color, std::string data) { return color == USERCOLOR_RANDOM; }));

@@ -155,6 +155,7 @@ namespace Zeal
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown);
 		char* trim_name(char* name);
 		char* trim_name(const char* name);
+		char* strip_name(char* name);
 		char* get_guildName_from_guildId(int guildId);
 		char* get_string(UINT id);
 		//void set_camera_position(Vec3* pos);

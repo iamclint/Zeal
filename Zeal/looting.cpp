@@ -89,7 +89,7 @@ void looting::looted_item()
 	}
 	if (loot_all && Zeal::EqGame::Windows && Zeal::EqGame::Windows->Loot && Zeal::EqGame::Windows->Loot->IsVisible)
 	{
-		std::string corpse_name = Zeal::EqGame::trim_name(Zeal::EqGame::get_active_corpse()->Name);
+		std::string corpse_name = Zeal::EqGame::strip_name(Zeal::EqGame::get_active_corpse()->Name);
 		std::string self_name = Zeal::EqGame::get_self()->Name;
 		bool is_me = corpse_name == self_name; //my own corpse
 		byte nodrop_confirm_bypass[2] = { 0x74, 0x22 };

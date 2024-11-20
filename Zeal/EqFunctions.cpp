@@ -467,6 +467,10 @@ namespace Zeal
 				return (char*)"";
 			return reinterpret_cast<char* (__thiscall*)(int CEverquest_ptr, char* spawnName)>(0x537D39)(*(int*)0x809478, name);
 		}
+		char* strip_name(char* name) //Removes "'s Corpse' and 000 numbers from Name
+		{
+			return reinterpret_cast<char* (__thiscall*)(int everquest, char* name)>(0x537e4b)(*(int*)0x809478, name);
+		}
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown)
 		{
 			reinterpret_cast<void(__cdecl*)(int* connection, UINT opcode, int* buffer, UINT size, int unknown)>(0x54e51a)((int*)0x7952fc, opcode, buffer, size, unknown);
