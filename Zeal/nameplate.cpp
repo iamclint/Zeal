@@ -249,7 +249,7 @@ std::string generateTargetNameplateString(const std::string& nameplateString) {
 	}
 	else //Target NPC Nameplate	
 	{  
-		if ((target->Race == 60 && target->StandingState == Zeal::EqEnums::Stance::Feigned) || target->Type == Zeal::EqEnums::EntityTypes::NPCCorpse || target->Type == Zeal::EqEnums::EntityTypes::PlayerCorpse) //Needed to play nice with Skeleton Nameplate fix code below
+		if (target->Race == 60 && (target->StandingState == Zeal::EqEnums::Stance::Feigned || target->StandingState == Zeal::EqEnums::Stance::Dead))//Needed to play nice with Skeleton Nameplate fix code below
 			ossShowNameLogic << Zeal::EqGame::trim_name(target->Name); //Prevents broken string bug on Skeleton Nameplate
 		else
 			ossShowNameLogic << nameplateString; //All other NPC Nameplate
