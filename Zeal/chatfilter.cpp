@@ -337,7 +337,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
             }
             return false;
         }));
-    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Say", 0x10005, [this, zeal](short& color, std::string data) { return color == CHANNEL_MYPETSAY; }));
+    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Say", 0x10005, [this, zeal](short& color, std::string data) { return color == CHANNEL_OTHERPETSAY; }));
     Extended_ChannelMaps.push_back(CustomFilter("Other Pet Damage", 0x10006, [this, zeal](short& color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
