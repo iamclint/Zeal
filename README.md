@@ -505,6 +505,15 @@ button click. The external window also supports a middle mouse button click to d
 
 * Key bind: "Toggle Map Interactive Mode" - toggles internal overlay between transparent and interactive
 
+#### Show zone mode
+Zone maps other than the player's current location can be explored using the show_zone command. The
+target zone is specified using the zone's short name (like /who all). Interactive mode, levels, grid,
+labels, and poi search all work for the selected zone.
+
+* Command examples
+  - `/map show_zone gukbottom` shows the zone map for the Ruins of Old Guk
+  - `/map show_zone` exits show_zone mode
+
 #### Map grid
 A simple background grid aligned at a selectable pitch is available. The x == 0 and y == 0 axes
 are colored orange.
@@ -536,7 +545,7 @@ in the options tab and instead use the key bind to situationally toggle it on an
 * Zeal checkbox to enable raid member visibility
 * Zeal slider to adjust name length
 * Key bind: "Toggle Map Show Raid" - Toggles visibility of raid members
-* Key bind: "Flash Map Member Names" - Displays names of group and raid members while held (if visible)
+* Key bind: "Flash Map Member Names" - Toggles (previously flashed) names of group and raid members
 * Command examples:
   - `/map show_group` toggles the group member markers on and off
   - `/map show_group labels_off` disables group member labels
