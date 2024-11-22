@@ -182,9 +182,9 @@ void ZoneMap::render_update_transforms(const ZoneMapData& zone_map_data) {
     const float scale_factor = min(scale_factor_x, scale_factor_y) * zoom_factor;
 
     const Vec3 position = (show_zone_id == kInvalidZoneId) ? Zeal::EqGame::get_self()->Position :
-        Vec3(-(zone_map_data.min_y + zone_map_data.max_y) / 2,  // Center on map, flipping y and x.
-            -(zone_map_data.min_x + zone_map_data.max_x) / 2,
-            (zone_map_data.min_z + zone_map_data.max_z) / 2);
+        Vec3(-static_cast<float>(zone_map_data.min_y + zone_map_data.max_y) / 2,  // Center on map, flipping y and x.
+            -static_cast<float>(zone_map_data.min_x + zone_map_data.max_x) / 2,
+            static_cast<float>(zone_map_data.min_z + zone_map_data.max_z) / 2);
     const float position_y = -position.x; // Note position is y,x,z.
     const bool full_height = map_height * scale_factor < viewport_height;
     const bool align_top = full_height ||
@@ -428,7 +428,7 @@ D3DCOLOR ZoneMap::get_background_color() const {
         background_color = D3DCOLOR_ARGB(alpha, 160, 160, 160);  // Light grey.
     }
     else if (map_background_state == BackgroundType::kTan) {
-        background_color = D3DCOLOR_ARGB(alpha, 240, 180, 140);  // Tan.
+        background_color = D3DCOLOR_ARGB(alpha, 190, 180, 150);  // Tan.
     }
     else if (external_enabled && map_background_state == BackgroundType::kClear) {
         background_color = D3DCOLOR_ARGB(alpha, 85, 90, 96);  // Default gray.
