@@ -166,6 +166,7 @@ private:
 	void parse_map_data_mode(const std::vector<std::string>& args);
 	void parse_show_group(const std::vector<std::string>& args);
 	void parse_show_raid(const std::vector<std::string>& args);
+	void parse_show_zone(const std::vector<std::string>& args);
 	void parse_grid(const std::vector<std::string>& args);
 	void parse_ring(const std::vector<std::string>& args);
 	void parse_font(const std::vector<std::string>& args);
@@ -175,6 +176,7 @@ private:
 	void clear_markers(bool erase_list = true);
 	bool set_map_rect(float top, float left, float bottom, float right, bool update_default = false);
 	bool set_level(int level);  // Set to 0 to show all levels.
+	bool set_show_zone_id(const std::string& zone_name);
 	void update_ui_options();
 
 	void load_ini(class IO_ini* ini);
@@ -184,6 +186,7 @@ private:
 	void callback_zone();
 	void callback_render();
 	void callback_dx_reset();
+	void reset_zone_state();
 
 	// The following methods execute as part of callback_render().
 	void render_release_resources(bool release_font = true);
@@ -231,6 +234,7 @@ private:
 	bool is_zlevel_change() const;
 
 	const ZoneMapData* get_zone_map(int zone_id);
+	int find_zone_id(const std::string& zone_name) const;
 	void add_map_data_from_internal(const ZoneMapData& internal_map, CustomMapData& map_data);
 	bool add_map_data_from_file(const std::string& filename, CustomMapData& map_data);
 	void assemble_zone_map(const char* zone_name, CustomMapData& map_data);
@@ -261,6 +265,7 @@ private:
 	ShowGroupMode::e map_show_group_mode = ShowGroupMode::kOff;
 	MapDataMode::e map_data_mode = MapDataMode::kInternal;
 	int zone_id = kInvalidZoneId;
+	int show_zone_id = kInvalidZoneId;  // Override to show zone indepent of current location.
 	std::vector<Marker> markers_list;
 	bool always_align_to_center = false;
 	int map_level_index = 0;
