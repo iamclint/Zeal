@@ -5,9 +5,8 @@ static HINSTANCE this_module{};
 static std::thread MainLoop{};
 
 
-void init()
+static void zeal_lifetime_thread(std::unique_ptr<ZealService> zeal)
 {
-    ZealService zeal;
     while (!exitFlag.load(std::memory_order_acquire))
     {
         if (GetAsyncKeyState(VK_PAUSE) & 0x8000 && GetAsyncKeyState(VK_SHIFT) & 0x8000 && GetAsyncKeyState(VK_CONTROL) & 0x8000)
@@ -17,7 +16,7 @@ void init()
     if (!exitFlag.load(std::memory_order_acquire))
     {
         exitFlag.store(true, std::memory_order_release);
-        zeal.~ZealService();
+        zeal.reset();  // Deletes the ZealService (calling deconstructor). Note: cross-thread call with eqgame's thread.
         Sleep(1000);
         while (!FreeLibrary(this_module))
         {
@@ -42,7 +41,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         {
             this_module = hModule;
             DisableThreadLibraryCalls(hModule);
-            MainLoop = std::thread(init);
+            auto zeal = std::make_unique<ZealService>();  // Construct before eqgame thread is started.
+            MainLoop = std::thread(zeal_lifetime_thread, std::move(zeal));
             MainLoop.detach();
         }
 		break;
