@@ -249,7 +249,7 @@ std::string generateTargetNameplateString(const std::string& nameplateString) {
 	}
 	else //Target NPC Nameplate	
 	{  
-		if (target->Race == 60 && target->StandingState == Zeal::EqEnums::Stance::Feigned) //Needed to play nice with Skeleton Nameplate fix code below
+		if (target->Race == 60 && (target->StandingState == Zeal::EqEnums::Stance::Feigned || target->StandingState == Zeal::EqEnums::Stance::Dead))//Needed to play nice with Skeleton Nameplate fix code below
 			ossShowNameLogic << Zeal::EqGame::trim_name(target->Name); //Prevents broken string bug on Skeleton Nameplate
 		else
 			ossShowNameLogic << nameplateString; //All other NPC Nameplate
@@ -346,18 +346,13 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		return;
 	}
 	if (spawn->Race == 60) { //Skeleton Feigned at spawn point Nameplate fix and Skeleton Corpse Nameplate fix
-		if (spawn->Type == Zeal::EqEnums::EntityTypes::NPC && spawn->StandingState != Zeal::EqEnums::Stance::Standing) 
+		if ((spawn->Type == Zeal::EqEnums::EntityTypes::NPC && spawn->StandingState != Zeal::EqEnums::Stance::Standing)  || spawn->Type == Zeal::EqEnums::EntityTypes::NPCCorpse || spawn->Type == Zeal::EqEnums::EntityTypes::PlayerCorpse)
 		{
-			ChangeDagStringSprite(spawn->ActorInfo->DagHeadPoint, fontTexture, Zeal::EqGame::trim_name(spawn->Name));
+			std::string skeletonName = Zeal::EqGame::trim_name(spawn->Name);
+			ChangeDagStringSprite(spawn->ActorInfo->DagHeadPoint, fontTexture, skeletonName.c_str());
 			SetNameSpriteTint(this_ptr, not_used, spawn);
 			return;
 		}
-		if (spawn->Type == Zeal::EqEnums::EntityTypes::NPCCorpse || spawn->Type == Zeal::EqEnums::EntityTypes::PlayerCorpse) 
-		{
-			ChangeDagStringSprite(spawn->ActorInfo->DagHeadPoint, fontTexture, Zeal::EqGame::trim_name(spawn->Name));
-			SetNameSpriteTint(this_ptr, not_used, spawn);
-			return;
-		}	
 	}
 }
 
