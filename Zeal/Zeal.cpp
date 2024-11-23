@@ -1,5 +1,6 @@
 #include "Zeal.h"
 #include "EqAddresses.h"
+#include "ZealSettings.h"
 #include <filesystem>
 #include <Windows.h>
 
@@ -17,7 +18,7 @@ ZealService::ZealService()
 	crash_handler = std::make_shared<CrashHandler>();
 	hooks = std::make_shared<HookWrapper>();
 	//hooks->Add("SetUnhandledExceptionFilter", (int)SetUnhandledExceptionFilter, SetUnhandledExceptionFilter_Hook, hook_type_detour);
-	ini = std::make_shared<IO_ini>(".\\eqclient.ini"); //other functions rely on this hook
+	ini = std::make_shared<IO_ini>(ZealSetting<bool>::kIniFilename, true); //other functions rely on this hook
 	dx = std::make_shared<directx>();
 //initialize the hooked function classes
 	commands_hook = std::make_shared<ChatCommands>(this); //other classes below rely on this class on initialize
