@@ -61,7 +61,7 @@ static bool is_valid_entity(const std::string& name, struct Zeal::EqStructures::
 		Zeal::EqGame::print_chat("MISMATCH: client[%i] entity does not match for name: %s", entity->SpawnId, name.c_str());
 		return false;
 	} else if (name != client_entity->Name) {
-		if (strcmp(Zeal::EqGame::trim_name(name.c_str()), Zeal::EqGame::trim_name(client_entity->Name)) == 0)
+		if (strcmp(Zeal::EqGame::strip_name(name.c_str()), Zeal::EqGame::strip_name(client_entity->Name)) == 0)
 			Zeal::EqGame::print_chat("NAME_CHANGED[%i]: manager: %s, client: %s", entity->SpawnId, name.c_str(), client_entity->Name);
 		else
 			Zeal::EqGame::print_chat("BADNAME[%i]: manager: %s, client: %s", entity->SpawnId, name.c_str(), client_entity->Name);

@@ -153,8 +153,10 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_entity_by_id(short id);  // Returns nullptr if invalid id.
 		Zeal::EqStructures::Entity* get_entity_by_parent_id(short parent_id);
 		void send_message(UINT opcode, int* buffer, UINT size, int unknown);
-		char* trim_name(char* name);
-		char* trim_name(const char* name);
+		// trim_name() and strip_name() both generate temporary modified string copies in global buffers that will get
+		// re-used, so the result should be consumed immediately (copy to std::string or compare immediately).
+		const char* trim_name(const char* name);  // Cleans but leaves suffixes. Use for name's corpse123 => name's corpse.
+		const char* strip_name(const char* name);  // Strips numbers and any text past an apostrophe ('s corpse).
 		char* get_guildName_from_guildId(int guildId);
 		char* get_string(UINT id);
 		//void set_camera_position(Vec3* pos);
