@@ -370,8 +370,7 @@ bool ui_manager::AlreadyLoadedXml(std::string name)
 	else
 	{
 		CreateTmpXML();
-		Zeal::EqGame::print_chat("Duplicate XML: %s", lName.c_str());
-		//MessageBoxA(NULL, name.c_str(), "Duplicate xml", 0);
+		Zeal::EqGame::print_chat("Warning: Duplicate XML Included: %s", lName.c_str());
 	}
 	return exists;
 }

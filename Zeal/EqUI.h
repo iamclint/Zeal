@@ -522,6 +522,34 @@ namespace Zeal
 			/*0x134*/ EditWnd* unk;
 			/*0x138*/ EditWnd* edit;
 		};
+		// onetimehero 09-17-03
+		// CContainerWnd
+		// Actual Size 0x17C in eqmac
+		class  ContianerWnd : public EQWND {
+		public:
+			/*0x134*/ DWORD   something;     // dont know maybe type or a counter/ID?;
+			/*0x138*/ DWORD* pIteminfo;     // Pointer to the contents of the container;// Matches the pointer in CHARINFO.Inventory/Bank/World
+			/*0x13c*/ EQWND* pSlots[0x0a];
+			/*0x164*/ EQWND* pCombine;
+			/*0x168*/ EQWND* pDone;
+			/*0x16c*/ EQWND* pIcon;
+			/*0x170*/ EQWND* A_DragItem;
+			/*0x174*/ EQWND* pLabel;
+			/*0x178*/ BYTE Unknown0x178[4];
+			/*0x17c*/
+		};
+
+		// Actual Size 0x54  eqmac fixed
+		class ContainerMgr {
+		public:
+			/*0x000*/   DWORD pvfTable; // NOT based on CXWnd.  Contains only destructor
+			/*0x004*/   ContianerWnd pPCContainers[0x11];  // All open containers, including World, in order of opening...
+			/*0x048**/  DWORD*   pWorldItems;            // Pointer to the contents of the world   If NULL, world container isn't open;
+			/*0x04c*/   DWORD Unknown0x04c;            // in the future this is ID of container in zone, starts at one (zero?) and goes up.
+			/*0x050*/   DWORD dwTimeSpentWithWorldContainerOpen;  // Cumulative counter?
+			/*0x054*/
+		};
+
 		struct ColorPickerWnd : public EQWND
 		{
 			void Activate(BasicWnd* wnd, DWORD color)
@@ -881,7 +909,7 @@ namespace Zeal
 			EQWND* PetitionQ;  // 0x63D6AC
 			EQWND* Soulmark;  // 0x63D6B0
 			void* InvSlotMgr;  // 0x63D6B4
-			void* ContainerMgr;  // 0x63D6B8
+			ContainerMgr* ContainerMgr;  // 0x63D6B8
 		};
 
 
