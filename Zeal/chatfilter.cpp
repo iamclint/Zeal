@@ -322,7 +322,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short& color, std::string data) { return color == USERCOLOR_RANDOM; }));
     Extended_ChannelMaps.push_back(CustomFilter("Loot", 0x10001, [this](short& color, std::string data) { return color == USERCOLOR_LOOT; }));
     Extended_ChannelMaps.push_back(CustomFilter("Money", 0x10002, [this](short& color, std::string data) { return color == USERCOLOR_MONEY_SPLIT || color == USERCOLOR_ECHO_AUTOSPLIT; }));
-    Extended_ChannelMaps.push_back(CustomFilter("My Pet Say", 0x10003, [this, zeal](short& color, std::string data) { return color == USERCOLOR_UNUSED001; }));
+    Extended_ChannelMaps.push_back(CustomFilter("My Pet Say", 0x10003, [this, zeal](short& color, std::string data) { return color == CHANNEL_MYPETSAY; }));
     Extended_ChannelMaps.push_back(CustomFilter("My Pet Damage", 0x10004, [this, zeal](short& color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
@@ -332,18 +332,24 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
             }
             if (isDamage && damageData.target && damageData.target->PetOwnerSpawnId && damageData.target->PetOwnerSpawnId == Zeal::EqGame::get_self()->SpawnId)
             {
-                color = CHANNEL_OTHERPETDMG;
+                color = CHANNEL_MYPETDMG;
                 return true;
             }
             return false;
         }));
-    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Say", 0x10005, [this, zeal](short& color, std::string data) { return color == USERCOLOR_UNUSED002; }));
+    Extended_ChannelMaps.push_back(CustomFilter("Other Pet Say", 0x10005, [this, zeal](short& color, std::string data) { return color == CHANNEL_OTHERPETSAY; }));
     Extended_ChannelMaps.push_back(CustomFilter("Other Pet Damage", 0x10006, [this, zeal](short& color, std::string data)
         {
             if (isDamage && damageData.source && damageData.source->PetOwnerSpawnId && damageData.source->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
+            {
+                color = CHANNEL_OTHERPETDMG;
                 return true;
+            }
             if (isDamage && damageData.target && damageData.target->PetOwnerSpawnId && damageData.target->PetOwnerSpawnId != Zeal::EqGame::get_self()->SpawnId)
+            {
+                color = CHANNEL_OTHERPETDMG;
                 return true;
+            }
             return false;
         }));
 
