@@ -439,26 +439,28 @@ D3DCOLOR ZoneMap::get_background_color() const {
 // Updates the succor_label with the current zone's safe coordinates.
 void ZoneMap::update_succor_label() {
     static constexpr char kSuccorString[] = "Succor";
+    static constexpr char kSuccorUnknownString[] = "SuccorUnknown";
+    bool valid_succor = (show_zone_id == kInvalidZoneId);
     const auto* zone_info = Zeal::EqGame::ZoneInfo;
-    succor_label.x = -static_cast<int16_t>(zone_info->SafeCoordsX);  // Negate to map data.
-    succor_label.y = -static_cast<int16_t>(zone_info->SafeCoordsY);
-    succor_label.z = static_cast<int16_t>(zone_info->SafeCoordsZ);
+    succor_label.x = valid_succor ? -static_cast<int16_t>(zone_info->SafeCoordsX) : 0;  // Negate to map data.
+    succor_label.y = valid_succor ? -static_cast<int16_t>(zone_info->SafeCoordsY) : 0;
+    succor_label.z = valid_succor ? static_cast<int16_t>(zone_info->SafeCoordsZ) : 0;
     succor_label.red = 0;
     succor_label.green = 255;
     succor_label.blue = 0;
-    succor_label.label = kSuccorString;
+    succor_label.label = valid_succor ? kSuccorString : kSuccorUnknownString;
 }
 
 // Loads the POI labels from the ZoneMapData with some level-based filtering.
 void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zone_map_data) {
     labels_list.clear();
 
+    update_succor_label();  // Ensure valid for poi searches.
     int num_labels_to_scan = zone_map_data.num_labels;
     if (map_labels_mode == LabelsMode::kOff)
         num_labels_to_scan = 0;  // Disable the scan below.
     else if (show_zone_id == kInvalidZoneId) {
         // Always insert succor if labels are active and not showing a different zone.
-        update_succor_label();
         labels_list.push_back(&succor_label);
     }
 
