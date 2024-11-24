@@ -46,7 +46,7 @@ jobs:
         env:
           ZEAL_BUILD_VERSION: ${{ steps.parse_git.outputs.short_hash }} # Consider also appending a dirty flag.
         run: |
-          msbuild /p:Configuration=Release /p:Platform=x86 /p:zeal_build_version=$env:ZEAL_BUILD_VERSION /p:LanguageStandard=stdcpp20 $env:SOLUTION_FILE_PATH /p:ExportHeader="" /p:ScanDependencies=""
+          msbuild /m /p:Configuration=Release /p:Platform=x86 /p:zeal_build_version=$env:ZEAL_BUILD_VERSION /p:LanguageStandard=stdcpp20 $env:SOLUTION_FILE_PATH /p:ExportHeader="" /p:ScanDependencies=""
 
       - name: Create the zip filename (using bash shell)
         id: zip_filename
