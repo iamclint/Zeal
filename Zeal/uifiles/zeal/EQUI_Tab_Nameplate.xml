@@ -62,8 +62,8 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
-<Button item="Zeal_NameplateSelf">
-    <ScreenID>Zeal_NameplateSelf</ScreenID>
+<Button item="Zeal_NameplateHideSelf">
+    <ScreenID>Zeal_NameplateHideSelf</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
@@ -122,8 +122,8 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
-<Button item="Zeal_NameplateRaidPets">
-    <ScreenID>Zeal_NameplateRaidPets</ScreenID>
+<Button item="Zeal_NameplateHideRaidPets">
+    <ScreenID>Zeal_NameplateHideRaidPets</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
@@ -295,9 +295,9 @@
     <Style_Sizable>true</Style_Sizable>
 	<Pieces>Zeal_NameplateColors</Pieces>
 	<Pieces>Zeal_NameplateConColors</Pieces>
-	<Pieces>Zeal_NameplateSelf</Pieces>
+	<Pieces>Zeal_NameplateHideSelf</Pieces>
 	<Pieces>Zeal_NameplateX</Pieces>
-	<Pieces>Zeal_NameplateRaidPets</Pieces>
+	<Pieces>Zeal_NameplateHideRaidPets</Pieces>
 	<Pieces>Zeal_NameplateCharSelect</Pieces>
 	<Pieces>Zeal_NameplateTargetColor</Pieces>
 	<Pieces>Zeal_NameplateTargetMarker</Pieces>
