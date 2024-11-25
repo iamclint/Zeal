@@ -5,13 +5,6 @@
 #include <string>
 #include <map>
 #include <stdexcept>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <map>
-#include <stdexcept>
 #include "EqFunctions.h"
 class IO_ini {
 private:
