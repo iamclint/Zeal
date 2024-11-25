@@ -326,14 +326,15 @@ private:
 	bool initialize_d3d_external_window();
 	void release_d3d_external_window();
 	void release_font();
-	RECT calc_external_window_client_rect();
 
 	HINSTANCE external_hinstance = nullptr;
 	HWND external_hwnd = nullptr;
 	LPDIRECT3D8 external_d3d = nullptr; // the pointer to our Direct3D interface
 	LPDIRECT3DDEVICE8 external_d3ddev = nullptr; // the pointer to the device class
 	int external_monitor_top_offset = 0;  // Virtual screen offsets of ext window monitor.
-	int external_monitor_left_offset = 0;
+	int external_monitor_left_offset = 0;  // These are to top left corner of client rect.
+	int external_monitor_height = 0;  // Client rect height and width.
+	int external_monitor_width = 0;
 };
 
 

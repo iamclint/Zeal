@@ -417,7 +417,7 @@ The map is controlled through three interfaces:
 * Key binds for frequent map actions (configure in EQ Options->Keyboard->UI)
 * The /map command
 
-The default map settings are stored in the EQClient.ini file of the root Everquest directory.
+The default map settings are stored in the zeal.ini file of the root Everquest directory.
 The defaults are updated when adjusting settings in the Zeal options map tab. The key binds and
 /map commands create temporary changes unless the `/map save_ini` command is used.
 
@@ -435,12 +435,14 @@ toggle visible levels).  The /map commands include extra options like poi search
   - `/map off` - Turns map off
 
 #### Map size, position, and alignment
-The map is drawn to fit within a rectangular viewport defined by a top left corner,
+The external map window (see external map window below) can be moved and resized like a standard window.
+
+The internal map is drawn to fit within a rectangular viewport defined by a top left corner,
 a height, and a width specified as a percentage of the game window dimensions. The
 map viewport is relative to the game window and independent of the game /viewport,
 so the map can be placed anywhere in the game window.
 
-The easiest method for adjusting the map size is through the Zeal Map options
+The easiest method for adjusting the internal map size is through the Zeal Map options
 tab sliders, but convenient toggling between map sizes (say small to large) is
 possible by setting up macros with /map size commands.
 
@@ -465,17 +467,18 @@ clear (0), dark (1), light (2), or tan (3).  Additionally, it supports alpha tra
 
 #### External map window
 The map has simple support for opening an external window outside of the EQ client window.
-This window can be dragged with the title bar and positioned as desired, but it is only resizable
-using the height and width Zeal map options sliders. The top and left sliders are ignored
-in external window mode. See interactive mode for mouse inputs. The map content is controlled
-with the normal map key binds. Also note that if external window mode is set in options,
-the map will not automatically open when the game starts. Use the map enable to open and
-close the window (recommend using the keybind 'm').
+This window can be moved and resized like a standard window. See interactive mode for other 
+mouse inputs. The map content is controlled with the normal map key binds. Use the save_ini
+command to store the current size and position as the default.
+
+Also note that if external window mode is set in options, the map will not automatically 
+open when the game starts. Use the map enable to open and close the window
+(recommend using the keybind 'm').
 
 * Zeal options checkbox
 * Command examples:
   - `/map external` - Toggles map between internal overlay and external window
-  - `/map save_ini` - Required to make the external map window position persistent
+  - `/map save_ini` - Stores the current external window size and position (and other settings)
 
 If the map content looks pixelated, the monitor may be set to a DPI scaling greater than 100%.
 Note that the EQ application itself does not properly handle this. To workaround, set the 
