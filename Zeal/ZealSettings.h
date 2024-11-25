@@ -6,8 +6,9 @@
 #include <memory>
 #include "callbacks.h"
 #include "EqFunctions.h"
+#include "io_ini.h"
 //#include "Zeal.h"
-class IO_ini;
+
 class ZealService;
 template <typename T>
 class ZealSetting
