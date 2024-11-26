@@ -332,6 +332,14 @@ void Binds::add_binds()
 			 ZealService::get_instance()->zone_map->set_interactive_enable(
 				!ZealService::get_instance()->zone_map->is_interactive_enabled(), false);
 		});
+	add_bind(243, "Toggle Click Through Self", "ToggleClickThroughSelf", key_category::Camera, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			ZealService::get_instance()->camera_mods->click_thru_self_toggle();
+		});
+	add_bind(244, "Toggle Click Through My Pet", "ToggleClickThroughMyPet", key_category::Camera, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			ZealService::get_instance()->camera_mods->click_thru_my_pet_toggle();
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)
