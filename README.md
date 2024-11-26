@@ -10,7 +10,7 @@ Zeal custom code is entirely open source and the releases are built directly
 from the repo using github actions, providing full transparency on the contents.
 
 ### Features
-- Camera motion improvements (major improvements to third person view)
+- Camera motion improvements (major improvements to third person view, click thru self/pet options)
 - Additional key binds (tab targeting, strafe, pet)
 - Additional commands (melody, useitem, autoinventory)
 - Additional ui support (new gauges, bag control, looting, spellsets, targetrings, nameplates)
@@ -252,13 +252,19 @@ ___
   - **Description:** toggles nameplate choices shown at character selection screen on and off (on/off)
 
 - `/nameplatetargetcolor`
-  - **Description:** toggles target nameplate color on and off (on/off)
+  - **Description:** toggles target nameplate color (on/off)
  
 - `/nameplatetargetmarker`
-  - **Description:** toggles target nameplate marker on and off (on/off)
+  - **Description:** toggles target nameplate marker (on/off)
  
 - `/nameplatetargethealth`
-  - **Description:** toggles target nameplate health on and off (on/off)
+  - **Description:** toggles target nameplate health (on/off)
+
+- `/clickthruself`
+  - **Description:** toggles ability to click through self (on/off)
+
+- `/clickthrumypet`
+  - **Description:** toggles ability to click through my pet (on/off)
 ___
 ### Binds
 - Cycle through nearest NPCs
@@ -290,10 +296,12 @@ ___
 - Toggle nameplate for self on/off
 - Toggle nameplate for self as X on/off
 - Toggle nameplate for raid pets and your pet on/off
-- Toggle nameplate choices that are shown at character selection screen on and off
-- Toggle target nameplate color on and off
-- Toggle target nameplate marker on and off
-- Toggle target nameplate health on and off
+- Toggle nameplate choices that are shown at character selection screen on/off
+- Toggle target nameplate color on/off
+- Toggle target nameplate marker on/off
+- Toggle target nameplate health on/off
+- Toggle ability to click through self on/off
+- Toggle ability to click through my pet on/off
 ___
 ### UI
 - **Gauge EqType's**
@@ -355,8 +363,8 @@ Build in `Release` `x86` (32bit) mode using Microsoft Visual Studio 2022 (free C
 ### Nameplate Options
 #### Setup and configuration
 Zeal 5.0 and later includes options for players to adjust Player Nameplates and NPC Nameplates in game.
-In addition, Skeletons now show a Nameplate. (Client Skeleton Nameplate Bug Fix)
-Necromancers will now have an easier time finding their corpses.
+Skeletons and Gargoyles now show a Nameplate at their spawn points. (Client Skeleton/Gargoyle Nameplate Bug Fix)
+In addition, Necromancers will now have an easier time finding their corpses.
 
 The nameplate is controlled through three interfaces:
 * Dedicated Zeal options window tab (requires `zeal\uifiles`, see Installation notes above)
