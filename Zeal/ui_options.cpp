@@ -326,6 +326,8 @@ void ui_options::InitCamera()
 	}
 	ui->AddCheckboxCallback(wnd, "Zeal_Cam_TurnLocked", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->cam_lock.set(wnd->Checked); } );
 	ui->AddCheckboxCallback(wnd, "Zeal_UseOldSens", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->camera_mods->use_old_sens.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_ClickThruSelf", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->ClickThruSelf.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_ClickThruMyPet", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->camera_mods->ClickThruMyPet.set(wnd->Checked); });
 	ui->AddSliderCallback(wnd, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->camera_mods->pan_delay.set(value * 4);
 		ui->SetLabelValue("Zeal_PanDelayValueLabel", "%d ms", ZealService::get_instance()->camera_mods->pan_delay);
@@ -578,6 +580,8 @@ void ui_options::UpdateOptionsCamera()
 	ui->SetLabelValue("Zeal_PanDelayValueLabel", "%d ms", ZealService::get_instance()->camera_mods->pan_delay.get());
 	ui->SetChecked("Zeal_Cam", ZealService::get_instance()->camera_mods->enabled.get());
 	ui->SetChecked("Zeal_UseOldSens", ZealService::get_instance()->camera_mods->use_old_sens.get());
+	ui->SetChecked("Zeal_ClickThruSelf", ZealService::get_instance()->camera_mods->ClickThruSelf.get());
+	ui->SetChecked("Zeal_ClickThruMyPet", ZealService::get_instance()->camera_mods->ClickThruMyPet.get());
 }
 void ui_options::UpdateOptionsTargetRing()
 {
