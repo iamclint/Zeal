@@ -26,7 +26,8 @@ public:
 	ZealSetting<float> user_sensitivity_y_3rd = { 0.1f, "Zeal", "MouseSensitivityY3rd", false };
 	ZealSetting<float> fov = { 45.f, "Zeal", "Fov", false, [this](float val) { Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();	if (ci) ci->FieldOfView = val; } };
 	ZealSetting<int> pan_delay = { 0, "Zeal", "PanDelay", false };
-
+	ZealSetting<bool> ClickThruSelf = { false, "Zeal", "ClickThruSelf", false, [this](bool val) { click_thru_self_toggle(); }, true };
+	ZealSetting<bool> ClickThruMyPet = { false, "Zeal", "ClickThruMyPet", false, [this](bool val) { click_thru_my_pet_toggle(); }, true };
 
 	const float max_zoom_out = 100;
 	const float zoom_speed = 5.f;
@@ -38,6 +39,8 @@ public:
 	float zeal_cam_yaw;
 	float current_zoom = 0.f;
 	float desired_zoom = 0.f;
+	float selfBoundingRadiusStored;
+	float myPetBoundingRadiusStored;
 	void set_smoothing(bool val);
 	void callback_main();
 	void callback_render();
@@ -51,6 +54,8 @@ public:
 	void handle_camera_motion_binds(int cmd, bool is_down);
 	void handle_cycle_camera_views(int cmd, bool is_down);
 	void proc_rmousedown(int x, int y);
+	void click_thru_self_toggle();
+	void click_thru_my_pet_toggle();
 	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
 	~CameraMods();
 private:
