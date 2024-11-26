@@ -249,8 +249,8 @@ std::string generateTargetNameplateString(const std::string& nameplateString) {
 	}
 	else //Target NPC Nameplate	
 	{  
-		if (target->Race == 60 && (target->StandingState == Zeal::EqEnums::Stance::Feigned || target->StandingState == Zeal::EqEnums::Stance::Dead))//Needed to play nice with Skeleton Nameplate fix code below
-			ossShowNameLogic << Zeal::EqGame::trim_name(target->Name); //Prevents broken string bug on Skeleton Nameplate
+		if ((target->Race == 60 || target->Race == 29) && target->StandingState != Zeal::EqEnums::Stance::Standing)//Needed to play nice with Skeleton/Gargoyle Nameplate fix code below
+			ossShowNameLogic << Zeal::EqGame::trim_name(target->Name); //Prevents broken string bug on Skeleton/Gargoyle Nameplate
 		else
 			ossShowNameLogic << nameplateString; //All other NPC Nameplate
 	}
@@ -345,8 +345,8 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		ChangeDagStringSprite(target->ActorInfo->DagHeadPoint, fontTexture, generateTargetNameplateString(targetNameplate).c_str());
 		return;
 	}
-	if (spawn->Race == 60) { //Skeleton Feigned at spawn point Nameplate fix and Skeleton Corpse Nameplate fix
-		if ((spawn->Type == Zeal::EqEnums::EntityTypes::NPC && spawn->StandingState != Zeal::EqEnums::Stance::Standing)  || spawn->Type == Zeal::EqEnums::EntityTypes::NPCCorpse || spawn->Type == Zeal::EqEnums::EntityTypes::PlayerCorpse)
+	if (spawn->Race == 60 || spawn->Race == 29) { //Skeleton Feigned and Gargoyle Sitting at spawn point Nameplate fix and Skeleton Corpse Nameplate fix
+		if ((spawn->Type == Zeal::EqEnums::EntityTypes::NPC && spawn->StandingState != Zeal::EqEnums::Stance::Standing) || spawn->StandingState == Zeal::EqEnums::Stance::Dead)
 		{
 			std::string skeletonName = Zeal::EqGame::trim_name(spawn->Name);
 			ChangeDagStringSprite(spawn->ActorInfo->DagHeadPoint, fontTexture, skeletonName.c_str());
