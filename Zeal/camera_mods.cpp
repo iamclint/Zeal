@@ -531,6 +531,67 @@ void CameraMods::callback_endmainloop()
     main_loop_ended = true;
 }
 
+void click_thru_self_set_enabled(bool _enabled)
+{
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_controlled();
+    if (!self) { return; }
+    if (!self->ActorInfo) { return; }
+    if (!self->ActorInfo->ViewActor_) { return; }
+    if (!self->ActorInfo->ViewActor_->BoundingRadius) { return; }
+
+    if (_enabled == true) 
+    {
+        ZealService::get_instance()->camera_mods->selfBoundingRadiusStored = self->ActorInfo->ViewActor_->BoundingRadius;
+        self->ActorInfo->ViewActor_->BoundingRadius = 0.0001f; //Can't use 0 because it breaks BoundingRadius reversion back to normal
+        Zeal::EqGame::print_chat("Click Through Self for %s is %s", self->Name, "Enabled");
+    }
+    if (_enabled == false)
+    {
+        self->ActorInfo->ViewActor_->BoundingRadius = ZealService::get_instance()->camera_mods->selfBoundingRadiusStored;
+        Zeal::EqGame::print_chat("Click Through Self for %s is %s", self->Name, "Disabled");
+    }
+}
+
+void click_thru_my_pet_set_enabled(bool _enabled)
+{
+    Zeal::EqStructures::Entity* myPet = Zeal::EqGame::get_pet();
+    if (!myPet) { return; }
+    if (!myPet->ActorInfo) { return; }
+    if (!myPet->ActorInfo->ViewActor_) { return; }
+    if (!myPet->ActorInfo->ViewActor_->BoundingRadius) { return; }
+
+    if (_enabled == true)
+    {
+        ZealService::get_instance()->camera_mods->myPetBoundingRadiusStored = myPet->ActorInfo->ViewActor_->BoundingRadius;
+        myPet->ActorInfo->ViewActor_->BoundingRadius = 0.0001f; //Can't use 0 because it breaks BoundingRadius reversion back to normal
+        Zeal::EqGame::print_chat("Click Through My Pet %s is %s", Zeal::EqGame::trim_name(myPet->Name), "Enabled");
+    }
+    if (_enabled == false)
+    {
+        myPet->ActorInfo->ViewActor_->BoundingRadius = ZealService::get_instance()->camera_mods->myPetBoundingRadiusStored;
+        Zeal::EqGame::print_chat("Click Through My Pet %s is %s", Zeal::EqGame::trim_name(myPet->Name), "Disabled");
+    }
+}
+
+void CameraMods::click_thru_self_toggle()
+{
+    ClickThruSelf = !ClickThruSelf.get();
+    if (ClickThruSelf.get() == true)
+        click_thru_self_set_enabled(true);
+    if (ClickThruSelf.get() == false)
+        click_thru_self_set_enabled(false);
+}
+
+void CameraMods::click_thru_my_pet_toggle()
+{
+    ClickThruMyPet = !ClickThruMyPet.get();
+    if (ClickThruMyPet.get() == true)
+        click_thru_my_pet_set_enabled(true);
+    if (ClickThruMyPet.get() == false)
+        click_thru_my_pet_set_enabled(false);
+}
+
+
 int SetCameraLens(int a1, float fov, float aspect_ratio, float a4, float a5)
 {
     ZealService* zeal = ZealService::get_instance();
@@ -562,6 +623,16 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
         mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::TotalCameras); //allow for the camera toggle hotkey to cycle through the new camera
     else
         mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::ZealCam);
+
+    if (ClickThruSelf.get() == true)
+        click_thru_self_set_enabled(true);
+    if (ClickThruSelf.get() == false)
+        click_thru_self_set_enabled(false);
+
+    if (ClickThruMyPet.get() == true)
+        click_thru_my_pet_set_enabled(true);
+    if (ClickThruMyPet.get() == false)
+        click_thru_my_pet_set_enabled(false);
 
     lastTime = std::chrono::steady_clock::now();
     fps = 0;
@@ -683,6 +754,16 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                     mem::write<byte>(0x4adcd9, Zeal::EqEnums::CameraView::ZealCam);
                 }
             }
+            return true;
+        });
+    zeal->commands_hook->Add("/clickthruself", {}, "Toggles Click Through Self",
+        [this](std::vector<std::string>& args) {
+            ZealService::get_instance()->camera_mods->click_thru_self_toggle();
+            return true;
+        });
+    zeal->commands_hook->Add("/clickthrumypet", {}, "Toggles Click Through Self",
+        [this](std::vector<std::string>& args) {
+            ZealService::get_instance()->camera_mods->click_thru_my_pet_toggle();
             return true;
         });
     zeal->binds_hook->replace_cmd(15, [this](int state) { handle_camera_motion_binds(15, state); return false; });
