@@ -77,11 +77,14 @@ void TargetRing::reset_render_states()
 void TargetRing::load_texture(const std::string& filename) {
 	try
 	{
-		if (!filename.length())
-			return;
 		if (targetRingTexture)
 			targetRingTexture->Release();
+
 		targetRingTexture = nullptr;
+
+		if (!filename.length())
+			return;
+
 		// Full texture path
 		std::string texturePath = "./uifiles/zeal/targetrings/" + filename + ".tga";
 
