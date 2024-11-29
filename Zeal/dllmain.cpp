@@ -26,7 +26,14 @@ static void zeal_lifetime_thread(std::unique_ptr<ZealService> zeal)
     }
 }
 
-
+static bool check_if_already_loaded()
+{
+    // Simple hack check is to see if client sided mana ticking was disabled (since before 0.3.0).
+    // This only works if this newer Zeal is loaded second, but a 50% detection is better than none.
+    //     mem::set(0x4C3F93, 0x90, 7);
+    const uint8_t* ptr = reinterpret_cast<uint8_t*>(0x4C3F93);
+    return *ptr == 0x90;  // Already loaded if set to a nop.
+}
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -37,7 +44,10 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        if (!this_module)
+        if (this_module || check_if_already_loaded())
+            MessageBoxA(NULL, "Error: An extra zeal .asi file is loading. This is bad and could crash. Remove extra .asi files from eq root directory.",
+                "Zeal installation error", MB_OK | MB_ICONERROR);
+        else
         {
             this_module = hModule;
             DisableThreadLibraryCalls(hModule);
