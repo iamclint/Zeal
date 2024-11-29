@@ -540,7 +540,7 @@ namespace Zeal
 			/* 0x000A */
 		};
 		struct EQZONEINFO
-		{
+		{   // OP_NewZone 0x4058 performs a memcpy of the first 0x23c bytes of NewZone_struct packet data to 0x00798784.
 			/* 0x0000 */ CHAR PlayerName[0x40];
 			/* 0x0040 */ CHAR ShortName[0x20];
 			/* 0x0060 */ CHAR LongName[0x80];
@@ -559,7 +559,7 @@ namespace Zeal
 			/* 0x019C */ FLOAT Unknown019C;
 			/* 0x01A0 */ FLOAT Unknown01A0;
 			/* 0x01A4 */ FLOAT Gravity;
-			/* 0x01A8 */ BYTE Unknown01A8;
+			/* 0x01A8 */ BYTE TimeType;  // 0 = indoor dungeon, 1 = outdoor, 2 = outdoor city, 3 = indoor city, 4 = nosky outdoor city, 5 = outdoor dungeon
 			/* 0x01A9 */ BYTE Unknown01A9;
 			/* 0x01AA */ BYTE Unknown01AA;
 			/* 0x01AB */ BYTE Unknown01AB;
