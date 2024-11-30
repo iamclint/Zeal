@@ -368,16 +368,20 @@ void SpellSets::create_context_menus(bool force)
         //spellset_menu->SetItemColor(header_index, { 255,255,255,255 });
         for (int i = 0; auto & s : spellsets)
         {
-            Zeal::EqUI::ContextMenu* SubCategoryMenu = InitializeMenu();
-            SubCategoryMenu->AddMenuItem("Load", 0x20000 + i);
-            SubCategoryMenu->AddMenuItem("Delete", 0x22000 + i);
-            int subcat = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(SubCategoryMenu);
-            spellset_menu->AddMenuItem(s, subcat, false, true);
-            //int index = SubCategoryMenu->AddMenuItem(s, 0x20000 + i);
+            spellset_menu->AddMenuItem(s, 0x20000 + i);
             spellset_map[0x20000 + i] = s;
-            MenuMap[subcat] = SubCategoryMenu;
             i++;
         }
+        Zeal::EqUI::ContextMenu* DeleteSubCatMenu = InitializeMenu();
+        for (int i = 0; auto & s : spellsets)
+        {
+            DeleteSubCatMenu->AddMenuItem(s, 0x22000 + i);
+            i++;
+        }
+        int delete_subcat = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(DeleteSubCatMenu);
+        spellset_menu->AddSeparator();
+        spellset_menu->AddMenuItem("Delete", delete_subcat, false, true);
+        MenuMap[delete_subcat] = DeleteSubCatMenu;
         spellset_menu->AddSeparator();
         spellset_menu->AddMenuItem("Save New", 0x21000);
         SpellSetMenuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(spellset_menu);
