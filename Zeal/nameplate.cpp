@@ -341,7 +341,7 @@ void NamePlate::HandleState(void* this_ptr, void* not_used, Zeal::EqStructures::
 		}
 	}
 	if (spawn == target && (nameplateTargetMarker || nameplateTargetHealth)) { //Target Marker and Target Health
-		std::string targetNameplate = spawn->ActorInfo->DagHeadPoint->StringSprite->Text;
+		std::string targetNameplate = Zeal::EqGame::trim_name(spawn->ActorInfo->DagHeadPoint->StringSprite->Text);
 		ChangeDagStringSprite(target->ActorInfo->DagHeadPoint, fontTexture, generateTargetNameplateString(targetNameplate).c_str());
 		return;
 	}
