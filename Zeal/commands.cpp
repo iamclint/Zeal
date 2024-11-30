@@ -362,6 +362,23 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				ZealService::get_instance()->entity_manager.get()->Dump();
 				return true;
 			}
+			if (args.size() == 2 && args[1] == "target_name")  // Report name parsing of current target.
+			{
+				Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
+				if (target) {
+					std::string original = target->Name;
+					std::string trimmed = Zeal::EqGame::trim_name(target->Name);
+					std::string stripped = Zeal::EqGame::strip_name(target->Name);
+					Zeal::EqGame::print_chat("Raw: %s, Trim: %s, Strip: %s, Equal: %s",
+						original.c_str(), trimmed.c_str(), stripped.c_str(), trimmed == stripped ? "true" : "false");
+					if (target->ActorInfo && target->ActorInfo->DagHeadPoint && target->ActorInfo->DagHeadPoint->StringSprite) {
+						auto& sprite = *target->ActorInfo->DagHeadPoint->StringSprite;
+						if (sprite.Unknown0000 == 0x51)
+							Zeal::EqGame::print_chat("Sprite: %s, len: %i", sprite.Text, sprite.TextLength);
+					}
+				}
+				return true;
+			}
 			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "help"))
 			{
 				print_commands();
