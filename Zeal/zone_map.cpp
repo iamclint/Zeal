@@ -953,7 +953,8 @@ void ZoneMap::add_position_marker_vertices(float map_y, float map_x, float headi
 
 // Goes through group member list adding their position vertices if enabled.
 void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertices) const {
-    if (map_show_group_mode == ShowGroupMode::kOff)
+    const auto* group_info = Zeal::EqGame::GroupInfo;
+    if (map_show_group_mode == ShowGroupMode::kOff || !group_info->is_in_group())
         return;
 
     const float kShrinkFactor = 0.8f;  // Make group members 20% smaller.
@@ -967,7 +968,6 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
         D3DCOLOR_XRGB(104, 153, 255),  // Purple (violet)
     };
 
-    const auto* group_info = Zeal::EqGame::GroupInfo;
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = group_info->EntityList[i];
         if ((strlen(group_info->Names[i]) == 0) || !member || member->Type != Zeal::EqEnums::EntityTypes::Player)
@@ -981,8 +981,10 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
 
 // Adds a label for each group member if enabled.
 void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
+    const auto* group_info = Zeal::EqGame::GroupInfo;
     if ((map_show_group_mode == ShowGroupMode::kOff) ||
-        (!map_show_all_names_override && (map_show_group_mode == ShowGroupMode::kMarkers)))
+        (!map_show_all_names_override && (map_show_group_mode == ShowGroupMode::kMarkers)) ||
+        !group_info->is_in_group())
         return;
 
     render_load_font(device);
@@ -997,7 +999,6 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
         && ZealService::get_instance()->ui->options.get())
         color = ZealService::get_instance()->ui->options.get()->GetColor(5);  // GroupColor
 
-    const auto* group_info = Zeal::EqGame::GroupInfo;
     const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
     for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
         Zeal::EqStructures::Entity* member = group_info->EntityList[i];
@@ -1021,7 +1022,8 @@ void ZoneMap::render_group_member_labels(IDirect3DDevice8& device) {
 
 // Adds a label for each raid member if enabled.
 void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
-    if (!map_show_raid || !map_show_all_names_override)
+    const Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+    if (!map_show_raid || !map_show_all_names_override || !raid_info->is_in_raid())
         return;
 
     render_load_font(device);
@@ -1036,8 +1038,6 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
     if (ZealService::get_instance()->ui && ZealService::get_instance()->ui->options
         && ZealService::get_instance()->ui->options.get())
         color = ZealService::get_instance()->ui->options.get()->GetColor(4);  // Raidcolor
-
-    const Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
 
     // Just add a label for members, including self, since this is intended to be for transient use.
     const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
@@ -1085,7 +1085,8 @@ void ZoneMap::add_raid_marker_vertices(const Vec3& position, float size,
 
 // Goes through raid member list adding their position vertices if enabled.
 void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices) const {
-    if (!map_show_raid)
+    const Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+    if (!map_show_raid || !raid_info->is_in_raid())
         return;
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
@@ -1099,8 +1100,6 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
     const DWORD kUngrouped = Zeal::EqStructures::RaidMember::kRaidUngrouped;
     const D3DCOLOR kColorLeader = D3DCOLOR_XRGB(255, 153, 153);
     const D3DCOLOR kColorUngrouped = D3DCOLOR_XRGB(240, 240, 240);
-
-    const Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
 
     // Disable the markers for the same group if show_group is active.
     DWORD self_group_number = kUngrouped - 1;  // Unique default number.
@@ -1777,8 +1776,17 @@ static int get_tracking_distance() {
     if (skill_level <= 0)
         return 0;
 
-    // Formula from GenerateTrackingList in client:
-    return 500 + skill_level * 10 + max(0, (skill_level - 100)) * 10;
+    // Formulas are from GenerateTrackingList in client and zone type dependent.
+    // Type 0: soldungb, gukbottom, sebilis (indoor dungeon)
+    // Type 1: fearplane, commons, lavastorm, oot (outdoor)
+    // Type 2: gfaydark, qeynos (outdoor city)
+    // Type 3: akanon, kaladima, neriaka (indoor city)
+    // Type 4: erudnint (only zone in db, outdoor city no sky?)
+    // Type 5: veeshan, airplane, blackburrow (outdoor dungeon)
+    const uint8_t zone_type = Zeal::EqGame::ZoneInfo->TimeType;
+    const bool long_range = (zone_type == 1) || (zone_type == 2) || (zone_type == 5);
+    return long_range ? (500 + skill_level * 10 + max(0, (skill_level - 100)) * 10) :
+                        (500 + skill_level / 2 + max(0, (skill_level - 100)) * 4);
 }
 
 bool ZoneMap::set_ring_radius(int new_radius, bool update_default) {
@@ -2777,6 +2785,7 @@ void ZoneMap::reset_zone_state() {
     dynamic_labels_list.clear();
     map_level_index = 0;
     zoom_factor = 1.f;  // Reset for more consistent behavior.
+    map_ring_radius = 0;  // Disable since skill-based range is zone dependent.
     reset_mouse();
     enable_autocenter();
 }
