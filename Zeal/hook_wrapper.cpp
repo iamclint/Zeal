@@ -1,4 +1,5 @@
 #include "hook_wrapper.h"
+typedef BYTE byte;	// unsigned char
 
 namespace Zeal
 {

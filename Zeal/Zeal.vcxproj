@@ -101,7 +101,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;ZEAL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;WIN32_LEAN_AND_MEAN;NDEBUG;ZEAL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(zeal_build_version)'!=''">ZEAL_BUILD_VERSION="$(zeal_build_version)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -194,6 +194,7 @@
     <ClInclude Include="cycle_target.h" />
     <ClInclude Include="EqAddresses.h" />
     <ClInclude Include="EqFunctions.h" />
+    <ClInclude Include="EqPackets.h" />    
     <ClInclude Include="eqstr.h" />
     <ClInclude Include="EqStructures.h" />
     <ClInclude Include="EqUI.h" />
@@ -234,7 +235,6 @@
     <ClCompile Include="default_spritefont.cpp" />
     <ClCompile Include="directx.cpp" />
     <ClCompile Include="EntityManager.cpp" />
-    <ClCompile Include="EqPackets.h" />
     <ClCompile Include="floating_damage.cpp" />
     <ClCompile Include="ui_group.cpp" />
     <ClCompile Include="ui_inputdialog.cpp" />

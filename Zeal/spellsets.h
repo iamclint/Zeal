@@ -3,6 +3,7 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "IO_ini.h"
+#include "EqFunctions.h"
 
 struct menudata
 {
@@ -46,7 +47,7 @@ private:
 	Stance original_stance;
 	void CleanUI();
 	void callback_main();
-	void callback_characterselect();
+	//void callback_characterselect();
 };
 
 
