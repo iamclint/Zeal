@@ -824,6 +824,10 @@ void ZoneMap::render_handle_cursor(IDirect3DDevice8& device) {
     const float yf = static_cast<float>(y);
     if (xf > clip_min_x && xf < clip_max_x && yf > clip_min_y && yf < clip_max_y)
     {
+        render_load_font(device);
+        if (!bitmap_font)
+            return;
+
         if (!external_enabled)
             hide_cursor();
         char loc_cursor[20];
