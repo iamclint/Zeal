@@ -409,7 +409,11 @@ namespace Zeal
 		}
 		void DoPercentConvert(std::string& data)
 		{
-			reinterpret_cast<void(__thiscall*)(int everquest, const char* name, int len)>(0x538110)(*(int*)0x809478, data.data(), 1);
+			char temp_buffer[2048];  // Same maximum size as internal DoPercentConvert.
+			strncpy_s(temp_buffer, data.c_str(), sizeof(temp_buffer));
+			temp_buffer[sizeof(temp_buffer) - 1] = 0;
+			reinterpret_cast<void(__thiscall*)(int everquest, const char* name, int len)>(0x538110)(*(int*)0x809478, temp_buffer, 1);
+			data = temp_buffer;
 		}
 		void log(std::string& data)
 		{

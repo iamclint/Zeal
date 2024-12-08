@@ -115,16 +115,14 @@ UINT32  __fastcall GetRGBAFromIndex(int t, int u, USHORT index)
 }
 
 
-void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u)
+void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool add_log)
 {
     if (!data || strlen(data) == 0)
         return;
     chat* c = ZealService::get_instance()->chat_hook.get();
     ZealService::get_instance()->pipe->chat_msg(data, color_index);
 
-
-
-    std::string data_str = data;
+    std::string data_str = data; //keeping this here for future use to strip out the unique identifiers _208 in names in the commented regex below.
     //if (data_str.length())
     //{
     //    data_str.erase(std::remove(data_str.begin(), data_str.end(), '#'), data_str.end());
@@ -132,12 +130,13 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
     //    data_str = std::regex_replace(data_str, pattern, "$1");
     //    std::replace(data_str.begin(), data_str.end(), '_', ' ');
     //}
+
     if (c->TimeStampsStyle.get() && strlen(data) > 0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
     {
-        mem::write<byte>(0x5380C9, 0xEB); // don't log information so we can manipulate data before between chat and logs
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, generateTimestampedString(data_str, c->TimeStampsStyle.get() == 1).c_str(), color_index, false);
-        mem::write<byte>(0x5380C9, 0x75); //reset the logging
-        if (u)
+        std::string timestamp_buffer = generateTimestampedString(data_str, c->TimeStampsStyle.get() == 1);
+        timestamp_buffer.resize(2048);
+        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, timestamp_buffer.data(), color_index, false);
+        if (add_log)
         {
             reinterpret_cast<bool(__thiscall*)(int t, const char* data, int)>(0x538110)(t, data, 0); // do the percent convert for logging
             reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data); //add to log
@@ -145,8 +144,9 @@ void __fastcall PrintChat(int t, int unused, const char* data, short color_index
     }
     else
     {
+        data_str.resize(2048);
         ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data_str.c_str(), color_index, false);
-        if (u)
+        if (add_log)
         {
             reinterpret_cast<bool(__thiscall*)(int t, const char* data, int)>(0x538110)(t, data, 0); // do the percent convert for logging
             reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data); //add to log
