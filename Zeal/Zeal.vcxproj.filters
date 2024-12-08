@@ -51,9 +51,6 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="memory.h">
       <Filter>Header Files\memory</Filter>
     </ClInclude>
@@ -243,6 +240,12 @@
     <ClInclude Include="ZealSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EqPackets.h">
+      <Filter>Header Files\everquest</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -344,9 +347,6 @@
     <ClCompile Include="autofire.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
-    <ClCompile Include="EqPackets.h">
-      <Filter>Header Files\everquest</Filter>
-    </ClCompile>
     <ClCompile Include="ui_raid.cpp">
       <Filter>Source Files\ui</Filter>
     </ClCompile>
@@ -415,9 +415,6 @@
     </ClCompile>
     <ClCompile Include="ui_inputdialog.cpp">
       <Filter>Source Files\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="ZealSettings.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

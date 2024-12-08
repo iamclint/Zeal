@@ -1,4 +1,7 @@
 #include "FindPattern.h"
+
+typedef const unsigned char* LPCBYTE;  // Not defined in WIN32_LEAN_AND_MEAN.
+
 namespace Zeal
 {
 	namespace Memory

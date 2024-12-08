@@ -1,13 +1,10 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include <string>
 #include <functional>
 #include <Windows.h>
-#include <memory>
 #include "callbacks.h"
-#include "EqFunctions.h"
 #include "io_ini.h"
-//#include "Zeal.h"
+#include "EqFunctions.h"
 
 class ZealService;
 template <typename T>

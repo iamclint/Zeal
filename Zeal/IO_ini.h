@@ -1,11 +1,15 @@
 #pragma once
-#include <iostream>
-#include <fstream>
+#include <Windows.h>
 #include <filesystem>
+#include <iostream>
+#include <sstream>
 #include <string>
-#include <map>
-#include <stdexcept>
-#include "EqFunctions.h"
+
+// Declare a single function from EqFunctions.h to avoid pulling in many headers.
+namespace Zeal::EqGame {
+    void print_chat(const char* format, ...);
+}
+
 class IO_ini {
 private:
     std::string filename;
