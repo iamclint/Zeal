@@ -66,6 +66,7 @@ namespace Zeal
 			static mem::function<int __fastcall(int t, int unk, int key, int type)> readKeyMapFromIni = 0x525520;
 			static mem::function<void __cdecl(Zeal::EqStructures::EQCHARINFO* _char, Zeal::EqStructures::_EQITEMINFO** Item, int)> auto_inventory = 0x4F0EEB;
 			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;
+			static mem::function<bool __cdecl()> IsNoSlashWndActive = 0x00545bbd;  // Returns false if merchant, loot, trade, and bank windows are not activated.
 			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_say = 0x4f8172;
 			static mem::function<float __fastcall(int, int)> encum_factor = 0x4bb9c7;
 			static mem::function<float __fastcall(int, int, int, int)> OpenContainer = 0x4168bd;
@@ -74,7 +75,24 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int, int)> CXWndIsType = 0x571300;
 			static mem::function<int __fastcall(int, int, int, int)> CXWndShowContextMenu = 0x5A02F0;
 			static mem::function<char __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, int left, int top, int right, int bottom)> CXWndMoveAndInvalidate = 0x00573600;
+			static mem::function<Zeal::EqUI::CXRect* __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect* rect)> CXWndGetMinimizedRect = 0x00573730;
+			static mem::function<int __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, uint32_t unknown3)> CXWndHandleRButtonDown = 0x005703f0;
+			static mem::function<void __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX)> CXWndDeactivate = 0x0056e0b0;  // Does nothing.
+			static mem::function<char __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect rect)> CXWndOnMove = 0x00402301;
+			static mem::function<int __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, int width, int height)> CXWndOnResize = 0x0056eb00;
+			static mem::function<void __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX)> CXWndOnMinimizeBox = 0x00402306;
+			static mem::function<int __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX)> CXWndOnActivate = 0x00402317;  // Just returns zero. Shared call.
+			static mem::function<int __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX)> CXWndAboutToDeleteWnd = 0x00402317;  // Just returns zero. Shared call.
+			static mem::function<Zeal::EqUI::CXRect* __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect* rect, int region)> CXWndGetHitTestRect = 0x00571540;
 			static mem::function<Zeal::EqUI::CXRect* __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect* rect)> CXWndGetInnerRect = 0x005714b0;
+			static mem::function<Zeal::EqUI::CXRect* __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect* rect)> CXWndGetClientRect = 0x00572390;
+			static mem::function<int __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX)> CSidlScreenWndOnShow = 0x0056f590;
+			static mem::function<void __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX)> CSidlScreenWndLoadIniInfo = 0x0056f5a0;
+			static mem::function<void __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX)> CSidlScreenWndStoreIniInfo = 0x0056fe10;
+			static mem::function<int* __fastcall(Zeal::EqUI::EQWND*, int unusedEDX, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name)> CSidlScreenWndConstructor = 0x0056e2b0;
+			static mem::function<int* __fastcall(Zeal::EqUI::EQWND*, int unusedEDX, bool delete_me)> CSidlScreenWndDestructor = 0x0056e0c0;
+			static mem::function<Zeal::EqUI::ItemDisplayWnd* __fastcall(const Zeal::EqUI::ItemDisplayWnd*, int unusedEDX, int unk)> CItemDisplayWndConstructor = 0x00423331;
+			static mem::function<int* __fastcall(Zeal::EqUI::ItemDisplayWnd*, int unusedEDX, bool delete_me)> CItemDisplayWndDestructor = 0x004234e8;
 			static mem::function<int __fastcall(int, int)> CLootWndDeactivate = 0x42651f;
 			static mem::function<int __cdecl()> MessageEvent = 0x52437F;
 			static mem::function<int __fastcall(int, int)> ProcessControls = 0x53F337;
@@ -84,6 +102,7 @@ namespace Zeal
 		namespace Spells //some wrappers for simplifying
 		{
 			void OpenBook();
+			void StopSpellBookAction();
 			void Memorize(int book_index, int gem_index);
 			void Forget(int index);
 			void UpdateGems(int index);

@@ -2145,7 +2145,14 @@ namespace Zeal
 		{
 			void OpenBook()
 			{
+				if (!Windows->SpellBook)
+					return;
 				Windows->SpellBook->OpenBook();
+			}
+			void StopSpellBookAction() {
+				if (!Windows->SpellBook)
+					return;
+				Windows->SpellBook->StopSpellBookAction();
 			}
 			void Memorize(int book_index, int gem_index)
 			{
@@ -2161,10 +2168,14 @@ namespace Zeal
 			}
 			void Forget(int index) 
 			{
+				if (!Windows->SpellGems)
+					return;
 				Windows->SpellGems->Forget(index);
 			}
 			void UpdateGems(int index)
 			{
+				if (!Windows->SpellGems)
+					return;
 				Windows->SpellGems->UpdateSpellGems(index);
 			}
 		}

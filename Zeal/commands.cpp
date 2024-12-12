@@ -313,7 +313,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		});
 	Add("/camp", {}, "Adds auto sit when attempting to camp.",
 		[](std::vector<std::string>& args) {
-			if (Zeal::EqGame::is_in_game())
+			if (Zeal::EqGame::is_in_game() && !Zeal::EqGame::EqGameInternal::IsNoSlashWndActive())
 				Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 			return false;
 		});

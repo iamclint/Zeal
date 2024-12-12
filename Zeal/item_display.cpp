@@ -5,23 +5,26 @@
 #include "Zeal.h"
 #include <algorithm>
 
-void __fastcall Deconstruct(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, BYTE reason)
-{
-	Zeal::EqGame::get_wnd_manager()->Unknown0x8 -= 1;
-}
-
 void ItemDisplay::init_ui()
 {
+	if (!windows.empty())
+		Zeal::EqGame::print_chat("Warning: InitUI and CleanUI out of sync in ItemDisplay");
 	windows.clear();
-	windows.push_back(Zeal::EqGame::Windows->ItemWnd);
+
+	if (Zeal::EqGame::Windows->ItemWnd)
+		windows.push_back(Zeal::EqGame::Windows->ItemWnd);
+	else
+		Zeal::EqGame::print_chat("Error: Client ItemDisplay is null");
+
 	for (int i = 0; i < max_item_displays; i++)
 	{
-		Zeal::EqUI::ItemDisplayWnd* new_wnd = new Zeal::EqUI::ItemDisplayWnd();
-		mem::set((int)new_wnd, 0, sizeof(Zeal::EqUI::ItemDisplayWnd));
+		Zeal::EqUI::ItemDisplayWnd* new_wnd = Zeal::EqUI::ItemDisplayWnd::Create(0);
+		if (!new_wnd) {
+			Zeal::EqGame::print_chat("Error: Memory allocation failed in ItemDisplay");
+			break;
+		}
 		windows.push_back(new_wnd);
-		reinterpret_cast<Zeal::EqUI::ItemDisplayWnd* (__thiscall*)(const Zeal::EqUI::ItemDisplayWnd*, int unk)>(0x423331)(new_wnd, 0);
-		new_wnd->SetupCustomVTable();
-		new_wnd->vtbl->Deconstructor = Deconstruct;
+		// new_wnd->SetupCustomVTable();  // Re-enable this and the deleter if custom vtables are required.
 		new_wnd->Location.Top += 20 * (i + 1);
 		new_wnd->Location.Left += 20 * (i + 1);
 		new_wnd->Location.Bottom += 20 * (i + 1);
@@ -69,9 +72,8 @@ void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, Zeal::EqStr
 	zeal->hooks->hook_map["SetItem"]->original(SetItem)(wnd, unused, item, show);
 	if (item->NoDrop!=0)
 		wnd->DisplayText.Append("Value: " + CopperToAll(item->Cost) + "<BR>");
-		//wnd->DisplayText.Append("<BR><c \"#FFFF00\">" + CopperToAll(item->Cost) + "</c>");
 
-	wnd->IconBtn->ZLayer = wnd->ZLayer;
+	// wnd->IconBtn->ZLayer = wnd->ZLayer;  // Disabled since it was causing bank/merchant wnd z-layer issues.
 	wnd->Activate();
 }
 char* build_token_string_PARAM(char* buffer, int stringID, char* string1, char* string2, int u1, int u2, int u3, int u4, int u5, int u6, int u7)
@@ -118,25 +120,41 @@ static char* ModifyInstrumentString(char* destination, char* source) {
 
 void ItemDisplay::CleanUI()
 {
-		for (auto& w : windows)
+	// The first item is the original one registered with the framework which will be cleaned
+	// automatically, so skip that and delete the rest.
+	for (int i = 1; i < windows.size(); ++i)
+	{
+		if (windows[i])
 		{
-			if (w)
-				w->IsVisible = false; 
+			// We assume that deactivate_ui() was called by the framework already (so not needed here).
+			// windows[i]->DeleteCustomVTable();  // Re-enable if custom vtables are required.
+			windows[i]->Destroy();
 		}
-		windows.clear();
+	}
+	windows.clear();
 }
+
+void ItemDisplay::DeactivateUI()
+{
+	// Skip the first one since framework will handle that.
+	for (int i = 1; i < windows.size(); ++i)
+	{
+		if (windows[i])
+			windows[i]->show(0, false);
+	}
+}
+
 
 ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 {
 	windows.clear();
-//	if (Zeal::EqGame::is_in_game()) init_ui(); /*for testing only must be in game before its loaded or you will crash*/
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
 	zeal->hooks->Add("ModifyInstrumentString", 0x423d0f, ModifyInstrumentString, hook_type_replace_call);
 	zeal->hooks->Add("ModifyHaste", 0x424a95, build_token_string_PARAM, hook_type_replace_call);
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
-	//zeal->callbacks->add_generic([this]() { if (!Zeal::EqGame::is_in_game()) CleanUI(); }, callback_type::MainLoop);
+	zeal->callbacks->AddGeneric([this]() { DeactivateUI(); }, callback_type::DeactivateUI);
 
 	mem::write<BYTE>(0x4090AB, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature
 	mem::write<BYTE>(0x40a4c4, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature

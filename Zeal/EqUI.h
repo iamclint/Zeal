@@ -6,16 +6,16 @@ namespace Zeal
 {
 	namespace EqUI
 	{
-		struct BaseVTable
+		struct BaseVTable  // Equivalent to CXWnd's VTable in eqmac.exe
 		{
-			/*0000*/ LPVOID IsValid; 
+			/*0000*/ LPVOID  IsValid;
 			/*0004*/ LPVOID  Deconstructor; 
-			/*0008*/ LPVOID  DrawNC; 
-			/*000C*/ LPVOID  PostDraw; 
-			/*0010*/ LPVOID  PostDraw2; 
+			/*0008*/ LPVOID  DrawNC;
+			/*000C*/ LPVOID  Draw;
+			/*0010*/ LPVOID  PostDraw;
 			/*0014*/ LPVOID  DrawCursor; 
-			/*0018*/ LPVOID  OnResize; 
-			/*001C*/ LPVOID  PostDraw3; 
+			/*0018*/ LPVOID  DrawChildItem;
+			/*001C*/ LPVOID  DrawCaret;
 			/*0020*/ LPVOID  DrawBackground; 
 			/*0024*/ LPVOID  DrawTooltip; 
 			/*0028*/ LPVOID  GetMinimizedRect; 
@@ -33,59 +33,60 @@ namespace Zeal
 			/*0058*/ LPVOID  HandleWheelButtonUp; 
 			/*005C*/ LPVOID  HandleMouseMove; 
 			/*0060*/ LPVOID  HandleWheelMove; 
-			/*0064*/ LPVOID  HandleKeyboardMsg1; 
-			/*0068*/ LPVOID  HandleKeyboardMsg2; 
+			/*0064*/ LPVOID  TranslateKeyboardMsg;
+			/*0068*/ LPVOID  HandleKeyboardMsg;
 			/*006C*/ LPVOID  OnDragDrop; 
 			/*0070*/ LPVOID  GetDragDropCursor; 
 			/*0074*/ LPVOID  QueryDropOK; 
 			/*0078*/ LPVOID  OnClickStick; 
-			/*007C*/ LPVOID  GetDragDropCursor2; 
+			/*007C*/ LPVOID  OnClickStickCursor;
 			/*0080*/ LPVOID  QueryClickStickDropOK; 
 			/*0084*/ LPVOID  WndNotification; 
 			/*0088*/ LPVOID  Deactivate; 
-			/*008C*/ LPVOID  ShowWindow; 
-			/*0090*/ LPVOID  OnMove; 
-			/*0094*/ LPVOID  OnResize2; 
-			/*0098*/ LPVOID  OnMinimizeBox; 
-			/*009C*/ LPVOID  OnTileBox; 
-			/*00A0*/ LPVOID  CXWnd_OnShowANDPostDraw; 
-			/*00A4*/ LPVOID  OnSetFocus; 
-			/*00A8*/ LPVOID  OnSetFocus2; 
+			/*008C*/ LPVOID  OnShow;
+			/*0090*/ LPVOID  OnMove;
+			/*0094*/ LPVOID  OnResize;
+			/*0098*/ LPVOID  OnMinimizeBox;
+			/*009C*/ LPVOID  OnTileBox;
+			/*00A0*/ LPVOID  OnTile;
+			/*00A4*/ LPVOID  OnSetFocus;
+			/*00A8*/ LPVOID  OnKillFocus;
 			/*00AC*/ LPVOID  OnProcessFrame; 
 			/*00B0*/ LPVOID  OnVScroll; 
 			/*00B4*/ LPVOID  OnHScroll; 
 			/*00B8*/ LPVOID  OnBroughtToTop; 
-			/*00BC*/ LPVOID  CXWnd_OnSetFocus; 
-			/*00C0*/ LPVOID  CXWnd_OnSetFocus2; 
-			/*00C4*/ LPVOID  CXWnd_RequestDockInfo; 
-			/*00C8*/ LPVOID  CXWnd_GetTooltip; 
-			/*00CC*/ LPVOID  CXWnd_HitTest; 
-			/*00D0*/ LPVOID  CXWnd_GetHitTestRect; 
-			/*00D4*/ LPVOID  CXWnd_GetInnerRect; 
-			/*00D8*/ LPVOID  CXWnd_GetClientRect; 
-			/*00DC*/ LPVOID  CXWnd_GetMinSize; 
-			/*00E0*/ LPVOID  CXWnd_GetUntileSize; 
+			/*00BC*/ LPVOID  OnActivate;
+			/*00C0*/ LPVOID  AboutToDeleteWnd;
+			/*00C4*/ LPVOID  RequestDockInfo;
+			/*00C8*/ LPVOID  GetTooltip;
+			/*00CC*/ LPVOID  HitTest;
+			/*00D0*/ LPVOID  GetHitTestRect;
+			/*00D4*/ LPVOID  GetInnerRect;
+			/*00D8*/ LPVOID  GetClientRect;
+			/*00DC*/ LPVOID  GetMinSize;
+			/*00E0*/ LPVOID  GetUntileSize;
 			/*00E4*/ LPVOID  IsPointTransparent; 
 			/*00E8*/ LPVOID  SetDrawTemplate; 
 			/*00EC*/ LPVOID  SetWindowTextA; 
 			/*00F0*/ LPVOID  SetVScrollPos; 
 			/*00F4*/ LPVOID  SetAttributesFromSidl; 
-			/*00F8*/ LPVOID  DefineImages; 
-			/*00FC*/ LPVOID  OnReloadSidl;
-			/*0100*/ LPVOID  LoadIniInfo;
-			/*0104*/ LPVOID  StoreIniInfo;
+			/*00F8*/ LPVOID  OnReloadSidl;
 		};
-		struct ItemDisplayVtable
+		struct SidlScreenWndVTable : BaseVTable  // VTable for EQWND
 		{
-			BaseVTable basic;
-			/*0x0FC*/ LPVOID  Unknown1;
-			/*0x100*/ LPVOID  Unknown2;
+			/*00FC*/ LPVOID  LoadIniInfo;
+			/*0100*/ LPVOID  StoreIniInfo;
+		};
+		struct ButtonWndVTable : BaseVTable
+		{
+			/*0x0FC*/ LPVOID  SetRadioGroup;
+		};
+		struct ItemDisplayVTable : SidlScreenWndVTable
+		{
 			/*0x104*/ LPVOID  Activate;
-			/*0x108*/ LPVOID  Unknown3;
 		};
-		struct ContextMenuVTable
+		struct ContextMenuVTable : BaseVTable // Not a SidlScreenWnd derived class.  CListWnd has the same layout.
 		{
-			BaseVTable basic;
 			/*0x0FC*/ LPVOID  OnHeaderClick;
 			/*0x100*/ LPVOID  DrawColumnSeparators;
 			/*0x104*/ LPVOID  DrawSeparator;
@@ -97,7 +98,7 @@ namespace Zeal
 			/*0x11c*/ LPVOID  Sort;
 		};
 		struct SpellGem {
-			/*0x134*/ BYTE Unknown0x134[0x168];
+			/*0x000*/ BYTE    Unknown0000[0x168];
 			/*0x168*/ DWORD   spellicon;//same as in lucys db if this is equal to FFFFFFFF there is no spell memmed in this slot...
 			/*0x16c*/ DWORD   spellstate;// 1 = cast in progress or refreshtime not met or gem is empty 2 means we ducked or aborted cast, 0 means its ok to cast
 			/*0x170*/
@@ -190,12 +191,12 @@ namespace Zeal
 			char Unknown0x0[0x20];
 			pCXSTR* Item;
 		};
-		struct BasicWnd
+		struct BasicWnd  // Equivalent to CXWnd in eqmac.exe.
 		{
 			//BasicWnd() {};
-			void Deconstruct()
+			void Deconstruct(bool delete_me)
 			{
-				reinterpret_cast<void(__thiscall*)(const BasicWnd*, BYTE)>(vtbl->Deconstructor)(this, 1);
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, bool delete_me)>(vtbl->Deconstructor)(this, delete_me);
 			}
 			void SetFocus()
 			{
@@ -207,16 +208,25 @@ namespace Zeal
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*, int)>(0x573a80)(this, 1);
 			}
 
-			void SetupCustomVTable()
+			// The client BasicWnd constructor (CXWnd::CXWnd()) sets the vtbl to point at a default
+			// BaseVTable located at 0x005eaa94. The constructors of other BasicWnd derived classes
+			// can have different default tables (contents and a few extra entries), so make a new 
+			// copy of the initial table to allow modifications.
+			void SetupCustomVTable(size_t size = sizeof(BaseVTable))
 			{
-				BaseVTable* newtbl = new BaseVTable();
-				mem::copy((int)newtbl, (int)vtbl, sizeof(BaseVTable));
-				vtbl = newtbl;
-				mem::unprotect_memory(vtbl, sizeof(BaseVTable));
+				BYTE* newtbl = new BYTE[size];
+				mem::copy((int)newtbl, (int)vtbl, size);
+				mem::unprotect_memory(newtbl, size);
+				vtbl = reinterpret_cast<BaseVTable*>(newtbl);
 			}
-			void show(bool unkown, bool visible)
+			void DeleteCustomVTable(BaseVTable* original = nullptr) 
 			{
-				reinterpret_cast<void(__thiscall*)(const BasicWnd*, bool, bool)>(0x572310)(this, unkown, visible);
+				delete[] reinterpret_cast<BYTE*>(vtbl);
+				vtbl = original ? original : reinterpret_cast<BaseVTable*>(0x005eaa94);  // ~CXWnd().
+			}
+			void show(int make_visible_flag, bool bring_to_top)
+			{
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, int, bool)>(0x572310)(this, make_visible_flag, bring_to_top);
 			}
 			BasicWnd* GetChildItem(CXSTR name, bool log_error = true)
 			{
@@ -325,6 +335,24 @@ namespace Zeal
 		{
 			~EQWND() {};
 			EQWND() {};
+
+			// The client EqWnd constructor (CSidlScreenWnd()) sets the vtbl to point at a default
+			// SidlScreenWndVTable located at 0x005ea98c. The constructors of other derived classes
+			// may have different default tables, so make a new specific copy to allow modification.
+			// Note that if the derived class has an extended vtable size, use the BasicWnd versions
+			// of these that support different sizes.
+			void SetupCustomVTable()
+			{
+				BasicWnd::SetupCustomVTable(sizeof(SidlScreenWndVTable));
+			}
+
+			// This should only be called immediately before destruction of custom EQWND classes
+			// created with SetupCustomVTable().
+			void DeleteCustomVTable()
+			{
+				auto* sidl_default_vtbl = reinterpret_cast<SidlScreenWndVTable*>(0x005ea98c);
+				BasicWnd::DeleteCustomVTable(sidl_default_vtbl);
+			}
 		
 			/*0x114*/   DWORD   Selector;
 			/*0x118*/   DWORD   PushToSelector;
@@ -340,7 +368,7 @@ namespace Zeal
 			};
 			/*0x124*/   DWORD   Unknown0x124; /* CTextureAnimation */
 			/*0x128*/   DWORD   Unknown0x128; /* CTextureAnimation */
-			/*0x12c*/   DWORD   ContextMenu; /* CTextureAnimation its an id for the menu*/
+			/*0x12c*/   DWORD   ContextMenu;  /* CTextureAnimation its an id for the menu*/
 			/*0x130*/	BYTE    Unknown0x130; /* CTextureAnimation */
 			/*0x131*/	BYTE    Unknown0x131; /* CTextureAnimation */
 			/*0x132*/	BYTE    Unknown0x132; /* CTextureAnimation */
@@ -348,7 +376,7 @@ namespace Zeal
 		};
 		struct CharSelect : EQWND
 		{
-			/*0x134*/	BYTE    Unk[0x3C];
+			/*0x134*/	BYTE    Unk[0x3C];  // 0x134 looks like an activated flag (set to 0 in Deactivate callbacks.)
 			/*0x170*/   BYTE    Rotate;
 			/*0x171*/   BYTE    Explore;
 		};
@@ -362,7 +390,7 @@ namespace Zeal
 			BYTE GetType(int button_index) { return *(BYTE*)(0x7f6862 + (button_index + (GetPage() * 0xA))); }
 		};
 
-		struct ComboWnd : EQWND
+		struct ComboWnd : BasicWnd  // Uses a BaseVTable.
 		{
 			void DeleteAll()
 			{
@@ -377,7 +405,7 @@ namespace Zeal
 				reinterpret_cast<void(__thiscall*)(const ComboWnd*, int)>(0x5A1860)(this, index);
 			}
 		};
-		struct ListWnd : EQWND
+		struct ListWnd : BasicWnd  // Note ListWnd has same vtable structure as ContextMenu, so this declaration is incomplete.
 		{
 			ListWnd() {};
 			int AddString(std::string str)
@@ -408,18 +436,42 @@ namespace Zeal
 			{
 				return reinterpret_cast<ListWnd*(__thiscall*)(const ListWnd*, CXSTR*, int, int)>(0x578ed0)(this, buffer, row, col);
 			}
+			/* 0x0114 */  BYTE Unknown0114[0x08];
+			/* 0x011c */  int  SelectedIndex;
+			// Incomplete list.
 		};
 
 		struct ItemDisplayWnd : EQWND
 		{
-			ItemDisplayWnd() {};
+		private:
+			ItemDisplayWnd() {};  // Either use Create() or assign a pointer to an existing class. 
+
+		public:
+			// Inspired by ui_manager::create_sidl to use the same heap for destructor deletion support.
+			static ItemDisplayWnd* Create(BasicWnd* parent_wnd = nullptr) {
+				ItemDisplayWnd* wnd = reinterpret_cast<ItemDisplayWnd*>(HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(ItemDisplayWnd)));
+				mem::set((int)wnd, 0, sizeof(ItemDisplayWnd));
+				reinterpret_cast<void(__fastcall*)(ItemDisplayWnd*, int, BasicWnd*)>(0x00423331)(wnd, 0, parent_wnd);
+				return wnd;
+			}
+
+			void Destroy()
+			{
+				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*, bool)>(this->vtbl->Deconstructor)(this, true);
+			}
+
+			// The client ItemDisplayWnd constructor (CItemDisplayWnd::CItemDisplayWnd()) sets the vtbl to point at a
+			// default ItemDisplayVTable located at 0x005e5a98. Copy that table over in order to modify it.
 			void SetupCustomVTable()
 			{
-				ItemDisplayVtable* newtbl = new ItemDisplayVtable();
-				mem::copy((int)newtbl, (int)vtbl, sizeof(ItemDisplayVtable));
-				vtbl = (BaseVTable*)newtbl;
-				mem::unprotect_memory(vtbl, sizeof(ItemDisplayVtable));
-				
+				BasicWnd::SetupCustomVTable(sizeof(ItemDisplayVTable));
+			}
+			// This should only be called immediately before destruction of custom ItemDisplayWnd classes
+			// created with SetupCustomVTable().
+			void DeleteCustomVTable()
+			{ 
+				auto* item_display_default_vtbl = reinterpret_cast<ItemDisplayVTable*>(0x005e5a98);
+				BasicWnd::DeleteCustomVTable(item_display_default_vtbl);
 			}
 			void Activate()
 			{
@@ -446,25 +498,18 @@ namespace Zeal
 			/* 0x0144 */ CXSTR DisplayText; // the item name is the title text
 			/* 0x0148 */ CXSTR WindowTitle; // the item stats text
 			/* 0x014C */ Zeal::EqStructures::_EQITEMINFO Item;
-			//BYTE Filler[0xEC];
+			//BYTE Filler[0xEC];  // Operator new has a total size of 0x23c bytes.
 
 		};
-		struct SliderWnd : EQWND
+		struct SliderWnd : BasicWnd // Uses a BaseVTable.
 		{
 			SliderWnd() {};
-			void SetupCustomVTable()
-			{
-				BaseVTable* newtbl = new BaseVTable();
-				mem::copy((int)newtbl, (int)vtbl, sizeof(BaseVTable));
-				vtbl = (BaseVTable*)newtbl;
-				mem::unprotect_memory(vtbl, sizeof(BaseVTable));
-
-			}
+			/* 0x0114 */ BYTE Unknown0114[0x20];
 			/* 0x0134 */ int current_val;
 			/* 0x0138 */ BYTE Unknown0138[4];
 			/* 0x013C */ int max_val; 
 			/* 0x0140 */ int val3;
-			/* 0x0144 */ BYTE Unknown0144[0xC]; // the item name is the title text
+			/* 0x0144 */ BYTE Unknown0144[0xC]; // the item name is the title text. Operator new has a total size of 0x150 bytes.
 		};
 		struct TradeWnd : public EQWND
 		{
@@ -486,7 +531,7 @@ namespace Zeal
 			/* 0x01B8 */ Zeal::EqStructures::_EQITEMINFO* Item[EQ_NUM_LOOT_WINDOW_ITEMS];
 		};
 
-		struct EditWnd : public BasicWnd
+		struct EditWnd : public BasicWnd  // Note: this definition has a truncated vtbl.
 		{
 			//void ReplaceSelection(const char* data, int length)
 			//{
@@ -525,7 +570,7 @@ namespace Zeal
 		// onetimehero 09-17-03
 		// CContainerWnd
 		// Actual Size 0x17C in eqmac
-		class  ContianerWnd : public EQWND {
+		class  ContainerWnd : public EQWND {
 		public:
 			/*0x134*/ DWORD   something;     // dont know maybe type or a counter/ID?;
 			/*0x138*/ DWORD* pIteminfo;     // Pointer to the contents of the container;// Matches the pointer in CHARINFO.Inventory/Bank/World
@@ -543,7 +588,7 @@ namespace Zeal
 		class ContainerMgr {
 		public:
 			/*0x000*/   DWORD pvfTable; // NOT based on CXWnd.  Contains only destructor
-			/*0x004*/   ContianerWnd pPCContainers[0x11];  // All open containers, including World, in order of opening...
+			/*0x004*/   ContainerWnd pPCContainers[0x11];  // All open containers, including World, in order of opening...
 			/*0x048**/  DWORD*   pWorldItems;            // Pointer to the contents of the world   If NULL, world container isn't open;
 			/*0x04c*/   DWORD Unknown0x04c;            // in the future this is ID of container in zone, starts at one (zero?) and goes up.
 			/*0x050*/   DWORD dwTimeSpentWithWorldContainerOpen;  // Cumulative counter?
@@ -596,19 +641,43 @@ namespace Zeal
 				
 		};
 
-
-
 		class ContextMenu
 		{
-		public:
-			ContextMenu(int cxwnd, int a1, CXRect r)
+		private:
+			ContextMenu() {}  // Either use Create() or assign a pointer to an existing class.
+
+			static void __fastcall CustomDestructor(void* menu, int unusedEDX, bool delete_me)
 			{
-				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, CXRect)>(0x417785)(this, cxwnd, a1, r);
-				SetupCustomVTable();
+				BasicWnd* wnd = reinterpret_cast<BasicWnd*>(menu);  // ContextMenu inherits from BasicWnd.
+				delete reinterpret_cast<ContextMenuVTable*>(wnd->vtbl);
+				wnd->vtbl = reinterpret_cast<BaseVTable*>(0x005e4a24);  // Set back to default ContextMenu::vtable.
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, bool)>(wnd->vtbl->Deconstructor)(wnd, delete_me);
+			};
+
+		public:
+			// Inspired by ui_manager::create_sidl to use the same heap for destructor deletion support.
+			// Useful for classes that require custom vtables but not custom destructors in that table.
+			static ContextMenu* Create(int cxwnd, int a1, CXRect r) {
+				ContextMenu* menu = reinterpret_cast<ContextMenu*>(HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(ContextMenu)));
+				if (!menu)
+					return nullptr;
+				mem::set((int)menu, 0, sizeof(ContextMenu));
+				reinterpret_cast<void(__fastcall*)(ContextMenu*, int, int, int, CXRect)>(0x417785)(menu, 0, cxwnd, a1, r);
+				ContextMenuVTable* newtbl = new ContextMenuVTable();
+				if (!newtbl)
+					return nullptr;
+				mem::copy((int)newtbl, (int)menu->fnTable, sizeof(ContextMenuVTable));
+				mem::unprotect_memory(newtbl, sizeof(ItemDisplayVTable));
+				menu->fnTable = newtbl;
+				menu->fnTable->Deconstructor = CustomDestructor;
+				return menu;
+			}
+			void Destroy()
+			{
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*, bool)>(this->fnTable->Deconstructor)(this, true);
 			}
 			void AddSeparator() const {
-				reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417A41)(this);
-					
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417A41)(this);		
 			}
 			void EnableMenuItem(int index, bool toggle)
 			{
@@ -626,25 +695,11 @@ namespace Zeal
 				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, ARGBCOLOR)>(0x579eb0)(this, index, 0x1, color);
 				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, int, ARGBCOLOR)>(0x579eb0)(this, index, 0x2, color);
 			}
-			static void __fastcall Deconstructor(int t, int unused, int f)
-			{
-				return; //handle the deconstruction in our code
-			}
-			void SetupCustomVTable()
-			{
-				ContextMenuVTable* newtbl = new ContextMenuVTable();
-				mem::copy((int)newtbl, (int)fnTable, sizeof(ContextMenuVTable));
-				fnTable = newtbl;
-				//fnTable->basic.Deconstructor = Deconstructor;//if you can make visual studio use a class member here or get the address of it without it complaining, go ahead
-			}
 			void RemoveAllMenuItems()
 			{
 				reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417a7f)(this);
 			}
-			void Deconstruct(int a)
-			{
-				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int)>(this->fnTable->basic.Deconstructor)(this,a);
-			}
+	
 			/*0x000*/   ContextMenuVTable* fnTable;
 			/*0x004*/   DWORD   Unknown0x004; /* set to 0 in CXWnd::Refade*/
 			/*0x008*/   DWORD   TimeMouseOver; /* "Delay" in ini*/
@@ -828,6 +883,10 @@ namespace Zeal
 			void OpenBook() const
 			{
 				reinterpret_cast<void(__thiscall*)(const EQWND*)>(0x43441F)(this);
+			}
+			void StopSpellBookAction() const  // Aborts memorization or scribing.
+			{
+				reinterpret_cast<void(__thiscall*)(const EQWND*)>(0x00435531)(this);
 			}
 		};
 

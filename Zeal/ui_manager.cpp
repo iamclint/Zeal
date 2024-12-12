@@ -8,12 +8,23 @@ Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name)
 {
 	Zeal::EqUI::EQWND* wnd = (Zeal::EqUI::EQWND*)HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(Zeal::EqUI::EQWND));
 	mem::set((int)wnd, 0, sizeof(Zeal::EqUI::EQWND));
-	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name)>(0x56e2b0)(wnd, 0, Zeal::EqUI::CXSTR(name));
+	Zeal::EqGame::EqGameInternal::CSidlScreenWndConstructor(wnd, 0, nullptr, Zeal::EqUI::CXSTR(name));
 	//reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::EQWND*, Zeal::EqUI::EQWND*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(wnd, 0, Zeal::EqUI::CXSTR(name), -1, 0);
 	wnd->SetupCustomVTable();
 	wnd->CreateChildren();
 	return wnd;
 }
+// The caller should nullptr the wnd after calling.
+void ui_manager::DestroySidlScreenWnd(Zeal::EqUI::EQWND* wnd) {
+	if (!wnd)
+		return;
+
+	// The SidlScreenWndDestructor call below also appears to release all children resources (at 0x005711e0),
+	// but probably doesn't handle any resources directly allocated in the custom EQWND class.
+	wnd->DeleteCustomVTable();
+	Zeal::EqGame::EqGameInternal::CSidlScreenWndDestructor(wnd, 0, true);  // Set true to dealloc memory.
+}
+
 static int __fastcall ButtonClick_hook(Zeal::EqUI::BasicWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();

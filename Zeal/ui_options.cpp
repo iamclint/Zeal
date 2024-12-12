@@ -25,32 +25,11 @@ int GetSensitivityForSlider(ZealSetting<float>& value)
 	else
 		return 0;
 }
-//Zeal::EqUI::EQWND* __fastcall deconstructor(Zeal::EqUI::EQWND* wnd, int u, byte p1)
-//{
-//	wnd->IsVisible = false;
-//	//reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*)>(0x56e680)(wnd);
-//	//if (p1)
-//	//{
-//	//	reinterpret_cast<void(__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*)>(0x5c63b3)(wnd, wnd);
-//	//}
-//	wnd->MouseHoverTimer = 0;
-//	wnd->ValidCXWnd = 0;
-//	wnd->Unknown0008 = 0;
-//	wnd->vtbl->Deconstructor = 0;
-//	MessageBoxA(0, "UHH deconstruct??", "Zeal options", 1);
-//	return 0;
-//}
-//most of the options window xml was put together by nillipus
-
-void PrintUIError()
-{
-	Zeal::EqGame::print_chat("Warning: The zeal ui files are not in place, cannot load zeal options!");
-}
 
 int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI::BasicWnd* sender, int message, int data)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
-	if (Zeal::EqGame::Windows && sender == (Zeal::EqUI::BasicWnd*)Zeal::EqGame::Windows->ColorPicker)
+	if (ui && Zeal::EqGame::Windows && sender == (Zeal::EqUI::BasicWnd*)Zeal::EqGame::Windows->ColorPicker)
 	{
 		if (message == 0x1E && ui->clicked_button)
 		{
@@ -61,7 +40,7 @@ int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI
 	return reinterpret_cast<int (__thiscall*)(Zeal::EqUI::BasicWnd * wnd, Zeal::EqUI::BasicWnd * sender, int message, int data)>(0x56e920)(wnd, sender, message, data);
 }
 
-void ui_options::SaveColors()
+void ui_options::SaveColors() const
 {
 	IO_ini* ini = ZealService::get_instance()->ini.get();
 	for (auto& [index, btn] : color_buttons)
@@ -70,7 +49,7 @@ void ui_options::SaveColors()
 	}
 }
 
-DWORD ui_options::GetColor(int index)
+DWORD ui_options::GetColor(int index) const
 {
 	auto it = color_buttons.find(index);
 	return (it == color_buttons.end()) ? 0xFFFFFFFF : it->second->TextColor.ARGB;
@@ -210,22 +189,21 @@ void ui_options::LoadColors()
 
 void ui_options::InitUI()
 {
+	if (wnd)
+		Zeal::EqGame::print_chat("Warning: Init out of sync for ui_options");
+
+	static const char* xml_file = "./uifiles/zeal/EQUI_ZealOptions.xml";
+	if (!wnd && ui && std::filesystem::exists(xml_file))
+		wnd = ui->CreateSidlScreenWnd("ZealOptions");
+	
 	if (!wnd)
 	{
-		if (std::filesystem::exists("./uifiles/zeal/EQUI_ZealOptions.xml"))
-		{
-			wnd = ui->CreateSidlScreenWnd("ZealOptions");
-			wnd->vtbl->WndNotification = WndNotification;
-
-			//ui->CreateSidlScreenWnd("Code_Generated_Screen")->IsVisible = true;
-		}
-		else
-		{
-			PrintUIError();
-			return;
-		}
+		Zeal::EqGame::print_chat("Error: Failed to load %s", xml_file);
+		return;
 	}
 
+	wnd->IsVisible = false;  // Redundant but ensure there is a transition to trigger sync.
+	wnd->vtbl->WndNotification = WndNotification;
 	InitGeneral();
 	InitCamera();
 	InitMap();
@@ -234,9 +212,7 @@ void ui_options::InitUI()
 	InitNameplate();
 	InitFloatingDamage();
 
-	isReady = true;
-	/*set the current states*/
-	UpdateOptions();
+	// The option states are synchronized when the wnd is made visible.
 }
 
 int ScaleFloatToSlider(float value, float fmin, float fmax, Zeal::EqUI::SliderWnd* wnd)
@@ -268,10 +244,7 @@ float ScaleSliderToFloat(int ivalue, float fmin, float fmax, Zeal::EqUI::SliderW
 void ui_options::InitColors()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
 
 	for (int i = 0; i < 100; i++)
 	{
@@ -284,10 +257,7 @@ void ui_options::InitColors()
 void ui_options::InitGeneral()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
 	/*add callbacks when the buttons are pressed in the options window*/
 	ui->AddCheckboxCallback(wnd, "Zeal_HideCorpse",				[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->set_hide_looted(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_Cam",					[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->set_smoothing(wnd->Checked); });
@@ -309,10 +279,7 @@ void ui_options::InitGeneral()
 void ui_options::InitFloatingDamage()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->enabled.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpells", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spells.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpellIcons", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spell_icons.set(wnd->Checked); });
@@ -320,10 +287,7 @@ void ui_options::InitFloatingDamage()
 void ui_options::InitCamera()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
 	ui->AddCheckboxCallback(wnd, "Zeal_Cam_TurnLocked", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->cam_lock.set(wnd->Checked); } );
 	ui->AddCheckboxCallback(wnd, "Zeal_UseOldSens", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->camera_mods->use_old_sens.set(wnd->Checked); });
 	ui->AddSliderCallback(wnd, "Zeal_PanDelaySlider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
@@ -362,11 +326,9 @@ void ui_options::InitCamera()
 void ui_options::InitMap()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
 	ui->AddCheckboxCallback(wnd, "Zeal_Map", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_enabled(wnd->Checked, true); });
+	ui->AddCheckboxCallback(wnd, "Zeal_MapInteractiveEnable", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_interactive_enable(wnd->Checked, true); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapExternalWindow", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_external_enable(wnd->Checked, true); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapShowRaid", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_raid(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapShowGrid", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_grid(wnd->Checked); });
@@ -375,6 +337,7 @@ void ui_options::InitMap()
 	ui->AddComboCallback(wnd, "Zeal_MapAlignment_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_alignment(value); });
 	ui->AddComboCallback(wnd, "Zeal_MapLabels_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_labels_mode(value); });
 	ui->AddComboCallback(wnd, "Zeal_MapDataMode_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_map_data_mode(value); });
+	ui->AddComboCallback(wnd, "Zeal_MapZoomDefault_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->zone_map->set_map_zoom_default_index(value); });
 
 	ui->AddComboCallback(wnd, "Zeal_MapFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		std::string font_name("");
@@ -391,18 +354,6 @@ void ui_options::InitMap()
 
 	ui->AddSliderCallback(wnd, "Zeal_MapZoom_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_zoom(value * 15 + 100);  // Note scale and zoom offset.
-		});
-	ui->AddSliderCallback(wnd, "Zeal_MapLeft_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->zone_map->set_map_left(value);
-		});
-	ui->AddSliderCallback(wnd, "Zeal_MapWidth_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->zone_map->set_map_width(value);
-		});
-	ui->AddSliderCallback(wnd, "Zeal_MapTop_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->zone_map->set_map_top(value);
-		});
-	ui->AddSliderCallback(wnd, "Zeal_MapHeight_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
-		ZealService::get_instance()->zone_map->set_map_height(value);
 		});
 	ui->AddSliderCallback(wnd, "Zeal_MapPositionSize_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
 		ZealService::get_instance()->zone_map->set_position_size(value);
@@ -423,10 +374,6 @@ void ui_options::InitMap()
 		ZealService::get_instance()->zone_map->set_grid_pitch(value * ZoneMap::kMaxGridPitch / 100);
 		});
 	ui->AddLabel(wnd, "Zeal_MapZoom_Value");
-	ui->AddLabel(wnd, "Zeal_MapLeft_Value");
-	ui->AddLabel(wnd, "Zeal_MapWidth_Value");
-	ui->AddLabel(wnd, "Zeal_MapTop_Value");
-	ui->AddLabel(wnd, "Zeal_MapHeight_Value");
 	ui->AddLabel(wnd, "Zeal_MapPositionSize_Value");
 	ui->AddLabel(wnd, "Zeal_MapMarkerSize_Value");
 	ui->AddLabel(wnd, "Zeal_MapBackgroundAlpha_Value");
@@ -437,10 +384,7 @@ void ui_options::InitMap()
 void ui_options::InitTargetRing()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
 	ui->AddLabel(wnd, "Zeal_TargetRingFill_Value");
 	ui->AddLabel(wnd, "Zeal_TargetRingSize_Value");
 	ui->AddLabel(wnd, "Zeal_TargetRingRotation_Value");
@@ -501,10 +445,7 @@ void ui_options::InitTargetRing()
 void ui_options::InitNameplate()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->colors_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateConColors", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->con_colors_set_enabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateHideSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->hide_self_set_enabled(wnd->Checked); });
@@ -518,13 +459,8 @@ void ui_options::InitNameplate()
 
 void ui_options::UpdateOptions()
 {
-	if (!isReady)
-		return;
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
 
 	UpdateOptionsCamera();
 	UpdateOptionsGeneral();
@@ -537,10 +473,8 @@ void ui_options::UpdateOptions()
 void ui_options::UpdateOptionsGeneral()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
+
 	ui->SetComboValue("Zeal_Timestamps_Combobox", ZealService::get_instance()->chat_hook->TimeStampsStyle.get());
 	ui->SetSliderValue("Zeal_HoverTimeout_Slider", ZealService::get_instance()->tooltips->hover_timeout > 0 ? ZealService::get_instance()->tooltips->hover_timeout / 5 : 0);
 	ui->SetLabelValue("Zeal_HoverTimeout_Value", "%d ms", ZealService::get_instance()->tooltips->hover_timeout);
@@ -559,10 +493,8 @@ void ui_options::UpdateOptionsGeneral()
 void ui_options::UpdateOptionsCamera()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
+
 	ui->SetChecked("Zeal_Cam_TurnLocked", ZealService::get_instance()->camera_mods->cam_lock.get());
 	ui->SetSliderValue("Zeal_PanDelaySlider", ZealService::get_instance()->camera_mods->pan_delay.get() > 0.f ? ZealService::get_instance()->camera_mods->pan_delay.get() / 4 : 0.f);
 	ui->SetSliderValue("Zeal_ThirdPersonSlider_Y", GetSensitivityForSlider(ZealService::get_instance()->camera_mods->user_sensitivity_y_3rd));
@@ -582,10 +514,8 @@ void ui_options::UpdateOptionsCamera()
 void ui_options::UpdateOptionsTargetRing()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
+
 	ui->SetChecked("Zeal_TargetRing", ZealService::get_instance()->target_ring->enabled.get());
 	ui->SetChecked("Zeal_TargetRingAttackIndicator", ZealService::get_instance()->target_ring->attack_indicator.get());
 	ui->SetChecked("Zeal_TargetRingForward", ZealService::get_instance()->target_ring->rotate_match_heading.get());
@@ -605,10 +535,8 @@ void ui_options::UpdateOptionsTargetRing()
 void ui_options::UpdateOptionsNameplate()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
+
 	ui->SetChecked("Zeal_NameplateColors", ZealService::get_instance()->nameplate->nameplateColors);
 	ui->SetChecked("Zeal_NameplateConColors", ZealService::get_instance()->nameplate->nameplateconColors);
 	ui->SetChecked("Zeal_NameplateHideSelf", ZealService::get_instance()->nameplate->nameplateHideSelf);
@@ -630,11 +558,10 @@ void ui_options::UpdateOptionsFloatingDamage()
 void ui_options::UpdateOptionsMap()
 {
 	if (!wnd)
-	{
-		PrintUIError();
 		return;
-	}
+
 	ui->SetChecked("Zeal_Map", ZealService::get_instance()->zone_map->is_enabled());
+	ui->SetChecked("Zeal_MapInteractiveEnable", ZealService::get_instance()->zone_map->is_interactive_enabled());
 	ui->SetChecked("Zeal_MapExternalWindow", ZealService::get_instance()->zone_map->is_external_enabled());
 	ui->SetChecked("Zeal_MapShowRaid", ZealService::get_instance()->zone_map->is_show_raid_enabled());
 	ui->SetChecked("Zeal_MapShowGrid", ZealService::get_instance()->zone_map->is_show_grid_enabled());
@@ -645,11 +572,8 @@ void ui_options::UpdateOptionsMap()
 	ui->SetComboValue("Zeal_MapDataMode_Combobox", ZealService::get_instance()->zone_map->get_map_data_mode());
 	ui->SetComboValue("Zeal_MapFont_Combobox",
 		FindComboIndex("Zeal_MapFont_Combobox", ZealService::get_instance()->zone_map->get_font()));
+	ui->SetComboValue("Zeal_MapZoomDefault_Combobox", ZealService::get_instance()->zone_map->get_map_zoom_default_index());
 	ui->SetSliderValue("Zeal_MapZoom_Slider", (ZealService::get_instance()->zone_map->get_zoom() - 100)/15);  // 100 to 1600%
-	ui->SetSliderValue("Zeal_MapLeft_Slider", ZealService::get_instance()->zone_map->get_map_left());
-	ui->SetSliderValue("Zeal_MapWidth_Slider", ZealService::get_instance()->zone_map->get_map_width());
-	ui->SetSliderValue("Zeal_MapTop_Slider", ZealService::get_instance()->zone_map->get_map_top());
-	ui->SetSliderValue("Zeal_MapHeight_Slider", ZealService::get_instance()->zone_map->get_map_height());
 	ui->SetSliderValue("Zeal_MapPositionSize_Slider", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetSliderValue("Zeal_MapMarkerSize_Slider", ZealService::get_instance()->zone_map->get_marker_size());
 	ui->SetSliderValue("Zeal_MapBackgroundAlpha_Slider", ZealService::get_instance()->zone_map->get_background_alpha());
@@ -657,10 +581,6 @@ void ui_options::UpdateOptionsMap()
 	ui->SetSliderValue("Zeal_MapNamesLength_Slider", ZealService::get_instance()->zone_map->get_name_length() * 100 / ZoneMap::kMaxNameLength);
 	ui->SetSliderValue("Zeal_MapGridPitch_Slider", ZealService::get_instance()->zone_map->get_grid_pitch() * 100 / ZoneMap::kMaxGridPitch);
 	ui->SetLabelValue("Zeal_MapZoom_Value", "%i%%", ZealService::get_instance()->zone_map->get_zoom());
-	ui->SetLabelValue("Zeal_MapLeft_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_left());
-	ui->SetLabelValue("Zeal_MapWidth_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_width());
-	ui->SetLabelValue("Zeal_MapTop_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_top());
-	ui->SetLabelValue("Zeal_MapHeight_Value", "%i%%", ZealService::get_instance()->zone_map->get_map_height());
 	ui->SetLabelValue("Zeal_MapPositionSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_position_size());
 	ui->SetLabelValue("Zeal_MapMarkerSize_Value", "%i%%", ZealService::get_instance()->zone_map->get_marker_size());
 	ui->SetLabelValue("Zeal_MapBackgroundAlpha_Value", "%i%%", ZealService::get_instance()->zone_map->get_background_alpha());
@@ -671,15 +591,15 @@ void ui_options::UpdateOptionsMap()
 
 void ui_options::RenderUI()
 {
-	if (wnd && Zeal::EqGame::Windows && Zeal::EqGame::Windows->Options)
-	{
-		bool was_visible = wnd->IsVisible;
-		wnd->IsVisible = Zeal::EqGame::Windows->Options->IsVisible;
-		if (!was_visible && wnd->IsVisible)
-		{
+	if (!wnd || !Zeal::EqGame::Windows || !Zeal::EqGame::Windows->Options)
+		return;
+
+	if (wnd->IsVisible != Zeal::EqGame::Windows->Options->IsVisible) {
+		if (Zeal::EqGame::Windows->Options->IsVisible) {
 			UpdateDynamicUI();
 			UpdateOptions();
 		}
+		wnd->show(Zeal::EqGame::Windows->Options->IsVisible, false);
 	}
 }
 
@@ -710,9 +630,17 @@ void ui_options::UpdateDynamicUI() {
 	if (!wnd)
 		return;
 
-	ZealService::get_instance()->target_ring->options_opened();
+	Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_TargetRingTexture_Combobox");
+	if (cmb) {
+		std::vector<std::string> textures = ZealService::get_instance()->target_ring->get_available_textures();
+		cmb->DeleteAll();
+		ZealService::get_instance()->ui->AddListItems(cmb, textures);
 
-	Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_MapFont_Combobox");
+		std::string current_texture = ZealService::get_instance()->target_ring->texture_name.get();
+		cmb->SetChoice(FindComboIndex("Zeal_TargetRingTexture_Combobox", current_texture));
+	}
+
+	cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_MapFont_Combobox");
 	if (cmb) {
 		std::vector<std::string> fonts = ZealService::get_instance()->zone_map->get_available_fonts();
 		cmb->DeleteAll();
@@ -738,38 +666,34 @@ void ui_options::CleanDynamicUI() {
 	}
 }
 
-
 void ui_options::CleanUI()
 {
-	isReady = false;
-	if (wnd)
-	{
-		color_buttons.clear();
-		wnd->show(0, 0);
-		CleanDynamicUI();
-		wnd->Deconstruct();
-		wnd = nullptr;
-	}
-}
-void ui_options::Deactivate()
-{
-	if (wnd)
-	{
-		wnd->show(0, 0);
-		CleanDynamicUI();
-  }
+	if (!wnd)
+		return;
+
+	// We assume that deactivate_ui() was called by the framework already (so not needed here).
+	color_buttons.clear();
+	CleanDynamicUI();  // The destructor below may handle these children, but just in case clean up.
+	ZealService::get_instance()->ui->DestroySidlScreenWnd(wnd);
+	wnd = nullptr;
 }
 
-ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
+void ui_options::Deactivate()
+{
+	if (!wnd)
+		return;
+
+	wnd->show(0, false);
+}
+
+ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr) : ui(mgr)
 {
 	wnd = nullptr;
-	ui = mgr;
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { RenderUI(); }, callback_type::RenderUI);
 	zeal->callbacks->AddGeneric([this]() { Deactivate(); }, callback_type::DeactivateUI);
 	ui->AddXmlInclude("EQUI_ZealOptions.xml");
-	//if (Zeal::EqGame::is_in_game()) InitUI();
 }
 ui_options::~ui_options()
 {

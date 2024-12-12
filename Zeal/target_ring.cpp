@@ -82,7 +82,7 @@ void TargetRing::load_texture(const std::string& filename) {
 
 		targetRingTexture = nullptr;
 
-		if (!filename.length())
+		if (!filename.length() || filename == "None")
 			return;
 
 		// Full texture path
@@ -456,7 +456,7 @@ void TargetRing::callback_render() {
 	}
 }
 
-std::vector<std::string> GetTGAFiles(const std::string& directoryPath) {
+static std::vector<std::string> GetTGAFiles(const std::string& directoryPath) {
 	std::vector<std::string> tgaFiles;
 
 	// Iterate over the directory
@@ -471,40 +471,11 @@ std::vector<std::string> GetTGAFiles(const std::string& directoryPath) {
 	return tgaFiles;
 }
 
-void TargetRing::options_opened()
-{
+
+std::vector<std::string> TargetRing::get_available_textures() const {
 	std::vector<std::string> tgas = GetTGAFiles("uifiles/zeal/targetrings");
 	tgas.insert(tgas.begin(), "None");
-	for (auto& t : tgas)
-	{
-		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)ZealService::get_instance()->ui->options->wnd->GetChildItem("Zeal_TargetRingTexture_Combobox");
-		if (!cmb)
-		{
-			Zeal::EqGame::print_chat("Couldn't find target ring texture combobox");
-			return;
-		}
-		cmb->DeleteAll();
-		//Zeal::EqUI::ListWnd* lst = cmb->CmbListWnd;
-		//if (!lst)
-		//{
-		//	Zeal::EqGame::print_chat("Couldn't find the list wnd");
-		//	return;
-		//}
-		int sel_index = -1;
-		for (int i = 0; i < tgas.size(); i++)
-		{
-			if (Zeal::String::compare_insensitive(tgas[i], texture_name.get()))
-			{
-				sel_index = i;
-				break;
-			}
-		}
-
-		ZealService::get_instance()->ui->AddListItems(cmb, tgas);
-		cmb->SetChoice(sel_index);
-		return;
-
-	}
+	return tgas;
 }
 
 void TargetRing::callback_initui()
@@ -513,40 +484,11 @@ void TargetRing::callback_initui()
 }
 
 
-
-//don't get too excited this isn't functioning
 TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::InitUI);
 
-	/*zeal->commands_hook->Add("/loadtextures", {}, "",
-		[this](std::vector<std::string>& args) {
-
-			std::vector<std::string> tgas = GetTGAFiles("uifiles/zeal/targetrings");
-			tgas.insert(tgas.begin(), "None");
-			for (auto& t : tgas)
-			{
-				Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)Zeal::EqGame::Windows->Options->GetChildItem("Zeal_TargetRingTexture_Combobox");
-				if (!cmb)
-				{
-					Zeal::EqGame::print_chat("Couldn't find target ring texture combobox");
-					return true;
-				}
-				cmb->DeleteAll();
-				Zeal::EqUI::ListWnd* lst = cmb->CmbListWnd;
-				if (!lst)
-				{
-					Zeal::EqGame::print_chat("Couldn't find the list wnd");
-					return true;
-				}
-				lst->Location.Bottom = lst->Location.Top + (23 * (tgas.size()-1));
-				ZealService::get_instance()->ui->AddListItems(lst, tgas);
-				return true;
-				
-			}
-			return true;
-		})*/;
 	zeal->commands_hook->Add("/targetring", {}, "Toggles target ring",
 		[this](std::vector<std::string>& args) {
 

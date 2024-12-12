@@ -51,8 +51,8 @@ class TargetRing
 public:
 	void callback_render();
 	void callback_initui();
-	void options_opened();
 
+	std::vector<std::string> get_available_textures() const;
 	void load_texture(const std::string& filename);
 	void render_ring(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle);
 	TargetRing(class ZealService* zeal, class IO_ini* ini);
@@ -67,7 +67,7 @@ public:
 	ZealSetting<float> rotation_speed = { 1.0f, "TargetRing", "RotateSpeed", true };
 	ZealSetting<float> flash_speed = { 1.0f, "TargetRing", "FlashSpeed", true };
 	ZealSetting<int> num_segments = { 128, "TargetRing", "Segments", true };
-	ZealSetting<std::string> texture_name = { "", "TargetRing", "Texture", true, [this](std::string name) { load_texture(name); }};
+	ZealSetting<std::string> texture_name = { "None", "TargetRing", "Texture", true, [this](std::string name) { load_texture(name); }};
 
 	void setup_render_states();
 	void reset_render_states();

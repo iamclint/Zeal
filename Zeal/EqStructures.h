@@ -964,8 +964,7 @@ namespace Zeal
 			/*0x099*/   BYTE    Location;            // 01=Outdoors, 02=dungeons, ff=Any 
 			/*0x09a*/   BYTE	Environment;
 			/*0x09b*/   BYTE	TimeOfDay;		     // 0=any, 1=day only, 2=night only
-			/*0x09c*/	BYTE	Unknown0x13e;
-			/*0x09d**/   BYTE    Level[0xf];         // per class. 
+			/*0x09c*/	BYTE	ClassLevel[0x10];    // per class using EQCHARINFO.Class (EQ_CLASS_X) as offset.
 			/*0x0a7*/   BYTE    Unknown0x14f[0x10];
 			/*0x0bc**/   BYTE    CastingAnim;
 			/*0x0bd*/	BYTE	Unknown0x0bd[0x13];
@@ -984,7 +983,7 @@ namespace Zeal
 			/*0x114*/
 		};
 		struct SPELLMGR {
-			 SPELL* Spells[4000];
+			 SPELL* Spells[EQ_NUM_SPELLS];
 		};
 		struct EQCommand
 		{

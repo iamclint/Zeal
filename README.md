@@ -422,7 +422,7 @@ The defaults are updated when adjusting settings in the Zeal options map tab. Th
 /map commands create temporary changes unless the `/map save_ini` command is used.
 
 It is recommended to use the Options tab to adjust the basic map settings to the preferred
-defaults (size, position, background, marker sizes) and then use the keybinds for more
+defaults (background, labels, names, marker sizes) and then use the keybinds for more
 frequent map adjustments (on/off, toggle zoom, toggle backgrounds, toggle labels,
 toggle visible levels).  The /map commands include extra options like poi search.
 
@@ -437,20 +437,22 @@ toggle visible levels).  The /map commands include extra options like poi search
 #### Map size, position, and alignment
 The external map window (see external map window below) can be moved and resized like a standard window.
 
-The internal map is drawn to fit within a rectangular viewport defined by a top left corner,
+The internal map operates in two modes.  In interactive mode, the map is framed by a
+standard client window that allows it to be positioned and sized. When disabled, the
+map draw viewport is fixed and transparent to the mouse. See Interactive Mode below
+for more details.
+
+The internal map size and position can also be controlled my the `/map size` command.
+The content is drawn to fit within a rectangular viewport defined by a top left corner,
 a height, and a width specified as a percentage of the game window dimensions. The
 map viewport is relative to the game window and independent of the game /viewport,
 so the map can be placed anywhere in the game window.
-
-The easiest method for adjusting the internal map size is through the Zeal Map options
-tab sliders, but convenient toggling between map sizes (say small to large) is
-possible by setting up macros with /map size commands.
 
 The zones have different aspect ratios, so some zones will scale to fill the height
 and others the width.  The map alignment setting (top left, top center, top right)
 controls where the map is drawn when it is height constrained.
 
-* Zeal options sliders for top, left, height, and width and a combobox for alignment
+* Zeal option enables for interactive mode or external window and a combobox for alignment
 * Command examples:
   - `/map size 2 3 50 60` map window top=2% left=3% height=50% width=60% of game window dimensions
   - `/map alignment center` aligns the aspect ratio constrained map to the top center of the viewport
@@ -471,10 +473,6 @@ This window can be moved and resized like a standard window. See interactive mod
 mouse inputs. The map content is controlled with the normal map key binds. Use the save_ini
 command to store the current size and position as the default.
 
-Also note that if external window mode is set in options, the map will not automatically 
-open when the game starts. Use the map enable to open and close the window
-(recommend using the keybind 'm').
-
 * Zeal options checkbox
 * Command examples:
   - `/map external` - Toggles map between internal overlay and external window
@@ -493,7 +491,7 @@ algorithm works to maximize the visible map closest to the player. Map edges wil
 to a viewport edge until the user moves at least half the viewport away, and then the map
 background will scroll with the player centered in the viewport.
 
-* Zeal options slider
+* Zeal options slider and default zoom select combobox
 * Key bind: "Toggle Map Zoom" - toggles through 100%, 200%, 400%, 800% zoom
 * Command examples:
   - `/map zoom 200` sets map scaling to 200% (2x)

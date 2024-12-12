@@ -6,7 +6,6 @@
 class ui_options
 {
 public:
-	Zeal::EqUI::EQWND* wnd = nullptr;
 	void UpdateOptions();
 	void UpdateOptionsMap();
 	void UpdateOptionsTargetRing();
@@ -14,6 +13,13 @@ public:
 	void UpdateOptionsCamera();
 	void UpdateOptionsGeneral();
 	void UpdateOptionsFloatingDamage();
+	void SaveColors() const;
+	void LoadColors();
+	DWORD GetColor(int index) const;
+	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
+	~ui_options();
+private:
+	void InitUI();
 	void InitColors();
 	void InitGeneral();
 	void InitMap();
@@ -21,22 +27,14 @@ public:
 	void InitTargetRing();
 	void InitNameplate();
 	void InitFloatingDamage();
-	void SaveColors();
-	void LoadColors();
-	DWORD GetColor(int index);
-	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
-	~ui_options();
-private:
-	bool isReady = false;
-	void InitUI();
 	void UpdateDynamicUI();
 	void CleanUI();
 	void CleanDynamicUI();
 	void RenderUI();
 	void Deactivate();
-	void LoadSettings(class IO_ini* ini);
 	int FindComboIndex(std::string combobox, std::string text_value);
 
+	Zeal::EqUI::EQWND* wnd = nullptr;
 	std::unordered_map<int, Zeal::EqUI::BasicWnd*> color_buttons;
-	ui_manager* ui;
+	ui_manager* const ui;
 };

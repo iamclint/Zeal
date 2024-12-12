@@ -14,6 +14,7 @@ public:
 private:
 	void init_ui();
 	void CleanUI();
+	void DeactivateUI();
 	const int max_item_displays = 5;
 };
 
