@@ -86,6 +86,13 @@ char* build_token_string_PARAM(char* buffer, int stringID, char* string1, char* 
 			return buffer;
 		}
 	}
+	if (strcmp(string2, "(Combat)") == 0)
+	{
+		ZealService* zeal = ZealService::get_instance();
+		Zeal::EqStructures::_EQITEMINFO* item = zeal->item_displays->current_item;
+		sprintf_s(buffer, 128, "Combat Effect: %s (Required level: %d)", string1, item->Common.CastingLevel);
+		return buffer;
+	}
 	return ZealService::get_instance()->hooks->hook_map["ModifyHaste"]->original(build_token_string_PARAM)(buffer, stringID, string1, string2, 0, 0, 0, 0, 0, 0, 0);
 }
 
