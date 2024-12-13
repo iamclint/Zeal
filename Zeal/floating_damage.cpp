@@ -338,7 +338,7 @@ void FloatingDamage::init_ui()
 		filepath << path << "gemicons0" << i << ".tga";
 		if (add_texture(filepath.str()))
 			continue;
-		filepath.clear();
+		filepath.str("");
 		filepath << default_path << "gemicons0" << i << ".tga";
 		if (!add_texture(filepath.str()))
 			Zeal::EqGame::print_chat("Texture not found: %s", filepath.str().c_str());
