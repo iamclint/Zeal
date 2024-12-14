@@ -67,6 +67,7 @@ namespace Zeal
 			static mem::function<void __cdecl(Zeal::EqStructures::EQCHARINFO* _char, Zeal::EqStructures::_EQITEMINFO** Item, int)> auto_inventory = 0x4F0EEB;
 			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;
 			static mem::function<bool __cdecl()> IsNoSlashWndActive = 0x00545bbd;  // Returns false if merchant, loot, trade, and bank windows are not activated.
+			static mem::function<bool __cdecl()> IsPlayerABardAndSingingASong = 0x0040a74a;  // Does internal pointer checking.
 			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_say = 0x4f8172;
 			static mem::function<float __fastcall(int, int)> encum_factor = 0x4bb9c7;
 			static mem::function<float __fastcall(int, int, int, int)> OpenContainer = 0x4168bd;

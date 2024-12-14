@@ -64,9 +64,15 @@ void SpellSets::load(const std::string& name)
     for (int gem_index = EQ_NUM_SPELL_GEMS - 1; gem_index >= 0; gem_index--)
     {
       short spell_id = ini->getValue<WORD>(name, std::to_string(gem_index));
+      if (spell_id == -1) { // Empty slot when saved.
+          Zeal::EqGame::Spells::Forget(gem_index);
+          continue;  // Leave it empty.
+      }
+
       if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS || !spell_manager->Spells[spell_id])
       {
-          Zeal::EqGame::print_chat("Error loading spellset [%s] spell id at index [%i] is 0", name.c_str(), gem_index);
+          Zeal::EqGame::print_chat("Error loading spellset [%s]: spell id at index [%i] is [%i]",
+                    name.c_str(), gem_index, spell_id);
           break;
       }
 

@@ -412,14 +412,17 @@ Zeal 4.0 and later includes an integrated in-game map that contains the map data
 all zones through Planes of Power. The map is drawn into the game's DirectX viewport
 as part of the rendering sequence and is by default not 'clickable' (see interactive mode below).
 
-The map is controlled through three interfaces:
+The map is controlled through four interfaces:
 * Dedicated Zeal options window tab (requires `zeal\uifiles`, see Installation notes above)
+* Mouse interactions (external window or internal window in interactive mode)
 * Key binds for frequent map actions (configure in EQ Options->Keyboard->UI)
 * The /map command
 
-The default map settings are stored in the zeal.ini file of the root Everquest directory.
-The defaults are updated when adjusting settings in the Zeal options map tab. The key binds and
-/map commands create temporary changes unless the `/map save_ini` command is used.
+Most of the default map settings are stored in the zeal.ini file of the root Everquest directory.
+The defaults are updated when adjusting settings in the Zeal options map tab. The size and
+position of the internal map window is stored as part of the UI_character.ini files like normal
+game windows. The key binds and /map commands create temporary changes unless the
+`/map save_ini` command is used.
 
 It is recommended to use the Options tab to adjust the basic map settings to the preferred
 defaults (background, labels, names, marker sizes) and then use the keybinds for more
@@ -442,7 +445,7 @@ standard client window that allows it to be positioned and sized. When disabled,
 map draw viewport is fixed and transparent to the mouse. See Interactive Mode below
 for more details.
 
-The internal map size and position can also be controlled my the `/map size` command.
+The internal map size and position can also be controlled by the `/map size` command.
 The content is drawn to fit within a rectangular viewport defined by a top left corner,
 a height, and a width specified as a percentage of the game window dimensions. The
 map viewport is relative to the game window and independent of the game /viewport,
