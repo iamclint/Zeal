@@ -236,7 +236,7 @@ void Melody::tick()
     }
 
     casting_melody_spell_id = current_gem_spell_id;
-    char_info->cast(current_gem, current_gem_spell_id, 0, 0);
+    char_info->cast(current_gem, current_gem_spell_id, 0, -1);
     start_of_cast_timestamp = current_timestamp;
 }
 

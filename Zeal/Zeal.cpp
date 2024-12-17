@@ -225,14 +225,9 @@ void ZealService::basic_binds()
 		if (ini->getValue<bool>("Zeal", "Escape"))//toggle is set to not close any windows
 			return true;
 
-		for (auto rit = item_displays->windows.rbegin(); rit != item_displays->windows.rend(); ++rit) {
-			Zeal::EqUI::ItemDisplayWnd* wnd = *rit;
-			if (wnd->IsVisible)
-			{
-				wnd->IsVisible = false;
-				return true;
-			}
-		}
+		if (item_displays->close_latest_window())
+			return true;
+
 		return false;
 	}); //handle escape
 }

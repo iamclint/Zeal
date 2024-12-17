@@ -1,21 +1,16 @@
 #include "item_display.h"
-#include "EqStructures.h"
 #include "EqAddresses.h"
-#include "EqFunctions.h"
 #include "Zeal.h"
+#include "hook_wrapper.h"
+#include "memory.h"
 #include <algorithm>
 
-void ItemDisplay::init_ui()
+void ItemDisplay::InitUI()
 {
 	if (!windows.empty())
 		Zeal::EqGame::print_chat("Warning: InitUI and CleanUI out of sync in ItemDisplay");
+	
 	windows.clear();
-
-	if (Zeal::EqGame::Windows->ItemWnd)
-		windows.push_back(Zeal::EqGame::Windows->ItemWnd);
-	else
-		Zeal::EqGame::print_chat("Error: Client ItemDisplay is null");
-
 	for (int i = 0; i < max_item_displays; i++)
 	{
 		Zeal::EqUI::ItemDisplayWnd* new_wnd = Zeal::EqUI::ItemDisplayWnd::Create(0);
@@ -29,17 +24,29 @@ void ItemDisplay::init_ui()
 		new_wnd->Location.Left += 20 * (i + 1);
 		new_wnd->Location.Bottom += 20 * (i + 1);
 		new_wnd->Location.Right += 20 * (i + 1);
+
+		// For an unclear reason the constructor above is not configuring the window relationships
+		// correctly, which causes the ItemDescription window to pop above the IconBtn when clicked.
+		new_wnd->HasChildren = true;  // Both flags seem to need to be set even if only one is true.
+		new_wnd->HasSiblings = true;
+		new_wnd->FirstChildWnd = new_wnd->ItemDescription;
+		new_wnd->ItemDescription->NextSiblingWnd = new_wnd->IconBtn;
+		new_wnd->ItemDescription->HasChildren = true;
+		new_wnd->ItemDescription->HasSiblings = true;
+		new_wnd->IconBtn->HasChildren = true;
+		new_wnd->IconBtn->HasSiblings = true;
 	}
 }
 
-Zeal::EqUI::ItemDisplayWnd* ItemDisplay::get_available_window(Zeal::EqStructures::_EQITEMINFO* item)
+// Returns a window to display the item or spell (use nullptr) in.
+Zeal::EqUI::ItemDisplayWnd* ItemDisplay::get_available_window(Zeal::EqStructures::EQITEMINFOBASE* item)
 {
 	if (item)
 	{
 		/*check if the item is already being displayed*/
 		for (auto& w : windows)
 		{
-			if (w->Item.ID == item->ID)
+			if (w->IsVisible && w->ItemValid && w->Item.ID == item->ID)
 				return w;
 		}
 	}
@@ -52,7 +59,21 @@ Zeal::EqUI::ItemDisplayWnd* ItemDisplay::get_available_window(Zeal::EqStructures
 	return windows.back();
 }
 
-std::string CopperToAll(unsigned long long copper) {
+bool ItemDisplay::close_latest_window()
+{
+	// We don't keep track of the latest, so just close starting from the end of the list.
+	for (auto rit = windows.rbegin(); rit != windows.rend(); ++rit) {
+		Zeal::EqUI::ItemDisplayWnd* wnd = *rit;
+		if (wnd->IsVisible)
+		{
+			wnd->Deactivate();
+			return true;
+		}
+	}
+	return false;
+}
+
+static std::string CopperToAll(unsigned long long copper) {
 	unsigned long long platinum = copper / 1000;
 	unsigned long long gold = (copper % 1000) / 100;
 	unsigned long long silver = (copper % 100) / 10;
@@ -64,78 +85,162 @@ std::string CopperToAll(unsigned long long copper) {
 	return result.str();
 }
 
-void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, Zeal::EqStructures::_EQITEMINFO* item, bool show)
+// C++ could really use a std split() function.
+static std::vector<std::string> split_text(const std::string& input, const std::string& delimiter = "\n")
 {
-	ZealService* zeal = ZealService::get_instance();
-	wnd = zeal->item_displays->get_available_window(item);
-	zeal->item_displays->current_item = item;
-	zeal->hooks->hook_map["SetItem"]->original(SetItem)(wnd, unused, item, show);
-	if (item->NoDrop!=0)
-		wnd->DisplayText.Append("Value: " + CopperToAll(item->Cost) + "<BR>");
-
-	// wnd->IconBtn->ZLayer = wnd->ZLayer;  // Disabled since it was causing bank/merchant wnd z-layer issues.
-	wnd->Activate();
+	std::vector<std::string> strings;
+	size_t start = 0;
+	size_t end = 0;
+	while (end != std::string::npos && start < input.size())
+	{
+		end = input.find(delimiter, start);
+		size_t count = (end == std::string::npos) ? std::string::npos : end - start;
+		strings.push_back(input.substr(start, count));
+		start = end + delimiter.size();
+	}
+	return strings;
 }
-char* build_token_string_PARAM(char* buffer, int stringID, char* string1, char* string2, int u1, int u2, int u3, int u4, int u5, int u6, int u7)
-{
-	if (strcmp(string1, "Haste") == 0)
-	{
-		if (strcmp(string2, "(Worn)") == 0)
+
+// Generate our customized item description text.
+void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQITEMINFO* item) {
+
+	if (!item || wnd->DisplayText.Data == nullptr)
+		return;
+
+	// Split the existing text into separate lines, release it, and then update line by line.
+	const std::string stml_line_break = "<BR>";
+	auto strings = split_text(std::string(wnd->DisplayText), stml_line_break);
+	wnd->DisplayText.FreeRep();
+	wnd->DisplayText = Zeal::EqUI::CXSTR("");
+	for (auto& s : strings) {
+		// Perform partial iteminfo filtering in combination with substrings.
+		if (item->Type == 0 && item->Common.Skill != 14 && item->Common.IsStackable > 1 &&
+			item->Common.IsStackable < 5)
 		{
-			ZealService* zeal = ZealService::get_instance();
-			Zeal::EqStructures::_EQITEMINFO* item = zeal->item_displays->current_item;
-			sprintf_s(buffer, 16, "Haste: %+d%%", item->Common.CastingLevel+1);
-			return buffer;
+			if (item->Common.IsStackableEx == 0 && s.find(" (Combat)") != std::string::npos)
+			{
+				size_t end = s.find(" (Combat)");
+				s = std::string("Combat ") + s.substr(0, end) + " (Required level: "
+					+ std::to_string(item->Common.CastingLevel) + ")";
+			}
+			else if (item->Common.IsStackableEx == 2 && s.find(" (Worn)") != std::string::npos)
+			{
+				s = std::string("Effect: Haste: +") + std::to_string(item->Common.CastingLevel + 1) + "%";
+			}
 		}
+		if (item->Type == 0 && item->Common.BardType != 0 && item->Common.BardValue > 10 && 
+			s.ends_with("Instruments") || s.ends_with("Instrument Types"))
+		{
+			int modifier = (item->Common.BardValue - 10) * 10;  // 18 = +80%, 24 = +140%
+			s += (std::string(": ") + std::to_string(modifier) + std::string("%"));
+		}
+		s += stml_line_break;
+		wnd->DisplayText.Append(s.c_str());
 	}
-	if (strcmp(string2, "(Combat)") == 0)
+	if (item->NoDrop != 0)
+		wnd->DisplayText.Append("Value: " + CopperToAll(item->Cost) + stml_line_break);
+}
+
+void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused,
+	Zeal::EqStructures::_EQITEMINFO* item, bool show)
+{
+	ZealService::get_instance()->hooks->hook_map["SetItem"]->original(SetItem)(wnd, unused, item, show);
+
+	// The callers of SetItem always call Activate() on it immediately after which includes
+	// a call to update the window text, so we just need to update the DisplayText here.
+	UpdateSetItemText(wnd, item);
+}
+
+static std::string get_target_type_string(int target_type)
+{
+	const char* type = nullptr;
+	switch (target_type)
 	{
-		ZealService* zeal = ZealService::get_instance();
-		Zeal::EqStructures::_EQITEMINFO* item = zeal->item_displays->current_item;
-		sprintf_s(buffer, 128, "Combat Effect: %s (Required level: %d)", string1, item->Common.CastingLevel);
-		return buffer;
+	case 3:
+	case 41:  // Bard songs at least.
+		type = "Group";
+		break;
+	case 4:
+		type = "Area of effect (Point blank)";
+		break;
+	case 5:
+		type = "Single";
+		break;
+	case 6:
+		type = "Self";
+		break;
+	case 8:
+		type = "Area of effect (Targeted)";
+		break;
+	case 9:
+		type = "Animal";
+		break;
+	case 10:
+		type = "Undead";
+		break;
+	case 11:
+		type = "Summoned";
+		break;
+	case 14:
+		type = "Pet";
+		break;
+	case 16:
+		type = "Plant";
+		break;
+	default:
+		break;
 	}
-	return ZealService::get_instance()->hooks->hook_map["ModifyHaste"]->original(build_token_string_PARAM)(buffer, stringID, string1, string2, 0, 0, 0, 0, 0, 0, 0);
+	if (!type)
+		return std::format("Target: Unknown ({})", target_type);
+	return std::string("Target: ") + std::string(type);
+}
+
+void UpdateSetSpellText(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id)
+{
+	auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
+	if (!spell_mgr || spell_id < 1 || spell_id > 3999 || wnd->DisplayText.Data == nullptr)
+		return;
+
+	const auto* sp_data = Zeal::EqGame::get_spell_mgr()->Spells[spell_id];
+	if (!sp_data)
+		return;
+
+	const std::string stml_line_break = "<BR>";
+	wnd->DisplayText.Append(get_target_type_string(sp_data->TargetType) + stml_line_break);
+
+	if (sp_data->Resist >= 0 && sp_data->Resist < 6)
+	{
+		const char* resist_lut[6] = {"Unresistable", "Magic", "Fire", "Cold", "Poison", "Disease"}; // No chromatic yet
+		std::string resist_type(resist_lut[sp_data->Resist]);
+		// std::string resist_adj = std::format(" ({:+d})", sp_data->ResistAdj);  // Unexpected values.
+		wnd->DisplayText.Append("Resist: " + resist_type + stml_line_break);
+	}
+	if (sp_data->SpellType == 0)
+		wnd->DisplayText.Append(std::string("Detrimental") + stml_line_break);
+	if (sp_data->Location > 0 && sp_data->Location < 3)
+		wnd->DisplayText.Append(std::string("Location: ") +
+			std::string((sp_data->Location == 1) ? "Outdoors" : "Dungeons") + stml_line_break);
 }
 
 void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_id, bool show, int unknown)
 {
 	ZealService* zeal = ZealService::get_instance();
-	wnd = zeal->item_displays->get_available_window(0);
 	zeal->hooks->hook_map["SetSpell"]->original(SetSpell)(wnd, unused, spell_id, show, unknown);
-	wnd->IconBtn->ZLayer = wnd->ZLayer;
-	wnd->Activate();
-}
-
-// Replaces a _mbscpy() call with a simple "copy" that appends the instrument modifier percentage.
-static char* ModifyInstrumentString(char* destination, char* source) {
-	const int kDestinationSize = 32;  // ASSUMED SAFE BUFFER SIZE
-	int modifier = 0;
-	ZealService* zeal = ZealService::get_instance();
-	if (zeal && zeal->item_displays && zeal->item_displays->current_item)
-	{
-		const auto& item = *zeal->item_displays->current_item;
-		if (item.Common.BardType != 0 && item.Common.BardValue > 10)
-			modifier = (item.Common.BardValue - 10) * 10;  // 18 = +80%, 24 = +140%
-	}
-	if (modifier)
-		snprintf(destination, kDestinationSize, "%s: %+d%%", source, modifier);
-	else
-		snprintf(destination, kDestinationSize, "%s", source);  // Null-terminated copy.
-	return destination;
+	UpdateSetSpellText(wnd, spell_id);
 }
 
 void ItemDisplay::CleanUI()
 {
-	// The first item is the original one registered with the framework which will be cleaned
-	// automatically, so skip that and delete the rest.
-	for (int i = 1; i < windows.size(); ++i)
+	for (auto& w : windows)
 	{
-		if (windows[i])
+		if (w)
 		{
-			// We assume that deactivate_ui() was called by the framework already (so not needed here).
-			// windows[i]->DeleteCustomVTable();  // Re-enable if custom vtables are required.
-			windows[i]->Destroy();
+			if (w->IsVisible)  // Should never happen.
+				w->Deactivate();
+
+			if (reinterpret_cast<uint32_t>(w->vtbl) != Zeal::EqUI::ItemDisplayWnd::kDefaultVTableAddr)
+				w->DeleteCustomVTable(); 
+			w->Destroy();
 		}
 	}
 	windows.clear();
@@ -143,35 +248,126 @@ void ItemDisplay::CleanUI()
 
 void ItemDisplay::DeactivateUI()
 {
-	// Skip the first one since framework will handle that.
-	for (int i = 1; i < windows.size(); ++i)
+	for (auto& w : windows)
 	{
-		if (windows[i])
-			windows[i]->show(0, false);
+		if (w && w->IsVisible)
+			w->Deactivate();  // Calls show(0) and clears IsActivated.
 	}
 }
 
+// Replaces the default vtable callback to allow temporarily replacing the global pointer.
+static int __fastcall InvSlotWnd_HandleLButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int unused_edx, int mouse_x, int mouse_y, unsigned int flags)
+{
+	// If there is an item, modify the ItemWnd global pointer to point to one of our windows.
+	auto* default_item_display_wnd = Zeal::EqGame::Windows->ItemWnd;
+	if (wnd->IsActive && wnd->invSlot && wnd->invSlot->Item)
+		Zeal::EqGame::Windows->ItemWnd = ZealService::get_instance()->item_displays->get_available_window(wnd->invSlot->Item);
+
+	if (Zeal::EqGame::Windows->ItemWnd->IsVisible)
+		Zeal::EqGame::Windows->ItemWnd->Deactivate();  // Avoid double activation.
+
+	int result = wnd->HandleLButtonUp(mouse_x, mouse_y, flags);
+
+	Zeal::EqGame::Windows->ItemWnd = default_item_display_wnd;
+	return result;
+}
+
+// SpellGemsWnd is known as CastSpellWnd in eqmac.
+static int __fastcall SpellGemsWnd_WndNotification(Zeal::EqUI::SpellGemsWnd* wnd, int unused_edx, Zeal::EqUI::BasicWnd* src_wnd, int param_2, void* param_3) {
+	// Forward all messages except for left mouse click messages with the alt key depressed.
+	if (param_2 != 1 || !Zeal::EqGame::get_wnd_manager() || !Zeal::EqGame::get_wnd_manager()->AltKeyState)
+		return wnd->WndNotification(src_wnd, param_2, param_3);
+
+	// Temporarily modify the ItemWnd global pointer to point to one of our windows.
+	auto* default_item_display_wnd = Zeal::EqGame::Windows->ItemWnd;
+	Zeal::EqGame::Windows->ItemWnd = ZealService::get_instance()->item_displays->get_available_window();
+
+	// The HandleSpellInfoDisplay() will toggle off a visible window, so deactivate it if needed.
+	if (Zeal::EqGame::Windows->ItemWnd->IsVisible)
+		Zeal::EqGame::Windows->ItemWnd->Deactivate();
+
+	// Invoke CCastSpellWnd::HandleSpellInfoDisplay() which calls SetSpell() and activates.
+	wnd->HandleSpellInfoDisplay(src_wnd);
+
+	Zeal::EqGame::Windows->ItemWnd = default_item_display_wnd;
+	return 0;
+}
+
+static int __fastcall SpellBookWnd_WndNotification(Zeal::EqUI::SpellBookWnd* wnd, int unused_edx, Zeal::EqUI::BasicWnd* src_wnd, int param_2, void* param_3) {
+	// Forward all messages except for left mouse click messages with the alt key depressed.
+	if (param_2 != 1 || !Zeal::EqGame::get_wnd_manager() || !Zeal::EqGame::get_wnd_manager()->AltKeyState)
+		return wnd->WndNotification(src_wnd, param_2, param_3);
+
+	// Temporarily modify the ItemWnd global pointer to point to one of our windows.
+	auto* default_item_display_wnd = Zeal::EqGame::Windows->ItemWnd;
+	Zeal::EqGame::Windows->ItemWnd = ZealService::get_instance()->item_displays->get_available_window();
+
+	// The DisplaySpellInfo() will toggle off a visible window, so deactivate it if needed.
+	if (Zeal::EqGame::Windows->ItemWnd->IsVisible)
+		Zeal::EqGame::Windows->ItemWnd->Deactivate();
+
+	// Invoke CSpellBookWnd::DisplaySpellInfo() which calls SetSpell() and activates.
+	wnd->DisplaySpellInfo(src_wnd);
+
+	Zeal::EqGame::Windows->ItemWnd = default_item_display_wnd;
+	return 0;
+}
 
 ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 {
 	windows.clear();
-	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);
-	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);
-	zeal->hooks->Add("ModifyInstrumentString", 0x423d0f, ModifyInstrumentString, hook_type_replace_call);
-	zeal->hooks->Add("ModifyHaste", 0x424a95, build_token_string_PARAM, hook_type_replace_call);
-	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
+	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);    // CItemDisplayWnd::SetItem
+	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);  // CItemDisplayWnd::SetSpell
+	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { DeactivateUI(); }, callback_type::DeactivateUI);
 
-	mem::write<BYTE>(0x4090AB, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature
-	mem::write<BYTE>(0x40a4c4, 0xEB); //for some reason the game when setting spell toggles the item display window unlike with items..this just disables that feature
-	mem::set(0x421EBF, 0x90, 14); //remove the auto focus of the main item window and handle it ourselves
-	mem::set(0x4e81e0, 0x90, 14); //remove the auto focus of the main item window and handle it ourselves
-	mem::set(0x4229BE, 0x90, 14); //remove the opening of the window when holding right click (allow zeal to handle it)
+	// Modify the Alt + Left Mouse click SetItem() related callback of CInvSlotWnd.
+	auto* inv_slot_wnd_vtable = Zeal::EqUI::InvSlotWnd::default_vtable;
+	mem::unprotect_memory(inv_slot_wnd_vtable, sizeof(*inv_slot_wnd_vtable));
+	inv_slot_wnd_vtable->HandleLButtonUp = InvSlotWnd_HandleLButtonUp;
+	mem::reset_memory_protection(inv_slot_wnd_vtable);
 
+	// Modify the Alt + Left Mouse click SetItem() related callback of SpellGemsWnd (CCastSpell).
+	auto* spell_gems_wnd_vtable = Zeal::EqUI::SpellGemsWnd::default_vtable;
+	mem::unprotect_memory(spell_gems_wnd_vtable, sizeof(*spell_gems_wnd_vtable));
+	spell_gems_wnd_vtable->WndNotification = SpellGemsWnd_WndNotification;
+	mem::reset_memory_protection(spell_gems_wnd_vtable);
+
+	// Modify the Alt + Left Mouse click SetItem() related callback of SpellBookWnd.
+	auto* spell_book_wnd_vtable = Zeal::EqUI::SpellBookWnd::default_vtable;
+	mem::unprotect_memory(spell_book_wnd_vtable, sizeof(*spell_book_wnd_vtable));
+	spell_book_wnd_vtable->WndNotification = SpellBookWnd_WndNotification;
+	mem::reset_memory_protection(spell_book_wnd_vtable);
+
+	// Not bothering to modify these windows (Retain default behavior using the default ItemDisplayWnd).
+	// CBuffWindow: Alt + Left click toggles persistent one at a time, Right click is temporary.
+	// CHotButtonWnd: Right click does a temporary pop-up.
 }
 
 ItemDisplay::~ItemDisplay()
 {
 }
+
+// Notes:
+//  - Besides CInvSlotWnd, the global ItemDisplayWnd is accessed in:
+//   - CBuffWindow::HandleSpellInfoDisplay: InvSlotWnd sends 0x17 or 0x19 to WndNotification (probably)
+//   - CCastSpellWnd::WndNotification responding to Alt+1 or 0x17 and 0x19. CSpellGemWnd::HandleLButtonUp
+//   - CCastSpellWnd::HandleSpellInfoDisplay called by WndNotification
+//   - CDisplay::NewUIProcessEscape
+//   - CHotButtonWnd::WndNotification: Responding to 0x17 or 0x19.
+//   - CSpellBookWnd::DisplaySpellInfo: Through WndNotification of Alt+1, 0x17, or 0x19.
+
+// Deprecated patches:
+// 
+// Setting spell was toggling the item display window unlike items. These disable that.
+// mem::write<BYTE>(0x4090AB, 0xEB);
+// mem::write<BYTE>(0x40a4c4, 0xEB);
+
+// There are three separate calls to SetItem() in the client and each of those feed in the
+// Zeal::EqGame::Windows->ItemWnd to both SetItem() and an Activate() immediately after.
+// The patches below disable the Activate() call afterwards.
+// mem::set(0x421EBF, 0x90, 14); // Disables in CInvSlotWnd::HandleLButtonUp.
+// mem::set(0x4229BE, 0x90, 14); // Disables in CInvSlot::HandleRButtonHeld().
+// mem::set(0x4e81e0, 0x90, 14); // Disables in OP_ItemLinkResponse message from the server.
 

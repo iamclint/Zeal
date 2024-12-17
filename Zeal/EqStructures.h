@@ -315,7 +315,7 @@ namespace Zeal
 			/* 0x00E7 */ CHAR File[15];
 			/* ...... */
 		} EQITEMBOOKINFO, * PEQITEMBOOKINFO;
-		typedef struct _EQITEMINFO
+		typedef struct
 		{
 			/*0x000*/	CHAR Name[0x40];
 			/*0x040*/	CHAR LoreName[0x50];
@@ -338,11 +338,15 @@ namespace Zeal
 			/*0x0c0*/	DWORD Cost;
 			/*0x0c4*/	DWORD Price;//*** needs confirm
 			/*0x0c8*/	BYTE  Unknown0c4[0x1c];
+			/*0x0E4*/  // memcpy size of 0xe4 in ItemDisplayWnd::SetItem().
+		} EQITEMINFOBASE, * PEQITEMINFOBASE;
+		typedef struct _EQITEMINFO : public EQITEMINFOBASE
+		{
 			union
 			{
-				/* 0x00E4 */ EQITEMCOMMONINFO    Common;
-				/* 0x00E4 */ EQITEMCONTAINERINFO Container;
-				/* 0x00E4 */ EQITEMBOOKINFO      Book;
+				/* 0x00E4 */ EQITEMCOMMONINFO    Common;    // EQITEMINFOBASE.Type == 0.
+				/* 0x00E4 */ EQITEMCONTAINERINFO Container; // EQITEMINFOBASE.Type == 1.
+				/* 0x00E4 */ EQITEMBOOKINFO      Book;      // EQITEMINFOBASE.Type == 2.
 			};
 			/* ...... */
 		} EQITEMINFO, * PEQITEMINFO;

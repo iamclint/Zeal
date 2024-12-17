@@ -447,6 +447,8 @@ namespace Zeal
 			ItemDisplayWnd() {};  // Either use Create() or assign a pointer to an existing class. 
 
 		public:
+			static constexpr uint32_t kDefaultVTableAddr = 0x005e5a98;
+
 			// Inspired by ui_manager::create_sidl to use the same heap for destructor deletion support.
 			static ItemDisplayWnd* Create(BasicWnd* parent_wnd = nullptr) {
 				ItemDisplayWnd* wnd = reinterpret_cast<ItemDisplayWnd*>(HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(ItemDisplayWnd)));
@@ -470,36 +472,56 @@ namespace Zeal
 			// created with SetupCustomVTable().
 			void DeleteCustomVTable()
 			{ 
-				auto* item_display_default_vtbl = reinterpret_cast<ItemDisplayVTable*>(0x005e5a98);
+				auto* item_display_default_vtbl = reinterpret_cast<ItemDisplayVTable*>(kDefaultVTableAddr);
 				BasicWnd::DeleteCustomVTable(item_display_default_vtbl);
 			}
 			void Activate()
 			{
-				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*)>(0x423606)(this);
+				auto* vtable = static_cast<ItemDisplayVTable*>(vtbl);
+				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*)>(vtable->Activate)(this);
 			}
-			void Unk3()
+			void Deactivate()
 			{
-				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*)>(0x423606)(this);
+				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*)>(vtbl->Deactivate)(this);
 			}
-			void SetItem(struct Zeal::EqStructures::_EQITEMINFO* Item, bool unk)
-			{
-				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*, struct Zeal::EqStructures::_EQITEMINFO *, bool)>(0x423640)(this, Item, unk);
-			}
-			void SetSpell(short spell_id, bool unk, int unk2)
-			{
-				reinterpret_cast<void(__thiscall*)(const ItemDisplayWnd*, short, bool, int)>(0x425957)(this, spell_id, unk, unk2);
-			}
-
 
 			/* 0x0134 */ struct EQWND* ItemDescription; // the item stats text window
 			/* 0x0138 */ BYTE Unknown0138[4];
-			/* 0x013C */ struct EQWND* IconBtn; // the item stats text window
-			/* 0x0140 */ BYTE Unknown0140[4];
+			/* 0x013C */ struct EQWND* IconBtn; // the item icon window
+			/* 0x0140 */ BYTE IsActivated;  // 1 if activated, 0 if deactivated
+			/* 0x0141 */ BYTE Unknown0140[3];
 			/* 0x0144 */ CXSTR DisplayText; // the item name is the title text
 			/* 0x0148 */ CXSTR WindowTitle; // the item stats text
-			/* 0x014C */ Zeal::EqStructures::_EQITEMINFO Item;
-			//BYTE Filler[0xEC];  // Operator new has a total size of 0x23c bytes.
-
+			/* 0x014C */ Zeal::EqStructures::EQITEMINFOBASE Item;  // Copied into in SetItem() if flag set.
+			/* 0x0230 */ BYTE ItemValid;  // Set to 1 if Item was populated in SetItem() else 0.
+			/* 0x0231 */ BYTE unknown0231[11];  // Operator new has a total size of 0x23c bytes.
+		};
+		struct InvSlotWnd;
+		struct InvSlot  // Operator new of 0x14 bytes.
+		{
+			/* 0x0000 */ void* destructor;  // Pointer to pointer to CInvSlot::~CInvSlot.
+			/* 0x0004 */ InvSlotWnd* invSlotWnd;  // Points back to "parent".
+			/* 0x0008 */ void* textureAnimation;  // Also copied to invSlotWnd->TextureAnimation
+			/* 0x000C */ DWORD Unknown000c;
+			/* 0x0010 */ Zeal::EqStructures::EQITEMINFOBASE* Item;
+		};
+		struct InvSlotWnd: BasicWnd  // Operator new of 0x12C bytes.
+		{
+			static constexpr BaseVTable* default_vtable = reinterpret_cast<BaseVTable*>(0x005eb774);
+			int HandleLButtonUp(int mouse_x, int mouse_y, unsigned int flags)
+			{
+				return reinterpret_cast<int(__thiscall*)(InvSlotWnd*, int, int, unsigned int)>
+													(0x005a7b10)(this, mouse_x, mouse_y, flags);
+			}
+			/* 0x0114 */ BYTE Unknown0114;
+			/* 0x0115 */ BYTE Unknown0015; // Passed in as param_3 to InvSlot::HandleLButtonUp().
+			/* 0x0116 */ BYTE Unknown0116;
+			/* 0x0117 */ BYTE Unknown0117;
+			/* 0x0118 */ InvSlot* invSlot;
+			/* 0x011C */ DWORD Unknown011c;
+			/* 0x0120 */ DWORD IsActive;  // Set to 1 when mouse has triggered an interaction, 0 when released.
+			/* 0x0124 */ DWORD Unknown0124;
+			/* 0x0128 */ DWORD Unknown0128;
 		};
 		struct SliderWnd : BasicWnd // Uses a BaseVTable.
 		{
@@ -611,8 +633,8 @@ namespace Zeal
 			/* 0x0000 */ UINT32 code;
 			/* 0x0004 */ int timestamp;
 			/* 0x0008 */ int unk;
-			/* 0x0010 */ int isDown;
-			/* 0x0014 */ int whoknows;
+			/* 0x000C */ int isDown;
+			/* 0x0010 */ int whoknows;
 		};
 
 		struct CTextureFont
@@ -636,9 +658,28 @@ namespace Zeal
 			/* 0x0028 */ EditWnd* ActiveEdit;
 			/* 0x002C */ int unknown1;
 			/* 0x0030 */ EQWND* Focused;
-			/* 0x0034 */ BYTE unknown34[0x8];
-			/* 0x0040 */ EQWND* Hovered;
-				
+			/* 0x0034 */ DWORD Unknown34;
+			/* 0x0038 */ DWORD Unknown38;
+			/* 0x003C */ EQWND* Hovered;
+			/* 0x0040 */ DWORD Unknown40[3];
+			/* 0x004C */ int AbsMouseX;
+			/* 0x0050 */ int AbsMouseY;
+			/* 0x0054 */ BYTE CapsLockState;
+			/* 0x0055 */ BYTE ShiftKeyState;    // GetKeyboardFlags() bit 0x01
+			/* 0x0056 */ BYTE ControlKeyState;  // GetKeyboardFlags() bit 0x02
+			/* 0x0057 */ BYTE AltKeyState;      // GetKeyboardFlags() bit 0x04
+			/* 0x0058 */ BYTE unknown58;        // GetKeyboardFlags() bit 0x08
+			/* 0x0059 */ BYTE unknown59[3];
+			/* 0x005C */ DWORD unknown5C;   // Accessed in ShowCursor
+			/* 0x0060 */ DWORD unknown60[0x50/4];   // Accessed in ShowCursor
+			/* 0x00B0 */ DWORD unknownB0;   // Accessed in ShowCursor
+			/* 0x00B4 */ DWORD unknownB4[2];
+			/* 0x00BC */ DWORD unknownBC;
+			/* 0x00C0 */ DWORD unknownC0;
+			/* 0x00C4 */ DWORD unknownC4;  // Pointer.
+			/* 0x00C8 */ DWORD unknownC8;
+
+
 		};
 
 		class ContextMenu
@@ -876,6 +917,8 @@ namespace Zeal
 		class SpellBookWnd : public EQWND
 		{
 		public:
+			static constexpr SidlScreenWndVTable* default_vtable = reinterpret_cast<SidlScreenWndVTable*>(0x005e6e48);
+
 			void BeginMemorize(int book_index, int gem_index, bool unsure) const
 			{
 				reinterpret_cast<void(__thiscall*)(const EQWND*, int, int, bool)>(0x434a05)(this, book_index, gem_index, unsure);
@@ -888,11 +931,24 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const EQWND*)>(0x00435531)(this);
 			}
+			int WndNotification(const BasicWnd* src_wnd, int param_2, void* param_3)
+			{
+				return reinterpret_cast<int(__thiscall*)(SpellBookWnd*, const BasicWnd*, int, void*)>
+					(0x004345cb)(this, src_wnd, param_2, param_3);
+			}
+			void DisplaySpellInfo(const BasicWnd* src_wnd)
+			{
+				reinterpret_cast<int(__thiscall*)
+					(SpellBookWnd*, const BasicWnd*)>(0x00435234)(this, src_wnd);
+			}
+
 		};
 
-		class SpellGemsWnd
+		class SpellGemsWnd : public EQWND  // Aka CastSpellWnd in eqmac
 		{
 		public:
+			static constexpr SidlScreenWndVTable* default_vtable = reinterpret_cast<SidlScreenWndVTable*>(0x005e41ac);
+
 			void Forget(int index) const
 			{
 				reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a662)(this, index);
@@ -901,7 +957,16 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a8b7)(this, index);
 			}
-			EQWND sidl;
+			int WndNotification(const BasicWnd* src_wnd, int param_2, void* param_3)
+			{
+				return reinterpret_cast<int(__thiscall*)(SpellGemsWnd*, const BasicWnd*, int, void*)>
+														(0x0040a32a)(this, src_wnd, param_2, param_3);
+			}
+			void HandleSpellInfoDisplay(const BasicWnd* src_wnd)
+			{
+				reinterpret_cast<int(__thiscall*)
+										(SpellGemsWnd*, const BasicWnd*)>(0x0040a480)(this, src_wnd);
+			}
 			/*0x134*/ BYTE Unknown0x134[0x08];
 			/*0x13C*/ SpellGem* SpellSlots[0x8];
 			/*0x15C*/ EQWND* SpellBook;
