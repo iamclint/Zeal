@@ -30,6 +30,7 @@ private:
 	std::unordered_map<int, Zeal::EqUI::BasicWnd*> buttons;
 	std::unordered_map<int, std::unordered_map<int, hotbutton_state>> states;
 	void InitUI();
+	void CleanUI();
 	void Render();
 	
 	ui_manager* ui;

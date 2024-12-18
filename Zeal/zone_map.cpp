@@ -5,7 +5,6 @@
 #include "string_util.h"
 #include "zone_map_data.h"
 #include "bitmap_font.h"
-#include "default_spritefont.h"
 #define DIRECTINPUT_VERSION 0x0800
 #include "dinput.h"
 #include <fstream>
@@ -88,9 +87,6 @@ static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositi
        * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers + kRingVertices);
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
-
-static constexpr char kFontDirectoryPath[] = "uifiles/zeal/fonts";
-static constexpr char kFontFileExtension[] = ".spritefont";
 
 static constexpr int kZLevelHeightScale = 15;  // Vertical height for z-level visibility.
 static constexpr int kWinMinSize = 160;  // Minimum size for window dimensions.
@@ -552,16 +548,7 @@ void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zo
 }
 
 std::vector<std::string> ZoneMap::get_available_fonts() const {
-    const std::string directoryPath = kFontDirectoryPath;
-
-    std::vector<std::string> fonts = { "default" };  // "default" is always first in list.
-    for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
-        if (entry.is_regular_file() && entry.path().extension() == kFontFileExtension) {
-            fonts.push_back(entry.path().stem().string());  // Add filename without extension.
-        }
-    }
-
-    return fonts;
+    return BitmapFont::get_available_fonts();
 }
 
 // Loads the bitmap font for real-time text rendering to screen.
@@ -572,26 +559,19 @@ void ZoneMap::render_load_font(IDirect3DDevice8& device) {
     if (font_filename.empty())  // Used to signal error state below.
         return;
 
-    if (font_filename != "default") {
-        std::string full_filename =
-            std::string(kFontDirectoryPath) + "/" + font_filename + kFontFileExtension;
-        bitmap_font = std::make_unique<BitmapFont>(device, full_filename.c_str());
-        if (bitmap_font->is_valid())
-            return;  // Font is ready, all done.
+    bitmap_font = BitmapFont::create_bitmap_font(device, font_filename);
+    if (bitmap_font)
+        return;  // Success
 
-        Zeal::EqGame::print_chat("Failed to load font file: %s", full_filename.c_str());
-        bitmap_font.reset();  // Release the invalid font.
-        font_filename = "default";  // Set back to the default (handled below).
+    if (font_filename != BitmapFont::kDefaultFontName) {
+        font_filename = BitmapFont::kDefaultFontName;
+        bitmap_font = BitmapFont::create_bitmap_font(device, font_filename);
+        if (bitmap_font)
+            return;  // Backup plan worked.
     }
 
-    // Initialize with the embedded default font.
-    bitmap_font = std::make_unique<BitmapFont>(device,
-                std::span<const uint8_t>(default_spritefont, default_spritefont_len));
-    if (!bitmap_font->is_valid()) {
-        bitmap_font.reset();  // Release and null the bad font to disable attempts to use.
-        font_filename = "";  // Clear to indicate invalid and do not auto-retry.
-        Zeal::EqGame::print_chat("Error initializing default font");
-    }
+    font_filename = "";  // Clear to indicate invalid and do not auto-retry.
+    Zeal::EqGame::print_chat("Error initializing map font");
 }
 
 // Primary render callback that executes all components.
@@ -1903,7 +1883,7 @@ bool ZoneMap::set_name_length(int new_length, bool update_default) {
 
 bool ZoneMap::set_font(std::string font_name, bool update_default) {
     release_font();  // Triggers update / reload.  Note that reload could fail later.
-    font_filename = font_name.empty() ? std::string("default") : font_name;
+    font_filename = font_name.empty() ? std::string(BitmapFont::kDefaultFontName) : font_name;
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<std::string>("Zeal", "MapFontFilename", font_filename);
@@ -2165,7 +2145,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     if (!ini->exists("Zeal", "MapMarkerSize"))
         ini->setValue<float>("Zeal", "MapMarkerSize", kDefaultMarkerSize);
     if (!ini->exists("Zeal", "MapFontFilename"))
-        ini->setValue<std::string>("Zeal", "MapFontFilename", std::string("default"));
+        ini->setValue<std::string>("Zeal", "MapFontFilename", std::string(BitmapFont::kDefaultFontName));
 
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
     enabled = false;  // Disable and use reenable to make it a pending flag.
@@ -2594,11 +2574,11 @@ void ZoneMap::parse_ring(const std::vector<std::string>& args) {
 void ZoneMap::parse_font(const std::vector<std::string>& args) {
     if (args.size() == 3) {
         set_font(args[2]);
-        Zeal::EqGame::print_chat("Setting font to: %s", args[2].c_str());
+        Zeal::EqGame::print_chat("Setting map font to: %s", args[2].c_str());
         return;
     }
     Zeal::EqGame::print_chat("Usage: /map font <name> (%s/<name>%s)",
-                                    kFontDirectoryPath, kFontFileExtension);
+                              BitmapFont::kFontDirectoryPath, BitmapFont::kFontFileExtension);
     Zeal::EqGame::print_chat("Available fonts:");
     auto fonts = get_available_fonts();
     for (const auto& font : fonts)

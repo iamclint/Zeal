@@ -283,6 +283,19 @@ void ui_options::InitFloatingDamage()
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->enabled.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpells", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spells.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpellIcons", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spell_icons.set(wnd->Checked); });
+
+	ui->AddComboCallback(wnd, "Zeal_FloatingFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
+		std::string font_name("");
+		if (value >= 0) {
+			Zeal::EqUI::CXSTR selected_name;
+			wnd->CmbListWnd->GetItemText(&selected_name, value, 0);
+			if (selected_name.Data) {
+				font_name = std::string(selected_name.Data->Text);
+				selected_name.FreeRep();
+			}
+		}
+		ZealService::get_instance()->floating_damage->set_font(font_name);
+		});
 }
 void ui_options::InitCamera()
 {
@@ -553,6 +566,12 @@ void ui_options::UpdateOptionsFloatingDamage()
 	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled.get());
 	ui->SetChecked("Zeal_FloatingSpells", ZealService::get_instance()->floating_damage->spells.get());
 	ui->SetChecked("Zeal_FloatingSpellIcons", ZealService::get_instance()->floating_damage->spell_icons.get());
+
+	std::string current_font = ZealService::get_instance()->floating_damage->get_font();
+	if (current_font.empty())
+		current_font = FloatingDamage::kUseClientFontString;
+	ui->SetComboValue("Zeal_FloatingFont_Combobox",
+		FindComboIndex("Zeal_FloatingFont_Combobox", current_font));
 }
 
 void ui_options::UpdateOptionsMap()
@@ -649,13 +668,26 @@ void ui_options::UpdateDynamicUI() {
 		std::string current_font = ZealService::get_instance()->zone_map->get_font();
 		cmb->SetChoice(FindComboIndex("Zeal_MapFont_Combobox", current_font));
 	}
+
+	cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_FloatingFont_Combobox");
+	if (cmb) {
+		std::vector<std::string> fonts = ZealService::get_instance()->floating_damage->get_available_fonts();
+		cmb->DeleteAll();
+		ZealService::get_instance()->ui->AddListItems(cmb, fonts);
+
+		std::string current_font = ZealService::get_instance()->floating_damage->get_font();
+		if (current_font.empty())
+			current_font = FloatingDamage::kUseClientFontString;
+		cmb->SetChoice(FindComboIndex("Zeal_FloatingFont_Combobox", current_font));
+	}
 }
 
 void ui_options::CleanDynamicUI() {
 	if (!wnd)
 		return;
 
-	std::vector<std::string> box_list = { "Zeal_TargetRingTexture_Combobox", "Zeal_MapFont_Combobox" };
+	std::vector<std::string> box_list = { "Zeal_TargetRingTexture_Combobox", "Zeal_MapFont_Combobox",
+											"Zeal_FloatingFont_Combobox"};
 	for (const auto& box_name : box_list) {
 		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem(box_name.c_str());
 		if (cmb)

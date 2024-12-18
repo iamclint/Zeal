@@ -255,6 +255,18 @@ void ItemDisplay::DeactivateUI()
 	}
 }
 
+// Response handler for OP_LinkRequest that calls SetItem and Activate().
+void __cdecl msg_request_inspect_item(Zeal::EqStructures::_EQITEMINFO* item)
+{
+	auto* default_item_display_wnd = Zeal::EqGame::Windows->ItemWnd;  // Cache the default.
+	Zeal::EqGame::Windows->ItemWnd = ZealService::get_instance()->item_displays->get_available_window(item);
+	if (Zeal::EqGame::Windows->ItemWnd->IsVisible)
+		Zeal::EqGame::Windows->ItemWnd->Deactivate();  // Avoid double activation.
+
+	ZealService::get_instance()->hooks->hook_map["msg_request_inspect_item"]->original(msg_request_inspect_item)(item);
+	Zeal::EqGame::Windows->ItemWnd = default_item_display_wnd;  // Restore.
+}
+
 // Replaces the default vtable callback to allow temporarily replacing the global pointer.
 static int __fastcall InvSlotWnd_HandleLButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int unused_edx, int mouse_x, int mouse_y, unsigned int flags)
 {
@@ -318,6 +330,7 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 	windows.clear();
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);    // CItemDisplayWnd::SetItem
 	zeal->hooks->Add("SetSpell", 0x425957, SetSpell, hook_type_detour);  // CItemDisplayWnd::SetSpell
+	zeal->hooks->Add("msg_request_inspect_item", 0x004e81c6, msg_request_inspect_item, hook_type_detour);
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { DeactivateUI(); }, callback_type::DeactivateUI);

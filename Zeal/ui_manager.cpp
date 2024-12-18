@@ -286,6 +286,8 @@ void ui_manager::CleanUI()
 	slider_names.clear();
 	slider_callbacks.clear();
 	label_names.clear();
+	button_names.clear();
+	button_callbacks.clear();
 }
 
 

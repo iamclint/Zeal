@@ -15,6 +15,7 @@
 #include <fstream>
 #include "EqFunctions.h"
 #include "bitmap_font.h"
+#include "default_spritefont.h"
 
 namespace {
 
@@ -86,6 +87,49 @@ std::vector<uint8_t> load_file(const char* filename) {
 }
 
 } // namespace
+
+
+// Factory for creating bitmap fonts. Returns nullptr if unsuccessful.
+std::unique_ptr<BitmapFont> BitmapFont::create_bitmap_font(IDirect3DDevice8& device,
+    const std::string& font_filename) {
+
+    std::unique_ptr<BitmapFont> bitmap_font;
+
+    // Attempt to load a filesystem font if there's a candidate name.
+    if (!font_filename.empty() && font_filename != kDefaultFontName) {
+        std::string full_filename =
+            std::string(kFontDirectoryPath) + "/" + font_filename + kFontFileExtension;
+        bitmap_font = std::make_unique<BitmapFont>(device, full_filename.c_str());
+        if (!bitmap_font->is_valid()) {
+            Zeal::EqGame::print_chat("Failed to load font file: %s", full_filename.c_str());
+            bitmap_font.reset();  // Release the invalid font and nulls the ptr.
+        }
+        return bitmap_font;
+    }
+
+    // Initialize with the embedded default font.
+    bitmap_font = std::make_unique<BitmapFont>(device,
+        std::span<const uint8_t>(default_spritefont, default_spritefont_len));
+    if (!bitmap_font->is_valid()) {
+        bitmap_font.reset();  // Release the invalid font and nulls the ptr.
+        Zeal::EqGame::print_chat("Error initializing default font");
+    }
+    return bitmap_font;
+}
+
+
+std::vector<std::string> BitmapFont::get_available_fonts() {
+    const std::string directoryPath = kFontDirectoryPath;
+
+    std::vector<std::string> fonts = { kDefaultFontName };  // "default" is always first in list.
+    for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
+        if (entry.is_regular_file() && entry.path().extension() == kFontFileExtension) {
+            fonts.push_back(entry.path().stem().string());  // Add filename without extension.
+        }
+    }
+
+    return fonts;
+}
 
 
 // Reads a font from files created with the MakeSpriteFont utility.

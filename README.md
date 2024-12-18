@@ -119,6 +119,13 @@ ___
 - `/reloadskin`
   - **Description:** reloads your current skin using ini.
     
+- `/fcd` (floating combat damage)
+  - **Arguments:** none, `client font size #`, `font`
+  - **Example:** `/fcd` toggles on and off
+  - **Example:** `/fcd 6` sets it to use client font size 6
+  - **Example:** `/fcd font arial_24` sets it to use custom font arial_24
+  - **Description:** shows floating combat damage.
+  
 - `/fov`
   - **Arguments:** `int`
   - **Example:** `/fov 65`
