@@ -23,8 +23,6 @@ private:
 	void InitUI();
 	void Deactivate();
 	void CleanUI();
-	void LoadSettings(class IO_ini* ini);
-	void PrintUIError();
 	ui_manager* ui;
 };
 

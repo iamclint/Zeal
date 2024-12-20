@@ -51,17 +51,12 @@ public:
 	bool set_ring_radius(int new_radius, bool update_default = true);
 	bool set_name_length(int new_length, bool update_default = true);
 	bool set_map_data_mode(int new_mode, bool update_default = true);
+	bool set_map_zoom_default_index(int new_index, bool update_default = true);
 	bool set_background(int new_state, bool update_default = true); // [clear, dark, light, tan]
 	bool set_background_alpha(int percent, bool update_default = true);
 	bool set_faded_zlevel_alpha(int percent, bool update_default = true);
 	bool set_alignment(int new_state, bool update_default = true); // [left, center, right]
 	bool set_labels_mode(int new_mode, bool update_default = true);  // [off, summary, all]
-	bool set_map_top(int top_percent, bool update_default = true, bool preserve_height = true);
-	bool set_map_left(int left_percent, bool update_default = true, bool preserve_width = true);
-	bool set_map_bottom(int bottom_percent, bool update_default = true);
-	bool set_map_height(int height_percent, bool update_default = true);
-	bool set_map_right(int right_percent, bool update_default = true);
-	bool set_map_width(int width_percent, bool update_default = true);
 	bool set_position_size(int new_size_percent, bool update_default = true);
 	bool set_marker_size(int new_size_percent, bool update_default = true);
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
@@ -73,6 +68,7 @@ public:
 	bool is_show_all_names_override() const { return map_show_all_names_override;}
 	bool is_interactive_enabled() const { return map_interactive_enabled; }
 	int get_show_group_mode() const { return map_show_group_mode; }
+	int get_map_zoom_default_index() const { return map_zoom_default_index; }
 	int get_name_length() const { return map_name_length; }
 	int get_grid_pitch() const { return map_grid_pitch; }
 	int get_map_data_mode() const { return static_cast<int>(map_data_mode); }
@@ -81,12 +77,6 @@ public:
 	int get_faded_zlevel_alpha() const { return static_cast<int>(map_faded_zlevel_alpha * 100 + 0.5f); }
 	int get_alignment() const { return static_cast<int>(map_alignment_state); }
 	int get_labels_mode() const { return static_cast<int>(map_labels_mode); }
-	int get_map_top() const { return static_cast<int>(map_rect_top * 100 + 0.5f); }
-	int get_map_left() const { return static_cast<int>(map_rect_left * 100 + 0.5f); }
-	int get_map_bottom() const { return static_cast<int>(map_rect_bottom * 100 + 0.5f); }
-	int get_map_height() const { return static_cast<int>((map_rect_bottom - map_rect_top) * 100 + 0.5f); }
-	int get_map_right() const { return static_cast<int>(map_rect_right * 100 + 0.5f); }
-	int get_map_width() const { return static_cast<int>((map_rect_right - map_rect_left) * 100 + 0.5f); }
 	int get_position_size() const { return static_cast<int>(position_size / kMaxPositionSize * 100 + 0.5f); }
 	int get_marker_size() const { return static_cast<int>(marker_size / kMaxMarkerSize * 100 + 0.5f); }
 	int get_zoom() const { return static_cast<int>(zoom_factor * 100 + 0.5f); }
@@ -109,6 +99,8 @@ public:
 	void process_left_mouse_button_down(int16_t x, int16_t y);
 	void process_right_mouse_button_down(int16_t x, int16_t y);
 	void process_wheel_mouse_button_down(int16_t x, int16_t y);
+	void process_on_move(const Zeal::EqUI::CXRect& rect);
+	void process_on_resize(int width, int height);
 
 private:
 	enum class LabelType { Normal, AddMarker, PositionLabel };
@@ -143,10 +135,6 @@ private:
 	static constexpr int kDefaultNameLength = 5;
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
 	static constexpr float kDefaultFadedZLevelAlpha = 0.2f;
-	static constexpr float kDefaultRectTop = 0.1f;
-	static constexpr float kDefaultRectLeft = 0.1f;
-	static constexpr float kDefaultRectBottom = 0.4f;
-	static constexpr float kDefaultRectRight = 0.4f;
 	static constexpr float kDefaultPositionSize = 0.01f;
 	static constexpr float kDefaultMarkerSize = 0.02f;
 
@@ -174,7 +162,7 @@ private:
 	bool search_poi(const std::string& search);
 	void set_marker(int y, int x, const char* label = nullptr);
 	void clear_markers(bool erase_list = true);
-	bool set_map_rect(float top, float left, float bottom, float right, bool update_default = false);
+	bool set_map_rect(float top, float left, float bottom, float right);
 	bool set_level(int level);  // Set to 0 to show all levels.
 	bool set_show_zone_id(const std::string& zone_name);
 	void update_ui_options();
@@ -243,12 +231,13 @@ private:
 	bool ui_is_visible() const;
 	void ui_hide();
 	bool ui_show();
-	void ui_clean();
-	void ui_deactivate();
-	void ui_init();
+	void callback_clean_ui();
+	void callback_deactivate_ui();
+	void callback_init_ui();
 	void ui_synchronize_window();
 
 	bool enabled = false;
+	bool reenable_on_zone = false;  // Flag to re-enable after a zone transition completes.
 	bool external_enabled = false;  // External map window enable and sizes.
 	bool map_interactive_enabled = false;  // Supports some mouse/cursor operations.
 	bool map_show_grid = false;
@@ -278,11 +267,9 @@ private:
 	LONG max_viewport_height = 0;
 	D3DXMATRIX mat_model2world;  // Map model data to viewport centered pixel data.
 	D3DXMATRIX mat_world2model;  // Inverse viewport centered pixel back to map model data.
+	int map_zoom_default_index = 0;
 	float zoom_factor = 1.f;
-	float map_rect_top = kDefaultRectTop;
-	float map_rect_left = kDefaultRectLeft;
-	float map_rect_bottom = kDefaultRectBottom;
-	float map_rect_right = kDefaultRectRight;
+	Zeal::EqUI::CXRect map_client_rect = {};
 	float clip_max_x = 0;  // Visible (non-clipped) model data limits.
 	float clip_min_x = 0;
 	float clip_max_y = 0;
@@ -293,6 +280,7 @@ private:
 	float position_size = kDefaultPositionSize;
 	float marker_size = kDefaultMarkerSize;
 	bool cursor_hidden = false;
+	bool manual_on_move_trigger = false;  // Flag set when the window is moved around.
 	Vec3 manual_position = Vec3(0, 0, 0);
 	POINT manual_screen_pt = POINT({ .x = kInvalidScreenValue, .y = kInvalidScreenValue });
 	POINT mouse_pt = POINT({ .x = kInvalidScreenValue, .y = kInvalidScreenValue });  // Latest mouse update.
@@ -322,18 +310,20 @@ private:
 	bool show_external_window();
 	void hide_external_window();
 	void synchronize_external_window();
+	void update_external_window_max_viewport();
 	void destroy_external_window();
 	bool initialize_d3d_external_window();
 	void release_d3d_external_window();
 	void release_font();
-	RECT calc_external_window_client_rect();
 
 	HINSTANCE external_hinstance = nullptr;
 	HWND external_hwnd = nullptr;
 	LPDIRECT3D8 external_d3d = nullptr; // the pointer to our Direct3D interface
 	LPDIRECT3DDEVICE8 external_d3ddev = nullptr; // the pointer to the device class
 	int external_monitor_top_offset = 0;  // Virtual screen offsets of ext window monitor.
-	int external_monitor_left_offset = 0;
+	int external_monitor_left_offset = 0;  // These are to top left corner of client rect.
+	int external_monitor_height = 0;  // Client rect height and width.
+	int external_monitor_width = 0;
 };
 
 

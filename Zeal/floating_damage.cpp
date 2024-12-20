@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <random>
 
+#if 0  // Not currently used.
+
 template <typename VertexType>
 LPDIRECT3DVERTEXBUFFER8 CreateVertexBuffer(LPDIRECT3DDEVICE8 d3dDevice, VertexType* vertices, int vertexCount, DWORD fvf)
 {
@@ -33,6 +35,7 @@ LPDIRECT3DVERTEXBUFFER8 CreateVertexBuffer(LPDIRECT3DDEVICE8 d3dDevice, VertexTy
 
 	return vertexBuffer;
 }
+#endif
 
 int getRandomIntBetween(int min, int max) {
 	// Create a random device and a random engine
@@ -61,7 +64,7 @@ void DamageData::tick(int active_number_count)
 		y_offset -= 2 + speed_offset;
 		opacity -= 0.01f + opacity_offset;
 		if (opacity < 0)
-			opacity = 0;
+			needs_removed = true;
 		last_tick = GetTickCount64();
 	}
 }
@@ -129,7 +132,19 @@ int  FloatingDamage::get_active_damage_count(Zeal::EqStructures::Entity* ent)
 
 void FloatingDamage::callback_render()
 {
-	if (!Zeal::EqGame::is_in_game() || !spell_icons.get())
+	if (!enabled.get() || !Zeal::EqGame::is_in_game())
+		return;
+
+	load_bitmap_font();
+	if (bitmap_font)
+		render_text();
+
+	render_spells();
+}
+
+void FloatingDamage::render_spells()
+{
+	if (!spell_icons.get())
 		return;
 	std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, false);
 	Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
@@ -151,15 +166,31 @@ void FloatingDamage::callback_render()
 		}
 	}
 }
+
 void FloatingDamage::callback_deferred()
 {
-	if (!Zeal::EqGame::is_in_game() || !enabled.get())
-		return;
-	if (Zeal::EqGame::get_wnd_manager())
+	if (enabled.get() && Zeal::EqGame::is_in_game() && bitmap_font == nullptr)
+		render_text();  // Bitmap fonts were disabled, so use the client CTextureFont.
+}
+
+// Simple helper calc that scales shadows with the font size.
+static int calc_shadow_offset(const std::unique_ptr<BitmapFont>& bitmap_font)
+{
+	if (!bitmap_font)
+		return 0;
+
+	int offset = static_cast<int>(bitmap_font->get_line_spacing() * 0.05f + 0.5f);
+	return max(1, offset);
+}
+
+void FloatingDamage::render_text()
+{
+	if (bitmap_font || Zeal::EqGame::get_wnd_manager())
 	{
-		Zeal::EqUI::CTextureFont* fnt = Zeal::EqGame::get_wnd_manager()->GetFont(font_size);
-		if (fnt)
+		Zeal::EqUI::CTextureFont* fnt = bitmap_font ? nullptr : Zeal::EqGame::get_wnd_manager()->GetFont(font_size);
+		if (bitmap_font || fnt)
 		{
+			int shadow_offset = calc_shadow_offset(bitmap_font);
 			std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, false);
 			Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
 			for (auto& [target, dmg_vec] : damage_numbers)
@@ -203,14 +234,24 @@ void FloatingDamage::callback_deferred()
 							}
 							if (dmg.heal > 0)
 								color = 0xFFFF00FF;
-							fnt->DrawWrappedText(dmg.str_dmg.c_str(),
-								Zeal::EqUI::CXRect((int)(screen_pos.x + dmg.y_offset),(int)(screen_pos.y + dmg.x_offset), (int)(screen_pos.x + 150),
-									(int)(screen_pos.y + 150)), Zeal::EqUI::CXRect(0, 0, (int)(screen_size.x * 2), (int)(screen_size.y * 2)), ModifyAlpha(color, dmg.opacity), 1, 0);
+							if (bitmap_font)
+							{  // Draw with a black drop shadow.
+								bitmap_font->queue_string(dmg.str_dmg.c_str(), Vec2(screen_pos.y + dmg.x_offset + shadow_offset,
+									screen_pos.x + dmg.y_offset + shadow_offset), false, ModifyAlpha(0, dmg.opacity));
+								bitmap_font->queue_string(dmg.str_dmg.c_str(), Vec2(screen_pos.y + dmg.x_offset,
+									screen_pos.x + dmg.y_offset), false, ModifyAlpha(color, dmg.opacity));
+							}
+							else 
+								fnt->DrawWrappedText(dmg.str_dmg.c_str(),
+									Zeal::EqUI::CXRect((int)(screen_pos.x + dmg.y_offset),(int)(screen_pos.y + dmg.x_offset), (int)(screen_pos.x + 150),
+										(int)(screen_pos.y + 150)), Zeal::EqUI::CXRect(0, 0, (int)(screen_size.x * 2), (int)(screen_size.y * 2)), ModifyAlpha(color, dmg.opacity), 1, 0);
 						}
 					}
 				}
 				dmg_vec.erase(std::remove_if(dmg_vec.begin(), dmg_vec.end(), [](const DamageData& d) { return d.needs_removed; }), dmg_vec.end());
 			}
+			if (bitmap_font)
+				bitmap_font->flush_queue_to_screen();
 		}
 		for (auto it = damage_numbers.begin(); it != damage_numbers.end();) {
 			if (it->second.empty()) {
@@ -328,7 +369,7 @@ bool FloatingDamage::add_texture(std::string path)
 
 void FloatingDamage::init_ui()
 {
-	textures.clear();
+	clean_ui();  // Just in case releases all resources and clears textures.
 	std::string current_ui = (char*)0x63D3C0;
 	std::string path = current_ui;
 	std::string default_path = "./UIFILES/default/";
@@ -343,11 +384,64 @@ void FloatingDamage::init_ui()
 		if (!add_texture(filepath.str()))
 			Zeal::EqGame::print_chat("Texture not found: %s", filepath.str().c_str());
 	}
+	auto ini = ZealService::get_instance()->ini.get();  // Short-life pointer.
+	if (ini)
+	{
+		if (!ini->exists("Zeal", "FloatingDamageFont"))
+			ini->setValue<std::string>("Zeal", "FloatingDamageFont", std::string(""));
+		bitmap_font_filename = ini->getValue<std::string>("Zeal", "FloatingDamageFont");
+	}
+}
+
+void FloatingDamage::clean_ui()
+{
+	for (auto& texture : textures)
+		if (texture)
+			texture->Release();
+	textures.clear();
+	bitmap_font.reset();
+}
+
+bool FloatingDamage::set_font(std::string font_name) {
+	if (bitmap_font && bitmap_font_filename == font_name)
+		return true;  // Already loaded.
+
+	bitmap_font.reset();  // Release all resources and reset to nullptr.
+	if (font_name == kUseClientFontString)
+		font_name = "";  // Disables the bitmap font.
+	bitmap_font_filename = font_name;  // Attempts to load at next render pass.
+
+	if (ZealService::get_instance() && ZealService::get_instance()->ini)
+		ZealService::get_instance()->ini->setValue<std::string>("Zeal", "FloatingDamageFont", bitmap_font_filename);
+
+	return true;  // Always succeed for now.
+}
+
+std::vector<std::string> FloatingDamage::get_available_fonts() const {
+	auto fonts = BitmapFont::get_available_fonts();
+	if (!fonts.empty() && fonts[0] == BitmapFont::kDefaultFontName)  // Default is too small.
+		fonts.erase(fonts.begin());
+	fonts.insert(fonts.begin(), kUseClientFontString);
+	return fonts;
+}
+
+
+// Loads the bitmap font for real-time text rendering to screen.
+void FloatingDamage::load_bitmap_font() {
+	if (bitmap_font || bitmap_font_filename.empty())
+		return;
+
+	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+	if (device != nullptr)
+		bitmap_font = BitmapFont::create_bitmap_font(*device, bitmap_font_filename);
+	if (!bitmap_font) {
+		Zeal::EqGame::print_chat("Failed to load font: %s", bitmap_font_filename.c_str());
+		bitmap_font_filename = "";  // Disable future attempts and use CTexture font.
+	}
 }
 
 FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 {
-	
 	//mem::write<BYTE>(0x4A594B, 0x14);
 	if (!ini->exists("Zeal", "FloatingDamage"))
 		ini->setValue<bool>("Zeal", "FloatingDamage", true);
@@ -362,34 +456,47 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { add_damage(source, target, damage, heal, spell_id); });
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
-	zeal->commands_hook->Add("/fcd", {}, "Toggles floating combat text or adjusts the font size with argument",
+	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::DXReset);  // Just release all resources.
+
+	zeal->commands_hook->Add("/fcd", {}, "Toggles floating combat text or adjusts the fonts with arguments",
 		[this, ini](std::vector<std::string>& args) {
 			int new_size = 5;
-			if (args.size() == 2)
+			if (args.size() == 3 && args[1] == "font")
 			{
-				if (Zeal::String::tryParse(args[1], &new_size))
-				{
-					font_size = new_size;
-					Zeal::EqGame::print_chat("Floating combat font size is now %i", font_size);
-				}
+				set_font(args[2]); 
+				Zeal::EqGame::print_chat("Floating combat font set to %s", bitmap_font_filename.c_str());
 			}
-			else
+			else if (args.size() == 2 && args[1] == "font") {
+				auto fonts = BitmapFont::get_available_fonts();
+				Zeal::EqGame::print_chat("Usage: `/fcd font <fontname>` selects the zeal font <fontname>");
+				Zeal::EqGame::print_chat("Available fonts:");
+				for (const auto& font : fonts)
+					Zeal::EqGame::print_chat("  %s", font.c_str());
+			}
+			else if (args.size() == 2 && Zeal::String::tryParse(args[1], &new_size))
+			{
+				font_size = new_size;
+				Zeal::EqGame::print_chat("Floating combat font size is now %i", font_size);
+				set_font("");  // Releases resources and disables the bitmap_font path.
+			}
+			else if (args.size() == 1)
 			{
 				enabled.toggle();
 				Zeal::EqGame::print_chat("Floating combat text is %s", enabled.get() ? "Enabled" : "Disabled");
 			}
-			return true;
-		});
+			else {
+				Zeal::EqGame::print_chat("Usage: `/fcd` toggles the enable on and off");
+				Zeal::EqGame::print_chat("Usage: `/fcd <#>` selects the client font size (1 to 6)");
+				Zeal::EqGame::print_chat("Usage: `/fcd font` prints the available fonts");
+				Zeal::EqGame::print_chat("Usage: `/fcd font <fontname>` selects the zeal font <fontname>");
+			}
 
-	
-	
-	//zeal->callbacks->add_generic([this]() { callback_render();  }, callback_type::Render);
+			return true;
+		});		
 }
 
 FloatingDamage::~FloatingDamage()
 {
-	for (auto& texture : textures)
-		if (texture)
-			texture->Release();
-	textures.clear();
+	clean_ui();
 }

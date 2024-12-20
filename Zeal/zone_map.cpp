@@ -5,14 +5,13 @@
 #include "string_util.h"
 #include "zone_map_data.h"
 #include "bitmap_font.h"
-#include "default_spritefont.h"
 #define DIRECTINPUT_VERSION 0x0800
 #include "dinput.h"
 #include <fstream>
 #include <string>
 
 
-// Possible enhancements:
+// Possible enhancements and issues:
 // - Look into intermittent z-depth clipping due to walls or heads/faces
 // - External map window issues:
 //   - Window message queue was not receiving expected window resize messages,
@@ -20,11 +19,18 @@
 //   - Was unable to transfer focus to the main window for keyboard input, so using an internal
 //     command router for hotkeys. This does not allow typing chat messages currently.
 // - Interactive mode:
-//   - TAKP eqgame.exe code appears to ignore the mouse button even though callbacks exist
+//   - TAKP eqgame.exe code appears to ignore the middle mouse button even though callbacks exist
 //   - Ideally would render map into the window background at the proper time, but that
 //     requires more investigation around the deferred calls. As a result, the border can
 //     be on top while the map render is hidden behind other UI elements.
-
+//   - Dragging a window off the left edge ignores the ui_synchronize() move and invalidate and
+//     thus keeps setting a large negative client Left, causing flashing and ugly sizing
+//   - Dragging a window up above top limit causes it to jump to lower right corner. Also 
+//     happens to chat windows, so it's an EQ client issue.
+//   - ContextMenu: Disable or support Background Texture and Tint Color options
+//   - Add zone name to the window title. Maybe level or other info as well.
+//   - Consider adding an option for minimize to go to a 320x320 instead of fully minimizing
+// - Old (Stone) UI: Not supported. Map remains disabled since wnd is nullptr.
 
 // Implementation notes:
 //
@@ -52,7 +58,17 @@
 //     - viewport: fixed transformation to fill viewport
 //       - Maps input +1 and -1 x and y scales to viewport width/2 and height/2
 //       - Maps 0,0 to the center of the viewport
-
+//
+//  SidlScreenWnd / EQWND tie-in:
+//   - callback_zone: Called to reset resource state before entering a new zone
+//     - character is known at this point
+//   - callback_init_ui: Called after character selection before entering the first zone.
+//       - Note: callback_zone happens before callback_init_ui for the first zone
+//     - Allocates UI resources (including from sidl files)
+//   - callback_deactivate_ui: Called upon exiting zone (and elsewhere)
+//     - Performs Deactivate callback on all UI pieces
+//   - callback_clean_ui: Called before returning to character selection (and elsewhere)
+//     - Releases / deconstructs and nulls UI resources
 
 namespace {
 
@@ -72,10 +88,12 @@ static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositi
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
-static constexpr char kFontDirectoryPath[] = "uifiles/zeal/fonts";
-static constexpr char kFontFileExtension[] = ".spritefont";
-
 static constexpr int kZLevelHeightScale = 15;  // Vertical height for z-level visibility.
+static constexpr int kWinMinSize = 160;  // Minimum size for window dimensions.
+
+// Note: Zoom factors are hard-coded in options combobox. Must keep in sync manually.
+static constexpr int kNumDefaultZoomFactors = 4;
+static constexpr float kDefaultZoomFactors[kNumDefaultZoomFactors] = { 1.f, 2.f, 4.f, 8.f };
 
 }  // namespace
 
@@ -98,7 +116,7 @@ void ZoneMap::render_release_resources(bool flush_font) {
         release_font();
 }
 
-// Use the map_rect values and render target to configure the viewport rectangle.
+// Configure the viewport and max dimensions based on render target and mode.
 void ZoneMap::render_update_viewport(IDirect3DDevice8& device) {
     // Use a 'custom' viewport for the map so that it ignores the games /viewport
     // settings and can draw outside of it. The rect/size scalefactors are relative
@@ -111,8 +129,8 @@ void ZoneMap::render_update_viewport(IDirect3DDevice8& device) {
         surface->Release();  // Decrements a reference counter.
     }
     else {
-        description.Width = 320;  // "safe" fallback values.
-        description.Height = 320;
+        description.Width = kWinMinSize;  // "safe" fallback values.
+        description.Height = kWinMinSize;
     }
 
     // Enable full-window mode in external window mode. Set the viewport to match
@@ -126,17 +144,48 @@ void ZoneMap::render_update_viewport(IDirect3DDevice8& device) {
 
     max_viewport_width = description.Width;  // Used for constant scaling of markers.
     max_viewport_height = description.Height;
+    
+    // In internal interactive (windowed) mode, update the viewport to match the window but
+    // constrain it to all fit within the render surface.
+    if (map_interactive_enabled) {
+        Zeal::EqUI::CXRect rect;
+        Zeal::EqGame::EqGameInternal::CXWndGetClientRect(wnd, 0, &rect);
+        int viewport_x = max(0, min(max_viewport_width - kWinMinSize, rect.Left));
+        int viewport_y = max(0, min(max_viewport_height - kWinMinSize, rect.Top));
+        if (manual_on_move_trigger) {
+            manual_on_move_trigger = false;
+            // Negated and swapped. Modify position since it is floating point and reduces drift.
+            manual_position.y += scale_pixels_to_model(static_cast<float>(viewport_x - static_cast<int>(viewport.X)));
+            manual_position.x += scale_pixels_to_model(static_cast<float>(viewport_y - static_cast<int>(viewport.Y)));
+        }
 
-    const DWORD rect_left = static_cast<DWORD>(std::floor(map_rect_left * description.Width));
-    const DWORD rect_right = static_cast<DWORD>(std::ceil(map_rect_right * description.Width));
-    const DWORD rect_top = static_cast<DWORD>(std::floor(map_rect_top * description.Height));
-    const DWORD rect_bottom = static_cast<DWORD>(std::ceil(map_rect_bottom * description.Height));
+        viewport.X = viewport_x;
+        viewport.Y = viewport_y;
+        // Handle an issue where a dragged window will continue to have the client rect go << -1
+        // even after the synchronize_window()'s move call. In that case, just decrement the 
+        // width by 1 each iteration. Height isn't an issue since can't drag it above screen.
+        if (rect.Left < -1)
+            viewport.Width = max(kWinMinSize,
+                min(max_viewport_width - static_cast<int>(viewport.X), rect.Right - rect.Left - 1));
+        else
+            viewport.Width = max(kWinMinSize, min(max_viewport_width, rect.Right) - static_cast<int>(viewport.X));
+        viewport.Height = max(kWinMinSize, min(max_viewport_height, rect.Bottom) - static_cast<int>(viewport.Y));
+        ui_synchronize_window();  // Force the window to resize if necessary.
+        return;
+    }
+   
+    // Internal non-active mode.
+    // Handle startup and generally just continue to keep in sync if wnd client size is known.
+    if (!wnd->IsMinimized)
+        Zeal::EqGame::EqGameInternal::CXWndGetClientRect(wnd, 0, &map_client_rect);
 
-    viewport = D3DVIEWPORT8{ .X = rect_left, .Y = rect_top,
-        .Width = rect_right - rect_left, .Height = rect_bottom - rect_top,
-        .MinZ = 0.0f, .MaxZ = 1.0f };
-
-    ui_synchronize_window();
+    // Sanity clamp and apply to viewport.
+    viewport.X = max(0, min(max_viewport_width - kWinMinSize, map_client_rect.Left));
+    viewport.Y = max(0, min(max_viewport_height - kWinMinSize, map_client_rect.Top));
+    viewport.Width = max(kWinMinSize, min(max_viewport_width, map_client_rect.Right) - static_cast<int>(viewport.X));
+    viewport.Height = max(kWinMinSize, min(max_viewport_height, map_client_rect.Bottom) - static_cast<int>(viewport.Y));
+    viewport.MinZ = 0.0f;
+    viewport.MaxZ = 1.0f;
 }
 
 // Synchronize the UI window client rect with the viewport.
@@ -145,7 +194,12 @@ void ZoneMap::ui_synchronize_window() {
         return;
 
     Zeal::EqUI::CXRect rect;
-    Zeal::EqGame::EqGameInternal::CXWndGetInnerRect(wnd, 0, &rect);
+    Zeal::EqGame::EqGameInternal::CXWndGetClientRect(wnd, 0, &rect);
+    // Keep the internal window size in sync by setting it to the target client rect size.
+    map_client_rect.Top = viewport.Y;
+    map_client_rect.Left = viewport.X;
+    map_client_rect.Bottom = viewport.Y + viewport.Height;
+    map_client_rect.Right = viewport.X + viewport.Width;
     if (viewport.X == rect.Left && viewport.Y == rect.Top && viewport.Width == (rect.Right - rect.Left) &&
             viewport.Height == rect.Bottom - rect.Top)
         return;
@@ -494,16 +548,7 @@ void ZoneMap::render_load_labels(IDirect3DDevice8& device, const ZoneMapData& zo
 }
 
 std::vector<std::string> ZoneMap::get_available_fonts() const {
-    const std::string directoryPath = kFontDirectoryPath;
-
-    std::vector<std::string> fonts = { "default" };  // "default" is always first in list.
-    for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
-        if (entry.is_regular_file() && entry.path().extension() == kFontFileExtension) {
-            fonts.push_back(entry.path().stem().string());  // Add filename without extension.
-        }
-    }
-
-    return fonts;
+    return BitmapFont::get_available_fonts();
 }
 
 // Loads the bitmap font for real-time text rendering to screen.
@@ -514,26 +559,19 @@ void ZoneMap::render_load_font(IDirect3DDevice8& device) {
     if (font_filename.empty())  // Used to signal error state below.
         return;
 
-    if (font_filename != "default") {
-        std::string full_filename =
-            std::string(kFontDirectoryPath) + "/" + font_filename + kFontFileExtension;
-        bitmap_font = std::make_unique<BitmapFont>(device, full_filename.c_str());
-        if (bitmap_font->is_valid())
-            return;  // Font is ready, all done.
+    bitmap_font = BitmapFont::create_bitmap_font(device, font_filename);
+    if (bitmap_font)
+        return;  // Success
 
-        Zeal::EqGame::print_chat("Failed to load font file: %s", full_filename.c_str());
-        bitmap_font.reset();  // Release the invalid font.
-        font_filename = "default";  // Set back to the default (handled below).
+    if (font_filename != BitmapFont::kDefaultFontName) {
+        font_filename = BitmapFont::kDefaultFontName;
+        bitmap_font = BitmapFont::create_bitmap_font(device, font_filename);
+        if (bitmap_font)
+            return;  // Backup plan worked.
     }
 
-    // Initialize with the embedded default font.
-    bitmap_font = std::make_unique<BitmapFont>(device,
-                std::span<const uint8_t>(default_spritefont, default_spritefont_len));
-    if (!bitmap_font->is_valid()) {
-        bitmap_font.reset();  // Release and null the bad font to disable attempts to use.
-        font_filename = "";  // Clear to indicate invalid and do not auto-retry.
-        Zeal::EqGame::print_chat("Error initializing default font");
-    }
+    font_filename = "";  // Clear to indicate invalid and do not auto-retry.
+    Zeal::EqGame::print_chat("Error initializing map font");
 }
 
 // Primary render callback that executes all components.
@@ -813,8 +851,10 @@ void ZoneMap::update_mouse() {
 
 
 void ZoneMap::render_handle_cursor(IDirect3DDevice8& device) {
-    if (!external_enabled && !map_interactive_enabled)
+    if (!external_enabled && !(map_interactive_enabled && wnd && wnd->IsMouseOver)) {
+        restore_cursor();
         return;
+    }
 
     auto xyz = transform_screen_to_model(static_cast<float>(mouse_pt.x), static_cast<float>(mouse_pt.y));
 
@@ -828,19 +868,44 @@ void ZoneMap::render_handle_cursor(IDirect3DDevice8& device) {
         if (!bitmap_font)
             return;
 
-        if (!external_enabled)
-            hide_cursor();
+        hide_cursor();
         char loc_cursor[20];
         snprintf(loc_cursor, sizeof(loc_cursor), "(%i, %i)", -y, -x);
         render_label_text(loc_cursor, y, x, D3DCOLOR_XRGB(240, 240, 128), LabelType::AddMarker);
         bitmap_font->flush_queue_to_screen();
         device.SetVertexShader(kMapVertexFvfCode);  // Restore assumed shader.
     }
-    else
+    else {
         restore_cursor();
+
+        // Do some logic to overcomb the eqgame.dll's constant decrementing of ShowCursor().
+        // We aren't over the visible map region, but check if the cursor is over the map window.
+        RECT win_rect;
+        if (external_enabled && external_hwnd && GetClientRect(external_hwnd, &win_rect) &&
+            AdjustWindowRectEx(&win_rect, WS_OVERLAPPEDWINDOW, false, NULL)) {
+            bool in_window = (mouse_pt.x >= win_rect.left && mouse_pt.x < win_rect.right &&
+                mouse_pt.y >= win_rect.top && mouse_pt.y < win_rect.bottom);
+            CURSORINFO ci = { sizeof(CURSORINFO) };
+            if (in_window && GetCursorInfo(&ci) && !(ci.flags & CURSOR_SHOWING))
+                while (ShowCursor(true) < 1);  // Increment until visible.
+        }
+    }
 }
 
 void ZoneMap::hide_cursor() {
+    // In external mode, the eqgame.dll logic is typically setting the thread's ShowCursor() counter
+    // with either true or false depending on whether the mouse is over the primary game window. We
+    // need to override that here. We are assuming this call only happens within the clip region.
+    if (external_enabled) {
+        CURSORINFO ci = { sizeof(CURSORINFO) };
+        if (GetCursorInfo(&ci) && (ci.flags & CURSOR_SHOWING))
+            while (ShowCursor(false) > 0);
+        return;
+    }
+
+    // In internal mode, we use the same patching approach the camera mods use.
+    if (cursor_hidden)
+        return;
     mem::write<byte>(0x53edef, 0xEB);
     cursor_hidden = true;
 }
@@ -880,13 +945,14 @@ void ZoneMap::process_wheel_mouse_button_down(int16_t mouse_x, int16_t mouse_y) 
     auto xyz = transform_screen_to_model(static_cast<float>(mouse_x), static_cast<float>(mouse_y));
     const int x = static_cast<int>(xyz[0] + 0.5f);
     const int y = static_cast<int>(xyz[1] + 0.5f);
-    set_marker(-y, -x, nullptr);  // Swap and negate x and y
+    set_marker(-y, -x, nullptr);  // Swap and negate x and y for location coordinates.
 }
 
 
 void ZoneMap::process_mouse_wheel(int16_t mouse_delta, uint16_t flags, int16_t mouse_x, int16_t mouse_y) {
     int mouse_steps = mouse_delta / 120;  // Mouse standard is 120/step.
-    float zoom_delta = max(0.5f, std::floorf(zoom_factor * 0.25)) * mouse_steps;
+    float scaled_factor = static_cast<float>(static_cast<int>(zoom_factor * 0.25f));  // std::floorf
+    float zoom_delta = max(0.5f, scaled_factor) * mouse_steps;
     int zoom_percent = static_cast<int>((zoom_factor + zoom_delta) * 100);
     set_zoom(zoom_percent);
 
@@ -911,11 +977,25 @@ void ZoneMap::process_mouse_wheel(int16_t mouse_delta, uint16_t flags, int16_t m
     manual_screen_pt = wheel_pt;
 }
 
+void ZoneMap::process_on_move(const Zeal::EqUI::CXRect& rect) {
+    if (external_enabled || !map_interactive_enabled)  // Shouldn't happen but protect against.
+        return;
+
+    if (!is_autocenter_enabled())
+        manual_on_move_trigger = true;
+}
+
+void ZoneMap::process_on_resize(int width, int height) {
+    // Note: This is called with 0,0 by the external wndproc.
+    enable_autocenter();  // Not ideal but keeps map visible during resizing.
+}
+
 
 void ZoneMap::enable_autocenter() {
     // Auto-center is enabled by disabling manual mode with invalid values.
     manual_screen_pt = POINT({ .x = kInvalidScreenValue, .y = kInvalidScreenValue });
     manual_position = Vec3(0, 0, 0);
+    manual_on_move_trigger = false;
 }
 
 bool ZoneMap::is_autocenter_enabled() const {
@@ -1341,9 +1421,13 @@ void ZoneMap::render_update_marker_buffer(IDirect3DDevice8& device) {
     marker_vertex_buffer->Unlock();
 }
 
-RECT ZoneMap::calc_external_window_client_rect() {
-    max_viewport_width = 320;  // Safe defaults.
-    max_viewport_height = 320;
+// Get the monitor size for scaling the markers and a few other elements.
+void ZoneMap::update_external_window_max_viewport() {
+    if (!external_enabled)
+        return;
+
+    max_viewport_width = 640;  // Safe defaults.
+    max_viewport_height = 480;
     if (external_hwnd) {
         // Window exists. Dynamically query the current monitor for resolution.
         HMONITOR hmonitor = MonitorFromWindow(external_hwnd, MONITOR_DEFAULTTOPRIMARY);
@@ -1354,35 +1438,7 @@ RECT ZoneMap::calc_external_window_client_rect() {
             max_viewport_width = monitor_info.rcMonitor.right - monitor_info.rcMonitor.left;
             max_viewport_height = monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top;
         }
-    } 
-    else {
-        // Verify that the saved external_monitor offsets are valid and use to pick monitor.
-        POINT point{ .x = external_monitor_left_offset, .y = external_monitor_top_offset };
-        HMONITOR hmonitor = MonitorFromPoint(point, MONITOR_DEFAULTTONULL);
-        MONITORINFO monitor_info = { 0 };
-        monitor_info.cbSize = sizeof(monitor_info);
-        if (hmonitor != NULL && GetMonitorInfoA(hmonitor, &monitor_info)) {
-            max_viewport_width = monitor_info.rcMonitor.right - monitor_info.rcMonitor.left;
-            max_viewport_height = monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top;
-        }
-        else {
-            // Fallback to primary.
-            external_monitor_left_offset = 16;  // Client area, so leave a little margin.
-            external_monitor_top_offset = 16;
-            max_viewport_width = GetSystemMetrics(SM_CXSCREEN);
-            max_viewport_height = GetSystemMetrics(SM_CYSCREEN);
-        }
     }
-
-    const LONG rect_left = external_monitor_left_offset;
-    const LONG rect_right = external_monitor_left_offset +
-        static_cast<LONG>(std::ceil((map_rect_right - map_rect_left) * max_viewport_width));
-    const LONG rect_top = external_monitor_top_offset;
-    const LONG rect_bottom = external_monitor_top_offset + 
-        static_cast<LONG>(std::ceil((map_rect_bottom - map_rect_top)* max_viewport_height));
-
-    RECT win_rect = {.left = rect_left, .top = rect_top, .right = rect_right, .bottom = rect_bottom };
-    return win_rect;
 }
 
 // The external window message processing queue is not entirely functional, so
@@ -1393,13 +1449,7 @@ void ZoneMap::synchronize_external_window() {
     if (!enabled || !external_enabled || !external_hwnd)
         return;
 
-    // Moving the window between displays with different DPI triggers an
-    // auto-rescaling that we don't want, so monitor for it. Preferably 
-    // trigger this (or suppress the change) using windows message queue,
-    // or alternatively trigger on a monitor ID change.
-    RECT target_rect = calc_external_window_client_rect();  // Monitor resolution dependent.
-    int target_width = target_rect.right - target_rect.left;
-    int target_height = target_rect.bottom - target_rect.top;
+    update_external_window_max_viewport();
 
     // Keep offsets synchronized.
     POINT corner = { 0 };
@@ -1407,26 +1457,14 @@ void ZoneMap::synchronize_external_window() {
     external_monitor_left_offset = corner.x;
     external_monitor_top_offset = corner.y;
 
-    // First check if the Window itself needs to be resized.
+    // Then check if the Window itself needs to be resized.
     RECT win_rect = { 0 };
     GetClientRect(external_hwnd, &win_rect);
-    bool force_resize = ((win_rect.right - win_rect.left) != target_width) ||
-        ((win_rect.bottom - win_rect.top) != target_height);
-
-    if (force_resize) {
-        win_rect.left = external_monitor_left_offset;
-        win_rect.top = external_monitor_top_offset;
-        win_rect.right = win_rect.left + target_width;
-        win_rect.bottom = win_rect.top + target_height;
-        if (!AdjustWindowRectEx(&win_rect, WS_CAPTION, false, NULL))
-            Zeal::EqGame::print_chat("error adjusting window rect");
-        else
-            SetWindowPos(external_hwnd, NULL, win_rect.left, win_rect.top,
-                win_rect.right - win_rect.left, win_rect.bottom - win_rect.top, NULL);
-    }
+    external_monitor_height = win_rect.bottom - win_rect.top;
+    external_monitor_width = win_rect.right - win_rect.left;
 
     // And then check if the existing d3d framebuffer needs to be resized.
-    if (external_d3ddev && (viewport.Height != target_height || viewport.Width != target_width)) {
+    if (external_d3ddev && (viewport.Height != external_monitor_height || viewport.Width != external_monitor_width)) {
         external_d3ddev->Release();  // Note: Reset() didn't work, so just recreate.
         external_d3ddev = nullptr;
     }
@@ -1456,7 +1494,17 @@ bool ZoneMap::is_zlevel_change() const {
 void ZoneMap::callback_render() {
     process_external_window_messages();  // Handle even when map disabled.
 
-    if (!enabled || !Zeal::EqGame::is_in_game())
+    if (!enabled || !Zeal::EqGame::is_in_game() || !wnd)
+        return;
+
+    // Ensure render is not out of sync with the UI window state (e.g. title bar close).
+    if (!external_enabled && map_interactive_enabled && !ui_is_visible()) {
+        set_enabled(false, false);
+        return;
+    }
+
+    // Bail out early if the external window is minimized (iconic). 
+    if (external_enabled && IsIconic(external_hwnd))
         return;
 
     // The external window message queue isn't reliable for resize messages.
@@ -1481,6 +1529,9 @@ void ZoneMap::callback_render() {
         zone_id = target_zone_id;
         render_load_map(*device, *zone_map_data);
     }
+
+    if (!external_enabled && map_interactive_enabled && wnd && wnd->IsMinimized)
+        return;  // Allow load map but do not attempt to render when minimized.
 
     render_update_viewport(*device);  // Updates size and position of output viewport.
     render_update_transforms(*zone_map_data);  // Updates scaling, offsets, and clipping.
@@ -1674,24 +1725,25 @@ void ZoneMap::assemble_zone_map(const char* zone_name, CustomMapData& map_data) 
 }
 
 void ZoneMap::set_enabled(bool _enabled, bool update_default) {
+    _enabled = _enabled && (wnd != nullptr);  // Only allow enabling after init_ui.
     if (!_enabled) {
         render_release_resources();  // Also flush font for now.
-        zone_id = kInvalidZoneId;  // Triggers update when re-enabled.
         hide_external_window();
         ui_hide();
         restore_cursor();
     }
     else if (!enabled && external_enabled) {
         render_release_resources();  // Just in case cleanup.
-        zone_id = kInvalidZoneId;  // Triggers reload of map.
         if (!show_external_window()) {
             Zeal::EqGame::print_chat("Falling back to internal map overlay");
             external_enabled = false;
         }
     }
-    else if (!enabled && map_interactive_enabled) {
+    else if (!external_enabled && map_interactive_enabled) {
         ui_show();
     }
+    if (!enabled && _enabled)
+        zone_id = kInvalidZoneId;  // Triggers reload of map.
     enabled = _enabled;
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
@@ -1705,6 +1757,8 @@ void ZoneMap::set_external_enable(bool _external_enabled, bool update_default) {
         bool was_enabled = enabled;
         set_enabled(false, false);
         external_enabled = _external_enabled;
+        enable_autocenter();  // Sizes can be very different so reset.
+        reset_mouse();
         if (was_enabled)
             set_enabled(true, false);
     }
@@ -1733,16 +1787,21 @@ void ZoneMap::set_show_all_names_override(bool flag) {
 void ZoneMap::set_interactive_enable(bool enable, bool update_default) {
     map_interactive_enabled = enable;
     if (map_interactive_enabled) {
-        if (!external_enabled)
+        if (enabled && !external_enabled)
             ui_show();
     }
     else {
         ui_hide();
-        enable_autocenter();
-        reset_mouse();
+        if (!external_enabled) {
+            enable_autocenter();
+            reset_mouse();
+        }
     }
 
-    // Not currently supporting a persistent setting.
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapInteractiveEnabled", map_interactive_enabled);
+
+    update_ui_options();
 }
 
 void ZoneMap::set_show_grid(bool enable, bool update_default) {
@@ -1824,7 +1883,7 @@ bool ZoneMap::set_name_length(int new_length, bool update_default) {
 
 bool ZoneMap::set_font(std::string font_name, bool update_default) {
     release_font();  // Triggers update / reload.  Note that reload could fail later.
-    font_filename = font_name.empty() ? std::string("default") : font_name;
+    font_filename = font_name.empty() ? std::string(BitmapFont::kDefaultFontName) : font_name;
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<std::string>("Zeal", "MapFontFilename", font_filename);
@@ -1982,6 +2041,14 @@ void ZoneMap::clear_markers(bool erase_list) {
 }
 
 void ZoneMap::set_marker(int y, int x, const char* label) {
+    // Only allow markers that are within the zone map data limits.
+    // Note the y and x are in location (position) negated coords.
+    const ZoneMapData* zone_map_data = get_zone_map(zone_id);
+    if (!zone_map_data ||
+        (-x < zone_map_data->min_x || -x > zone_map_data->max_x ||
+        -y < zone_map_data->min_y || -y > zone_map_data->max_y))
+        return;
+
     clear_markers(false);  // Reset visible markers but don't empty list.
 
     // Convert nullptr labels to position labels.
@@ -1994,9 +2061,17 @@ void ZoneMap::set_marker(int y, int x, const char* label) {
     markers_list.push_back({ .loc_y = y, .loc_x = x, .label = std::string(label)});
 }
 
+bool ZoneMap::set_map_zoom_default_index(int new_index, bool update_default) {
+    map_zoom_default_index = max(0, min(kNumDefaultZoomFactors - 1, new_index));
+    set_zoom(static_cast<int>(100 * kDefaultZoomFactors[map_zoom_default_index] + 0.5f));   // Also triggers update_ui_options();
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<int>("Zeal", "MapZoomDefaultIndex", map_zoom_default_index);
+
+    return true;  // Just clamp and report success.
+}
+
 void ZoneMap::toggle_zoom() {
-    const int kNumDefaultZoomFactors = 4;
-    const float kDefaultZoomFactors[kNumDefaultZoomFactors] = { 2.f, 4.f, 8.f };
 
     // Assumes zoom factors are monotonic and look for the first zoom higher
     // than the current state.  Wraps back to 100% if beyond max zoom.
@@ -2008,9 +2083,8 @@ void ZoneMap::toggle_zoom() {
         }
     }
     clear_markers(false);  // Marker size is dependent on scale_factor.
-    if (!is_autocenter_enabled()) {  // Toggle back to auto-center at 1x zoom.
+    if (!is_autocenter_enabled()) {  // Toggle back to auto-center.
         enable_autocenter();
-        zoom_factor = 1.f;
     }
     zoom_factor = new_zoom_factor;
     enable_autocenter(); 
@@ -2030,12 +2104,20 @@ void ZoneMap::load_ini(IO_ini* ini)
 {
     if (!ini->exists("Zeal", "MapEnabled"))
         ini->setValue<bool>("Zeal", "MapEnabled", false);
+    if (!ini->exists("Zeal", "MapInteractiveEnabled"))
+        ini->setValue<bool>("Zeal", "MapInteractiveEnabled", false);
     if (!ini->exists("Zeal", "MapExternalEnabled"))
         ini->setValue<bool>("Zeal", "MapExternalEnabled", false);
     if (!ini->exists("Zeal", "MapExternalLeftOffset"))
         ini->setValue<int>("Zeal", "MapExternalLeftOffset", 16);
     if (!ini->exists("Zeal", "MapExternalTopOffset"))
         ini->setValue<int>("Zeal", "MapExternalTopOffset", 16);
+    if (!ini->exists("Zeal", "MapExternalWidth"))
+        ini->setValue<int>("Zeal", "MapExternalWidth", 640);
+    if (!ini->exists("Zeal", "MapExternalHeight"))
+        ini->setValue<int>("Zeal", "MapExternalHeight", 640);
+    if (!ini->exists("Zeal", "MapZoomDefaultIndex"))
+        ini->setValue<int>("Zeal", "MapZoomDefaultIndex", 0);
     if (!ini->exists("Zeal", "MapShowRaid"))
         ini->setValue<bool>("Zeal", "MapShowRaid", false);
     if (!ini->exists("Zeal", "MapShowGrid"))
@@ -2058,29 +2140,23 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<int>("Zeal", "MapLabelsMode", static_cast<int>(LabelsMode::kOff));
     if (!ini->exists("Zeal", "MapShowGroupMode"))
         ini->setValue<int>("Zeal", "MapShowGroupMode", static_cast<int>(ShowGroupMode::kOff));
-    if (!ini->exists("Zeal", "MapRectTop"))
-        ini->setValue<float>("Zeal", "MapRectTop", kDefaultRectTop);
-    if (!ini->exists("Zeal", "MapRectLeft"))
-        ini->setValue<float>("Zeal", "MapRectLeft", kDefaultRectLeft);
-    if (!ini->exists("Zeal", "MapRectBottom"))
-        ini->setValue<float>("Zeal", "MapRectBottom", kDefaultRectBottom);
-    if (!ini->exists("Zeal", "MapRectRight"))
-        ini->setValue<float>("Zeal", "MapRectRight", kDefaultRectRight);
     if (!ini->exists("Zeal", "MapPositionSize"))
         ini->setValue<float>("Zeal", "MapPositionSize", kDefaultPositionSize);
     if (!ini->exists("Zeal", "MapMarkerSize"))
         ini->setValue<float>("Zeal", "MapMarkerSize", kDefaultMarkerSize);
     if (!ini->exists("Zeal", "MapFontFilename"))
-        ini->setValue<std::string>("Zeal", "MapFontFilename", std::string("default"));
+        ini->setValue<std::string>("Zeal", "MapFontFilename", std::string(BitmapFont::kDefaultFontName));
 
     // TODO: Protect against corrupted ini file (like a boolean instead of float).
-    enabled = ini->getValue<bool>("Zeal", "MapEnabled");
+    enabled = false;  // Disable and use reenable to make it a pending flag.
+    reenable_on_zone = ini->getValue<bool>("Zeal", "MapEnabled");
+    map_interactive_enabled = ini->getValue<bool>("Zeal", "MapInteractiveEnabled");
     external_enabled = ini->getValue<bool>("Zeal", "MapExternalEnabled");
-    // Force map to start up disabled in external window mode, which will require a manual
-    // enable that will happen after the primary EQ D3D is setup and running.
-    enabled = enabled && !external_enabled;
     external_monitor_left_offset = ini->getValue<int>("Zeal", "MapExternalLeftOffset");
     external_monitor_top_offset = ini->getValue<int>("Zeal", "MapExternalTopOffset");
+    external_monitor_width = ini->getValue<int>("Zeal", "MapExternalWidth");
+    external_monitor_height = ini->getValue<int>("Zeal", "MapExternalHeight");
+    map_zoom_default_index = ini->getValue<int>("Zeal", "MapZoomDefaultIndex");
     map_show_raid = ini->getValue<bool>("Zeal", "MapShowRaid");
     map_show_grid = ini->getValue<bool>("Zeal", "MapShowGrid");
     map_grid_pitch = ini->getValue<int>("Zeal", "MapGridPitch");
@@ -2092,10 +2168,6 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_alignment_state = AlignmentType::e(ini->getValue<int>("Zeal", "MapAlignment"));
     map_labels_mode = LabelsMode::e(ini->getValue<int>("Zeal", "MapLabelsMode"));
     map_show_group_mode = ShowGroupMode::e(ini->getValue<int>("Zeal", "MapShowGroupMode"));
-    map_rect_top = ini->getValue<float>("Zeal", "MapRectTop");
-    map_rect_left = ini->getValue<float>("Zeal", "MapRectLeft");
-    map_rect_bottom = ini->getValue<float>("Zeal", "MapRectBottom");
-    map_rect_right = ini->getValue<float>("Zeal", "MapRectRight");
     position_size = ini->getValue<float>("Zeal", "MapPositionSize");
     marker_size = ini->getValue<float>("Zeal", "MapMarkerSize");
     font_filename = ini->getValue<std::string>("Zeal", "MapFontFilename");
@@ -2107,19 +2179,16 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_background_state = max(BackgroundType::kFirst, min(BackgroundType::kLast, map_background_state));
     map_background_alpha = max(0, min(1.f, map_background_alpha));
     map_faded_zlevel_alpha = max(0, min(1.f, map_faded_zlevel_alpha));
+    map_zoom_default_index = max(0, min(kNumDefaultZoomFactors, map_zoom_default_index));
     map_alignment_state = max(AlignmentType::kFirst, min(AlignmentType::kLast, map_alignment_state));
     map_labels_mode = max(LabelsMode::kFirst, min(LabelsMode::kLast, map_labels_mode));
     map_show_group_mode = max(ShowGroupMode::kFirst, min(ShowGroupMode::kLast, map_show_group_mode));
-    if (map_rect_top < 0 || map_rect_top > map_rect_bottom || map_rect_bottom > 1) {
-        map_rect_top = kDefaultRectTop;
-        map_rect_bottom = kDefaultRectBottom;
-    }
-    if (map_rect_left < 0 || map_rect_left > map_rect_right || map_rect_right > 1) {
-        map_rect_left = kDefaultRectLeft;
-        map_rect_right = kDefaultRectRight;
-    }
     position_size = max(0.01f, min(kMaxPositionSize, position_size));
     marker_size = max(0.01f, min(kMaxMarkerSize, marker_size));
+
+    // Not checking the external monitor left and top since virtual screens can be negative.
+    external_monitor_width = max(kWinMinSize, external_monitor_width);
+    external_monitor_height = max(kWinMinSize, external_monitor_height);
 }
 
 void ZoneMap::save_ini()
@@ -2131,9 +2200,13 @@ void ZoneMap::save_ini()
         return;
 
     ini->setValue<bool>("Zeal", "MapEnabled", enabled);
+    ini->setValue<bool>("Zeal", "MapInteractiveEnabled", map_interactive_enabled);
     ini->setValue<bool>("Zeal", "MapExternalEnabled", external_enabled);
     ini->setValue<int>("Zeal", "MapExternalLeftOffset", external_monitor_left_offset);
     ini->setValue<int>("Zeal", "MapExternalTopOffset", external_monitor_top_offset);
+    ini->setValue<int>("Zeal", "MapExternalWidth", external_monitor_width);
+    ini->setValue<int>("Zeal", "MapExternalHeight", external_monitor_height);
+    ini->setValue<int>("Zeal", "MapZoomDefaultIndex", map_zoom_default_index);
     ini->setValue<bool>("Zeal", "MapShowRaid", map_show_raid);
     ini->setValue<bool>("Zeal", "MapShowGrid", map_show_grid);
     ini->setValue<int>("Zeal", "MapGridPitch", map_grid_pitch);
@@ -2145,10 +2218,6 @@ void ZoneMap::save_ini()
     ini->setValue<int>("Zeal", "MapAlignment", static_cast<int>(map_alignment_state));
     ini->setValue<int>("Zeal", "MapLabelsMode", static_cast<int>(map_labels_mode));
     ini->setValue<int>("Zeal", "MapShowGroupMode", static_cast<int>(map_show_group_mode));
-    ini->setValue<float>("Zeal", "MapRectTop", map_rect_top);
-    ini->setValue<float>("Zeal", "MapRectLeft", map_rect_left);
-    ini->setValue<float>("Zeal", "MapRectBottom", map_rect_bottom);
-    ini->setValue<float>("Zeal", "MapRectRight", map_rect_right);
     ini->setValue<float>("Zeal", "MapPositionSize", position_size);
     ini->setValue<float>("Zeal", "MapMarkerSize", marker_size); 
     ini->setValue<std::string>("Zeal", "MapFontFilename",
@@ -2156,67 +2225,38 @@ void ZoneMap::save_ini()
 }
 
 void ZoneMap::update_ui_options() {
-    if (ZealService::get_instance() && ZealService::get_instance()->ui
+    if (wnd != nullptr && ZealService::get_instance() && ZealService::get_instance()->ui
                     && ZealService::get_instance()->ui->options)
        ZealService::get_instance()->ui->options->UpdateOptionsMap();
 }
 
-bool ZoneMap::set_map_top(int top_percent, bool update_default, bool preserve_height) {
-    float new_top = top_percent / 100.f;
-    float bottom = preserve_height ? (new_top + (map_rect_bottom - map_rect_top)) : map_rect_bottom;
-    return set_map_rect(new_top, map_rect_left, bottom, map_rect_right, update_default);
-}
+bool ZoneMap::set_map_rect(float top, float left, float bottom, float right) {
+    if (!max_viewport_width || !max_viewport_height)
+        return false;
 
-bool ZoneMap::set_map_left(int left_percent, bool update_default, bool preserve_width) {
-    float new_left = left_percent / 100.f;
-    float right = preserve_width ? (new_left + (map_rect_right - map_rect_left)) : map_rect_right;
-    return set_map_rect(map_rect_top, new_left, map_rect_bottom, right, update_default);
-}
+    if (!wnd || wnd->IsMinimized || external_enabled)
+        return false;
 
-bool ZoneMap::set_map_bottom(int bottom_percent, bool update_default) {
-    return set_map_rect(map_rect_top, map_rect_left, bottom_percent / 100.f, map_rect_right, update_default);
-}
-
-bool ZoneMap::set_map_height(int height_percent, bool update_default) {
-    return set_map_rect(map_rect_top, map_rect_left, map_rect_top + height_percent / 100.f, map_rect_right, update_default);
-}
-
-bool ZoneMap::set_map_right(int right_percent, bool update_default) {
-    return set_map_rect(map_rect_top, map_rect_left, map_rect_bottom, right_percent / 100.f, update_default);
-}
-
-bool ZoneMap::set_map_width(int width_percent, bool update_default) {
-    return set_map_rect(map_rect_top, map_rect_left, map_rect_bottom, map_rect_left + width_percent / 100.f, update_default);
-}
-
-bool ZoneMap::set_map_rect(float top, float left, float bottom, float right, bool update_default) {
-    const float kMinimumDimension = 0.1f;
-    top = max(0.f, min(1.f, top));
-    left = max(0.f, min(1.f, left));
-    bottom = max(0.f, min(1.f, bottom));
-    right = max(0.f, min(1.f, right));
-    if ((top > bottom - kMinimumDimension) || (left > right - kMinimumDimension)) {
-        update_ui_options();
+    int top_edge = static_cast<int>(max(0.f, min(1.f, top)) * max_viewport_height);
+    int left_edge = static_cast<int>(max(0.f, min(1.f, left)) * max_viewport_width);
+    int bottom_edge = static_cast<int>(max(0.f, min(1.f, bottom)) * max_viewport_height);
+    int right_edge = static_cast<int>(max(0.f, min(1.f, right)) * max_viewport_width);
+    if ((bottom_edge - top_edge < kWinMinSize) || (right_edge - left_edge < kWinMinSize)) {
         return false;  // Reject if not at least minimum size.
     }
+    map_client_rect = Zeal::EqUI::CXRect(left_edge, top_edge, right_edge, bottom_edge);
 
-    map_rect_top = top;
-    map_rect_left = left;
-    map_rect_bottom = bottom;
-    map_rect_right = right;
+    // Update the UI window's size to match (with padding).
+    Zeal::EqUI::CXRect rect;
+    Zeal::EqGame::EqGameInternal::CXWndGetClientRect(wnd, 0, &rect);
+    rect.Left = rect.Left - wnd->Location.Left;
+    rect.Top = rect.Top - wnd->Location.Top;
+    rect.Right = rect.Right - wnd->Location.Right;
+    rect.Bottom = rect.Bottom - wnd->Location.Bottom;
+    Zeal::EqGame::EqGameInternal::CXWndMoveAndInvalidate(wnd, 0, left_edge - rect.Left, top_edge - rect.Top,
+        right_edge - rect.Right, bottom_edge - rect.Bottom);
 
-    render_release_resources(false);  // Invalidate buffers but leave font (slewing map size).
-    zone_id = kInvalidZoneId;  // Triggers reload.
     enable_autocenter();  // Manual screen coordinates are invalid. Just flush.
-
-    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini) {
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectTop", top);
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectLeft", left);
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectBottom", bottom);
-        ZealService::get_instance()->ini->setValue<float>("Zeal", "MapRectRight", right);
-    }
-    update_ui_options();
-
     return true;
 }
 
@@ -2240,7 +2280,7 @@ void ZoneMap::parse_rect(const std::vector<std::string>& args) {
             break;
     }
 
-    if ((tlbr.size() != 4) || !set_map_rect(tlbr[0] / 100.f, tlbr[1] / 100.f, tlbr[2] / 100.f, tlbr[3] / 100.f, false))
+    if ((tlbr.size() != 4) || !set_map_rect(tlbr[0] / 100.f, tlbr[1] / 100.f, tlbr[2] / 100.f, tlbr[3] / 100.f))
     {
         Zeal::EqGame::print_chat("Usage: /map rect <top> <left> <bottom> <right> (percent of screen dimensions)");
         Zeal::EqGame::print_chat("Example: /map rect 10 20 50 65");
@@ -2261,7 +2301,7 @@ void ZoneMap::parse_size(const std::vector<std::string>& args) {
 
     if ((tlhw.size() != 4) || !set_map_rect(tlhw[0] / 100.f, tlhw[1] / 100.f,
         (tlhw[0] + tlhw[2]) / 100.f,    // Convert height to bottom (top + height).
-        (tlhw[1] + tlhw[3]) / 100.f, false))   // And width to right (left + width).
+        (tlhw[1] + tlhw[3]) / 100.f))   // And width to right (left + width).
     {
         Zeal::EqGame::print_chat("Usage: /map size <top> <left> <height> <width> (percent of screen dimensions)");
         Zeal::EqGame::print_chat("Example: /map size 10 20 40 45");
@@ -2534,11 +2574,11 @@ void ZoneMap::parse_ring(const std::vector<std::string>& args) {
 void ZoneMap::parse_font(const std::vector<std::string>& args) {
     if (args.size() == 3) {
         set_font(args[2]);
-        Zeal::EqGame::print_chat("Setting font to: %s", args[2].c_str());
+        Zeal::EqGame::print_chat("Setting map font to: %s", args[2].c_str());
         return;
     }
     Zeal::EqGame::print_chat("Usage: /map font <name> (%s/<name>%s)",
-                                    kFontDirectoryPath, kFontFileExtension);
+                              BitmapFont::kFontDirectoryPath, BitmapFont::kFontFileExtension);
     Zeal::EqGame::print_chat("Available fonts:");
     auto fonts = get_available_fonts();
     for (const auto& font : fonts)
@@ -2658,14 +2698,22 @@ void print_matrix(const D3DMATRIX& matrix, const char* name) {
 }
 
 void ZoneMap::dump() {
-    Zeal::EqGame::print_chat("enabled: %i, background: %i (%.2f), grid: %i, align: %i, labels:%i, zone: %i, show: %i",
-                            enabled, map_background_state, map_background_alpha, map_show_grid ? map_grid_pitch : 0,
-                            map_alignment_state, map_labels_mode, zone_id, show_zone_id);
+    Zeal::EqGame::print_chat("-----Map-----");
+    Zeal::EqGame::print_chat("enabled: %i, inter_enable: %i, ext_enable: %i, reenable: %i, zone_id: %i",
+        enabled, map_interactive_enabled, external_enabled, reenable_on_zone, zone_id);
+    Zeal::EqGame::print_chat("background: %i (%.2f), grid: %i, align: %i, labels:%i, show_zone: %i",
+        map_background_state, map_background_alpha, map_show_grid ? map_grid_pitch : 0,
+        map_alignment_state, map_labels_mode, show_zone_id);
     Zeal::EqGame::print_chat("num_markers: %i, num_labels: %i, name_length: %i, ring: %i",
             markers_list.size(), labels_list.size(), map_name_length, map_ring_radius);
     Zeal::EqGame::print_chat("view: t: %i, l: %i, h: %i, w: %i, Max H: %i, W: %i", 
         viewport.Y, viewport.X, viewport.Height, viewport.Width, max_viewport_height, max_viewport_width);
-    Zeal::EqGame::print_chat("rect: t: %f, l: %f, b: %f, r: %f", map_rect_top, map_rect_left, map_rect_bottom, map_rect_right);
+    if (wnd) {
+        const Zeal::EqUI::CXRect& loc = wnd->IsMinimized ? wnd->LocationPlaceholder : wnd->Location;
+        Zeal::EqGame::print_chat("wnd: t: %i, l: %i, b: %i, r: %i", loc.Top, loc.Left, loc.Bottom, loc.Right);
+    }
+    Zeal::EqGame::print_chat("client: t: %i, l: %i, b: %i, r: %i", 
+        map_client_rect.Top, map_client_rect.Left, map_client_rect.Bottom, map_client_rect.Right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_min_y, clip_min_x, clip_max_y, clip_max_x);
     Zeal::EqGame::print_chat("level: index: %i, z_max: %i, z_min: %i, faded_alpha: %.2f",
                                 map_level_index, clip_max_z, clip_min_z, map_faded_zlevel_alpha);
@@ -2678,10 +2726,10 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("line_count: %i, grid: %i, line: %i, position: %i, marker: %i, font: %i (%s)", line_count,
         grid_line_count, line_vertex_buffer != nullptr, position_vertex_buffer != nullptr, marker_vertex_buffer != nullptr,
         bitmap_font != nullptr, font_filename.c_str());
-    Zeal::EqGame::print_chat("interactive: %i, (%i, %i) = (%f, %f)", map_interactive_enabled,
-                    manual_screen_pt.x, manual_screen_pt.y, manual_position.x, manual_position.y);
-    Zeal::EqGame::print_chat("external_monitor_left_offset: %i, monitor_left_offset: %i, monitor_top_offset: %i",
-        external_enabled, external_monitor_left_offset, external_monitor_top_offset);
+    Zeal::EqGame::print_chat("interactive: (%i, %i) = (%f, %f), mouse: (%i, %i)", manual_screen_pt.x,
+                   manual_screen_pt.y, manual_position.x, manual_position.y, mouse_pt.x, mouse_pt.y);
+    Zeal::EqGame::print_chat("external: enabled: %i, left: %i, top: %i, width: %i, height: %i",
+        external_enabled, external_monitor_left_offset, external_monitor_top_offset, external_monitor_width, external_monitor_height);
     Zeal::EqGame::print_chat("hinstance: 0x%08x, hwnd: 0x%08x, d3d: 0x%08x, d3ddev: 0x%08x",
         reinterpret_cast<uint32_t>(external_hinstance), reinterpret_cast<uint32_t>(external_hwnd),
         reinterpret_cast<uint32_t>(external_d3d), reinterpret_cast<uint32_t>(external_d3ddev));
@@ -2788,15 +2836,21 @@ void ZoneMap::reset_zone_state() {
     clear_markers(true);
     dynamic_labels_list.clear();
     map_level_index = 0;
-    zoom_factor = 1.f;  // Reset for more consistent behavior.
+    zoom_factor = kDefaultZoomFactors[map_zoom_default_index];  // Reset for consistent behavior.
     map_ring_radius = 0;  // Disable since skill-based range is zone dependent.
+    manual_on_move_trigger = false;
     reset_mouse();
     enable_autocenter();
 }
 
 void ZoneMap::callback_zone() {
+    if (!wnd)
+        return;  // Block calls until init_ui has been called.
+
     reset_zone_state();
-    set_interactive_enable(false, false);  // Also reset for consistency.
+    if (enabled || reenable_on_zone)
+        set_enabled(true, false);  // Calls ui_show() and syncs enable state.
+    reenable_on_zone = false;
 }
 
 void ZoneMap::release_font() {
@@ -2813,43 +2867,7 @@ void ZoneMap::callback_dx_reset() {
 }
 
 
-bool ZoneMap::ui_is_visible() const {
-    if (!wnd)
-        return false;
-    return wnd->IsVisible;
-}
-
-void ZoneMap::ui_hide()
-{
-    if (wnd) {
-        wnd->show(0, 0);
-        wnd->IsVisible = false;
-    }
-}
-
-bool ZoneMap::ui_show()
-{
-    if (!wnd || wnd->IsVisible)
-        return false;
-    wnd->show(0, 1);
-    wnd->IsVisible = true;
-    return true;
-}
-
-void ZoneMap::ui_clean()
-{
-    if (wnd)
-    {
-        wnd->show(0, 0);
-        wnd->Deconstruct();
-        wnd = nullptr;
-    }
-}
-void ZoneMap::ui_deactivate()
-{
-    ui_hide();
-}
-
+// SidlScreenWnd vtable function definitions
 
 // Disable drawing a background (make it transparent).
 static int __fastcall DrawBackground(Zeal::EqUI::EQWND* wnd, int unusedEDX) {
@@ -2874,6 +2892,12 @@ static int __fastcall HandleLButtonDown(Zeal::EqUI::EQWND* wnd, int unusedEDX, i
 
 // Use the mouse right button down event since it has undergone proper zlayer window filtering.
 static int __fastcall HandleRButtonDown(Zeal::EqUI::EQWND* wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, uint32_t unused3) {
+    // Need to manually do a simple hit test for a right click in the title bar region.
+    Zeal::EqUI::CXRect rect;
+    Zeal::EqGame::EqGameInternal::CXWndGetClientRect(wnd, 0, &rect);
+    if (mouse_y < rect.Top)
+        return Zeal::EqGame::EqGameInternal::CXWndHandleRButtonDown(wnd, unusedEDX, mouse_x, mouse_y, unused3);
+
     ZealService* zeal = ZealService::get_instance();
     if (zeal && zeal->zone_map)
         zeal->zone_map->process_right_mouse_button_down(mouse_x, mouse_y);
@@ -2893,44 +2917,169 @@ static int __fastcall DropMouseUpdate(Zeal::EqUI::EQWND* wnd, int unusedEDX, int
     return 0;
 }
 
-void ZoneMap::ui_init()
+// Note: This is not called through the normal handler by the client infrastructure. Instead we call it
+// explicitly for now in ui_deactivate().
+static void __fastcall Deactivate(Zeal::EqUI::EQWND* wnd, int unusedEDX) {
+    wnd->show(0, false);
+    return;
+}
+
+// Could be used to detect the map getting closed by the title bar button.
+static int __fastcall OnShow(Zeal::EqUI::EQWND* wnd, int unusedEDX) {
+    return Zeal::EqGame::EqGameInternal::CSidlScreenWndOnShow(wnd, unusedEDX);
+}
+
+static int __fastcall OnMove(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect rect) {
+    //Zeal::EqGame::print_chat("OnMove: l: %i t: %i r: %i b: %i", rect.Left, rect.Top, rect.Right, rect.Bottom);
+    ZealService* zeal = ZealService::get_instance();
+    if (zeal && zeal->zone_map)
+        zeal->zone_map->process_on_move(rect);
+    return 0;  // The default CXWnd::OnMove() just returns 0.
+}
+
+// Constrain the size to reasonable minimums.  Also verified during rendering.
+static int __fastcall OnResize(Zeal::EqUI::EQWND* wnd, int unusedEDX, int width, int height) {
+    //Zeal::EqGame::print_chat("OnResize: %i x %i", width, height);
+    width = max(width, kWinMinSize);
+    height = max(height, kWinMinSize);
+    ZealService* zeal = ZealService::get_instance();
+    if (zeal && zeal->zone_map)
+        zeal->zone_map->process_on_resize(width, height);
+    return Zeal::EqGame::EqGameInternal::CXWndOnResize(wnd, unusedEDX, width, height);
+}
+
+// Hooked to characterize and to allow debug printing when desired.
+static void __fastcall OnMinimizeBox(Zeal::EqUI::EQWND* wnd, int unusedEDX) {
+    Zeal::EqGame::EqGameInternal::CXWndOnMinimizeBox(wnd, unusedEDX);
+}
+
+// Not currently getting called by the framework.  Base class does nothing anyways.
+static int __fastcall OnActivate(Zeal::EqUI::EQWND* wnd, int unusedEDX) {
+    return Zeal::EqGame::EqGameInternal::CXWndOnActivate(wnd, unusedEDX);
+}
+
+// Hooked to characterize.
+static int __fastcall AboutToDeleteWnd(Zeal::EqUI::EQWND* wnd, int unusedEDX) {
+    return Zeal::EqGame::EqGameInternal::CXWndAboutToDeleteWnd(wnd, unusedEDX);
+}
+
+// Hooked to characterize and to allow debug printing when desired.
+static Zeal::EqUI::CXRect* __fastcall GetMinimizedRect(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect* rect) {
+    return Zeal::EqGame::EqGameInternal::CXWndGetMinimizedRect(wnd, unusedEDX, rect);
+}
+
+// Hooked to characterize and to allow debug printing when desired.
+static void __fastcall StoreIniInfo(Zeal::EqUI::EQWND* wnd, int unusedEDX) {
+    Zeal::EqGame::EqGameInternal::CSidlScreenWndStoreIniInfo(wnd, unusedEDX);
+}
+
+// This callback is required since the Map window isn't tied into the EQ window list for creation. The
+// code goes through and allocates memory and then calls the constructor of each sidl window. The
+// ui CreateSidlScreen function handles that by creating a base SidlScreenWnd.
+void ZoneMap::callback_init_ui()
+{
+    static const char* xml_file = "./uifiles/zeal/EQUI_ZealMap.xml";
+    if (!wnd && std::filesystem::exists(xml_file) && ZealService::get_instance()->ui)
+        wnd = ZealService::get_instance()->ui->CreateSidlScreenWnd("ZealMap");
+
+    if (!wnd) {
+        Zeal::EqGame::print_chat("Error: Failed to load %s", xml_file);
+        return;
+    }
+
+    auto* vtbl = static_cast<Zeal::EqUI::SidlScreenWndVTable*>(wnd->vtbl);
+    vtbl->DrawBackground = DrawBackground;
+    vtbl->HandleWheelMove = HandleWheelMove;
+    vtbl->HandleMouseMove = DropMouseUpdate;
+    vtbl->HandleLButtonDown = HandleLButtonDown;
+    vtbl->HandleLButtonUp = DropMouseUpdate;
+    vtbl->HandleLButtonHeld = DropMouseUpdate;
+    vtbl->HandleLButtonUpAfterHeld = DropMouseUpdate;
+    vtbl->HandleRButtonDown = HandleRButtonDown;
+    vtbl->HandleRButtonUp = DropMouseUpdate;
+    vtbl->HandleRButtonHeld = DropMouseUpdate;
+    vtbl->HandleRButtonUpAfterHeld = DropMouseUpdate;
+    vtbl->HandleWheelButtonDown = HandleWheelButtonDown;
+    vtbl->Deactivate = Deactivate;
+    vtbl->OnShow = OnShow;
+    vtbl->OnMove = OnMove;
+    vtbl->OnResize = OnResize;
+    vtbl->OnMinimizeBox = OnMinimizeBox;
+    vtbl->GetMinimizedRect = GetMinimizedRect;
+    vtbl->OnActivate = OnActivate;
+    vtbl->AboutToDeleteWnd = AboutToDeleteWnd;
+    vtbl->StoreIniInfo = StoreIniInfo;
+
+    // Add sanity check constraints on the window size.
+    if ((wnd->Location.Right - wnd->Location.Left < kWinMinSize) ||
+        (wnd->Location.Bottom - wnd->Location.Top) < kWinMinSize) {
+        Zeal::EqGame::EqGameInternal::CXWndMoveAndInvalidate(wnd, 0, 0, 0, kWinMinSize, kWinMinSize);
+    }
+
+    // Re-initialize to defaults on every reload (after character select). Also lets the enable arm.
+    if (ZealService::get_instance() && ZealService::get_instance()->ini
+        && ZealService::get_instance()->ini.get())
+        load_ini(ZealService::get_instance()->ini.get());
+    else
+        Zeal::EqGame::print_chat("Error: Failed to load map ini options");
+
+    // The EnterZone hook gets called before the init_ui() callback, so call it here after the wnd has
+    // been generated so we can support enabling windows by default.
+    callback_zone();
+}
+ 
+
+bool ZoneMap::ui_is_visible() const {
+    if (!wnd)
+        return false;
+    return wnd->IsVisible;
+}
+
+void ZoneMap::ui_hide()
+{
+    if (wnd)
+        Deactivate(wnd, 0);
+}
+
+bool ZoneMap::ui_show()
 {
     if (!wnd)
-    {
-        static const char* xml_file = "./uifiles/zeal/EQUI_ZealMap.xml";
-        if (std::filesystem::exists(xml_file))
-        {
-            wnd = ZealService::get_instance()->ui->CreateSidlScreenWnd("ZealMap");
-            wnd->IsLocked = true;
-            wnd->AlphaTransparency = 5;
-            wnd->FadeDelay = 1000;
-            wnd->FadeDuration = 350;
-            wnd->FadedAlpha = 0;
-            wnd->UnfadedAlpha = 255;
-            wnd->vtbl->DrawBackground = DrawBackground;
-            wnd->vtbl->HandleWheelMove = HandleWheelMove;
-            wnd->vtbl->HandleMouseMove = DropMouseUpdate;
-            wnd->vtbl->HandleLButtonDown = HandleLButtonDown;
-            wnd->vtbl->HandleLButtonUp = DropMouseUpdate;
-            wnd->vtbl->HandleLButtonHeld = DropMouseUpdate;
-            wnd->vtbl->HandleLButtonUpAfterHeld = DropMouseUpdate;
-            wnd->vtbl->HandleRButtonDown = HandleRButtonDown;
-            wnd->vtbl->HandleRButtonUp = DropMouseUpdate;
-            wnd->vtbl->HandleRButtonHeld = DropMouseUpdate;
-            wnd->vtbl->HandleRButtonUpAfterHeld = DropMouseUpdate;
-            wnd->vtbl->HandleWheelButtonDown = HandleWheelButtonDown;  // This is not obviously in-use by eqgame.exe code.
-        }
-        else
-        {
-            Zeal::EqGame::print_chat("Error: Failed to load %s", xml_file);
-            return;
-        }
+        return false;
+    if (!wnd->IsVisible)
+        wnd->show(1, false);
+    return wnd->IsVisible;
+}
+
+// This callback is required since the Map window isn't tied into the EQ window list for destruction.
+// ui_clean() goes through a list of UI elements calling their destructors and nulling the pointers.
+// - Called at StartingCharacterSelection for the new UI and looks like when switching to gamestate == 2
+void ZoneMap::callback_clean_ui()
+{
+    if (wnd) {
+        // We assume that deactivate_ui() was called by the framework already (so not needed here).
+        ZealService::get_instance()->ui->DestroySidlScreenWnd(wnd);
+        wnd = nullptr;  // Disables map rendering until another ui_init().
+    }
+
+    hide_external_window();  // Also take advantage to shut down the external window.
+}
+
+// This callback is required since the Map window isn't tied into the EQ window list for deactivation.
+// The client code just cycles through that list invoking the Deactivate handler (0x88).
+// -ui_deactivate() is called at least once before ui_init() is first called. It is
+// also called on exiting a zone.
+void ZoneMap::callback_deactivate_ui()
+{
+    if (wnd) {
+        if (enabled && map_interactive_enabled && ui_is_visible())
+            reenable_on_zone = true;  // Arm it to re-enable if we enter a new zone.
+
+        Deactivate(wnd, 0);  // Directly call the vtbl entry we populate in init.
     }
 }
 
 ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
 {
-    load_ini(ini);
     zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
     zeal->callbacks->AddGeneric([this]() { callback_dx_reset(); }, callback_type::DXReset);
     zeal->callbacks->AddGeneric([this]() { callback_zone(); }, callback_type::Zone);
@@ -2939,11 +3088,11 @@ ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
             return parse_command(args);
         });
 
-    zeal->callbacks->AddGeneric([this]() { ui_clean(); }, callback_type::CleanUI);
-    zeal->callbacks->AddGeneric([this]() { ui_init(); }, callback_type::InitUI);
-    zeal->callbacks->AddGeneric([this]() { ui_deactivate(); }, callback_type::DeactivateUI);
+    zeal->callbacks->AddGeneric([this]() { callback_clean_ui(); }, callback_type::CleanUI);
+    zeal->callbacks->AddGeneric([this]() { callback_init_ui(); }, callback_type::InitUI);
+    zeal->callbacks->AddGeneric([this]() { callback_deactivate_ui(); }, callback_type::DeactivateUI);
 
-    zeal->ui->AddXmlInclude("EQUI_ZealMap.xml");
+    zeal->ui->AddXmlInclude("EQUI_ZealMap.xml");  // Required for the SIDL values to load properly.
 }
 
 ZoneMap::~ZoneMap()
@@ -3040,46 +3189,61 @@ void process_key(uint32_t vk_key, bool key_down) {
     }
 }
 
-
 // Window processing logic.  Note that the primary game window is using DirectInput for the keyboard and mouse,
 // and trying to set the cooperative level of the keyboard failed to re-route input back to the game. Re-routing
 // WM key messages to the game wndproc doesn't work since it isn't DirectInput.
 LRESULT CALLBACK ZoneMap::external_window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
     switch (uMsg) {
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            break;
         case WM_DPICHANGED:
             return 0;  // Ignore any resizing due to a monitor scale change.
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
             if ((lParam & 0x40000000) == 0)  // Only send if this is a transition.
                 process_key(wParam, true);
-            break;
+            return 0;
         case WM_KEYUP:
         case WM_SYSKEYUP:
                 process_key(wParam, false);
-            break;
+            return 0;
         case WM_LBUTTONDOWN:
             process_left_mouse_button_down(static_cast<int16_t>(lParam & 0xffff), static_cast<int16_t>(lParam >> 16));
-            break;
+            return 0;
         case WM_RBUTTONDOWN:
             process_right_mouse_button_down(static_cast<int16_t>(lParam & 0xffff), static_cast<int16_t>(lParam >> 16));
-            break;
+            return 0;
         case WM_MBUTTONDOWN:
             process_wheel_mouse_button_down(static_cast<int16_t>(lParam & 0xffff), static_cast<int16_t>(lParam >> 16));
-            break;
+            return 0;
         case WM_MOUSEWHEEL:
             process_mouse_wheel(static_cast<int16_t>(wParam >> 16), wParam & 0xffff,
                 static_cast<int16_t>(lParam & 0xffff), static_cast<int16_t>(lParam >> 16));
-            return 0;  // Handled.
+            return 0;
+        case WM_GETMINMAXINFO:  // Set minimum size to avoid corner case crashes.
+            reinterpret_cast<LPMINMAXINFO>(lParam)->ptMinTrackSize.x = kWinMinSize;
+            reinterpret_cast<LPMINMAXINFO>(lParam)->ptMinTrackSize.y = kWinMinSize;
+            return 0;
+        case WM_DESTROY:
+            set_enabled(false, false);  // Disables, releases resources.
+            release_d3d_external_window(); // And also purge D3D resources connected to the window.
+            external_hwnd = nullptr;
+            break;  // Let DefWindowProc() handle the rest.
+        case WM_SIZING:
+            process_on_resize(0, 0);  // Just used to trigger autocenter mode.
+            break;
+        case WM_SYSCOMMAND:
+            if ((wParam & 0xFFF0) == SC_CLOSE && enabled) {
+                set_enabled(false, false);  // Disables, releases resources.
+                release_d3d_external_window();  // And also purge D3D resources connected to the window.
+                // Even though we never SetCapture() in zone_map, something else is which can bug out the mouse.
+                ReleaseCapture();  // Calling this prevents mouse glitching behavior.
+            }
+            break;
         default:
-            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+            break;
     }
-    return 0;
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
-
 
 void ZoneMap::process_external_window_messages() {
 
@@ -3087,15 +3251,10 @@ void ZoneMap::process_external_window_messages() {
         return;
 
     MSG msg = {};
-    if (PeekMessage(&msg, external_hwnd, 0, 0, PM_REMOVE))
+    while (PeekMessage(&msg, external_hwnd, 0, 0, PM_REMOVE))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
-    }
-
-    if (msg.message == WM_QUIT) {
-        set_enabled(false, false);  // Disables, releases resources.
-        external_hwnd = nullptr;
     }
 }
 
@@ -3123,29 +3282,29 @@ bool ZoneMap::create_external_window() {
 
     WNDCLASSEX wcex = { 0 };
     wcex.cbSize = sizeof(WNDCLASSEX);
-    wcex.style = CS_HREDRAW | CS_VREDRAW;  // Not sure if these are required.
-    wcex.lpfnWndProc = static_external_window_proc;
-    wcex.hInstance = external_hinstance;
-    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wcex.lpszClassName = kExternalWindowClassName;
-    if (RegisterClassEx(&wcex) == 0) {   // Returns 0 if fails.
-        Zeal::EqGame::print_chat("Error registering external map window class");
-        return false;
+    if (!GetClassInfoEx(external_hinstance, kExternalWindowClassName, &wcex)) {
+        wcex.cbSize = sizeof(WNDCLASSEX);
+        wcex.style = CS_HREDRAW | CS_VREDRAW;  // Not sure if these are required.
+        wcex.lpfnWndProc = static_external_window_proc;
+        wcex.hInstance = external_hinstance;
+        wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+        wcex.lpszClassName = kExternalWindowClassName;
+        if (RegisterClassEx(&wcex) == 0) {   // Returns 0 if fails.
+            Zeal::EqGame::print_chat("Error registering external map window class: %i", GetLastError());
+            return false;
+        }
     }
 
-    // Set the created window size so that the client size matches our render target.
-    // Note: WS_OVERLAPPED does not work with adjust window, so use WS_CAPTION.
-    RECT win_rect = calc_external_window_client_rect();
-    if (!AdjustWindowRectEx(&win_rect, WS_CAPTION, false, NULL))
-        Zeal::EqGame::print_chat("Error adjusting window rect");
-
+    // Stored window size is the client area (viewport).
+    RECT win_rect = { .left = external_monitor_left_offset, .top = external_monitor_top_offset,
+                        .right = external_monitor_left_offset + external_monitor_width,
+                        .bottom = external_monitor_top_offset + external_monitor_height };
+    AdjustWindowRectEx(&win_rect, WS_OVERLAPPEDWINDOW, false, NULL);
     external_hwnd = CreateWindowEx(NULL,
         kExternalWindowClassName,
         kExernalWindowTitle,
-        WS_OVERLAPPED,
-        win_rect.left, win_rect.top,  // x, y offset.
-        win_rect.right - win_rect.left,  // adjusted for client width
-        win_rect.bottom - win_rect.top,  // adjust for client height
+        WS_OVERLAPPEDWINDOW,
+        win_rect.left, win_rect.top, win_rect.right - win_rect.left, win_rect.bottom - win_rect.top,
         NULL,
         NULL,
         external_hinstance,
@@ -3172,6 +3331,7 @@ bool ZoneMap::initialize_d3d_external_window()
     if (!external_d3d) {
         Zeal::EqGame::print_chat("Error creating external map D3D");
         release_d3d_external_window();
+        reset_zone_state();
         return false;
     }
 
@@ -3192,6 +3352,7 @@ bool ZoneMap::initialize_d3d_external_window()
         &external_d3ddev))) {
         Zeal::EqGame::print_chat("Error creating external map device");
         release_d3d_external_window();
+        reset_zone_state();
         return false;
     }
 

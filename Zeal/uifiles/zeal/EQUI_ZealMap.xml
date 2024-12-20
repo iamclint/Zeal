@@ -4,21 +4,23 @@
   <Screen item="ZealMap">
     <RelativePosition>false</RelativePosition>
     <Location>
-      <X>95</X>
-      <Y>240</Y>
+      <X>5</X>
+      <Y>5</Y>
     </Location>
     <Size>
-      <CX>421</CX>
-      <CY>120</CY>
+      <CX>500</CX>
+      <CY>400</CY>
     </Size>
     <Style_VScroll>false</Style_VScroll>
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
-    <DrawTemplate>WDT_Def2</DrawTemplate>
-    <Style_Titlebar>false</Style_Titlebar>
-    <Style_Closebox>false</Style_Closebox>
-    <Style_Minimizebox>false</Style_Minimizebox>
+    <DrawTemplate>WDT_Rounded</DrawTemplate>
+    <Style_Titlebar>true</Style_Titlebar>
+    <Style_Closebox>true</Style_Closebox>
+    <Style_Minimizebox>true</Style_Minimizebox>
     <Style_Border>true</Style_Border>
-    <Style_Sizable>false</Style_Sizable>
+    <Style_Sizable>true</Style_Sizable>
+    <Text>Zeal Map</Text>
+    <TooltipReference>This is the zeal map.</TooltipReference>
   </Screen>
 </XML>

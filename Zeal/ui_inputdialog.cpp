@@ -7,11 +7,6 @@
 #include "string_util.h"
 #include <algorithm>
 
-void ui_inputdialog::PrintUIError()
-{
-	Zeal::EqGame::print_chat("Warning: The zeal ui files are not in place EQUI_ZealInputDialog.xml not found!");
-}
-
 bool ui_inputdialog::isVisible()
 {
 	if (!wnd)
@@ -20,8 +15,8 @@ bool ui_inputdialog::isVisible()
 }
 void ui_inputdialog::hide()
 {
-	wnd->show(0, 0);
-	wnd->IsVisible = false;
+	if (wnd)
+		wnd->show(0, false);
 }
 bool ui_inputdialog::show(const std::string& title, const std::string& message, const std::string& button1_name, const std::string button2_name, InputDialogCallback button1_callback, InputDialogCallback button2_callback, bool show_input_field)
 {
@@ -36,16 +31,15 @@ bool ui_inputdialog::show(const std::string& title, const std::string& message, 
 		label->Text = message;
 	if (wnd)
 		wnd->Text = title;
-	input->IsVisible = show_input_field;
-	wnd->show(0, 1);
-	wnd->IsVisible = true;
 	if (input)
 	{
-		wnd->BringToFront();
+		input->IsVisible = show_input_field;
 		input->SetText("");
-		//Zeal::EqGame::print_chat("0x%x", Zeal::EqGame::Windows->ChatManager->ChatWindows[0]->edit->vtbl->OnSetFocus);
-		input->SetFocus();
 	}
+
+	wnd->show(1, input != nullptr);
+	if (input)
+		input->SetFocus();
 	return true;
 }
 
@@ -73,8 +67,8 @@ void ui_inputdialog::CleanUI()
 {
 	if (wnd)
 	{
-		wnd->show(0, 0);
-		wnd->Deconstruct();
+		// Should already be deactivated by the time the framework calls this.
+		ui->DestroySidlScreenWnd(wnd);
 		wnd = nullptr;
 	}
 }
@@ -82,29 +76,30 @@ void ui_inputdialog::Deactivate()
 {
 	if (wnd)
 	{
-		wnd->show(0, 0);
+		wnd->show(0, false);
 	}
 }
 
 void ui_inputdialog::InitUI()
 {
+	if (wnd)
+		Zeal::EqGame::print_chat("Warning: Init out of sync for ui_inputdialog");
+
+	static const char* xml_file = "./uifiles/zeal/EQUI_ZealInputDialog.xml";
+	if (!wnd && ui && std::filesystem::exists(xml_file))
+		wnd = ui->CreateSidlScreenWnd("ZealInputDialog");
+	
 	if (!wnd)
 	{
-		if (std::filesystem::exists("./uifiles/zeal/EQUI_ZealInputDialog.xml"))
-		{
-			wnd = ui->CreateSidlScreenWnd("ZealInputDialog");
-			wnd->vtbl->WndNotification = IDWndNotification;
-			button1 = wnd->GetChildItem("ZealDialogButton1");
-			button2 = wnd->GetChildItem("ZealDialogButton2");
-			label = wnd->GetChildItem("ZealDialogMessage");
-			input = (Zeal::EqUI::EditWnd*)wnd->GetChildItem("ZealDialogInput");
-		}
-		else
-		{
-			PrintUIError();
-			return;
-		}
+		Zeal::EqGame::print_chat("Error: Failed to load %s", xml_file);
+		return;
 	}
+
+	wnd->vtbl->WndNotification = IDWndNotification;
+	button1 = wnd->GetChildItem("ZealDialogButton1");
+	button2 = wnd->GetChildItem("ZealDialogButton2");
+	label = wnd->GetChildItem("ZealDialogMessage");
+	input = (Zeal::EqUI::EditWnd*)wnd->GetChildItem("ZealDialogInput");
 }
 
 ui_inputdialog::ui_inputdialog(ZealService* zeal, IO_ini* ini, ui_manager* mgr)

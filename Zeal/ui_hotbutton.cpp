@@ -60,11 +60,18 @@ void ui_hotbutton::InitUI()
 	}
 }
 
+void ui_hotbutton::CleanUI()
+{
+	buttons.clear();
+	states.clear();
+	int last_button = 0;
+	int last_page = 0;
+}
+
 void ui_hotbutton::Render()
 {
-	if (Zeal::EqGame::is_in_game())
+	if (Zeal::EqGame::is_in_game() && states.size())
 	{
-		if (!states.size()) InitUI();
 		int current_page = Zeal::EqGame::Windows->HotButton->GetPage();
 		if (states.count(current_page))
 		{
@@ -82,6 +89,7 @@ ui_hotbutton::ui_hotbutton(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 	ui = mgr;
 	zeal->callbacks->AddGeneric([this]() { Render();  }, callback_type::Render);
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
+	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->hooks->Add("DoHotButton", 0x4209bd, DoHotButton, hook_type_detour);
 	zeal->hooks->Add("SetCheck", 0x595790, SetCheck, hook_type_detour);
 	zeal->commands_hook->Add("/timer", { }, "Sets a timer for the last pressed hotbutton to keep it visually pressed in duration is in deciseconds (10=1 second).",
@@ -102,5 +110,5 @@ ui_hotbutton::ui_hotbutton(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 }
 ui_hotbutton::~ui_hotbutton()
 {
-
+	CleanUI();
 }

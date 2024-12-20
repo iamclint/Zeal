@@ -315,7 +315,7 @@ namespace Zeal
 			/* 0x00E7 */ CHAR File[15];
 			/* ...... */
 		} EQITEMBOOKINFO, * PEQITEMBOOKINFO;
-		typedef struct _EQITEMINFO
+		typedef struct
 		{
 			/*0x000*/	CHAR Name[0x40];
 			/*0x040*/	CHAR LoreName[0x50];
@@ -338,11 +338,15 @@ namespace Zeal
 			/*0x0c0*/	DWORD Cost;
 			/*0x0c4*/	DWORD Price;//*** needs confirm
 			/*0x0c8*/	BYTE  Unknown0c4[0x1c];
+			/*0x0E4*/  // memcpy size of 0xe4 in ItemDisplayWnd::SetItem().
+		} EQITEMINFOBASE, * PEQITEMINFOBASE;
+		typedef struct _EQITEMINFO : public EQITEMINFOBASE
+		{
 			union
 			{
-				/* 0x00E4 */ EQITEMCOMMONINFO    Common;
-				/* 0x00E4 */ EQITEMCONTAINERINFO Container;
-				/* 0x00E4 */ EQITEMBOOKINFO      Book;
+				/* 0x00E4 */ EQITEMCOMMONINFO    Common;    // EQITEMINFOBASE.Type == 0.
+				/* 0x00E4 */ EQITEMCONTAINERINFO Container; // EQITEMINFOBASE.Type == 1.
+				/* 0x00E4 */ EQITEMBOOKINFO      Book;      // EQITEMINFOBASE.Type == 2.
 			};
 			/* ...... */
 		} EQITEMINFO, * PEQITEMINFO;
@@ -964,8 +968,7 @@ namespace Zeal
 			/*0x099*/   BYTE    Location;            // 01=Outdoors, 02=dungeons, ff=Any 
 			/*0x09a*/   BYTE	Environment;
 			/*0x09b*/   BYTE	TimeOfDay;		     // 0=any, 1=day only, 2=night only
-			/*0x09c*/	BYTE	Unknown0x13e;
-			/*0x09d**/   BYTE    Level[0xf];         // per class. 
+			/*0x09c*/	BYTE	ClassLevel[0x10];    // per class using EQCHARINFO.Class (EQ_CLASS_X) as offset.
 			/*0x0a7*/   BYTE    Unknown0x14f[0x10];
 			/*0x0bc**/   BYTE    CastingAnim;
 			/*0x0bd*/	BYTE	Unknown0x0bd[0x13];
@@ -984,7 +987,7 @@ namespace Zeal
 			/*0x114*/
 		};
 		struct SPELLMGR {
-			 SPELL* Spells[4000];
+			 SPELL* Spells[EQ_NUM_SPELLS];
 		};
 		struct EQCommand
 		{

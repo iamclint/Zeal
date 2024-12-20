@@ -15,15 +15,26 @@
 class BitmapFont
 {
 public:
+    static constexpr char kFontDirectoryPath[] = "uifiles/zeal/fonts";
+    static constexpr char kFontFileExtension[] = ".spritefont";
+    static constexpr char kDefaultFontName[] = "default";
+
+    // Recommended to use the create_bitmap_font factory to create a valid font object.
+    // A font_filename of kDefaultFontName or empty will load the embedded font.
+    // Releases resources and returns nullptr if unsuccessful.
+    static std::unique_ptr<BitmapFont> create_bitmap_font(IDirect3DDevice8& device,
+                                                const std::string& font_filename);
+
+    // Utility class to report the available fonts.
+    static std::vector<std::string> get_available_fonts();
+
     BitmapFont(IDirect3DDevice8& device, std::span<const uint8_t> data_span);
     BitmapFont(IDirect3DDevice8& device, const char* filename);
     virtual ~BitmapFont();
 
-    // Disable copy and move.
+    // Disable copy.
     BitmapFont(BitmapFont const&) = delete;
     BitmapFont& operator= (BitmapFont const&) = delete;
-    BitmapFont(BitmapFont&&) = delete;
-    BitmapFont& operator= (BitmapFont&&) = delete;
 
     // Returns true if a valid bitmap texture is ready for use by the GPU.
     bool is_valid() const { return texture != nullptr; }

@@ -25,15 +25,15 @@ public:
 	void finished_memorizing(int a1, int a2);
 	void finished_scribing(int a1, int a2);
 	void create_context_menus(bool force = false);
+	int add_menu_to_manager(Zeal::EqUI::ContextMenu* new_menu);
 	void destroy_context_menus();
-	
+	bool check_caster_level(int spell_id) const;
+
 	std::string ui_selected_name;
 	Zeal::EqUI::ContextMenu* menu;
 	Zeal::EqUI::ContextMenu* spellset_menu;
-	Zeal::EqUI::ContextMenu* spellset_delete;
 	int SpellMenuIndex = 0;
 	int SpellSetMenuIndex = 0;
-	int SpellSetDeleteIndex = 0;
 	std::map<std::string, std::map<std::string, std::list<menudata>>>  SpellCategory;
 	std::map<int, Zeal::EqUI::ContextMenu*> MenuMap;
 	std::map<int, std::string> spellset_map;

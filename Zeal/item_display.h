@@ -1,20 +1,22 @@
 #pragma once
-#include "hook_wrapper.h"
-#include "memory.h"
+#include "EqStructures.h"
 #include "EqUI.h"
+#include "IO_ini.h"
+#include <vector>
 
 class ItemDisplay
 {
 public:
 	ItemDisplay(class ZealService* pHookWrapper, class IO_ini* ini);
 	~ItemDisplay();
-	Zeal::EqUI::ItemDisplayWnd* get_available_window(Zeal::EqStructures::_EQITEMINFO* item);
-	Zeal::EqStructures::_EQITEMINFO* current_item;
-	std::vector<Zeal::EqUI::ItemDisplayWnd*> windows;
+	Zeal::EqUI::ItemDisplayWnd* get_available_window(Zeal::EqStructures::EQITEMINFOBASE* item = nullptr);
+	bool close_latest_window();
 private:
-	void init_ui();
+	void InitUI();
 	void CleanUI();
+	void DeactivateUI();
 	const int max_item_displays = 5;
+	std::vector<Zeal::EqUI::ItemDisplayWnd*> windows;
 };
 
 

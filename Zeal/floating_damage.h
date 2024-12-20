@@ -5,7 +5,9 @@
 #include "EqStructures.h"
 #include "EqUI.h"
 #include "d3dx8/d3d8.h"
+#include "bitmap_font.h"
 #include "ZealSettings.h"
+
 struct DamageData
 {
 	ULONGLONG start_time;
@@ -27,13 +29,19 @@ struct DamageData
 class FloatingDamage
 {
 public:
+	static constexpr char kUseClientFontString[] = "Use client /fcd #";
+
 	void add_damage(struct Zeal::EqStructures::Entity* source, struct  Zeal::EqStructures::Entity* target, short dmg, int heal, short spell_id);
 	void callback_deferred();
 	void callback_render();
 	ZealSetting<bool> enabled = { true, "FloatingDamage", "Enabled", true };
 	ZealSetting<bool> spell_icons = { true, "FloatingDamage", "Icons", true };
 	ZealSetting<bool> spells = { true, "FloatingDamage", "Spells", true };
+	bool set_font(std::string font_name);
+	std::string get_font() const { return bitmap_font_filename; }
+	std::vector<std::string> get_available_fonts() const;
 	void init_ui();
+	void clean_ui();
 	void draw_icon(int index, float x, float y, float opacity);
 	int get_active_damage_count(Zeal::EqStructures::Entity* ent);
 	FloatingDamage(class ZealService* zeal, class IO_ini* ini);
@@ -43,6 +51,11 @@ private:
 	bool add_texture(std::string path);
 	std::vector<IDirect3DTexture8*> textures;
 	IDirect3DTexture8* load_texture(std::string path);
+	void load_bitmap_font();
+	void render_spells();
+	void render_text();  // Called in "render" for bitmap_font or "deferred" for CTextureFont.
+	std::unique_ptr<BitmapFont> bitmap_font = nullptr;
+	std::string bitmap_font_filename;
 	int font_size = 5;
 	std::unordered_map<Zeal::EqStructures::Entity*, std::vector<DamageData>> damage_numbers;
 };

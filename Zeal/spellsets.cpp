@@ -5,15 +5,26 @@
 #include "SpellCategories.h"
 #include <algorithm>
 
+static bool is_valid_name(const std::string& name) {
+    if (name.empty() || name.size() > 32)
+    {
+        Zeal::EqGame::print_chat("Invalid spellset name");
+        return false;
+    }
+    return true;
+}
+
 void SpellSets::save(const std::string& name)
 {
+    if (!is_valid_name(name))
+        return;
+
     set_ini();
     Zeal::EqGame::print_chat("Saving spellset [%s]", name.c_str());
     for (size_t i = 0; i < EQ_NUM_SPELL_GEMS; i++)
     {
         ini->setValue(name, std::to_string(i), Zeal::EqGame::get_self()->CharInfo->MemorizedSpell[i]);
     }
-    destroy_context_menus();
     create_context_menus(true);
 }
 void SpellSets::remove(const std::string& name)
@@ -22,7 +33,6 @@ void SpellSets::remove(const std::string& name)
     Zeal::EqGame::print_chat("Removing spellset [%s]", name.c_str());
     if (!ini->deleteSection(name))
         Zeal::EqGame::print_chat("Error removing spellset [%s]", name.c_str());
-    destroy_context_menus();
     create_context_menus(true);
 }
 void SpellSets::remove_selected()
@@ -31,9 +41,18 @@ void SpellSets::remove_selected()
 }
 void SpellSets::load(const std::string& name)
 {
-    set_ini();
+    bool interrupted = !mem_buffer.empty();
     mem_buffer.clear();
+    Zeal::EqGame::Spells::StopSpellBookAction();  // Clears in-progress state.
 
+    if (!is_valid_name(name))
+        return;
+
+    const auto* spell_manager = Zeal::EqGame::get_spell_mgr();
+    if (!spell_manager || !Zeal::EqGame::get_char_info())
+        return;
+
+    set_ini();
 
     if (!ini->exists(name, "0"))
     {
@@ -42,20 +61,31 @@ void SpellSets::load(const std::string& name)
     }
     Zeal::EqGame::print_chat("Loading spellset [%s]", name.c_str());
 
-    for (size_t gem_index = 0; gem_index < EQ_NUM_SPELL_GEMS; gem_index++)
+    for (int gem_index = EQ_NUM_SPELL_GEMS - 1; gem_index >= 0; gem_index--)
     {
       short spell_id = ini->getValue<WORD>(name, std::to_string(gem_index));
-      if (spell_id == 0)
+      if (spell_id == -1) { // Empty slot when saved.
+          Zeal::EqGame::Spells::Forget(gem_index);
+          continue;  // Leave it empty.
+      }
+
+      if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS || !spell_manager->Spells[spell_id])
       {
-          Zeal::EqGame::print_chat("Error loading spellset [%s] spell id at index [%i] is 0", name.c_str(), gem_index);
+          Zeal::EqGame::print_chat("Error loading spellset [%s]: spell id at index [%i] is [%i]",
+                    name.c_str(), gem_index, spell_id);
           break;
       }
+
       short memmed_spell = Zeal::EqGame::get_self()->CharInfo->MemorizedSpell[gem_index];
-      if (memmed_spell != spell_id && spell_id!=-1)
+      if (memmed_spell != spell_id)
       {
-          if (memmed_spell != -1) 
+          if (memmed_spell != -1)
               Zeal::EqGame::Spells::Forget(gem_index);
-                
+
+          // Bail out early if too low level (skips memorization time and state issues).
+          if (!check_caster_level(spell_id))
+              continue;
+
           for (size_t book_index = 0; book_index < EQ_NUM_SPELL_BOOK_SPELLS; book_index++)
           {
               if (Zeal::EqGame::get_self()->CharInfo->SpellBook[book_index] == spell_id)
@@ -63,13 +93,13 @@ void SpellSets::load(const std::string& name)
                   mem_buffer.push_back({ book_index,gem_index });
                   break;
               }
-
           }
       }
     }
     if (mem_buffer.size())
     {
-        original_stance = (Stance)Zeal::EqGame::get_self()->StandingState;
+        if (!interrupted)
+            original_stance = (Stance)Zeal::EqGame::get_self()->StandingState;
         Zeal::EqGame::Spells::Memorize(mem_buffer.back().first, mem_buffer.back().second);
     }
 }
@@ -77,26 +107,32 @@ void SpellSets::load(const std::string& name)
 
 void SpellSets::finished_scribing(int a1, int a2)
 {
-    destroy_context_menus();
     create_context_menus(true);
 }
 
 void SpellSets::finished_memorizing(int a1, int a2)
 {
-    if (!Zeal::EqGame::Windows->SpellBook)
+    if (!mem_buffer.size()) 
         return;
-    if (Zeal::EqGame::Windows->SpellBook && !Zeal::EqGame::Windows->SpellBook->IsVisible)
-        mem_buffer.clear();
-    if (mem_buffer.size())
+
+    // Handle interruptions gracefully by clearing state and restoring stance.
+    if (!Zeal::EqGame::Windows->SpellBook || !Zeal::EqGame::Windows->SpellBook->IsVisible)
     {
-        mem_buffer.pop_back();
-        if (mem_buffer.size())
-            Zeal::EqGame::Spells::Memorize(mem_buffer.back().first, mem_buffer.back().second);
-        else if (Zeal::EqGame::Windows->SpellBook->IsVisible)
-        {
+        if (Zeal::EqGame::get_self() && Zeal::EqGame::is_in_game() &&
+                    original_stance != Stance::Sit &&
+                    ((Stance)Zeal::EqGame::get_self()->StandingState == Stance::Sit))
             Zeal::EqGame::get_self()->ChangeStance(original_stance);
-            Zeal::EqGame::Windows->SpellBook->IsVisible = false;
-        }
+        mem_buffer.clear();
+        return;
+    }
+
+    mem_buffer.pop_back();
+    if (mem_buffer.size())
+        Zeal::EqGame::Spells::Memorize(mem_buffer.back().first, mem_buffer.back().second);
+    else if (Zeal::EqGame::Windows->SpellBook->IsVisible)
+    {
+        Zeal::EqGame::get_self()->ChangeStance(original_stance);
+        Zeal::EqGame::Windows->SpellBook->show(0, false);
     }
 }
 
@@ -129,38 +165,50 @@ static Zeal::EqStructures::SPELL* GetSpell(int id)
         return 0;
     return Zeal::EqGame::get_spell_mgr()->Spells[id];
 }
+
+// Memorization fails (and locks up spellbook state) if the caster level is too low.
+bool SpellSets::check_caster_level(int spell_id) const {
+    const auto* spell_manager = Zeal::EqGame::get_spell_mgr();
+    const auto* self_char = Zeal::EqGame::get_char_info();
+    if (!spell_manager || !self_char) {
+        Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "SpellSet game state error. Aborting.");
+        return false;
+    }
+
+    const int spell_level = spell_manager->Spells[spell_id]->ClassLevel[self_char->Class];
+    if (self_char->Level < spell_level)
+    {
+        Zeal::EqGame::print_chat(USERCOLOR_SHOUT,
+            "Stop dying. You will have to achieve level %i to memorize the spell %s",
+            spell_level, spell_manager->Spells[spell_id]->Name);
+        return false;
+    }
+
+    return true;
+}
+
 void SpellSets::handle_menu_mem(int book_index, int gem_index)
 {
-    original_stance = (Stance)Zeal::EqGame::get_self()->StandingState;
+    bool interrupted = !mem_buffer.empty();
+    mem_buffer.clear();  // Clear any in-progress reloads.
+    Zeal::EqGame::Spells::StopSpellBookAction();
+
+    const auto* spell_manager = Zeal::EqGame::get_spell_mgr();
+    const auto* self_char = Zeal::EqGame::get_char_info();
+    if (!spell_manager || !self_char)
+        return;
+    
+    // Bail out early if too low level (skips memorization time).
+    const int spell_id = self_char->SpellBook[book_index];
+    if (!check_caster_level(spell_id))
+        return;
+
+    if (!interrupted)
+        original_stance = (Stance)Zeal::EqGame::get_self()->StandingState;
     mem_buffer.push_back({ book_index,gem_index });
     Zeal::EqGame::Spells::Memorize(book_index, gem_index);
 }
 
-static void __fastcall SpellSetDeactivate(Zeal::EqUI::EQWND* pwnd, int unused)
-{
-    SpellSets* ss = ZealService::get_instance()->spell_sets.get();
-    ss->spellset_menu->SelectedIndex = -1;
-    ss->spellset_delete->SelectedIndex = -1;
-    ((Zeal::EqUI::EQWND*)(ss->spellset_delete))->show(false, false);
-    ((Zeal::EqUI::EQWND*)(ss->spellset_menu))->show(false, false);
-    return;
-}
-
-static int __fastcall SpellSetRButtonUp(Zeal::EqUI::EQWND* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
-{
-    if (pWnd->SelectedIndex != -1)
-    {
-        SpellSets* ss = ZealService::get_instance()->spell_sets.get();
-        if ((size_t)pWnd->SelectedIndex < ss->spellsets.size()+2)
-        {
-            ss->ui_selected_name = ss->spellsets[pWnd->SelectedIndex-2];
-            Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(ss->SpellSetDeleteIndex, pt, (Zeal::EqUI::EQWND*)ss->spellset_delete);
-        }
-    }
-    
-    
-    return 1;
-}
 static int __stdcall SpellSetMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
 {
     int msg_data = (int)data;
@@ -245,8 +293,8 @@ static int __fastcall SpellGemWnd_Book_HandleRButtonUp(Zeal::EqUI::EQWND* btn, i
 
 bool compareBySpellLevel(const Zeal::EqStructures::SPELL* a, const Zeal::EqStructures::SPELL* b) {
     Zeal::EqStructures::EQCHARINFO* self_char = Zeal::EqGame::get_self()->CharInfo;
-    int aLevel = a->Level[self_char->Class - 1];
-    int bLevel = b->Level[self_char->Class - 1];
+    int aLevel = a->ClassLevel[self_char->Class];
+    int bLevel = b->ClassLevel[self_char->Class];
     if (aLevel != bLevel)
         return aLevel > bLevel;
     return a->Name > b->Name;
@@ -258,22 +306,20 @@ void SpellSets::destroy_context_menus()
 
     if (Zeal::EqGame::Windows->ContextMenuManager)
     {
+        int* ptr = reinterpret_cast<int*>(Zeal::EqGame::Windows->ContextMenuManager);
+
         for (auto it = MenuMap.rbegin(); it != MenuMap.rend(); ++it) {
             auto [index, cmenu] = *it;
-            cmenu->RemoveAllMenuItems();
-            cmenu->Deconstruct(0x0);
-            for (unsigned int i = index; i < Zeal::EqGame::Windows->ContextMenuManager->MenuCount - 1; i++)
-            {
-                Zeal::EqGame::Windows->ContextMenuManager->Menus[i] = Zeal::EqGame::Windows->ContextMenuManager->Menus[i + 1];
+            // Only release if there's a match (should always match).
+            if (cmenu == Zeal::EqGame::Windows->ContextMenuManager->Menus[index])             {
+                // The manager should call the custom destructor and release the resources.
+                Zeal::EqGame::Windows->ContextMenuManager->RemoveMenu(index, true);
             }
-            Zeal::EqGame::Windows->ContextMenuManager->MenuCount--;
-            Zeal::EqGame::Windows->ContextMenuManager->Menus[Zeal::EqGame::Windows->ContextMenuManager->MenuCount];
         }
-        spellset_delete = 0;
-        menu = 0;
-        spellset_menu = 0;
-        MenuMap.clear();
     }
+    menu = 0;
+    spellset_menu = 0;
+    MenuMap.clear();
 }
 
 void SpellSets::set_ini()
@@ -283,23 +329,35 @@ void SpellSets::set_ini()
     ini->set(ss.str());
 }
 
-Zeal::EqUI::ContextMenu* InitializeMenu(void* notificationFunc = nullptr) {
-    auto menu = new Zeal::EqUI::ContextMenu(0, 0, { 100, 100, 100, 100 });
-    menu->HasChildren = true;
+static Zeal::EqUI::ContextMenu* InitializeMenu(void* notificationFunc = nullptr) {
+    auto menu = Zeal::EqUI::ContextMenu::Create(0, 0, { 100, 100, 100, 100 });
+    if (!menu)
+        throw std::bad_alloc();
+
+    menu->HasChildren = true;  // Note: Evaluate if these are still necessary.
     menu->HasSiblings = true;
     menu->Unknown0x015 = 0;
     menu->Unknown0x016 = 0;
     menu->Unknown0x017 = 0;
-    menu->fnTable->basic.WndNotification = notificationFunc;
+    menu->fnTable->WndNotification = notificationFunc;
     return menu;
 }
 
+int SpellSets::add_menu_to_manager(Zeal::EqUI::ContextMenu* new_menu)
+{
+    int addedindex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(new_menu);
+    MenuMap[addedindex] = new_menu;
+    return addedindex;
+}
 
 void SpellSets::create_context_menus(bool force)
 {
     if (!Zeal::EqGame::is_new_ui()) { return; } // prevent callback crashing oldui
 
-    if ((!menu || force)  && Zeal::EqGame::get_self() && Zeal::EqGame::is_in_game())
+    if (force)
+        destroy_context_menus();
+
+    if (!menu && Zeal::EqGame::get_self() && Zeal::EqGame::is_in_game())
     {
         ZealService* zeal = ZealService::get_instance();
         set_ini();
@@ -322,7 +380,7 @@ void SpellSets::create_context_menus(bool force)
             SpellCat SpellCatData = getSpellCategoryAndSubcategory(s->ID);
             menudata md;
             md.ID = s->ID;
-            int Level = s->Level[self_char->Class - 1];
+            int Level = s->ClassLevel[self_char->Class];
             std::stringstream ss;
             if (SpellCatData.NewName.length())
                 ss << Level << " - " << SpellCatData.NewName;
@@ -345,16 +403,11 @@ void SpellSets::create_context_menus(bool force)
                 Zeal::EqUI::ContextMenu* SpellMenu = InitializeMenu();
                 for (auto& sp : spells)
                     SpellMenu->AddMenuItem(sp.Name, 0x10000 + sp.ID);
-                int addedindex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(SpellMenu);
-                MenuMap[addedindex] = SpellMenu;
-                SpellSubCategory->AddMenuItem(subcat, addedindex, false, true);
+                SpellSubCategory->AddMenuItem(subcat, add_menu_to_manager(SpellMenu), false, true);
             }
-            int addedindex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(SpellSubCategory);
-            MenuMap[addedindex] = SpellSubCategory;
-            menu->AddMenuItem(cat, addedindex, false, true);
+            menu->AddMenuItem(cat, add_menu_to_manager(SpellSubCategory), false, true);
         }
-        SpellMenuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(menu);
-        MenuMap[SpellMenuIndex] = menu;
+        SpellMenuIndex = add_menu_to_manager(menu);
 
         if (!spellset_menu)
             spellset_menu = InitializeMenu(SpellSetMenuNotification);
@@ -372,31 +425,17 @@ void SpellSets::create_context_menus(bool force)
             spellset_map[0x20000 + i] = s;
             i++;
         }
+        spellset_menu->AddSeparator();
         Zeal::EqUI::ContextMenu* DeleteSubCatMenu = InitializeMenu();
         for (int i = 0; auto & s : spellsets)
         {
             DeleteSubCatMenu->AddMenuItem(s, 0x22000 + i);
             i++;
         }
-        int delete_subcat = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(DeleteSubCatMenu);
-        spellset_menu->AddSeparator();
-        spellset_menu->AddMenuItem("Delete", delete_subcat, false, true);
-        MenuMap[delete_subcat] = DeleteSubCatMenu;
+        spellset_menu->AddMenuItem("Delete", add_menu_to_manager(DeleteSubCatMenu), false, true);
         spellset_menu->AddSeparator();
         spellset_menu->AddMenuItem("Save New", 0x21000);
-        SpellSetMenuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(spellset_menu);
-        MenuMap[SpellSetMenuIndex] = spellset_menu;
-
-
-        //this idea caused weird bugs
-        //if (!spellset_delete)
-        //    spellset_delete = new Zeal::EqUI::ContextMenu(0, 0, { 100,100,100,100 });
-        //spellset_delete->HasChildren = 1;
-        //spellset_delete->fnTable->basic.WndNotification = SpellSetDeleteMenuNotification;
-        //spellset_delete->AddMenuItem("Delete", 0x40000); //i'm just making up numbers
-        //SpellSetDeleteIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(spellset_delete);
-        //MenuMap[SpellSetDeleteIndex] = spellset_delete;
-
+        SpellSetMenuIndex = add_menu_to_manager(spellset_menu);
     }
 }
 
@@ -404,9 +443,7 @@ void SpellSets::CleanUI()
 {
     destroy_context_menus();
 }
-//void SpellSets::callback_characterselect()
-//{
-//}
+
 SpellSets::SpellSets(ZealService* zeal)
 {
     menu = 0;
@@ -432,7 +469,6 @@ SpellSets::SpellSets(ZealService* zeal)
                 {
                     if (Zeal::String::compare_insensitive(args[1], "test"))
                     {
-                        destroy_context_menus();
                         create_context_menus(true);
                     }
                     if (Zeal::String::compare_insensitive(args[1], "save"))

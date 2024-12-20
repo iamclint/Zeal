@@ -27,7 +27,6 @@ public:
 
 	Zeal::EqUI::BasicWnd* clicked_button = nullptr;
 	std::unordered_map<Zeal::EqUI::BasicWnd*, std::unordered_map<std::string, Zeal::EqUI::BasicWnd*>> WindowChildren;
-	Zeal::EqUI::BasicWnd* GetChild(Zeal::EqUI::BasicWnd* parent, std::string name);
 	void SetLabelValue(std::string name, const char* format, ...);
 	void SetSliderValue(std::string name, int value);
 	void SetSliderValue(std::string name, float value);
@@ -42,6 +41,7 @@ public:
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>> data);
 	void AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::string> data);
 	Zeal::EqUI::EQWND* CreateSidlScreenWnd(const std::string& name);
+	void DestroySidlScreenWnd(Zeal::EqUI::EQWND* sidl_wnd);
 	void WriteTemporaryUI(const std::string& file_path, std::string ui_path);
 	void RemoveTemporaryUI(const std::string& file_path);
 	void AddXmlInclude(const std::string& name);
@@ -57,7 +57,7 @@ public:
 	std::shared_ptr<ui_inputdialog> inputDialog = nullptr;
 	std::vector<std::string> included_files;
 	void CreateTmpXML();
-	void CreateTestXML();
+
 private:
 	std::vector<std::string> XMLIncludes;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> checkbox_names;
