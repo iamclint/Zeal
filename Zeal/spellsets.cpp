@@ -65,8 +65,7 @@ void SpellSets::load(const std::string& name)
     {
       short spell_id = ini->getValue<WORD>(name, std::to_string(gem_index));
       if (spell_id == -1) { // Empty slot when saved.
-          Zeal::EqGame::Spells::Forget(gem_index);
-          continue;  // Leave it empty.
+          continue;  // Leave it unchanged.
       }
 
       if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS || !spell_manager->Spells[spell_id])
