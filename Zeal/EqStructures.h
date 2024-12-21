@@ -472,7 +472,13 @@ namespace Zeal
 			/* 0x00B4 */ FLOAT Unknown00B4;
 			/* 0x00B8 */ FLOAT Unknown00B8;
 			/* 0x00BC */ FLOAT MovementSpeedModifier; // how much slower/faster you move
-			/* 0x00C0 */ BYTE Unknown00C0[196];
+			/* 0x00C0 */ BYTE Unknown00C0[0xc];
+			/* 0x00CC */ DWORD CastingTimeout;  // Set in CastSpell as current time + casting time.
+			/* 0x00D0 */ BYTE Unknown00D0[0x8];
+			/* 0x00D8 */ DWORD RecastTimeout[EQ_NUM_SPELL_GEMS]; // Set in the OP_MemorizeSpell handler.
+			/* 0x00F8 */ BYTE Unknown00F8[0x68];
+			/* 0x0160 */ DWORD FizzleTimeout;   // Set in the OP_MemorizeSpell handler.
+			/* 0x0164 */ BYTE Unknown0164[0x20];
 			/* 0x0184 */ DWORD Animation;
 			/* 0x0188 */ BYTE Unknown0188[16];
 			/* 0x0198 */ int Unsure_Strafe_Calc;
@@ -488,8 +494,8 @@ namespace Zeal
 			/* 0x0270 */ BYTE Unknown0270[4];
 			/* 0x0274 */ BYTE Unknown0274[4];
 			/* 0x0278 */ BYTE Unknown0278[4];
-			/* 0x027C */ WORD CastingSpellId;
-			/* 0x027E */ BYTE CastingSpellGemNumber; // 255 = Bard Singing
+			/* 0x027C */ WORD CastingSpellId;  // Set in StartCasting. Set to -1 (kInvalidSpell) in stop.
+			/* 0x027E */ BYTE CastingSpellGemNumber; // StartCasting:Gem #, OP_MemorizeSpell handler: 0xff. Stop: 0x0.
 			/* 0x027F */ BYTE Unknown027F;
 			/* 0x0280 */ BYTE Unknown0280[4];
 			/* 0x0284 */ struct _EQMODELINFO* ModelInfo;
@@ -503,7 +509,9 @@ namespace Zeal
 			/* 0x0320 */ BYTE MovementType; // 0 = None, 4 = Walking, 6 = Running, 7 = Swimming
 			/* 0x0321 */ BYTE Unknown0321[12];
 			/* 0x032D */ BYTE IsMovingTimer; // 0 = Moving, 1-6 = Recently Stopped Moving, 200 = Not Moving
-			/* 0x032E */ BYTE Unknown032E[266];
+			/* 0x032E */ BYTE Unknown032E[0xf6];
+			/* 0x0424 */ DWORD CastingSpellCastTime;  // Set in StartCasting. Used in GetSpellCastingTime().
+			/* 0x0428 */ BYTE Unknown0428[0x10];
 			/* 0x0438 */ DWORD IsLookingForGroup;
 			/* 0x043C */ DWORD IsTrader;
 			/* ...... */
