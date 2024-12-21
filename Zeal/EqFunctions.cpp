@@ -6,6 +6,11 @@ namespace Zeal
 {
 	namespace EqGame
 	{
+		int GetSpellCastingTime()  // GetSpellCastingTime() in eqmac.
+		{
+			return reinterpret_cast<int(__cdecl*)(void)>(0x00435f28)();
+		}
+
 		DWORD GetLevelCon(Zeal::EqStructures::Entity* ent) {
 			if (!ent || !Zeal::EqGame::get_self())
 				return 0;

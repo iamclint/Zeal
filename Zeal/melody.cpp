@@ -31,17 +31,11 @@
 // - Terminated when sitting
 // - Paused when zoning, trading, looting, or ducking and then resumed
 
-// Issues list:
-// - There's a timing window vulnerability if a UI gem is clicked right as a melody song
-//   ends. The click should terminate melody but it doesn't always work and melody just
-//   continues after that song is cast (can be confusing). When the current song is
-//   failing (like Selo's indoors), the vulnerable timing window is dominant, making it
-//   hard to click off the melody with the UI. The new retry_count logic mitigates this.
-
 constexpr int RETRY_COUNT_REWIND_LIMIT = 8;  // Will rewind up to 8 times.
 constexpr int RETRY_COUNT_END_LIMIT = 15;  // Will terminate if 15 retries w/out a 'success'.
-constexpr ULONGLONG MELODY_SONG_INTERVAL = 150; // Interval between songs and after clickies. If too low, the song may not fire.
-constexpr ULONGLONG USE_ITEM_QUEUE_TIMEOUT = 3500 + MELODY_SONG_INTERVAL; // Max duration a useitem will stay queued for before giving up (mostly to prevent ultra-stale clicks).
+constexpr ULONGLONG MELODY_ZONE_IN_DELAY = 2000; // Minimum wait after zoning before attempting to continue melody.
+constexpr ULONGLONG MELODY_WAIT_TIMEOUT = 1500; // Maximum wait after the casting timer expires before retrying.
+constexpr ULONGLONG USE_ITEM_QUEUE_TIMEOUT = 3650; // Max duration a useitem will stay queued for before giving up (mostly to prevent ultra-stale clicks).
 
 bool Melody::start(const std::vector<int>& new_songs)
 {
@@ -77,10 +71,13 @@ bool Melody::start(const std::vector<int>& new_songs)
             valid_songs.push_back(gem_index);
     }
 
-    if (valid_songs.empty()) {
+    if (valid_songs.empty() && !new_songs.empty()) {
         Zeal::EqGame::print_chat(USERCOLOR_SPELL_FAILURE, "Error: no valid songs");
         return false;
     }
+
+    if (!enter_zone_time)  // Ensure this gets set so melody starts immediately.
+        enter_zone_time = GetTickCount64() - MELODY_ZONE_IN_DELAY;
 
     songs = valid_songs;
     current_index = -1;
@@ -156,6 +153,39 @@ void Melody::stop_current_cast()
     casting_melody_spell_id = kInvalidSpellId;
 }
 
+// This code gets rid of the "Your song ends" spam and an unneeded server message by replacing the
+// StopSpellCast() call with specific duplicated code. The server code does not require Bards to
+// send a stop, but the client logic expects the casting state to be cleared before calling the next
+// StartCast of a song. This path does not send the server an OP_ManaChange message (StopSpellCast),
+// so it must be immediately followed by a start cast to keep things in sync.
+static void stop_current_song_client_only()
+{
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+
+    // Clear the casting state per StopSpellCast() for the bard case.
+    *(int16_t*)(0x007ce45a) = -1; // Some sort of casting SPELL.SpellType cache.
+    self->ActorInfo->CastingSpellId = kInvalidSpellId;
+    self->ActorInfo->CastingSpellGemNumber = 0;
+    self->ActorInfo->CastingTimeout = 0;
+    self->ActorInfo->FizzleTimeout = 0;
+
+    // For some reason stop is updating the RecastTimeouts, so duplicate that also.
+    Zeal::EqStructures::SPELLMGR* get_spell_mgr();
+    auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
+    for (int i = 0; i < EQ_NUM_SPELL_GEMS; ++i)
+    {
+        int spell_id = char_info->MemorizedSpell[i];
+        if (spell_mgr && spell_id > 0 && spell_id < 4000)
+        {
+            auto* spell_info = spell_mgr->Spells[spell_id];
+            if (spell_info && spell_info->RecastTime)
+                continue;
+        }
+        self->ActorInfo->RecastTimeout[i] = 0;
+    }
+}
+
 void Melody::tick()
 {
     if (!songs.size())
@@ -165,7 +195,7 @@ void Melody::tick()
     Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
 
     // Handle various reasons to terminate Zeal automatically.
-    if (!Zeal::EqGame::is_in_game() || !self || !char_info ||
+    if (!Zeal::EqGame::is_in_game() || !self || !self->ActorInfo || !char_info ||
         (self->StandingState == Stance::Sit) || (char_info->StunnedState) ||
         (retry_count > RETRY_COUNT_END_LIMIT))
     {
@@ -173,13 +203,18 @@ void Melody::tick()
         return;
     }
 
-    //use timestamps to add minimum delay after casting ends and detect excessive retries.
+    // Use timestamps to add minimum delay after casting ends and detect excessive retries.
     static ULONGLONG casting_visible_timestamp = GetTickCount64();
     static ULONGLONG start_of_cast_timestamp = casting_visible_timestamp;
 
     ULONGLONG current_timestamp = GetTickCount64();
 
-    if (!Zeal::EqGame::Windows->Casting || Zeal::EqGame::Windows->Casting->IsVisible)
+    // Pause updates from start of zoning until a small delay after entering to let things stabilize.
+    if (!enter_zone_time || current_timestamp < enter_zone_time + MELODY_ZONE_IN_DELAY)
+        return;
+
+    // Wait until the currently casting song / spell has finished.
+    if (Zeal::EqGame::GetSpellCastingTime() != -1)  // Used by CCastingWnd.
     {
         casting_visible_timestamp = current_timestamp;
         //reset retry_count if the song cast window has been visible for > 1 second.
@@ -188,24 +223,38 @@ void Melody::tick()
         return;
     }
 
-    // Successfully finished casting current song/spell
-    // Reseting this field prevents the song from repeating after this point
+    // Either casting finished normally or the retry logic has already kicked in,
+	// so resetting this field prevents the song from repeating after this point.
     casting_melody_spell_id = kInvalidSpellId;
 
+	// A call to CastSpell() sets both ActorInfo->CastingSpellId and ->CastingSpellGemNumber
+	// to valid values. The server receives the cast opcode and then after the cast timer
+	// sends an OP_MemorizeSpell in Mob::CastedSpellFinished to update the gem bar state.
+	// That update sets the CastingSpellGemNumber to 0xff.
+    // The timeout is for debug reporting and recovery if something goes wrong.
+	bool casting_active = self->ActorInfo->CastingSpellId != kInvalidSpellId;
+	bool server_ack_cast = (self->ActorInfo->CastingSpellGemNumber == 0xff);
     // Wait for MELODY_SONG_INTERVAL ms between casting the next song
-    if ((current_timestamp - casting_visible_timestamp) < MELODY_SONG_INTERVAL)
-        return;
+    if (casting_active && !server_ack_cast)
+	{
+	    bool timed_out = ((current_timestamp - casting_visible_timestamp) > MELODY_WAIT_TIMEOUT);
+        if (!timed_out)
+            return;  // Wait for the ack.
+        else {
+            Zeal::EqGame::print_chat("Melody: ack time out error, trying to restart");
+            stop_current_cast();  // Something is out of sync. Abort current casting.
+        }
+	}
 
     // Handles situations like trade windows, looting (Stance::Bind), and ducking.
     if (!Zeal::EqGame::get_eq() || !Zeal::EqGame::get_eq()->IsOkToTransact() ||
         self->StandingState != Stance::Stand)
         return;
 
-    stop_current_cast();  //abort bard song if active.
-
     // Execute a pending use_item() call here
     if (use_item_index >= 0)
     {
+        stop_current_cast();  // Terminate bard song (if active) in order to cast.
         bool success = (use_item_timeout >= current_timestamp) && Zeal::EqGame::use_item(use_item_index);
         use_item_index = -1;
         if (success) {
@@ -235,15 +284,39 @@ void Melody::tick()
         return;
     }
 
+    // Note: A cast() call must always follow a stop_current_song_client_only() call to ensure
+    // the server and client stay in sync.
+    if (Zeal::EqGame::EqGameInternal::IsPlayerABardAndSingingASong())
+        stop_current_song_client_only();  // Use the shortcut to reduce log spam and handshaking.
+    else
+        stop_current_cast();  // Just in case call. Does nothing if casting not active (expected).
+
     casting_melody_spell_id = current_gem_spell_id;
     char_info->cast(current_gem, current_gem_spell_id, 0, -1);
     start_of_cast_timestamp = current_timestamp;
+}
+
+// The player state gets wiped on zoning, so pause melody during the transition time and
+// rewind the state if there was an interrupted song cast.
+void Melody::handle_deactivate_ui()
+{
+    enter_zone_time = 0;  // Pauses melody processing loop
+
+    // Bail out if melody not active (bard or not) and if not a bard singing a song.
+    if (!songs.size() || !Zeal::EqGame::EqGameInternal::IsPlayerABardAndSingingASong())
+        return;
+
+    // Re-use the interrupted logic to rewind melody to cleanly continue after zone in.
+    // CastingSpellId must be valid to have gotten here.
+    handle_stop_cast_callback(3, Zeal::EqGame::get_self()->ActorInfo->CastingSpellId);
 }
 
 Melody::Melody(ZealService* zeal, IO_ini* ini)
 {
     zeal->callbacks->AddGeneric([this]() { tick();  });
     zeal->callbacks->AddGeneric([this]() { end(); }, callback_type::CharacterSelect);
+    zeal->callbacks->AddGeneric([this]() { handle_deactivate_ui(); }, callback_type::DeactivateUI);
+    zeal->callbacks->AddGeneric([this]() { enter_zone_time = GetTickCount64(); }, callback_type::Zone);
     zeal->hooks->Add("StopCast", 0x4cb510, StopCast, hook_type_detour); //Hook in to end melody as well.
     zeal->commands_hook->Add("/melody", {"/mel"}, "Bard only, auto cycles 5 songs of your choice.",
         [this](std::vector<std::string>& args) {
