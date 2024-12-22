@@ -123,7 +123,7 @@ void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQI
 				s = std::string("Combat ") + s.substr(0, end) + " (Required level: "
 					+ std::to_string(item->Common.CastingLevel) + ")";
 			}
-			else if (item->Common.IsStackableEx == 2 && s.find(" (Worn)") != std::string::npos)
+			else if (item->Common.IsStackableEx == 2 && s.find("Effect: Haste (Worn)") != std::string::npos)
 			{
 				s = std::string("Effect: Haste: +") + std::to_string(item->Common.CastingLevel + 1) + "%";
 			}
