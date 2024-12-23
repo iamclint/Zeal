@@ -444,6 +444,11 @@ int __fastcall XMLReadNoValidate(void* t, int unused, Zeal::EqUI::CXSTR path1, Z
 
 std::string ui_manager::GetUIIni()
 {
+	// First try to use client's function (GetUIIniFilename) to retrieve it.
+	const char* ui_ini_file = reinterpret_cast<const char* (__cdecl*)(void)>(0x00437481)();
+	if (ui_ini_file && ui_ini_file[0])
+		return ui_ini_file;
+
 	Zeal::EqStructures::EQCHARINFO* c = Zeal::EqGame::get_char_info();
 	if (c)
 	{

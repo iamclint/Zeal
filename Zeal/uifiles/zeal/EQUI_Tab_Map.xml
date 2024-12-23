@@ -533,7 +533,7 @@
       <CX>150</CX>
       <CY>32</CY>
     </Size>
-    <Text>Use unlocked interactive mode to resize map.</Text>
+    <Text>Use unlocked interactive mode to resize/move map.</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>

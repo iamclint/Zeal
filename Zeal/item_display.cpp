@@ -101,8 +101,37 @@ static std::vector<std::string> split_text(const std::string& input, const std::
 	return strings;
 }
 
+static std::string GetSpellClassLevels(const Zeal::EqStructures::_EQITEMINFO& item, const std::string& original) {
+	if (item.Type != 0 || item.Common.Skill != 0x14)
+		return original;
+
+	const auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
+	int spell_id = item.Common.SpellIdEx;
+	if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS || !spell_mgr)
+		return original;
+
+	const auto* spell = spell_mgr->Spells[spell_id];
+	if (!spell)
+		return original;
+
+	// Cycle through the classes adding levels.
+	std::string result("Class: ");
+	for (int i = Zeal::EqEnums::ClassTypes::Warrior; i <= Zeal::EqEnums::ClassTypes::Beastlord; ++i)
+	{
+		unsigned int class_bit = 1 << (i - 1);
+		if ((item.Common.Classes & class_bit) == 0)
+			continue;
+		int class_level = spell->ClassLevel[i];
+		auto class_name = Zeal::EqGame::class_name_short(i);
+		std::transform(class_name.begin(), class_name.end(), class_name.begin(), ::toupper);
+		result += std::format(" {} ({})", class_name, class_level);
+	}
+
+	return result;
+}
+
 // Generate our customized item description text.
-void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQITEMINFO* item) {
+static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQITEMINFO* item) {
 
 	if (!item || wnd->DisplayText.Data == nullptr)
 		return;
@@ -114,7 +143,7 @@ void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQI
 	wnd->DisplayText = Zeal::EqUI::CXSTR("");
 	for (auto& s : strings) {
 		// Perform partial iteminfo filtering in combination with substrings.
-		if (item->Type == 0 && item->Common.Skill != 14 && item->Common.IsStackable > 1 &&
+		if (item->Type == 0 && item->Common.Skill != 0x14 && item->Common.IsStackable > 1 &&
 			item->Common.IsStackable < 5)
 		{
 			if (item->Common.IsStackableEx == 0 && s.find(" (Combat)") != std::string::npos)
@@ -127,6 +156,10 @@ void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQI
 			{
 				s = std::string("Effect: Haste: +") + std::to_string(item->Common.CastingLevel + 1) + "%";
 			}
+		}
+		if (item->Type == 0 && item->Common.Skill == 0x14 && s.starts_with("Class: "))
+		{
+			s = GetSpellClassLevels(*item, s);
 		}
 		if (item->Type == 0 && item->Common.BardType != 0 && item->Common.BardValue > 10 && 
 			s.ends_with("Instruments") || s.ends_with("Instrument Types"))
@@ -195,10 +228,10 @@ static std::string get_target_type_string(int target_type)
 	return std::string("Target: ") + std::string(type);
 }
 
-void UpdateSetSpellText(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id)
+static void UpdateSetSpellText(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id)
 {
 	auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
-	if (!spell_mgr || spell_id < 1 || spell_id > 3999 || wnd->DisplayText.Data == nullptr)
+	if (!spell_mgr || spell_id < 1 || spell_id >= EQ_NUM_SPELLS || wnd->DisplayText.Data == nullptr)
 		return;
 
 	const auto* sp_data = Zeal::EqGame::get_spell_mgr()->Spells[spell_id];
