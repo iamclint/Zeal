@@ -403,6 +403,7 @@ void ui_options::InitTargetRing()
 	ui->AddLabel(wnd, "Zeal_TargetRingRotation_Value");
 	ui->AddLabel(wnd, "Zeal_TargetRingSegments_Value");
 	ui->AddLabel(wnd, "Zeal_TargetRingFlash_Value");
+	ui->AddLabel(wnd, "Zeal_TargetRingTransparency_Value");
 
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRing", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->enabled.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingAttackIndicator", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->attack_indicator.set(wnd->Checked); });
@@ -452,6 +453,12 @@ void ui_options::InitTargetRing()
 		ZealService::get_instance()->target_ring->num_segments.set(value);
 		ui->SetLabelValue("Zeal_TargetRingSegments_Value", "%i", value);
 	}, 128);
+	ui->AddSliderCallback(wnd, "Zeal_TargetRingTransparency_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		float val = ScaleSliderToFloat(value, 0, 1, wnd);
+		ZealService::get_instance()->target_ring->transparency.set(val);
+		ui->SetLabelValue("Zeal_TargetRingTransparency_Value", "%.2f", val);
+	}, 128);
+
 
 }
 
@@ -543,6 +550,7 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetLabelValue("Zeal_TargetRingSegments_Value", "%i", ZealService::get_instance()->target_ring->num_segments.get());
 	ui->SetLabelValue("Zeal_TargetRingRotation_Value", "%.2f", ZealService::get_instance()->target_ring->rotation_speed.get());
 	ui->SetLabelValue("Zeal_TargetRingSize_Value", "%.2f", ZealService::get_instance()->target_ring->outer_size.get());
+	ui->SetLabelValue("Zeal_TargetRingTransparency_Value", "%.2f", ZealService::get_instance()->target_ring->transparency.get());
 }
 
 void ui_options::UpdateOptionsNameplate()
