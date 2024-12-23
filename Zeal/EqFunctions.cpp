@@ -2071,7 +2071,7 @@ namespace Zeal
 				class_string = "Rng";
 				break;
 			case Zeal::EqEnums::ClassTypes::Shadowknight:
-				class_string = "Sk";
+				class_string = "Shd";
 				break;
 			case Zeal::EqEnums::ClassTypes::Druid:
 				class_string = "Dru";
@@ -2086,7 +2086,7 @@ namespace Zeal
 				class_string = "Rog";
 				break;
 			case Zeal::EqEnums::ClassTypes::Shaman:
-				class_string = "Sha";
+				class_string = "Shm";
 				break;
 			case Zeal::EqEnums::ClassTypes::Necromancer:
 				class_string = "Nec";

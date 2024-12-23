@@ -217,7 +217,7 @@ void TellWindows::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, sho
             if (!tell_window)
             {
                 std::string WinName = TellWindowIdentifier + name;
-                std::string ini_name = ZealService::get_instance()->ui->GetUIIni();// ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+                std::string ini_name = ZealService::get_instance()->ui->GetUIIni();
                 int font_size = 3;
                 if (ini_name.length())
                 {
@@ -304,7 +304,7 @@ void __fastcall DeactivateChatManager(Zeal::EqUI::CChatManager* t, int u)
 {
     //toggle the tell windows to not load on next game load
     ZealService::get_instance()->hooks->hook_map["DeactivateChatManager"]->original(DeactivateChatManager)(t, u);
-    std::string ini_name = ZealService::get_instance()->ui->GetUIIni();// ".\\UI_" + std::string(Zeal::EqGame::get_self()->Name) + "_pq.proj.ini";
+    std::string ini_name = ZealService::get_instance()->ui->GetUIIni();
     if (ini_name.length())
     {
         IO_ini ini(ini_name);
