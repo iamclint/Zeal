@@ -545,6 +545,7 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetSliderValue("Zeal_TargetRingRotation_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->rotation_speed.get(), -1, 1, ui->GetSlider("Zeal_TargetRingSize_Slider")));
 	ui->SetSliderValue("Zeal_TargetRingFlash_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->flash_speed.get(), 1, 5, ui->GetSlider("Zeal_TargetRingFlash_Slider")));
 	ui->SetSliderValue("Zeal_TargetRingSegments_Slider", static_cast<int>(ZealService::get_instance()->target_ring->num_segments.get()));
+	ui->SetSliderValue("Zeal_TargetRingTransparency_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->transparency.get(), 0, 1, ui->GetSlider("Zeal_TargetRingTransparency_Slider")));
 	ui->SetLabelValue("Zeal_TargetRingFlash_Value", "%.2f", ZealService::get_instance()->target_ring->flash_speed.get());
 	ui->SetLabelValue("Zeal_TargetRingFill_Value", "%.2f", ZealService::get_instance()->target_ring->inner_percent.get());
 	ui->SetLabelValue("Zeal_TargetRingSegments_Value", "%i", ZealService::get_instance()->target_ring->num_segments.get());

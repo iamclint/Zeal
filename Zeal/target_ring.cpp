@@ -279,8 +279,7 @@ void TargetRing::drawVertices(Vec3 pos, DWORD vertex_count, IDirect3DTexture8* t
 void generate_vertices(SolidVertex* ringVertices, SolidVertex* outer_cylinderVertices, SolidVertex* inner_cylinderVertices, TexturedVertex* textureVertices, int num_segments, float radius, float inner_percent, float rotationAngle, DWORD color, float height)
 {
 	float trp = 1.0f - ZealService::get_instance()->target_ring->transparency.get();  // 50% transparency
-	if (trp <= 0.01)
-		trp = 0.01f;
+	trp = std::max(0.01f, std::min(1.0f, trp));
 	BYTE alpha = static_cast<BYTE>(trp * 255);  // Convert to alpha byte
 	DWORD newColor = (color & 0x00FFFFFF) | (alpha << 24);  // Apply alpha
 
