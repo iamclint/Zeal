@@ -58,7 +58,6 @@ static int __fastcall InvSlotWnd_HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, in
 		Zeal::EqStructures::EQCHARINFO* c = Zeal::EqGame::get_char_info();
 		if (!c || c->CursorItem || c->CursorCopper || c->CursorGold || c->CursorPlatinum || c->CursorSilver) {
 			return res; // Fast-fail. We are holding something.
-
 		}
 
 		Zeal::EqStructures::EQITEMINFO* container = c->InventoryPackItem[src_container_i];
