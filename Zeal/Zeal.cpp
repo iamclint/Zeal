@@ -29,6 +29,7 @@ ZealService::ZealService()
 	binds_hook = std::make_shared<Binds>(this);
 	raid_hook = std::make_shared<raid>(this);
 	eqstr_hook = std::make_shared<eqstr>(this);
+	equip_item_hook = std::make_shared<EquipItem>(this, ini.get());
 	spell_sets = std::make_shared<SpellSets>(this);
 	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
 	tooltips = std::make_shared<tooltip>(this, ini.get());

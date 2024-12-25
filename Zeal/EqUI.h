@@ -72,6 +72,21 @@ namespace Zeal
 			/*00F4*/ LPVOID  SetAttributesFromSidl; 
 			/*00F8*/ LPVOID  OnReloadSidl;
 		};
+		struct CXPoint
+		{
+			int x;
+			int y;
+			CXPoint(int _x, int _y) : x(_x), y(_y) {};
+		};
+		struct CXRect
+		{
+			int Left;
+			int Top;
+			int Right;
+			int Bottom;
+			CXRect() {}
+			CXRect(int l, int t, int r, int b) { Left = l; Top = t; Right = r; Bottom = b; }
+		};
 		struct SidlScreenWndVTable : BaseVTable  // VTable for EQWND
 		{
 			/*00FC*/ LPVOID  LoadIniInfo;
@@ -153,16 +168,6 @@ namespace Zeal
 			//	FreeRep();
 			//}
 			pCXSTR* Data;
-		};
-
-		struct CXRect
-		{
-			int Left;
-			int Top;
-			int Right;
-			int Bottom;
-			CXRect() {}
-			CXRect(int l, int t, int r, int b) { Left = l; Top = t; Right = r; Bottom = b; }
 		};
 
 		struct EQFONT
@@ -248,6 +253,31 @@ namespace Zeal
 			void MinimizeToggle()
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(vtbl->OnMinimizeBox)(this);
+			}
+			CXPoint GetScreenCenterPoint()
+			{
+				CXRect rect = this->Location;
+				int x = rect.Left;
+				int y = rect.Top;
+				int w = rect.Right - rect.Left;
+				int h = rect.Bottom - rect.Top;
+
+				BasicWnd* parent = (BasicWnd*)this->ParentWnd;
+				while (parent) {
+					x += parent->Location.Left;
+					y += parent->Location.Top;
+					parent = (BasicWnd*)parent->ParentWnd;
+				}
+
+				return { x + (w / 2), y + (h / 2) };
+			}
+			void LeftClickDown(int mouse_x, int mouse_y, unsigned int flags = 0)
+			{
+				reinterpret_cast<int(__thiscall*)(const BasicWnd*, int x, int y, uint32_t)>(vtbl->HandleLButtonDown)(this, mouse_x, mouse_y, flags);
+			}
+			void LeftClickUp(int mouse_x, int mouse_y, unsigned int flags = 0)
+			{
+				reinterpret_cast<int(__thiscall*)(const BasicWnd*, int x, int y, unsigned)>(vtbl->HandleLButtonUp)(this, mouse_x, mouse_y, flags);
 			}
 
 			/* 0x0000 */ BaseVTable* vtbl;
@@ -502,7 +532,7 @@ namespace Zeal
 			/* 0x0000 */ void* destructor;  // Pointer to pointer to CInvSlot::~CInvSlot.
 			/* 0x0004 */ InvSlotWnd* invSlotWnd;  // Points back to "parent".
 			/* 0x0008 */ void* textureAnimation;  // Also copied to invSlotWnd->TextureAnimation
-			/* 0x000C */ DWORD Unknown000c;
+			/* 0x000C */ DWORD Index;             // Index to CInvSlotMgr->invSlots[i]. This changes as containers are opened/closed.
 			/* 0x0010 */ Zeal::EqStructures::EQITEMINFOBASE* Item;
 		};
 		struct InvSlotWnd: BasicWnd  // Operator new of 0x12C bytes.
@@ -510,8 +540,11 @@ namespace Zeal
 			static constexpr BaseVTable* default_vtable = reinterpret_cast<BaseVTable*>(0x005eb774);
 			int HandleLButtonUp(int mouse_x, int mouse_y, unsigned int flags)
 			{
-				return reinterpret_cast<int(__thiscall*)(InvSlotWnd*, int, int, unsigned int)>
-													(0x005a7b10)(this, mouse_x, mouse_y, flags);
+				return reinterpret_cast<int(__thiscall*)(InvSlotWnd*, int, int, unsigned int)>(0x005a7b10)(this, mouse_x, mouse_y, flags);
+			}
+			int HandleRButtonUp(int mouse_x, int mouse_y, unsigned int flags)
+			{
+				return reinterpret_cast<int(__thiscall*)(InvSlotWnd*, int, int, unsigned int)>(0x005a7e80)(this, mouse_x, mouse_y, flags);
 			}
 			/* 0x0114 */ BYTE Unknown0114;
 			/* 0x0115 */ BYTE Unknown0015; // Passed in as param_3 to InvSlot::HandleLButtonUp().
@@ -859,13 +892,6 @@ namespace Zeal
 			/*0x178*/	int* Unknown0x178;
 			/*0x17c*/	DWORD Unknown0x17c;
 
-		};
-
-		struct CXPoint
-		{
-			int x;
-			int y;
-			CXPoint(int _x, int _y) : x(_x), y(_y) {};
 		};
 
 		class CChatManager// : public EQWND

@@ -121,6 +121,12 @@ namespace Zeal
 		void DoPercentConvert(std::string& str);
 		void move_item(int a1, int slot, int a2, int a3);
 		bool can_inventory_item(Zeal::EqStructures::EQITEMINFO* item);
+		// Checks if the race/class/deity etc can equip this item
+		bool can_use_item(Zeal::EqStructures::EQCHARINFO* c, Zeal::EqStructures::EQITEMINFO* item);
+		// Checks if the item can currently be equipped in this inventory slot.
+		// This also prevents equipping an offhand while holding a 2Hander. Or equipping a mainhand with an instrument, etc.
+		// Use [1..21] for slot number.
+		bool can_item_equip_in_slot(Zeal::EqStructures::EQCHARINFO* c, Zeal::EqStructures::EQITEMINFO* item, int slot);
 		bool can_equip_item(Zeal::EqStructures::EQITEMINFO* item);
 		void print_debug(const char* format, ...);
 		UINT get_eq_time();
