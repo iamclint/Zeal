@@ -175,7 +175,7 @@ static int __fastcall InvSlotWnd_HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, in
 
 EquipItem::EquipItem(ZealService* zeal, IO_ini* ini)
 {
-	// Modify the Alt + Left Mouse click SetItem() related callback of CInvSlotWnd.
+	// Hook the Right Click event for CInvSlotWnd
 	auto* inv_slot_wnd_vtable = Zeal::EqUI::InvSlotWnd::default_vtable;
 	mem::unprotect_memory(inv_slot_wnd_vtable, sizeof(*inv_slot_wnd_vtable));
 	inv_slot_wnd_vtable->HandleRButtonUp = InvSlotWnd_HandleRButtonUp;
