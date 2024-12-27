@@ -260,21 +260,26 @@ namespace Zeal
 			default: return "Unknown";
 			}
 		}
+		bool can_use_item(Zeal::EqStructures::EQCHARINFO* c, Zeal::EqStructures::EQITEMINFO* item) {
+			using FunctionType2 = bool(__thiscall*)(Zeal::EqStructures::EQCHARINFO* char_info, Zeal::EqStructures::EQITEMINFO* iItem);
+			FunctionType2 can_use_item = reinterpret_cast<FunctionType2>(0x4BB8E8);
+			return can_use_item(c, item);
+		}
+		bool can_item_equip_in_slot(Zeal::EqStructures::EQCHARINFO* c, Zeal::EqStructures::EQITEMINFO* item, int slot) {
+			using FunctionType = bool(__cdecl*)(Zeal::EqStructures::EQCHARINFO* char_info, UINT equipable_slots, UINT slot, Zeal::EqStructures::EQITEMINFO* iItem);
+			FunctionType check_loc = reinterpret_cast<FunctionType>(0x4F0DB4);
+			return check_loc(c, item->EquipableSlots, slot, item);
+		}
 		bool can_equip_item(Zeal::EqStructures::EQITEMINFO* item)
 		{
 			Zeal::EqStructures::EQCHARINFO* c = Zeal::EqGame::get_char_info();
 			if (!item || !c)
 				return false;
-			
-			using FunctionType2 = bool(__thiscall*)(Zeal::EqStructures::EQCHARINFO* char_info, Zeal::EqStructures::EQITEMINFO* iItem);
-			using FunctionType  = bool(__cdecl*)(Zeal::EqStructures::EQCHARINFO* char_info, UINT equipable_slots, UINT slot, Zeal::EqStructures::EQITEMINFO * iItem);
-			FunctionType check_loc = reinterpret_cast<FunctionType>(0x4F0DB4);
-			FunctionType2 can_use_item = reinterpret_cast<FunctionType2>(0x4BB8E8);
 			if (!can_use_item(c, item))
 				return false;
 			for (int i = 0; i < EQ_NUM_INVENTORY_SLOTS; i++)
 			{
-				if (check_loc(c, item->EquipableSlots, i+1, item) && !c->InventoryItem[i])
+				if (can_item_equip_in_slot(c, item, i+1) && !c->InventoryItem[i])
 				{
 					//print_chat("equipable? slot: %i  %s   %i", i, equipSlotToString(i).c_str(), c->InventoryItem[i]);
 					return true;

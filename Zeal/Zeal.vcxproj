@@ -167,6 +167,7 @@
     <ClInclude Include="default_spritefont.h" />
     <ClInclude Include="directx.h" />
     <ClInclude Include="EntityManager.h" />
+    <ClInclude Include="equip_item.h" />
     <ClInclude Include="floating_damage.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="ui_group.h" />
@@ -194,7 +195,7 @@
     <ClInclude Include="cycle_target.h" />
     <ClInclude Include="EqAddresses.h" />
     <ClInclude Include="EqFunctions.h" />
-    <ClInclude Include="EqPackets.h" />    
+    <ClInclude Include="EqPackets.h" />
     <ClInclude Include="eqstr.h" />
     <ClInclude Include="EqStructures.h" />
     <ClInclude Include="EqUI.h" />
@@ -235,6 +236,7 @@
     <ClCompile Include="default_spritefont.cpp" />
     <ClCompile Include="directx.cpp" />
     <ClCompile Include="EntityManager.cpp" />
+    <ClCompile Include="equip_item.cpp" />
     <ClCompile Include="floating_damage.cpp" />
     <ClCompile Include="ui_group.cpp" />
     <ClCompile Include="ui_inputdialog.cpp" />

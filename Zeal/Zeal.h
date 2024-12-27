@@ -21,6 +21,7 @@ public:
 	std::shared_ptr<CameraMods> camera_mods = nullptr;
 	std::shared_ptr<raid> raid_hook = nullptr;
 	std::shared_ptr<eqstr> eqstr_hook = nullptr;
+	std::shared_ptr<EquipItem> equip_item_hook = nullptr;
 	std::shared_ptr<chat> chat_hook = nullptr;
 	std::shared_ptr<chatfilter> chatfilter_hook = nullptr;
 	std::shared_ptr<SpellSets> spell_sets = nullptr;
