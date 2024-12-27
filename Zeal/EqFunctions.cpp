@@ -260,7 +260,7 @@ namespace Zeal
 			default: return "Unknown";
 			}
 		}
-		bool can_use_item(Zeal::EqStructures::EQCHARINFO * c, Zeal::EqStructures::EQITEMINFO * item) {
+		bool can_use_item(Zeal::EqStructures::EQCHARINFO* c, Zeal::EqStructures::EQITEMINFO* item) {
 			using FunctionType2 = bool(__thiscall*)(Zeal::EqStructures::EQCHARINFO* char_info, Zeal::EqStructures::EQITEMINFO* iItem);
 			FunctionType2 can_use_item = reinterpret_cast<FunctionType2>(0x4BB8E8);
 			return can_use_item(c, item);
