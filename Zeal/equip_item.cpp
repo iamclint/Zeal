@@ -14,7 +14,7 @@ static int __fastcall InvSlotWnd_HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, in
 
 void EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mouse_y)
 {
-	if (!enabled || !wnd || !wnd->invSlot || !wnd->invSlot->Item) {
+	if (!Enabled.get() || !wnd || !wnd->invSlot || !wnd->invSlot->Item) {
 		return;
 	}
 
@@ -149,13 +149,13 @@ void EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mo
 }
 
 bool EquipItem::ClickInventoryWindowSlot(int invSlot, unsigned int flags) {
+	// Note: Don't need to check for visible for Inventory UI. The elements are clickable even when not shown.
 	if (!Zeal::EqGame::Windows->Inventory) {
 		return false;
 	}
 	if (invSlot < 1 || invSlot > 22) {
 		return false;
 	}
-	// Note: Don't need to check for visible for Inventory UI. The elements are clickable even when not shown.
 	Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Inventory->GetChildItem("InvSlot" + std::to_string(invSlot));
 	if (btn) {
 		Zeal::EqUI::CXPoint point = btn->GetScreenCenterPoint();
@@ -166,18 +166,10 @@ bool EquipItem::ClickInventoryWindowSlot(int invSlot, unsigned int flags) {
 	return false;
 }
 
-EquipItem::EquipItem(ZealService* zeal, IO_ini* ini)
+EquipItem::EquipItem(ZealService* zeal)
 {
 	if (!Zeal::EqGame::is_new_ui()) {
 		return;
-	}
-
-	if (ini->exists("Zeal", "RightClickToEquip")) {
-		enabled = ini->getValue<bool>("Zeal", "RightClickToEquip");
-	}
-	else {
-		enabled = true;
-		ini->setValue<bool>("Zeal", "RightClickToEquip", true);
 	}
 
 	// Hook the Right Click event for CInvSlotWnd
@@ -185,12 +177,6 @@ EquipItem::EquipItem(ZealService* zeal, IO_ini* ini)
 	mem::unprotect_memory(inv_slot_wnd_vtable, sizeof(*inv_slot_wnd_vtable));
 	inv_slot_wnd_vtable->HandleRButtonUp = InvSlotWnd_HandleRButtonUp;
 	mem::reset_memory_protection(inv_slot_wnd_vtable);
-}
-
-void EquipItem::SetEnabled(bool in_enabled)
-{
-	enabled = in_enabled;
-	ZealService::get_instance()->ini->setValue<bool>("Zeal", "RightClickToEquip", in_enabled);
 }
 
 EquipItem::~EquipItem()
