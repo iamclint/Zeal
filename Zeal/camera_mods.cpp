@@ -612,7 +612,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 if (Zeal::String::tryParse(args[1], &delay))
                 {
                     pan_delay.set(delay);
-                    Zeal::EqGame::print_chat("Click to pan delay is now %i", pan_delay);
+                    Zeal::EqGame::print_chat("Click to pan delay is now %i", pan_delay.get());
                 }
             }
             else
