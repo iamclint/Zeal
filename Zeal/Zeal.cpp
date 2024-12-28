@@ -257,6 +257,7 @@ ZealService::~ZealService()
 	item_displays.reset();
 	spell_sets.reset();
 	eqstr_hook.reset();
+	equip_item_hook.reset();
 	raid_hook.reset();
 	binds_hook.reset();
 	labels_hook.reset();
