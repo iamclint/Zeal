@@ -4,6 +4,33 @@
 #include "EqFunctions.h"
 #include "EqPackets.h"
 #include "Zeal.h"
+
+namespace {
+
+// Simple tracing class to log the last major callback activity.
+class CallbackTrace {
+public:
+	CallbackTrace(const char* _trace) {
+		trace = _trace;
+		status = "Enter";
+	}
+	~CallbackTrace() {
+		status = "Exit";
+	}
+	static std::string get_trace() { return std::string(trace) + ": " + status; }
+private:
+	static const char* trace;
+	static const char* status;
+};
+
+const char* CallbackTrace::trace = "Startup";
+const char* CallbackTrace::status = "Unknown";
+} // namespace
+
+std::string CallbackManager::get_trace() const {
+	return CallbackTrace::get_trace();
+}
+
 CallbackManager::~CallbackManager()
 {
 
@@ -11,6 +38,7 @@ CallbackManager::~CallbackManager()
 
 void __fastcall main_loop_hk(int t, int unused)
 {
+	CallbackTrace trace("MainLoopHook");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->callbacks->invoke_generic(callback_type::MainLoop);
 	zeal->callbacks->invoke_delayed();
@@ -19,6 +47,7 @@ void __fastcall main_loop_hk(int t, int unused)
 
 void __fastcall render_hk(int t, int unused)
 {
+	CallbackTrace trace("Render");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->hooks->hook_map["Render"]->original(render_hk)(t, unused);
 	zeal->callbacks->invoke_generic(callback_type::Render);
@@ -26,6 +55,7 @@ void __fastcall render_hk(int t, int unused)
 
 void render_ui(int x)
 {
+	CallbackTrace trace("RenderUI");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->callbacks->invoke_generic(callback_type::RenderUI);
 	zeal->hooks->hook_map["RenderUI"]->original(render_ui)(x);
@@ -33,6 +63,7 @@ void render_ui(int x)
 
 void _fastcall charselect_hk(int t, int u)
 {
+	CallbackTrace trace("DoCharacterSelection");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->callbacks->invoke_generic(callback_type::CharacterSelect);
 	zeal->hooks->hook_map["DoCharacterSelection"]->original(charselect_hk)(t, u);
@@ -74,18 +105,21 @@ void CallbackManager::AddOutputText(std::function<void(Zeal::EqUI::ChatWnd*& wnd
 
 void __fastcall enterzone_hk(int t, int unused, int hwnd)
 {
+	CallbackTrace trace("EnterZone");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->hooks->hook_map["EnterZone"]->original(enterzone_hk)(t, unused, hwnd);
 	zeal->callbacks->invoke_generic(callback_type::Zone);
 }
 void __fastcall initgameui_hk(int t, int u)
 {
+	CallbackTrace trace("InitGameUI");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->hooks->hook_map["InitGameUI"]->original(initgameui_hk)(t, u);
 	zeal->callbacks->invoke_generic(callback_type::InitUI);
 }
 void __stdcall clean_up_ui()
 {
+	CallbackTrace trace("CleanUpUI");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->callbacks->invoke_generic(callback_type::CleanUI);
 	zeal->hooks->hook_map["CleanUpUI"]->original(clean_up_ui)();
@@ -172,6 +206,7 @@ void send_message_hk(int* connection, UINT opcode, char* buffer, UINT len, int u
 
 void executecmd_hk(UINT cmd, bool isdown, int unk2)
 {
+	CallbackTrace trace("ExecuteCmd");
 	ZealService* zeal = ZealService::get_instance();
 	//Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Cmd: %i", cmd);
 	if (cmd == 0xd2)
@@ -195,6 +230,7 @@ void msg_new_text(char* msg)
 
 int __fastcall AddDeferred(int t, int u)
 {
+	CallbackTrace trace("AddDeferred");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->callbacks->invoke_generic(callback_type::AddDeferred);
 	return ZealService::get_instance()->hooks->hook_map["AddDeferred"]->original(AddDeferred)(t, u);
@@ -282,6 +318,7 @@ void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* 
 
 void DeactivateMainUI()
 {
+	CallbackTrace trace("DeactivateMainUI");
 	ZealService::get_instance()->callbacks->invoke_generic(callback_type::DeactivateUI);
 	ZealService::get_instance()->hooks->hook_map["DeactivateMainUI"]->original(DeactivateMainUI)();
 }

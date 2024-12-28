@@ -12,7 +12,7 @@ public:
 
 	void HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mouse_y);
 
-	ZealSetting<bool> Enabled = { true, "Zeal", "RightClickToEquip", false };
+	ZealSetting<bool> Enabled = { false, "Zeal", "RightClickToEquip", false };
 
 private:
 	bool ClickInventoryWindowSlot(int invSlot, unsigned int flags = 0);

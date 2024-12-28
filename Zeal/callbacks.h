@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include "EqUI.h"
 #include <Windows.h>
+#include <string>
 enum class callback_type
 {
 	MainLoop,
@@ -48,6 +49,7 @@ public:
 	bool invoke_command(callback_type fn, UINT opcode, bool state);
 	void invoke_outputtext(struct Zeal::EqUI::ChatWnd*& wnd, std::string& msg, short& channel);
 	void invoke_delayed();
+	std::string get_trace() const;
 	CallbackManager(class ZealService* zeal);
 	~CallbackManager();
 	void eml();
