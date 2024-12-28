@@ -174,7 +174,18 @@ looting::looting(ZealService* zeal)
 			//}
 			return false;
 		});
-	
+	zeal->commands_hook->Add("/lootall", {}, "Loot all items",
+		[this](std::vector<std::string>& args) {
+			if (!Zeal::EqGame::Windows->Loot || !Zeal::EqGame::Windows->Loot->IsVisible)
+				Zeal::EqGame::print_chat("Looting window not visible");
+			else
+			{
+				ZealService::get_instance()->looting_hook->loot_all = true;
+				ZealService::get_instance()->looting_hook->looted_item();
+			}
+			return true;
+		});
+
 	zeal->hooks->Add("ReleaseLoot", 0x426576, release_loot, hook_type_detour);
 	zeal->hooks->Add("CLootWndDeactivate", 0x426559, CLootWndDeactivate, hook_type_detour);
 	
