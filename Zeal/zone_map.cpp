@@ -3344,13 +3344,16 @@ bool ZoneMap::initialize_d3d_external_window()
     d3dpp.BackBufferHeight = external_height;    // set the height of the buffer
 
     // create a device class using this information and the info from the d3dpp stuct
-    if (FAILED(external_d3d->CreateDevice(D3DADAPTER_DEFAULT,
+    auto result = external_d3d->CreateDevice(D3DADAPTER_DEFAULT,
         D3DDEVTYPE_HAL,
         external_hwnd,
         D3DCREATE_HARDWARE_VERTEXPROCESSING,
         &d3dpp,
-        &external_d3ddev))) {
-        Zeal::EqGame::print_chat("Error creating external map device");
+        &external_d3ddev);
+
+    if (FAILED(result)) {
+        Zeal::EqGame::print_chat("Error creating external map device: %d (%d x %d)",
+            result, external_width, external_height);
         release_d3d_external_window();
         reset_zone_state();
         return false;
