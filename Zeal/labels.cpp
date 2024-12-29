@@ -115,7 +115,29 @@ int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 			break;
 	}
 
-	return ZealService::get_instance()->hooks->hook_map["GetGauge"]->original(GetGaugeFromEq)(EqType, str);
+	int result = ZealService::get_instance()->hooks->hook_map["GetGauge"]->original(GetGaugeFromEq)(EqType, str);
+
+	switch (EqType)
+	{
+		case 11:  // Intercept the player HP gauges (group window typically) to tag the leader.
+		case 12:
+		case 13:
+		case 14:
+		case 15:
+		{
+			const Zeal::EqStructures::GroupInfo* group_info = Zeal::EqGame::GroupInfo;
+			if (group_info->is_in_group() && strcmp(str->Data->Text, group_info->LeaderName) == 0)
+			{
+				std::string name = std::string(str->Data->Text) + "*";
+				str->FreeRep();
+				*str = Zeal::EqUI::CXSTR(name.c_str());
+			}
+		}
+		break;
+		default:
+			break;
+	}
+	return result;
 }
 
 void labels::print_debug_info(std::string data)
