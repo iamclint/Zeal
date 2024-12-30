@@ -351,7 +351,8 @@ void ui_manager::RemoveTemporaryUI(const std::string& file_path)
 void __fastcall LoadSidlHk(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
-	ui->included_files.clear();
+	if (ui->included_files.size())
+		ui->included_files.clear();
 	std::string str_filename = filename;
 	std::string zeal_file = ui_manager::ui_path + str_filename;
 
