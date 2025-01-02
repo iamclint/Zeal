@@ -122,7 +122,6 @@ const std::map<int, std::string> GaugeNames = {
 pipe_data::pipe_data(pipe_data_type _type, std::string _data)
 {
 	data = _data;
-	data_len = data.length();
 	if (Zeal::EqGame::is_in_game() && Zeal::EqGame::get_self())
 		character = Zeal::EqGame::get_self()->Name;
 	else
@@ -133,14 +132,18 @@ pipe_data::pipe_data(pipe_data_type _type, std::string _data)
 void log_hook(char* data)
 {
 	ZealService* zeal = ZealService::get_instance();
-	pipe_data pd(pipe_data_type::log, data);
-	if (zeal->pipe.get())
+	if (zeal->pipe && zeal->pipe->is_connected()) {
+		pipe_data pd(pipe_data_type::log, data);
 		zeal->pipe->write(pd.serialize().dump());
+	}
 	zeal->hooks->hook_map["logtextfile"]->original(log_hook)(data);
 }
 
 void named_pipe::chat_msg(const char* data, int color_index)
 {
+	if (!is_connected())
+		return;
+
 	try {
 		std::string sanitized_data(data);
 
@@ -168,11 +171,11 @@ bool IsPipeConnected(HANDLE hPipe) {
 
 void named_pipe::main_loop()
 {
-	if (!pipe_handles.size()) //nothing is connected don't waste the cpu time getting values
+	if (!is_connected() || pipe_delay <= 0) // Don't waste cpu time if not connected or disabled.
 		return;
 
 	static auto last_output = GetTickCount64();
-	if (GetTickCount64() - last_output > pipe_delay && pipe_delay>0)
+	if (GetTickCount64() - last_output > pipe_delay)
 	{
 		const auto* raid_info = Zeal::EqGame::RaidInfo;
 		if (raid_info->is_in_raid())
@@ -450,6 +453,13 @@ named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 				OVERLAPPED overlapped;
 				memset(&overlapped, 0, sizeof(overlapped));
 				overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+				if (overlapped.hEvent == NULL)
+				{
+					MessageBoxA(0, "Unable to create pipe event", "Pipe error", 0);
+					CloseHandle(pipe_handle);
+					end_thread = true;
+					continue;
+				}
 				// Connect named pipe with overlapped I/O
 				if (ConnectNamedPipe(pipe_handle, &overlapped))
 				{

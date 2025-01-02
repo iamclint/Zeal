@@ -16,19 +16,17 @@ enum struct pipe_data_type
 struct pipe_data
 {
 	pipe_data_type type;
-	UINT data_len;
 	std::string data;
 	std::string character;
 	pipe_data(pipe_data_type _type, std::string _data);
-	pipe_data() : data{ "" }, character{ "" } {};
+	pipe_data() : type(pipe_data_type::custom), data{ "" }, character{ "" } {};
 	nlohmann::json serialize() const
 	{
-		return nlohmann::json{ {"type", type}, {"data_len", data_len}, {"data", data}, {"character", character} };
+		return nlohmann::json{ {"type", type}, {"data_len", data.length()}, {"data", data}, {"character", character}};
 	}
 	void deserialize(nlohmann::json json_obj)
 	{
 		type = json_obj["type"];
-		data_len = json_obj["data_len"];
 		data = json_obj["data"];
 	}
 };
@@ -43,6 +41,7 @@ public:
 	void write(const char* format, ...);
 	void main_loop();
 	void update_delay(unsigned new_delay);
+	bool is_connected() const { return pipe_handles.size() != 0; }
 private:
 	int pipe_delay=500;
 	bool end_thread = false;
