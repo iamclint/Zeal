@@ -171,6 +171,8 @@ bool IsPipeConnected(HANDLE hPipe) {
 
 void named_pipe::main_loop()
 {
+	update_pipe_handles();  // Handle thread synchronization.
+
 	if (!is_connected() || pipe_delay <= 0) // Don't waste cpu time if not connected or disabled.
 		return;
 
@@ -413,6 +415,20 @@ void named_pipe::update_delay(unsigned new_delay)
 	Zeal::EqGame::print_chat("pipe delay is now set to %i", pipe_delay);
 }
 
+// Adds the handle to the thread protected transfer queue.
+void named_pipe::add_new_pipe_handle(const HANDLE& handle) {
+	std::scoped_lock lock(pipe_handle_mutex);
+	pipe_handle_queue.push_back(handle);
+}
+
+// Copies handles from thread protected queue to main thread vector.
+void named_pipe::update_pipe_handles() {
+	std::scoped_lock lock(pipe_handle_mutex);
+	for (auto& h : pipe_handle_queue)
+		pipe_handles.push_back(h);
+	pipe_handle_queue.clear();
+}
+
 named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 {
 	if (!ini->exists("Zeal", "PipeDelay"))
@@ -464,7 +480,7 @@ named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 				if (ConnectNamedPipe(pipe_handle, &overlapped))
 				{
 					// Connection succeeded immediately
-					pipe_handles.push_back(pipe_handle);
+					add_new_pipe_handle(pipe_handle);
 				}
 				else
 				{
@@ -477,7 +493,7 @@ named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 						if (result == WAIT_OBJECT_0)
 						{
 							// Connection completed successfully
-							pipe_handles.push_back(pipe_handle);
+							add_new_pipe_handle(pipe_handle);
 						}
 						else if (result == WAIT_TIMEOUT)
 						{
@@ -513,6 +529,7 @@ named_pipe::~named_pipe()
 	if (pipe_thread.joinable())
 		pipe_thread.join();
 
+	update_pipe_handles();  // Just in case copy over queued handles for cleanup.
 	for (auto& h : pipe_handles)
 	{
 		DisconnectNamedPipe(h);

@@ -2,6 +2,7 @@
 #include "json.hpp"
 #include <Windows.h>
 #include <string>
+#include <mutex>
 #include <thread>
 enum struct pipe_data_type
 {
@@ -43,10 +44,15 @@ public:
 	void update_delay(unsigned new_delay);
 	bool is_connected() const { return pipe_handles.size() != 0; }
 private:
+	void add_new_pipe_handle(const HANDLE& handle);
+	void update_pipe_handles();
+
 	int pipe_delay=500;
 	bool end_thread = false;
 	std::string name = "\\\\.\\pipe\\zeal_";
 	std::vector<HANDLE> pipe_handles;
+	std::vector<HANDLE> pipe_handle_queue;  // Mutex protected transfer queue.
 	std::thread pipe_thread;
+	std::mutex pipe_handle_mutex;
 };
 
