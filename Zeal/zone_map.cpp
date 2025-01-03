@@ -88,7 +88,6 @@ static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositi
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
-static constexpr int kZLevelHeightScale = 15;  // Vertical height for z-level visibility.
 static constexpr int kWinMinSize = 160;  // Minimum size for window dimensions.
 
 // Note: Zoom factors are hard-coded in options combobox. Must keep in sync manually.
@@ -328,10 +327,10 @@ D3DCOLOR ZoneMap::render_get_line_color_and_opacity(const ZoneMapLine& line, int
         int max_delta = max(line_max_z - position_z, position_z - line_max_z);  // Absolute value.
         int min_delta = max(line_min_z - position_z, position_z - line_min_z);
         int min_distance = min(max_delta, min_delta);
-        if (min_distance >= 2 * kZLevelHeightScale)
+        if (min_distance >= 2 * zlevel_height_scale)
             alpha = static_cast<uint8_t>(map_faded_zlevel_alpha * 255);
-        else if (min_distance > kZLevelHeightScale) {
-            float fraction = static_cast<float>(min_distance) / kZLevelHeightScale;  // value between 1.f and 2.f.
+        else if (min_distance > zlevel_height_scale) {
+            float fraction = static_cast<float>(min_distance) / zlevel_height_scale;  // value between 1.f and 2.f.
             alpha = static_cast<uint8_t>((map_faded_zlevel_alpha + (1 - map_faded_zlevel_alpha) * (2 - fraction)) * 255);
         }
     }
@@ -350,13 +349,14 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
     render_release_resources(false);  // Forces update of all graphics but leave font.
 
     // Need position_z only in auto z-level fade mode (map_level_index == -1).
+    zlevel_height_scale = get_zlevel_scale();
     auto* self = Zeal::EqGame::get_self();
     zlevel_position_z = (self && map_level_index == -1) ? static_cast<int>(self->Position.z) : kInvalidPositionValue;
     int level_id = (map_level_index > 0) ? zone_map_data.levels[map_level_index].level_id : kZoneMapInvalidLevelId;
     if (level_id == kZoneMapInvalidLevelId) {
         bool no_z_fade = (zlevel_position_z == kInvalidPositionValue || zone_map_data.num_levels < 2);
-        clip_max_z = no_z_fade ? zone_map_data.max_z : zlevel_position_z + kZLevelHeightScale;
-        clip_min_z = no_z_fade ? zone_map_data.min_z : zlevel_position_z - kZLevelHeightScale;
+        clip_max_z = no_z_fade ? zone_map_data.max_z : zlevel_position_z + zlevel_height_scale;
+        clip_min_z = no_z_fade ? zone_map_data.min_z : zlevel_position_z - zlevel_height_scale;
     }
     else {
         clip_max_z = zone_map_data.levels[map_level_index].max_z;
@@ -1477,6 +1477,29 @@ void ZoneMap::synchronize_external_window() {
     } 
 }
 
+int ZoneMap::get_zlevel_scale() const {
+    if (zlevel_height_scale_override > 0)
+        return zlevel_height_scale_override;
+
+    switch (zone_id) {
+        case 103:   // chardok
+        case 1103:  // chardok_instanced
+        case 108:   // veeshan
+        case 1108:  // veeshan_instanced
+            return 30;
+        case 121:   // crystal
+        case 89:    // sebilis
+        case 1089:  // sebilis_instanced
+            return 20;
+        case 10:    // freporte
+            return 15;
+        case 63:    // unrest
+            return 6;
+        default:
+            return kDefaultZLevelHeightScale;
+    }
+}
+
 // Returns true  if a map update is needed due to a z level change.
 bool ZoneMap::is_zlevel_change() const {
     if (map_level_index != -1)
@@ -1487,7 +1510,7 @@ bool ZoneMap::is_zlevel_change() const {
         return false;
 
     int abs_delta_z = abs(static_cast<int>(self->Position.z) - zlevel_position_z);
-    return abs_delta_z > kZLevelHeightScale / 4;
+    return abs_delta_z > zlevel_height_scale / 4;
 }
 
 // System callback to execute the map rendering.
@@ -1804,6 +1827,19 @@ void ZoneMap::set_interactive_enable(bool enable, bool update_default) {
     update_ui_options();
 }
 
+void ZoneMap::set_default_to_zlevel_autofade(bool enable_autofade, bool update_default) {
+    if (default_to_zlevel_autofade != enable_autofade) {
+        default_to_zlevel_autofade = enable_autofade;
+        map_level_index = default_to_zlevel_autofade ? -1 : 0;
+        zone_id = kInvalidZoneId;  // Triggers reload.
+    }
+
+    if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
+        ZealService::get_instance()->ini->setValue<bool>("Zeal", "MapDefaultToAutofade", default_to_zlevel_autofade);
+
+    update_ui_options();
+}
+
 void ZoneMap::set_show_grid(bool enable, bool update_default) {
     map_show_grid = enable;
 
@@ -2108,6 +2144,8 @@ void ZoneMap::load_ini(IO_ini* ini)
         ini->setValue<bool>("Zeal", "MapInteractiveEnabled", false);
     if (!ini->exists("Zeal", "MapExternalEnabled"))
         ini->setValue<bool>("Zeal", "MapExternalEnabled", false);
+    if (!ini->exists("Zeal", "MapDefaultToAutofade"))
+        ini->setValue<bool>("Zeal", "MapDefaultToAutofade", false);
     if (!ini->exists("Zeal", "MapExternalLeftOffset"))
         ini->setValue<int>("Zeal", "MapExternalLeftOffset", 16);
     if (!ini->exists("Zeal", "MapExternalTopOffset"))
@@ -2152,6 +2190,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     reenable_on_zone = ini->getValue<bool>("Zeal", "MapEnabled");
     map_interactive_enabled = ini->getValue<bool>("Zeal", "MapInteractiveEnabled");
     external_enabled = ini->getValue<bool>("Zeal", "MapExternalEnabled");
+    default_to_zlevel_autofade = ini->getValue<bool>("Zeal", "MapDefaultToAutofade");
     external_monitor_left_offset = ini->getValue<int>("Zeal", "MapExternalLeftOffset");
     external_monitor_top_offset = ini->getValue<int>("Zeal", "MapExternalTopOffset");
     external_monitor_width = ini->getValue<int>("Zeal", "MapExternalWidth");
@@ -2202,6 +2241,7 @@ void ZoneMap::save_ini()
     ini->setValue<bool>("Zeal", "MapEnabled", enabled);
     ini->setValue<bool>("Zeal", "MapInteractiveEnabled", map_interactive_enabled);
     ini->setValue<bool>("Zeal", "MapExternalEnabled", external_enabled);
+    ini->setValue<bool>("Zeal", "MapDefaultToAutofade", default_to_zlevel_autofade);
     ini->setValue<int>("Zeal", "MapExternalLeftOffset", external_monitor_left_offset);
     ini->setValue<int>("Zeal", "MapExternalTopOffset", external_monitor_top_offset);
     ini->setValue<int>("Zeal", "MapExternalWidth", external_monitor_width);
@@ -2646,8 +2686,14 @@ void ZoneMap::parse_level(const std::vector<std::string>& args) {
     }
     else if (args.size() == 4 && args[2] == "alpha" && Zeal::String::tryParse(args[3], &value))
         set_faded_zlevel_alpha(value, false);
-    else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &value) || !set_level(value))
+    else if (args.size() == 4 && args[2] == "autoz" && Zeal::String::tryParse(args[3], &value)) {
+        zlevel_height_scale_override = value;
+        zone_id = kInvalidZoneId;  // Triggers reload.
+    }
+    else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &value) || !set_level(value)) {
         Zeal::EqGame::print_chat("Usage: /map level <index> (0: to show all levels, -1: auto z-level)");
+        Zeal::EqGame::print_chat("Usage: /map level alpha <0-100>, /map level autoz <height>");
+    }
 }
 
 
@@ -2715,8 +2761,9 @@ void ZoneMap::dump() {
     Zeal::EqGame::print_chat("client: t: %i, l: %i, b: %i, r: %i", 
         map_client_rect.Top, map_client_rect.Left, map_client_rect.Bottom, map_client_rect.Right);
     Zeal::EqGame::print_chat("clip: t: %f, l: %f, b: %f, r: %f", clip_min_y, clip_min_x, clip_max_y, clip_max_x);
-    Zeal::EqGame::print_chat("level: index: %i, z_max: %i, z_min: %i, faded_alpha: %.2f",
-                                map_level_index, clip_max_z, clip_min_z, map_faded_zlevel_alpha);
+    Zeal::EqGame::print_chat("level: index: %i, z_max: %i, z_min: %i, faded_alpha: %.2f, z_scale: %i",
+                                map_level_index, clip_max_z, clip_min_z, map_faded_zlevel_alpha, 
+                                zlevel_height_scale_override > 0 ? zlevel_height_scale_override : zlevel_height_scale);
     Zeal::EqGame::print_chat("position_size: %f, marker_size: %f, show_group: %i, show_raid: %i",
         position_size, marker_size, static_cast<int>(map_show_group_mode), map_show_raid);
     Zeal::EqGame::print_chat("scale_factor: %f, offset_y: %f, offset_x: %f, zoom: %f",
@@ -2835,7 +2882,7 @@ void ZoneMap::reset_zone_state() {
     show_zone_id = kInvalidZoneId;
     clear_markers(true);
     dynamic_labels_list.clear();
-    map_level_index = 0;
+    map_level_index = default_to_zlevel_autofade ? -1 : 0;
     zoom_factor = kDefaultZoomFactors[map_zoom_default_index];  // Reset for consistent behavior.
     map_ring_radius = 0;  // Disable since skill-based range is zone dependent.
     manual_on_move_trigger = false;

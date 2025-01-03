@@ -43,6 +43,7 @@ public:
 	void set_enabled(bool enable, bool update_default = false);
 	void set_external_enable(bool enabled, bool update_default = false);
 	void set_interactive_enable(bool enable, bool update_default = true);
+	void set_default_to_zlevel_autofade(bool enable_autofade, bool update_default = true);
 	bool set_show_group_mode(int new_mode, bool update_default = true);
 	void set_show_raid(bool enable, bool update_default = true);
 	void set_show_all_names_override(bool flag);  // Override to enable showing group and raid names.
@@ -67,6 +68,7 @@ public:
 	bool is_show_grid_enabled() const { return map_show_grid; }
 	bool is_show_all_names_override() const { return map_show_all_names_override;}
 	bool is_interactive_enabled() const { return map_interactive_enabled; }
+	bool is_default_zlevel_autofade() const { return default_to_zlevel_autofade; }
 	int get_show_group_mode() const { return map_show_group_mode; }
 	int get_map_zoom_default_index() const { return map_zoom_default_index; }
 	int get_name_length() const { return map_name_length; }
@@ -133,6 +135,7 @@ private:
 	static constexpr int kInvalidPositionValue = 0x7fff;
 	static constexpr int kDefaultGridPitch = 1000;
 	static constexpr int kDefaultNameLength = 5;
+	static constexpr int kDefaultZLevelHeightScale = 10;
 	static constexpr float kDefaultBackgroundAlpha = 0.5f;
 	static constexpr float kDefaultFadedZLevelAlpha = 0.2f;
 	static constexpr float kDefaultPositionSize = 0.01f;
@@ -219,6 +222,7 @@ private:
 	D3DCOLOR get_background_color() const;
 	D3DCOLOR render_get_line_color_and_opacity(const ZoneMapLine& line, int position_z, int level_id) const;
 	void update_succor_label();
+	int get_zlevel_scale() const;
 	bool is_zlevel_change() const;
 
 	const ZoneMapData* get_zone_map(int zone_id);
@@ -240,6 +244,7 @@ private:
 	bool reenable_on_zone = false;  // Flag to re-enable after a zone transition completes.
 	bool external_enabled = false;  // External map window enable and sizes.
 	bool map_interactive_enabled = false;  // Supports some mouse/cursor operations.
+	bool default_to_zlevel_autofade = false;  // Start in auto-fade mode.
 	bool map_show_grid = false;
 	int map_grid_pitch = kDefaultGridPitch;  // Pitch when grid is visible.
 	int map_ring_radius = 0;
@@ -276,6 +281,8 @@ private:
 	float clip_min_y = 0;
 	int clip_max_z = 0;
 	int clip_min_z = 0;
+	int zlevel_height_scale = kDefaultZLevelHeightScale;  // Vertical height for z-level visibility.
+	int zlevel_height_scale_override = 0;  // Zero disables the override.
 	int zlevel_position_z = kInvalidPositionValue;
 	float position_size = kDefaultPositionSize;
 	float marker_size = kDefaultMarkerSize;

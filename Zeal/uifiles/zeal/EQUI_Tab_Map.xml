@@ -189,13 +189,44 @@
     <AlignCenter>false</AlignCenter>
     <AlignRight>true</AlignRight>
   </Label>
+  <!-- Zeal Map AutoFade Enable-->
+  <Button item="Zeal_MapAutoFadeEnable">
+    <ScreenID>Zeal_MapAutoFadeEnable</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>184</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Defaults to z-level autofade mode</TooltipReference>
+    <Text>Default to Z Autofade</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <!-- Zeal Map Alignment Combobox -->
   <Label item="Zeal_MapAlignment_Label">
     <ScreenID>Zeal_MapAlignment_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>184</Y>
+      <Y>214</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -216,7 +247,7 @@
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
       <X>10</X>
-      <Y>204</Y>
+      <Y>234</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -240,7 +271,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>239</Y>
+      <Y>269</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -261,7 +292,7 @@
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
       <X>10</X>
-      <Y>259</Y>
+      <Y>289</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -286,7 +317,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>294</Y>
+      <Y>324</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -307,7 +338,7 @@
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <Location>
       <X>10</X>
-      <Y>314</Y>
+      <Y>344</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -332,7 +363,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>349</Y>
+      <Y>379</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -363,7 +394,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>379</Y>
+      <Y>409</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -384,7 +415,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>399</Y>
+      <Y>429</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -397,7 +428,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>110</X>
-      <Y>399</Y>
+      <Y>429</Y>
     </Location>
     <Size>
       <CX>40</CX>
@@ -419,7 +450,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>422</Y>
+      <Y>452</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -450,7 +481,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>452</Y>
+      <Y>482</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -471,7 +502,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>472</Y>
+      <Y>502</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -484,7 +515,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>110</X>
-      <Y>472</Y>
+      <Y>502</Y>
     </Location>
     <Size>
       <CX>40</CX>
@@ -952,6 +983,7 @@
     <Pieces>Zeal_MapFadedZLevelAlpha_Label</Pieces>
     <Pieces>Zeal_MapFadedZLevelAlpha_Slider</Pieces>
     <Pieces>Zeal_MapFadedZLevelAlpha_Value</Pieces>
+    <Pieces>Zeal_MapAutoFadeEnable</Pieces>
     <Pieces>Zeal_MapNamesLength_Label</Pieces>
     <Pieces>Zeal_MapNamesLength_Slider</Pieces>
     <Pieces>Zeal_MapNamesLength_Value</Pieces>
