@@ -342,6 +342,7 @@ void ui_options::InitMap()
 	if (!wnd)
 		return;
 	ui->AddCheckboxCallback(wnd, "Zeal_Map", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_enabled(wnd->Checked, true); });
+	ui->AddCheckboxCallback(wnd, "Zeal_MapAutoFadeEnable", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_default_to_zlevel_autofade(wnd->Checked, true); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapInteractiveEnable", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_interactive_enable(wnd->Checked, true); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapExternalWindow", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_external_enable(wnd->Checked, true); });
 	ui->AddCheckboxCallback(wnd, "Zeal_MapShowRaid", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->zone_map->set_show_raid(wnd->Checked); });
@@ -554,6 +555,8 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetLabelValue("Zeal_TargetRingRotation_Value", "%.2f", ZealService::get_instance()->target_ring->rotation_speed.get());
 	ui->SetLabelValue("Zeal_TargetRingSize_Value", "%.2f", ZealService::get_instance()->target_ring->outer_size.get());
 	ui->SetLabelValue("Zeal_TargetRingTransparency_Value", "%.2f", ZealService::get_instance()->target_ring->transparency.get());
+	ui->SetComboValue("Zeal_TargetRingTexture_Combobox",
+		FindComboIndex("Zeal_TargetRingTexture_Combobox", ZealService::get_instance()->target_ring->texture_name.get()));
 }
 
 void ui_options::UpdateOptionsNameplate()
@@ -589,8 +592,9 @@ void ui_options::UpdateOptionsMap()
 {
 	if (!wnd)
 		return;
-
+	
 	ui->SetChecked("Zeal_Map", ZealService::get_instance()->zone_map->is_enabled());
+	ui->SetChecked("Zeal_MapAutoFadeEnable", ZealService::get_instance()->zone_map->is_default_zlevel_autofade());
 	ui->SetChecked("Zeal_MapInteractiveEnable", ZealService::get_instance()->zone_map->is_interactive_enabled());
 	ui->SetChecked("Zeal_MapExternalWindow", ZealService::get_instance()->zone_map->is_external_enabled());
 	ui->SetChecked("Zeal_MapShowRaid", ZealService::get_instance()->zone_map->is_show_raid_enabled());
