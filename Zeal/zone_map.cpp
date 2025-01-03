@@ -1482,11 +1482,15 @@ int ZoneMap::get_zlevel_scale() const {
         return zlevel_height_scale_override;
 
     switch (zone_id) {
+        case 71:    // airplane
+            return 50;
         case 103:   // chardok
         case 1103:  // chardok_instanced
         case 108:   // veeshan
         case 1108:  // veeshan_instanced
             return 30;
+        case 76:    // hateplane
+        case 1076:  // hate_instanced
         case 121:   // crystal
         case 89:    // sebilis
         case 1089:  // sebilis_instanced
@@ -1496,7 +1500,8 @@ int ZoneMap::get_zlevel_scale() const {
         case 63:    // unrest
             return 6;
         default:
-            return kDefaultZLevelHeightScale;
+            // Effectively disable for open outdoor zones (type 1).
+            return (Zeal::EqGame::ZoneInfo->TimeType == 1) ? 2000 :  kDefaultZLevelHeightScale;
     }
 }
 
