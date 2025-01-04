@@ -235,11 +235,85 @@ void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
     }
 }
 
+static bool check_for_tab_completion_prefix(const std::string& text, const char* prefix) {
+    // Bail out if not the correct prefix, insufficient extra chars, or a second space.
+    int length = strlen(prefix);
+    if (!text.starts_with(prefix) || text.length() <= length ||
+        text.find(' ', length) != std::string::npos)
+        return false;
+    return true;
+}
+
+// Search the client's tell list, which is a most recent first sorted list of other players that
+// have sent tells to the client.
+static std::vector<std::string> get_tell_list_matches(const std::string& start_of_name) {
+    std::vector<std::string> result;
+    const int tell_list_size = 31;  // Stores most recent 31 tell names.
+    const char (*tell_list)[64] = reinterpret_cast<const char (*)[64]>(0x007CE45C);
+    for (int i = 0; i < tell_list_size; ++i)
+    {
+        if (tell_list[i][0] == 0)  // Rest of list is empty.
+            break;
+        if (_strnicmp(tell_list[i], start_of_name.c_str(), start_of_name.length()) == 0)
+            result.push_back(tell_list[i]);
+    }
+    return result;
+}
+
+// The game client already supports simple tab cycling through the tell list for /tell. Add a
+// tab completion alternative for /t and /consent.
+static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 key, int modifier, char keydown)
+{
+    if (key != 0xf || !keydown || modifier != 0)
+        return false;
+
+    auto entity_manager = ZealService::get_instance()->entity_manager.get();  // Short-term ptr.
+    if (!entity_manager || !active_edit->InputText.Data || active_edit->InputText.Data->Encoding != 0 
+        || active_edit->InputText.Data->Length < 4 || active_edit->item_link_count)
+        return false;
+
+    // If the active edit wnd text starts with '/t *^' || '/consent *^'
+    std::vector<const char*> prefix_list = { "/t ", "/consent "};
+    std::string text = active_edit->InputText.Data->Text;
+    for (const char* prefix : prefix_list)
+    {
+        if (check_for_tab_completion_prefix(text, prefix))
+        {
+            std::string target = text.substr(strlen(prefix), std::string::npos);
+            auto matches = get_tell_list_matches(target);
+            auto ent_matches = entity_manager->GetPlayerPartialMatches(target);
+            std::copy(ent_matches.begin(), ent_matches.end(), std::back_inserter(matches));
+            if (matches.size() == 1)  // Found our match. Update the text.
+            {
+                std::string updated_text = std::string(prefix) + matches[0];
+                active_edit->InputText.FreeRep();
+                active_edit->InputText = Zeal::EqUI::CXSTR(updated_text);
+                active_edit->Caret_End = active_edit->GetInputLength();
+                active_edit->Caret_Start = active_edit->Caret_End;
+            }
+            else if (matches.size() > 1)
+            {
+                Zeal::EqGame::print_chat("Possible matches:");
+                for (const auto& match : matches)
+                    Zeal::EqGame::print_chat("  %s", match.c_str());
+            }
+            else
+                Zeal::EqGame::print_chat("No matches");
+
+            return true;  // Break and ignore further processing of the tab key.
+        }
+    }
+    return false;
+}
+
 int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 key, int modifier, char keydown)
 {
     if (!ZealService::get_instance()->chat_hook->UseZealInput.get())
         return ZealService::get_instance()->hooks->hook_map["EditWndHandleKey"]->original(EditWndHandleKey)(active_edit, u, key, modifier, keydown);
    // Zeal::EqGame::print_chat("EditWnd: 0x%x key: %x modifier: %i state: %i", active_edit, key, modifier, keydown);
+    if (check_for_tab_completion(active_edit, key, modifier, keydown)) {
+        return 0;
+    }
     if (ZealService::get_instance()->tells->HandleKeyPress(key, keydown, modifier))
         return 0;
     //you can use a bitwise & operator on the modifier with eq_modifier_keys to check key states
