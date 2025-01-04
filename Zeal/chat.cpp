@@ -282,7 +282,9 @@ static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 ke
             std::string target = text.substr(strlen(prefix), std::string::npos);
             auto matches = get_tell_list_matches(target);
             auto ent_matches = entity_manager->GetPlayerPartialMatches(target);
-            std::copy(ent_matches.begin(), ent_matches.end(), std::back_inserter(matches));
+            for (const auto& name : ent_matches)
+                if (std::find(matches.begin(), matches.end(), name) == matches.end())
+                    matches.push_back(name);
             if (matches.size() == 1)  // Found our match. Update the text.
             {
                 std::string updated_text = std::string(prefix) + matches[0];
