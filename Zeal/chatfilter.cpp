@@ -214,6 +214,11 @@ void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short
     }
 }
 
+void __fastcall whoGlobalPrintChat(int t, int unused, const char* data)
+{
+    Zeal::EqGame::print_chat(USERCOLOR_WHO, data);
+}
+
 void __fastcall PrintSplit(int t, int unused, const char* data, short color_index, bool u)
 {
     ZealService::get_instance()->hooks->hook_map["PrintSplit"]->original(PrintSplit)(t, unused, data, USERCOLOR_MONEY_SPLIT, u);
@@ -352,6 +357,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
             }
             return false;
         }));
+    Extended_ChannelMaps.push_back(CustomFilter("/who", 0x10007, [this, zeal](short& color, std::string data) { return color == USERCOLOR_WHO; }));
 
     zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel) { this->AddOutputText(wnd, msg, channel); });
     
@@ -367,7 +373,11 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     //zeal->hooks->Add("ColorToChannelMap", 0x411173, ColorToChannelMap, hook_type_replace_call);
     zeal->hooks->Add("serverGetString", 0x4EE6C9, serverGetString, hook_type_replace_call);
     zeal->hooks->Add("serverPrintChat", 0x4ee727, serverPrintChat, hook_type_replace_call);
-
+    zeal->hooks->Add("whoGlobalPrintChat1", 0x4e4d6f, whoGlobalPrintChat, hook_type_replace_call);
+    zeal->hooks->Add("whoGlobalPrintChat2", 0x4e4d7e, whoGlobalPrintChat, hook_type_replace_call);
+    zeal->hooks->Add("whoGlobalPrintChat3", 0x4e523a, whoGlobalPrintChat, hook_type_replace_call);
+    zeal->hooks->Add("whoGlobalPrintChat4", 0x4e53b1, whoGlobalPrintChat, hook_type_replace_call);
+    
     //ChatWindow::WndNotification Conditional Patch
     mem::write<byte[2]>(0x414117, { 0x8d, 0x05 });  //lea eax
     mem::write<int>(0x414119, (int)FilterConditional);
