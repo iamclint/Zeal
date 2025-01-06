@@ -2053,7 +2053,7 @@ bool ZoneMap::set_map_data_mode(int mode_in, bool update_default) {
 }
 
 bool ZoneMap::set_position_size(int new_size_percent, bool update_default) {
-    position_size = max(0.01f, min(kMaxPositionSize, new_size_percent / 100.f * kMaxPositionSize));
+    position_size = max(kMinPositionSize, min(kMaxPositionSize, new_size_percent / 100.f * kMaxPositionSize));
 
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<float>("Zeal", "MapPositionSize", position_size);
@@ -2063,7 +2063,7 @@ bool ZoneMap::set_position_size(int new_size_percent, bool update_default) {
 }
 
 bool ZoneMap::set_marker_size(int new_size_percent, bool update_default) {
-    marker_size = max(0.01f, min(kMaxMarkerSize, new_size_percent / 100.f * kMaxMarkerSize));
+    marker_size = max(kMinMarkerSize, min(kMaxMarkerSize, new_size_percent / 100.f * kMaxMarkerSize));
     clear_markers(false);  // Release resources but keep validity state to trigger an update.
     if (update_default && ZealService::get_instance() && ZealService::get_instance()->ini)
         ZealService::get_instance()->ini->setValue<float>("Zeal", "MapMarkerSize", marker_size);
@@ -2227,8 +2227,8 @@ void ZoneMap::load_ini(IO_ini* ini)
     map_alignment_state = max(AlignmentType::kFirst, min(AlignmentType::kLast, map_alignment_state));
     map_labels_mode = max(LabelsMode::kFirst, min(LabelsMode::kLast, map_labels_mode));
     map_show_group_mode = max(ShowGroupMode::kFirst, min(ShowGroupMode::kLast, map_show_group_mode));
-    position_size = max(0.01f, min(kMaxPositionSize, position_size));
-    marker_size = max(0.01f, min(kMaxMarkerSize, marker_size));
+    position_size = max(kMinPositionSize, min(kMaxPositionSize, position_size));
+    marker_size = max(kMinMarkerSize, min(kMaxMarkerSize, marker_size));
 
     // Not checking the external monitor left and top since virtual screens can be negative.
     external_monitor_width = max(kWinMinSize, external_monitor_width);
