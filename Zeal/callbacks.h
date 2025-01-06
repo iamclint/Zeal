@@ -23,7 +23,7 @@ enum class callback_type
 	Delayed,
 	RenderUI,
 	EndScene,
-	AddDeferred,
+	DrawWindows,
 	DXReset,
 	DXResetComplete,
 	EntitySpawn,
