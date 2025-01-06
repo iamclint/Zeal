@@ -235,13 +235,21 @@ void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
     }
 }
 
-static bool check_for_tab_completion_prefix(const std::string& text, const char* prefix) {
-    // Bail out if not the correct prefix, insufficient extra chars, or a second space.
+static std::string get_tab_completion_target(const std::string& text, const char* prefix) {
+    // Only process if the correct prefix and some characters after the prefix's trailing space.
     int length = strlen(prefix);
-    if (!text.starts_with(prefix) || text.length() <= length ||
-        text.find(' ', length) != std::string::npos)
-        return false;
-    return true;
+    if (text.starts_with(prefix) && text.length() > length)
+    {
+        // Valid target if either no second space or the space is the final character.
+        auto second_space = text.find(' ', length);
+        bool no_space = (second_space == std::string::npos);
+        if (no_space || (second_space == text.length() - 1))
+        {
+            auto count = no_space ? std::string::npos : (second_space - length);
+            return text.substr(length, count);  // Return with stripped trailing space.
+        }
+    }
+    return std::string();
 }
 
 // Search the client's tell list, which is a most recent first sorted list of other players that
@@ -260,48 +268,118 @@ static std::vector<std::string> get_tell_list_matches(const std::string& start_o
     return result;
 }
 
-// The game client already supports simple tab cycling through the tell list for /tell. Add a
-// tab completion alternative for /t and /consent.
-static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 key, int modifier, char keydown)
+// Search the client's raid list for matches.
+static std::vector<std::string> get_raid_list_matches(const std::string& start_of_name) {
+    std::vector<std::string> result;
+    const Zeal::EqStructures::RaidInfo* raid_info = Zeal::EqGame::RaidInfo;
+    if (!raid_info->is_in_raid())
+        return result;
+
+    const int kRaidMaxMembers = Zeal::EqStructures::RaidInfo::kRaidMaxMembers;
+    for (int i = 0; i < kRaidMaxMembers; ++i) {
+        const auto& member = raid_info->MemberList[i];
+        if (_strnicmp(member.Name, start_of_name.c_str(), start_of_name.length()) == 0)
+            result.push_back(member.Name);
+    }
+    return result;
+}
+
+// Assembles a list of all tell list, raid, and local zone name matches
+static std::vector<std::string> get_all_matches(const std::string& start_of_name)
 {
-    if (key != 0xf || !keydown || modifier != 0)
-        return false;
+    auto matches = get_tell_list_matches(start_of_name);
+    auto raid_matches = get_raid_list_matches(start_of_name);
+    for (const auto& name : raid_matches)
+        if (std::find(matches.begin(), matches.end(), name) == matches.end())
+            matches.push_back(name);
 
     auto entity_manager = ZealService::get_instance()->entity_manager.get();  // Short-term ptr.
-    if (!entity_manager || !active_edit->InputText.Data || active_edit->InputText.Data->Encoding != 0 
-        || active_edit->InputText.Data->Length < 4 || active_edit->item_link_count)
-        return false;
+    if (entity_manager)
+    {
+        auto ent_matches = entity_manager->GetPlayerPartialMatches(start_of_name);
+        for (const auto& name : ent_matches)
+            if (std::find(matches.begin(), matches.end(), name) == matches.end())
+                matches.push_back(name);
+    }
+    return matches;
+}
 
-    // If the active edit wnd text starts with '/t *^' || '/consent *^'
-    std::vector<const char*> prefix_list = { "/t ", "/consent "};
-    std::string text = active_edit->InputText.Data->Text;
+// Safely convert a wide Unicode string to an UTF8 string.
+static std::string wchar_to_utf8(const wchar_t* input)
+{
+    std::wstring wstr = input;
+    if (wstr.empty()) return std::string();
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+    std::string result(size_needed, 0);
+    WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &result[0], size_needed, NULL, NULL);
+    return result;
+}
+
+// Enhance the /tell tab completion to include the raid and zone player list and also enable
+// it for /t and /consent.
+static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 key, int modifier, char keydown)
+{
+    static std::vector<std::string> matches;  // Cache state for cycling through the list.
+
+    bool not_a_tab_down = (key != 0xf || !keydown || (modifier != 0 && modifier != 1));
+    if (not_a_tab_down || !active_edit->InputText.Data || active_edit->item_link_count
+         || active_edit->InputText.Data->Length < 4)
+    {
+        // Clear the cache if keydown is not a shift key (DIK_LSHIFT or DIK_RSHIFT).
+        if (keydown && (key != 0x2a && key != 0x36))
+            matches.clear();  // Flush the cached list (if any) for any other keydown press.
+        return false;
+    }
+
+    // First check if the start of the text is one that supports tab completion.
+    // We cycle through this even if we already have matches just to re-use code.
+    std::vector<const char*> prefix_list = { "/t ", "/tell ", "/consent " };
+    const char* input_text = active_edit->InputText.Data->Text;
+    std::string text = (active_edit->InputText.Data->Encoding == 0) ?
+        std::string(input_text) :
+        wchar_to_utf8(reinterpret_cast<const wchar_t*>(input_text));
     for (const char* prefix : prefix_list)
     {
-        if (check_for_tab_completion_prefix(text, prefix))
+        auto target = get_tab_completion_target(text, prefix);
+        if (!target.empty())
         {
-            std::string target = text.substr(strlen(prefix), std::string::npos);
-            auto matches = get_tell_list_matches(target);
-            auto ent_matches = entity_manager->GetPlayerPartialMatches(target);
-            for (const auto& name : ent_matches)
-                if (std::find(matches.begin(), matches.end(), name) == matches.end())
-                    matches.push_back(name);
-            if (matches.size() == 1)  // Found our match. Update the text.
+            bool first_pass = matches.empty();
+            if (matches.empty())
             {
-                std::string updated_text = std::string(prefix) + matches[0];
+                matches = get_all_matches(target);
+                if (matches.size() > 1)
+                {
+                    Zeal::EqGame::print_chat("Possible matches:");
+                    for (const auto& match : matches)
+                        Zeal::EqGame::print_chat("  %s", match.c_str());
+                }
+            }
+            else if (matches.size() > 1) {
+                if (modifier == 0)  // Shift not down, cycle forwards
+                {
+                    std::string old_front = matches.front();  // Rotate list forward.
+                    for (int i = 1; i < matches.size(); ++i)
+                        matches[i - 1] = matches[i];
+                    matches.back() = old_front;
+                }
+                else
+                {
+                    std::string old_back = matches.back();  // Rotate list backwards.
+                    for (int i = matches.size() - 1; i > 0; --i)
+                        matches[i] = matches[i - 1];
+                    matches.front() = old_back;
+                }
+            }
+            if (matches.empty())
+                Zeal::EqGame::print_chat("No matches");
+            else  // Update the text with the first match in the list.
+            {
+                std::string updated_text = std::string(prefix) + matches.front() + " ";
                 active_edit->InputText.FreeRep();
                 active_edit->InputText = Zeal::EqUI::CXSTR(updated_text);
                 active_edit->Caret_End = active_edit->GetInputLength();
                 active_edit->Caret_Start = active_edit->Caret_End;
             }
-            else if (matches.size() > 1)
-            {
-                Zeal::EqGame::print_chat("Possible matches:");
-                for (const auto& match : matches)
-                    Zeal::EqGame::print_chat("  %s", match.c_str());
-            }
-            else
-                Zeal::EqGame::print_chat("No matches");
-
             return true;  // Break and ignore further processing of the tab key.
         }
     }
@@ -620,6 +698,11 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("GetRGBAFromIndex5", 0x4139eb, GetRGBAFromIndex, hook_type_replace_call); 
     zeal->hooks->Add("GetRGBAFromIndex6", 0x438719, GetRGBAFromIndex, hook_type_replace_call);   
     InitPercentReplacements();
+
+    // Disable the cycle reply forwards and backwards if ZealInput enabled
+    zeal->binds_hook->replace_cmd(0x3c, [this](int state) { return ZealService::get_instance()->chat_hook->UseZealInput.get(); });
+    zeal->binds_hook->replace_cmd(0x3d, [this](int state) { return ZealService::get_instance()->chat_hook->UseZealInput.get(); });
+
 }
 void chat::set_classes()
 {
