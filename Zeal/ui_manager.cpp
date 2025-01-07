@@ -459,6 +459,23 @@ std::string ui_manager::GetUIIni()
 	return "";
 }
 
+// Instead of a full ui_SkillsWnd class just patch things here for sorting with left clicks.
+static int __fastcall SkillsWnd_WndNotification(Zeal::EqUI::EQWND* wnd, int unused_edx,
+										Zeal::EqUI::BasicWnd* src_wnd, int param_2, int param_3) {
+	// CListWnd::OnHeaderClick() generates a WndNotification callback to the parent with a code of 0x0e.
+	if (param_2 == 0x0e && (param_3 == 0 || param_3 == 2)) {
+		auto list_wnd = reinterpret_cast<Zeal::EqUI::ListWnd*>(src_wnd);
+		Zeal::EqGame::sort_list_wnd(list_wnd, param_3);
+		return 0;
+	}
+
+	// Pass through other notifications to original CSkillsWnd::WndNotification().
+	reinterpret_cast<int(__fastcall*)(Zeal::EqUI::EQWND * wnd, int unused_edx,
+		Zeal::EqUI::BasicWnd * src_wnd, int param_2, int param_3)>(0x00432943)
+												(wnd, unused_edx, src_wnd, param_2, param_3);
+	return 0;
+}
+
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
@@ -485,17 +502,8 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	zeal->hooks->Add("XMLRead", 0x58D640, XMLRead, hook_type_detour);
 	zeal->hooks->Add("XMLReadNoValidate", 0x58DA10, XMLReadNoValidate, hook_type_detour);
 
-	zeal->commands_hook->Add("/sortskill", {}, "",
-		[this](std::vector<std::string>& args) {
-			if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->Skills && Zeal::EqGame::Windows->Skills->IsVisible)
-			{
-				Zeal::EqUI::ListWnd* wnd = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Skills->GetChildItem("SkillList");
-				if (wnd)
-				{
-					wnd->Sort(2);
-				}
-			}
-			return true;
-		});
+	// Patch the CSkillsWnd vtable so that it calls our custom WndNotification handler.
+	auto vtable = reinterpret_cast<Zeal::EqUI::SidlScreenWndVTable*>(0x005e6b3c);
+	vtable->WndNotification = SkillsWnd_WndNotification;
 }
 

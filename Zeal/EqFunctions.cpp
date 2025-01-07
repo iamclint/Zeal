@@ -2216,5 +2216,60 @@ namespace Zeal
 				}
 			}
 		}
+
+		// Primitive comparison with simple numeric string support.
+		static bool sort_list_wnd_compare(const std::vector<std::string>& a,
+			const std::vector<std::string>& b, int sort_column)
+		{
+			int a_num = std::atoi(a[sort_column].c_str());
+			int b_num = std::atoi(b[sort_column].c_str());
+			if (a_num != 0 && b_num != 0)  // Both are non-zero numerics strings, so numeric comparison.
+				return a_num < b_num;
+			return a[sort_column] < b[sort_column];  // Else use default string comparison.
+		}
+
+		// Sorts the contents of a list window by the sort_column index.
+		void sort_list_wnd(Zeal::EqUI::ListWnd* list_wnd, int sort_column)
+		{
+			if (!list_wnd)
+				return;
+
+			const int num_rows = list_wnd->ItemCount;
+
+			// Determined the num_cols from inspecting the disassembly. There appears to be a
+			// pointer to a row length array of structures at an offset of 0xfc (CmbListWnd in
+			// struct) with the num_cols of the first row at integer index [1]. We just assume equal
+			// number of columns for every row.
+			if (list_wnd->CmbListWnd == nullptr)
+				return;
+			const int num_cols = reinterpret_cast<int*>(list_wnd->CmbListWnd)[1];
+			if (sort_column < 0 || sort_column >= num_cols)
+				return;
+
+			// Copy data into a standard 2-D structure for sorting.
+			std::vector<std::vector<std::string>> data;
+			Zeal::EqUI::CXSTR temp;
+			for (int r = 0; r < num_rows; ++r)
+			{
+				data.push_back(std::vector<std::string>());
+				for (int c = 0; c < num_cols; ++c)
+				{
+					list_wnd->GetItemText(&temp, r, c);
+					data[r].push_back(temp.Data->Text);
+				}
+			}
+			temp.FreeRep();  // Need to release the temporary reference count.
+
+			std::sort(data.begin(), data.end(), [sort_column](const std::vector<std::string>& a,
+				const std::vector<std::string>& b)
+				{ return sort_list_wnd_compare(a, b, sort_column); });
+
+			for (int r = 0; r < num_rows; ++r)
+			{
+				for (int c = 0; c < num_cols; ++c)
+					list_wnd->SetItemText(data[r][c], r, c);
+			}
+		}
+
 	}
 }
