@@ -13,7 +13,7 @@ from the repo using github actions, providing full transparency on the contents.
 - Camera motion improvements (major improvements to third person view)
 - Additional key binds (tab targeting, strafe, pet)
 - Additional commands (melody, useitem, autoinventory)
-- Additional ui support (new gauges, bag control, looting, spellsets, targetrings, nameplates)
+- Additional ui support (new gauges, bag control, looting, spellsets, targetrings, nameplates, right click to equip)
 - Third party tool support (silent log messages, direct ZealPipes)
 - Integrated map (see In-game Map section below)
 - Various bug fixes
@@ -135,6 +135,9 @@ ___
   - **Arguments:** none, `open` (reports raid groups with open slots), `all` (lists all raid groups)
   - **Description:** prints out your current group leader (and raid leader if in raid).
 
+- `/lootall`
+  - **Description:** loots all items from a corpse if looting window is open.
+
 - `/melody`
   - **Arguments:** `song gem #'s (maximum of 5)`
   - **Aliases:** `/mel`
@@ -142,7 +145,7 @@ ___
   - **Description:** plays songs in order until interrupted in any fashion.
 
 - `/map`
-  - **Arguments:** `on`, `off`, `size`, `alignment`, `marker`, `background`, `zoom`, `poi`, `labels`, `level`
+  - **Arguments:** `on`, `off`, `size`, `alignment`, `marker`, `background`, `zoom`, `poi`, `labels`, `level`, `ring`, `grid`
   - **Example:** See In-game map section below
   - **Description:** controls map enable, size, labels, zoom, and markers
     
@@ -285,6 +288,7 @@ ___
 - Slow turn right
 - Target nearest pc corpse
 - Target nearest npc corpse
+- Cycle through nearest pc corpses
 - Toggle map on/off
 - Toggle through map default zooms
 - Toggle through map backgrounds
@@ -293,7 +297,6 @@ ___
 - Toggle map visibility of raid members and member names
 - Toggle map visibility of grid lines
 - Toggle map interactive mode (internal overlay)
-- Press to display group and raid member labels
 - Toggle nameplate colors for players on/off
 - Toggle nameplate con colors for npcs on/off
 - Toggle nameplate for self on/off
