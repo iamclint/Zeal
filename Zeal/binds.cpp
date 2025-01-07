@@ -77,27 +77,26 @@ void Binds::read_ini()
 	}
 }
 
+static void cycle_targets(int key_down, Zeal::EqEnums::EntityTypes type)
+{
+	if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+	{
+		Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_next_ent(250, type);
+		if (ent)
+			Zeal::EqGame::set_target(ent);
+	}
+}
+
 void Binds::add_binds()
 {
 	//just start binds at 211 to avoid overwriting any existing cmd/bind
 	add_bind(211, "Strafe Left",	"StrafeLeft",		key_category::Movement,	[this](int key_down) {});	// stub
 	add_bind(212, "Strafe Right", "StrafeRight",	key_category::Movement, [this](int key_down) {});	// stub
 	add_bind(213, "Cycle through nearest NPCs", "CycleTargetNPC", key_category::Target, [](int key_down) {
-
-		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
-		{
-			Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_next_ent(250, 1);
-			if (ent)
-				Zeal::EqGame::set_target(ent);
-		}
-	});
+			cycle_targets(key_down, Zeal::EqEnums::NPC);
+		});
 	add_bind(214, "Cycle through nearest PCs", "CycleTargetPC", key_category::Target, [](int key_down) {
-		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
-		{
-			Zeal::EqStructures::Entity* ent = ZealService::get_instance()->cycle_target->get_next_ent(250, 0);
-			if (ent)
-				Zeal::EqGame::set_target(ent);
-		}
+			cycle_targets(key_down, Zeal::EqEnums::Player);
 		});
 	add_bind(215, "Toggle all containers", "OpenCloseContainers", key_category::UI | key_category::Commands, [](int key_down) {
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
@@ -333,6 +332,9 @@ void Binds::add_binds()
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 			 ZealService::get_instance()->zone_map->set_interactive_enable(
 				!ZealService::get_instance()->zone_map->is_interactive_enabled(), false);
+		});
+	add_bind(243, "Cycle through near PC corpses", "CycleTargetPCCorpses", key_category::Target, [](int key_down) {
+			cycle_targets(key_down, Zeal::EqEnums::PlayerCorpse);
 		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
