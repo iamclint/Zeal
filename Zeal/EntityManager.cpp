@@ -52,6 +52,20 @@ Zeal::EqStructures::Entity* EntityManager::Get(WORD id) const
 	return entity;
 }
 
+std::vector<std::string> EntityManager::GetPlayerPartialMatches(const std::string& start_of_name) const
+{
+	std::vector<std::string> result;
+	Zeal::EqStructures::Entity* current_ent = Zeal::EqGame::get_entity_list();
+	while (current_ent != nullptr)
+	{
+		if (current_ent->Type == Zeal::EqEnums::Player &&
+			_strnicmp(current_ent->Name, start_of_name.c_str(), start_of_name.length()) == 0)
+			result.push_back(current_ent->Name);
+		current_ent = current_ent->Next;
+	}
+	return result;
+}
+
 // Local Dump() helper that confirms there isn't a mismatch of a hashmap key/value pair.
 static bool is_valid_entity(const std::string& name, struct Zeal::EqStructures::Entity* entity) {
 	if (!entity)

@@ -9,8 +9,7 @@
 #include <algorithm>
 #define NUM_VERTICES 4
 
-
-
+static constexpr char const * kTextureDirectoryPath = "./uifiles/zeal/targetrings/";
 
 RenderState::RenderState(IDirect3DDevice8* device, DWORD state, DxStateType_ type)
 	: state(state), type(type)
@@ -86,7 +85,7 @@ void TargetRing::load_texture(const std::string& filename) {
 			return;
 
 		// Full texture path
-		std::string texturePath = "./uifiles/zeal/targetrings/" + filename + ".tga";
+		std::string texturePath = kTextureDirectoryPath + filename + ".tga";
 
 		// Get the Direct3D device
 		IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
@@ -474,7 +473,9 @@ static std::vector<std::string> GetTGAFiles(const std::string& directoryPath) {
 
 
 std::vector<std::string> TargetRing::get_available_textures() const {
-	std::vector<std::string> tgas = GetTGAFiles("uifiles/zeal/targetrings");
+	std::vector<std::string> tgas = GetTGAFiles(kTextureDirectoryPath);
+	if (tgas.empty())
+		Zeal::EqGame::print_chat("Warning: no texture files found at: %s", kTextureDirectoryPath);
 	tgas.insert(tgas.begin(), "None");
 	return tgas;
 }

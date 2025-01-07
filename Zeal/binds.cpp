@@ -10,7 +10,9 @@ Binds::~Binds()
 bool Binds::execute_cmd(UINT cmd, bool isdown)
 {
 	ZealService* zeal = ZealService::get_instance();
-	if (!Zeal::EqGame::game_wants_input() || !isdown) //checks if the game wants keyboard input... don't call our binds when the game wants input
+	// Don't call our binds on keydown when the game wants input except for reply cycling.
+	bool reply_cycle = (cmd == 0x3c || cmd == 0x3d);
+	if (!Zeal::EqGame::game_wants_input() || !isdown || reply_cycle)
 	{
 		//if (isdown)
 		//	Zeal::EqGame::print_chat("cmd: %i down: %i", cmd, isdown);

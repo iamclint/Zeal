@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 class EntityManager
 {
@@ -14,6 +15,7 @@ public:
 	void Remove(struct Zeal::EqStructures::Entity*);
 	Zeal::EqStructures::Entity* Get(std::string name) const;  // Returns nullptr if not found.
 	Zeal::EqStructures::Entity* Get(WORD id) const;  // Note: Equivalent to EqGame::get_entity_by_id()
+	std::vector<std::string> GetPlayerPartialMatches(const std::string& start_of_name) const;
 	void Dump() const;
 
 private:
