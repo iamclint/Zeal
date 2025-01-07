@@ -581,6 +581,8 @@ is selectable using the toggle map level keybinds (see below).
   - `/map level` shows the current zone's map data level info
   - `/map level 0` shows default of all levels
   - `/map level 2` shows the current zone's level 2 data
+  - `/map level -1` enables auto z-level mode
+  - `/map level autoz 10`  sets the auto z-level mode height limit to +/- 10 (setting to 0 restores default)
 
 #### Position markers
 The map supports adding position markers for easier identification of target coordinates. The

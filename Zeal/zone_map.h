@@ -30,7 +30,10 @@ public:
 
 	static constexpr int kMaxNameLength = 20;  // Name buffer is >= 30.
 	static constexpr int kMaxGridPitch = 2500;
+
+	static constexpr float kMinPositionSize = 0.0025f;  // In fraction of screen size.
 	static constexpr float kMaxPositionSize = 0.05f;  // In fraction of screen size.
+	static constexpr float kMinMarkerSize = 0.0025f;
 	static constexpr float kMaxMarkerSize = 0.05f;
 
 	ZoneMap(class ZealService* zeal, class IO_ini* ini);

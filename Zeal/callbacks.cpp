@@ -228,12 +228,12 @@ void msg_new_text(char* msg)
 	zeal->hooks->hook_map["MsgNewText"]->original(msg_new_text)(msg);
 }
 
-int __fastcall AddDeferred(int t, int u)
+int __fastcall DrawWindows(int t, int u)
 {
-	CallbackTrace trace("AddDeferred");
+	CallbackTrace trace("DrawWindows");
 	ZealService* zeal = ZealService::get_instance();
-	zeal->callbacks->invoke_generic(callback_type::AddDeferred);
-	return ZealService::get_instance()->hooks->hook_map["AddDeferred"]->original(AddDeferred)(t, u);
+	zeal->callbacks->invoke_generic(callback_type::DrawWindows);
+	return ZealService::get_instance()->hooks->hook_map["DrawWindows"]->original(DrawWindows)(t, u);
 }
 
 
@@ -325,7 +325,7 @@ void DeactivateMainUI()
 
 CallbackManager::CallbackManager(ZealService* zeal)
 {
-	zeal->hooks->Add("AddDeferred", 0x59E000, AddDeferred, hook_type_detour); //render in this hook so damage is displayed behind ui
+	zeal->hooks->Add("DrawWindows", 0x59E000, DrawWindows, hook_type_detour); //render in this hook so damage is displayed behind ui
 	zeal->hooks->Add("MsgNewText", 0x4e25a1, msg_new_text, hook_type_detour);
 	zeal->hooks->Add("ExecuteCmd", 0x54050c, executecmd_hk, hook_type_detour);
 	zeal->hooks->Add("MainLoop", 0x5473c3, main_loop_hk, hook_type_detour);

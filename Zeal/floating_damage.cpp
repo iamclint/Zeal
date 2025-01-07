@@ -452,7 +452,7 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
 	spells = ini->getValue<bool>("Zeal", "FloatingDamageSpells");
 	spell_icons = ini->getValue<bool>("Zeal", "FloatingDamageIcons");
-	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::AddDeferred);
+	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::DrawWindows);
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { add_damage(source, target, damage, heal, spell_id); });
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
