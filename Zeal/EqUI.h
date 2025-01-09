@@ -773,6 +773,10 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const ContextMenu*)>(0x417a7f)(this);
 			}
+			void CheckMenuItem(int row, bool check, bool unknown = false)
+			{
+				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, bool, bool)>(0x417ae8)(this, row, check, unknown);
+			}
 	
 			/*0x000*/   ContextMenuVTable* fnTable;
 			/*0x004*/   DWORD   Unknown0x004; /* set to 0 in CXWnd::Refade*/
