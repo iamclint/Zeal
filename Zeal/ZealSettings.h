@@ -27,7 +27,7 @@ public:
 	{
 		set(!value, store);
 	}
-	T get() { return value; }
+	T get() const { return value; }
 	std::string get_section_name() const {
 		if (!per_character)
 			return section;

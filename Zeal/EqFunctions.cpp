@@ -500,12 +500,6 @@ namespace Zeal
 			}
 			return false;
 		}
-		char* get_guildName_from_guildId(int guildId)
-		{
-			if (guildId == 0xFFFF)
-				return (char*)"";
-			return (Zeal::EqGame::guild_names->Guild[guildId].Name);
-		}
 		void print_group_leader()
 		{
 			const Zeal::EqStructures::GroupInfo* group_info = Zeal::EqGame::GroupInfo;
@@ -692,6 +686,33 @@ namespace Zeal
 					group_count++;
 			}
 			return min(6, group_count);
+		}
+
+		bool is_raid_pet(const Zeal::EqStructures::Entity& entity)
+		{
+			const int pet_owner_id = entity.PetOwnerSpawnId;
+			if (!pet_owner_id || (entity.Type != Zeal::EqEnums::NPC))
+				return false;
+
+			const auto self = Zeal::EqGame::get_self();
+			if (!self || self->SpawnId == pet_owner_id)
+				return false;  // Don't hide the self pet.
+
+			const auto raid_info = Zeal::EqGame::RaidInfo;
+			if (!raid_info->is_in_raid())
+				return false;
+
+			for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i)
+			{
+				const Zeal::EqStructures::RaidMember& member = raid_info->MemberList[i];
+				if (member.Name[0] == 0)  // Empty string check.
+					continue;
+				auto raid_entity = ZealService::get_instance()->entity_manager->Get(member.Name);
+				if (raid_entity && raid_entity->SpawnId == pet_owner_id)
+					return true;
+			}
+
+			return false;
 		}
 
 		Vec3 get_view_actor_head_pos()
@@ -1708,9 +1729,14 @@ namespace Zeal
 		}
 		void set_target(Zeal::EqStructures::Entity* target)
 		{
+			auto old_target = Zeal::EqGame::get_target();
 			if (!target)
 				print_chat(get_string(0x3057)); //you no longer have a target
 			*(Zeal::EqStructures::Entity**)Zeal::EqGame::Target = target;
+
+			// Note: The change in target will get detected in EQ_Character::DoPassageOfTime() which
+			// is called by the RenderReal_World() code. That sends a TargetMouse opcode (0x4162)
+			// that will keep the server in sync and also trigger a target HP update packet response.
 		}
 		void do_target(const char* name)
 		{
@@ -2122,7 +2148,39 @@ namespace Zeal
 				class_string += " GuildMaster";
 			return class_string;
 		}
-
+		int get_showname()
+		{
+			// Holds value of /showname command.
+			//  1 = first names, 2 = first/last names, 3 = first/last/guild names, 4 = everything
+			return *reinterpret_cast<int32_t*>(0x007d01e4);
+		}
+		std::string get_full_zone_name(int zone_id) {
+			const int fn_GetFullZoneName = 0x00523e49;
+			void* pWorld = *reinterpret_cast<void**>(0x007F9494);
+			char buffer[512];  // Size used in client SetNameSpriteState.
+			buffer[0] = 0;
+			reinterpret_cast<void(__thiscall*)(void* this_world, int zone_id, char* buffer)>(fn_GetFullZoneName)(pWorld, zone_id, buffer);
+			return std::string(buffer);
+		}
+		std::string get_class_desc(int class_id) {
+			const int fn_GetClassDesc = 0x0052d5f1;
+			auto pEverquest = Zeal::EqGame::get_eq();
+			auto desc = reinterpret_cast<const char* (__thiscall*)(Zeal::EqStructures::Everquest*, int)>(fn_GetClassDesc)(pEverquest, class_id);
+			return std::string(desc);
+		}
+		std::string get_title_desc(int class_id, int aa_rank, int gender) {
+			const int fn_GetTitleDesc = 0x0052eb69;
+			auto pEverquest = Zeal::EqGame::get_eq();
+			auto desc = reinterpret_cast<const char* (__thiscall*)(Zeal::EqStructures::Everquest*, int, int, int)>(fn_GetTitleDesc)(pEverquest, class_id, aa_rank, gender);
+			return std::string(desc);
+		}
+		std::string get_player_guild_name(short guild_id) {
+			// Roughly equivalent to:
+			// return (guild_id == -1) ? "Unknown" : Zeal::EqGame::guild_names->Guild[guildId].Name;
+			const int fn_GetPlayerGuildName = 0x0054c7e1;
+			auto desc = reinterpret_cast<const char* (*)(short)>(fn_GetPlayerGuildName)(guild_id);
+			return std::string(desc);
+		}
 		bool is_targetable(Zeal::EqStructures::Entity* ent)
 		{
 			
