@@ -196,6 +196,12 @@ namespace Zeal
 			char Unknown0x0[0x20];
 			pCXSTR* Item;
 		};
+		struct ListWndColInfo  // CListWnd::SetItemText strides by 7 * 4 bytes for each row.
+		{
+			DWORD Unknown0x00;
+			int ColCount;  // Used in SetItemText as the number of columns.
+			DWORD Unknown0x08[5];  // Total size of 0x1c.
+		};
 		struct BasicWnd  // Equivalent to CXWnd in eqmac.exe.
 		{
 			//BasicWnd() {};
@@ -327,11 +333,11 @@ namespace Zeal
 			/*0x0b0*/   DWORD   ZLayer2;
 			/*0x0b4*/   BYTE   Unknown0x0b4[0x28];
 			/*0x0dc*/   DWORD   FadeTickCount;
-			/*0x0e0*/   BYTE    Unknown0x0f8; /* CXWnd::StartFade */
-			/*0x0e1*/   BYTE    Unknown0x0f9; /* CXWnd::StartFade */
-			/*0x0e2*/   BYTE    Unknown0x0fa;
-			/*0x0e3*/   BYTE    Unknown0x0fb;
-			/*0x0e4*/   DWORD   Unknown0x0fc; /* CXWnd::StartFade, CXWnd::Minimize */
+			/*0x0e0*/   BYTE    Unknown0x0e0; /* CXWnd::StartFade */
+			/*0x0e1*/   BYTE    Unknown0x0e1; /* CXWnd::StartFade */
+			/*0x0e2*/   BYTE    Unknown0x0e2;
+			/*0x0e3*/   BYTE    Unknown0x0e3;
+			/*0x0e4*/   DWORD   Unknown0x0e4; /* CXWnd::StartFade, CXWnd::Minimize */
 			/*0x0e8*/   DWORD   VScrollMax;
 			/*0x0ec*/   DWORD   VScrollPos;
 			/*0x0f0*/   DWORD   HScrollMax;
@@ -339,7 +345,7 @@ namespace Zeal
 			/*0x0f8*/   BYTE    ValidCXWnd;
 			/*0x0f9*/   BYTE    Unused0x0f9[0x3];
 			/*0x0fc*/   union {
-
+				struct ListWndColInfo* ColInfoArray;  // Row-length array of info structures.
 				struct pCXSTR* SidlText;
 				DWORD Items;
 				struct ListWnd* CmbListWnd;
