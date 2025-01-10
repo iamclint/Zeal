@@ -2236,13 +2236,12 @@ namespace Zeal
 
 			const int num_rows = list_wnd->ItemCount;
 
-			// Determined the num_cols from inspecting the disassembly. There appears to be a
-			// pointer to a row length array of structures at an offset of 0xfc (CmbListWnd in
-			// struct) with the num_cols of the first row at integer index [1]. We just assume equal
-			// number of columns for every row.
-			if (list_wnd->CmbListWnd == nullptr)
+			// The CListWnd::SetItemText() code showed that the number of columns was accessed
+			// by a pointer at +0xfc that points to an array of 28 byte structures with the column
+			// value in the second integer index.
+			if (list_wnd->ColInfoArray == nullptr)
 				return;
-			const int num_cols = reinterpret_cast<int*>(list_wnd->CmbListWnd)[1];
+			const int num_cols = list_wnd->ColInfoArray[0].ColCount;
 			if (sort_column < 0 || sort_column >= num_cols)
 				return;
 
@@ -2251,6 +2250,12 @@ namespace Zeal
 			Zeal::EqUI::CXSTR temp;
 			for (int r = 0; r < num_rows; ++r)
 			{
+				// Temporary logging / sanity check that there are equal number of columns for each row.
+				if (list_wnd->ColInfoArray[r].ColCount != num_cols) {
+					Zeal::EqGame::print_chat("Sorting column mismatch: %d vs %d",
+									num_cols, list_wnd->ColInfoArray[r].ColCount);
+					return;
+				}
 				data.push_back(std::vector<std::string>());
 				for (int c = 0; c < num_cols; ++c)
 				{

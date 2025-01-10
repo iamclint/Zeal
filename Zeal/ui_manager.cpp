@@ -470,9 +470,9 @@ static int __fastcall SkillsWnd_WndNotification(Zeal::EqUI::EQWND* wnd, int unus
 	}
 
 	// Pass through other notifications to original CSkillsWnd::WndNotification().
-	reinterpret_cast<int(__fastcall*)(Zeal::EqUI::EQWND * wnd, int unused_edx,
+	reinterpret_cast<int(__thiscall*)(Zeal::EqUI::EQWND * wnd,
 		Zeal::EqUI::BasicWnd * src_wnd, int param_2, int param_3)>(0x00432943)
-												(wnd, unused_edx, src_wnd, param_2, param_3);
+												(wnd, src_wnd, param_2, param_3);
 	return 0;
 }
 
