@@ -154,9 +154,9 @@ int32_t __fastcall AddMenu(int this_, int u, Zeal::EqUI::ContextMenu* menu)
         Zeal::EqUI::CXSTR cstr(ec.name);
         cf->ZealMenu->AddMenuItem(cstr, ec.channelMap);
     }
-    int menuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(cf->ZealMenu);
+    cf->menuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(cf->ZealMenu);
 
-    menu->AddMenuItem("Zeal", menuIndex, true, true);
+    menu->AddMenuItem("Zeal", cf->menuIndex, true, true);
 
 	return ZealService::get_instance()->hooks->hook_map["AddMenu"]->original(AddMenu)(this_, u, menu);
 }
@@ -199,16 +199,12 @@ void __fastcall UpdateContextMenus(Zeal::EqUI::CChatManager* cman, int u, Zeal::
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
 
-    for (int i = 0; i < cf->Extended_ChannelMaps.size(); i++)
+    if (cf->ZealMenu)
     {
-        Zeal::EqUI::ChatWnd * mapped = cf->Extended_ChannelMaps.at(i).windowHandle;
-        if (mapped == window)
+        for (int i = 0; i < cf->Extended_ChannelMaps.size(); i++)
         {
-            cf->ZealMenu->CheckMenuItem(i, true);
-        }
-        else
-        {
-            cf->ZealMenu->CheckMenuItem(i, false);
+            Zeal::EqUI::ChatWnd* mapped = cf->Extended_ChannelMaps.at(i).windowHandle;
+            cf->ZealMenu->CheckMenuItem(i, mapped == window);
         }
     }
     ZealService::get_instance()->hooks->hook_map["UpdateContextMenus"]->original(UpdateContextMenus)(cman, u, window);
@@ -239,6 +235,17 @@ void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
     }
     ZealService::get_instance()->hooks->hook_map["Deactivate"]->original(Deactivate)(cman, u);
 }
+
+void chatfilter::callback_clean_ui()
+{
+    if (ZealMenu and menuIndex != -1)
+    {
+        Zeal::EqGame::Windows->ContextMenuManager->RemoveMenu(menuIndex, true);
+    }
+    menuIndex = -1;
+    ZealMenu = NULL;
+}
+
 
 void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel)
 {
@@ -401,6 +408,7 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 
     //Callbacks
     zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel) { this->AddOutputText(wnd, msg, channel); });
+    zeal->callbacks->AddGeneric([this]() { callback_clean_ui(); }, callback_type::CleanUI);
     
     //ChatManager
     zeal->hooks->Add("CChatManager", 0x4100e2, CChatManager, hook_type_detour);

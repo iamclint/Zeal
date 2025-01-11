@@ -42,14 +42,16 @@ class chatfilter
   public:
 	chatfilter(class ZealService* pHookWrapper, class IO_ini* ini);
 	std::vector<CustomFilter> Extended_ChannelMaps;
-	Zeal::EqUI::ContextMenu* ZealMenu;
+	Zeal::EqUI::ContextMenu* ZealMenu = nullptr;
 	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel);
 	void LoadSettings(Zeal::EqUI::CChatManager* cm);
+	void callback_clean_ui();
 	bool isExtendedCM(int channelMap, int applyOffset = 0);
 	bool isStandardCM(int channelMap, int applyOffset = 0);
 	bool isDamage=false;
 	bool isMyPetSay=false;
 	bool isPetMessage=false;
+	int menuIndex = -1;
 	damage_data damageData;
 	~chatfilter();
 };
