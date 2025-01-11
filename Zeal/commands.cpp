@@ -48,7 +48,8 @@ void __fastcall InterpretCommand(int c, int unused, Zeal::EqStructures::Entity* 
 			InterpretCommand(c, unused, player, (char*)str_cmd.c_str());
 			return;
 		}
-		str_cmd = "/" + str_cmd;
+		//Zeal::EqGame::print_chat("Command: %s", str_cmd.c_str()); //if the problem comes up again use this with the test to see what happening
+		//str_cmd = "/" + str_cmd;
 	}
 	std::vector<std::string> args = Zeal::String::split(str_cmd," ");
 	const std::string& cmd_name = args.front();
