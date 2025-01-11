@@ -130,17 +130,33 @@ __declspec (naked) void FilterConditional(void)
     }
 }
 
+static Zeal::EqUI::ContextMenu* InitializeMenu(void* notificationFunc = nullptr) {
+    auto menu = Zeal::EqUI::ContextMenu::Create(0, 0, { 100, 100, 100, 100 });
+    if (!menu)
+        throw std::bad_alloc();
+
+    menu->HasChildren = true;  // Note: Evaluate if these are still necessary.
+    menu->HasSiblings = true;
+    menu->Unknown0x015 = 0;
+    menu->Unknown0x016 = 0;
+    menu->Unknown0x017 = 0;
+    menu->fnTable->WndNotification = notificationFunc;
+    return menu;
+}
+
 int32_t __fastcall AddMenu(int this_, int u, Zeal::EqUI::ContextMenu* menu)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
-
-    menu->AddSeparator();
+    cf->ZealMenu = InitializeMenu();
 
     for (auto& ec : cf->Extended_ChannelMaps)
     {
         Zeal::EqUI::CXSTR cstr(ec.name);
-        menu->AddMenuItem(cstr, ec.channelMap);
+        cf->ZealMenu->AddMenuItem(cstr, ec.channelMap);
     }
+    cf->menuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(cf->ZealMenu);
+
+    menu->AddMenuItem("Zeal", cf->menuIndex, true, true);
 
 	return ZealService::get_instance()->hooks->hook_map["AddMenu"]->original(AddMenu)(this_, u, menu);
 }
@@ -179,6 +195,21 @@ int __fastcall CChatManager(Zeal::EqUI::CChatManager* cman, int u)
     return retVal;
 }
 
+void __fastcall UpdateContextMenus(Zeal::EqUI::CChatManager* cman, int u, Zeal::EqUI::ChatWnd * window)
+{
+    chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
+
+    if (cf->ZealMenu)
+    {
+        for (int i = 0; i < cf->Extended_ChannelMaps.size(); i++)
+        {
+            Zeal::EqUI::ChatWnd* mapped = cf->Extended_ChannelMaps.at(i).windowHandle;
+            cf->ZealMenu->CheckMenuItem(i, mapped == window);
+        }
+    }
+    ZealService::get_instance()->hooks->hook_map["UpdateContextMenus"]->original(UpdateContextMenus)(cman, u, window);
+}
+
 void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
 {
     std::string ini_name = ZealService::get_instance()->ui->GetUIIni();
@@ -204,6 +235,17 @@ void __fastcall Deactivate(Zeal::EqUI::CChatManager* cman, int u)
     }
     ZealService::get_instance()->hooks->hook_map["Deactivate"]->original(Deactivate)(cman, u);
 }
+
+void chatfilter::callback_clean_ui()
+{
+    if (ZealMenu and menuIndex != -1)
+    {
+        Zeal::EqGame::Windows->ContextMenuManager->RemoveMenu(menuIndex, true);
+    }
+    menuIndex = -1;
+    ZealMenu = NULL;
+}
+
 
 void chatfilter::AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel)
 {
@@ -364,8 +406,11 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
         }));
     Extended_ChannelMaps.push_back(CustomFilter("/who", 0x10007, [this, zeal](short& color, std::string data) { return color == USERCOLOR_WHO; }));
 
+    //Callbacks
     zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel) { this->AddOutputText(wnd, msg, channel); });
+    zeal->callbacks->AddGeneric([this]() { callback_clean_ui(); }, callback_type::CleanUI);
     
+    //ChatManager
     zeal->hooks->Add("CChatManager", 0x4100e2, CChatManager, hook_type_detour);
     zeal->hooks->Add("Deactivate", 0x410871, Deactivate, hook_type_detour);
     zeal->hooks->Add("AddMenu", 0x4120DD, AddMenu, hook_type_replace_call);
@@ -373,9 +418,11 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("SetChannelMap", 0x4113F1, SetChannelMap, hook_type_detour);
     zeal->hooks->Add("ClearChannelMap", 0x41140C, ClearChannelMap, hook_type_detour);
     zeal->hooks->Add("ClearChannelMaps", 0x411638, ClearChannelMaps, hook_type_detour);
+    zeal->hooks->Add("UpdateContextMenus", 0x412f9b, UpdateContextMenus, hook_type_detour);
+
+    //Individiual Modifications
     zeal->hooks->Add("PrintSplit", 0x54755b, PrintSplit, hook_type_replace_call); //fix up money split
     zeal->hooks->Add("PrintAutoSplit", 0x4FB477, PrintAutoSplit, hook_type_replace_call); //fix up money split
-    //zeal->hooks->Add("ColorToChannelMap", 0x411173, ColorToChannelMap, hook_type_replace_call);
     zeal->hooks->Add("serverGetString", 0x4EE6C9, serverGetString, hook_type_replace_call);
     zeal->hooks->Add("serverPrintChat", 0x4ee727, serverPrintChat, hook_type_replace_call);
     zeal->hooks->Add("whoGlobalPrintChat1", 0x4e4d6f, whoGlobalPrintChat_wrapped, hook_type_replace_call);
