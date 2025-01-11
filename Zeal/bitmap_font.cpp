@@ -131,6 +131,11 @@ std::vector<std::string> BitmapFont::get_available_fonts() {
     return fonts;
 }
 
+// Calculates the default shadow offset for this font size.
+float BitmapFont::calculate_shadow_offset() const {
+    float offset = std::roundf(get_line_spacing() * 0.05f);  // Round to integer offsets.
+    return std::max(1.f, offset);
+}
 
 // Reads a font from files created with the MakeSpriteFont utility.
 BitmapFont::BitmapFont(IDirect3DDevice8& device_in, const char* filename) :

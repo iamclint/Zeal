@@ -48,6 +48,7 @@ public:
     Vec2 measure_string(const char* text) const;
     RECT measure_draw_rect(const char* text, const Vec2& position) const;
     float get_line_spacing() const { return line_spacing; }
+    float calculate_shadow_offset() const;
 
     // Renders any queued string content to the screen and clears the queue.
     // Note that the D3D stream source, indices, vertex shader, and texture states

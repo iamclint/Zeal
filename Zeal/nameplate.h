@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "EqStructures.h"
 #include "ZealSettings.h"
+#include "bitmap_font.h"
 
 class NamePlate
 {
@@ -45,11 +46,26 @@ public:
 	ZealSetting<bool> setting_target_health = { false, "Zeal", "NameplateTargetHealth", false };
 	ZealSetting<bool> setting_inline_guild = { false, "Zeal", "NameplateInlineGuild", false };
 
+	// Advanced fonts
+	ZealSetting<bool> setting_zeal_fonts = { false, "Zeal", "NamePlateZealFonts", false,
+		[this](bool val) { if (val) nameplate_info_map.clear(); } };
+
 	// Internal use only (public for use by callbacks).
 	__declspec(noinline) bool handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity);
 	bool handle_SetNameSpriteState(void* this_display, Zeal::EqStructures::Entity* entity, int show);
 
 private:
+	struct NamePlateInfo {
+		std::string text;
+		DWORD color;
+	};
+
+	struct RenderInfo {
+		NamePlateInfo* info;
+		float distance;
+		Vec2 screen_xy;
+	};
+
 	void parse_args(const std::vector<std::string>& args);
 	ColorIndex get_color_index(const Zeal::EqStructures::Entity& entity);
 	ColorIndex get_player_color_index(const Zeal::EqStructures::Entity& entity) const;
@@ -57,4 +73,11 @@ private:
 	std::string generate_nameplate_text(const Zeal::EqStructures::Entity& entity, int show) const;
 	std::string generate_target_postamble(const Zeal::EqStructures::Entity& entity) const;
 	bool is_nameplate_hidden_by_race(const Zeal::EqStructures::Entity& entity) const;
+
+	void clean_ui();
+	void render_ui();
+	void load_bitmap_fonts();
+
+	std::vector<std::unique_ptr<BitmapFont>> bitmap_fonts;
+	std::unordered_map<struct Zeal::EqStructures::Entity*, NamePlateInfo> nameplate_info_map;
 };
