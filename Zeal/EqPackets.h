@@ -12,6 +12,7 @@ namespace Zeal
             PrintNonMeleeDamage = 0x4236,
             CorpseDrag = 0x4114,
             CorpseDrop = 0x1337,
+            TargetMouse = 0x4162,
             RequestTrade = 0x40D1
         };
         struct TradeRequest_Struct {
@@ -52,6 +53,11 @@ namespace Zeal
             /*016*/	UINT8   is_PC;
             /*017*/	UINT8   unknown015[3];
             /*020*/
+        };
+        struct ClientTarget_Struct
+        {
+            /*000*/	UINT16	new_target; // Target spawn ID.
+            /*002*/
         };
     }
 }

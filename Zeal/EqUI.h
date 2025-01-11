@@ -412,7 +412,8 @@ namespace Zeal
 		};
 		struct CharSelect : EQWND
 		{
-			/*0x134*/	BYTE    Unk[0x3C];  // 0x134 looks like an activated flag (set to 0 in Deactivate callbacks.)
+			/*0x134*/	BYTE    Activated;   // Set to 1 when activated and 0 in Deactivate().
+			/*0x135*/	BYTE    Unknown0x135[0x3B];
 			/*0x170*/   BYTE    Rotate;
 			/*0x171*/   BYTE    Explore;
 		};

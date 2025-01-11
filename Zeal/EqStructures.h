@@ -402,7 +402,8 @@ namespace Zeal
 		} EQARGBCOLOR;
 		typedef struct _EQSTRINGSPRITE
 		{
-			/* 0x0000 */ DWORD Unknown0000;
+			static constexpr int kMagicValidValue = 0x51;  // Magic value that means valid.
+			/* 0x0000 */ DWORD MagicValue;  // Set to kMagicValidValue in valid StringSprites.
 			/* 0x0004 */ DWORD Unknown0004;
 			/* 0x0008 */ DWORD Unknown0008;
 			/* 0x000C */ DWORD Unknown000C;
@@ -709,7 +710,7 @@ namespace Zeal
 			/* 0x0F10 */ FLOAT ZoneBirthZ;
 			/* 0x0F14 */ BYTE Unknown0F14[1080];
 			/* 0x134C */ WORD Deity;
-			/* 0x134E */ WORD GuildId;
+			/* 0x134E */ short GuildId;
 			/* 0x1350 */ BYTE Unknown1350[8];
 			/* 0x1358 */ BYTE Unknown1358;
 			/* 0x1359 */ BYTE Unknown1359;
@@ -775,7 +776,7 @@ namespace Zeal
 			/* 0x0096 */ WORD PetOwnerSpawnId; // spawn id of the owner of this pet spawn
 			/* 0x0098 */ DWORD HpMax;
 			/* 0x009C */ DWORD HpCurrent;
-			/* 0x00A0 */ WORD GuildId;
+			/* 0x00A0 */ short GuildId;  // -1 is unguilded
 			/* 0x00A2 */ BYTE Unknown00A2[6];
 			/* 0x00A8 */ BYTE Type; // EQ_SPAWN_TYPE_x
 			/* 0x00A9 */ BYTE Class; // EQ_CLASS_x

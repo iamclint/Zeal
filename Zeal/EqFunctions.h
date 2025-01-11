@@ -183,14 +183,18 @@ namespace Zeal
 		// re-used, so the result should be consumed immediately (copy to std::string or compare immediately).
 		const char* trim_name(const char* name);  // Cleans but leaves suffixes. Use for name's corpse123 => name's corpse.
 		const char* strip_name(const char* name);  // Strips numbers and any text past an apostrophe ('s corpse).
-		char* get_guildName_from_guildId(int guildId);
 		char* get_string(UINT id);
 		//void set_camera_position(Vec3* pos);
 		int* get_display();
 		float heading_to_yaw(float heading);
 		bool is_mouse_hovering_window();
+		int get_showname(); // Holds value of /showname command.
 		std::string class_name_short(int class_id);
 		std::string class_name(int class_id);
+		std::string get_full_zone_name(int zone_id);  // EQWorldData::GetFullZoneName()
+		std::string get_class_desc(int class_id);  // CEverQuest::GetClassDesc()
+		std::string get_title_desc(int class_id, int aa_rank, int gender);  // CEverQuest::GetTitleDesc()
+		std::string get_player_guild_name(short guild_id); // GetPlayerGuildName()
 		bool is_game_ui_window_hovered();
 		bool is_targetable(Zeal::EqStructures::Entity* ent);
 		bool is_in_game();
@@ -201,6 +205,7 @@ namespace Zeal
 		std::vector<Zeal::EqStructures::RaidMember*> get_raid_list();
 		DWORD get_raid_group_number();
 		int get_raid_group_count(DWORD group_number);
+		bool is_raid_pet(const Zeal::EqStructures::Entity& entity);
 		std::string get_raid_group_leader(DWORD group_number);
 		void print_group_leader();
 		void print_raid_leaders(bool show_all_groups = false, bool show_open_groups = false);

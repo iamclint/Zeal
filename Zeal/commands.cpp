@@ -374,7 +374,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 						original.c_str(), trimmed.c_str(), stripped.c_str(), trimmed == stripped ? "true" : "false");
 					if (target->ActorInfo && target->ActorInfo->DagHeadPoint && target->ActorInfo->DagHeadPoint->StringSprite) {
 						auto& sprite = *target->ActorInfo->DagHeadPoint->StringSprite;
-						if (sprite.Unknown0000 == 0x51)
+						if (sprite.MagicValue == sprite.kMagicValidValue)
 							Zeal::EqGame::print_chat("Sprite: %s, len: %i", sprite.Text, sprite.TextLength);
 					}
 				}

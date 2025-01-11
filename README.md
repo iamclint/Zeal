@@ -245,32 +245,10 @@ ___
   - **Arguments:** `oldui`
   - **Description:** Re-opens the alarm window, if oldui is specified it allows for an alarm on it.
 
-- `/nameplatecolors`
-  - **Description:** toggles nameplate colors for players
+- `/nameplate`
+  - **Arguments:** `colors`, `concolors`, `targetcolor`, `charselect`, `hideself`, `x`, `hideraidpets`, `targetmarker`, `targethealth`, `inlineguild`
+  - **Description:** toggles nameplate modes for adjusting colors (tints) and text
 
-- `/nameplateconcolors`
-  - **Description:** toggles nameplate con colors for npcs
-
-- `/nameplatehideself`
-  - **Description:** toggles nameplate for self (on/off)
-
-- `/nameplatex`
-  - **Description:** toggles nameplate for self as X (on/off)
-
-- `/nameplatehideraidpets`
-  - **Description:** toggles nameplate for raid pets and your pet (on/off)
- 
-- `/nameplatecharselect`
-  - **Description:** toggles nameplate choices shown at character selection screen on and off (on/off)
-
-- `/nameplatetargetcolor`
-  - **Description:** toggles target nameplate color on and off (on/off)
- 
-- `/nameplatetargetmarker`
-  - **Description:** toggles target nameplate marker on and off (on/off)
- 
-- `/nameplatetargethealth`
-  - **Description:** toggles target nameplate health on and off (on/off)
 ___
 ### Binds
 - Cycle through nearest NPCs
@@ -373,18 +351,20 @@ Necromancers will now have an easier time finding their corpses.
 The nameplate is controlled through three interfaces:
 * Dedicated Zeal options window tab (requires `zeal\uifiles`, see Installation notes above)
 * Key binds for nameplate options (configure in EQ Options->Keyboard->Target)
-* The five /nameplate commands listed below
+* The /nameplate commands described below
 
 #### Enabling Disabling Nameplate Options
-* The `/nameplatecolors` command - Toggles Nameplate Colors for Players on and off
-* The `/nameplateconcolors` command - Toggles Nameplate Con Colors for NPCs on and off
-* The `/nameplatehideself` command - Toggles Player Nameplate on and off
-* The `/nameplatex` command - Toggles Player Nameplate as X on and off
-* The `/nameplatehideraidpets` command - Toggles NPC Raid Pets Nameplate on and off
-* The `/nameplatecharselect` command - Toggles Nameplate Choices Shown at Character Selection Screen on and off
-* The `/nameplatetargetcolor` command - Toggles Target Nameplate Color on and off
-* The `/nameplatetargetmarker` command - Toggles Target Nameplate Marker on and off
-* The `/nameplatetargethealth` command - Toggles Target Nameplate Health on and off
+* The `/nameplate colors` command - Toggles Nameplate Colors for Players on and off
+* The `/nameplate concolors` command - Toggles Nameplate Con Colors for NPCs on and off
+* The `/nameplate hideself` command - Toggles Player Nameplate on and off
+* The `/nameplate x` command - Toggles Player Nameplate as X on and off
+* The `/nameplate hideraidpets` command - Toggles NPC Raid Pets Nameplate on and off
+* The `/nameplate charselect` command - Toggles Nameplate Choices Shown at Character Selection Screen on and off
+* The `/nameplate targetcolor` command - Toggles Target Nameplate Color on and off
+* The `/nameplate targetmarker` command - Toggles Target Nameplate Marker on and off
+* The `/nameplate targethealth` command - Toggles Target Nameplate Health on and off
+* The `/nameplate targethealth` command - Toggles Target Nameplate Health on and off
+* The `/nameplate inlineguild` command - Toggles guild name appearing inline or on a separate line
 
 #### Changing the Color of Nameplates
 Zeal allows players to change the colors of the Nameplates of Players and NPCs in game.
