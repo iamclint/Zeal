@@ -209,7 +209,26 @@ namespace Zeal
 
 			return conlevel;
 		}
-
+		bool IsPlayableRace(WORD race) {
+			switch (race) {
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 10:
+			case 11:
+			case 12:
+			case 128:
+			case 130:
+				return true;
+			}
+			return false;
+		}
 		void move_item(int a1, int slot, int a2, int a3)
 		{
 			reinterpret_cast<bool (__thiscall*)(int t, int a1, int slot, int a2, int a3)>(0x422b1c)(*(int*)0x63d6b4, a1, slot, a2, a3);

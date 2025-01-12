@@ -24,6 +24,7 @@
 #include "directx.h"
 #include "nameplate.h"
 #include "tellwindows.h"
+#include "helm_manager.h"
 // other features
 #include "NPCGive.h"
 #include "cycle_target.h"

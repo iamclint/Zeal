@@ -318,25 +318,24 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
 			return false;
 		});
-	Add("/showhelm", { "/helm" }, "Sends server command #showhelm with arugments on/off.",
+	Add("/showhelm", { "/helm" }, "Toggles your show helm setting on/off.",
 		[](std::vector<std::string>& args) {
-			if (args.size() == 1)
-			{
-				Zeal::EqGame::print_chat("usage: /showhelm [on | off]");
+			if (args.size() == 1) {
+				ZealService::get_instance()->helm->ShowHelmEnabled.toggle();
 				return true;
 			}
-			if (args.size() > 1 && args.size() < 3) {
+			if (args.size() == 2) {
 				if (Zeal::String::compare_insensitive(args[1], "on")) {
-					Zeal::EqGame::do_say(true, "#showhelm on");
+					ZealService::get_instance()->helm->ShowHelmEnabled.set(true);
 					return true;
 				}
-				else if (Zeal::String::compare_insensitive(args[1], "off"))
-				{
-					Zeal::EqGame::do_say(true, "#showhelm off");
+				if (Zeal::String::compare_insensitive(args[1], "off")) {
+					ZealService::get_instance()->helm->ShowHelmEnabled.set(false);
 					return true;
 				}
 			}
-			return false;
+			Zeal::EqGame::print_chat("Usage: /showhelm or /showhelm <on|off>");
+			return true;
 		});
 	Add("/showlootlockouts", { "/sll", "/showlootlockout", "/showlockouts" }, "Sends #showlootlockouts to server.",
 		[](std::vector<std::string>& args) {
