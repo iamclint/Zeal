@@ -88,7 +88,7 @@ int HelmManager::HandleSwapHead(int cDisplay, Zeal::EqStructures::Entity* entity
         }
     }
 
-    // (3) Fix a packet bug sending wrnog values:
+    // (3) Fix a packet bug sending wrong values:
     // - When equipping a non-Velious Helm when local_only=false, this causes a double-send with a wrong value in the first packet. Suppressing this causes it to single-send the correct value only.
     // - But we don't want to suppress Velious Helms, as those do no exhibit the double-send bug, and it would instead cause nothing to be sent.
     if (new_material < kMaterialVeliousHelm || block_outbound_wearchange > 0) {
@@ -101,8 +101,8 @@ int HelmManager::HandleSwapHead(int cDisplay, Zeal::EqStructures::Entity* entity
     int result = zeal->hooks->hook_map[SwapHeadHook]->original(SwapHead_hk)(cDisplay, 0, entity, new_material, old_material, color, local_only);
 
     // (4) Fix CDisplay::SwapHead() overflow:
-    // The native call only writes the lo-byte of the 'new_material' value to entity->EquipmentMaterialType[0] in some code paths.
-    // Because of our new logic, we can overflow this when custom IT### numbers (in the 500-600) rather than the 240-241 IDs.
+    // The original call only writes the lo-byte of the 'new_material' value to entity->EquipmentMaterialType[0] in some code paths.
+    // Because of our new logic, we can overflow this when custom IT### numbers are introduced (in the 500-600).
     // Simply overwriting this value after the call works fine.
     entity->EquipmentMaterialType[kMaterialSlotHead] = new_material;
 
@@ -196,7 +196,7 @@ int HelmManager::HandleIllusion(Zeal::EqStructures::Entity* entity, Zeal::Packet
 
 // Callback when Server (local_only=true) or UI (local_only=false) is changing our armor appearance
 void HelmManager::HandleWearChangeArmor(int cDisplay, Zeal::EqStructures::Entity* spawn, int wear_slot, WORD new_material, WORD old_material, DWORD colors, int local_only) {
-    int force_block = 0;
+    int block_wearchange = 0;
     if (wear_slot == kMaterialSlotHead && local_only && spawn == Zeal::EqGame::get_self()) {
         // Check for any showhelm violation.
         if (new_material != kMaterialNone && !ShowHelmEnabled.get()) {
@@ -205,12 +205,12 @@ void HelmManager::HandleWearChangeArmor(int cDisplay, Zeal::EqStructures::Entity
             }
             RefreshHelm(false, 0);
         }
-        // Inbound WearChanges from the server should never generate a response.
-        force_block = 1; 
+        // Inbound WearChanges from the server shouldn't generate a response. However, the client doesn't respect 'local_only' flag on some helmets.
+        block_wearchange = 1;
     }
-    block_outbound_wearchange += force_block;
+    block_outbound_wearchange += block_wearchange;
     ZealService::get_instance()->hooks->hook_map["WearChangeArmor"]->original(WearChangeArmor_hk)(cDisplay, 0, spawn, wear_slot, new_material, old_material, colors, local_only);
-    block_outbound_wearchange -= force_block;
+    block_outbound_wearchange -= block_wearchange;
 }
 
 // Callback for server WearChange packets. It immediately calls HandleWearChangeArmor after for non-weapon slots.
@@ -309,7 +309,7 @@ WORD HelmManager::ToCanonicalHelmID(WORD material, WORD race) {
             return kMaterialVeliousHelm;
         case 641: // OGR (F) Alternate Helm (Barbarian/RZ look)
         case 646: // OGR (M) Alternate Helm (Barbarian/RZ look)
-            if (race == 11) {
+            if (race == 10) {
                 return kMaterialVeliousHelmOgreRZ;
             }
             return kMaterialVeliousHelm;
@@ -345,7 +345,7 @@ WORD HelmManager::ToRacialHelmMaterial(WORD material, WORD race, BYTE gender) {
     // Material 241 exists but only gives Ogres an alternate looking helmet.
     // Treat the rest like regular Velious helms for now.
     if (material == kMaterialVeliousHelmOgreRZ) {
-        if (race == 11) {
+        if (race == 10) {
             return kMaterialVeliousHelmOgreRZ;
         } else if (Zeal::EqGame::IsPlayableRace(race)) {
             material = kMaterialVeliousHelm;
