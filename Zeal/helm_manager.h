@@ -57,7 +57,7 @@ private:
     // We do some initialization on enter world once per-character
     std::string last_seen_character = "";
 
-    // Auto-detected flags on startup based that tell us whether hhey have the necessary .s3d patch installed
+    // Auto-detected flags on startup that tell us if their Velious asset patch is installed
     bool DetectInstalledFixesComplete = false;
     bool UseHumanFemaleFix = false;
     bool UseBarbarianFemaleFix = false;
