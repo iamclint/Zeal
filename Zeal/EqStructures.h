@@ -387,8 +387,9 @@ namespace Zeal
 		};
 		struct _EQMODELINFO
 		{
-			DWORD Unknown0000[16];
-			DWORD NumSkinsAttachedToHierarchicalSprite;
+			/* 0x0000 */ BYTE Unknown0000[64];
+			/* 0x0040 */ DWORD NumSkinsAttachedToHierarchicalSprite;
+			/* ...... */
 		};
 				typedef struct _EQARGBCOLOR {
 			union {
@@ -824,7 +825,7 @@ namespace Zeal
 			/* 0x0150 */ BYTE Unknown0150;
 			/* 0x0151 */ BYTE HairColor;
 			/* 0x0152 */ BYTE BeardColor;
-			/* 0x0153 */ BYTE Unknown0151[2];
+			/* 0x0153 */ BYTE Unknown0153[2];
 			/* 0x0155 */ BYTE HairStyle;
 			/* 0x0156 */ BYTE BeardStyle;
 			/* 0x0157 */ BYTE Unknown0157[5];

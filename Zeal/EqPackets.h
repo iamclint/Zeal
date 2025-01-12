@@ -56,7 +56,6 @@ namespace Zeal
             /*017*/	UINT8   unknown015[3];
             /*020*/
         };
-
         struct ClientTarget_Struct
         {
             /*000*/	UINT16	new_target; // Target spawn ID.
