@@ -9,6 +9,8 @@
 class NamePlate
 {
 public:
+	static constexpr char kUseDefaultFontString[] = "default";
+
 	// The positive color indices must be kept in sync with the color options.
 	enum class ColorIndex : int
 	{
@@ -48,7 +50,13 @@ public:
 
 	// Advanced fonts
 	ZealSetting<bool> setting_zeal_fonts = { false, "Zeal", "NamePlateZealFonts", false,
-		[this](bool val) { if (val) nameplate_info_map.clear(); } };
+		[this](bool val) { clean_ui(); } };
+	ZealSetting<bool> setting_drop_shadow = { false, "Zeal", "NamePlateDropShadow", false,
+		[this](bool val) { clean_ui(); } };
+	ZealSetting<std::string> setting_fontname = { std::string(kUseDefaultFontString), "Zeal", "NamePlateFontname", false,
+		[this](std::string val) { clean_ui(); } };
+
+	std::vector<std::string> get_available_fonts() const;
 
 	// Internal use only (public for use by callbacks).
 	__declspec(noinline) bool handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity);
@@ -76,8 +84,8 @@ private:
 
 	void clean_ui();
 	void render_ui();
-	void load_bitmap_fonts();
+	void load_sprite_font();
 
-	std::vector<std::unique_ptr<BitmapFont>> bitmap_fonts;
+	std::unique_ptr<SpriteFont> sprite_font;
 	std::unordered_map<struct Zeal::EqStructures::Entity*, NamePlateInfo> nameplate_info_map;
 };

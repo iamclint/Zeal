@@ -53,12 +53,12 @@ public:
     // Renders any queued string content to the screen and clears the queue.
     // Note that the D3D stream source, indices, vertex shader, and texture states
     // are not preserved across this call.
-    void flush_queue_to_screen();
+    virtual void flush_queue_to_screen();
 
     // Releases resources including DirectX. Must call on a DirectX reset / lost device.
-    void release();  // Release resources.
+    virtual void release();  // Release resources.
 
-private:
+protected:
     // Describes a single character bitmap glyph.
     struct Glyph
     {
@@ -91,7 +91,7 @@ private:
     void create_texture(uint32_t width, uint32_t height, D3DFORMAT format,
         uint32_t stride, uint32_t rows, const uint8_t* data);
     bool create_index_buffer();
-    void render_queue();
+    virtual void render_queue();
     void calculate_glyph_vertices(const GlyphQueueEntry& entry,
                                     GlyphVertex glyph_vertices[4]) const;
 
@@ -111,4 +111,68 @@ private:
     IDirect3DIndexBuffer8* index_buffer = nullptr;
     int vertex_buffer_wr_index = 0;
     std::unique_ptr<GlyphVertex[]> vertices;  // Local CPU scratch.
+};
+
+
+// TODO: Instead of deriving from BitmapFont should derive from a base class with
+// some support functions (or classless static support functions).
+class SpriteFont : public BitmapFont
+{
+public:
+
+    // Recommended to use the create_sprite_font factory to create a valid font object.
+    // A font_filename of kDefaultFontName or empty will load the embedded font.
+    // Releases resources and returns nullptr if unsuccessful.
+    static std::unique_ptr<SpriteFont> create_sprite_font(IDirect3DDevice8& device,
+        const std::string& font_filename);
+
+    SpriteFont(IDirect3DDevice8& device, std::span<const uint8_t> data_span) ;
+    SpriteFont(IDirect3DDevice8& device, const char* filename);
+    virtual ~SpriteFont();
+
+    // Disable copy.
+    SpriteFont(SpriteFont const&) = delete;
+    SpriteFont& operator= (SpriteFont const&) = delete;
+
+    void set_drop_shadow(bool enable) { drop_shadow = enable; }
+    void set_outlined(bool enable) { outlined = enable; }
+
+    // Primary interface for drawing text. The position is in world coodinates
+    // and specifies the center (true) or the upper left (false).
+    void queue_string_3d(const char* text, const Vec3& position, bool center = true,
+        const D3DCOLOR color = D3DCOLOR_XRGB(255, 255, 255));
+
+    // Renders any queued string content to the screen and clears the queue.
+     // Note that the D3D stream source, indices, vertex shader, and texture states
+     // are not preserved across this call.
+    void flush_queue_to_screen() override;
+
+    void release() override;  // Release all resources (disables functionality).
+
+private:
+    struct GlyphString {
+        Vec3 position;  // Origin anchor point for a string of glyphs.
+        int start_index;
+        int stop_index;  // Exclusive.
+    };
+
+    // Vertices allow texturing and color modulation.
+    struct Glyph3DVertex {
+        static constexpr DWORD kFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+
+        float x, y, z;  // Transformed position coordinates and rhw.
+        D3DCOLOR color;      // Color (modulates font color which is typically white).
+        float u, v;          // Texture coordinates from D3DFVF_TEX1.
+    };
+
+
+    void render_queue() override;
+    void calculate_glyph_vertices(const GlyphQueueEntry& entry,
+        Glyph3DVertex glyph_vertices[4]) const;
+
+    bool drop_shadow = false;
+    bool outlined = false;
+    std::vector<GlyphString> glyph_string_queue;
+    std::unique_ptr<Glyph3DVertex[]> vertices_3d;  // Local CPU scratch.
+
 };
