@@ -65,6 +65,7 @@ public:
 	bool set_marker_size(int new_size_percent, bool update_default = true);
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
 	bool set_font(std::string font_name, bool update_default = true);
+	void set_marauders_map(bool enable) { map_show_all = enable; }  // Resets to false on zone.
 
 	bool is_external_enabled() const { return external_enabled; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
@@ -196,6 +197,8 @@ private:
 	void render_positions(IDirect3DDevice8& device);
 	void render_group_member_labels(IDirect3DDevice8& device);
 	void render_raid_member_labels(IDirect3DDevice8& device);
+	void render_non_ally_labels(IDirect3DDevice8& device,
+		const std::vector<Zeal::EqStructures::Entity*>& entities);
 	void render_update_marker_buffer(IDirect3DDevice8& device);
 	void render_labels(IDirect3DDevice8& device);
 	void render_label_text(const char* label, int map_y, int map_x, D3DCOLOR font_color,
@@ -212,9 +215,16 @@ private:
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 	void add_group_member_position_vertices(std::vector<MapVertex>& vertices) const;
 	void add_raid_member_position_vertices(std::vector<MapVertex>& vertices) const;
+	void add_non_ally_position_vertices(std::vector<MapVertex>& vertices,
+		const std::vector<Zeal::EqStructures::Entity*>& entities) const;
 	void add_raid_marker_vertices(const Vec3& position_loc, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
+	void add_non_ally_player_marker_vertices(const Vec3& position_loc, float size,
+		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
+	void add_npc_marker_vertices(const Vec3& position_loc, float size,
+		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
 	void add_ring_vertices(std::vector<MapVertex>& vertices) const;
+	std::vector<Zeal::EqStructures::Entity*> get_non_ally_entities() const;
 	float convert_size_fraction_to_model(float sizes_fraction) const;
 	float scale_pixels_to_model(float pixels) const;
 	Vec3 transform_matrix(const D3DXMATRIX& matrix, const Vec3& vec) const;
@@ -248,6 +258,7 @@ private:
 	bool external_enabled = false;  // External map window enable and sizes.
 	bool map_interactive_enabled = false;  // Supports some mouse/cursor operations.
 	bool default_to_zlevel_autofade = false;  // Start in auto-fade mode.
+	bool map_show_all = false;  // PVP mode level playing field (show everything).
 	bool map_show_grid = false;
 	int map_grid_pitch = kDefaultGridPitch;  // Pitch when grid is visible.
 	int map_ring_radius = 0;

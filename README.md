@@ -14,10 +14,10 @@ from the repo using github actions, providing full transparency on the contents.
 - Additional key binds (tab targeting, strafe, pet)
 - Additional commands (melody, useitem, autoinventory)
 - Additional ui support (new gauges, bag control, looting, spellsets, targetrings, nameplates, right click to equip)
+- Enhanced chat (additional filters and colors, tell windows, tab completion)
 - Third party tool support (silent log messages, direct ZealPipes)
 - Integrated map (see In-game Map section below)
-- Various bug fixes
-- Unique npc naming for better parsing
+- Various client bug fixes and patches (fix crashes and helm graphical glitches, skill window sorting, etc)
 
 ### Installation
 #### The easy way
@@ -75,7 +75,6 @@ ___
   - **Description:** sorts your current group members in the ui  using /sq 1 2 will swap players 1 and 2 in your group on your ui.
 
 - `/cc`
-  - **Arguments:** ``
   - **Example:** `/cc`
   - **Description:** toggles classic classes in who and other areas.
 
@@ -301,28 +300,8 @@ ___
 
 
 ### Options UI 
-- **ScreenID Checkboxes**
-  - Zeal_ShowHelm
-  - Zeal_HideCorpse
-  - Zeal_Cam
-  - Zeal_BlueCon
-  - Zeal_Timestamp
-  - Zeal_Input
-  - Zeal_Escape_
-    
-- **ScreenID Sliders**
-  - Zeal_PanDelaySlider
-  - Zeal_FirstPersonSlider_X
-  - Zeal_FirstPersonSlider_Y
-  - Zeal_ThirdPersonSlider_X
-  - Zeal_ThirdPersonSlider_Y
-    
-- **ScreenID Labels**
-  - Zeal_ThirdPersonLabel_X
-  - Zeal_ThirdPersonLabel_Y
-  - Zeal_FirstPersonLabel_X
-  - Zeal_FirstPersonLabel_Y
-  - Zeal_PanDelayLabel
+- Separate Zeal options window that opens in parallel with the client window
+
 ___
 
 ### Zeal pipes in c#

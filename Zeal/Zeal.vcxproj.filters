@@ -246,6 +246,12 @@
     <ClInclude Include="EqPackets.h">
       <Filter>Header Files\everquest</Filter>
     </ClInclude>
+    <ClInclude Include="equip_item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helm_manager.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -415,6 +421,12 @@
     </ClCompile>
     <ClCompile Include="ui_inputdialog.cpp">
       <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="equip_item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helm_manager.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

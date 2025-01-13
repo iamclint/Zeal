@@ -38,6 +38,7 @@ ZealService::ZealService()
 	game_patches = std::make_shared<patches>();
 	nameplate = std::make_shared<NamePlate>(this, ini.get());
 	tells = std::make_shared<TellWindows>(this, ini.get());
+	helm = std::make_shared<HelmManager>(this);
 
 	entity_manager = std::make_shared<EntityManager>(this, ini.get());
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());
@@ -263,6 +264,7 @@ ZealService::~ZealService()
 	labels_hook.reset();
 	looting_hook.reset();
 	callbacks.reset();
+	helm.reset();
 	commands_hook.reset();
 	ini.reset();
 	

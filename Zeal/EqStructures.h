@@ -385,6 +385,12 @@ namespace Zeal
 			/* 0x00EC */ struct _EQDAGCHILDREN* Children;
 			/* ...... */
 		};
+		struct _EQMODELINFO
+		{
+			/* 0x0000 */ BYTE Unknown0000[64];
+			/* 0x0040 */ DWORD NumSkinsAttachedToHierarchicalSprite;
+			/* ...... */
+		};
 				typedef struct _EQARGBCOLOR {
 			union {
 				struct {
@@ -788,13 +794,13 @@ namespace Zeal
 			/* 0x00B0 */ BYTE IsPlayerKill; // PVP flagged with red name by Priest of Discord
 			/* 0x00B1 */ BYTE StandingState; // EQ_STANDING_STATE_x
 			/* 0x00B2 */ BYTE LightType; // EQ_LIGHT_TYPE_x
-			/* 0x00B3 */ BYTE Unknown00B3;
+			/* 0x00B3 */ BYTE Face;
 			/* 0x00B4 */ WORD EquipmentMaterialType[7]; // EQ_EQUIPMENT_MATERIAL_TYPE_x ; Head,Chest,Arms,Wrist,Hands,Legs,Feet
 			/* 0x00C2 */ WORD EquipmentPrimaryItemType; // EQ_EQUIPMENT_ITEM_TYPE_x ; Primary
 			/* 0x00C4 */ WORD EquipmentSecondaryItemType; // EQ_EQUIPMENT_ITEM_TYPE_x ; Secondary
 			/* 0x00C6 */ WORD Unknown00C6;
-			/* 0x00C8 */ BYTE Unknown00C8[36];
-			/* 0x00EC */ BYTE Unknown00EC;
+			/* 0x00C8 */ DWORD EquipmentMaterialColor[9];
+			/* 0x00EC */ BYTE Texture; // Body texture. For players, 0xFF means show-equipment textures.
 			/* 0x00F0 */ FLOAT Height; // model height or size/scale (shrink, grow, etc)
 			/* 0x00F4 */ FLOAT Unknown00F4;
 			/* 0x00F8 */ FLOAT Unknown00F8;
@@ -817,7 +823,11 @@ namespace Zeal
 			/* 0x014C */ WORD GuildStatus; // guild rank
 			/* 0x014E */ WORD Deity; // EQ_DEITY_x
 			/* 0x0150 */ BYTE Unknown0150;
-			/* 0x0151 */ BYTE Unknown0151[6];
+			/* 0x0151 */ BYTE HairColor;
+			/* 0x0152 */ BYTE BeardColor;
+			/* 0x0153 */ BYTE Unknown0153[2];
+			/* 0x0155 */ BYTE HairStyle;
+			/* 0x0156 */ BYTE BeardStyle;
 			/* 0x0157 */ BYTE Unknown0157[5];
 			/* 0x015C */ DWORD Unknown015C;
 			/* 0x0160 */ DWORD Unknown0160;

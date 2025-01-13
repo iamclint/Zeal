@@ -83,16 +83,24 @@ static constexpr int kRaidPositionVertices = 3; // Fixed triangle list with one 
 static constexpr int kMaxDynamicLabels = 10;
 static constexpr int kRingLineSegments = 72;  // Every 5 degrees.
 static constexpr int kRingVertices = kRingLineSegments + 1; // N + 1 for D3DPT_LINESTRIP
+static constexpr int kMaxNonAllyTriangles = 500;  // Markers use 1 or 2 triangles each.
 static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositionVertices
-       * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers + kRingVertices);
+       * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers +
+        kRaidPositionVertices * kMaxNonAllyTriangles + kRingVertices);
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
+
 
 static constexpr int kWinMinSize = 160;  // Minimum size for window dimensions.
 
 // Note: Zoom factors are hard-coded in options combobox. Must keep in sync manually.
 static constexpr int kNumDefaultZoomFactors = 4;
 static constexpr float kDefaultZoomFactors[kNumDefaultZoomFactors] = { 1.f, 2.f, 4.f, 8.f };
+
+static D3DCOLOR get_target_color() {
+    const int kTargetColorIndex = 18; // NamePlate::ColorIndex::Target
+    return ZealService::get_instance()->ui->options->GetColor(kTargetColorIndex);
+}
 
 }  // namespace
 
@@ -1058,8 +1066,9 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
             continue;  // Not a valid group member, out of zone (nullptr), or corpse.
 
         // Position is y,x,z.
+        auto color = (member == Zeal::EqGame::get_target()) ? get_target_color() : kGroupColorLut[i];
         add_position_marker_vertices(-member->Position.x, -member->Position.y, member->Heading, size,
-            kGroupColorLut[i], vertices);
+            color, vertices);
     }
 }
 
@@ -1144,6 +1153,39 @@ void ZoneMap::render_raid_member_labels(IDirect3DDevice8 & device) {
     device.SetVertexShader(kMapVertexFvfCode);  // Restore assumed shader.
 }
 
+// Adds a label for each non_ally if enabled.
+void ZoneMap::render_non_ally_labels(IDirect3DDevice8& device,
+                            const std::vector<Zeal::EqStructures::Entity*>& entities) {
+    if (!map_show_all_names_override || entities.empty())
+        return;
+
+    render_load_font(device);
+    if (!bitmap_font || entities.empty())
+        return;
+
+    const float offset_y = max(5.f, position_size * min(max_viewport_width, max_viewport_height));
+    const Vec2 offset_pixels = { 0, -offset_y };
+    
+    const auto player_color = D3DCOLOR_XRGB(255, 0, 0);  // red
+    const auto npc_color = D3DCOLOR_XRGB(255, 102, 0);  // orange
+    auto target = Zeal::EqGame::get_target();
+
+    const int short_name_length = min(map_name_length, kMaxNameLength);  // Paranoia limit.
+    for (const auto& entity : entities) {
+        int loc_y = static_cast<int>(entity->Position.x + 0.5f);  // Position is y,x,z.
+        int loc_x = static_cast<int>(entity->Position.y + 0.5f);  // Also need to negate it below.
+        auto color = (entity == target) ? get_target_color() :
+                (entity->Type == Zeal::EqEnums::Player) ? player_color : npc_color;
+        // Future: Append the class type for player characters.
+        char label[kMaxNameLength + 1] = { 0 };  // Null-terminate.
+        for (int j = 0; j < short_name_length; ++j)
+            label[j] = entity->Name[j];
+        render_label_text(label, -loc_y, -loc_x, color, LabelType::PositionLabel, offset_pixels);
+    }
+    bitmap_font->flush_queue_to_screen();
+    device.SetVertexShader(kMapVertexFvfCode);  // Restore assumed shader.
+}
+
 // Adds simple position markers for raid members.
 void ZoneMap::add_raid_marker_vertices(const Vec3& position, float size,
     D3DCOLOR color, std::vector<MapVertex>& vertices) const {
@@ -1164,6 +1206,50 @@ void ZoneMap::add_raid_marker_vertices(const Vec3& position, float size,
                 .z = 0.5f,
                 .color = color
             });
+    }
+}
+
+// Adds simple position markers for non ally players.
+void ZoneMap::add_non_ally_player_marker_vertices(const Vec3& position, float size,
+    D3DCOLOR color, std::vector<MapVertex>& vertices) const {
+
+    // Add a simple equilateral triangle centered at the position pointing down.
+    const float kFactor1 = 0.577350f; // 1 / sqrt(3)
+    const float kFactor2 = 0.288675f; // 1 / (2 * sqrt(3))
+    Vec3 vertex0 = { 0, size * kFactor1, 0 };
+    Vec3 vertex1 = { +size * 0.5f, -size * kFactor2, 0 };
+    Vec3 vertex2 = { -size * 0.5f, -size * kFactor2, 0 };
+    Vec3 symbol[kRaidPositionVertices] = { vertex0, vertex1, vertex2 };
+
+    // Allow the position marker to exceed the rect limits by size but must stay on screen.
+    for (int i = 0; i < kRaidPositionVertices; ++i) {
+        vertices.push_back(MapVertex{
+                .x = symbol[i].x + -position.y,  // Note y,x,z and negation.
+                .y = symbol[i].y + -position.x,
+                .z = 0.5f,
+                .color = color
+            });
+    }
+}
+
+// Adds simple position markers for NPCs.
+void ZoneMap::add_npc_marker_vertices(const Vec3& position, float size,
+    D3DCOLOR color, std::vector<MapVertex>& vertices) const {
+    // Add a simple square made of two triangles centered at the position.
+    size *= 0.4f;  // Shrink by 80%.
+    Vec2 vertex0 = { -size, -size };
+    Vec2 vertex1 = { +size, -size };
+    Vec2 vertex2 = { +size, +size };
+    Vec2 vertex3 = { -size, +size };
+    Vec2 symbol[2 * kRaidPositionVertices] = { vertex0, vertex1, vertex2, vertex0, vertex2, vertex3 };
+
+    for (int i = 0; i < 2 * kRaidPositionVertices; ++i) {
+        vertices.push_back(MapVertex{
+                .x = symbol[i].x + -position.y,  // Note y,x,z and negation.
+                .y = symbol[i].y + -position.x,
+                .z = 0.5f,
+                .color = color
+         });
     }
 }
 
@@ -1207,13 +1293,99 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
         if (!entity || entity->Type != Zeal::EqEnums::EntityTypes::Player)
             continue;  // Could be out of zone or a corpse.
 
-        auto color = member.IsGroupLeader ? kColorLeader :
+        auto color = (entity == Zeal::EqGame::get_target()) ? get_target_color() :
+            member.IsGroupLeader ? kColorLeader :
             (member.GroupNumber == kUngrouped ? kColorUngrouped :
                 D3DCOLOR_XRGB(224, 224, 128 + member.GroupNumber * 8));
         // Position is y,x,z.
         add_raid_marker_vertices(entity->Position, size, color, vertices);
     }
 }
+
+// Returns entities not in our raid or group. This could possibly be
+// handled in EntityManager so we don't have to brute force this every render call.
+std::vector<Zeal::EqStructures::Entity*> ZoneMap::get_non_ally_entities() const {
+    std::vector<Zeal::EqStructures::Entity*> entities;
+    if (!map_show_all || (!map_show_raid && !Zeal::EqGame::get_target()))
+        return entities;  // Empty list.
+
+    // First we make a list of the allied entities.
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    auto entity_manager = ZealService::get_instance()->entity_manager.get();  // Short-term ptr.
+    if (!entity_manager || !self)
+        return entities;  // Empty list.
+
+    const auto group_info = Zeal::EqGame::GroupInfo;
+    const auto raid_info = Zeal::EqGame::RaidInfo;
+    std::vector<Zeal::EqStructures::Entity*> allies;
+    if (raid_info->is_in_raid())
+    {
+        for (int i = 0; i < kRaidMaxMembers; ++i) {
+            const auto& member = raid_info->MemberList[i];
+            if (member.Name[0] == 0)
+                continue;
+            auto entity = entity_manager->Get(member.Name);
+            if (entity && entity->Type == Zeal::EqEnums::EntityTypes::Player)
+                allies.push_back(entity);
+        }
+    }
+    else if (group_info->is_in_group()) {
+        allies.push_back(self);
+        for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; ++i) {
+            Zeal::EqStructures::Entity* entity = group_info->EntityList[i];
+            if (entity)
+                allies.push_back(entity);
+        }
+    }
+    else
+        allies.push_back(self);
+
+    // Support adding just the target when not showing all of raid.
+    if (!map_show_raid) {
+        auto target = Zeal::EqGame::get_target();
+        if (std::none_of(allies.begin(), allies.end(), [target](auto entity) { return entity == target;}))
+            entities.push_back(target);  // Non_ally target.
+        return entities;
+    }
+
+    // Now scan the global entity list for npc and other players not in the list.
+    Zeal::EqStructures::Entity* current = Zeal::EqGame::get_entity_list();
+    while (current != nullptr) {
+        if (current->Type == Zeal::EqEnums::NPC ||
+            (current->Type == Zeal::EqEnums::Player &&
+                std::none_of(allies.begin(), allies.end(), [current](auto entity)
+                { return current == entity; }))) {
+            entities.push_back(current);
+        }
+        current = current->Next;
+    }
+
+    return entities;
+}
+
+
+// PVP mode support to show non-allied other entities (players and NPCs).
+void ZoneMap::add_non_ally_position_vertices(std::vector<MapVertex>&vertices, 
+    const std::vector<Zeal::EqStructures::Entity*>& entities) const {
+    if (entities.empty())
+        return;
+    const float size = convert_size_fraction_to_model(position_size);
+    auto target = Zeal::EqGame::get_target();
+    auto start = vertices.size();
+    const int kVertexLimit = (kMaxNonAllyTriangles - 2) * kRaidPositionVertices;  // Room for two more.
+    for (const auto& entity : entities)
+    {
+        const D3DCOLOR color = (entity == target) ? get_target_color() :
+                         (Zeal::EqGame::GetLevelCon(entity) | 0xff000000);
+        if (entity->Type == Zeal::EqEnums::Player)
+            add_non_ally_player_marker_vertices(entity->Position, size, color, vertices);
+        else
+            add_npc_marker_vertices(entity->Position, size, color, vertices);
+        if ((vertices.size() - start) > kVertexLimit)
+            break;  // Note: Dropping markers, but names will still show up.
+    }
+}
+
 
 void ZoneMap::add_ring_vertices(std::vector<MapVertex>& vertices) const {
     if (map_ring_radius <= 0 || !Zeal::EqGame::get_self())
@@ -1265,6 +1437,8 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
     add_ring_vertices(position_vertices);
     const int ring_vertex_count = position_vertices.size();
     add_raid_member_position_vertices(position_vertices);
+    std::vector<Zeal::EqStructures::Entity*> pvp_entities = get_non_ally_entities();
+    add_non_ally_position_vertices(position_vertices, pvp_entities);
     add_group_member_position_vertices(position_vertices);
     const int member_vertex_count = position_vertices.size() - ring_vertex_count;
 
@@ -1310,6 +1484,7 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
 
     // Then draw the raid and group labels (on top of markers but below self marker).
     render_raid_member_labels(device);
+    render_non_ally_labels(device, pvp_entities);
     render_group_member_labels(device);
 
     // And finally draw the self marker. Three vertices per triangle in D3DPT_TRIANGLELIST.
@@ -2190,7 +2365,7 @@ void ZoneMap::load_ini(IO_ini* ini)
     if (!ini->exists("Zeal", "MapFontFilename"))
         ini->setValue<std::string>("Zeal", "MapFontFilename", std::string(BitmapFont::kDefaultFontName));
 
-    // TODO: Protect against corrupted ini file (like a boolean instead of float).
+    // Note: Not protected against corrupted ini file (like a boolean instead of float).
     enabled = false;  // Disable and use reenable to make it a pending flag.
     reenable_on_zone = ini->getValue<bool>("Zeal", "MapEnabled");
     map_interactive_enabled = ini->getValue<bool>("Zeal", "MapInteractiveEnabled");
@@ -2899,6 +3074,7 @@ void ZoneMap::callback_zone() {
     if (!wnd)
         return;  // Block calls until init_ui has been called.
 
+    map_show_all = false;  // Disable marauders mode on a zone.
     reset_zone_state();
     if (enabled || reenable_on_zone)
         set_enabled(true, false);  // Calls ui_show() and syncs enable state.
@@ -3219,7 +3395,7 @@ void process_key(uint32_t vk_key, bool key_down) {
     if (GetKeyState(VK_MENU) & 0x8000)
         key_code = key_code | 0x40000000;
 
-    // TODO: Support the proper eqgame call for DIK_ESCAPE functionality (not a command).
+    // Note: Not supporting the proper eqgame call for DIK_ESCAPE functionality (not a command).
 
     // Translate the final key code into an index into the binds.
     // Suppress some commands since we don't support typing into the chat bar from the other window.
