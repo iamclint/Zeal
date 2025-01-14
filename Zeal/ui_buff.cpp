@@ -29,10 +29,10 @@ std::string EQ_GetShortTickTimeString(int ticks) {
 	char timeText[128] = { 0 };
 
 	if (time.hours > 0) {
-		std::snprintf(timeText, sizeof(timeText), "%dh %dm", time.hours, time.minutes, time.seconds);
+		std::snprintf(timeText, sizeof(timeText), "%dh", time.hours);
 	}
 	else if (time.minutes > 0) {
-		std::snprintf(timeText, sizeof(timeText), "%dm", time.minutes, time.seconds);
+		std::snprintf(timeText, sizeof(timeText), "%dm", time.minutes);
 	}
 	else {
 		std::snprintf(timeText, sizeof(timeText), "%ds", time.seconds);
