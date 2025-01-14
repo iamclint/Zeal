@@ -1548,13 +1548,13 @@ namespace Zeal
 		{
 			byte orig[13] = {0};
 			if (hide_local)
-				mem::set(0x4f828b, 0x90, 13, orig);
+				mem::set(0x538672, 0x90, 13, orig);
 
 			EqGameInternal::do_say(get_self(), data.c_str());
 
 			if (hide_local && orig)
 			{
-				mem::copy(0x4f828b, orig, 13);
+				mem::copy(0x538672, orig, 13);
 			}
 		}
 
