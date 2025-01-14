@@ -283,6 +283,28 @@ ___
 - Toggle target nameplate color on and off
 - Toggle target nameplate marker on and off
 - Toggle target nameplate health on and off
+
+---
+### Advanced input (/zealinput) including tab completion
+- Enables copy (ctrl+c), paste (ctrl+v)
+- Enables left, right, shift + left and shift + right for highlighting, home, end etc
+- Enables enhanced tab completion for /tell, /t, and /consent
+  - `/tell<tab>`, `/tell <tab>`, `/tell name <tab>` cycles tell history list like default client
+    - Tell history cycling mode will result from a reply keybind (`r`) 
+  - `/tell start_of_name` triggers a search across tell history, group, raid, and zone
+     to populate a new cycle list (tab or shift-tab) which is printed to chat
+    - Any key besides tab or shift will clear the search cycle list
+
+## Right click to equip item
+- Enabled in Zeal general options
+- Must be in your bags.
+- Will equip to an empty slot when available.
+- Equip Priority: Primary, Secondary, Range, Chest, Legs, Head, Arms, Hands, Feet,
+  Shoulders, Back, Neck, Face, Waist, WristLeft, WristRight, EarLeft, EarRight, RingLeft,
+  RingRight, Ammo
+- Can hold Shift (2nd) / Ctrl (3rd) / Shift+Ctrl (4th) to equip the item to alternate slots
+  if it can be equipped in several slots in the list.
+
 ___
 ### UI
 - **Gauge EqType's**
@@ -303,10 +325,11 @@ ___
 - Separate Zeal options window that opens in parallel with the client window
 
 ___
+### Zeal pipes
+- Zeal supports creating a namedpipe for streaming game updates to third party applications
+- C# example: https://github.com/OkieDan/ZealPipes
 
-### Zeal pipes in c#
-- https://github.com/OkieDan/ZealPipes
-
+---
 ### Building
 #### Github official release builds
 1. Commit an updated, unique ZEAL_VERSION in Zeal/Zeal.h that will be used as the release tag.
@@ -321,6 +344,7 @@ ___
 #### Local builds
 Build in `Release` `x86` (32bit) mode using Microsoft Visual Studio 2022 (free Community edition works)
 
+---
 ### Nameplate Options
 #### Setup and configuration
 Zeal 5.0 and later includes options for players to adjust Player Nameplates and NPC Nameplates in game.
@@ -373,6 +397,7 @@ The following 19 Nameplate Colors can be changed to custom colors.
 * 18 - Red Con NPCs - CON_RED
 * 19 - Target Color - Default Pink
 
+---
 ### In-game Map
 #### Map data source
 The map data was sourced from Brewall's maps: https://www.eqmaps.info/eq-map-files/ with minimal
