@@ -290,9 +290,9 @@ namespace Zeal
 				return reinterpret_cast<CXRect(__thiscall*)(const BasicWnd*)>(0x005751C0)(this);
 			}
 
-			void DrawTooltipAtPoint(int top, int left)
+			void DrawTooltipAtPoint(int left, int top)
 			{
-				reinterpret_cast<void(__thiscall*)(const BasicWnd*, int, int)>(0x00574800)(this, top, left);
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, int, int)>(0x00574800)(this, left, top);
 			}
 
 			void LeftClickDown(int mouse_x, int mouse_y, unsigned int flags = 0)

@@ -41,15 +41,13 @@ std::string EQ_GetShortTickTimeString(int ticks) {
 }
 
 
-int __fastcall BuffWindow_Refresh(Zeal::EqUI::BuffWindow* this_ptr, void* not_used)
+int __fastcall BuffWindow_Refresh(Zeal::EqUI::BuffWindow* this_ptr, void* not_used) //this is used for the actual tooltip
 {
 	int result = ZealService::get_instance()->hooks->hook_map["BuffWindow_Refresh"]->original(BuffWindow_Refresh)(this_ptr, not_used);
 	Zeal::EqStructures::EQCHARINFO* charInfo = Zeal::EqGame::get_char_info();
 
-	if (charInfo == NULL)
-	{
+	if (!charInfo)
 		return result;
-	}
 
 	for (size_t i = 0; i < EQ_NUM_BUFFS; i++)
 	{
@@ -60,28 +58,23 @@ int __fastcall BuffWindow_Refresh(Zeal::EqUI::BuffWindow* this_ptr, void* not_us
 
 		int buffTicks = charInfo->Buff[i].Ticks;
 
-		if (buffTicks == 0)
+		if (!buffTicks)
 			continue;
-
 
 		char buffTimeText[128];
 		std::snprintf(buffTimeText, sizeof(buffTimeText) - 1, " %s", EQ_GetShortTickTimeString(buffTicks).c_str());
 		Zeal::EqUI::EQWND* buffButtonWnd = this_ptr->BuffButtonWnd[i];
-		if (buffButtonWnd != nullptr)
-		{
-			if (buffButtonWnd->ToolTipText.Data)
-				buffButtonWnd->ToolTipText.Append(buffTimeText);
-		}
+		if (buffButtonWnd && buffButtonWnd->ToolTipText.Data)
+			buffButtonWnd->ToolTipText.Append(buffTimeText);
 	}
 	return result;
 };
 
 int __fastcall BuffWindow_PostDraw(Zeal::EqUI::BuffWindow* this_ptr, void* not_used)
 {
-
 	int result = ZealService::get_instance()->hooks->hook_map["BuffWindow_PostDraw"]->original(BuffWindow_PostDraw)(this_ptr, not_used);
 	Zeal::EqStructures::EQCHARINFO* charInfo = Zeal::EqGame::get_char_info();
-	if (charInfo == nullptr)
+	if (!charInfo)
 		return result;
 
 	for (size_t i = 0; i < EQ_NUM_BUFFS; i++)
@@ -91,24 +84,19 @@ int __fastcall BuffWindow_PostDraw(Zeal::EqUI::BuffWindow* this_ptr, void* not_u
 
 		int buffTicks = charInfo->Buff[i].Ticks;
 
-		if (buffTicks == 0)
+		if (!buffTicks)
 			continue;
 
 		char buffTimeText[128];
 		std::snprintf(buffTimeText, sizeof(buffTimeText) - 1, "%s", EQ_GetShortTickTimeString(buffTicks).c_str());
 		Zeal::EqUI::EQWND* buffButtonWnd = this_ptr->BuffButtonWnd[i];
-		if (buffButtonWnd != nullptr)
+		if (buffButtonWnd && buffButtonWnd->ToolTipText.Data)
 		{
-			if (buffButtonWnd->ToolTipText.Data != nullptr)
-			{
-			//	buffButtonWnd->FontPointer->Size = 3;
 				std::string orig = buffButtonWnd->ToolTipText.Data->Text;
 				buffButtonWnd->ToolTipText.Set(buffTimeText);
 				Zeal::EqUI::CXRect relativeRect = buffButtonWnd->GetScreenRect();
 				buffButtonWnd->DrawTooltipAtPoint(relativeRect.Left, relativeRect.Top);
 				buffButtonWnd->ToolTipText.Set(orig);
-			//	buffButtonWnd->FontPointer->Size = 3;
-			}
 		}
 	}
 
