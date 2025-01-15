@@ -302,6 +302,36 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+	<Button item="Zeal_NameplateTargetBlink">
+		<ScreenID>Zeal_NameplateTargetBlink</ScreenID>
+		<RelativePosition>true</RelativePosition>
+		<Location>
+			<X>200</X>
+			<Y>90</Y>
+		</Location>
+		<Size>
+			<CX>150</CX>
+			<CY>20</CY>
+		</Size>
+		<Style_VScroll>false</Style_VScroll>
+		<Style_HScroll>false</Style_HScroll>
+		<Style_Transparent>false</Style_Transparent>
+		<Style_Checkbox>true</Style_Checkbox>
+		<TooltipReference>Uses targetring rate slider</TooltipReference>
+		<Text>Target autoattack indicator</Text>
+		<TextColor>
+			<R>255</R>
+			<G>255</G>
+			<B>255</B>
+		</TextColor>
+		<ButtonDrawTemplate>
+			<Normal>A_BtnNormal</Normal>
+			<Pressed>A_BtnPressed</Pressed>
+			<Flyby>A_BtnFlyby</Flyby>
+			<Disabled>A_BtnDisabled</Disabled>
+			<PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+		</ButtonDrawTemplate>
+	</Button>
 	<Button item="Zeal_NameplateZealFonts">
 		<ScreenID>Zeal_NameplateZealFonts</ScreenID>
 		<RelativePosition>true</RelativePosition>
@@ -415,6 +445,7 @@
 	<Pieces>Zeal_NameplateTargetColor</Pieces>
 	<Pieces>Zeal_NameplateTargetMarker</Pieces>
 	<Pieces>Zeal_NameplateTargetHealth</Pieces>
+	<Pieces>Zeal_NameplateTargetBlink</Pieces>
 	<Pieces>Zeal_NameplateZealFonts</Pieces>
 	<Pieces>Zeal_NameplateDropShadow</Pieces>
 	<Pieces>Zeal_NameplateFont_Combobox</Pieces>

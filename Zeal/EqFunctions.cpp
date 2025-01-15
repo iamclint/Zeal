@@ -1511,6 +1511,23 @@ namespace Zeal
 			return rval;
 		}
 
+		float get_target_attack_fade_factor(float speed_factor) {
+			if (!(bool)(*(BYTE*)0x7f6ffe))  // Auto attack enabled.
+				return 1.0f; // No fading.
+
+			// Calculate a fraction of the cycle time. Phase alignment doesn't matter, so just
+			// do a modulo off of the current time in millseconds.
+			const float client_cycle_time_ms = 300.f;  // Base client flicker cycle rate is ~300 ms.
+			const float cycle_time_ms = max(2.f, (speed_factor <= 0) ? 2.f : 
+				(client_cycle_time_ms * speed_factor));
+			const float fraction = static_cast<float>(
+				fmod(static_cast<double>(GetTickCount64()), cycle_time_ms)) / cycle_time_ms;
+
+			// Fade in during the first half of the cycle and out the second.
+			const float fade_factor = (fraction < 0.5) ? (fraction * 2) : (1.0f - fraction) * 2;
+			return fade_factor;
+		}
+
 		std::vector<std::string> splitStringByNewLine(const std::string& str) {
 			std::vector<std::string> tokens;
 			std::istringstream iss(str);

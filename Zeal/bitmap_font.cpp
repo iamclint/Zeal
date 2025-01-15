@@ -220,6 +220,26 @@ BitmapFontBase::~BitmapFontBase() {
     release();
 }
 
+void BitmapFontBase::dump() const {
+    Zeal::EqGame::print_chat("drop_shadow: %d, outlined: %d, align_bottom: %d",
+        drop_shadow, outlined, align_bottom);
+    Zeal::EqGame::print_chat("line_spacing: %d, default_character: %c",
+        line_spacing, default_character);
+
+    if (texture) {
+        Zeal::EqGame::print_chat("Texture:");
+        D3DSURFACE_DESC desc;
+        if (FAILED(texture->GetLevelDesc(0, &desc)))
+            Zeal::EqGame::print_chat("Invalid");
+        else {
+            Zeal::EqGame::print_chat("Format: %d, Type: %d, Usage: %d",
+                desc.Format, desc.Type, desc.Usage);
+            Zeal::EqGame::print_chat("Width: %d, Height: %d, MultiSampleType: %d",
+                desc.Width, desc.Height, desc.MultiSampleType);
+        }
+    }
+}
+
 // DirectX resources need to be manually released.
 void BitmapFontBase::release() {
     if (texture)
@@ -715,7 +735,7 @@ void SpriteFont::render_queue() {
     device.GetTransform(D3DTS_VIEW, &viewMatrix);
 
     // Need to scale the bitmap font to roughly the right size in world data.
-    const float scale_factor = 0.033f; // Empirically set so arial_20_bold roughly matches client.
+    const float scale_factor = 0.025f; // Empirically set so arial_24_bold roughly matches client.
     D3DXMATRIX scaleMatrix, rotationMatrix, translationMatrix;
     D3DXMatrixScaling(&scaleMatrix, scale_factor, scale_factor, scale_factor);
     // And we need to rotate it so that it faces the camera.

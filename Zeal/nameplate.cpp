@@ -84,11 +84,17 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"hideraidpets", &setting_hide_raid_pets },
 		{"targetmarker", &setting_target_marker },
 		{"targethealth", &setting_target_health },
+		{"targetblink", &setting_target_blink },
 		{"inlineguild", &setting_inline_guild },
 		{"zealfont", &setting_zeal_fonts },
 		{"dropshadow", &setting_drop_shadow },
 	};
 
+	if (args.size() == 2 && args[1] == "dump") {
+		if (sprite_font)
+			sprite_font->dump();
+		return;
+	}
 	if (args.size() == 2 && command_map.find(args[1]) != command_map.end())
 	{
 		auto setting = command_map[args[1]];
@@ -101,7 +107,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	}
 
 	Zeal::EqGame::print_chat("Usage: /nameplate option where option is one of");
-	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, charselect");
+	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, targetmarker, targethealth, inlineguild");
 	Zeal::EqGame::print_chat("font:  zealfont, dropshadow");
 }
@@ -125,7 +131,7 @@ void NamePlate::load_sprite_font() {
 
 	std::string font_filename = setting_fontname.get();
 	if (font_filename.empty() || font_filename == kUseDefaultFontString)
-		font_filename = "arial_bold_20";
+		font_filename = "arial_bold_24";
 
 	sprite_font = SpriteFont::create_sprite_font(*device, font_filename);
 	if (!sprite_font)
@@ -152,6 +158,9 @@ void NamePlate::render_ui()
 	{
 		Zeal::EqGame::print_chat("Nameplate: Failed to load zeal fonts, disabling");
 		setting_zeal_fonts.set(false, false);  // Fallback to native nameplates.
+		if (ZealService::get_instance() && ZealService::get_instance()->ui
+			&& ZealService::get_instance()->ui->options)
+			ZealService::get_instance()->ui->options->UpdateOptionsNameplate();
 		return;
 	}
 
@@ -259,9 +268,9 @@ NamePlate::ColorIndex NamePlate::get_color_index(const Zeal::EqStructures::Entit
 	if (Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT)
 		return setting_char_select.get() ? ColorIndex::Adventurer : ColorIndex::UseClient;
 
-	// Special handling for the current target since we want to leave the blinking indicator on it.
-	if (&entity == Zeal::EqGame::get_target())
-		return setting_target_color.get() ? ColorIndex::Target : ColorIndex::UseClient;
+	// Target setting overrides all other choices.
+	if (&entity == Zeal::EqGame::get_target() && setting_target_color.get())
+		return ColorIndex::Target;
 
 	// Otherwise tint based on entity Type and other properties.
 	auto color_index = ColorIndex::UseClient;
@@ -309,6 +318,19 @@ bool NamePlate::handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity)
 		color = Zeal::EqGame::GetLevelCon(entity);
 	else if (color_index != ColorIndex::UseClient)
 		color = ZealService::get_instance()->ui->options->GetColor(static_cast<int>(color_index));
+
+	if (entity == Zeal::EqGame::get_target() && setting_target_blink.get())
+	{
+		// Share the flash speed slider with the target_ring so they aren't beating.
+		float flash_speed = ZealService::get_instance()->target_ring->flash_speed.get();
+		float fade_factor = Zeal::EqGame::get_target_attack_fade_factor(flash_speed);
+		if (fade_factor < 1.0f) {
+			BYTE faded_red = static_cast<BYTE>(((color >> 16) & 0xFF) * fade_factor);
+			BYTE faded_green = static_cast<BYTE>(((color >> 8) & 0xFF) * fade_factor);
+			BYTE faded_blue = static_cast<BYTE>((color & 0xFF) * fade_factor);
+			color = D3DCOLOR_ARGB(0xff, faded_red, faded_green, faded_blue);
+		}
+	}
 
 	if (zeal_fonts) {
 		auto it = nameplate_info_map.find(entity);

@@ -46,6 +46,7 @@ public:
 	ZealSetting<bool> setting_hide_raid_pets = { false, "Zeal", "NameplateHideRaidPets", false };
 	ZealSetting<bool> setting_target_marker = { false, "Zeal", "NameplateTargetMarker", false };
 	ZealSetting<bool> setting_target_health = { false, "Zeal", "NameplateTargetHealth", false };
+	ZealSetting<bool> setting_target_blink = { false, "Zeal", "NameplateTargetBlink", false };
 	ZealSetting<bool> setting_inline_guild = { false, "Zeal", "NameplateInlineGuild", false };
 
 	// Advanced fonts

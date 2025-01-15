@@ -61,6 +61,8 @@ public:
     // Releases resources including DirectX. Must call on a DirectX reset / lost device.
     virtual void release();  // Note: No longer usable after this call (delete).
 
+    virtual void dump() const;  // Print debug information like texture size.
+
 protected:
     // Strings are split into multiple lines.
     struct Lines {
