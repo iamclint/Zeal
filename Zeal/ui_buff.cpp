@@ -44,6 +44,8 @@ std::string EQ_GetShortTickTimeString(int ticks) {
 int __fastcall BuffWindow_Refresh(Zeal::EqUI::BuffWindow* this_ptr, void* not_used) //this is used for the actual tooltip
 {
 	int result = ZealService::get_instance()->hooks->hook_map["BuffWindow_Refresh"]->original(BuffWindow_Refresh)(this_ptr, not_used);
+	if (!ZealService::get_instance()->ui->buffs->BuffTimers.get())
+		return result;
 	Zeal::EqStructures::EQCHARINFO* charInfo = Zeal::EqGame::get_char_info();
 
 	if (!charInfo)
@@ -73,6 +75,8 @@ int __fastcall BuffWindow_Refresh(Zeal::EqUI::BuffWindow* this_ptr, void* not_us
 int __fastcall BuffWindow_PostDraw(Zeal::EqUI::BuffWindow* this_ptr, void* not_used)
 {
 	int result = ZealService::get_instance()->hooks->hook_map["BuffWindow_PostDraw"]->original(BuffWindow_PostDraw)(this_ptr, not_used);
+	if (!ZealService::get_instance()->ui->buffs->BuffTimers.get())
+		return result;
 	Zeal::EqStructures::EQCHARINFO* charInfo = Zeal::EqGame::get_char_info();
 	if (!charInfo)
 		return result;
@@ -95,7 +99,7 @@ int __fastcall BuffWindow_PostDraw(Zeal::EqUI::BuffWindow* this_ptr, void* not_u
 				std::string orig = buffButtonWnd->ToolTipText.Data->Text;
 				buffButtonWnd->ToolTipText.Set(buffTimeText);
 				Zeal::EqUI::CXRect relativeRect = buffButtonWnd->GetScreenRect();
-				buffButtonWnd->DrawTooltipAtPoint(relativeRect.Left, relativeRect.Top);
+				buffButtonWnd->DrawTooltipAtPoint(relativeRect.Left-1, relativeRect.Top+2);
 				buffButtonWnd->ToolTipText.Set(orig);
 		}
 	}

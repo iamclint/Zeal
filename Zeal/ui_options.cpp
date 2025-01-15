@@ -269,11 +269,13 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_RaidEscapeLock",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ini->setValue<bool>("Zeal", "EscapeRaidLock", wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ShowHelm",				[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->helm->ShowHelmEnabled.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_AltContainerTooltips",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tooltips->set_alt_all_containers(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->set_spellbook_autostand(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->SpellBookAutoStand.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_CastAutoStand",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->CastAutoStand.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_RightClickToEquip",      [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->equip_item_hook->Enabled.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses",		    [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->chat_hook->UseClassicClassNames.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindowsHist",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetHist(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_BuffTimers",				[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->buffs->BuffTimers.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_EnableContainerLock",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->options->setting_enable_container_lock.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ExportOnCamp",           [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->outputfile->setting_export_on_camp.set(wnd->Checked); });
@@ -543,8 +545,10 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_Escape", ZealService::get_instance()->ini->getValue<bool>("Zeal", "Escape"));
 	ui->SetChecked("Zeal_ShowHelm", ZealService::get_instance()->helm->ShowHelmEnabled.get());
 	ui->SetChecked("Zeal_AltContainerTooltips", ZealService::get_instance()->tooltips->all_containers);
-	ui->SetChecked("Zeal_SpellbookAutoStand", ZealService::get_instance()->movement->spellbook_autostand);
+	ui->SetChecked("Zeal_SpellbookAutoStand", ZealService::get_instance()->movement->SpellBookAutoStand.get());
+	ui->SetChecked("Zeal_CastAutoStand", ZealService::get_instance()->movement->CastAutoStand.get());
 	ui->SetChecked("Zeal_RightClickToEquip", ZealService::get_instance()->equip_item_hook->Enabled.get());
+	ui->SetChecked("Zeal_BuffTimers", ZealService::get_instance()->ui->buffs->BuffTimers.get());
 }
 void ui_options::UpdateOptionsCamera()
 {

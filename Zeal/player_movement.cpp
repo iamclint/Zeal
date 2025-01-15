@@ -33,7 +33,7 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 						case 6: 
 						case 211:
 						case 212:
-							if (!spellbook_autostand) { return; }
+							if (!SpellBookAutoStand.get()) { return; }
 								CloseSpellbook();
 							break;
 						default: { return; }
@@ -52,8 +52,8 @@ void PlayerMovement::handle_movement_binds(int cmd, bool key_down)
 					// left and right arrows dont turn pages on oldui by default
 					// so I'm not sure if we'll add support for other keys
 					if (cmd == 4) { return; }
-					else if (cmd == 5 && !spellbook_autostand)  { return; }
-					else if (cmd == 6 && !spellbook_autostand) { return; }
+					else if (cmd == 5 && !SpellBookAutoStand.get())  { return; }
+					else if (cmd == 6 && !SpellBookAutoStand.get()) { return; }
 				}
 			}
 
@@ -96,14 +96,8 @@ void PlayerMovement::handle_spellcast_binds(int cmd)
 			}
 		}
 
-		// not in a window, handle things normally
-		switch (Zeal::EqGame::get_self()->StandingState)
-		{
-			case Zeal::EqEnums::Stance::Sitting:
-				Zeal::EqGame::get_self()->ChangeStance(Stance::Stand);
-				break;
-			default: { return; }
-		}
+		if (ZealService::get_instance()->movement->CastAutoStand.get() && Zeal::EqGame::get_self()->StandingState == Zeal::EqEnums::Stance::Sitting)
+			Zeal::EqGame::get_self()->ChangeStance(Stance::Stand);
 	}
 }
 
@@ -164,32 +158,35 @@ void PlayerMovement::callback_main()
 		}
 	}
 }
-void PlayerMovement::set_spellbook_autostand(bool enabled)
-{
-	spellbook_autostand = enabled;
-	ZealService::get_instance()->ini->setValue<bool>("Zeal", "SpellbookAutostand", enabled);
-}
 
-void PlayerMovement::load_settings()
-{
-	if (!ini_handle->exists("Zeal", "SpellbookAutostand"))
-		ini_handle->setValue<bool>("Zeal", "SpellbookAutostand", false);
-	//if (!ini_handle->exists("Zeal", "LeftStrafeSpellbookAutostand"))
-	//	ini_handle->setValue<bool>("Zeal", "LeftStrafeSpellbookAutostand", true);
-	//if (!ini_handle->exists("Zeal", "RightStrafeSpellbookAutostand"))
-	//	ini_handle->setValue<bool>("Zeal", "RightStrafeSpellbookAutostand", true);
+//void PlayerMovement::load_settings()
+//{
+//	if (!ini_handle->exists("Zeal", "SpellbookAutostand"))
+//		ini_handle->setValue<bool>("Zeal", "SpellbookAutostand", false);
+//	//if (!ini_handle->exists("Zeal", "LeftStrafeSpellbookAutostand"))
+//	//	ini_handle->setValue<bool>("Zeal", "LeftStrafeSpellbookAutostand", true);
+//	//if (!ini_handle->exists("Zeal", "RightStrafeSpellbookAutostand"))
+//	//	ini_handle->setValue<bool>("Zeal", "RightStrafeSpellbookAutostand", true);
+//
+//	SpellBookAutoStand = ini_handle->getValue<bool>("Zeal", "SpellbookAutostand");
+//	/*spellbook_right_autostand = ini_handle->getValue<bool>("Zeal", "RightTurnSpellbookAutostand");
+//	spellbook_left_strafe_autostand = ini_handle->getValue<bool>("Zeal", "LeftStrafeSpellbookAutostand");
+//	spellbook_right_strafe_autostand = ini_handle->getValue<bool>("Zeal", "RightStrafeSpellbookAutostand");*/
+//}
+//
 
-	spellbook_autostand = ini_handle->getValue<bool>("Zeal", "SpellbookAutostand");
-	/*spellbook_right_autostand = ini_handle->getValue<bool>("Zeal", "RightTurnSpellbookAutostand");
-	spellbook_left_strafe_autostand = ini_handle->getValue<bool>("Zeal", "LeftStrafeSpellbookAutostand");
-	spellbook_right_strafe_autostand = ini_handle->getValue<bool>("Zeal", "RightStrafeSpellbookAutostand");*/
+int __fastcall CastSpell(void* this_ptr, void* not_used, unsigned char a1, short a2, Zeal::EqStructures::EQITEMINFO** a3, short a4)
+{
+	if (ZealService::get_instance()->movement->CastAutoStand.get() && Zeal::EqGame::get_self() && Zeal::EqGame::get_self()->StandingState == Zeal::EqEnums::Stance::Sitting)
+			Zeal::EqGame::get_self()->ChangeStance(Stance::Stand);
+	return ZealService::get_instance()->hooks->hook_map["CastSpell"]->original(CastSpell)(this_ptr, not_used, a1, a2, a3, a4);
 }
 
 PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_ini* ini)
 {
 	ini_handle = ini;
-	load_settings();
-
+	//zeal->hooks->Add("CastSpell", 0x004C483B, CastSpell, hook_type_detour);
+	
 	// ISSUE: Mapping LEFT/RIGHT arrow keys to strafe on TAKP2.1 client fails to function.
 	binds->replace_cmd(211, [this](int state) {
 		if (!state && current_strafe == strafe_direction::Left)
@@ -227,8 +224,8 @@ PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_i
 				std::ostringstream oss;
 				if (Zeal::String::compare_insensitive(args[1], "spellbook"))
 				{
-					set_spellbook_autostand(!spellbook_autostand);
-					std::string is_enabled = spellbook_autostand ? "enabled" : "disabled";
+					SpellBookAutoStand.toggle();
+					std::string is_enabled = SpellBookAutoStand.get() ? "enabled" : "disabled";
 					oss << "[Autostand] spellbook autostand has been " << is_enabled << "." << std::endl;
 					Zeal::EqGame::print_chat(oss.str());
 					return true;

@@ -252,6 +252,9 @@
     <ClInclude Include="helm_manager.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="ui_buff.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -427,6 +430,9 @@
     </ClCompile>
     <ClCompile Include="helm_manager.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_buff.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
