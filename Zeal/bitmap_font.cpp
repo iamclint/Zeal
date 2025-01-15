@@ -16,6 +16,7 @@
 #include "EqFunctions.h"
 #include "bitmap_font.h"
 #include "default_spritefont.h"
+#include "string_util.h"
 
 namespace {
 
@@ -34,7 +35,7 @@ public:
     BinaryReader(const uint8_t* buffer, int size_bytes) : buffer(buffer), size_bytes(size_bytes) {}
 
     bool is_error() const { return read_error; }
-    int bytes_left() { return size_bytes - read_offset; }
+    int bytes_left() const { return size_bytes - read_offset; }
 
     const uint8_t* read_bytes(size_t num_bytes) {
         if (read_offset + num_bytes > size_bytes) {
@@ -118,7 +119,7 @@ std::unique_ptr<BitmapFont> BitmapFont::create_bitmap_font(IDirect3DDevice8& dev
 }
 
 
-std::vector<std::string> BitmapFont::get_available_fonts() {
+std::vector<std::string> BitmapFontBase::get_available_fonts() {
     const std::string directoryPath = kFontDirectoryPath;
 
     std::vector<std::string> fonts = { kDefaultFontName };  // "default" is always first in list.
@@ -132,18 +133,18 @@ std::vector<std::string> BitmapFont::get_available_fonts() {
 }
 
 // Calculates the default shadow offset for this font size.
-float BitmapFont::calculate_shadow_offset() const {
+float BitmapFontBase::calculate_shadow_offset() const {
     float offset = std::roundf(get_line_spacing() * 0.05f);  // Round to integer offsets.
     return std::max(1.f, offset);
 }
 
 // Reads a font from files created with the MakeSpriteFont utility.
-BitmapFont::BitmapFont(IDirect3DDevice8& device_in, const char* filename) :
-    BitmapFont(device_in, load_file(filename)) {
+BitmapFontBase::BitmapFontBase(IDirect3DDevice8& device_in, const char* filename) :
+    BitmapFontBase(device_in, load_file(filename)) {
 }
 
 // Parse the binary MakeSprintFont blob, initialize the glyphs table, and create the D3D texture.
-BitmapFont::BitmapFont(IDirect3DDevice8& device, std::span<const uint8_t> data_span): device(device) {
+BitmapFontBase::BitmapFontBase(IDirect3DDevice8& device, std::span<const uint8_t> data_span): device(device) {
 
     BinaryReader reader(data_span.data(), data_span.size());
 
@@ -215,12 +216,12 @@ BitmapFont::BitmapFont(IDirect3DDevice8& device, std::span<const uint8_t> data_s
 }
 
 // Ensure all resources are released in the destructor.
-BitmapFont::~BitmapFont() {
+BitmapFontBase::~BitmapFontBase() {
     release();
 }
 
 // DirectX resources need to be manually released.
-void BitmapFont::release() {
+void BitmapFontBase::release() {
     if (texture)
         texture->Release();
     texture = nullptr;
@@ -230,12 +231,18 @@ void BitmapFont::release() {
     if (index_buffer)
         index_buffer->Release();
     index_buffer = nullptr;
-    vertices.reset();
     glyph_queue.clear();
 }
 
+
+// DirectX resources need to be manually released.
+void BitmapFont::release() {
+    BitmapFontBase::release();
+    vertices.reset();
+}
+
 // Creates the D3D texture (acquires and configures resources).
-void BitmapFont::create_texture(uint32_t width, uint32_t height,
+void BitmapFontBase::create_texture(uint32_t width, uint32_t height,
     D3DFORMAT format, uint32_t stride, uint32_t rows,
     const uint8_t* data) {
 
@@ -243,7 +250,7 @@ void BitmapFont::create_texture(uint32_t width, uint32_t height,
     //    width, height, format, stride, rows);
 
     const uint64_t size_bytes = uint64_t(stride) * uint64_t(rows);
-    if (size_bytes > 256*1024)  // Just a sanity check.
+    if (size_bytes > 256*1024ull)  // Just a sanity check.
         return;
 
     // Texture copy below assumes 4x4 packed DXT2 format.
@@ -289,7 +296,7 @@ void BitmapFont::create_texture(uint32_t width, uint32_t height,
 }
 
 // Returns the glyph details for the character (or default if out of range).
-const BitmapFont::Glyph* BitmapFont::get_glyph(char character) const {
+const BitmapFontBase::Glyph* BitmapFontBase::get_glyph(char character) const {
     if (character >= kNumGlyphs)
         character = default_character;
     return &glyph_table[character];
@@ -297,7 +304,7 @@ const BitmapFont::Glyph* BitmapFont::get_glyph(char character) const {
 
 // The core glyph layout algorithm shared by the string functions.
 template<typename TAction>
-void BitmapFont::for_each_glyph(const char* text, TAction action) const
+void BitmapFontBase::for_each_glyph(const char* text, TAction action) const
 {
     float x = 0;
     float y = 0;
@@ -331,27 +338,73 @@ void BitmapFont::for_each_glyph(const char* text, TAction action) const
     }
 }
 
+void BitmapFontBase::queue_lines(const std::vector<Lines>& lines, D3DCOLOR color, Vec2 offset)
+{
+    for (const auto& line : lines) {
+        Vec2 upper_left = line.upper_left + offset;
+        for_each_glyph(line.text.c_str(),
+            [&](const Glyph* glyph, float x, float y) {
+                glyph_queue.push_back({ glyph, upper_left + Vec2(x,y), color });
+            });
+    }
+}
+
 // Public interface that queues a string for later rendering in the flush call.
-void BitmapFont::queue_string(const char* text, const Vec2& position, bool center,
-                             const D3DCOLOR color) {
+void BitmapFontBase::queue_string(const char* text, const Vec3& position, bool center,
+                             const D3DCOLOR color, bool grid_align) {
     if (!text || !(*text))
         return;  // Skip nullptr or empty strings.
 
-    Vec2 upper_left = position;
-    if (center) {
-        Vec2 size = measure_string(text);
-        upper_left -= Vec2(0.5f * size.x, 0.5 * size.y);
+    std::vector<Lines> lines;
+    Vec2 upper_left(position.x, position.y);
+    if (center && strchr(text, '\n') != nullptr) {
+        // Split into the multiple lines and measure the width of each line.
+        auto text_lines = Zeal::String::split_text(std::string(text));
+        float x_max = 0;
+        float y_height = 0;
+        float y_final = 0;
+        for (const auto& line : text_lines) {
+            Vec2 size = measure_string(line.c_str());
+            x_max = std::max(x_max, size.x);
+            lines.push_back({ line, Vec2(size.x, y_height) });
+            y_final = size.y;
+            y_height += line_spacing;
+        }
+        y_height -= (line_spacing - y_final);  // Adjust for final line height.
+        float x_offset = -x_max * 0.5f;  // Common base offset for all lines.
+        float y_offset = align_bottom ? -y_height : -y_height * 0.5f;
+        for (auto& line : lines) {
+            float x_line_offset = x_offset + 0.5f * (x_max - line.upper_left.x);
+            float y_line_offset = line.upper_left.y + y_offset;
+            line.upper_left = upper_left + Vec2(x_line_offset, y_line_offset);
+        }
     }
-    upper_left.x = std::round(upper_left.x);  // Starts need to be grid aligned for clean rendering.
-    upper_left.y = std::round(upper_left.y);
-    for_each_glyph(text,
-        [&](const Glyph* glyph, float x, float y) {
-            glyph_queue.push_back({ glyph, upper_left + Vec2(x,y), color});
-        });
+    else {
+        if (center) {
+            Vec2 size = measure_string(text);
+            upper_left -= Vec2(0.5f * size.x, align_bottom ? size.y : 0.5 * size.y);
+        }
+        lines.push_back({ std::string(text), upper_left });
+    }
+    if (grid_align) {
+        for (auto& line : lines) {
+            line.upper_left.x = std::round(line.upper_left.x);  // Starts need to be grid aligned for clean rendering.
+            line.upper_left.y = std::round(line.upper_left.y);
+        }
+    }
+    if (drop_shadow || outlined) {
+        float shadow_offset = calculate_shadow_offset();
+        queue_lines(lines, D3DCOLOR_XRGB(0, 0, 0), Vec2(shadow_offset, shadow_offset));
+        if (outlined) {
+            // Technically would be cleaner with left, right, top, bottom adjusts (4 passes).
+            queue_lines(lines, D3DCOLOR_XRGB(0, 0, 0), Vec2(-shadow_offset, -shadow_offset));
+        }
+    }
+    queue_lines(lines, color);
 }
 
 // Returns the height and width of the string. Does not include line spacing.
-Vec2 BitmapFont::measure_string(const char* text) const
+Vec2 BitmapFontBase::measure_string(const char* text) const
 {
     Vec2 result{ 0, 0 };
     if (!text || !(*text))
@@ -368,7 +421,7 @@ Vec2 BitmapFont::measure_string(const char* text) const
 }
 
 // Returns the bounding box around the string.
-RECT BitmapFont::measure_draw_rect(const char* text, const Vec2& position) const {
+RECT BitmapFontBase::measure_draw_rect(const char* text, const Vec2& position) const {
     if (!text || !(*text))
         return { 0, 0, 0, 0 };  // Skip nullptr or empty strings.
 
@@ -400,7 +453,7 @@ RECT BitmapFont::measure_draw_rect(const char* text, const Vec2& position) const
 }
 
 // Renders all queued bitmap glyphs to the screen.
-void BitmapFont::flush_queue_to_screen() {
+void BitmapFontBase::flush_queue_to_screen() {
     if (!texture) 
         glyph_queue.clear();
 
@@ -409,9 +462,9 @@ void BitmapFont::flush_queue_to_screen() {
 
     if (!vertex_buffer) {
         if (FAILED(device.CreateVertexBuffer(
-                kVertexBufferMaxBatchCount * kNumGlyphVertices * sizeof(GlyphVertex),
-                D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, GlyphVertex::kGlyphVertexFvfCode,
-                D3DPOOL_DEFAULT, &vertex_buffer))) {
+            kVertexBufferMaxBatchCount * kNumGlyphVertices * get_vertex_size(),
+            D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, get_fvf_code(),
+            D3DPOOL_DEFAULT, &vertex_buffer))) {
             vertex_buffer = nullptr;  // Ensure nullptr.
             release();  // Disable future attempts.
             return;
@@ -502,7 +555,7 @@ void BitmapFont::render_queue() {
 }
 
 // Create the index buffer, lock it, fill it with fixed indices, and unlock.
-bool BitmapFont::create_index_buffer() {
+bool BitmapFontBase::create_index_buffer() {
     if (index_buffer)
         return true;
 
@@ -573,20 +626,6 @@ void BitmapFont::calculate_glyph_vertices(const GlyphQueueEntry& entry,
     }
 }
 
-// Reads a font from files created with the MakeSpriteFont utility.
-SpriteFont::SpriteFont(IDirect3DDevice8& device_in, const char* filename) :
-    BitmapFont(device_in, filename) {
-}
-
-// Parse the binary MakeSprintFont blob, initialize the glyphs table, and create the D3D texture.
-SpriteFont::SpriteFont(IDirect3DDevice8& device_in, std::span<const uint8_t> data_span) :
-    BitmapFont(device_in, data_span) {
-}
-
-// Ensure all resources are released in the destructor.
-SpriteFont::~SpriteFont() {
-    release();
-}
 
 // Factory for creating spritefonts. Returns nullptr if unsuccessful.
 std::unique_ptr<SpriteFont> SpriteFont::create_sprite_font(IDirect3DDevice8& device,
@@ -616,86 +655,35 @@ std::unique_ptr<SpriteFont> SpriteFont::create_sprite_font(IDirect3DDevice8& dev
     return sprite_font;
 }
 
-
 // Public interface that queues a string for later rendering in the flush call.
-void SpriteFont::queue_string_3d(const char* text, const Vec3& position, bool center,
-    const D3DCOLOR color) {
+void SpriteFont::queue_string(const char* text, const Vec3& position, bool center,
+    const D3DCOLOR color, bool grid_align) {
     if (!text || !(*text))
         return;  // Skip nullptr or empty strings.
 
-    Vec2 upper_left(0,0);
-    if (center) {
-        Vec2 size = measure_string(text);
-        upper_left -= Vec2(0.5f * size.x, 0.5 * size.y);
-    }
     int start_index = glyph_queue.size();
-    float shadow_offset = calculate_shadow_offset();
-    if (drop_shadow || outlined) {
-        Vec2 upper_left_adjust = upper_left + Vec2(shadow_offset, shadow_offset);
-        for_each_glyph(text,
-            [&](const Glyph* glyph, float x, float y) {
-                glyph_queue.push_back({ glyph, upper_left_adjust + Vec2(x,y), D3DCOLOR_XRGB(0,0,0) });
-            });
-    }
-    if (outlined) {
-        // Technically would be cleaner with left, right, top, bottom adjusts (4 passes).
-        Vec2 upper_left_adjust = upper_left - Vec2(shadow_offset, shadow_offset);
-        for_each_glyph(text,
-            [&](const Glyph* glyph, float x, float y) {
-                glyph_queue.push_back({ glyph, upper_left_adjust + Vec2(x,y), D3DCOLOR_XRGB(0,0,0) });
-            });
-    }
-
-    for_each_glyph(text,
-        [&](const Glyph* glyph, float x, float y) {
-            glyph_queue.push_back({ glyph, upper_left + Vec2(x,y), color });
-        });
-
+    BitmapFontBase::queue_string(text, Vec3(0, 0, 0), center, color, grid_align);
     int stop_index = glyph_queue.size();
     glyph_string_queue.push_back({ .position = position, .start_index = start_index, .stop_index = stop_index });
 }
 
-
 // Renders all queued glyphs to the screen.
 void SpriteFont::flush_queue_to_screen() {
-    if (!texture)
-        release();  // Clears the queue.
-
-    if (glyph_queue.empty())
-        return;
-
-    if (!vertex_buffer) {
-        if (FAILED(device.CreateVertexBuffer(
-            kVertexBufferMaxBatchCount * kNumGlyphVertices * sizeof(Glyph3DVertex),
-            D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, Glyph3DVertex::kFvfCode,
-            D3DPOOL_DEFAULT, &vertex_buffer))) {
-            vertex_buffer = nullptr;  // Ensure nullptr.
-            release();  // Disable future attempts.
-            return;
-        }
-    }
-
-    if (!index_buffer && !create_index_buffer()) {
-        release();  // Disable future attempts.
-        return;
-    }
-
-    render_queue();
-    glyph_queue.clear();
+    BitmapFontBase::flush_queue_to_screen();
     glyph_string_queue.clear();
 }
 
 // DirectX resources need to be manually released.
 void SpriteFont::release() {
-    BitmapFont::release();
-    vertices_3d.reset();
+    BitmapFontBase::release();
+    vertices.reset();
     glyph_string_queue.clear();
 }
 
 // Submits glyph sprites to the GPU in batches.
 void SpriteFont::render_queue() {
-    if (!vertices_3d)
-        vertices_3d = std::make_unique<Glyph3DVertex[]>(kVertexBufferMaxBatchCount * kNumGlyphVertices);
+    if (!vertices)
+        vertices = std::make_unique<Glyph3DVertex[]>(kVertexBufferMaxBatchCount * kNumGlyphVertices);
 
     // Configure for 3D drawing with alpha blending enabled.
     D3DRenderStateStash render_state(device);
@@ -759,7 +747,7 @@ void SpriteFont::render_queue() {
                 break;  // Shouldn't happen, but if it does, just abort processing glyphs.
 
             for (int i = 0; i < batch_count; i++)
-                calculate_glyph_vertices(glyph_queue[read_index + i], &vertices_3d[i * kNumGlyphVertices]);
+                calculate_glyph_vertices(glyph_queue[read_index + i], &vertices[i * kNumGlyphVertices]);
 
             auto lock_type = (vertex_buffer_wr_index == 0) ? D3DLOCK_DISCARD : D3DLOCK_NOOVERWRITE;
             const int start_vertex_index = vertex_buffer_wr_index * kNumGlyphVertices;
@@ -771,7 +759,7 @@ void SpriteFont::render_queue() {
                 release();
                 return;
             }
-            memcpy(buffer, vertices_3d.get(), copy_size);
+            memcpy(buffer, vertices.get(), copy_size);
             vertex_buffer->Unlock();
 
             device.SetIndices(index_buffer, 0);

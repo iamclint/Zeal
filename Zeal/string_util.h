@@ -12,5 +12,6 @@ namespace Zeal
 		bool tryParse(const std::string& str, float* result, bool quiet = false);
 		std::string bytes_to_hex(const char* byteArray, size_t length);
 		std::string replace(std::string& input, const std::string& from, const std::string& to);
+		std::vector<std::string> split_text(const std::string& input, const std::string& delimiter = "\n");
 	};
 }

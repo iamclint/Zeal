@@ -4,6 +4,7 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include <algorithm>
+#include "string_util.h"
 
 void ItemDisplay::InitUI()
 {
@@ -85,22 +86,6 @@ static std::string CopperToAll(unsigned long long copper) {
 	return result.str();
 }
 
-// C++ could really use a std split() function.
-static std::vector<std::string> split_text(const std::string& input, const std::string& delimiter = "\n")
-{
-	std::vector<std::string> strings;
-	size_t start = 0;
-	size_t end = 0;
-	while (end != std::string::npos && start < input.size())
-	{
-		end = input.find(delimiter, start);
-		size_t count = (end == std::string::npos) ? std::string::npos : end - start;
-		strings.push_back(input.substr(start, count));
-		start = end + delimiter.size();
-	}
-	return strings;
-}
-
 static std::string GetSpellClassLevels(const Zeal::EqStructures::_EQITEMINFO& item, const std::string& original) {
 	if (item.Type != 0 || item.Common.Skill != 0x14)
 		return original;
@@ -138,7 +123,7 @@ static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructure
 
 	// Split the existing text into separate lines, release it, and then update line by line.
 	const std::string stml_line_break = "<BR>";
-	auto strings = split_text(std::string(wnd->DisplayText), stml_line_break);
+	auto strings = Zeal::String::split_text(std::string(wnd->DisplayText), stml_line_break);
 	wnd->DisplayText.FreeRep();
 	wnd->DisplayText = Zeal::EqUI::CXSTR("");
 	for (auto& s : strings) {

@@ -33,7 +33,7 @@ int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI
 	{
 		if (message == 0x1E && ui->clicked_button)
 		{
-			ui->clicked_button->TextColor.ARGB = data;
+			ui->clicked_button->TextColor.ARGB = data | 0xff000000;  // Ensure alpha = 0xff.
 			ui->options->SaveColors();
 		}
 	}

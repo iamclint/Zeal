@@ -59,7 +59,7 @@ public:
 	std::vector<std::string> get_available_fonts() const;
 
 	// Internal use only (public for use by callbacks).
-	__declspec(noinline) bool handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity);
+	bool handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity);
 	bool handle_SetNameSpriteState(void* this_display, Zeal::EqStructures::Entity* entity, int show);
 
 private:

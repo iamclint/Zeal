@@ -85,7 +85,8 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"targetmarker", &setting_target_marker },
 		{"targethealth", &setting_target_health },
 		{"inlineguild", &setting_inline_guild },
-		{"zealfonts", &setting_zeal_fonts },
+		{"zealfont", &setting_zeal_fonts },
+		{"dropshadow", &setting_drop_shadow },
 	};
 
 	if (args.size() == 2 && command_map.find(args[1]) != command_map.end())
@@ -102,6 +103,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	Zeal::EqGame::print_chat("Usage: /nameplate option where option is one of");
 	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, targetmarker, targethealth, inlineguild");
+	Zeal::EqGame::print_chat("font:  zealfont, dropshadow");
 }
 
 std::vector<std::string> NamePlate::get_available_fonts() const {
@@ -129,6 +131,7 @@ void NamePlate::load_sprite_font() {
 	if (!sprite_font)
 		return;  // Let caller deal with the failure.
 	sprite_font->set_drop_shadow(setting_drop_shadow.get());
+	sprite_font->set_align_bottom(true);  // Bottom align for multi-line and font sizes.
 }
 
 void NamePlate::clean_ui()
@@ -171,7 +174,7 @@ void NamePlate::render_ui()
 		NamePlateInfo& info = it->second;
 		Vec3 position = entity->ActorInfo->DagHeadPoint->Position;
 		position.z += entity->ModelHeightOffset * 0.5f; // TODO: Does not exactly match client.
-		sprite_font->queue_string_3d(info.text.c_str(), position, true, info.color | 0xff000000);
+		sprite_font->queue_string(info.text.c_str(), position, true, info.color | 0xff000000);
 	}
 	sprite_font->flush_queue_to_screen();
 }
@@ -317,7 +320,7 @@ bool NamePlate::handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity)
 	if (!entity->ActorInfo->DagHeadPoint->StringSprite ||
 		entity->ActorInfo->DagHeadPoint->StringSprite->MagicValue != Zeal::EqStructures::EQSTRINGSPRITE::kMagicValidValue)
 		return false;
-	entity->ActorInfo->DagHeadPoint->StringSprite->Color = color & 0x00ffffff;  // TODO: Check what client does.
+	entity->ActorInfo->DagHeadPoint->StringSprite->Color = color;
 	return true;
 }
 

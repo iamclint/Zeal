@@ -127,5 +127,21 @@ namespace Zeal
 			return oss.str();
 		}
 
+		// C++ could really use a std split() function.
+		std::vector<std::string> split_text(const std::string& input, const std::string& delimiter)
+		{
+			std::vector<std::string> strings;
+			size_t start = 0;
+			size_t end = 0;
+			while (end != std::string::npos && start < input.size())
+			{
+				end = input.find(delimiter, start);
+				size_t count = (end == std::string::npos) ? std::string::npos : end - start;
+				strings.push_back(input.substr(start, count));
+				start = end + delimiter.size();
+			}
+			return strings;
+		}
+
 	}
 }
