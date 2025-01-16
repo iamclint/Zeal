@@ -272,10 +272,12 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_SpellbookAutoStand",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->SpellBookAutoStand.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_CastAutoStand",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->movement->CastAutoStand.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_RightClickToEquip",      [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->equip_item_hook->Enabled.set(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses",		    [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->chat_hook->UseClassicClassNames.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses",		    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chat_hook->UseClassicClassNames.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindowsHist",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetHist(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_BuffTimers",				[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->buffs->BuffTimers.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_BrownSkeletons",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->game_patches->BrownSkeletons.set(wnd->Checked); });
+	
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_EnableContainerLock",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->options->setting_enable_container_lock.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ExportOnCamp",           [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->outputfile->setting_export_on_camp.set(wnd->Checked); });
@@ -549,6 +551,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_CastAutoStand", ZealService::get_instance()->movement->CastAutoStand.get());
 	ui->SetChecked("Zeal_RightClickToEquip", ZealService::get_instance()->equip_item_hook->Enabled.get());
 	ui->SetChecked("Zeal_BuffTimers", ZealService::get_instance()->ui->buffs->BuffTimers.get());
+	ui->SetChecked("Zeal_BrownSkeletons", ZealService::get_instance()->game_patches->BrownSkeletons.get());
 }
 void ui_options::UpdateOptionsCamera()
 {

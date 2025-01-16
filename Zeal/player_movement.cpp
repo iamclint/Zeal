@@ -185,7 +185,7 @@ int __fastcall CastSpell(void* this_ptr, void* not_used, unsigned char a1, short
 PlayerMovement::PlayerMovement(ZealService* zeal, class Binds* binds, class IO_ini* ini)
 {
 	ini_handle = ini;
-	//zeal->hooks->Add("CastSpell", 0x004C483B, CastSpell, hook_type_detour);
+	zeal->hooks->Add("CastSpell", 0x004C483B, CastSpell, hook_type_detour);
 	
 	// ISSUE: Mapping LEFT/RIGHT arrow keys to strafe on TAKP2.1 client fails to function.
 	binds->replace_cmd(211, [this](int state) {

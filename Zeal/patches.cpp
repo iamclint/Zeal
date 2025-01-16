@@ -81,6 +81,18 @@ void patches::fonts() //this was a test function and I later found out these are
 	//	DeleteObject(fonts[i]);
 
 }
+
+void patches::SetBrownSkeletons()
+{
+	if (BrownSkeletons.get())
+	{
+		mem::write<byte>(0x49f297, 0xEB);
+	}
+	else
+	{
+		mem::write<byte>(0x49f297, 0x75);
+	}
+}
 patches::patches()
 {
 	const char sit_stand_patch[] = { (char)0xEB, (char)0x1A };
@@ -88,10 +100,13 @@ patches::patches()
 	
 	//disable client sided hp ticking
 	//mem::set(0x4b9141, 0x90, 6);
-
+	SetBrownSkeletons();
 	//disable client sided mana ticking
 	mem::set(0x4C3F93, 0x90, 7);
 	mem::set(0x4C7642, 0x90, 7);
+
+
+	
 
 	//the following does not work entirely needs more effort
 	//mem::write<byte>(0x4A594B, 15); //load font sizes 1 to 14 (default is 6)
