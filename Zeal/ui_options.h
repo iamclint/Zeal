@@ -33,6 +33,8 @@ private:
 	void RenderUI();
 	void Deactivate();
 	int FindComboIndex(std::string combobox, std::string text_value);
+	void UpdateComboBox(const std::string& name, const std::string& label,
+		const std::string& default_label);
 
 	Zeal::EqUI::EQWND* wnd = nullptr;
 	std::unordered_map<int, Zeal::EqUI::BasicWnd*> color_buttons;
