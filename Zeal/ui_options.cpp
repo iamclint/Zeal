@@ -7,6 +7,8 @@
 #include <algorithm>
 #include "ZealSettings.h"
 
+static constexpr int kMaxComboBoxItems = 50;  // Maximum length of dynamic combobox lists.
+
 float GetSensitivityFromSlider(int value)
 {
 	return value / 100.f;
@@ -295,7 +297,7 @@ void ui_options::InitFloatingDamage()
 				selected_name.FreeRep();
 			}
 		}
-		ZealService::get_instance()->floating_damage->set_font(font_name);
+		ZealService::get_instance()->floating_damage->bitmap_font_filename.set(font_name);
 		});
 }
 void ui_options::InitCamera()
@@ -557,8 +559,9 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetLabelValue("Zeal_TargetRingRotation_Value", "%.2f", ZealService::get_instance()->target_ring->rotation_speed.get());
 	ui->SetLabelValue("Zeal_TargetRingSize_Value", "%.2f", ZealService::get_instance()->target_ring->outer_size.get());
 	ui->SetLabelValue("Zeal_TargetRingTransparency_Value", "%.2f", ZealService::get_instance()->target_ring->transparency.get());
-	ui->SetComboValue("Zeal_TargetRingTexture_Combobox",
-		FindComboIndex("Zeal_TargetRingTexture_Combobox", ZealService::get_instance()->target_ring->texture_name.get()));
+
+	std::string current_texture = ZealService::get_instance()->target_ring->texture_name.get();
+	UpdateComboBox("Zeal_TargetRingTexture_Combobox", current_texture, "None");
 }
 
 void ui_options::UpdateOptionsNameplate()
@@ -584,11 +587,8 @@ void ui_options::UpdateOptionsFloatingDamage()
 	ui->SetChecked("Zeal_FloatingSpells", ZealService::get_instance()->floating_damage->spells.get());
 	ui->SetChecked("Zeal_FloatingSpellIcons", ZealService::get_instance()->floating_damage->spell_icons.get());
 
-	std::string current_font = ZealService::get_instance()->floating_damage->get_font();
-	if (current_font.empty())
-		current_font = FloatingDamage::kUseClientFontString;
-	ui->SetComboValue("Zeal_FloatingFont_Combobox",
-		FindComboIndex("Zeal_FloatingFont_Combobox", current_font));
+	std::string current_font = ZealService::get_instance()->floating_damage->bitmap_font_filename.get();
+	UpdateComboBox("Zeal_FloatingFont_Combobox", current_font, FloatingDamage::kUseClientFontString);
 }
 
 void ui_options::UpdateOptionsMap()
@@ -607,8 +607,6 @@ void ui_options::UpdateOptionsMap()
 	ui->SetComboValue("Zeal_MapAlignment_Combobox", ZealService::get_instance()->zone_map->get_alignment());
 	ui->SetComboValue("Zeal_MapLabels_Combobox", ZealService::get_instance()->zone_map->get_labels_mode());
 	ui->SetComboValue("Zeal_MapDataMode_Combobox", ZealService::get_instance()->zone_map->get_map_data_mode());
-	ui->SetComboValue("Zeal_MapFont_Combobox",
-		FindComboIndex("Zeal_MapFont_Combobox", ZealService::get_instance()->zone_map->get_font()));
 	ui->SetComboValue("Zeal_MapZoomDefault_Combobox", ZealService::get_instance()->zone_map->get_map_zoom_default_index());
 	ui->SetSliderValue("Zeal_MapZoom_Slider", (ZealService::get_instance()->zone_map->get_zoom() - 100)/15);  // 100 to 1600%
 	ui->SetSliderValue("Zeal_MapPositionSize_Slider", ZealService::get_instance()->zone_map->get_position_size());
@@ -624,6 +622,9 @@ void ui_options::UpdateOptionsMap()
 	ui->SetLabelValue("Zeal_MapFadedZLevelAlpha_Value", "%i%%", ZealService::get_instance()->zone_map->get_faded_zlevel_alpha());
 	ui->SetLabelValue("Zeal_MapNamesLength_Value", "%i", ZealService::get_instance()->zone_map->get_name_length());
 	ui->SetLabelValue("Zeal_MapGridPitch_Value", "%i", ZealService::get_instance()->zone_map->get_grid_pitch());
+
+	std::string current_font = ZealService::get_instance()->zone_map->get_font();
+	UpdateComboBox("Zeal_MapFont_Combobox", current_font, BitmapFont::kDefaultFontName);
 }
 
 void ui_options::RenderUI()
@@ -649,7 +650,7 @@ int ui_options::FindComboIndex(std::string combobox, std::string text_value) {
 		return -1;
 
 	int value = 0;
-	for (int value = 0; value < 20; ++value) {
+	for (int value = 0; value < kMaxComboBoxItems; ++value) {
 		Zeal::EqUI::CXSTR selected_name;
 		cmb->CmbListWnd->GetItemText(&selected_name, value, 0);  // Assumption: value > rows is safe.
 		if (!selected_name.Data)
@@ -663,6 +664,15 @@ int ui_options::FindComboIndex(std::string combobox, std::string text_value) {
 	return -1;
 }
 
+void ui_options::UpdateComboBox(const std::string& name, const std::string& label,
+	const std::string& default_label) {
+	int index = FindComboIndex(name, label.empty() ? default_label : label);
+	if (index < 0)
+		index = FindComboIndex(name, default_label);
+	ui->SetComboValue(name, max(0, index));
+}
+
+
 void ui_options::UpdateDynamicUI() {
 	if (!wnd)
 		return;
@@ -671,32 +681,27 @@ void ui_options::UpdateDynamicUI() {
 	if (cmb) {
 		std::vector<std::string> textures = ZealService::get_instance()->target_ring->get_available_textures();
 		cmb->DeleteAll();
+		if (textures.size() > kMaxComboBoxItems)
+			textures.resize(kMaxComboBoxItems);
 		ZealService::get_instance()->ui->AddListItems(cmb, textures);
-
-		std::string current_texture = ZealService::get_instance()->target_ring->texture_name.get();
-		cmb->SetChoice(max(0, FindComboIndex("Zeal_TargetRingTexture_Combobox", current_texture)));
 	}
 
 	cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_MapFont_Combobox");
 	if (cmb) {
 		std::vector<std::string> fonts = ZealService::get_instance()->zone_map->get_available_fonts();
+		if (fonts.size() > kMaxComboBoxItems)
+			fonts.resize(kMaxComboBoxItems);
 		cmb->DeleteAll();
 		ZealService::get_instance()->ui->AddListItems(cmb, fonts);
-
-		std::string current_font = ZealService::get_instance()->zone_map->get_font();
-		cmb->SetChoice(max(0, FindComboIndex("Zeal_MapFont_Combobox", current_font)));
 	}
 
 	cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_FloatingFont_Combobox");
 	if (cmb) {
 		std::vector<std::string> fonts = ZealService::get_instance()->floating_damage->get_available_fonts();
+		if (fonts.size() > kMaxComboBoxItems)
+			fonts.resize(kMaxComboBoxItems);
 		cmb->DeleteAll();
 		ZealService::get_instance()->ui->AddListItems(cmb, fonts);
-
-		std::string current_font = ZealService::get_instance()->floating_damage->get_font();
-		if (current_font.empty())
-			current_font = FloatingDamage::kUseClientFontString;
-		cmb->SetChoice(max(0, FindComboIndex("Zeal_FloatingFont_Combobox", current_font)));
 	}
 }
 
