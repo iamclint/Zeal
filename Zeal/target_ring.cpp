@@ -390,7 +390,11 @@ void TargetRing::callback_render() {
 	ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
 
 	// ### Target Ring Color ###
-	DWORD originalColor = Zeal::EqGame::GetLevelCon(target);
+	DWORD originalColor;
+	if (target_color.get())
+		originalColor = get_target_color();
+	else
+		originalColor = Zeal::EqGame::GetLevelCon(target);
 	// Max Red, Green, and Blue by default
 	DWORD Color = originalColor;
 		/*Color = D3DCOLOR_ARGB(0xFF,
