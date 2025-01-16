@@ -324,17 +324,6 @@ static bool is_autocycle_tell(const std::string& text, const char* prefix) {
     return (second_space == text.length() - 1);
 }
 
-// Safely convert a wide Unicode string to an UTF8 string.
-static std::string wchar_to_utf8(const wchar_t* input)
-{
-    std::wstring wstr = input;
-    if (wstr.empty()) return std::string();
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
-    std::string result(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &result[0], size_needed, NULL, NULL);
-    return result;
-}
-
 // Enhance the /tell tab completion to include the raid and zone player list and also enable
 // it for /t and /consent.
 static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 key, int modifier, char keydown)
@@ -354,10 +343,7 @@ static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 ke
     // First check if the start of the text is one that supports tab completion.
     // We cycle through this even if we already have matches just to re-use code.
     std::vector<const char*> prefix_list = { "/tell", "/t", "/consent" };
-    const char* input_text = active_edit->InputText.Data->Text;
-    std::string text = (active_edit->InputText.Data->Encoding == 0) ?
-        std::string(input_text) :
-        wchar_to_utf8(reinterpret_cast<const wchar_t*>(input_text));
+    std::string text = std::string(active_edit->InputText);
     for (const char* prefix : prefix_list)
     {
         if (!text.starts_with(prefix))

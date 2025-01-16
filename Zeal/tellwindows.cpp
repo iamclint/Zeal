@@ -133,7 +133,7 @@ bool TellWindows::HandleTell(std::string& cmd_data)
         Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
         if (IsTellWindow(wnd))
         {
-                std::string window_title = wnd->Text.Data->Text;
+                std::string window_title = std::string(wnd->Text);
                 cmd_data = "/tell " + window_title.substr(1, window_title.length()-1) + " " + cmd_data;
                 return true;
         }
@@ -148,7 +148,7 @@ Zeal::EqUI::ChatWnd* TellWindows::FindTellWnd(std::string& name)
         Zeal::EqUI::ChatWnd* cwnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
         if (cwnd && cwnd->Text.Data)
         {
-            std::string title = cwnd->Text.Data->Text;
+            std::string title = std::string(cwnd->Text);
             if (IsTellWindow(cwnd) && Zeal::String::compare_insensitive(title.substr(1, title.length() - 1), name))
                 return cwnd;
         }
@@ -251,7 +251,7 @@ bool TellWindows::IsTellWindow(Zeal::EqUI::ChatWnd* wnd)
 {
     if (wnd && wnd->Text.Data)
     {
-        std::string title = wnd->Text.Data->Text;
+        std::string title = std::string(wnd->Text);
         if (title.substr(0, 1) == TellWindowIdentifier)
         {
             return true;
@@ -348,7 +348,7 @@ TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
                     Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
                     if (IsTellWindow(wnd))
                     {
-                        std::string window_title = wnd->Text.Data->Text;
+                        std::string window_title = std::string(wnd->Text);
                         Zeal::EqGame::do_target(window_title.substr(1, window_title.length() - 1).c_str());
                         return true;
                     }
