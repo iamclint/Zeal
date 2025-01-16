@@ -122,6 +122,36 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+  <Button item="Zeal_TargetRingColor">
+    <ScreenID>Zeal_TargetRingColor</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>11</X>
+      <Y>98</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Renders Target ring color using Target Color</TooltipReference>
+    <Text>Target Color</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
    <!-- Zeal Target Ring Fill slider -->
   <Label item="Zeal_TargetRingFill_Label">
     <ScreenID>Zeal_TargetRingFill_Label</ScreenID>
@@ -545,6 +575,7 @@
 	<Pieces>Zeal_TargetRingForward</Pieces>
     <Pieces>Zeal_TargetRingTexture_Combobox</Pieces>
 	<Pieces>Zeal_TargetRingCone</Pieces>
+    <Pieces>Zeal_TargetRingColor</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>
