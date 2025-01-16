@@ -113,11 +113,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 }
 
 std::vector<std::string> NamePlate::get_available_fonts() const {
-	auto fonts = BitmapFont::get_available_fonts();
-	if (!fonts.empty() && fonts[0] == BitmapFont::kDefaultFontName)  // Default is too small.
-		fonts.erase(fonts.begin());
-	fonts.insert(fonts.begin(), kUseDefaultFontString);
-	return fonts;
+	return BitmapFont::get_available_fonts();  // Note that we customize the "default" one.
 }
 
 // Loads the sprite font for real-time text rendering to screen.
@@ -130,7 +126,7 @@ void NamePlate::load_sprite_font() {
 		return;
 
 	std::string font_filename = setting_fontname.get();
-	if (font_filename.empty() || font_filename == kUseDefaultFontString)
+	if (font_filename.empty() || font_filename == BitmapFont::kDefaultFontName)
 		font_filename = "arial_bold_24";
 
 	sprite_font = SpriteFont::create_sprite_font(*device, font_filename);

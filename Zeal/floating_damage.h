@@ -37,8 +37,9 @@ public:
 	ZealSetting<bool> enabled = { true, "FloatingDamage", "Enabled", true };
 	ZealSetting<bool> spell_icons = { true, "FloatingDamage", "Icons", true };
 	ZealSetting<bool> spells = { true, "FloatingDamage", "Spells", true };
+	ZealSetting<std::string> bitmap_font_filename = { std::string(kUseClientFontString),
+		"FloatingDamage", "Font", true, [this](std::string val) { bitmap_font.reset(); } };
 	bool set_font(std::string font_name);
-	std::string get_font() const { return bitmap_font_filename; }
 	std::vector<std::string> get_available_fonts() const;
 	void init_ui();
 	void clean_ui();
@@ -55,7 +56,6 @@ private:
 	void render_spells();
 	void render_text();  // Called in "render" for bitmap_font or "deferred" for CTextureFont.
 	std::unique_ptr<BitmapFont> bitmap_font = nullptr;
-	std::string bitmap_font_filename;
 	int font_size = 5;
 	std::unordered_map<Zeal::EqStructures::Entity*, std::vector<DamageData>> damage_numbers;
 };

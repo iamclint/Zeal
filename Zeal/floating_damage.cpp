@@ -357,7 +357,7 @@ void FloatingDamage::init_ui()
 	clean_ui();  // Just in case releases all resources and clears textures.
 	std::string current_ui = (char*)0x63D3C0;
 	std::string path = current_ui;
-	std::string default_path = "./UIFILES/default/";
+	std::string default_path = "./uifiles/default/";
 	for (int i = 1; i <= 3; i++)
 	{
 		std::stringstream filepath;
@@ -369,13 +369,6 @@ void FloatingDamage::init_ui()
 		if (!add_texture(filepath.str()))
 			Zeal::EqGame::print_chat("Texture not found: %s", filepath.str().c_str());
 	}
-	auto ini = ZealService::get_instance()->ini.get();  // Short-life pointer.
-	if (ini)
-	{
-		if (!ini->exists("Zeal", "FloatingDamageFont"))
-			ini->setValue<std::string>("Zeal", "FloatingDamageFont", std::string(""));
-		bitmap_font_filename = ini->getValue<std::string>("Zeal", "FloatingDamageFont");
-	}
 }
 
 void FloatingDamage::clean_ui()
@@ -385,21 +378,6 @@ void FloatingDamage::clean_ui()
 			texture->Release();
 	textures.clear();
 	bitmap_font.reset();
-}
-
-bool FloatingDamage::set_font(std::string font_name) {
-	if (bitmap_font && bitmap_font_filename == font_name)
-		return true;  // Already loaded.
-
-	bitmap_font.reset();  // Release all resources and reset to nullptr.
-	if (font_name == kUseClientFontString)
-		font_name = "";  // Disables the bitmap font.
-	bitmap_font_filename = font_name;  // Attempts to load at next render pass.
-
-	if (ZealService::get_instance() && ZealService::get_instance()->ini)
-		ZealService::get_instance()->ini->setValue<std::string>("Zeal", "FloatingDamageFont", bitmap_font_filename);
-
-	return true;  // Always succeed for now.
 }
 
 std::vector<std::string> FloatingDamage::get_available_fonts() const {
@@ -413,15 +391,16 @@ std::vector<std::string> FloatingDamage::get_available_fonts() const {
 
 // Loads the bitmap font for real-time text rendering to screen.
 void FloatingDamage::load_bitmap_font() {
-	if (bitmap_font || bitmap_font_filename.empty())
+	if (bitmap_font || bitmap_font_filename.get().empty() ||
+		bitmap_font_filename.get() == kUseClientFontString)
 		return;
 
 	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
 	if (device != nullptr)
-		bitmap_font = BitmapFont::create_bitmap_font(*device, bitmap_font_filename);
+		bitmap_font = BitmapFont::create_bitmap_font(*device, bitmap_font_filename.get());
 	if (!bitmap_font) {
-		Zeal::EqGame::print_chat("Failed to load font: %s", bitmap_font_filename.c_str());
-		bitmap_font_filename = "";  // Disable future attempts and use CTexture font.
+		Zeal::EqGame::print_chat("Failed to load font: %s", bitmap_font_filename.get().c_str());
+		bitmap_font_filename.set(kUseClientFontString);  // Disable attempts and use CTexture font.
 	}
 	else {
 		bitmap_font->set_drop_shadow(true);
@@ -431,15 +410,6 @@ void FloatingDamage::load_bitmap_font() {
 FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 {
 	//mem::write<BYTE>(0x4A594B, 0x14);
-	if (!ini->exists("Zeal", "FloatingDamage"))
-		ini->setValue<bool>("Zeal", "FloatingDamage", true);
-	if (!ini->exists("Zeal", "FloatingDamageSpells"))
-		ini->setValue<bool>("Zeal", "FloatingDamageSpells", true);
-	if (!ini->exists("Zeal", "FloatingDamageIcons"))
-		ini->setValue<bool>("Zeal", "FloatingDamageIcons", true);
-	enabled = ini->getValue<bool>("Zeal", "FloatingDamage");
-	spells = ini->getValue<bool>("Zeal", "FloatingDamageSpells");
-	spell_icons = ini->getValue<bool>("Zeal", "FloatingDamageIcons");
 	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::DrawWindows);
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { add_damage(source, target, damage, heal, spell_id); });
@@ -448,12 +418,12 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::DXReset);  // Just release all resources.
 
 	zeal->commands_hook->Add("/fcd", {}, "Toggles floating combat text or adjusts the fonts with arguments",
-		[this, ini](std::vector<std::string>& args) {
+		[this](std::vector<std::string>& args) {
 			int new_size = 5;
 			if (args.size() == 3 && args[1] == "font")
 			{
-				set_font(args[2]); 
-				Zeal::EqGame::print_chat("Floating combat font set to %s", bitmap_font_filename.c_str());
+				bitmap_font_filename.set(args[2]);  // Releases to force a reload.
+				Zeal::EqGame::print_chat("Floating combat font set to %s", bitmap_font_filename.get().c_str());
 			}
 			else if (args.size() == 2 && args[1] == "font") {
 				auto fonts = BitmapFont::get_available_fonts();
@@ -466,7 +436,7 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 			{
 				font_size = new_size;
 				Zeal::EqGame::print_chat("Floating combat font size is now %i", font_size);
-				set_font("");  // Releases resources and disables the bitmap_font path.
+				bitmap_font_filename.set(kUseClientFontString);  // Releases and disables bitmap font path.
 			}
 			else if (args.size() == 1)
 			{

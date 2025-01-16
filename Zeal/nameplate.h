@@ -9,8 +9,6 @@
 class NamePlate
 {
 public:
-	static constexpr char kUseDefaultFontString[] = "default";
-
 	// The positive color indices must be kept in sync with the color options.
 	enum class ColorIndex : int
 	{
@@ -54,8 +52,8 @@ public:
 		[this](bool val) { clean_ui(); } };
 	ZealSetting<bool> setting_drop_shadow = { false, "Zeal", "NamePlateDropShadow", false,
 		[this](bool val) { clean_ui(); } };
-	ZealSetting<std::string> setting_fontname = { std::string(kUseDefaultFontString), "Zeal", "NamePlateFontname", false,
-		[this](std::string val) { clean_ui(); } };
+	ZealSetting<std::string> setting_fontname = { std::string(BitmapFont::kDefaultFontName),
+		"Zeal", "NamePlateFontname", false, [this](std::string val) { clean_ui(); } };
 
 	std::vector<std::string> get_available_fonts() const;
 
