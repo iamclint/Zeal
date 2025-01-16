@@ -291,7 +291,7 @@ void ui_options::InitFloatingDamage()
 			Zeal::EqUI::CXSTR selected_name;
 			wnd->CmbListWnd->GetItemText(&selected_name, value, 0);
 			if (selected_name.Data) {
-				font_name = std::string(selected_name.Data->Text);
+				font_name = std::string(selected_name);
 				selected_name.FreeRep();
 			}
 		}
@@ -360,7 +360,7 @@ void ui_options::InitMap()
 			Zeal::EqUI::CXSTR selected_name;
 			wnd->CmbListWnd->GetItemText(&selected_name, value, 0);
 			if (selected_name.Data) {
-				font_name = std::string(selected_name.Data->Text);
+				font_name = std::string(selected_name);
 				selected_name.FreeRep();
 			}
 		}
@@ -419,7 +419,7 @@ void ui_options::InitTargetRing()
 			wnd->CmbListWnd->GetItemText(&texture_name, value, 0);
 			if (texture_name.Data)
 			{
-				ZealService::get_instance()->target_ring->texture_name.set(texture_name.Data->Text);
+				ZealService::get_instance()->target_ring->texture_name.set(std::string(texture_name));
 				texture_name.FreeRep();
 			}
 		}
@@ -655,7 +655,7 @@ int ui_options::FindComboIndex(std::string combobox, std::string text_value) {
 		if (!selected_name.Data)
 			return -1;  // End of list.
 
-		std::string value_label = std::string(selected_name.Data->Text);
+		std::string value_label = std::string(selected_name);
 		selected_name.FreeRep();
 		if (Zeal::String::compare_insensitive(value_label, text_value))
 			return value;
