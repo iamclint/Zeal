@@ -11,6 +11,11 @@
 
 static constexpr char const * kTextureDirectoryPath = "./uifiles/zeal/targetrings/";
 
+static D3DCOLOR get_target_color() {
+	const int kTargetColorIndex = 18; // NamePlate::ColorIndex::Target
+	return ZealService::get_instance()->ui->options->GetColor(kTargetColorIndex);
+}
+
 RenderState::RenderState(IDirect3DDevice8* device, DWORD state, DxStateType_ type)
 	: state(state), type(type)
 {
