@@ -2337,7 +2337,7 @@ namespace Zeal
 				for (int c = 0; c < num_cols; ++c)
 				{
 					list_wnd->GetItemText(&temp, r, c);
-					data[r].push_back(temp.Data->Text);
+					data[r].push_back(std::string(temp));
 				}
 			}
 			temp.FreeRep();  // Need to release the temporary reference count.

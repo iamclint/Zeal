@@ -126,9 +126,9 @@ int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 		case 15:
 		{
 			const Zeal::EqStructures::GroupInfo* group_info = Zeal::EqGame::GroupInfo;
-			if (group_info->is_in_group() && strcmp(str->Data->Text, group_info->LeaderName) == 0)
+			if (group_info->is_in_group() && strcmp(str->CastToCharPtr(), group_info->LeaderName) == 0)
 			{
-				std::string name = std::string(str->Data->Text) + "*";
+				std::string name = std::string(*str) + "*";
 				str->FreeRep();
 				*str = Zeal::EqUI::CXSTR(name.c_str());
 			}
@@ -173,7 +173,7 @@ bool labels::GetLabel(int EqType, std::string& str)
 	bool val = GetLabelFromEq(EqType, (Zeal::EqUI::CXSTR*)&tmp, &override, &color);
 	if (tmp.Data)
 	{
-		str = tmp.Data->Text;
+		str = std::string(tmp);
 		tmp.FreeRep();
 	}
 	return val;
@@ -184,7 +184,7 @@ int labels::GetGauge(int EqType, std::string& str)
 	int value = GetGaugeFromEq(EqType, (Zeal::EqUI::CXSTR*)&tmp);
 	if (tmp.Data)
 	{
-		str = tmp.Data->Text;
+		str = std::string(tmp);
 		tmp.FreeRep();
 	}
 	return value;
@@ -207,7 +207,7 @@ labels::labels(ZealService* zeal)
 				ULONG color = 0;
 				GetLabelFromEq(i, (Zeal::EqUI::CXSTR*)&tmp, &override, &color);
 				if (tmp.Data)
-					Zeal::EqGame::print_chat("label: %i value: %s", i, tmp.Data->Text);
+					Zeal::EqGame::print_chat("label: %i value: %s", i, tmp.CastToCharPtr());
 			}
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});

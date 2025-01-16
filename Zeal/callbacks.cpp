@@ -263,9 +263,6 @@ void __fastcall EQPlayerDeconstruct(Zeal::EqStructures::Entity* ent, int unused)
 void __fastcall OutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR msg, short channel)
 {
 	ZealService* zeal = ZealService::get_instance();
-	//int multiByteSize = WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, NULL, 0, NULL, NULL);
-	//std::string msg_data(multiByteSize, '\0');
-	//WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)msg.Data->Text, -1, msg_data.data(), multiByteSize, NULL, NULL);
 	short new_channel = channel;
 	if (msg.Data)
 	{
