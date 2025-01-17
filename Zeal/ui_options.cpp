@@ -274,6 +274,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_ClassicClasses",		    [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->chat_hook->UseClassicClassNames.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindows",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetEnabled(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindowsHist",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetHist(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddComboCallback(wnd,	 "Zeal_Timestamps_Combobox",	[](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->TimeStampsStyle.set(value); });
 	ui->AddSliderCallback(wnd,	 "Zeal_HoverTimeout_Slider",	[this](Zeal::EqUI::SliderWnd* wnd, int value) {	int val = value * 5; ZealService::get_instance()->tooltips->set_timer(val); ui->SetLabelValue("Zeal_HoverTimeout_Value", "%i ms", val); });
 	ui->AddLabel(wnd, "Zeal_HoverTimeout_Value");
@@ -522,6 +523,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_HideCorpse", ZealService::get_instance()->looting_hook->hide_looted);
 	ui->SetChecked("Zeal_TellWindows", ZealService::get_instance()->tells->enabled);
 	ui->SetChecked("Zeal_TellWindowsHist", ZealService::get_instance()->tells->hist_enabled);
+	ui->SetChecked("Zeal_LinkAllAltDelimiter", ZealService::get_instance()->looting_hook->setting_alt_delimiter.get());
 	ui->SetChecked("Zeal_ClassicClasses", ZealService::get_instance()->chat_hook->UseClassicClassNames.get());
 	ui->SetLabelValue("Zeal_VersionValue", "%s (%s)", ZEAL_VERSION, ZEAL_BUILD_VERSION);
 	ui->SetChecked("Zeal_BlueCon", ZealService::get_instance()->chat_hook->UseBlueCon.get());

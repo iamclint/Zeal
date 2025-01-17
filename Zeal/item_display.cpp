@@ -21,10 +21,6 @@ void ItemDisplay::InitUI()
 		}
 		windows.push_back(new_wnd);
 		// new_wnd->SetupCustomVTable();  // Re-enable this and the deleter if custom vtables are required.
-		new_wnd->Location.Top += 20 * (i + 1);
-		new_wnd->Location.Left += 20 * (i + 1);
-		new_wnd->Location.Bottom += 20 * (i + 1);
-		new_wnd->Location.Right += 20 * (i + 1);
 
 		// For an unclear reason the constructor above is not configuring the window relationships
 		// correctly, which causes the ItemDescription window to pop above the IconBtn when clicked.
@@ -36,6 +32,13 @@ void ItemDisplay::InitUI()
 		new_wnd->ItemDescription->HasSiblings = true;
 		new_wnd->IconBtn->HasChildren = true;
 		new_wnd->IconBtn->HasSiblings = true;
+
+		// Set up independent ini settings for these new windows and reload using the new name.
+		new_wnd->EnableINIStorage = 0x19;  // Magic value to use the INIStorageName.
+		new_wnd->INIStorageName = Zeal::EqUI::CXSTR(std::format("ZealItemDisplay{}", i).c_str());
+		auto vtable = static_cast<Zeal::EqUI::ItemDisplayVTable*>(new_wnd->vtbl);
+		auto load_ini = reinterpret_cast<void(__fastcall*)(Zeal::EqUI::ItemDisplayWnd*, int unused)>(vtable->LoadIniInfo);
+		load_ini(new_wnd, 0);
 	}
 }
 
