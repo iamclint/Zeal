@@ -4,30 +4,12 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include "string_util.h"
+#include "looting.h"
+
 static int __fastcall LinkAllButtonDown(Zeal::EqUI::LootWnd* pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
 	int rval = reinterpret_cast<int(__fastcall*)(Zeal::EqUI::LootWnd * pWnd, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)>(0x0595330)(pWnd, unused, pt, flag);
-	Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->GetActiveChatWindow();
-	if (wnd)
-	{
-		Zeal::EqUI::EditWnd* input_wnd = (Zeal::EqUI::EditWnd*)wnd->edit;
-		std::stringstream ss;
-		bool has_added_link = false;
-		for (int i = 0; i < 30; i++)
-		{
-			if (Zeal::EqGame::Windows->Loot->Item[i] && input_wnd->item_link_count < 0xA)
-			{
-				if (has_added_link)
-					input_wnd->ReplaceSelection(", ", false);
-				input_wnd->AddItemTag(Zeal::EqGame::Windows->Loot->Item[i]->ID, Zeal::EqGame::Windows->Loot->Item[i]->Name);
-				has_added_link = true;
-			}
-		}
-		input_wnd->SetFocus();
-	}
-	else
-		Zeal::EqGame::print_chat("No active chat window found");
-
+	ZealService::get_instance()->looting_hook->link_all();  // Uses default active chat window.
 	return rval;
 }
 
