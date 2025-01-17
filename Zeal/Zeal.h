@@ -34,6 +34,7 @@ public:
 	std::shared_ptr<NamePlate> nameplate = nullptr;
 	std::shared_ptr<TellWindows> tells = nullptr;
 	std::shared_ptr<HelmManager> helm = nullptr;
+	std::shared_ptr<MusicManager> music = nullptr;
 
 	//other features
 	std::shared_ptr<OutputFile> outputfile = nullptr;
@@ -66,4 +67,5 @@ private:
 	BYTE orig_render_data[11];
 	void basic_binds();
 };
+
 

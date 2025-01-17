@@ -255,6 +255,9 @@
     <ClInclude Include="ui_buff.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="music.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -433,6 +436,9 @@
     </ClCompile>
     <ClCompile Include="ui_buff.cpp">
       <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="music.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
