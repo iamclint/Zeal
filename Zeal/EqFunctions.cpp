@@ -1557,9 +1557,26 @@ namespace Zeal
 				mem::copy(0x538672, orig, 13);
 			}
 		}
-
-		
-
+		void do_gsay(std::string data)
+		{
+			EqGameInternal::do_gsay(get_self(), data.c_str());
+		}
+		void do_guildsay(std::string data)
+		{
+			EqGameInternal::do_guildsay(get_self(), data.c_str());
+		}
+		void do_auction(std::string data)
+		{
+			EqGameInternal::do_auction(get_self(), data.c_str());
+		}
+		void do_ooc(std::string data)
+		{
+			EqGameInternal::do_ooc(get_self(), data.c_str());
+		}
+		void send_raid_chat(std::string data)
+		{
+			EqGameInternal::send_raid_chat(Zeal::EqGame::RaidInfo, 0, data.c_str());
+		}
 		void print_chat(std::string data)
 		{
 			if (!is_in_game())
