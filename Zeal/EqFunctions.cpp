@@ -734,6 +734,18 @@ namespace Zeal
 			return false;
 		}
 
+		bool is_player_pet(const Zeal::EqStructures::Entity& entity)
+		{
+			const int pet_owner_id = entity.PetOwnerSpawnId;
+			if (!pet_owner_id || (entity.Type != Zeal::EqEnums::NPC))
+				return false;
+
+			if (Zeal::EqGame::get_entity_by_id(pet_owner_id));
+				return true;
+
+			return false;
+		}
+
 		Vec3 get_view_actor_head_pos()
 		{
 			//print_chat("movement: %i", get_view_actor()->Entity->ActorInfo->MovementType);
