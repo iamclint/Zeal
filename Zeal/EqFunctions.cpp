@@ -740,8 +740,8 @@ namespace Zeal
 			if (!pet_owner_id || (entity.Type != Zeal::EqEnums::NPC))
 				return false;
 
-			if (Zeal::EqGame::get_entity_by_id(pet_owner_id));
-				return true;
+			auto owner_entity = Zeal::EqGame::get_entity_by_id(pet_owner_id);
+				return (owner_entity && owner_entity->Type == Zeal::EqEnums::Player);
 
 			return false;
 		}
