@@ -12,6 +12,8 @@
 // - Options mixed with guilds, raids, and pets
 // - Tab cycle targeting updates of text and tint
 
+static float z_position_offset = 1.5f; // Static global to allow parse overrides during evaluation.
+
 static void ChangeDagStringSprite(Zeal::EqStructures::EQDAGINFO* dag, int fontTexture, const char* str)
 {
 	reinterpret_cast<int(__thiscall*)(void* _this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, const char* text)>(0x4B0AA8)(*(void**)0x7F9510, dag, fontTexture, str);
@@ -62,12 +64,17 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 			return true;
 		});
 
-	// TODO: Add render callback hooks for the new bitmap fonts.
+	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::InitUI);  // Just release all resources.
+	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::DXReset);  // Just release all resources.
+	zeal->callbacks->AddGeneric([this]() { render_ui(); }, callback_type::RenderUI);
 }
 
 NamePlate::~NamePlate()
 {
 }
+
+
 
 void NamePlate::parse_args(const std::vector<std::string>& args)
 {
@@ -81,8 +88,24 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"hideraidpets", &setting_hide_raid_pets },
 		{"targetmarker", &setting_target_marker },
 		{"targethealth", &setting_target_health },
+		{"targetblink", &setting_target_blink },
 		{"inlineguild", &setting_inline_guild },
+		{"zealfont", &setting_zeal_fonts },
+		{"dropshadow", &setting_drop_shadow },
 	};
+
+	if (args.size() == 2 && args[1] == "dump") {
+		if (sprite_font)
+			sprite_font->dump();
+		return;
+	}
+	if (args.size() == 3 && args[1] == "offset") {
+		float offset;
+		if (Zeal::String::tryParse(args[2], &offset)) {
+			z_position_offset = max(-1.f, min(25.f, offset));
+			return;
+		}
+	}
 
 	if (args.size() == 2 && command_map.find(args[1]) != command_map.end())
 	{
@@ -96,8 +119,105 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	}
 
 	Zeal::EqGame::print_chat("Usage: /nameplate option where option is one of");
-	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, charselect");
+	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, targetmarker, targethealth, inlineguild");
+	Zeal::EqGame::print_chat("font:  zealfont, dropshadow");
+}
+
+std::vector<std::string> NamePlate::get_available_fonts() const {
+	return BitmapFont::get_available_fonts();  // Note that we customize the "default" one.
+}
+
+// Loads the sprite font for real-time text rendering to screen.
+void NamePlate::load_sprite_font() {
+	if (sprite_font || !setting_zeal_fonts.get())
+		return;
+
+	IDirect3DDevice8* device = ZealService::get_instance()->dx->GetDevice();
+	if (device == nullptr)
+		return;
+
+	std::string font_filename = setting_fontname.get();
+	if (font_filename.empty() || font_filename == BitmapFont::kDefaultFontName)
+		font_filename = "arial_bold_24";
+
+	sprite_font = SpriteFont::create_sprite_font(*device, font_filename);
+	if (!sprite_font)
+		return;  // Let caller deal with the failure.
+	sprite_font->set_drop_shadow(setting_drop_shadow.get());
+	sprite_font->set_align_bottom(true);  // Bottom align for multi-line and font sizes.
+}
+
+void NamePlate::clean_ui()
+{
+	nameplate_info_map.clear();
+	sprite_font.reset(); // Relying on spritefont destructor to be invoked to release resources.
+}
+
+// Approximation for the client behavior. Exact formula is unknown.
+static float get_nameplate_z_offset(const Zeal::EqStructures::Entity& entity)
+{
+	return z_position_offset;
+
+#if 0  // Adonis formula (before fix to bottom alignment).
+	const float scale_factor = (entity.ActorInfo && entity.ActorInfo->ViewActor_) ?
+		entity.ActorInfo->ViewActor_->ScaleFactor : 1.f;
+	const float base_offset = entity.Height + entity.ModelHeightOffset;
+
+	if (scale_factor > 3)
+		return base_offset * 0.08f;
+	if (scale_factor > 2)
+		return base_offset * 0.1f;
+	if (scale_factor > 1)
+		return base_offset * 0.11f;
+	if (scale_factor > 0.8)
+		return base_offset * 0.12f;
+
+	return base_offset * 0.14f;
+#endif
+
+}
+
+
+void NamePlate::render_ui()
+{
+	if (!setting_zeal_fonts.get() || Zeal::EqGame::get_gamestate() != GAMESTATE_INGAME)
+		return;
+
+	if (!sprite_font)
+		load_sprite_font();
+	if (!sprite_font)
+	{
+		Zeal::EqGame::print_chat("Nameplate: Failed to load zeal fonts, disabling");
+		setting_zeal_fonts.set(false, false);  // Fallback to native nameplates.
+		if (ZealService::get_instance() && ZealService::get_instance()->ui
+			&& ZealService::get_instance()->ui->options)
+			ZealService::get_instance()->ui->options->UpdateOptionsNameplate();
+		return;
+	}
+
+	// Go through world visible list. 
+	const float kMaxDist = 400; // Quick testing of client extended nameplates was ~ 375.
+	auto visible_entities = Zeal::EqGame::get_world_visible_actor_list(kMaxDist, false);
+	if (*Zeal::EqGame::camera_view != Zeal::EqEnums::CameraView::FirstPerson)
+	visible_entities.push_back(Zeal::EqGame::get_self());  // Add self nameplate.
+		
+	std::vector<RenderInfo> render_list;
+	for (const auto& entity : visible_entities)
+	{
+		// Added Unknown0003 check due to some bad results with 0x05 at startup causing a crash.
+		if (!entity || entity->Unknown0000 != 0x03 || !entity->ActorInfo || !entity->ActorInfo->DagHeadPoint)
+			continue;
+		auto it = nameplate_info_map.find(entity);
+		if (it == nameplate_info_map.end())
+			continue;
+
+		NamePlateInfo& info = it->second;
+		Vec3 position = entity->ActorInfo->DagHeadPoint->Position;
+		position.z += get_nameplate_z_offset(*entity);
+		sprite_font->queue_string(info.text.c_str(), position, true, info.color | 0xff000000);
+	}
+	sprite_font->flush_queue_to_screen();
 }
 
 
@@ -180,9 +300,9 @@ NamePlate::ColorIndex NamePlate::get_color_index(const Zeal::EqStructures::Entit
 	if (Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT)
 		return setting_char_select.get() ? ColorIndex::Adventurer : ColorIndex::UseClient;
 
-	// Special handling for the current target since we want to leave the blinking indicator on it.
-	if (&entity == Zeal::EqGame::get_target())
-		return setting_target_color.get() ? ColorIndex::Target : ColorIndex::UseClient;
+	// Target setting overrides all other choices.
+	if (&entity == Zeal::EqGame::get_target() && setting_target_color.get())
+		return ColorIndex::Target;
 
 	// Otherwise tint based on entity Type and other properties.
 	auto color_index = ColorIndex::UseClient;
@@ -220,13 +340,37 @@ bool NamePlate::handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity)
 		return false;
 
 	auto color_index = get_color_index(*entity);
-	if (color_index == ColorIndex::UseClient)
+
+	bool zeal_fonts = setting_zeal_fonts.get() && Zeal::EqGame::get_gamestate() != GAMESTATE_CHARSELECT;
+	if (color_index == ColorIndex::UseClient && !zeal_fonts)
 		return false;
 
-	auto color = (color_index == ColorIndex::UseConsider) ? Zeal::EqGame::GetLevelCon(entity) :
-		ZealService::get_instance()->ui->options->GetColor(static_cast<int>(color_index));
+	auto color = D3DCOLOR_XRGB(128, 255, 255);  // Approximately the default nameplate color.
+	if (color_index == ColorIndex::UseConsider)
+		color = Zeal::EqGame::GetLevelCon(entity);
+	else if (color_index != ColorIndex::UseClient)
+		color = ZealService::get_instance()->ui->options->GetColor(static_cast<int>(color_index));
 
-	// TODO: If bitmap font nameplates, store the color rendering and skip the update.
+	if (entity == Zeal::EqGame::get_target() && setting_target_blink.get())
+	{
+		// Share the flash speed slider with the target_ring so they aren't beating.
+		float flash_speed = ZealService::get_instance()->target_ring->flash_speed.get();
+		float fade_factor = Zeal::EqGame::get_target_attack_fade_factor(flash_speed);
+		if (fade_factor < 1.0f) {
+			BYTE faded_red = static_cast<BYTE>(((color >> 16) & 0xFF) * fade_factor);
+			BYTE faded_green = static_cast<BYTE>(((color >> 8) & 0xFF) * fade_factor);
+			BYTE faded_blue = static_cast<BYTE>((color & 0xFF) * fade_factor);
+			color = D3DCOLOR_ARGB(0xff, faded_red, faded_green, faded_blue);
+		}
+	}
+
+	if (zeal_fonts) {
+		auto it = nameplate_info_map.find(entity);
+		if (it != nameplate_info_map.end())
+			it->second.color = color;
+		return true;
+	}
+
 	if (!entity->ActorInfo->DagHeadPoint->StringSprite ||
 		entity->ActorInfo->DagHeadPoint->StringSprite->MagicValue != Zeal::EqStructures::EQSTRINGSPRITE::kMagicValidValue)
 		return false;
@@ -248,13 +392,14 @@ bool NamePlate::is_nameplate_hidden_by_race(const Zeal::EqStructures::Entity& en
 	if (&entity == Zeal::EqGame::get_target())
 		return false;
 
-	if (entity.Race == 0xf4)
+	if (entity.Race == 0xf4)  // 0xf4 = "Ent"
 		return true;
 
 	auto animation = entity.ActorInfo->Animation;
-	if (entity.Race == 0x3c)
+	if (entity.Race == 0x3c)  // 0x3c = "Skeleton"
 		return !entity.PetOwnerSpawnId && (animation == 0x10 || animation == 0x21 || animation == 0x26);
 
+	// 0x1d = "Gargoyle", 0x34 = "Mimic", 0x118 = "Nightmare Gargoyle"
 	if (entity.Race == 0x1d || entity.Race == 0x34 || entity.Race == 0x118)
 		return (animation == 0x21 || animation == 0x26);
 
@@ -388,10 +533,21 @@ bool NamePlate::handle_SetNameSpriteState(void* this_display, Zeal::EqStructures
 	if (!world_display_started || !font_texture)
 		return false;
 
-	// TODO: If bitmap font nameplates, store the text for rendering and blank the StringSprite.
 	std::string text = generate_nameplate_text(*entity, show);
-	const char* sprite_text = text.empty() ? nullptr : text.c_str();
-	ChangeDagStringSprite(entity->ActorInfo->DagHeadPoint, font_texture, sprite_text);
+	const char* string_sprite_text = text.c_str();
+	if (setting_zeal_fonts.get() && Zeal::EqGame::get_gamestate() != GAMESTATE_CHARSELECT) {
+		if (!text.empty())
+			nameplate_info_map[entity] = { .text = text, .color = D3DCOLOR_XRGB(255,255,255)};
+		else {
+			auto it = nameplate_info_map.find(entity);
+			if (it != nameplate_info_map.end())
+				nameplate_info_map.erase(it);
+		}
+		string_sprite_text = nullptr;  // This disables the client's sprite in call below.
+	}
+
+	ChangeDagStringSprite(entity->ActorInfo->DagHeadPoint, font_texture, string_sprite_text);
+
 	if (!text.empty())
 		SetNameSpriteTint(this_display, nullptr, entity);
 	return true;

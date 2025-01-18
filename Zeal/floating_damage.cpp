@@ -173,16 +173,6 @@ void FloatingDamage::callback_deferred()
 		render_text();  // Bitmap fonts were disabled, so use the client CTextureFont.
 }
 
-// Simple helper calc that scales shadows with the font size.
-static int calc_shadow_offset(const std::unique_ptr<BitmapFont>& bitmap_font)
-{
-	if (!bitmap_font)
-		return 0;
-
-	int offset = static_cast<int>(bitmap_font->get_line_spacing() * 0.05f + 0.5f);
-	return max(1, offset);
-}
-
 void FloatingDamage::render_text()
 {
 	if (bitmap_font || Zeal::EqGame::get_wnd_manager())
@@ -190,7 +180,6 @@ void FloatingDamage::render_text()
 		Zeal::EqUI::CTextureFont* fnt = bitmap_font ? nullptr : Zeal::EqGame::get_wnd_manager()->GetFont(font_size);
 		if (bitmap_font || fnt)
 		{
-			int shadow_offset = calc_shadow_offset(bitmap_font);
 			std::vector<Zeal::EqStructures::Entity*> visible_ents = Zeal::EqGame::get_world_visible_actor_list(250, false);
 			Vec2 screen_size = ZealService::get_instance()->dx->GetScreenRect();
 			for (auto& [target, dmg_vec] : damage_numbers)
@@ -235,12 +224,8 @@ void FloatingDamage::render_text()
 							if (dmg.heal > 0)
 								color = 0xFFFF00FF;
 							if (bitmap_font)
-							{  // Draw with a black drop shadow.
-								bitmap_font->queue_string(dmg.str_dmg.c_str(), Vec2(screen_pos.y + dmg.x_offset + shadow_offset,
-									screen_pos.x + dmg.y_offset + shadow_offset), false, ModifyAlpha(0, dmg.opacity));
-								bitmap_font->queue_string(dmg.str_dmg.c_str(), Vec2(screen_pos.y + dmg.x_offset,
-									screen_pos.x + dmg.y_offset), false, ModifyAlpha(color, dmg.opacity));
-							}
+								bitmap_font->queue_string(dmg.str_dmg.c_str(), Vec3(screen_pos.y + dmg.x_offset,
+									screen_pos.x + dmg.y_offset, 0), false, ModifyAlpha(color, dmg.opacity));
 							else 
 								fnt->DrawWrappedText(dmg.str_dmg.c_str(),
 									Zeal::EqUI::CXRect((int)(screen_pos.x + dmg.y_offset),(int)(screen_pos.y + dmg.x_offset), (int)(screen_pos.x + 150),
@@ -416,6 +401,9 @@ void FloatingDamage::load_bitmap_font() {
 	if (!bitmap_font) {
 		Zeal::EqGame::print_chat("Failed to load font: %s", bitmap_font_filename.get().c_str());
 		bitmap_font_filename.set(kUseClientFontString);  // Disable attempts and use CTexture font.
+	}
+	else {
+		bitmap_font->set_drop_shadow(true);
 	}
 }
 

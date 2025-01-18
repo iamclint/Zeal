@@ -35,7 +35,7 @@ int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI
 	{
 		if (message == 0x1E && ui->clicked_button)
 		{
-			ui->clicked_button->TextColor.ARGB = data;
+			ui->clicked_button->TextColor.ARGB = data | 0xff000000;  // Ensure alpha = 0xff.
 			ui->options->SaveColors();
 		}
 	}
@@ -481,6 +481,22 @@ void ui_options::InitNameplate()
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetColor", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_color.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetMarker", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_marker.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetHealth", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_health.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetBlink", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_blink.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateZealFonts", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_zeal_fonts.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateDropShadow", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_drop_shadow.set(wnd->Checked); });
+
+	ui->AddComboCallback(wnd, "Zeal_NameplateFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
+		std::string font_name("");
+		if (value >= 0) {
+			Zeal::EqUI::CXSTR selected_name;
+			wnd->CmbListWnd->GetItemText(&selected_name, value, 0);
+			if (selected_name.Data) {
+				font_name = std::string(selected_name);
+				selected_name.FreeRep();
+			}
+		}
+		ZealService::get_instance()->nameplate->setting_fontname.set(font_name);
+		});
 }
 
 void ui_options::UpdateOptions()
@@ -581,6 +597,12 @@ void ui_options::UpdateOptionsNameplate()
 	ui->SetChecked("Zeal_NameplateTargetColor", ZealService::get_instance()->nameplate->setting_target_color.get());
 	ui->SetChecked("Zeal_NameplateTargetMarker", ZealService::get_instance()->nameplate->setting_target_marker.get());
 	ui->SetChecked("Zeal_NameplateTargetHealth", ZealService::get_instance()->nameplate->setting_target_health.get());
+	ui->SetChecked("Zeal_NameplateTargetBlink", ZealService::get_instance()->nameplate->setting_target_blink.get());
+	ui->SetChecked("Zeal_NameplateZealFonts", ZealService::get_instance()->nameplate->setting_zeal_fonts.get());
+	ui->SetChecked("Zeal_NameplateDropShadow", ZealService::get_instance()->nameplate->setting_drop_shadow.get());
+
+	std::string current_font = ZealService::get_instance()->nameplate->setting_fontname.get();
+	UpdateComboBox("Zeal_NameplateFont_Combobox", current_font, BitmapFont::kDefaultFontName);
 }
 
 void ui_options::UpdateOptionsFloatingDamage()
@@ -705,6 +727,16 @@ void ui_options::UpdateDynamicUI() {
 		cmb->DeleteAll();
 		ZealService::get_instance()->ui->AddListItems(cmb, fonts);
 	}
+
+	cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_NameplateFont_Combobox");
+	if (cmb) {
+		std::vector<std::string> fonts = ZealService::get_instance()->nameplate->get_available_fonts();
+		if (fonts.size() > kMaxComboBoxItems)
+			fonts.resize(kMaxComboBoxItems);
+		cmb->DeleteAll();
+		ZealService::get_instance()->ui->AddListItems(cmb, fonts);
+	}
+
 }
 
 void ui_options::CleanDynamicUI() {
@@ -712,7 +744,7 @@ void ui_options::CleanDynamicUI() {
 		return;
 
 	std::vector<std::string> box_list = { "Zeal_TargetRingTexture_Combobox", "Zeal_MapFont_Combobox",
-											"Zeal_FloatingFont_Combobox"};
+											"Zeal_FloatingFont_Combobox", "Zeal_NameplateFont_Combobox"};
 	for (const auto& box_name : box_list) {
 		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem(box_name.c_str());
 		if (cmb)

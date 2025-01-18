@@ -812,9 +812,9 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
         label_x = max(view_left + half_width, min(view_right - half_width, label_x));
         label_y = max(view_top + half_height, min(view_bottom - half_height, label_y));
     }
-    bitmap_font->queue_string(short_label, Vec2(label_x, label_y), true, font_color);
+    bitmap_font->queue_string(short_label, Vec3(label_x, label_y, 0), true, font_color);
     if (label_type == LabelType::AddMarker)
-        bitmap_font->queue_string("+", Vec2(label_screen[0], label_screen[1]), true, font_color);
+        bitmap_font->queue_string("+", Vec3(label_screen[0], label_screen[1], 0), true, font_color);
 }
 
 // Resets the mouse state to an idle state.
