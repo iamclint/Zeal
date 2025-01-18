@@ -4,7 +4,500 @@
 <!-- Zeal Nameplates -->
   <Button item="Zeal_NameplateColors">
     <ScreenID>Zeal_NameplateColors</ScreenID>
+    <RelativePosition>true</RelativePosi<?xml version="1.0" encoding="us-ascii"?>
+<XML ID="EQInterfaceDefinitionLanguage">
+  <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
+<!-- Zeal Nameplates -->
+  <Button item="Zeal_NameplateColors">
+    <ScreenID>Zeal_NameplateColors</ScreenID>
     <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>24</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Adds custom coloring to player nameplates, choose from Zeal Colors tab</TooltipReference>
+    <Text>Player Name Colors</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+    <Button item="Zeal_NameplateConColors">
+    <ScreenID>Zeal_NameplateConColors</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>46</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Renders npc names in the color of your con</TooltipReference>
+    <Text>NPC Name Con Colors</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+<Button item="Zeal_NameplateHideSelf">
+    <ScreenID>Zeal_NameplateHideSelf</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>68</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Toggle Self Nameplate</TooltipReference>
+    <Text>Hide Player Name</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+<Button item="Zeal_NameplateX">
+    <ScreenID>Zeal_NameplateX</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>90</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Render Self Nameplate as X</TooltipReference>
+    <Text>Show Player Name as X</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+<Button item="Zeal_NameplateHideRaidPets">
+    <ScreenID>Zeal_NameplateHideRaidPets</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>112</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Toggle Raid Pet Nameplates</TooltipReference>
+    <Text>Hide Raid Pets Names</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+<Button item="Zeal_NameplateShowPetOwnerName">
+    <ScreenID>Zeal_NameplateShowPetOwnerName</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>134</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Show Pet Owner Names for Players</TooltipReference>
+    <Text>Show Pet Owner Names</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+<Button item="Zeal_NameplateCharSelect">
+    <ScreenID>Zeal_NameplateCharSelect</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>156</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Show Nameplate Options at Character Selection Screen</TooltipReference>
+    <Text>Character Select Screen</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+  <Button item="Zeal_NameplateInlineGuild">
+    <ScreenID>Zeal_NameplateInlineGuild</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>178</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Toggle inline guild name</TooltipReference>
+    <Text>Inline guild name</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+	<Button item="Zeal_NameplateTargetColor">
+    <ScreenID>Zeal_NameplateTargetColor</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>200</X>
+      <Y>24</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Renders target name in the color of your choice</TooltipReference>
+    <Text>Show Target Name Color</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+    <Button item="Zeal_NameplateTargetMarker">
+    <ScreenID>Zeal_NameplateTargetMarker</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>200</X>
+      <Y>46</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Adds markers to target name for better visibility</TooltipReference>
+    <Text>Show Target Name Marker</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+<Button item="Zeal_NameplateTargetHealth">
+    <ScreenID>Zeal_NameplateTargetHealth</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>200</X>
+      <Y>68</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Shows target health in target name</TooltipReference>
+    <Text>Show Target Name Health</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+	<Button item="Zeal_NameplateTargetBlink">
+		<ScreenID>Zeal_NameplateTargetBlink</ScreenID>
+		<RelativePosition>true</RelativePosition>
+		<Location>
+			<X>200</X>
+			<Y>90</Y>
+		</Location>
+		<Size>
+			<CX>150</CX>
+			<CY>20</CY>
+		</Size>
+		<Style_VScroll>false</Style_VScroll>
+		<Style_HScroll>false</Style_HScroll>
+		<Style_Transparent>false</Style_Transparent>
+		<Style_Checkbox>true</Style_Checkbox>
+		<TooltipReference>Uses targetring rate slider</TooltipReference>
+		<Text>Target autoattack indicator</Text>
+		<TextColor>
+			<R>255</R>
+			<G>255</G>
+			<B>255</B>
+		</TextColor>
+		<ButtonDrawTemplate>
+			<Normal>A_BtnNormal</Normal>
+			<Pressed>A_BtnPressed</Pressed>
+			<Flyby>A_BtnFlyby</Flyby>
+			<Disabled>A_BtnDisabled</Disabled>
+			<PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+		</ButtonDrawTemplate>
+	</Button>
+	<Button item="Zeal_NameplateZealFonts">
+		<ScreenID>Zeal_NameplateZealFonts</ScreenID>
+		<RelativePosition>true</RelativePosition>
+		<Location>
+			<X>200</X>
+			<Y>134</Y>
+		</Location>
+		<Size>
+			<CX>150</CX>
+			<CY>20</CY>
+		</Size>
+		<Style_VScroll>false</Style_VScroll>
+		<Style_HScroll>false</Style_HScroll>
+		<Style_Transparent>false</Style_Transparent>
+		<Style_Checkbox>true</Style_Checkbox>
+		<TooltipReference>Toggle use of zeal fonts for nameplate</TooltipReference>
+		<Text>Zeal fonts</Text>
+		<TextColor>
+			<R>255</R>
+			<G>255</G>
+			<B>255</B>
+		</TextColor>
+		<ButtonDrawTemplate>
+			<Normal>A_BtnNormal</Normal>
+			<Pressed>A_BtnPressed</Pressed>
+			<Flyby>A_BtnFlyby</Flyby>
+			<Disabled>A_BtnDisabled</Disabled>
+			<PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+		</ButtonDrawTemplate>
+	</Button>
+	<!-- Font Combobox -->
+	<Combobox item="Zeal_NameplateFont_Combobox">
+		<ScreenID>Zeal_NameplateFont_Combobox</ScreenID>
+		<DrawTemplate>WDT_Inner</DrawTemplate>
+		<Location>
+			<X>200</X>
+			<Y>156</Y>
+		</Location>
+		<Size>
+			<CX>150</CX>
+			<CY>24</CY>
+		</Size>
+		<TextColor>
+			<R>255</R>
+			<G>255</G>
+			<B>255</B>
+		</TextColor>
+		<ListHeight>70</ListHeight>
+		<Button>BDT_Combo</Button>
+		<Style_Border>true</Style_Border>
+		<Choices>default</Choices>
+	</Combobox>
+	<Button item="Zeal_NameplateDropShadow">
+		<ScreenID>Zeal_NameplateDropShadow</ScreenID>
+		<RelativePosition>true</RelativePosition>
+		<Location>
+			<X>200</X>
+			<Y>182</Y>
+		</Location>
+		<Size>
+			<CX>150</CX>
+			<CY>20</CY>
+		</Size>
+		<Style_VScroll>false</Style_VScroll>
+		<Style_HScroll>false</Style_HScroll>
+		<Style_Transparent>false</Style_Transparent>
+		<Style_Checkbox>true</Style_Checkbox>
+		<TooltipReference>Enable font drop shadow</TooltipReference>
+		<Text>Add drop shadow</Text>
+		<TextColor>
+			<R>255</R>
+			<G>255</G>
+			<B>255</B>
+		</TextColor>
+		<ButtonDrawTemplate>
+			<Normal>A_BtnNormal</Normal>
+			<Pressed>A_BtnPressed</Pressed>
+			<Flyby>A_BtnFlyby</Flyby>
+			<Disabled>A_BtnDisabled</Disabled>
+			<PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+		</ButtonDrawTemplate>
+	</Button>
+	
+	<Page item="Tab_Nameplate">
+    <ScreenID>Tab_Nameplate</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <!-- Pages are sized and positioned by their parent tab -->
+    <Style_VScroll>true</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <DrawTemplate>WDT_Def</DrawTemplate>
+    <TabText>Nameplate</TabText>
+    <TabTextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TabTextColor>
+    <TabTextActiveColor>
+      <R>255</R>
+      <G>255</G>
+      <B>0</B>
+    </TabTextActiveColor>
+    <Style_Sizable>true</Style_Sizable>
+	<Pieces>Zeal_NameplateColors</Pieces>
+	<Pieces>Zeal_NameplateConColors</Pieces>
+	<Pieces>Zeal_NameplateHideSelf</Pieces>
+	<Pieces>Zeal_NameplateX</Pieces>
+	<Pieces>Zeal_NameplateHideRaidPets</Pieces>
+	<Pieces>Zeal_NameplateCharSelect</Pieces>
+	<Pieces>Zeal_NameplateInlineGuild</Pieces>
+	<Pieces>Zeal_NameplateTargetColor</Pieces>
+	<Pieces>Zeal_NameplateTargetMarker</Pieces>
+	<Pieces>Zeal_NameplateTargetHealth</Pieces>
+	<Pieces>Zeal_NameplateTargetBlink</Pieces>
+	<Pieces>Zeal_NameplateZealFonts</Pieces>
+	<Pieces>Zeal_NameplateDropShadow</Pieces>
+	<Pieces>Zeal_NameplateFont_Combobox</Pieces>
+	<Pieces>Zeal_NameplateShowPetOwnerName</Pieces>
+		
+		<Location>
+      <X>0</X>
+      <Y>22</Y>
+    </Location>
+    <Size>
+      <CX>380</CX>
+      <CY>339</CY>
+    </Size>
+  </Page>
+  </XML>
+tion>
     <Location>
       <X>10</X>
       <Y>24</Y>
