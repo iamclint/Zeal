@@ -332,6 +332,67 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+<Button item="Zeal_NameplateExtended">
+    <ScreenID>Zeal_NameplateExtended</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>200</X>
+      <Y>90</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Extends the range of the nameplate rendering in default eq</TooltipReference>
+    <Text>Extended Range</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+    <Page item="Tab_Nameplate">
+	<Button item="Zeal_NameplateTargetBlink">
+		<ScreenID>Zeal_NameplateTargetBlink</ScreenID>
+		<RelativePosition>true</RelativePosition>
+		<Location>
+			<X>200</X>
+			<Y>90</Y>
+		</Location>
+		<Size>
+			<CX>150</CX>
+			<CY>20</CY>
+		</Size>
+		<Style_VScroll>false</Style_VScroll>
+		<Style_HScroll>false</Style_HScroll>
+		<Style_Transparent>false</Style_Transparent>
+		<Style_Checkbox>true</Style_Checkbox>
+		<TooltipReference>Blink rate set by TargetRing rate slider</TooltipReference>
+		<Text>Enable target blinking</Text>
+		<TextColor>
+			<R>255</R>
+			<G>255</G>
+			<B>255</B>
+		</TextColor>
+		<ButtonDrawTemplate>
+			<Normal>A_BtnNormal</Normal>
+			<Pressed>A_BtnPressed</Pressed>
+			<Flyby>A_BtnFlyby</Flyby>
+			<Disabled>A_BtnDisabled</Disabled>
+			<PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+		</ButtonDrawTemplate>
+	</Button>
   <Button item="Zeal_NameplateTargetBlink">
     <ScreenID>Zeal_NameplateTargetBlink</ScreenID>
     <RelativePosition>true</RelativePosition>
@@ -544,6 +605,26 @@
     <Pieces>Zeal_NameplateShowPetOwnerName</Pieces>
 
     <Location>
+	<Pieces>Zeal_NameplateColors</Pieces>
+	<Pieces>Zeal_NameplateConColors</Pieces>
+	<Pieces>Zeal_NameplateHideSelf</Pieces>
+	<Pieces>Zeal_NameplateX</Pieces>
+	<Pieces>Zeal_NameplateHideRaidPets</Pieces>
+	<Pieces>Zeal_NameplateCharSelect</Pieces>
+	<Pieces>Zeal_NameplateInlineGuild</Pieces>
+	<Pieces>Zeal_NameplateTargetColor</Pieces>
+	<Pieces>Zeal_NameplateTargetMarker</Pieces>
+	<Pieces>Zeal_NameplateTargetHealth</Pieces>
+	<Pieces>Zeal_NameplateExtended</Pieces>
+    <Location>
+	<Pieces>Zeal_NameplateTargetBlink</Pieces>
+  <Pieces>Zeal_NameplateAttackOnly</Pieces>
+  <Pieces>Zeal_NameplateZealFonts</Pieces>
+	<Pieces>Zeal_NameplateDropShadow</Pieces>
+	<Pieces>Zeal_NameplateFont_Combobox</Pieces>
+	<Pieces>Zeal_NameplateShowPetOwnerName</Pieces>
+		
+		<Location>
       <X>0</X>
       <Y>22</Y>
     </Location>

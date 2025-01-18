@@ -99,7 +99,7 @@ int __fastcall BuffWindow_PostDraw(Zeal::EqUI::BuffWindow* this_ptr, void* not_u
 				std::string orig = buffButtonWnd->ToolTipText.Data->Text;
 				buffButtonWnd->ToolTipText.Set(buffTimeText);
 				Zeal::EqUI::CXRect relativeRect = buffButtonWnd->GetScreenRect();
-				buffButtonWnd->DrawTooltipAtPoint(relativeRect.Left-1, relativeRect.Top+2);
+				buffButtonWnd->DrawTooltipAtPoint(relativeRect.Left, relativeRect.Top);
 				buffButtonWnd->ToolTipText.Set(orig);
 		}
 	}

@@ -493,6 +493,8 @@ void ui_options::InitNameplate()
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetColor", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_color.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetMarker", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_marker.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetHealth", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_health.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateExtended", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_extended_nameplate.set(wnd->Checked); });
+}
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetBlink", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_blink.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateAttackOnly", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_attack_only.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateZealFonts", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_zeal_fonts.set(wnd->Checked); });
@@ -620,6 +622,7 @@ void ui_options::UpdateOptionsNameplate()
 	ui->SetChecked("Zeal_NameplateTargetColor", ZealService::get_instance()->nameplate->setting_target_color.get());
 	ui->SetChecked("Zeal_NameplateTargetMarker", ZealService::get_instance()->nameplate->setting_target_marker.get());
 	ui->SetChecked("Zeal_NameplateTargetHealth", ZealService::get_instance()->nameplate->setting_target_health.get());
+	ui->SetChecked("Zeal_NameplateExtended", ZealService::get_instance()->nameplate->setting_extended_nameplate.get());
 	ui->SetChecked("Zeal_NameplateTargetBlink", ZealService::get_instance()->nameplate->setting_target_blink.get());
 	ui->SetChecked("Zeal_NameplateAttackOnly", ZealService::get_instance()->nameplate->setting_attack_only.get());
 	ui->SetChecked("Zeal_NameplateZealFonts", ZealService::get_instance()->nameplate->setting_zeal_fonts.get());

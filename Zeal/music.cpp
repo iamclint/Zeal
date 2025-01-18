@@ -89,7 +89,7 @@ int __fastcall MusicManager_Play(int pthis, int unused, int trackIdx, int bStart
 			else if (bStartStop == 0)
 			{
 				trackIdx = g_curMusicTrack;
-				g_LastMusicStop = GetTickCount();
+				g_LastMusicStop = tickCount;
 			}
 		}
 	}

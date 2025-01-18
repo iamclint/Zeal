@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "EqStructures.h"
 #include "ZealSettings.h"
+#
 #include "bitmap_font.h"
 
 class NamePlate
@@ -48,6 +49,8 @@ public:
 	ZealSetting<bool> setting_target_blink = { true, "Zeal", "NameplateTargetBlink", false };
 	ZealSetting<bool> setting_attack_only = { false, "Zeal", "NameplateAttackOnly", false };
 	ZealSetting<bool> setting_inline_guild = { false, "Zeal", "NameplateInlineGuild", false };
+	
+	ZealSetting<bool> setting_extended_nameplate = { true, "Zeal", "NameplateExtended", false, [this](bool& val) { mem::write<BYTE>(0x4B0B3D, val ? 0 : 1); }, true };
 
 	// Advanced fonts
 	ZealSetting<bool> setting_health_bars = { false, "Zeal", "NameplateHealthBars", false };

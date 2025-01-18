@@ -50,7 +50,7 @@ static int __fastcall SetNameSpriteTint_UpdateState(void* this_display, void* no
 
 NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 {
-	mem::write<byte>(0x4B0B3D, 0); //arg 2 for SetStringSpriteYonClip (extended nameplate)
+	//mem::write<byte>(0x4B0B3D, 0); //arg 2 for SetStringSpriteYonClip (extended nameplate)
 
 	zeal->hooks->Add("SetNameSpriteState", 0x4B0BD9, SetNameSpriteState, hook_type_detour);
 	zeal->hooks->Add("SetNameSpriteTint", 0x4B114D, SetNameSpriteTint, hook_type_detour);
