@@ -42,6 +42,7 @@ public:
 	ZealSetting<bool> setting_hide_self = { false, "Zeal", "NameplateHideSelf", false };
 	ZealSetting<bool> setting_x = { false, "Zeal", "NameplateX", false };
 	ZealSetting<bool> setting_hide_raid_pets = { false, "Zeal", "NameplateHideRaidPets", false };
+	ZealSetting<bool> setting_show_pet_owner_name = { false, "Zeal", "NameplateShowPetOwnerName", false };
 	ZealSetting<bool> setting_target_marker = { false, "Zeal", "NameplateTargetMarker", false };
 	ZealSetting<bool> setting_target_health = { false, "Zeal", "NameplateTargetHealth", false };
 	ZealSetting<bool> setting_target_blink = { false, "Zeal", "NameplateTargetBlink", false };
