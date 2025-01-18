@@ -62,6 +62,7 @@ public:
 	ZealSetting<bool> attack_indicator = { false, "TargetRing", "AttackIndicator", true };
 	ZealSetting<bool> rotate_match_heading = { false, "TargetRing", "MatchHeading", true };
 	ZealSetting<bool> use_cone = { false, "TargetRing", "Cone", true };
+	ZealSetting<bool> target_color = { false, "TargetRing", "TargetColor", true };
 	ZealSetting<float> inner_percent = { 0.50f, "TargetRing", "InnerSize", true };
 	ZealSetting<float> outer_size = { 10.0f, "TargetRing", "Size", true };
 	ZealSetting<float> rotation_speed = { 1.0f, "TargetRing", "RotateSpeed", true };

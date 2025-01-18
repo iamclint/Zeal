@@ -414,6 +414,7 @@ void ui_options::InitTargetRing()
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingAttackIndicator", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->attack_indicator.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingForward", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->rotate_match_heading.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingCone", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->target_ring->use_cone.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingColor", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->target_ring->target_color.set(wnd->Checked); });
 	
 	ui->AddComboCallback(wnd, "Zeal_TargetRingTexture_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		if (value >= 0)
@@ -565,6 +566,7 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetChecked("Zeal_TargetRingAttackIndicator", ZealService::get_instance()->target_ring->attack_indicator.get());
 	ui->SetChecked("Zeal_TargetRingForward", ZealService::get_instance()->target_ring->rotate_match_heading.get());
 	ui->SetChecked("Zeal_TargetRingCone", ZealService::get_instance()->target_ring->use_cone.get());
+	ui->SetChecked("Zeal_TargetRingColor", ZealService::get_instance()->target_ring->target_color.get());
 	ui->SetSliderValue("Zeal_TargetRingFill_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->inner_percent.get(), 0, 1, ui->GetSlider("Zeal_TargetRingFill_Slider")));
 	ui->SetSliderValue("Zeal_TargetRingSize_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->outer_size.get(), 0, 20, ui->GetSlider("Zeal_TargetRingSize_Slider")));
 	ui->SetSliderValue("Zeal_TargetRingRotation_Slider", ScaleFloatToSlider(ZealService::get_instance()->target_ring->rotation_speed.get(), -1, 1, ui->GetSlider("Zeal_TargetRingSize_Slider")));
