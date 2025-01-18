@@ -477,6 +477,7 @@ void ui_options::InitNameplate()
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateHideSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_hide_self.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateX", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_x.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateHideRaidPets", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_hide_raid_pets.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_NameplateShowPetOwnerName", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_show_pet_owner_name.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateCharSelect", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_char_select.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateInlineGuild", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_inline_guild.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetColor", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_color.set(wnd->Checked); });
@@ -594,6 +595,7 @@ void ui_options::UpdateOptionsNameplate()
 	ui->SetChecked("Zeal_NameplateHideSelf", ZealService::get_instance()->nameplate->setting_hide_self.get());
 	ui->SetChecked("Zeal_NameplateX", ZealService::get_instance()->nameplate->setting_x.get());
 	ui->SetChecked("Zeal_NameplateHideRaidPets", ZealService::get_instance()->nameplate->setting_hide_raid_pets.get());
+	ui->SetChecked("Zeal_NameplateShowPetOwnerName", ZealService::get_instance()->nameplate->setting_show_pet_owner_name.get());
 	ui->SetChecked("Zeal_NameplateCharSelect", ZealService::get_instance()->nameplate->setting_char_select.get());
 	ui->SetChecked("Zeal_NameplateInlineGuild", ZealService::get_instance()->nameplate->setting_inline_guild.get());
 	ui->SetChecked("Zeal_NameplateTargetColor", ZealService::get_instance()->nameplate->setting_target_color.get());
