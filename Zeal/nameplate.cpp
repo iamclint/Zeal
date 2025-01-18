@@ -12,6 +12,8 @@
 // - Options mixed with guilds, raids, and pets
 // - Tab cycle targeting updates of text and tint
 
+static float z_position_offset = 1.5f; // Static global to allow parse overrides during evaluation.
+
 static void ChangeDagStringSprite(Zeal::EqStructures::EQDAGINFO* dag, int fontTexture, const char* str)
 {
 	reinterpret_cast<int(__thiscall*)(void* _this_ptr, Zeal::EqStructures::EQDAGINFO * dag, int fontTexture, const char* text)>(0x4B0AA8)(*(void**)0x7F9510, dag, fontTexture, str);
@@ -72,6 +74,8 @@ NamePlate::~NamePlate()
 {
 }
 
+
+
 void NamePlate::parse_args(const std::vector<std::string>& args)
 {
 	static std::unordered_map<std::string, ZealSetting<bool>*> command_map = {
@@ -95,6 +99,14 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 			sprite_font->dump();
 		return;
 	}
+	if (args.size() == 3 && args[1] == "offset") {
+		float offset;
+		if (Zeal::String::tryParse(args[2], &offset)) {
+			z_position_offset = max(-1.f, min(25.f, offset));
+			return;
+		}
+	}
+
 	if (args.size() == 2 && command_map.find(args[1]) != command_map.end())
 	{
 		auto setting = command_map[args[1]];
@@ -142,6 +154,30 @@ void NamePlate::clean_ui()
 	sprite_font.reset(); // Relying on spritefont destructor to be invoked to release resources.
 }
 
+// Approximation for the client behavior. Exact formula is unknown.
+static float get_nameplate_z_offset(const Zeal::EqStructures::Entity& entity)
+{
+	return z_position_offset;
+
+#if 0  // Adonis formula (before fix to bottom alignment).
+	const float scale_factor = (entity.ActorInfo && entity.ActorInfo->ViewActor_) ?
+		entity.ActorInfo->ViewActor_->ScaleFactor : 1.f;
+	const float base_offset = entity.Height + entity.ModelHeightOffset;
+
+	if (scale_factor > 3)
+		return base_offset * 0.08f;
+	if (scale_factor > 2)
+		return base_offset * 0.1f;
+	if (scale_factor > 1)
+		return base_offset * 0.11f;
+	if (scale_factor > 0.8)
+		return base_offset * 0.12f;
+
+	return base_offset * 0.14f;
+#endif
+
+}
+
 
 void NamePlate::render_ui()
 {
@@ -178,7 +214,7 @@ void NamePlate::render_ui()
 
 		NamePlateInfo& info = it->second;
 		Vec3 position = entity->ActorInfo->DagHeadPoint->Position;
-		position.z += entity->ModelHeightOffset * 0.5f; // TODO: Does not exactly match client.
+		position.z += get_nameplate_z_offset(*entity);
 		sprite_font->queue_string(info.text.c_str(), position, true, info.color | 0xff000000);
 	}
 	sprite_font->flush_queue_to_screen();

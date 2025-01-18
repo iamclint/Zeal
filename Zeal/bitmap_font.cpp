@@ -433,7 +433,7 @@ Vec2 BitmapFontBase::measure_string(const char* text) const
     for_each_glyph(text,
         [&](Glyph const* glyph, float x, float y) {
             auto const w = static_cast<float>(glyph->sub_rect.right - glyph->sub_rect.left);
-            auto h = static_cast<float>(glyph->sub_rect.bottom - glyph->sub_rect.top) + glyph->y_offset;
+            auto h = static_cast<float>(glyph->sub_rect.bottom - glyph->sub_rect.top);
             result = Vec2(std::max(result.x, x + w), std::max(result.y, y + h));
         });
 
