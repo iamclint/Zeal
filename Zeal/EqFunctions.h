@@ -68,7 +68,12 @@ namespace Zeal
 			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;
 			static mem::function<bool __cdecl()> IsNoSlashWndActive = 0x00545bbd;  // Returns false if merchant, loot, trade, and bank windows are not activated.
 			static mem::function<bool __cdecl()> IsPlayerABardAndSingingASong = 0x0040a74a;  // Does internal pointer checking.
+			static mem::function<int __fastcall(void* this_raid, int unused_edx, const char*)> send_raid_chat = 0x0049e2e8;  // CRaid::SendRaidChat()
 			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_say = 0x4f8172;
+			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_guildsay = 0x004f4bd1;
+			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_gsay = 0x004f82a8;
+			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_auction = 0x004f8325;
+			static mem::function<int __cdecl(Zeal::EqStructures::Entity*, const char*)> do_ooc = 0x004f8346;
 			static mem::function<float __fastcall(int, int)> encum_factor = 0x4bb9c7;
 			static mem::function<float __fastcall(int, int, int, int)> OpenContainer = 0x4168bd;
 			static mem::function<float __fastcall(int, int)> CloseAllContainers = 0x416a43;
@@ -156,6 +161,7 @@ namespace Zeal
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable = true);
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor);
 		bool can_target(Zeal::EqStructures::Entity* ent);
+		float get_target_attack_fade_factor(float speed_factor);  // Returns 0 to 1.0f if autoattacking.
 		bool is_view_actor_me();
 		void print_chat_hook(const char* format, ...);
 		void print_chat(std::string data);
@@ -201,6 +207,11 @@ namespace Zeal
 		bool is_in_game();
 		void do_say(bool hide_local, const char* format, ...);
 		void do_say(bool hide_local, std::string data);
+		void do_gsay(std::string data);
+		void do_guildsay(std::string data);
+		void do_auction(std::string data);
+		void do_ooc(std::string data);
+		void send_raid_chat(std::string data);
 		int get_region_from_pos(Vec3* pos);
 		EqUI::CXWndManager* get_wnd_manager();
 		std::vector<Zeal::EqStructures::RaidMember*> get_raid_list();

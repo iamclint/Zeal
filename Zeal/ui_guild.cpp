@@ -46,7 +46,7 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 						members->GetItemText(&name, i, 0);
 						members->GetItemText(&level, i, 1);
 						members->GetItemText(&_class, i, 2);
-						Zeal::EqGame::print_chat("%s %s %s", name.Data->Text, level.Data->Text, _class.Data->Text);
+						Zeal::EqGame::print_chat("%s %s %s", name.CastToCharPtr(), level.CastToCharPtr(), _class.CastToCharPtr());
 					}
 				}
 				return true;

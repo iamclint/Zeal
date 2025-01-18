@@ -392,8 +392,6 @@ void TargetRing::callback_render() {
 		return;
 	float radius = 10.f;// Zeal::EqGame::CalcCombatRange(Zeal::EqGame::get_self(), target);
 
-	ULONGLONG currentTime = GetTickCount64(); // Get the current time in milliseconds
-
 	// ### Target Ring Color ###
 	DWORD originalColor;
 	if (target_color.get())
@@ -410,32 +408,25 @@ void TargetRing::callback_render() {
 	static ULONGLONG lastColorChanged = 0; // Store the last time the color was changed
 
 	// ### Auto Attack Indicator (fade/unfade target's color while autoattack turned on)###
-	if ((bool)(*(BYTE*)0x7f6ffe) && attack_indicator.get()) // auto attack is enabled
+	if (attack_indicator.get()) // auto attack is enabled
 	{
-		if (currentTime - lastColorChanged >= (300.f * flash_speed.get())) // Reset the timer every 300ms
-			lastColorChanged = currentTime;
+		float fadeFactor = Zeal::EqGame::get_target_attack_fade_factor(flash_speed.get());
+		if (fadeFactor < 1.0f) {
+			// Extract the ARGB components from the original color
+			BYTE originalA = (originalColor >> 24) & 0xFF;
+			BYTE originalR = (originalColor >> 16) & 0xFF;
+			BYTE originalG = (originalColor >> 8) & 0xFF;
+			BYTE originalB = originalColor & 0xFF;
 
-		float elapsedTime = (currentTime - lastColorChanged) / (300.0f * flash_speed.get()); // Get the time elapsed in the current cycle as a fraction
-		float fadeFactor;
-		if (elapsedTime < 0.5f)
-			fadeFactor = elapsedTime * 2; // Fade in during the first half of the cycle
-		else
-			fadeFactor = (1.0f - elapsedTime) * 2; // Fade out during the second half of the cycle
+			// Calculate the faded color components
+			BYTE fadedA = originalA; // Keep the original alpha value
+			BYTE fadedR = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalR);
+			BYTE fadedG = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalG);
+			BYTE fadedB = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalB);
 
-		// Extract the ARGB components from the original color
-		BYTE originalA = (originalColor >> 24) & 0xFF;
-		BYTE originalR = (originalColor >> 16) & 0xFF;
-		BYTE originalG = (originalColor >> 8) & 0xFF;
-		BYTE originalB = originalColor & 0xFF;
-
-		// Calculate the faded color components
-		BYTE fadedA = originalA; // Keep the original alpha value
-		BYTE fadedR = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalR);
-		BYTE fadedG = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalG);
-		BYTE fadedB = (BYTE)((1.0f - fadeFactor) * 0x00 + fadeFactor * originalB);
-
-		// Set the color with the faded components
-		Color = D3DCOLOR_ARGB(fadedA, fadedR, fadedG, fadedB);
+			// Set the color with the faded components
+			Color = D3DCOLOR_ARGB(fadedA, fadedR, fadedG, fadedB);
+		}
 	}
 
 	if (targetRingTexture) {

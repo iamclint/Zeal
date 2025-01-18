@@ -4,6 +4,7 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include <algorithm>
+#include "string_util.h"
 
 void ItemDisplay::InitUI()
 {
@@ -20,10 +21,6 @@ void ItemDisplay::InitUI()
 		}
 		windows.push_back(new_wnd);
 		// new_wnd->SetupCustomVTable();  // Re-enable this and the deleter if custom vtables are required.
-		new_wnd->Location.Top += 20 * (i + 1);
-		new_wnd->Location.Left += 20 * (i + 1);
-		new_wnd->Location.Bottom += 20 * (i + 1);
-		new_wnd->Location.Right += 20 * (i + 1);
 
 		// For an unclear reason the constructor above is not configuring the window relationships
 		// correctly, which causes the ItemDescription window to pop above the IconBtn when clicked.
@@ -35,6 +32,13 @@ void ItemDisplay::InitUI()
 		new_wnd->ItemDescription->HasSiblings = true;
 		new_wnd->IconBtn->HasChildren = true;
 		new_wnd->IconBtn->HasSiblings = true;
+
+		// Set up independent ini settings for these new windows and reload using the new name.
+		new_wnd->EnableINIStorage = 0x19;  // Magic value to use the INIStorageName.
+		new_wnd->INIStorageName = Zeal::EqUI::CXSTR(std::format("ZealItemDisplay{}", i).c_str());
+		auto vtable = static_cast<Zeal::EqUI::ItemDisplayVTable*>(new_wnd->vtbl);
+		auto load_ini = reinterpret_cast<void(__fastcall*)(Zeal::EqUI::ItemDisplayWnd*, int unused)>(vtable->LoadIniInfo);
+		load_ini(new_wnd, 0);
 	}
 }
 
@@ -85,22 +89,6 @@ static std::string CopperToAll(unsigned long long copper) {
 	return result.str();
 }
 
-// C++ could really use a std split() function.
-static std::vector<std::string> split_text(const std::string& input, const std::string& delimiter = "\n")
-{
-	std::vector<std::string> strings;
-	size_t start = 0;
-	size_t end = 0;
-	while (end != std::string::npos && start < input.size())
-	{
-		end = input.find(delimiter, start);
-		size_t count = (end == std::string::npos) ? std::string::npos : end - start;
-		strings.push_back(input.substr(start, count));
-		start = end + delimiter.size();
-	}
-	return strings;
-}
-
 static std::string GetSpellClassLevels(const Zeal::EqStructures::_EQITEMINFO& item, const std::string& original) {
 	if (item.Type != 0 || item.Common.Skill != 0x14)
 		return original;
@@ -138,7 +126,7 @@ static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructure
 
 	// Split the existing text into separate lines, release it, and then update line by line.
 	const std::string stml_line_break = "<BR>";
-	auto strings = split_text(std::string(wnd->DisplayText), stml_line_break);
+	auto strings = Zeal::String::split_text(std::string(wnd->DisplayText), stml_line_break);
 	wnd->DisplayText.FreeRep();
 	wnd->DisplayText = Zeal::EqUI::CXSTR("");
 	for (auto& s : strings) {

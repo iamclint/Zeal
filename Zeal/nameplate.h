@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "EqStructures.h"
 #include "ZealSettings.h"
+#include "bitmap_font.h"
 
 class NamePlate
 {
@@ -43,13 +44,35 @@ public:
 	ZealSetting<bool> setting_hide_raid_pets = { false, "Zeal", "NameplateHideRaidPets", false };
 	ZealSetting<bool> setting_target_marker = { false, "Zeal", "NameplateTargetMarker", false };
 	ZealSetting<bool> setting_target_health = { false, "Zeal", "NameplateTargetHealth", false };
+	ZealSetting<bool> setting_target_blink = { false, "Zeal", "NameplateTargetBlink", false };
 	ZealSetting<bool> setting_inline_guild = { false, "Zeal", "NameplateInlineGuild", false };
 
+	// Advanced fonts
+	ZealSetting<bool> setting_zeal_fonts = { false, "Zeal", "NamePlateZealFonts", false,
+		[this](bool val) { clean_ui(); } };
+	ZealSetting<bool> setting_drop_shadow = { false, "Zeal", "NamePlateDropShadow", false,
+		[this](bool val) { clean_ui(); } };
+	ZealSetting<std::string> setting_fontname = { std::string(BitmapFont::kDefaultFontName),
+		"Zeal", "NamePlateFontname", false, [this](std::string val) { clean_ui(); } };
+
+	std::vector<std::string> get_available_fonts() const;
+
 	// Internal use only (public for use by callbacks).
-	__declspec(noinline) bool handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity);
+	bool handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity);
 	bool handle_SetNameSpriteState(void* this_display, Zeal::EqStructures::Entity* entity, int show);
 
 private:
+	struct NamePlateInfo {
+		std::string text;
+		DWORD color;
+	};
+
+	struct RenderInfo {
+		NamePlateInfo* info;
+		float distance;
+		Vec2 screen_xy;
+	};
+
 	void parse_args(const std::vector<std::string>& args);
 	ColorIndex get_color_index(const Zeal::EqStructures::Entity& entity);
 	ColorIndex get_player_color_index(const Zeal::EqStructures::Entity& entity) const;
@@ -57,4 +80,11 @@ private:
 	std::string generate_nameplate_text(const Zeal::EqStructures::Entity& entity, int show) const;
 	std::string generate_target_postamble(const Zeal::EqStructures::Entity& entity) const;
 	bool is_nameplate_hidden_by_race(const Zeal::EqStructures::Entity& entity) const;
+
+	void clean_ui();
+	void render_ui();
+	void load_sprite_font();
+
+	std::unique_ptr<SpriteFont> sprite_font;
+	std::unordered_map<struct Zeal::EqStructures::Entity*, NamePlateInfo> nameplate_info_map;
 };

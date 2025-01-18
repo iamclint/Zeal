@@ -378,7 +378,8 @@ namespace Zeal
 			/* 0x0010 */ struct _EQMODELINFO* ModelInfo;
 			/* 0x0014 */ struct _EQTRACKINFO* Track1;
 			/* 0x0018 */ struct _EQTRACKINFO* Track2;
-			/* 0x001C */ BYTE Unknown001C[96];
+			/* 0x001C */ BYTE Unknown001C[0x3c];  // Possibly used in t3dGetCurrentDagFrameTransform.
+			/* 0x0058 */ float ObjectToWorldTransform[9];  // Copied out in t3dGetCurrentDagObjectToWorldTransform.
 			/* 0x007C */ Vec3 Position;
 			/* 0x0088 */ BYTE Unknown0088[96];
 			/* 0x00E8 */ DWORD NumChildren;
@@ -414,20 +415,20 @@ namespace Zeal
 			/* 0x0008 */ DWORD Unknown0008;
 			/* 0x000C */ DWORD Unknown000C;
 			/* 0x0010 */ DWORD Unknown0010;
-			/* 0x0014 */ PVOID Unknown0014;
+			/* 0x0014 */ PVOID Unknown0014;      // Set as param_3 in s3dCreateStringSprite (ref counter?)
 			/* 0x0018 */ PCHAR Text;
 			/* 0x001C */ DWORD TextLength;
-			/* 0x0020 */ DWORD Unknown0020;
-			/* 0x0024 */ DWORD MaxScaleFactor1;
+			/* 0x0020 */ DWORD Unknown0020;      // Set as param_5 in s3dCreateStringSprite
+			/* 0x0024 */ DWORD MaxScaleFactor1;  // s3dSetStringSpriteMaxScaleFactor
 			/* 0x0028 */ FLOAT MaxScaleFactor2;
 			/* 0x002C */ FLOAT MaxScaleFactor3;
-			/* 0x0030 */ DWORD IsYonClipEnabled;
+			/* 0x0030 */ DWORD IsYonClipEnabled;  // s3dSetStringSpriteYonClip
 			/* 0x0034 */ DWORD YonClipDistance;
-			/* 0x0038 */ FLOAT Unknown0038;
+			/* 0x0038 */ FLOAT Unknown0038;      // Set to DAT_100db1a8 in s3dCreateStringSprite
 			/* 0x003C */ DWORD Width;
 			/* 0x0040 */ DWORD Height;
-			/* 0x0044 */ FLOAT Unknown0044;
-			/* 0x0048 */ EQARGBCOLOR Color;
+			/* 0x0044 */ FLOAT Unknown0044;  // Set to 0.5 * sqrt(width^2 + height^2) * Unknown0038
+			/* 0x0048 */ EQARGBCOLOR Color;  // s3dSetStringSpriteTint
 		} EQSTRINGSPRITE, * PEQSTRINGSPRITE;
 		struct ActorInfo
 		{
