@@ -393,19 +393,10 @@ void TargetRing::callback_render() {
 	float radius = 10.f;// Zeal::EqGame::CalcCombatRange(Zeal::EqGame::get_self(), target);
 
 	// ### Target Ring Color ###
-	DWORD originalColor;
-	if (target_color.get())
-		originalColor = get_target_color();
-	else
-		originalColor = Zeal::EqGame::GetLevelCon(target);
+	DWORD originalColor = target_color.get() ? get_target_color() : Zeal::EqGame::GetLevelCon(target);
+
 	// Max Red, Green, and Blue by default
 	DWORD Color = originalColor;
-		/*Color = D3DCOLOR_ARGB(0xFF,
-		(originalColor & 0x00FF0000) ? 0xFF : 0x00,
-		(originalColor & 0x0000FF00) ? 0xFF : 0x00,
-		(originalColor & 0x000000FF) ? 0xFF : 0x00);*/
-	
-	static ULONGLONG lastColorChanged = 0; // Store the last time the color was changed
 
 	// ### Auto Attack Indicator (fade/unfade target's color while autoattack turned on)###
 	if (attack_indicator.get()) // auto attack is enabled
