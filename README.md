@@ -134,6 +134,10 @@ ___
   - **Arguments:** none, `open` (reports raid groups with open slots), `all` (lists all raid groups)
   - **Description:** prints out your current group leader (and raid leader if in raid).
 
+- `/linkall`
+  - **Arguments:** none (pastes into active chat) or `rs` (rsay), `gs` (gsay), `gu` (guildsay), `ooc`, `auc`, `say`
+  - **Description:** prints item links if looting window is open. The argument options route directly to channel for macros.
+
 - `/lootall`
   - **Description:** loots all items from a corpse if looting window is open.
 
@@ -217,7 +221,7 @@ ___
 - `/zealinput`
   - **Description:** toggles the zeal input setup for any input in game, giving you a more modern input
      - ctrl+c, ctrl+v, left, right, shift left+right for highlighting, home, end, etc
-     - enhanced tab completion for /tell, /t, and /consent, etc
+     - enhanced tab completion for /tell, /t, and /consent
 
 - `/help zeal`
   - **Description:** Shows the custom Zeal commands.
@@ -291,7 +295,7 @@ ___
 - Enables enhanced tab completion for /tell, /t, and /consent
   - `/tell<tab>`, `/tell <tab>`, `/tell name <tab>` cycles tell history list like default client
     - Tell history cycling mode will result from a reply keybind (`r`) 
-  - `/tell start_of_name` triggers a search across tell history, group, raid, and zone
+  - `/tell start_of_name` triggers a search across tell history, raid, and zone
      to populate a new cycle list (tab or shift-tab) which is printed to chat
     - Any key besides tab or shift will clear the search cycle list
 
@@ -318,7 +322,7 @@ ___
   - `134` Spell being casted
 
 - **LootAllButton**
-- **LinkAllButton**
+- **LinkAllButton** (w/option to select either `, ` or ` | ` delimiter)
 
 
 ### Options UI 
@@ -496,6 +500,8 @@ background will scroll with the player centered in the viewport.
   - `/map zoom 200` sets map scaling to 200% (2x)
 
 #### Interactive mode
+* Note: Use right click context menu in interactive mode to unlock the window to move and resize.
+
 The map supports drag panning and mouse wheel zoom in interactive mode. Interactive mode is always 
 enabled in external window mode, while a keybind toggle is used to toggle the internal overlay map
 in and out of interactive mode. When not in interactive mode, the internal overlay map is transparent
