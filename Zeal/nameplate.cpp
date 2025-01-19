@@ -86,6 +86,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"hideself", &setting_hide_self },
 		{"x", &setting_x },
 		{"hideraidpets", &setting_hide_raid_pets },
+		{"showpetownername", &setting_show_pet_owner_name },
 		{"targetmarker", &setting_target_marker },
 		{"targethealth", &setting_target_health },
 		{"targetblink", &setting_target_blink },
@@ -120,7 +121,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 
 	Zeal::EqGame::print_chat("Usage: /nameplate option where option is one of");
 	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, charselect");
-	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, targetmarker, targethealth, inlineguild");
+	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, showpetownername, targetmarker, targethealth, inlineguild");
 	Zeal::EqGame::print_chat("font:  zealfont, dropshadow");
 }
 
