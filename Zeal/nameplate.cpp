@@ -473,6 +473,12 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 		text += std::string(Zeal::EqGame::trim_name(entity.Name));
 		if (is_target)
 			text += generate_target_postamble(entity);
+		if (setting_show_pet_owner_name.get() && Zeal::EqGame::is_player_pet(entity))
+		{
+			text += "\n(";
+			text += Zeal::EqGame::trim_name(Zeal::EqGame::get_entity_by_id(entity.PetOwnerSpawnId)->Name);
+			text += "'s Pet)";
+		}
 		return text;
 	}
 

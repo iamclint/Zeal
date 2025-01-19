@@ -214,6 +214,7 @@ namespace Zeal
 		void send_raid_chat(std::string data);
 		int get_region_from_pos(Vec3* pos);
 		EqUI::CXWndManager* get_wnd_manager();
+		bool is_player_pet(const Zeal::EqStructures::Entity& entity);
 		std::vector<Zeal::EqStructures::RaidMember*> get_raid_list();
 		DWORD get_raid_group_number();
 		int get_raid_group_count(DWORD group_number);
