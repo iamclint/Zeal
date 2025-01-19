@@ -475,9 +475,11 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 			text += generate_target_postamble(entity);
 		if (setting_show_pet_owner_name.get() && Zeal::EqGame::is_player_pet(entity))
 		{
-			text += "\n(";
-			text += Zeal::EqGame::trim_name(Zeal::EqGame::get_entity_by_id(entity.PetOwnerSpawnId)->Name);
-			text += "'s Pet)";
+			auto pet_owner = Zeal::EqGame::get_entity_by_id(entity.PetOwnerSpawnId);
+			if (pet_owner && pet_owner != Zeal::EqGame::get_self())
+				text += std::format("\n({}'s Pet)", Zeal::EqGame::trim_name(pet_owner->Name));
+			else
+				text += "\n(Pet)";  // Self-pet or missing owner.
 		}
 		return text;
 	}

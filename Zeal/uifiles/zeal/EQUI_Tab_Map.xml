@@ -937,6 +937,36 @@
     <Choices>Both</Choices>
     <Choices>External</Choices>
   </Combobox>
+  <Button item="Zeal_MapAddLocText">
+    <ScreenID>Zeal_MapAddLocText</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>197</X>
+      <Y>458</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Adds location coordinates to map</TooltipReference>
+    <Text>Add /loc text</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
 
   <!-- *** Zeal Map Tab *** -->
   <Page item="Tab_Map">
@@ -984,6 +1014,7 @@
     <Pieces>Zeal_MapFadedZLevelAlpha_Slider</Pieces>
     <Pieces>Zeal_MapFadedZLevelAlpha_Value</Pieces>
     <Pieces>Zeal_MapAutoFadeEnable</Pieces>
+    <Pieces>Zeal_MapAddLocText</Pieces>
     <Pieces>Zeal_MapNamesLength_Label</Pieces>
     <Pieces>Zeal_MapNamesLength_Slider</Pieces>
     <Pieces>Zeal_MapNamesLength_Value</Pieces>
