@@ -1,6 +1,147 @@
 #include "patches.h"
 #include "Zeal.h"
 
+// We use SpawnAppearance packets to do client<->server feature flag handshakes. This SpawnAppearance type (257) is a unique value we use for Zeal messages.
+// Also defined in eq_constants.h on the server, but we can use any 256+ value as long as its unique.
+constexpr WORD kSpawnAppearanceTypeZealFeature = 257;
+
+// These are feature flag IDs that can be put into the cliemt<->server feature flag handshakes to setup features that require server cooperation.
+// These IDs must match up with the server (eq_constants.h) so it knows what feature we are enabling.
+constexpr DWORD kZealFeatureFixBuffStacking_Id = 1; // "fix buffstacking" feature
+
+// The value for send if turning on the "fix buffstacking" feature flag.
+constexpr DWORD kZealFeatureFixBuffStacking_Version_1 = 1;
+
+// SPA spelleffect
+constexpr int SE_MovementSpeed = 3;
+
+// Status of the buffstacking fix. Right now it's 0 or 1, unless we support different versions/iterations of this.
+WORD buffstacking_fix = 0;
+bool buffstacking_in_find_affect_slot = false;
+
+void SendFeatureHandshake(DWORD feature_id, DWORD feature_value, bool is_request) {
+	Zeal::Packets::SpawnAppearance_Struct handshake;
+	handshake.type = kSpawnAppearanceTypeZealFeature;
+	handshake.spawn_id = 0;
+	handshake.parameter = (feature_id << 16) | feature_value;
+	if (is_request)
+		handshake.parameter &= 0x7FFFFFFFu;
+	else
+		handshake.parameter |= 0x80000000u;
+	Zeal::EqGame::send_message(Zeal::Packets::opcodes::SpawnAppearance, (int*)&handshake, sizeof(Zeal::Packets::SpawnAppearance_Struct), 0);
+}
+
+void HandleFeatureHandshake(DWORD feature_id, DWORD feature_value, bool is_request)
+{
+	// Got a handshake message from the server. Turn on our feature flags if we support this feature.
+	if (feature_id == kZealFeatureFixBuffStacking_Id) {
+		if (feature_value > kZealFeatureFixBuffStacking_Version_1) {
+			feature_value = kZealFeatureFixBuffStacking_Version_1;
+		}
+		buffstacking_fix = feature_value;
+	}
+	// If the server initiated the handshake, respond to the server with our feature status.
+	if (is_request) {
+		SendFeatureHandshake(feature_id, feature_value, false);
+	}
+}
+
+// Used for FeatureHandshake negotiation
+BYTE __fastcall HandleSpawnAppearanceMessage_hk(int unk1, int unused_edx, int unk2, int opcode, Zeal::Packets::SpawnAppearance_Struct* sa)
+{
+	// Intercept any SpawnAppearance packets using our special Zeal handshake type
+	if (sa->type == kSpawnAppearanceTypeZealFeature) {
+		// Note: The server should send spawn_id 0 for these types of handshakes
+		if (sa->spawn_id == 0 || Zeal::EqGame::get_self() && Zeal::EqGame::get_self()->SpawnId == sa->spawn_id) {
+			bool is_request = (sa->parameter >> 31) == 0;
+			DWORD feature_id = sa->parameter >> 16 & 0x7FFFu;
+			DWORD feature_value = sa->parameter & 0xFFFFu;
+			HandleFeatureHandshake(feature_id, feature_value, is_request);
+		}
+		return 1;
+	}
+	return ZealService::get_instance()->hooks->hook_map["HandleSpawnAppearanceMessage"]->original(HandleSpawnAppearanceMessage_hk)(unk1, unused_edx, unk2, opcode, sa);
+}
+
+void onZone() {
+	// Fix Buff Stacking - Initiates feature handshakes on every zone, since the ZoneServer changes.
+	buffstacking_fix = 0; // Turn off the patch until the Zone acknowledges which setting to use.
+	SendFeatureHandshake(kZealFeatureFixBuffStacking_Id, kZealFeatureFixBuffStacking_Version_1, true);
+}
+
+// BuffStacking Patch - FindAffectSlot()
+// ---------------------------------------------------------------------------------------------------
+// Without Patch - Uses caster's class rather than just using the spell's class.
+// * is_bard_song = spell->IsBardsong() && caster->Class == Bard
+// * is_caster_bard = caster->Class == Bard
+// ---------------------------------------------------------------------------------------------------
+// With Patch - Uses the spell's class only for better detection.
+// * is_bard_song = spell->IsBardsong()
+// * is_caster_bard = is_bard_song
+// ---------------------------------------------------------------------------------------------------
+Zeal::EqStructures::_EQBUFFINFO* __fastcall FindAffectSlot_hk(Zeal::EqStructures::EQCHARINFO* this_, int unused, WORD spellid, Zeal::EqStructures::Entity* caster, DWORD* out_slot, int flag)
+{
+	// To achieve the above psuedocode, we temporarily set the caster's class to Bard/not-Bard to match whatever spell is being cast.
+	// The EQ logic gets the rest correct if we do this.
+	if (buffstacking_fix) {
+		BYTE origClass = caster->Class;
+		caster->Class = 1;
+		if (spellid >= 0 && spellid < EQ_NUM_SPELLS) {
+			Zeal::EqStructures::SPELL* spell = Zeal::EqGame::get_spell_mgr()->Spells[spellid];
+			if (spell && spell->IsBardsong()) {
+				caster->Class = 8; // Bard
+			}
+		}
+		buffstacking_in_find_affect_slot = true;
+		Zeal::EqStructures::_EQBUFFINFO* result = ZealService::get_instance()->hooks->hook_map["FindAffectSlot"]->original(FindAffectSlot_hk)(this_, unused, spellid, caster, out_slot, flag);
+		buffstacking_in_find_affect_slot = false;
+		caster->Class = origClass;
+		return result;
+	}
+	return ZealService::get_instance()->hooks->hook_map["FindAffectSlot"]->original(FindAffectSlot_hk)(this_, unused, spellid, caster, out_slot, flag);
+}
+
+// BuffStacking Patch - IsStackBlocked()
+// ---------------------------------------------------------------------------------------------------
+// Without Patch - Very broken!! Uses the target's class instead and the spell's class for detecting a bard song.
+// * is_bard_song == spell->IsBardsong() && this->IsBard()
+// ---------------------------------------------------------------------------------------------------
+// With Patch - Ignores the class of recipient, only cares whether the spell is a bard spell or not.
+// * is_bard_song == spell->IsBardsong()
+// ---------------------------------------------------------------------------------------------------
+bool __fastcall IsStackBlocked_hk(Zeal::EqStructures::EQCHARINFO* this_char_info, int unused, Zeal::EqStructures::SPELL* spell)
+{
+	// To achieve the above psuedocode, we temporarily set our class to Bard/not-Bard to match whatever spell is being cast.
+	// The EQ logic gets the rest correct if we do this.
+	if (buffstacking_fix) {
+		BYTE origClass = this_char_info->Class;
+		this_char_info->Class = spell->IsBardsong() ? 8 : 1;
+		bool result = ZealService::get_instance()->hooks->hook_map["IsStackBlocked"]->original(IsStackBlocked_hk)(this_char_info, unused, spell);
+		this_char_info->Class = origClass;
+		return result;
+	}
+	return ZealService::get_instance()->hooks->hook_map["IsStackBlocked"]->original(IsStackBlocked_hk)(this_char_info, unused, spell);
+}
+
+// BuffStacking Patch - SpellAffectIndex()
+// ---------------------------------------------------------------------------------------------------
+// Without Patch - Client uses 'is_movement_spell' to apply a lot of special-case logic to block bard movement songs.
+// * is_movement_spell = HasSpellEffect(SE_MovementSpeed)
+// ---------------------------------------------------------------------------------------------------
+// With Patch - We set 'is_movement_spell' to false on bard songs, which bypasses the special-case logic, letting the default (fixed/correct now) stacking logic apply.
+// * is_movement_spell = HasSpellEffect(SE_MovementSpeed) && (!is_bard_song || is_detrimental)
+// ---------------------------------------------------------------------------------------------------
+BYTE __fastcall SpellAffectIndex_hk(Zeal::EqStructures::SPELL* spell, int unused_edx, int effectType) {
+	// All the special-case bard logic involves the following check.
+	// We just have to return 0/false when queried about whether a bard song is a movement effect, and it effectly bypasses all the weird stacking logic that stops Selos from stacking with JBoots/SoW.
+	// The EQ logic handles buff stacking normally once we get it to skip over all this special-case stuff.
+	if (buffstacking_fix && buffstacking_in_find_affect_slot) { // Only do this logic while inside FindAffectSlot(..)'s execution
+		if (effectType == SE_MovementSpeed && spell->IsBeneficial() && spell->IsBardsong()) {
+			return 0;
+		}
+	}
+	return ZealService::get_instance()->hooks->hook_map["SpellAffectIndex"]->original(SpellAffectIndex_hk)(spell, unused_edx, effectType);
+}
 
 void __fastcall GetZoneInfoFromNetwork(int* t, int unused, char* p1)
 {
@@ -99,8 +240,17 @@ patches::patches()
 	
 
 	ZealService::get_instance()->callbacks->AddGeneric([this]() { ; }, callback_type::InitUI);
+	ZealService::get_instance()->callbacks->AddGeneric([]() { onZone(); }, callback_type::Zone);
 
 	mem::write<BYTE>(0x4A14CF, 0xEB); //don't print Your XML files are not compatible with current EverQuest files, certain windows may not perform correctly.  Use "/loadskin Default 1" to load the EverQuest default skin.
+
+	// Client/Server patch handshake support
+	ZealService::get_instance()->hooks->Add("HandleSpawnAppearanceMessage", 0x004DF52A, HandleSpawnAppearanceMessage_hk, hook_type_detour);
+
+	// Buffstacking Patches
+	ZealService::get_instance()->hooks->Add("FindAffectSlot", 0x004C7A3E, FindAffectSlot_hk, hook_type_detour);
+	ZealService::get_instance()->hooks->Add("IsStackBlocked", 0x004C830B, IsStackBlocked_hk, hook_type_detour);
+	ZealService::get_instance()->hooks->Add("SpellAffectIndex", 0x004D79C8, SpellAffectIndex_hk, hook_type_detour);
 
 	ZealService::get_instance()->hooks->Add("GetZoneInfoFromNetwork", 0x53D026, GetZoneInfoFromNetwork, hook_type_detour);
 

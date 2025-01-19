@@ -15,7 +15,8 @@ namespace Zeal
             TargetMouse = 0x4162,
             RequestTrade = 0x40D1,
             WearChange = 0x4092,
-            Illusion = 0x4091
+            Illusion = 0x4091,
+            SpawnAppearance = 0x40F5,
         };
         struct TradeRequest_Struct {
             /*000*/	UINT16 to_id;
@@ -96,6 +97,12 @@ namespace Zeal
             /*014*/ short   unknown_void;
             /*016*/ int     size;
             /*020*/
+        };
+        struct SpawnAppearance_Struct { // sizeof=0x8
+            /*000*/ WORD spawn_id;
+            /*002*/ WORD type;
+            /*004*/ DWORD parameter;
+            /*008*/
         };
     }
 }

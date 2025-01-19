@@ -1005,6 +1005,9 @@ namespace Zeal
 			/*0x10c**/   BYTE	ResistAdj;
 			/*0x10d*/   BYTE	Unknown0x10d[0xb];
 			/*0x114*/
+
+			inline bool IsBeneficial() { return SpellType; }
+			inline bool IsBardsong() { return ClassLevel[8] != 0xFF && ClassLevel[8] != 0; }
 		};
 		struct SPELLMGR {
 			 SPELL* Spells[EQ_NUM_SPELLS];
