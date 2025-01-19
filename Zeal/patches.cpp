@@ -9,7 +9,7 @@ constexpr WORD kSpawnAppearanceTypeZealFeature = 257;
 // These IDs must match up with the server (eq_constants.h) so it knows what feature we are enabling.
 constexpr DWORD kZealFeatureFixBuffStacking_Id = 1; // "fix buffstacking" feature
 
-// The value for send if turning on the "fix buffstacking" feature flag.
+// The value to send for turning on the "fix buffstacking" feature flag.
 constexpr DWORD kZealFeatureFixBuffStacking_Version_1 = 1;
 
 // SPA spelleffect
