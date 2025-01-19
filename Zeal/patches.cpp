@@ -103,10 +103,10 @@ Zeal::EqStructures::_EQBUFFINFO* __fastcall FindAffectSlot_hk(Zeal::EqStructures
 
 // BuffStacking Patch - IsStackBlocked()
 // ---------------------------------------------------------------------------------------------------
-// Without Patch - Very broken!! Uses the target's class instead and the spell's class for detecting a bard song.
+// Without Patch - Uses the TARGET's class (which makes zero sense) and the spell's class for detecting a bard song.
 // * is_bard_song == spell->IsBardsong() && this->IsBard()
 // ---------------------------------------------------------------------------------------------------
-// With Patch - Ignores the class of recipient, only cares whether the spell is a bard spell or not.
+// With Patch - Ignores the class of target, only cares whether the spell is a bard spell or not.
 // * is_bard_song == spell->IsBardsong()
 // ---------------------------------------------------------------------------------------------------
 bool __fastcall IsStackBlocked_hk(Zeal::EqStructures::EQCHARINFO* this_char_info, int unused, Zeal::EqStructures::SPELL* spell)
