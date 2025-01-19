@@ -167,6 +167,7 @@ BitmapFontBase::BitmapFontBase(IDirect3DDevice8& device, std::span<const uint8_t
     }
 
     line_spacing = reader.read<float>();
+    line_spacing = static_cast<float>(static_cast<int>(line_spacing + 0.5f));  // ceil().
 
     // Read in the default character and set all uninitialized table entries to it.
     uint32_t file_default_character = reader.read<uint32_t>();
@@ -223,7 +224,7 @@ BitmapFontBase::~BitmapFontBase() {
 void BitmapFontBase::dump() const {
     Zeal::EqGame::print_chat("drop_shadow: %d, outlined: %d, align_bottom: %d",
         drop_shadow, outlined, align_bottom);
-    Zeal::EqGame::print_chat("line_spacing: %d, default_character: %c",
+    Zeal::EqGame::print_chat("line_spacing: %f, default_character: %c",
         line_spacing, default_character);
 
     if (texture) {

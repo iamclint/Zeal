@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <vector>
 #include <windows.h>
+#include "ZealSettings.h"
 
 
 class ZoneMap
@@ -66,6 +67,7 @@ public:
 	bool set_zoom(int zoom_percent);  // Note: 100% = 1x.
 	bool set_font(std::string font_name, bool update_default = true);
 	void set_marauders_map(bool enable) { map_show_all = enable; }  // Resets to false on zone.
+	ZealSetting<bool> setting_add_loc_text = { false, "Zeal", "MapAddLocText", false };
 
 	bool is_external_enabled() const { return external_enabled; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
@@ -109,7 +111,7 @@ public:
 	void process_on_resize(int width, int height);
 
 private:
-	enum class LabelType { Normal, AddMarker, PositionLabel };
+	enum class LabelType { Normal, LeftJustified, AddMarker, PositionLabel };
 
 	// DynamicLabels are added using add_label() and are in addition to the static map data labels.
 	struct DynamicLabel {
@@ -213,6 +215,7 @@ private:
 	std::vector<ZoneMap::MapVertex> calculate_grid_vertices(const ZoneMapData& zone_map_data) const;
 	void add_position_marker_vertices(float map_y, float map_x, float heading, float size,
 		D3DCOLOR color, std::vector<MapVertex>& vertices) const;
+	void add_self_pet_position_vertices(std::vector<MapVertex>& vertices) const;
 	void add_group_member_position_vertices(std::vector<MapVertex>& vertices) const;
 	void add_raid_member_position_vertices(std::vector<MapVertex>& vertices) const;
 	void add_non_ally_position_vertices(std::vector<MapVertex>& vertices,

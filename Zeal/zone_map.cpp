@@ -706,32 +706,37 @@ void ZoneMap::render_markers(IDirect3DDevice8& device) {
 
 // Handles the rendering of the labels_list and dynamic_labels_list.
 void ZoneMap::render_labels(IDirect3DDevice8& device) {
-    bool add_level_label = (map_level_index > 0);
-    bool show_zone_label = (show_zone_id != kInvalidZoneId);
-    if (!add_level_label && labels_list.empty() && dynamic_labels_list.empty() && !show_zone_label)
+
+    std::string label;
+    if (show_zone_id != kInvalidZoneId) {
+        const ZoneMapData* zone_map_data = get_zone_map(zone_id);
+        label += (zone_map_data) ? zone_map_data->name : "Unknown";
+        label += " ";
+    }
+    else if (setting_add_loc_text.get()) {
+        const Vec3& position = Zeal::EqGame::get_self()->Position;
+        label += std::format("{0:.0f}, {1:.0f}\n", position.x, position.y);
+    }
+    if (map_level_index == -1 && !default_to_zlevel_autofade)
+        label += "Auto";
+    else if (map_level_index == 0 && default_to_zlevel_autofade)
+        label += "All";
+    else if (map_level_index > 0)
+        label += "Level: " + std::to_string(map_level_index);
+
+    if (label.empty() && labels_list.empty() && dynamic_labels_list.empty())
         return;
 
     render_load_font(device);
     if (!bitmap_font)
         return;
 
-    if (add_level_label || show_zone_label) {
-        char level_label_buffer[20] = { 0 };
-        if (add_level_label)
-            snprintf(level_label_buffer, sizeof(level_label_buffer), "Level: %i", map_level_index);
-        char* level_label_string = level_label_buffer;
-        char zone_label_buffer[60];
-        if (show_zone_label) {
-            const ZoneMapData* zone_map_data = get_zone_map(zone_id);
-            const char* zone_name = (zone_map_data) ? zone_map_data->name : "Unknown";
-            snprintf(zone_label_buffer, sizeof(zone_label_buffer), "%s %s", zone_name, level_label_string);
-            level_label_string = zone_label_buffer;
-        }
-        Vec2 level_size = bitmap_font->measure_string(level_label_string);
-        const float indent_x = scale_pixels_to_model(5 + 0.5f * level_size.x);
-        const float indent_y = scale_pixels_to_model(5 + 0.5f * level_size.y);
-        render_label_text(level_label_string, static_cast<int16_t>(clip_min_y + indent_y),
-            static_cast<int16_t>(clip_min_x + indent_x), D3DCOLOR_XRGB(255, 255, 255));
+    if (!label.empty()) {
+        const float indent_x = scale_pixels_to_model(5);
+        const float indent_y = scale_pixels_to_model(5);
+        render_label_text(label.c_str(), static_cast<int16_t>(clip_min_y + indent_y),
+            static_cast<int16_t>(clip_min_x + indent_x), D3DCOLOR_XRGB(255, 255, 255),
+            LabelType::LeftJustified);
     }
 
     for (const ZoneMapLabel* label : labels_list) {
@@ -762,7 +767,7 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
     if (!bitmap_font || !label || !(*label))  // Defensive programming and empty string check.
         return;
 
-   // Then check if the label is visible on the clipped map rect.
+    // Then check if the label is visible on the clipped map rect.
     // Text rendering is slow. Perform some manual clipping to skip processing
     // if the label is off screen.
     const float xf = static_cast<float>(map_x);
@@ -805,16 +810,17 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
         label_x += offset_pixels.x;
         label_y += offset_pixels.y;
     }
-    if (label_type != LabelType::Normal) {
+    bool center = (label_type != LabelType::LeftJustified);
+    if (center && label_type != LabelType::Normal) {
         Vec2 size = bitmap_font->measure_string(short_label);
         const float half_width = size.x * 0.5f;
         const float half_height = size.y * 0.5f;
         label_x = max(view_left + half_width, min(view_right - half_width, label_x));
         label_y = max(view_top + half_height, min(view_bottom - half_height, label_y));
     }
-    bitmap_font->queue_string(short_label, Vec3(label_x, label_y, 0), true, font_color);
+    bitmap_font->queue_string(short_label, Vec3(label_x, label_y, 0), center, font_color);
     if (label_type == LabelType::AddMarker)
-        bitmap_font->queue_string("+", Vec3(label_screen[0], label_screen[1], 0), true, font_color);
+        bitmap_font->queue_string("+", Vec3(label_screen[0], label_screen[1], 0), center, font_color);
 }
 
 // Resets the mouse state to an idle state.
@@ -1069,6 +1075,24 @@ void ZoneMap::add_group_member_position_vertices(std::vector<MapVertex>& vertice
         auto color = (member == Zeal::EqGame::get_target()) ? get_target_color() : kGroupColorLut[i];
         add_position_marker_vertices(-member->Position.x, -member->Position.y, member->Heading, size,
             color, vertices);
+    }
+}
+
+void ZoneMap::add_self_pet_position_vertices(std::vector<MapVertex>& vertices) const {
+    if (map_show_group_mode == ShowGroupMode::kOff)
+        return;
+
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (self && self->ActorInfo && self->ActorInfo->PetID) {
+        auto pet_entity = Zeal::EqGame::get_entity_by_id(self->ActorInfo->PetID);
+        if (pet_entity) {
+            const float kShrinkFactor = 0.7f;  // Make pet 30% smaller.
+            const float size = convert_size_fraction_to_model(position_size * kShrinkFactor);
+
+            auto pet_color = D3DCOLOR_XRGB(195, 176, 145); // Lemon khaki
+            add_position_marker_vertices(-pet_entity->Position.x, -pet_entity->Position.y,
+                pet_entity->Heading, size, pet_color, vertices);
+        }
     }
 }
 
@@ -1440,6 +1464,7 @@ void ZoneMap::render_positions(IDirect3DDevice8& device) {
     std::vector<Zeal::EqStructures::Entity*> pvp_entities = get_non_ally_entities();
     add_non_ally_position_vertices(position_vertices, pvp_entities);
     add_group_member_position_vertices(position_vertices);
+    add_self_pet_position_vertices(position_vertices);
     const int member_vertex_count = position_vertices.size() - ring_vertex_count;
 
     const float size = convert_size_fraction_to_model(position_size);
