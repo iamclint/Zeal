@@ -741,9 +741,8 @@ namespace Zeal
 				return false;
 
 			auto owner_entity = Zeal::EqGame::get_entity_by_id(pet_owner_id);
-				return (owner_entity && owner_entity->Type == Zeal::EqEnums::Player);
-
-			return false;
+				
+			return (owner_entity && owner_entity->Type == Zeal::EqEnums::Player);
 		}
 
 		Vec3 get_view_actor_head_pos()
