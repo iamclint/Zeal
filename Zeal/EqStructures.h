@@ -680,7 +680,7 @@ namespace Zeal
 			/* 0x0D40 */ BYTE Unknown0D40[20];
 			/* 0x0D54 */ DWORD Hunger;
 			/* 0x0D58 */ DWORD Thirst;
-			/* 0x0D5C */ _EQBUFFINFO BuffsExtIndexMinus15DoNotUse[2]; // The client uses this field to read from 'BuffsExt' by passing int the non-subtracted buff index (e.g 20 instead of 20-15), and the result is that is reads from offset BuffExt[n-15].
+			/* 0x0D5C */ _EQBUFFINFO BuffsExtIndexMinus15DoNotUse[2]; // The client uses this field to read from 'BuffsExt[n-15]' by passing BuffsExtIndexMinus15DoNotUse[n] to this array, which is the same struct offset.
 			/* 0x0D70 */ DWORD ZoneId;
 			/* 0x0D74 */ Entity* SpawnInfo;
 			/* 0x0D78 */  _EQITEMINFO* CursorItem;
