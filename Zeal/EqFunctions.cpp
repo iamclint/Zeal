@@ -2386,13 +2386,15 @@ namespace Zeal
 			return a[sort_column] < b[sort_column];  // Else use default string comparison.
 		}
 
-		// Sorts the contents of a list window by the sort_column index.
-		void sort_list_wnd(Zeal::EqUI::ListWnd* list_wnd, int sort_column)
+		// Sorts the contents of a list window by the sort_column index and sort_type
+		void sort_list_wnd(Zeal::EqUI::ListWnd* list_wnd, int sort_column, SortType sort_type)
 		{
 			if (!list_wnd)
 				return;
 
 			const int num_rows = list_wnd->ItemCount;
+			if (num_rows < 2)
+				return;
 
 			// The CListWnd::SetItemText() code showed that the number of columns was accessed
 			// by a pointer at +0xfc that points to an array of 28 byte structures with the column
@@ -2423,9 +2425,18 @@ namespace Zeal
 			}
 			temp.FreeRep();  // Need to release the temporary reference count.
 
-			std::sort(data.begin(), data.end(), [sort_column](const std::vector<std::string>& a,
-				const std::vector<std::string>& b)
-				{ return sort_list_wnd_compare(a, b, sort_column); });
+			bool ascending = (sort_type == SortType::Ascending) ||
+				(sort_type == SortType::Toggle &&
+					sort_list_wnd_compare(data.back(), data.front(), sort_column));
+			if (ascending)
+				std::sort(data.begin(), data.end(), [sort_column](const std::vector<std::string>& a,
+					const std::vector<std::string>& b)
+					{ return sort_list_wnd_compare(a, b, sort_column); });
+			else
+				std::sort(data.rbegin(), data.rend(), [sort_column](const std::vector<std::string>& a,
+					const std::vector<std::string>& b)
+					{ return sort_list_wnd_compare(a, b, sort_column); });
+
 
 			for (int r = 0; r < num_rows; ++r)
 			{

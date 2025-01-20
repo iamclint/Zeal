@@ -229,6 +229,8 @@ namespace Zeal
 		void dump_raid_state();
 		std::string generateTimestamp();
 		bool use_item(int item_index);
-		void sort_list_wnd(Zeal::EqUI::ListWnd* list_wnd, int sort_column);
+		enum class SortType {Ascending, Descending, Toggle};
+		void sort_list_wnd(Zeal::EqUI::ListWnd* list_wnd, int sort_column,
+			SortType sort_type = SortType::Ascending);
 	}
 }

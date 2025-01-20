@@ -465,7 +465,7 @@ static int __fastcall SkillsWnd_WndNotification(Zeal::EqUI::EQWND* wnd, int unus
 	// CListWnd::OnHeaderClick() generates a WndNotification callback to the parent with a code of 0x0e.
 	if (param_2 == 0x0e && (param_3 == 0 || param_3 == 2)) {
 		auto list_wnd = reinterpret_cast<Zeal::EqUI::ListWnd*>(src_wnd);
-		Zeal::EqGame::sort_list_wnd(list_wnd, param_3);
+		Zeal::EqGame::sort_list_wnd(list_wnd, param_3, Zeal::EqGame::SortType::Toggle);
 		return 0;
 	}
 
