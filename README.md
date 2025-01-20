@@ -249,7 +249,7 @@ ___
   - **Description:** Re-opens the alarm window, if oldui is specified it allows for an alarm on it.
 
 - `/nameplate`
-  - **Arguments:** `colors`, `concolors`, `targetcolor`, `charselect`, `hideself`, `x`, `hideraidpets`, `targetmarker`, `targethealth`, `inlineguild`
+  - **Arguments:** `colors`, `concolors`, `targetcolor`, `charselect`, `hideself`, `x`, `hideraidpets`, `showpetownername`, `targetmarker`, `targethealth`, `inlineguild`
   - **Description:** toggles nameplate modes for adjusting colors (tints) and text
 
 ___
@@ -283,6 +283,7 @@ ___
 - Toggle nameplate for self on/off
 - Toggle nameplate for self as X on/off
 - Toggle nameplate for raid pets and your pet on/off
+- Toggle nameplate for players pet owners name on/off
 - Toggle nameplate choices that are shown at character selection screen on and off
 - Toggle target nameplate color on and off
 - Toggle target nameplate marker on and off
@@ -382,7 +383,8 @@ The Zeal Nameplate options tab is the primary interface, but the redundant comma
 * `/nameplate concolors` - Toggles Nameplate Con Colors for NPCs on and off
 * `/nameplate hideself` - Toggles Player Nameplate on and off
 * `/nameplate x` - Toggles Player Nameplate as X on and off
-* `/nameplate hideraidpets` - Toggles NPC Raid Pets Nameplate on and off
+* `/nameplate hideraidpets` - Toggles Raid member Pets Nameplate on and off
+* `/nameplate showpetownername` - Toggles Players Pet Owner on Nameplate on and off
 * `/nameplate charselect` - Toggles Nameplate Choices Shown at Character Selection Screen on and off
 * `/nameplate targetcolor` - Toggles Target Nameplate Color on and off
 * `/nameplate targetblink` - Toggles auto-attack indicator on and off
