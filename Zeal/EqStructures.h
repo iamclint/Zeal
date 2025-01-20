@@ -680,7 +680,7 @@ namespace Zeal
 			/* 0x0D40 */ BYTE Unknown0D40[20];
 			/* 0x0D54 */ DWORD Hunger;
 			/* 0x0D58 */ DWORD Thirst;
-			/* 0x0D5C */ _EQBUFFINFO BuffsExtIndexMinus15DoNotUse[2]; // The client uses this field to read from 'BuffsExt[n-15]' by passing BuffsExtIndexMinus15DoNotUse[n] to this array, which is the same struct offset.
+			/* 0x0D5C */ _EQBUFFINFO BuffsExtIndexMinus15[2]; // The client uses this field to read from 'BuffsExt[n-15]' by passing BuffsExtIndexMinus15[n] to this array, which is the same struct offset. Usage not recommended.
 			/* 0x0D70 */ DWORD ZoneId;
 			/* 0x0D74 */ Entity* SpawnInfo;
 			/* 0x0D78 */  _EQITEMINFO* CursorItem;
@@ -691,8 +691,8 @@ namespace Zeal
 			};
 			/* 0x0DD0 */ struct _EQITEMINFO* InventoryPackItem[EQ_NUM_INVENTORY_PACK_SLOTS];
 			/* 0x0DF0 */ BYTE Unknown0DF0[2];
-			/* 0x0DF2 */ _EQBUFFINFO BuffsExt[15]; // non-PCs have access to 15 more buff slots. We can maybe use this space for the short-buff window in the future if we get really creative.
-			/* 0x0E88 */ WORD WhoPutThisBuffOnMe[30]; // The entity ID who put buffs 1-30 on this unit (this is literally what the function is called in EQMac that reads from this, as well)
+			/* 0x0DF2 */ _EQBUFFINFO BuffsExt[15]; // non-PCs have access to 15 more buff slots. We can maybe use this space for the short-buff window in the future
+			/* 0x0E88 */ WORD BuffCasterId[30]; // The entity ID who put buffs 1-30 on this unit
 			/* 0x0EC4 */ DWORD ZoneBoundId;
 			/* 0x0EC8 */ DWORD Unknown0EC8;
 			/* 0x0ECC */ DWORD Unknown0ECC;
