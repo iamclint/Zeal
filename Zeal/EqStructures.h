@@ -550,13 +550,13 @@ namespace Zeal
 		} EQINVENTORY, * PEQINVENTORY;
 		struct _EQBUFFINFO
 		{
-			/* 0x0000 */ BYTE Unknown0000;
+			/* 0x0000 */ BYTE Valid; // Whether this buff slot is active or empty
 			/* 0x0001 */ BYTE CasterLevel; // level of player who casted the buff
 			/* 0x0002 */ BYTE Modifier; // divide by 10 to get Bard song modifier
-			/* 0x0003 */ BYTE Unknown0003;
+			/* 0x0003 */ BYTE Activated; // Copied from spell data to buff struct.  Only a few spells have this set to 1, the rest are 0
 			/* 0x0004 */ WORD SpellId;
 			/* 0x0006 */ WORD Ticks; //  duration in ticks ; seconds = ticks * 6
-			/* 0x0008 */ WORD Unknown0008;
+			/* 0x0008 */ WORD Counters; // rune amount, poison/disease/curse counters
 			/* 0x000A */
 		};
 		struct EQZONEINFO
@@ -624,7 +624,8 @@ namespace Zeal
 			/* 0x0042 */ CHAR LastName[70]; // [0x46] ; surname or title
 			/* 0x0088 */ WORD Gender; // EQ_GENDER_x
 			/* 0x008A */ WORD Race; // EQ_RACE_x
-			/* 0x008C */ WORD Class; // EQ_CLASS_x
+			/* 0x008C */ BYTE Class; // EQ_CLASS_x
+			/* 0x008D */ BYTE Unknown008D;
 			/* 0x008E */ WORD Unknown008E;
 			/* 0x0090 */ WORD Level;
 			/* 0x0092 */ WORD Unknown0092;
@@ -680,7 +681,7 @@ namespace Zeal
 			/* 0x0D40 */ BYTE Unknown0D40[20];
 			/* 0x0D54 */ DWORD Hunger;
 			/* 0x0D58 */ DWORD Thirst;
-			/* 0x0D5C */ BYTE Unknown0D5C[20];
+			/* 0x0D5C */ _EQBUFFINFO BuffsExtIndexMinus15[2]; // The client uses this field to read from 'BuffsExt[n-15]' by passing BuffsExtIndexMinus15[n] to this array, which is the same struct offset. Usage not recommended.
 			/* 0x0D70 */ DWORD ZoneId;
 			/* 0x0D74 */ Entity* SpawnInfo;
 			/* 0x0D78 */  _EQITEMINFO* CursorItem;
@@ -690,11 +691,9 @@ namespace Zeal
 				/* 0x0D7C */ struct _EQITEMINFO* InventoryItem[EQ_NUM_INVENTORY_SLOTS];
 			};
 			/* 0x0DD0 */ struct _EQITEMINFO* InventoryPackItem[EQ_NUM_INVENTORY_PACK_SLOTS];
-			/* 0x0DF0 */ BYTE Unknown0DF0[116];
-			/* 0x0E64 */ DWORD Unknown0E64;
-			/* 0x0E68 */ BYTE Unknown0E68[32];
-			/* 0x0E88 */ DWORD Unknown0E88;
-			/* 0x0E8C */ BYTE Unknown0E8C[56];
+			/* 0x0DF0 */ BYTE Unknown0DF0[2];
+			/* 0x0DF2 */ _EQBUFFINFO BuffsExt[15]; // non-PCs have access to 15 more buff slots. We can maybe use this space for the short-buff window in the future
+			/* 0x0E88 */ WORD BuffCasterId[30]; // The entity ID who put buffs 1-30 on this unit
 			/* 0x0EC4 */ DWORD ZoneBoundId;
 			/* 0x0EC8 */ DWORD Unknown0EC8;
 			/* 0x0ECC */ DWORD Unknown0ECC;

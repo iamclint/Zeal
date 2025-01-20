@@ -221,7 +221,7 @@ bool HelmManager::Handle_In_OP_WearChange(Zeal::Packets::WearChange_Struct* wc) 
             last_wc = *wc;
         }
         if (HELM_MANAGER_LOG_DEBUG) {
-            Zeal::EqStructures::Entity* spawn = (self && self->SpawnId == wc->spawn_id) ? self : ZealService::get_instance()->entity_manager->Get(wc->spawn_id);
+            Zeal::EqStructures::Entity* spawn = (self && self->SpawnId == wc->spawn_id) ? self : Zeal::EqGame::get_entity_by_id(wc->spawn_id);
             Zeal::EqGame::print_chat("[HelmManager] [OP_WearChange] RECV WearChange from %s Material=%u Color=0x%08x", spawn ? spawn->Name : "Unknown", wc->material, wc->color.Color);
         }
     }
