@@ -11,8 +11,21 @@ ZealService* ZealService::ptr_service = nullptr;
 //	return 0;
 //}
 
+// Add simple heap integrity check.
+static void mem_check(int line_number = 0) {
+	int result = _heapchk();
+	if (result != _HEAPOK) {
+		std::string message = std::format("Zeal {0} ({1}) detected heap corruption ({2}). EqGame will terminate.",
+			ZEAL_VERSION, ZEAL_BUILD_VERSION, line_number);
+		MessageBoxA(NULL, message.c_str(),
+			"Zeal heap monitor", MB_OK | MB_ICONERROR);
+		throw std::bad_alloc();  // Will crash out the program.
+	}
+}
+
 ZealService::ZealService()
 {
+	mem_check(__LINE__);
 	//since the hooked functions are called back via a different thread, make sure the service ptr is available immediately
 	ZealService::ptr_service = this; //this setup makes it not unit testable but since the caller functions of the hooks don't know the pointers I had to make a method to retrieve the base atleast
 	crash_handler = std::make_shared<CrashHandler>();
@@ -25,6 +38,7 @@ ZealService::ZealService()
 	callbacks = std::make_shared<CallbackManager>(this); //other functions rely on this hook
 	looting_hook = std::make_shared<looting>(this);
 	labels_hook = std::make_shared<labels>(this);
+	mem_check(__LINE__);
 	pipe = std::make_shared<named_pipe>(this, ini.get()); //other classes below rely on this class on initialize
 	binds_hook = std::make_shared<Binds>(this);
 	raid_hook = std::make_shared<raid>(this);
@@ -34,6 +48,7 @@ ZealService::ZealService()
 	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
 	tooltips = std::make_shared<tooltip>(this, ini.get());
 	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
+	mem_check(__LINE__);
 	give = std::make_shared<NPCGive>(this, ini.get());
 	game_patches = std::make_shared<patches>();
 	nameplate = std::make_shared<NamePlate>(this, ini.get());
@@ -50,14 +65,17 @@ ZealService::ZealService()
 	buff_timers = std::make_shared<BuffTimers>(this);
 	movement = std::make_shared<PlayerMovement>(this, binds_hook.get(), ini.get());
 	alarm = std::make_shared<Alarm>(this);
+	mem_check(__LINE__);
 	netstat = std::make_shared<Netstat>(this, ini.get());
 	ui = std::make_shared<ui_manager>(this, ini.get());
 	melody = std::make_shared<Melody>(this, ini.get());
 	autofire = std::make_shared<AutoFire>(this, ini.get());
+	mem_check(__LINE__);
 	physics = std::make_shared<Physics>(this, ini.get());
 	target_ring = std::make_shared<TargetRing>(this, ini.get());
 	zone_map = std::make_shared<ZoneMap>(this, ini.get());
-	
+	mem_check(__LINE__);
+
 	callbacks->AddGeneric([this]() {
 		if (Zeal::EqGame::is_in_game() && print_buffer.size())
 		{
@@ -71,6 +89,7 @@ ZealService::ZealService()
 	this->basic_binds();
 	
 	configuration_check();
+	mem_check(__LINE__);
 }
 
 void ZealService::configuration_check()

@@ -1010,10 +1010,13 @@ namespace Zeal
 		};
 		struct EQCommand
 		{
-			int string_id;
-			const char* name;
-			const char* localized_name;
-			int fn;
+			static constexpr int kNumCommands = 0x116;  // The array has 0x116 entries.
+			int string_id;  // For localization table.
+			const char* name;  // Internal name.
+			const char* localized_name;  // Loaded in LoadString from str.txt files.
+			int fn;  // Command function pointer.
+			short gm_command;  // If != 0, needs entity.IsGameMaster to be set.
+			short category;  // Help command category type.
 		};
 	}
 }
