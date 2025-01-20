@@ -456,6 +456,42 @@ namespace Zeal
 		{
 			reinterpret_cast<void(__thiscall*)(int, bool)>(0x5493b5)(0x798540, enabled);
 		}
+		const Zeal::EqStructures::EQCommand* get_command_struct(const std::string& command)
+		{
+			auto command_list = reinterpret_cast<const Zeal::EqStructures::EQCommand*>(0x00609af8);
+			for (int i = 0; i < Zeal::EqStructures::EQCommand::kNumCommands; ++i)
+			{
+				if ((command_list[i].localized_name && command == command_list[i].localized_name) ||
+					(command == command_list[i].name))
+					return &command_list[i];
+			}
+			return nullptr;
+		}
+		int get_command_function(const std::string& command)
+		{
+			auto eq_command = get_command_struct(command);
+			if (eq_command)
+				return eq_command->fn;
+			return 0;
+		}
+		std::vector<std::string> get_command_matches(const std::string& start_of_name) {
+			std::vector<std::string> result;
+			auto command_list = reinterpret_cast<const Zeal::EqStructures::EQCommand*>(0x00609af8);
+			for (int i = 0; i < Zeal::EqStructures::EQCommand::kNumCommands; ++i)
+			{
+				const char* localized_name = command_list[i].localized_name;
+				const char* name = command_list[i].name;
+				if (localized_name && (start_of_name.empty() ||
+					_strnicmp(localized_name, start_of_name.c_str(), start_of_name.length()) == 0))
+					result.push_back(command_list[i].localized_name);
+
+				if ((start_of_name.empty() || 
+					_strnicmp(name, start_of_name.c_str(), start_of_name.length()) == 0)
+					&& (!localized_name || _stricmp(localized_name, name)))
+					result.push_back(command_list[i].name);
+			}
+			return result;
+		}
 		Zeal::EqStructures::ViewActor* get_view_actor()
 		{
 			Zeal::EqStructures::ViewActor* v = *(Zeal::EqStructures::ViewActor**)Zeal::EqGame::ViewActor;

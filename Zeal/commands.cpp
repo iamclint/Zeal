@@ -362,6 +362,19 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				ZealService::get_instance()->entity_manager.get()->Dump();
 				return true;
 			}
+			if (args.size() == 3 && args[1] == "get_command")
+			{
+				auto command = Zeal::EqGame::get_command_struct(args[2]);
+				if (command)
+					Zeal::EqGame::print_chat("%s: id: %i, name: %s, localized: %s, gm: %i, category: %i, fn: 0x%08x",
+						args[2].c_str(), command->string_id, command->name ? command->name : "null",
+						command->localized_name ? command->localized_name : "null",
+						command->gm_command, command->category, command->fn);
+				else
+					Zeal::EqGame::print_chat("no matches");
+
+				return true;
+			}
 			if (args.size() == 2 && args[1] == "target_name")  // Report name parsing of current target.
 			{
 				Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();

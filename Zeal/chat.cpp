@@ -313,21 +313,15 @@ static bool is_tell_list_cycle_trigger(const std::string& text, const char* pref
     return text == std::string(prefix) || text == std::string(prefix) + " ";
 }
 
+
 // Enhance the /tell tab completion to include the raid and zone player list and also enable
 // it for /t and /consent.
-static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 key, int modifier, char keydown)
+static bool handle_tell_tab_completion(Zeal::EqUI::EditWnd* active_edit, int modifier,
+    std::vector<std::string>& matches)
 {
-    static std::vector<std::string> matches;  // Cache state for cycling through the list.
-
-    bool not_a_tab_down = (key != 0xf || !keydown || (modifier != 0 && modifier != 1));
-    if (not_a_tab_down || !active_edit->InputText.Data || active_edit->item_link_count
-         || active_edit->InputText.Data->Length < 2)
-    {
-        // Clear the cache if keydown is not a shift key (DIK_LSHIFT or DIK_RSHIFT).
-        if (keydown && (key != 0x2a && key != 0x36))
-            matches.clear();  // Flush the cached list (if any) for any other keydown press.
-        return false;
-    }
+    // First check if there is an in-progress /command match list.
+    if (!matches.empty() && matches[0].starts_with("/"))
+        return false;  // Not targets, so bail out.
 
     // First check if the start of the text is one that supports tab completion.
     // We cycle through this even if we already have matches just to re-use code.
@@ -345,7 +339,7 @@ static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 ke
             else
             {
                 auto target = get_tab_completion_target(text, prefix);
-                if (target.empty()) 
+                if (target.empty())
                     continue; // Didn't match a valid tab action for this prefix.
 
                 matches = get_all_matches(target);
@@ -387,6 +381,101 @@ static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 ke
         }
         return true;  // Break and ignore further processing of the tab key.
     }
+    return false;
+}
+
+// Utility method for finding the common prefix for command tab completion.
+static std::string find_common_prefix(const std::vector<std::string>& strings) {
+    if (strings.empty())
+        return "";
+
+    std::string prefix = strings[0];
+    for (size_t i = 1; i < strings.size(); ++i) {
+        while (!strings[i].starts_with(prefix)) {
+            prefix = prefix.substr(0, prefix.size() - 1);
+            if (prefix.empty())
+                return "";
+        }
+    }
+    return prefix;
+}
+
+// Tab command completion works more like bash shell completion.
+static bool handle_command_tab_completion(Zeal::EqUI::EditWnd* active_edit, int modifier,
+    std::vector<std::string>& matches)
+{
+    std::string text = std::string(active_edit->InputText);
+    if (text.size() < 2 || text[0] != '/' || 
+        (std::find(text.begin(), text.end(), ' ') != text.end()))
+        return false;
+
+    std::string prefix;
+    if (matches.empty())
+    {
+        matches = Zeal::EqGame::get_command_matches(text);
+        const auto& command_map = ZealService::get_instance()->commands_hook->CommandFunctions;
+        for (const auto& entry : command_map)
+        {
+            if (entry.first.starts_with(text) && 
+                std::find(matches.begin(), matches.end(), entry.first) == matches.end())
+                    matches.push_back(entry.first);
+            const auto& aliases = entry.second.aliases;
+            for (const auto& alias : aliases)
+                if (alias.starts_with(text) && 
+                    std::find(matches.begin(), matches.end(), alias) == matches.end())
+                    matches.push_back(alias);
+        }
+        if (matches.size() > 1)
+        {
+            Zeal::EqGame::print_chat("Possible matches:");
+            for (const auto& match : matches)
+                Zeal::EqGame::print_chat("  %s", match.c_str());
+            prefix = find_common_prefix(matches);
+        }
+    }
+    else if (matches.size() > 1 && text == matches.front())
+    {
+        if (modifier == 0)  // Shift not down, cycle forwards
+            std::rotate(matches.begin(), matches.begin() + 1, matches.end());
+        else
+            std::rotate(matches.rbegin(), matches.rbegin() + 1, matches.rend());
+    }
+
+    if (matches.empty())
+        Zeal::EqGame::print_chat("No matches");
+    else  // Update the text with the first match in the list.
+    {
+        std::string updated_text = prefix.empty() ? matches.front() : prefix;
+        active_edit->InputText.FreeRep();
+        active_edit->InputText = Zeal::EqUI::CXSTR(updated_text);
+        active_edit->Caret_End = active_edit->GetInputLength();
+        active_edit->Caret_Start = active_edit->Caret_End;
+    }
+    return !matches.empty();
+}
+
+
+// Handles tab completion logic for tell targets and commands.
+static bool check_for_tab_completion(Zeal::EqUI::EditWnd* active_edit, UINT32 key, int modifier, char keydown)
+{
+    static std::vector<std::string> matches;  // Cache state for cycling through the list.
+
+    bool not_a_tab_down = (key != 0xf || !keydown || (modifier != 0 && modifier != 1));
+    if (not_a_tab_down || !active_edit->InputText.Data || active_edit->item_link_count
+         || active_edit->InputText.Data->Length < 2)
+    {
+        // Clear the cache if keydown is not a shift key (DIK_LSHIFT or DIK_RSHIFT).
+        if (keydown && (key != 0x2a && key != 0x36))
+            matches.clear();  // Flush the cached list (if any) for any other keydown press.
+        return false;
+    }
+
+    if (handle_tell_tab_completion(active_edit, modifier, matches))
+        return true;
+
+    if (handle_command_tab_completion(active_edit, modifier, matches))
+        return true;
+
     matches.clear();
     return false;
 }

@@ -154,6 +154,9 @@ namespace Zeal
 		Vec3 get_view_actor_head_pos();
 		void pet_command(int cmd, short spawn_id);
 		float encum_factor();
+		const Zeal::EqStructures::EQCommand* get_command_struct(const std::string& command);
+		int get_command_function(const std::string& command);  // Returns function pointer of command.
+		std::vector<std::string> get_command_matches(const std::string& start_of_command);
 		Zeal::EqStructures::Entity* get_view_actor_entity();
 		inline Zeal::EqStructures::GuildName* guild_names = (Zeal::EqStructures::GuildName*)0x7F9C94;
 		bool collide_with_world(Vec3 start, Vec3 end, Vec3& result, char collision_type = 0x3, bool debug = false);
