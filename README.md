@@ -13,7 +13,7 @@ from the repo using github actions, providing full transparency on the contents.
 - Camera motion improvements (major improvements to third person view)
 - Additional key binds (tab targeting, strafe, pet)
 - Additional commands (melody, useitem, autoinventory)
-- Additional ui support (new gauges, bag control, looting, spellsets, targetrings, nameplates, right click to equip)
+- Additional ui support (new gauges, bag control & locking, looting, spellsets, targetrings, nameplates, right click to equip)
 - Enhanced chat (additional filters and colors, tell windows, tab completion)
 - Third party tool support (silent log messages, direct ZealPipes)
 - Integrated map (see In-game Map section below)
@@ -213,6 +213,11 @@ ___
 
 - `/camp`
   - **Description:** Auto sits before camping.
+
+- `/useitem`
+  - **Arguments:** `slot_#` (+ optional `quiet` that suppresses warnings if no click effect)
+  - **Description:** Activates a click effect on item in slot_#.
+  - **Example:** `/useitem 16 quiet` activates click effect on BP and suppresses some warnings
 
 - `/zeal`
   - **Arguments:** `version`
