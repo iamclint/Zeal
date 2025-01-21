@@ -2,6 +2,7 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
+#include "ZealSettings.h"
 
 class ui_options
 {
@@ -18,6 +19,9 @@ public:
 	DWORD GetColor(int index) const;
 	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_options();
+
+	ZealSetting<bool> setting_enable_container_lock = { false, "Zeal", "EnableContainerLock", false };
+
 private:
 	void InitUI();
 	void InitColors();

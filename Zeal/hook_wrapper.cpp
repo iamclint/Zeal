@@ -23,6 +23,21 @@ void hook::replace(int addr, int dest)
 	}
 }
 
+static void patch_relative_addresses(int trampoline, int addr, int byte_count)
+{
+	int i = 0;
+	unsigned char* opcodes = reinterpret_cast<unsigned char*>(trampoline);
+	while (i < byte_count)
+	{
+		if (opcodes[i] == 0xe8 || opcodes[i] == 0xe9)
+		{
+			int32_t* relative_address = reinterpret_cast<int32_t*>(&opcodes[i + 1]);
+			*relative_address += addr - trampoline;  // Just modify with delta.
+		}
+		i += Zeal::InstructionLength(&opcodes[i]);  // Stay opcode aligned.
+	}
+}
+
 void hook::detour(int addr, int dest)
 {
 	int orig_to_dest_offset = dest - addr - 5;
@@ -46,6 +61,7 @@ void hook::detour(int addr, int dest)
 		trampoline = (int)malloc(orig_byte_count + 5); // A jump is 5 bytes
 		VirtualProtect((LPVOID)trampoline, orig_byte_count+5, PAGE_EXECUTE_READWRITE, &old_protect);
 		mem::copy(trampoline, original_bytes, orig_byte_count);
+		patch_relative_addresses(trampoline, addr, orig_byte_count);
 		// Calculate the relative offsets
 		int trampoline_to_orig_offset = addr - trampoline - orig_byte_count;
 

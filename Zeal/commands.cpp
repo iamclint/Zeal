@@ -227,7 +227,8 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			{
 				if (char_info->Class == Zeal::EqEnums::ClassTypes::Bard && ZealService::get_instance()->melody->use_item(item_index))
 					return true;
-				Zeal::EqGame::use_item(item_index);
+				bool quiet = args.size() > 2 && args[2] == "quiet";
+				Zeal::EqGame::use_item(item_index, quiet);
 			}
 			else
 			{

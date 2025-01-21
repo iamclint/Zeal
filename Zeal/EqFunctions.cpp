@@ -1767,7 +1767,7 @@ namespace Zeal
 			oss << std::put_time(&timeinfo, "%Y-%m-%d_%H-%M-%S");
 			return oss.str();
 		}
-		bool use_item(int item_index)
+		bool use_item(int item_index, bool quiet)
 		{
 			Zeal::EqStructures::EQCHARINFO* chr = Zeal::EqGame::get_char_info();
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
@@ -1789,12 +1789,14 @@ namespace Zeal
 
 			if (!item)
 			{
-				Zeal::EqGame::print_chat("There isn't an item at %i", item_index);
+				if (!quiet)
+					Zeal::EqGame::print_chat("There isn't an item at %i", item_index);
 				return false;
 			}
 			if (item->Type != 0 || !item->Common.SpellId)
 			{
-				Zeal::EqGame::print_chat("Item %s does not have a spell attached to it.", item->Name);
+				if (!quiet)
+					Zeal::EqGame::print_chat("Item %s does not have a spell attached to it.", item->Name);
 				return false;
 			}
 			// List of checks copied from eqemu/zone/client_packet.cpp:
@@ -1803,7 +1805,8 @@ namespace Zeal
 				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectEquipClick) &&
 				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectClick2))
 			{
-				Zeal::EqGame::print_chat("Item %s does not have a click effect.", item->Name);
+				if (!quiet)
+					Zeal::EqGame::print_chat("Item %s does not have a click effect.", item->Name);
 				return false;
 			}
 			if (!self->ActorInfo || self->ActorInfo->CastingSpellId != kInvalidSpellId)
