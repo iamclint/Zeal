@@ -292,6 +292,7 @@
     <ResourceCompile Include="Zeal.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CHANGELOG.md" />
     <None Include="..\README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
