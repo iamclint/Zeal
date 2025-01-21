@@ -293,7 +293,7 @@ namespace Zeal
 			/* 0x0010 */ BYTE FadedAlpha;  // Alpha transparency value when faded
 			/* 0x0011 */ BYTE IsNotFaded;  // Set to 0 when faded, 1 when not faded
 			/* 0x0012 */ BYTE IsLocked;
-			/* 0x0013 */ BYTE Unknown0013;
+			/* 0x0013 */ BYTE LockEnable;  // Enable Lock option in CContextMenuManager::WarnDefaultMenu.
 			/* 0x0014 */ PVOID Unknown0014;
 			/* 0x0018 */ DWORD Unknown0018;
 			/* 0x001C */ struct EQWND* ParentWnd;
