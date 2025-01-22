@@ -184,6 +184,8 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_self();
 		Zeal::EqStructures::Entity* get_pet();
 		Zeal::EqStructures::SPELLMGR* get_spell_mgr();
+		int get_spell_level(int spell_id);
+		const char* get_spell_name(int spell_id);
 		Zeal::EqStructures::Entity* get_controlled();
 		Zeal::EqStructures::CameraInfo* get_camera();
 		Zeal::EqStructures::Entity* get_entity_by_id(short id);  // Returns nullptr if invalid id.

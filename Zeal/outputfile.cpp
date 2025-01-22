@@ -67,7 +67,7 @@ static bool ItemIsStackable(Zeal::EqStructures::EQITEMINFO* item)
   return ((item->Common.IsStackable) && (item->Common.SpellId == 0));
 }
 
-void OutputFile::export_inventory(std::vector<std::string>& args)
+void OutputFile::export_inventory(const std::vector<std::string>& args)
 {
   Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 
@@ -193,27 +193,26 @@ void OutputFile::export_inventory(std::vector<std::string>& args)
     oss << "Bank-Coin" << t << "Currency" << t << 0 << t << coin << t << 0 << std::endl;
   }
 
-  std::string optional_name = "";
+  std::string optional_name = "";  // Blank optional_name results in "<char_name>-Inventory.txt".
   if (args.size() > 2) {
     optional_name = args[2];
   }
   write_to_file(oss.str(), "Inventory", optional_name);
 }
 
-// This function on the Titanium client prints out the spell level and actual name of the spell.
-// Unfortuantely, we currently lack functionality to figure out spell data solely based off of SpellId,
-// so we'll settle for just printing out that information for now.
-void OutputFile::export_spellbook(std::vector<std::string>& args)
+void OutputFile::export_spellbook(const std::vector<std::string>& args)
 {
   Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 
   std::stringstream oss;
-  oss << "Index\tSpell Id" << std::endl;
+  oss << "Index\tSpellId\tLevel\tName" << std::endl;
   for (size_t i = 0; i < EQ_NUM_SPELL_BOOK_SPELLS; ++i) {
     WORD SpellId = self->CharInfo->SpellBook[i];
-    // EQITEMINFO->EquipSlot value only updates when a load happens. Don't use it for this.
-    if (SpellId != USHRT_MAX) {
-      oss << i << "\t" << SpellId << std::endl;
+    int Level = Zeal::EqGame::get_spell_level(SpellId);
+    const char* Name = Zeal::EqGame::get_spell_name(SpellId);
+    Name = Name ? Name : "Unknown";
+    if (SpellId && SpellId != USHRT_MAX) {
+      oss << i << "\t" << SpellId << "\t" << Level << "\t" << Name << std::endl;
     }
   }
 
