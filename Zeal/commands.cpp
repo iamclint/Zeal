@@ -317,6 +317,10 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		[](std::vector<std::string>& args) {
 			if (Zeal::EqGame::is_in_game() && !Zeal::EqGame::EqGameInternal::IsNoSlashWndActive())
 				Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
+			if (ZealService::get_instance()->outputfile->setting_export_on_camp.get()) {
+				ZealService::get_instance()->outputfile->export_inventory();
+				ZealService::get_instance()->outputfile->export_spellbook();
+			}
 			return false;
 		});
 	Add("/showhelm", { "/helm" }, "Toggles your show helm setting on/off.",

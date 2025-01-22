@@ -1880,6 +1880,31 @@ namespace Zeal
 		{
 			return *(Zeal::EqStructures::SPELLMGR**)0x805CB0;
 		}
+		int get_spell_level(int spell_id)
+		{
+			Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+			const auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
+			if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS || !spell_mgr || !char_info)
+				return -1;
+
+			const auto* spell = spell_mgr->Spells[spell_id];
+			if (!spell)
+				return -1;
+
+			return spell->ClassLevel[char_info->Class];
+		}
+		const char* get_spell_name(int spell_id) 
+		{
+			const auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
+			if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS || !spell_mgr)
+				return nullptr;
+
+			const auto* spell = spell_mgr->Spells[spell_id];
+			if (!spell)
+				return nullptr;
+
+			return spell->Name;
+		}
 		Zeal::EqStructures::Entity* get_self()
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::Self;
