@@ -45,7 +45,8 @@ public:
 	ZealSetting<bool> setting_show_pet_owner_name = { false, "Zeal", "NameplateShowPetOwnerName", false };
 	ZealSetting<bool> setting_target_marker = { false, "Zeal", "NameplateTargetMarker", false };
 	ZealSetting<bool> setting_target_health = { false, "Zeal", "NameplateTargetHealth", false };
-	ZealSetting<bool> setting_target_blink = { false, "Zeal", "NameplateTargetBlink", false };
+	ZealSetting<bool> setting_target_blink = { true, "Zeal", "NameplateTargetBlink", false };
+	ZealSetting<bool> setting_attack_only = { false, "Zeal", "NameplateAttackOnly", false };
 	ZealSetting<bool> setting_inline_guild = { false, "Zeal", "NameplateInlineGuild", false };
 
 	// Advanced fonts

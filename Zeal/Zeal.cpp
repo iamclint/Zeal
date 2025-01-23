@@ -50,20 +50,33 @@ ZealService::ZealService()
 	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
 	mem_check(__LINE__);
 	give = std::make_shared<NPCGive>(this, ini.get());
+	mem_check(__LINE__);  // TODO: Added add'l mem_checks between NPCGive and Alarm after seeing coarser checks trip once.
 	game_patches = std::make_shared<patches>();
+	mem_check(__LINE__);
 	nameplate = std::make_shared<NamePlate>(this, ini.get());
+	mem_check(__LINE__);
 	tells = std::make_shared<TellWindows>(this, ini.get());
+	mem_check(__LINE__);
 	helm = std::make_shared<HelmManager>(this);
-
+	mem_check(__LINE__);
 	entity_manager = std::make_shared<EntityManager>(this, ini.get());
+	mem_check(__LINE__);
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());
+	mem_check(__LINE__);
 	cycle_target = std::make_shared<CycleTarget>(this);
+	mem_check(__LINE__);
 	experience = std::make_shared<Experience>(this);
+	mem_check(__LINE__);
 	chat_hook = std::make_shared<chat>(this, ini.get());
+	mem_check(__LINE__);
 	chatfilter_hook = std::make_shared<chatfilter>(this, ini.get());
+	mem_check(__LINE__);
 	outputfile = std::make_shared<OutputFile>(this);
+	mem_check(__LINE__);
 	buff_timers = std::make_shared<BuffTimers>(this);
+	mem_check(__LINE__);
 	movement = std::make_shared<PlayerMovement>(this, binds_hook.get(), ini.get());
+	mem_check(__LINE__);
 	alarm = std::make_shared<Alarm>(this);
 	mem_check(__LINE__);
 	netstat = std::make_shared<Netstat>(this, ini.get());

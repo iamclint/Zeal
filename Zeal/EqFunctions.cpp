@@ -1546,8 +1546,8 @@ namespace Zeal
 			return rEnts;
 		}
 
-		float get_target_attack_fade_factor(float speed_factor) {
-			if (!(bool)(*(BYTE*)0x7f6ffe))  // Auto attack enabled.
+		float get_target_blink_fade_factor(float speed_factor, bool auto_attack_only) {
+			if (auto_attack_only && !(bool)(*(BYTE*)0x7f6ffe))  // Auto attack disabled.
 				return 1.0f; // No fading.
 
 			// Calculate a fraction of the cycle time. Phase alignment doesn't matter, so just

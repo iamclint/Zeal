@@ -401,7 +401,7 @@ void TargetRing::callback_render() {
 	// ### Auto Attack Indicator (fade/unfade target's color while autoattack turned on)###
 	if (attack_indicator.get()) // auto attack is enabled
 	{
-		float fadeFactor = Zeal::EqGame::get_target_attack_fade_factor(flash_speed.get());
+		float fadeFactor = Zeal::EqGame::get_target_blink_fade_factor(flash_speed.get(), true);
 		if (fadeFactor < 1.0f) {
 			// Extract the ARGB components from the original color
 			BYTE originalA = (originalColor >> 24) & 0xFF;
