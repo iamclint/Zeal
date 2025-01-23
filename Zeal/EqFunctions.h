@@ -202,7 +202,11 @@ namespace Zeal
 		int get_showname(); // Holds value of /showname command.
 		std::string class_name_short(int class_id);
 		std::string class_name(int class_id);
+		static constexpr int kInvalidZoneId = 0;  // get_index_from_zone_name() returns 0 if no matches.
+		static constexpr int kNumZoneIds = 1000;  // 0 = invalid, 999 = last reliable entry in EQWorldData
 		std::string get_full_zone_name(int zone_id);  // EQWorldData::GetFullZoneName()
+		std::string get_zone_name_from_index(int zone_id); // EqWorldData::GetZoneNameFromIndex()
+		int get_index_from_zone_name(const std::string& name);  // EqWorldData::GetIndexFromZoneName()
 		std::string get_class_desc(int class_id);  // CEverQuest::GetClassDesc()
 		std::string get_title_desc(int class_id, int aa_rank, int gender);  // CEverQuest::GetTitleDesc()
 		std::string get_player_guild_name(short guild_id); // GetPlayerGuildName()

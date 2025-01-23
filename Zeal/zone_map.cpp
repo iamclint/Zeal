@@ -1812,7 +1812,7 @@ void ZoneMap::add_dynamic_label(const std::string& label_text,
 const ZoneMapData* ZoneMap::get_zone_map(int zone_id) {
     // Based on map_data_mode uses internal data and/or external data.
     const ZoneMapData* internal_map = get_zone_map_data(zone_id);
-    if (!internal_map || (map_data_mode == MapDataMode::kInternal))
+    if (map_data_mode == MapDataMode::kInternal)
         return internal_map;
 
     auto it = map_data_cache.find(zone_id);
@@ -1822,21 +1822,27 @@ const ZoneMapData* ZoneMap::get_zone_map(int zone_id) {
         else
             return it->second->zone_map_data.get();  // Note: Sharing a naked pointer here.
 
-    // Not in cache, so try to load it. Note the internal_map->name field is required.
+    // Not in cache, so try to load it. Need a name, so check zone map data or client world data.
+    std::string short_name = internal_map ?
+        std::string(internal_map->name) : Zeal::EqGame::get_zone_name_from_index(zone_id);
+    if (short_name.empty())
+        return internal_map;
+
+    // Note the internal_map->name field is required.
     auto new_map = std::make_unique<CustomMapData>();
 
     // Primary file must exist.
-    std::string filename = "map_files/" + std::string(internal_map->name) + ".txt";
+    std::string filename = "map_files/" + short_name + ".txt";
     if (!add_map_data_from_file(filename, *new_map)) {
         map_data_cache[zone_id] = nullptr;  // Flag it as a failed load.
         return internal_map;
     }
 
     // Optional data from a second file (typically poi's).
-    std::string filename_1 = "map_files/" + std::string(internal_map->name) + "_1.txt";
+    std::string filename_1 = "map_files/" + short_name + "_1.txt";
     add_map_data_from_file(filename_1, *new_map);
 
-    if (map_data_mode == MapDataMode::kBoth)
+    if (map_data_mode == MapDataMode::kBoth && internal_map)
         add_map_data_from_internal(*internal_map, *new_map);
     else if (new_map->lines.size() == 0) {
         map_data_cache[zone_id] = nullptr;  // Flag it as a failed load.
@@ -1844,7 +1850,7 @@ const ZoneMapData* ZoneMap::get_zone_map(int zone_id) {
     }
 
     // Analyzes all added data to populate the final ZoneMapData structure.
-    assemble_zone_map(internal_map->name, *new_map);
+    assemble_zone_map(short_name.c_str(), *new_map);
 
     map_data_cache.emplace(zone_id, std::move(new_map));
     return map_data_cache[zone_id]->zone_map_data.get();
@@ -2758,6 +2764,11 @@ void ZoneMap::parse_zoom(const std::vector<std::string>& args) {
 }
 
 int ZoneMap::find_zone_id(const std::string& zone_name) const {
+    // First search the client's available zones for a match.
+    int index = Zeal::EqGame::get_index_from_zone_name(zone_name);
+    if (index != Zeal::EqGame::kInvalidZoneId)
+        return index;
+
     // This doesn't happen frequently, so just do a brute force search for the matching name.
     for (int i = 0; i < 1200; ++i) {
         const auto* zone_map_data = get_zone_map_data(i);
@@ -2795,6 +2806,40 @@ void ZoneMap::parse_show_zone(const std::vector<std::string>& args) {
         
     Zeal::EqGame::print_chat("Usage: /map show_zone <short_name> (blank name resets to normal mode)");
 }
+
+void ZoneMap::parse_world_data(const std::vector<std::string>& args) {
+    if (args.size() == 3 && args[2] == "dump") {
+        for (int i = 0; i < Zeal::EqGame::kNumZoneIds; ++i) {
+            std::string short_name = Zeal::EqGame::get_zone_name_from_index(i);
+            std::string long_name = Zeal::EqGame::get_full_zone_name(i);
+            if (!short_name.empty()) {
+                Zeal::EqGame::print_chat("[%i]: %s, %s", i, short_name.c_str(), long_name.c_str());
+                int reverse_lookup = Zeal::EqGame::get_index_from_zone_name(short_name.c_str());
+                if (reverse_lookup != i)
+                    Zeal::EqGame::print_chat("[%i]: Reverse mismatch %i", i, reverse_lookup);
+            }
+        }
+        return;
+    }
+    if (args.size() == 4 && args[2] == "search") {
+        Zeal::EqGame::print_chat("Searching for %s", args[3].c_str());
+        for (int i = 0; i < Zeal::EqGame::kNumZoneIds; ++i) {
+            std::string short_name = Zeal::EqGame::get_zone_name_from_index(i);
+            std::string long_name = Zeal::EqGame::get_full_zone_name(i);
+            transform(short_name.begin(), short_name.end(), short_name.begin(), ::tolower);
+            transform(long_name.begin(), long_name.end(), long_name.begin(), ::tolower);
+            std::string search = args[3];
+            transform(search.begin(), search.end(), search.begin(), ::tolower);
+            if (short_name.find(search) != std::string::npos ||
+                long_name.find(search) != std::string::npos)
+                Zeal::EqGame::print_chat("[%i]: %s, %s", i, short_name.c_str(), long_name.c_str());
+        }
+        return;
+    }
+
+    Zeal::EqGame::print_chat("Usage: /map world dump, /map world search <substring>");
+}
+
 
 void ZoneMap::parse_grid(const std::vector<std::string>& args) {
     int grid_pitch = 0;
@@ -3053,6 +3098,9 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (args[1] == "show_zone") {
         parse_show_zone(args);
     }
+    else if (args[1] == "world") {
+        parse_world_data(args);
+    }
     else if (args[1] == "save_ini") {
         Zeal::EqGame::print_chat("Saving current map settings");
         save_ini();
@@ -3075,7 +3123,7 @@ bool ZoneMap::parse_command(const std::vector<std::string>& args) {
     else if (!parse_shortcuts(args)) {
         Zeal::EqGame::print_chat("Usage: /map [on|off|size|alignment|marker|background|zoom|poi|labels|level|]");
         Zeal::EqGame::print_chat("Usage: /map [show_group|show_raid|show_zone|save_ini|grid|ring|font]");
-        Zeal::EqGame::print_chat("Beta: /map [external|data_mode|always_center]");
+        Zeal::EqGame::print_chat("Usage: /map [external|data_mode|world]");
         Zeal::EqGame::print_chat("Shortcuts: /map <y> <x>, /map 0, /map <poi_search_term>");
         Zeal::EqGame::print_chat("Examples: /map 100 -200 (drops a marker at loc 100, -200), /map 0 (clears marker)");
     }

@@ -2273,10 +2273,23 @@ namespace Zeal
 		std::string get_full_zone_name(int zone_id) {
 			const int fn_GetFullZoneName = 0x00523e49;
 			void* pWorld = *reinterpret_cast<void**>(0x007F9494);
-			char buffer[512];  // Size used in client SetNameSpriteState.
-			buffer[0] = 0;
+			char buffer[512];  // LongName is only 0x80 in EQZONEINFO.
+			buffer[0] = 0;  // Returns "Unknown Zone" if invalid index 
 			reinterpret_cast<void(__thiscall*)(void* this_world, int zone_id, char* buffer)>(fn_GetFullZoneName)(pWorld, zone_id, buffer);
 			return std::string(buffer);
+		}
+		std::string get_zone_name_from_index(int zone_id) {
+			const int fn_GetZoneNameFromIndex = 0x00523f73;
+			void* pWorld = *reinterpret_cast<void**>(0x007F9494);
+			char buffer[512];  // ShortName is only 0x20 in EQZONEINFO.
+			if (!reinterpret_cast<bool(__thiscall*)(void* this_world, int zone_id, char* buffer)>(fn_GetZoneNameFromIndex)(pWorld, zone_id, buffer))
+				buffer[0] = 0;  // Return an empty buffer if not found.
+			return std::string(buffer);
+		}
+		int get_index_from_zone_name(const std::string& name) {
+			const int fn_GetIndexFromZoneName = 0x00523fa4;  // Returns 0 if not found.
+			void* pWorld = *reinterpret_cast<void**>(0x007F9494);
+			return reinterpret_cast<int(__thiscall*)(void* this_world, const char* buffer)>(fn_GetIndexFromZoneName)(pWorld, name.c_str());
 		}
 		std::string get_class_desc(int class_id) {
 			const int fn_GetClassDesc = 0x0052d5f1;

@@ -549,14 +549,18 @@ button click. The external window also supports a middle mouse button click to d
 
 * Key bind: "Toggle Map Interactive Mode" - toggles internal overlay between transparent and interactive
 
-#### Show zone mode
+#### Show zone mode and world data search
 Zone maps other than the player's current location can be explored using the show_zone command. The
 target zone is specified using the zone's short name (like /who all). Interactive mode, levels, grid,
 labels, and poi search all work for the selected zone.
 
+The world command allows browsing the available zone names in EQWorldData. See command examples below.
+
 * Command examples
   - `/map show_zone gukbottom` shows the zone map for the Ruins of Old Guk
   - `/map show_zone` exits show_zone mode
+  - `/map world dump` prints the zone ids, short names, and long names of all available zones
+  - `/map world search karan` prints all available zones that contain 'karan' in their short or long names
 
 #### Map grid
 A simple background grid aligned at a selectable pitch is available. The x == 0 and y == 0 axes
