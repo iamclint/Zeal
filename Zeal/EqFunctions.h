@@ -163,7 +163,7 @@ namespace Zeal
 		void get_camera_location();
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable = true);
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor);
-		float get_target_attack_fade_factor(float speed_factor);  // Returns 0 to 1.0f if autoattacking.
+		float get_target_blink_fade_factor(float speed_factor, bool auto_attack_only);  // Returns 0 to 1.0f.
 		bool is_view_actor_me();
 		void print_chat_hook(const char* format, ...);
 		void print_chat(std::string data);

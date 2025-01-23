@@ -90,6 +90,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"targetmarker", &setting_target_marker },
 		{"targethealth", &setting_target_health },
 		{"targetblink", &setting_target_blink },
+		{"attackonly", &setting_attack_only },
 		{"inlineguild", &setting_inline_guild },
 		{"zealfont", &setting_zeal_fonts },
 		{"dropshadow", &setting_drop_shadow },
@@ -120,7 +121,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	}
 
 	Zeal::EqGame::print_chat("Usage: /nameplate option where option is one of");
-	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, charselect");
+	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, attackonly, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, showpetownername, targetmarker, targethealth, inlineguild");
 	Zeal::EqGame::print_chat("font:  zealfont, dropshadow");
 }
@@ -358,7 +359,8 @@ bool NamePlate::handle_SetNameSpriteTint(Zeal::EqStructures::Entity* entity)
 	{
 		// Share the flash speed slider with the target_ring so they aren't beating.
 		float flash_speed = ZealService::get_instance()->target_ring->flash_speed.get();
-		float fade_factor = Zeal::EqGame::get_target_attack_fade_factor(flash_speed);
+		float fade_factor = Zeal::EqGame::get_target_blink_fade_factor(flash_speed,
+			setting_attack_only.get());
 		if (fade_factor < 1.0f) {
 			BYTE faded_red = static_cast<BYTE>(((color >> 16) & 0xFF) * fade_factor);
 			BYTE faded_green = static_cast<BYTE>(((color >> 8) & 0xFF) * fade_factor);

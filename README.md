@@ -392,7 +392,8 @@ The Zeal Nameplate options tab is the primary interface, but the redundant comma
 * `/nameplate showpetownername` - Toggles Players Pet Owner on Nameplate on and off
 * `/nameplate charselect` - Toggles Nameplate Choices Shown at Character Selection Screen on and off
 * `/nameplate targetcolor` - Toggles Target Nameplate Color on and off
-* `/nameplate targetblink` - Toggles auto-attack indicator on and off
+* `/nameplate targetblink` - Toggles blinking of target nameplate on and off (rate controlled by targetring slider)
+* `/nameplate attackonly` - Limits blinking of target nameplate to only when auto-attack is on
 * `/nameplate targetmarker` - Toggles Target Nameplate Marker on and off
 * `/nameplate targethealth` - Toggles Target Nameplate Health on and off
 * `/nameplate targethealth` - Toggles Target Nameplate Health on and off
