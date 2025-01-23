@@ -619,6 +619,10 @@ namespace Zeal
 			{
 				return reinterpret_cast<void(__thiscall*)(EQCHARINFO*, UINT, WORD)>(0x4cb510)(this, reason, spell_id);
 			}
+			bool can_i_see_invis() // CanISeeInvis()
+			{
+				return reinterpret_cast<bool(__thiscall*)(EQCHARINFO*)>(0x004c0d02)(this);
+			}
 			/* 0x0000 */ BYTE Unknown0000[2];
 			/* 0x0002 */ CHAR Name[64]; // [0x40]
 			/* 0x0042 */ CHAR LastName[70]; // [0x46] ; surname or title
