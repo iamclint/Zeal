@@ -136,7 +136,7 @@ private:
 		std::unique_ptr<ZoneMapData> zone_map_data;
 	};
 
-	static constexpr int kInvalidZoneId = 0;
+	static constexpr int kInvalidZoneId = Zeal::EqGame::kInvalidZoneId;  // 0 == invalid.
 	static constexpr int kInvalidScreenValue = 0x7fff;  // EQ game sets mouse abs to this when not focused.
 	static constexpr int kInvalidPositionValue = 0x7fff;
 	static constexpr int kDefaultGridPitch = 1000;
@@ -164,6 +164,7 @@ private:
 	void parse_show_group(const std::vector<std::string>& args);
 	void parse_show_raid(const std::vector<std::string>& args);
 	void parse_show_zone(const std::vector<std::string>& args);
+	void parse_world_data(const std::vector<std::string>& args);
 	void parse_grid(const std::vector<std::string>& args);
 	void parse_ring(const std::vector<std::string>& args);
 	void parse_font(const std::vector<std::string>& args);
