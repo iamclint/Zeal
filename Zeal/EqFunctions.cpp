@@ -1499,14 +1499,18 @@ namespace Zeal
 			int* cObject = *(int**)(disp + 0x2CDC);
 			Zeal::EqStructures::Entity* current_ent;
 			
+			auto char_info = Zeal::EqGame::get_char_info();
+			bool can_see_invis = char_info && char_info->can_i_see_invis();
 			std::vector<Zeal::EqStructures::Entity*> rEnts;
 			for (int i = 0; i < ent_count; i++)
 			{
-				if (*cObject)
+				if (cObject[i])
 				{
 					bool add_to_list = !only_targetable;
-					current_ent = *(Zeal::EqStructures::Entity**)(*cObject + 0x60);
-					if (current_ent && current_ent->Position.Dist2D(Zeal::EqGame::get_self()->Position)<= mdist)
+					current_ent = *(Zeal::EqStructures::Entity**)(cObject[i] + 0x60);
+					if (!current_ent || current_ent == self || current_ent->TargetType > 0x40)
+						continue;  // Skip self or invalid target spawn types.
+					if (current_ent->Position.Dist2D(self->Position)<= mdist)
 					{
 						if (only_targetable)
 						{
@@ -1532,30 +1536,14 @@ namespace Zeal
 								i++;
 							}
 						}
-						if (current_ent != EqGame::get_self() && !current_ent->IsHidden && add_to_list)
+						bool is_visible = (current_ent->IsHidden != 0x01) ||
+							(can_see_invis && (self->IsGameMaster || !current_ent->IsGameMaster));
+						if (add_to_list && is_visible)
 							rEnts.push_back(current_ent);
 					}
 				}
-				cObject += 1;
 			}
 			return rEnts;
-		}
-
-		bool can_target(Zeal::EqStructures::Entity* ent)
-		{
-			bool rval=1;
-			DWORD addr = 0x4afa90;
-			DWORD self = (DWORD)EqGame::get_self();
-			DWORD x = (DWORD)EqGame::get_display();
-			__asm
-			{
-				push ent
-				push self
-				mov ecx, x
-				call addr
-				mov rval, al
-			}
-			return rval;
 		}
 
 		float get_target_attack_fade_factor(float speed_factor) {
@@ -2311,10 +2299,21 @@ namespace Zeal
 		}
 		bool is_targetable(Zeal::EqStructures::Entity* ent)
 		{
-			
-			if (!ent->IsHidden && !ent->ActorInfo->IsInvisible)
-				return true;
-			return false;
+			if (!ent || !ent->ActorInfo || ent->ActorInfo->IsInvisible || ent->TargetType > 0x40)
+				return false;
+
+			if (ent->IsHidden == 0x01)
+			{
+				auto self = Zeal::EqGame::get_self();
+				auto char_info = Zeal::EqGame::get_char_info();
+				if (self && char_info)
+				{
+					bool can_see_invis = char_info && char_info->can_i_see_invis();
+					return (can_see_invis && (self->IsGameMaster || !ent->IsGameMaster));
+				}
+				return false;
+			}
+			return true;
 		}
 		bool is_in_game()
 		{

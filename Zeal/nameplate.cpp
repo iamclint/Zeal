@@ -200,9 +200,11 @@ void NamePlate::render_ui()
 	// Go through world visible list. 
 	const float kMaxDist = 400; // Quick testing of client extended nameplates was ~ 375.
 	auto visible_entities = Zeal::EqGame::get_world_visible_actor_list(kMaxDist, false);
-	if (*Zeal::EqGame::camera_view != Zeal::EqEnums::CameraView::FirstPerson)
-	visible_entities.push_back(Zeal::EqGame::get_self());  // Add self nameplate.
-		
+	auto self = Zeal::EqGame::get_self();
+	if (self && *Zeal::EqGame::camera_view != Zeal::EqEnums::CameraView::FirstPerson &&
+		!Zeal::EqGame::EqGameInternal::is_invisible(self, self))
+		visible_entities.push_back(self);  // Add self nameplate.
+
 	std::vector<RenderInfo> render_list;
 	for (const auto& entity : visible_entities)
 	{
@@ -460,7 +462,7 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 		return std::string();
 
 	if (is_self && setting_x.get())
-		return std::string((entity.IsHidden) ? "(X)" : "X");
+		return std::string((entity.IsHidden == 0x01) ? "(X)" : "X");
 
 	if (entity.Race >= 0x8cd)  // Some sort of magic higher level races w/out name trimming.
 		return std::string(entity.Name);
@@ -495,10 +497,10 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 	}
 
 	// Finally work on the primary player name with embellishments.
-	if (entity.IsHidden)
+	if (entity.IsHidden == 0x01)  // Client code only does () on normal invisibility.
 		text += "(";
 	text += Zeal::EqGame::trim_name(entity.Name);
-	if (entity.IsHidden)
+	if (entity.IsHidden == 0x01)
 		text += ")";
 
 	if (show_name > 1 && entity.LastName[0]) {

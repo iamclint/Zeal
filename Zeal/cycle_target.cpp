@@ -36,7 +36,7 @@ Zeal::EqStructures::Entity* CycleTarget::get_next_ent(float dist, byte type)
 	{
 		if (ent->Unknown0000 != 3)
 			continue;
-		if (!ent->IsHidden && ent->Type == type && ent->Level>0 && ent->TargetType<66)
+		if (ent->Type == type && ent->Level > 0)
 		{
 			if (ent->PetOwnerSpawnId)
 			{
@@ -81,7 +81,7 @@ Zeal::EqStructures::Entity* CycleTarget::get_nearest_ent(float dist, byte type)
 			continue;
 		if (ent->ActorInfo && ent->ActorInfo->IsInvisible)
 			continue;
-		if (!ent->IsHidden && ent->Type == type && ent->Level > 0 && ent->TargetType < 66)
+		if (ent->Type == type && ent->Level > 0)
 		{
 			if (ent->PetOwnerSpawnId)
 			{

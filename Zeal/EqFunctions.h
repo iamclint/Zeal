@@ -47,7 +47,7 @@ namespace Zeal
 
 			static mem::function<void __fastcall(int t, int unused, const char* data, short color, bool un)> print_chat = 0x537f99;
 			//static mem::function<void __stdcall(const char* data)> log = 0x5240dc;
-			static mem::function<char __fastcall(int display, int unused, Zeal::EqStructures::Entity*, Zeal::EqStructures::Entity*)> can_target = 0x4afa90;
+			static mem::function<char __stdcall(Zeal::EqStructures::Entity* viewer, Zeal::EqStructures::Entity* target)> is_invisible = 0x4afa90;  // can_target
 			static mem::function<char __fastcall(int, int, int, int, float*, float, UINT32)> get_world_visible_actor_list = 0x7f9850;
 			static mem::function<char __fastcall(int, int, int, int, float*, float, UINT32)> get_camera_location = 0x7f99d4;
 			static mem::function<char __fastcall(int, int, float, float, float, float, float, float, float*, float*, float* , char) > s3dCollideSphereWithWorld = 0x4b3c45;
@@ -163,7 +163,6 @@ namespace Zeal
 		void get_camera_location();
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable = true);
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor);
-		bool can_target(Zeal::EqStructures::Entity* ent);
 		float get_target_attack_fade_factor(float speed_factor);  // Returns 0 to 1.0f if autoattacking.
 		bool is_view_actor_me();
 		void print_chat_hook(const char* format, ...);
