@@ -2299,7 +2299,7 @@ namespace Zeal
 		}
 		bool is_targetable(Zeal::EqStructures::Entity* ent)
 		{
-			if (!ent || !ent->ActorInfo || ent->ActorInfo->IsInvisible)
+			if (!ent || !ent->ActorInfo || ent->ActorInfo->IsInvisible || ent->TargetType > 0x40)
 				return false;
 
 			if (ent->IsHidden == 0x01)
@@ -2311,8 +2311,9 @@ namespace Zeal
 					bool can_see_invis = char_info && char_info->can_i_see_invis();
 					return (can_see_invis && (self->IsGameMaster || !ent->IsGameMaster));
 				}
+				return false;
 			}
-			return false;
+			return true;
 		}
 		bool is_in_game()
 		{
