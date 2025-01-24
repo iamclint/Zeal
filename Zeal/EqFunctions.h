@@ -161,6 +161,7 @@ namespace Zeal
 		inline Zeal::EqStructures::GuildName* guild_names = (Zeal::EqStructures::GuildName*)0x7F9C94;
 		bool collide_with_world(Vec3 start, Vec3 end, Vec3& result, char collision_type = 0x3, bool debug = false);
 		void get_camera_location();
+		bool is_view_actor_invisible(Zeal::EqStructures::Entity* entity);
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable = true);
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor);
 		float get_target_blink_fade_factor(float speed_factor, bool auto_attack_only);  // Returns 0 to 1.0f.

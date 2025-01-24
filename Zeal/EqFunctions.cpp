@@ -1469,6 +1469,12 @@ namespace Zeal
 			return size_mod;
 		}
 
+		bool is_view_actor_invisible(Zeal::EqStructures::Entity* entity) {
+			// Replicates logic of t3dIsActorInvisible
+			if (entity && entity->ActorInfo && entity->ActorInfo->ViewActor_)
+				return (entity->ActorInfo->ViewActor_->Flags & 0x40000000) != 0;
+		}
+
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable)
 		{
 			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
@@ -1508,8 +1514,11 @@ namespace Zeal
 				{
 					bool add_to_list = !only_targetable;
 					current_ent = *(Zeal::EqStructures::Entity**)(cObject[i] + 0x60);
-					if (!current_ent || current_ent == self || current_ent->TargetType > 0x40)
-						continue;  // Skip self or invalid target spawn types.
+					if (!current_ent || current_ent == self || current_ent->StructType != 0x03 ||
+						current_ent->TargetType > 0x40 || !current_ent->ActorInfo ||
+						current_ent->ActorInfo->IsInvisible || is_view_actor_invisible(current_ent))
+						continue;  // Skip self, invalid struct or target spawn types, non-visible.
+
 					if (current_ent->Position.Dist2D(self->Position)<= mdist)
 					{
 						if (only_targetable)
@@ -2312,7 +2321,8 @@ namespace Zeal
 		}
 		bool is_targetable(Zeal::EqStructures::Entity* ent)
 		{
-			if (!ent || !ent->ActorInfo || ent->ActorInfo->IsInvisible || ent->TargetType > 0x40)
+			if (!ent || ent->StructType != 0x03 || !ent->ActorInfo || ent->ActorInfo->IsInvisible
+				|| ent->TargetType > 0x40 || is_view_actor_invisible(ent))
 				return false;
 
 			if (ent->IsHidden == 0x01)

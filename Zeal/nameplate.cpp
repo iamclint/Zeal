@@ -210,7 +210,7 @@ void NamePlate::render_ui()
 	for (const auto& entity : visible_entities)
 	{
 		// Added Unknown0003 check due to some bad results with 0x05 at startup causing a crash.
-		if (!entity || entity->Unknown0000 != 0x03 || !entity->ActorInfo || !entity->ActorInfo->DagHeadPoint)
+		if (!entity || entity->StructType != 0x03 || !entity->ActorInfo || !entity->ActorInfo->DagHeadPoint)
 			continue;
 		auto it = nameplate_info_map.find(entity);
 		if (it == nameplate_info_map.end())
