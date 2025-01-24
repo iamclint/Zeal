@@ -353,10 +353,10 @@ namespace Zeal
 
 		struct ViewActor
 		{
-			/* 0x0000 */ DWORD Unknown0000;
+			/* 0x0000 */ DWORD Type;  // Checked if it is set to 0x18 in GetClickedActor()
 			/* 0x0004 */ DWORD Unknown0004;
 			/* 0x0008 */ DWORD Unknown0008;
-			/* 0x000C */ DWORD Unknown000C;
+			/* 0x000C */ DWORD Flags;  // Bit 0x40000000 = invisible
 			/* 0x0010 */ Vec3 Position;
 			/* 0x001C */ DWORD Unknown001C;
 			/* 0x0020 */ DWORD Unknown0020;
@@ -488,8 +488,9 @@ namespace Zeal
 			/* 0x0160 */ DWORD FizzleTimeout;   // Set in the OP_MemorizeSpell handler.
 			/* 0x0164 */ BYTE Unknown0164[0x20];
 			/* 0x0184 */ DWORD Animation;
-			/* 0x0188 */ BYTE Unknown0188[16];
-			/* 0x0198 */ int Unsure_Strafe_Calc;
+			/* 0x0188 */ BYTE Unknown0188[0xc];
+			/* 0x0194 */ struct Entity* Entity0194;  // Entity is linked in UpdatePlayerVisibility.
+			/* 0x0198 */ struct Entity* Entity0198;  // Appears to be a horse entity in UpdatePlayerVisiblity.
 			/* 0x019C */ BYTE Unknown019c[24];
 			/* 0x01B4 */ DWORD IsInvisible; // NPCs only? used by /hidecorpses command
 			/* 0x01B8 */ BYTE Unknown01B8[10];
@@ -761,7 +762,7 @@ namespace Zeal
 				if (this && this->StandingState != new_stance)
 					reinterpret_cast<void(__thiscall*)(Entity*, unsigned char)>(0x50be3c)(this, new_stance);
 			}
-			/* 0x0000 */ BYTE Unknown0000; // always equals 0x03
+			/* 0x0000 */ BYTE StructType; // If != 0x03, this struct is invalid (e.g. bad ActorInfo pointer).
 			/* 0x0001 */ CHAR Name[30]; // [0x1E]
 			/* 0x001F */ BYTE Unknown001F[37];
 			/* 0x0044 */ DWORD ZoneId; // EQ_ZONE_ID_x

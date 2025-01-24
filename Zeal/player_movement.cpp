@@ -150,7 +150,7 @@ void PlayerMovement::callback_main()
 			*Zeal::EqGame::strafe_speed *= .5f;
 		if (controlled_player->ActorInfo && controlled_player->ActorInfo->MovementSpeedModifier < 0)
 			*Zeal::EqGame::strafe_speed *= .5f;
-		if (controlled_player->ActorInfo && controlled_player->ActorInfo->Unsure_Strafe_Calc != 0)
+		if (controlled_player->ActorInfo && controlled_player->ActorInfo->Entity0198 != 0)
 			*Zeal::EqGame::strafe_speed *= .25f;
 		if (controlled_player->ActorInfo && controlled_player->ActorInfo->MovementSpeedModifier < -1000.0f)
 		{

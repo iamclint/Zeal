@@ -34,7 +34,7 @@ Zeal::EqStructures::Entity* CycleTarget::get_next_ent(float dist, byte type)
 	near_ents.clear();
 	for (auto& ent : visible_ents)
 	{
-		if (ent->Unknown0000 != 3)
+		if (ent->StructType != 0x03)
 			continue;
 		if (ent->Type == type && ent->Level > 0)
 		{
@@ -77,9 +77,7 @@ Zeal::EqStructures::Entity* CycleTarget::get_nearest_ent(float dist, byte type)
 	near_ents.clear();
 	for (auto& ent : visible_ents)
 	{
-		if (ent->Unknown0000 != 3)
-			continue;
-		if (ent->ActorInfo && ent->ActorInfo->IsInvisible)
+		if (ent->StructType != 0x03)
 			continue;
 		if (ent->Type == type && ent->Level > 0)
 		{
