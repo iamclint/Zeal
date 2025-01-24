@@ -571,7 +571,36 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
-
+  <Button item="Zeal_SelfClickThru">
+    <ScreenID>Zeal_SelfClickThru</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>354</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Disables third person click on self (/selfclickthru)</TooltipReference>
+    <Text>Self-click thru</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <!-- end -->
     
   <Page item="Tab_General">
@@ -616,6 +645,7 @@
     <Pieces>Zeal_LinkAllAltDelimiter</Pieces>
     <Pieces>Zeal_EnableContainerLock</Pieces>
     <Pieces>Zeal_ExportOnCamp</Pieces>
+    <Pieces>Zeal_SelfClickThru</Pieces>
     <Pieces>Zeal_Timestamps_Combobox</Pieces>
     <Location>
       <X>0</X>

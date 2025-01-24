@@ -553,6 +553,21 @@ void __fastcall DoCamAI(int display, int u, float p1)
         zeal->camera_mods->update_cam();
 }
 
+static void __fastcall GetClickedActor(int this_display, int unused_edx, int mouse_x, int mouse_y, int get_on_actor)
+{
+    auto self = Zeal::EqGame::get_self();
+    bool clickthru = !get_on_actor && ZealService::get_instance()->camera_mods->setting_selfclickthru.get();
+    float* bounding_radius = (clickthru && self && self->ActorInfo && self->ActorInfo->ViewActor_) ?
+        &self->ActorInfo->ViewActor_->BoundingRadius : nullptr;
+    float original_radius = bounding_radius ? *bounding_radius : 0;
+    if (bounding_radius)
+        *bounding_radius = 0.001f;  // Small, hard to click value.
+    ZealService* zeal = ZealService::get_instance();
+    zeal->hooks->hook_map["GetClickedActor"]->original(GetClickedActor)(this_display, unused_edx, mouse_x, mouse_y, get_on_actor);
+    if (bounding_radius)
+        *bounding_radius = original_radius;
+}
+
 CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
 {
     mem::write<byte>(0x53fa50, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
@@ -576,8 +591,9 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
     zeal->hooks->Add("DoCamAI", 0x4db384, DoCamAI, hook_type_detour);
+    zeal->hooks->Add("GetClickedActor", 0x004b008a, GetClickedActor, hook_type_detour);
     FARPROC eqfx = GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dSetCameraLens");
-    if (eqfx != NULL) 
+    if (eqfx != NULL)
         zeal->hooks->Add("SetCameraLens", (int)eqfx, SetCameraLens, hook_type_detour);
     zeal->commands_hook->Add("/fov", { }, "Set your field of view requires a value between 45 and 90.",
         [this](std::vector<std::string>& args) {
@@ -592,7 +608,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                         Zeal::EqGame::print_chat("Use a fov value between 45 and 90");
                         return true;
                     }
-                    
+
                     fov.set(_fov);
                 }
                 else
@@ -619,6 +635,17 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
                 Zeal::EqGame::print_chat("Invalid arguments for pandelay example usage: /pandelay 200");
             return true;
         });
+    zeal->commands_hook->Add("/selfclickthru", {}, "Disable (on) or enable (off) clicking on self.",
+        [this](const std::vector<std::string>& args) {
+            if (args.size() == 2 && args[1] == "on")
+                setting_selfclickthru.set(true);
+            else if (args.size() == 2 && args[1] == "off")
+                setting_selfclickthru.set(false);
+            else
+                Zeal::EqGame::print_chat("Usage: /selfclickthru on or /selfclickthru off");
+            Zeal::EqGame::print_chat("Selfclickthru is now %s", setting_selfclickthru.get() ? "on" : "off");
+            return true;
+    });
     zeal->commands_hook->Add("/zealcam", { "/smoothing" }, "Toggles the zealcam on/off as well as adjusting the sensitivities.",
         [this](std::vector<std::string>& args) {
             if (args.size() == 2 && Zeal::String::compare_insensitive(args[1], "info"))
