@@ -1473,6 +1473,7 @@ namespace Zeal
 			// Replicates logic of t3dIsActorInvisible
 			if (entity && entity->ActorInfo && entity->ActorInfo->ViewActor_)
 				return (entity->ActorInfo->ViewActor_->Flags & 0x40000000) != 0;
+			return false;
 		}
 
 		std::vector<Zeal::EqStructures::Entity*> get_world_visible_actor_list(float max_dist, bool only_targetable)
