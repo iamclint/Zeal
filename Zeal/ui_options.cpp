@@ -277,6 +277,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_EnableContainerLock",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->options->setting_enable_container_lock.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ExportOnCamp",           [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->outputfile->setting_export_on_camp.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_SelfClickThru",          [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->setting_selfclickthru.set(wnd->Checked); });
 	ui->AddComboCallback(wnd,	 "Zeal_Timestamps_Combobox",	[](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->TimeStampsStyle.set(value); });
 	ui->AddSliderCallback(wnd,	 "Zeal_HoverTimeout_Slider",	[this](Zeal::EqUI::SliderWnd* wnd, int value) {	int val = value * 5; ZealService::get_instance()->tooltips->set_timer(val); ui->SetLabelValue("Zeal_HoverTimeout_Value", "%i ms", val); });
 	ui->AddLabel(wnd, "Zeal_HoverTimeout_Value");
@@ -532,6 +533,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_LinkAllAltDelimiter", ZealService::get_instance()->looting_hook->setting_alt_delimiter.get());
 	ui->SetChecked("Zeal_EnableContainerLock", ZealService::get_instance()->ui->options->setting_enable_container_lock.get());
 	ui->SetChecked("Zeal_ExportOnCamp", ZealService::get_instance()->outputfile->setting_export_on_camp.get());
+	ui->SetChecked("Zeal_SelfClickThru", ZealService::get_instance()->camera_mods->setting_selfclickthru.get());
 	ui->SetChecked("Zeal_ClassicClasses", ZealService::get_instance()->chat_hook->UseClassicClassNames.get());
 	ui->SetLabelValue("Zeal_VersionValue", "%s (%s)", ZEAL_VERSION, ZEAL_BUILD_VERSION);
 	ui->SetChecked("Zeal_BlueCon", ZealService::get_instance()->chat_hook->UseBlueCon.get());

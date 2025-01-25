@@ -26,7 +26,7 @@ public:
 	ZealSetting<float> user_sensitivity_y_3rd = { 0.1f, "Zeal", "MouseSensitivityY3rd", false };
 	ZealSetting<float> fov = { 45.f, "Zeal", "Fov", false, [this](float val) { Zeal::EqStructures::CameraInfo* ci = Zeal::EqGame::get_camera();	if (ci) ci->FieldOfView = val; } };
 	ZealSetting<int> pan_delay = { 0, "Zeal", "PanDelay", false };
-
+	ZealSetting<bool> setting_selfclickthru = { false, "Zeal", "SelfClickThru", false };
 
 	const float max_zoom_out = 100;
 	const float zoom_speed = 5.f;

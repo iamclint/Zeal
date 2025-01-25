@@ -214,6 +214,10 @@ ___
 - `/camp`
   - **Description:** Auto sits before camping.
 
+- `/selfclickthru`
+  - **Arguments:** `on`, `off`
+  - **Description:** Disables (on) click on self in third person and allows 'u' to activate doors.
+
 - `/useitem`
   - **Arguments:** `slot_#` (+ optional `quiet` that suppresses warnings if no click effect)
   - **Description:** Activates a click effect on item in slot_#.
