@@ -2,7 +2,15 @@
 
 Summarizes notable changes to Zeal
 
-## [0.6.4 (BETA)] - 2025/01/21
+## [0.6.4 (BETA1)] - 2025/01/24
+* Nameplate updates
+  - Multiple fixes to visibility (see invis / invis, hidecorpse, 0x41 traps, etc)
+  - Add target blink always and only during auto-attack options
+* Add option to export inventory and spellbook on /camp
+* Add /selfclickthru command and option ('u' to open doors works in 3rd person)
+* Map supports loading zones not in the linked in database, has /map world command
+
+## [0.6.4 (BETA0)] - 2025/01/21
 
 ### New features:
 Nameplates
