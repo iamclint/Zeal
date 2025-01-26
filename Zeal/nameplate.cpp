@@ -35,13 +35,18 @@ static int __fastcall SetNameSpriteState(void* this_display, void* unused_edx, Z
 	return ZealService::get_instance()->hooks->hook_map["SetNameSpriteState"]->original(SetNameSpriteState)(this_display, unused_edx, entity, show);
 }
 
-// Promotes a SetNameSpriteTint call to a SetNameSpriteState call (for faster target updates).
+// Promotes a SetNameSpriteTint call to a SetNameSpriteState call (for faster target updates) if visible.
 static int __fastcall SetNameSpriteTint_UpdateState(void* this_display, void* not_used, Zeal::EqStructures::Entity* entity)
 {
-	SetNameSpriteState(this_display, not_used, entity, 1);  // Calls SetNameSpriteTint internally.
-	return 1;  // SetNameSpriteTint returns 1 if a tint was applied.
+	bool show = (entity && ((entity->Type == Zeal::EqEnums::Player && Zeal::EqGame::get_show_pc_names()) ||
+		(entity->Type == Zeal::EqEnums::NPC && Zeal::EqGame::get_show_npc_names())));
+	if (show)
+	{
+		SetNameSpriteState(this_display, not_used, entity, show);  // Calls SetNameSpriteTint internally.
+		return 1;  // SetNameSpriteTint returns 1 if a tint was applied.
+	}
+	return SetNameSpriteTint(this_display, not_used, entity);
 }
-
 
 NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 {
@@ -471,11 +476,11 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 			Zeal::EqGame::get_full_zone_name(entity.ZoneId));
 	}
 
-	// Handle other reasons for disabled nameplates.
-	const uint32_t show_name = Zeal::EqGame::get_showname();
-	if ((show == 0) || (show_name < 1 && (entity.Type != Zeal::EqEnums::NPC)))
+	// Handle client decision to explicitly not show the nameplate.
+	if (show == 0)
 		return std::string();
 
+	const uint32_t show_name = Zeal::EqGame::get_showname();
 	const bool is_self = (&entity == Zeal::EqGame::get_self());
 	const bool is_target = (&entity == Zeal::EqGame::get_target());
 	if (!is_target && ((is_self && setting_hide_self.get())
