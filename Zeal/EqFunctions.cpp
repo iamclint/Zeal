@@ -2274,6 +2274,18 @@ namespace Zeal
 				class_string += " GuildMaster";
 			return class_string;
 		}
+		uint8_t get_showPCname()
+		{
+			//Holds value of Options -> Display -> Show PC Names
+			// 0 = off, 1 = on
+			return *reinterpret_cast<int8_t*>(0x0063D6C8);
+		}
+		uint8_t get_showNPCname()
+		{
+			//Holds value of Options -> Display -> Show NPC Names
+			// 0 = off, 1 = on
+			return *reinterpret_cast<int8_t*>(0x0063D6CC);
+		}
 		int get_showname()
 		{
 			// Holds value of /showname command.
