@@ -35,13 +35,18 @@ static int __fastcall SetNameSpriteState(void* this_display, void* unused_edx, Z
 	return ZealService::get_instance()->hooks->hook_map["SetNameSpriteState"]->original(SetNameSpriteState)(this_display, unused_edx, entity, show);
 }
 
-// Promotes a SetNameSpriteTint call to a SetNameSpriteState call (for faster target updates).
+// Promotes a SetNameSpriteTint call to a SetNameSpriteState call (for faster target updates) if visible.
 static int __fastcall SetNameSpriteTint_UpdateState(void* this_display, void* not_used, Zeal::EqStructures::Entity* entity)
 {
-	SetNameSpriteState(this_display, not_used, entity, 1);  // Calls SetNameSpriteTint internally.
-	return 1;  // SetNameSpriteTint returns 1 if a tint was applied.
+	bool show = (entity && ((entity->Type == Zeal::EqEnums::Player && Zeal::EqGame::get_show_pc_names()) ||
+		(entity->Type == Zeal::EqEnums::NPC && Zeal::EqGame::get_show_npc_names())));
+	if (show)
+	{
+		SetNameSpriteState(this_display, not_used, entity, show);  // Calls SetNameSpriteTint internally.
+		return 1;  // SetNameSpriteTint returns 1 if a tint was applied.
+	}
+	return SetNameSpriteTint(this_display, not_used, entity);
 }
-
 
 NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 {
@@ -68,6 +73,13 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::DXReset);  // Just release all resources.
 	zeal->callbacks->AddGeneric([this]() { render_ui(); }, callback_type::RenderUI);
+
+	// Ensure our local entity cache is flushed when an entity despawns.
+	zeal->callbacks->AddEntity([this](struct Zeal::EqStructures::Entity* entity) {
+		auto it = nameplate_info_map.find(entity);
+		if (it != nameplate_info_map.end())
+			nameplate_info_map.erase(it);
+		}, callback_type::EntityDespawn);
 }
 
 NamePlate::~NamePlate()
@@ -92,6 +104,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"targetblink", &setting_target_blink },
 		{"attackonly", &setting_attack_only },
 		{"inlineguild", &setting_inline_guild },
+		{"healthbars", &setting_health_bars },
 		{"zealfont", &setting_zeal_fonts },
 		{"dropshadow", &setting_drop_shadow },
 	};
@@ -123,7 +136,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	Zeal::EqGame::print_chat("Usage: /nameplate option where option is one of");
 	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, attackonly, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, showpetownername, targetmarker, targethealth, inlineguild");
-	Zeal::EqGame::print_chat("font:  zealfont, dropshadow");
+	Zeal::EqGame::print_chat("font:  zealfont, dropshadow, healthbars");
 }
 
 std::vector<std::string> NamePlate::get_available_fonts() const {
@@ -218,8 +231,28 @@ void NamePlate::render_ui()
 
 		NamePlateInfo& info = it->second;
 		Vec3 position = entity->ActorInfo->DagHeadPoint->Position;
+		if (position.x == 0 && position.y == 0 && position.z == 0) // TODO: Experimental suppression of misplaced DagHeadpoints.
+			continue;  // Some entity positions have a delay after spawn before updating. Skip.
 		position.z += get_nameplate_z_offset(*entity);
-		sprite_font->queue_string(info.text.c_str(), position, true, info.color | 0xff000000);
+
+		// Support an optional healthbar for zeal font mode only.
+		const char* text_c_str = info.text.c_str();
+		std::string new_text;
+		if (setting_health_bars.get() &&
+			(entity->Type == Zeal::EqEnums::EntityTypes::NPC ||
+				entity->Type == Zeal::EqEnums::EntityTypes::Player)) {
+			const char healthbar[4] = { '\n', BitmapFontBase::kHealthBarBackground,
+				BitmapFontBase::kHealthBarValue, 0 };
+			new_text = info.text + healthbar;
+			text_c_str = new_text.c_str();
+			int hp_percent = entity->HpCurrent;	// NPC value is stored as a percent.
+			if (entity->Type == Zeal::EqEnums::EntityTypes::Player)
+				hp_percent = (entity->HpCurrent > 0 && entity->HpMax > 0) ?
+					(entity->HpCurrent * 100) / entity->HpMax : 0;
+			sprite_font->set_hp_percent(hp_percent);
+		}
+
+		sprite_font->queue_string(text_c_str, position, true, info.color | 0xff000000);
 	}
 	sprite_font->flush_queue_to_screen();
 }
@@ -452,11 +485,11 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 			Zeal::EqGame::get_full_zone_name(entity.ZoneId));
 	}
 
-	// Handle other reasons for disabled nameplates.
-	const uint32_t show_name = Zeal::EqGame::get_showname();
-	if ((show == 0) || (show_name < 1 && (entity.Type != Zeal::EqEnums::NPC)))
+	// Handle client decision to explicitly not show the nameplate.
+	if (show == 0)
 		return std::string();
 
+	const uint32_t show_name = Zeal::EqGame::get_showname();
 	const bool is_self = (&entity == Zeal::EqGame::get_self());
 	const bool is_target = (&entity == Zeal::EqGame::get_target());
 	if (!is_target && ((is_self && setting_hide_self.get())

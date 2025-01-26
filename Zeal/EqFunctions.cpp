@@ -2280,6 +2280,18 @@ namespace Zeal
 			//  1 = first names, 2 = first/last names, 3 = first/last/guild names, 4 = everything
 			return *reinterpret_cast<int32_t*>(0x007d01e4);
 		}
+		int get_show_pc_names()
+		{
+			// Holds value of Options -> Display -> Show PC Names
+			// 0 = off, 1 = on
+			return *reinterpret_cast<int*>(0x0063D6C8);
+		}
+		int get_show_npc_names()
+		{
+			// Holds value of Options -> Display -> Show NPC Names
+			// 0 = off, 1 = on
+			return *reinterpret_cast<int*>(0x0063D6CC);
+		}
 		std::string get_full_zone_name(int zone_id) {
 			const int fn_GetFullZoneName = 0x00523e49;
 			void* pWorld = *reinterpret_cast<void**>(0x007F9494);

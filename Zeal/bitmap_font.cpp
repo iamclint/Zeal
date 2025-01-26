@@ -206,14 +206,28 @@ BitmapFontBase::BitmapFontBase(IDirect3DDevice8& device, std::span<const uint8_t
     D3DFORMAT d3dformat = D3DFMT_DXT2;  // Equivalent to BC2_UNORM.
 
     // Create the D3D texture.
-    create_texture(
+    RECT texture_rect = create_texture(
         texture_width, texture_height,
         d3dformat,
         texture_stride, texture_rows,
         texture_data);
 
-    if (!texture)
+    if (!texture) {
         Zeal::EqGame::print_chat("Failed to create the font bitmap texture");
+        return;
+    }
+
+    // We customize two special glyph indices to support the healthbar. The background glyph's
+    // advance is set to measure "zero" width so the value bar starts at the same location while
+    // the value glyph's advance is set to the full width size for the centering calcs.
+    // The create_texture has created a solid 4x4 block at the end for the health bar to use.
+    RECT sub_rect = { texture_rect.right - 3, texture_rect.bottom - 2, texture_rect.right - 1,
+                    texture_rect.bottom - 1};
+    glyph_table[kHealthBarBackground] = { .character = kHealthBarBackground,
+        .sub_rect = sub_rect, .x_offset = 0, .y_offset = 1,
+        .x_advance = static_cast<float>(sub_rect.left - sub_rect.right) };
+    glyph_table[kHealthBarValue] = { .character = kHealthBarValue,
+        .sub_rect = sub_rect, .x_offset = 0, .y_offset = 1, .x_advance = kHealthBarWidth };
 }
 
 // Ensure all resources are released in the destructor.
@@ -263,7 +277,7 @@ void BitmapFont::release() {
 }
 
 // Creates the D3D texture (acquires and configures resources).
-void BitmapFontBase::create_texture(uint32_t width, uint32_t height,
+RECT BitmapFontBase::create_texture(uint32_t width, uint32_t height,
     D3DFORMAT format, uint32_t stride, uint32_t rows,
     const uint8_t* data) {
 
@@ -272,12 +286,12 @@ void BitmapFontBase::create_texture(uint32_t width, uint32_t height,
 
     const uint64_t size_bytes = uint64_t(stride) * uint64_t(rows);
     if (size_bytes > 256*1024ull)  // Just a sanity check.
-        return;
+        return RECT(0, 0, 0, 0);
 
     // Texture copy below assumes 4x4 packed DXT2 format.
     if (format != D3DFMT_DXT2 || (rows * 4 != height)) {
         Zeal::EqGame::print_chat("Font: Unsupported texture: fmt: 0x%08x, rows: %i, height: %i", format, rows, height);
-        return;
+        return RECT(0, 0, 0, 0);
     }
 
     uint32_t mip_levels = 1;
@@ -291,7 +305,7 @@ void BitmapFontBase::create_texture(uint32_t width, uint32_t height,
         Zeal::EqGame::print_chat("Font texture failure: w: %i, h: %i, code: 0x%08x",
             width_pow2, height_pow2, hresult);
         texture = nullptr;  // Ensure it is nulled.
-        return;
+        return RECT(0, 0, 0, 0);
     }
 
     // Cache away conversion factors for use in vertex texture coordinates.
@@ -304,7 +318,7 @@ void BitmapFontBase::create_texture(uint32_t width, uint32_t height,
         Zeal::EqGame::print_chat("Font texture: Lock failed");
         texture->Release();
         texture = nullptr;
-        return;
+        return RECT(0, 0, 0, 0);
     }
 
     // Note: This uses rows, not height, and stride to copy over the data assuming this
@@ -313,7 +327,19 @@ void BitmapFontBase::create_texture(uint32_t width, uint32_t height,
     for (int y = 0; y < rows; ++y)
         memcpy(&texture_data[y * locked_rect.Pitch], &data[y * stride], stride);
   
+
+    // To support the health bar, we make a solid block at the very end of the texture. This
+    // is going to be unused in all likely scenarios due to the power of two ceiling above.
+    int last_row = height_pow2 / 4 - 1;  // Rows = height / 4 since 4x4 block compression.
+    int last_block = 4 * width_pow2  - 16;
+    Zeal::EqGame::print_chat("(%i, %i), %i, %i", height_pow2, width_pow2, last_row, last_block);
+    if (last_block + 16 <= locked_rect.Pitch)
+        memset(&texture_data[last_row * locked_rect.Pitch + last_block], 0xff, 16);
+    else
+        Zeal::EqGame::print_chat("Error: Unable to set health bar texture (%i vs %i)", locked_rect.Pitch, last_block);
+
     texture->UnlockRect(0);
+    return RECT(0, 0, width_pow2, height_pow2);
 }
 
 // Returns the glyph details for the character (or default if out of range).
@@ -365,6 +391,9 @@ void BitmapFontBase::queue_lines(const std::vector<Lines>& lines, D3DCOLOR color
         Vec2 upper_left = line.upper_left + offset;
         for_each_glyph(line.text.c_str(),
             [&](const Glyph* glyph, float x, float y) {
+                if ((glyph->character == kHealthBarBackground || glyph->character == kHealthBarValue)
+                    && color == D3DCOLOR_XRGB(0, 0, 0))
+                    return;  // Skip drop shadow for the health bar.
                 glyph_queue.push_back({ glyph, upper_left + Vec2(x,y), color });
             });
     }
@@ -431,10 +460,15 @@ Vec2 BitmapFontBase::measure_string(const char* text) const
     if (!text || !(*text))
         return result;  // Skip nullptr or empty strings.
 
+    // for_each_glyph resets x for each line, y for each glyph, and includes the offsets in x and y.
     for_each_glyph(text,
         [&](Glyph const* glyph, float x, float y) {
-            auto const w = static_cast<float>(glyph->sub_rect.right - glyph->sub_rect.left);
-            auto h = static_cast<float>(glyph->sub_rect.bottom - glyph->sub_rect.top);
+            float w = static_cast<float>(glyph->sub_rect.right - glyph->sub_rect.left);
+            float h = static_cast<float>(glyph->sub_rect.bottom - glyph->sub_rect.top);
+            if (glyph->character == kHealthBarValue) {
+                w = glyph->x_advance;
+                h = kHealthBarHeight;
+            }
             result = Vec2(std::max(result.x, x + w), std::max(result.y, y + h));
         });
 
@@ -685,7 +719,8 @@ void SpriteFont::queue_string(const char* text, const Vec3& position, bool cente
     int start_index = glyph_queue.size();
     BitmapFontBase::queue_string(text, Vec3(0, 0, 0), center, color, grid_align);
     int stop_index = glyph_queue.size();
-    glyph_string_queue.push_back({ .position = position, .start_index = start_index, .stop_index = stop_index });
+    glyph_string_queue.push_back({ .position = position, .start_index = start_index,
+        .stop_index = stop_index, .hp_percent = hp_percent });
 }
 
 // Renders all queued glyphs to the screen.
@@ -753,6 +788,7 @@ void SpriteFont::render_queue() {
         D3DXMatrixTranslation(&translationMatrix, entry.position.x, entry.position.y, entry.position.z);
         worldMatrix = mat_font_to_face_camera * translationMatrix;
         device.SetTransform(D3DTS_WORLD, &worldMatrix);
+        hp_percent = entry.hp_percent;  // Recall the hp state.
 
         int read_index = entry.start_index;
         while (read_index < entry.stop_index) {
@@ -807,9 +843,27 @@ void SpriteFont::calculate_glyph_vertices(const GlyphQueueEntry& entry,
     Glyph3DVertex glyph_vertices[4]) const {
     // Vertices in xy 00, 10, 01, 11 order.
     static_assert(kNumGlyphVertices == 4);
+    float width = static_cast<float>(entry.glyph->sub_rect.right - entry.glyph->sub_rect.left);
+    float height = static_cast<float>(entry.glyph->sub_rect.bottom - entry.glyph->sub_rect.top);
+    float z = (entry.color == 0xff000000) ? +1.f : 0.0f;  // Note: Hacky way to detect drop shadow.
+    auto color = entry.color;
+    if (entry.glyph->character == kHealthBarBackground) {
+        z = -0.25f;  // Slightly in front of normal text.
+        width = kHealthBarWidth;
+        height = kHealthBarHeight;
+        color = D3DCOLOR_ARGB(128, 128, 128, 128);
+    } else if (entry.glyph->character == kHealthBarValue) {
+        z = -0.5f;  // Slightly more in front.
+        width = hp_percent * ((1.f / 100.f) * kHealthBarWidth);
+        height = kHealthBarHeight;
+        color = (hp_percent > 75) ? D3DCOLOR_XRGB(0, 192, 0) :  // Green
+            (hp_percent > 50) ? D3DCOLOR_XRGB(192, 192, 0) :  // Yellow
+            (hp_percent > 25) ? D3DCOLOR_XRGB(192, 96, 40) :  // Orange
+            D3DCOLOR_XRGB(192, 0, 0);  // Red
+    }
+
     glyph_vertices[0].x = entry.position.x;
-    glyph_vertices[1].x = (entry.position.x
-        + entry.glyph->sub_rect.right - entry.glyph->sub_rect.left);
+    glyph_vertices[1].x = entry.position.x + width;
     glyph_vertices[2].x = glyph_vertices[0].x;
     glyph_vertices[3].x = glyph_vertices[1].x;
 
@@ -820,8 +874,7 @@ void SpriteFont::calculate_glyph_vertices(const GlyphQueueEntry& entry,
 
     glyph_vertices[0].y = entry.position.y;
     glyph_vertices[1].y = glyph_vertices[0].y;
-    glyph_vertices[2].y = (entry.position.y 
-        + entry.glyph->sub_rect.bottom - entry.glyph->sub_rect.top);
+    glyph_vertices[2].y = entry.position.y + height;
     glyph_vertices[3].y = glyph_vertices[2].y;
 
     glyph_vertices[0].v = entry.glyph->sub_rect.top * inverse_texture_size.y;
@@ -830,10 +883,8 @@ void SpriteFont::calculate_glyph_vertices(const GlyphQueueEntry& entry,
     glyph_vertices[3].v = glyph_vertices[2].v;
 
     for (int i = 0; i < kNumGlyphVertices; ++i) {
-        // TODO: Clean up this hard-coded assumption used to fix the drop shadow
-        // z-order to prevent flickering.
-        glyph_vertices[i].z = (entry.color == 0xff000000) ? +1.f : 0.0f;
-        glyph_vertices[i].color = entry.color;
+        glyph_vertices[i].z = z;
+        glyph_vertices[i].color = color;
     }
 }
 
