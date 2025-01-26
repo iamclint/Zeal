@@ -92,6 +92,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"targetblink", &setting_target_blink },
 		{"attackonly", &setting_attack_only },
 		{"inlineguild", &setting_inline_guild },
+		{"healthbars", &setting_health_bars },
 		{"zealfont", &setting_zeal_fonts },
 		{"dropshadow", &setting_drop_shadow },
 	};
@@ -123,7 +124,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	Zeal::EqGame::print_chat("Usage: /nameplate option where option is one of");
 	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, attackonly, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, showpetownername, targetmarker, targethealth, inlineguild");
-	Zeal::EqGame::print_chat("font:  zealfont, dropshadow");
+	Zeal::EqGame::print_chat("font:  zealfont, dropshadow, healthbars");
 }
 
 std::vector<std::string> NamePlate::get_available_fonts() const {
@@ -219,7 +220,25 @@ void NamePlate::render_ui()
 		NamePlateInfo& info = it->second;
 		Vec3 position = entity->ActorInfo->DagHeadPoint->Position;
 		position.z += get_nameplate_z_offset(*entity);
-		sprite_font->queue_string(info.text.c_str(), position, true, info.color | 0xff000000);
+
+		// Support an optional healthbar for zeal font mode only.
+		const char* text_c_str = info.text.c_str();
+		std::string new_text;
+		if (setting_health_bars.get() &&
+			(entity->Type == Zeal::EqEnums::EntityTypes::NPC ||
+				entity->Type == Zeal::EqEnums::EntityTypes::Player)) {
+			const char healthbar[4] = { '\n', BitmapFontBase::kHealthBarBackground,
+				BitmapFontBase::kHealthBarValue, 0 };
+			new_text = info.text + healthbar;
+			text_c_str = new_text.c_str();
+			int hp_percent = entity->HpCurrent;	// NPC value is stored as a percent.
+			if (entity->Type == Zeal::EqEnums::EntityTypes::Player)
+				hp_percent = (entity->HpCurrent > 0 && entity->HpMax > 0) ?
+					(entity->HpCurrent * 100) / entity->HpMax : 0;
+			sprite_font->set_hp_percent(hp_percent);
+		}
+
+		sprite_font->queue_string(text_c_str, position, true, info.color | 0xff000000);
 	}
 	sprite_font->flush_queue_to_screen();
 }

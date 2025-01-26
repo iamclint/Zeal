@@ -23,6 +23,10 @@ public:
     static constexpr char kFontFileExtension[] = ".spritefont";
     static constexpr char kDefaultFontName[] = "default";
 
+    // Support display of a health bar using non-visible ASCII values.
+    static constexpr char kHealthBarBackground = 1;  // ASCII '\x01' draws the background.
+    static constexpr char kHealthBarValue = 2;  // ASCII '\x02' draws the health value.
+
     // Utility method to report the available fonts.
     static std::vector<std::string> get_available_fonts();
 
@@ -47,6 +51,7 @@ public:
     void set_drop_shadow(bool enable) { drop_shadow = enable; }
     void set_outlined(bool enable) { outlined = enable; }
     void set_align_bottom(bool enable) { align_bottom = enable; }
+    void set_hp_percent(int value) { hp_percent = value; }  // Set before queue_string().
     
     // Primary interface for drawing text. The position is in screen pixel coordinates
     // and specifies the center (true) or the upper left (false).
@@ -68,6 +73,7 @@ protected:
     struct Lines {
         std::string text;
         Vec2 upper_left;
+        int hp_percent;
     };
 
     // Describes a single character bitmap glyph.
@@ -88,10 +94,12 @@ protected:
     };
 
     static constexpr int kNumGlyphs = 128;  // Support ASCII 0 - 127.
+    static constexpr float kHealthBarHeight = 6;
+    static constexpr float kHealthBarWidth = 120;
 
     void queue_lines(const std::vector<Lines>& lines, D3DCOLOR color, Vec2 offset = Vec2(0,0));
     const Glyph* get_glyph(char character) const;
-    void create_texture(uint32_t width, uint32_t height, D3DFORMAT format,
+    RECT create_texture(uint32_t width, uint32_t height, D3DFORMAT format,
         uint32_t stride, uint32_t rows, const uint8_t* data);
     bool create_index_buffer();
 
@@ -105,6 +113,7 @@ protected:
     bool drop_shadow = false;
     bool outlined = false;
     bool align_bottom = false;  // Applies only when text is queued with center flag.
+    int hp_percent = 0;
 
     IDirect3DDevice8& device;
     Glyph glyph_table[kNumGlyphs] = {};
@@ -193,6 +202,7 @@ protected:
         Vec3 position;  // Origin anchor point for a string of glyphs.
         int start_index;
         int stop_index;  // Exclusive.
+        int hp_percent;  // Value of internal hp_percent when queued.
     };
 
     // Vertices allow texturing and color modulation.

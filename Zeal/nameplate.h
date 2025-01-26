@@ -50,6 +50,7 @@ public:
 	ZealSetting<bool> setting_inline_guild = { false, "Zeal", "NameplateInlineGuild", false };
 
 	// Advanced fonts
+	ZealSetting<bool> setting_health_bars = { false, "Zeal", "NameplateHealthBars", false };
 	ZealSetting<bool> setting_zeal_fonts = { false, "Zeal", "NamePlateZealFonts", false,
 		[this](bool val) { clean_ui(); } };
 	ZealSetting<bool> setting_drop_shadow = { false, "Zeal", "NamePlateDropShadow", false,
