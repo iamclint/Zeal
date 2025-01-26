@@ -200,6 +200,8 @@ namespace Zeal
 		int* get_display();
 		float heading_to_yaw(float heading);
 		bool is_mouse_hovering_window();
+		uint8_t get_showPCname(); //Holds value of Options -> Display -> Show PC Names
+		uint8_t get_showNPCname(); //Holds value of Options -> Display -> Show NPC Names
 		int get_showname(); // Holds value of /showname command.
 		std::string class_name_short(int class_id);
 		std::string class_name(int class_id);
