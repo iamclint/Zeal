@@ -73,6 +73,13 @@ NamePlate::NamePlate(ZealService* zeal, IO_ini* ini)
 	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::DXReset);  // Just release all resources.
 	zeal->callbacks->AddGeneric([this]() { render_ui(); }, callback_type::RenderUI);
+
+	// Ensure our local entity cache is flushed when an entity despawns.
+	zeal->callbacks->AddEntity([this](struct Zeal::EqStructures::Entity* entity) {
+		auto it = nameplate_info_map.find(entity);
+		if (it != nameplate_info_map.end())
+			nameplate_info_map.erase(it);
+		}, callback_type::EntityDespawn);
 }
 
 NamePlate::~NamePlate()
@@ -224,6 +231,8 @@ void NamePlate::render_ui()
 
 		NamePlateInfo& info = it->second;
 		Vec3 position = entity->ActorInfo->DagHeadPoint->Position;
+		if (position.x == 0 && position.y == 0 && position.z == 0) // TODO: Experimental suppression of misplaced DagHeadpoints.
+			continue;  // Some entity positions have a delay after spawn before updating. Skip.
 		position.z += get_nameplate_z_offset(*entity);
 
 		// Support an optional healthbar for zeal font mode only.
