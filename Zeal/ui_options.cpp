@@ -494,7 +494,6 @@ void ui_options::InitNameplate()
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetMarker", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_marker.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetHealth", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_health.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateExtended", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_extended_nameplate.set(wnd->Checked); });
-}
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateTargetBlink", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_target_blink.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateAttackOnly", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_attack_only.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_NameplateZealFonts", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->nameplate->setting_zeal_fonts.set(wnd->Checked); });
