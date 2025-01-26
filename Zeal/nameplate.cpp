@@ -454,7 +454,13 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 
 	// Handle other reasons for disabled nameplates.
 	const uint32_t show_name = Zeal::EqGame::get_showname();
+	const uint8_t show_PC_name = Zeal::EqGame::get_showPCname();
+	const uint8_t show_NPC_name = Zeal::EqGame::get_showNPCname();
 	if ((show == 0) || (show_name < 1 && (entity.Type != Zeal::EqEnums::NPC)))
+		return std::string();
+	if (show_PC_name == 0 && entity.Type == Zeal::EqEnums::Player)
+		return std::string();
+	if (show_NPC_name == 0 && entity.Type == Zeal::EqEnums::NPC)
 		return std::string();
 
 	const bool is_self = (&entity == Zeal::EqGame::get_self());
