@@ -509,7 +509,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>200</X>
-      <Y>204</Y>
+      <Y>226</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -535,7 +535,7 @@
     </ButtonDrawTemplate>
   </Button>
   
-	<Page item="Tab_Nameplate">
+	<Button item="Tab_Nameplate">
     <ScreenID>Zeal_NameplateZealFonts</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
@@ -685,8 +685,6 @@
     <Pieces>Zeal_NameplateHealthBars</Pieces>
     <Pieces>Zeal_NameplateFont_Combobox</Pieces>
     <Pieces>Zeal_NameplateShowPetOwnerName</Pieces>
-
-    <Location>
 	<Pieces>Zeal_NameplateColors</Pieces>
 	<Pieces>Zeal_NameplateConColors</Pieces>
 	<Pieces>Zeal_NameplateHideSelf</Pieces>
