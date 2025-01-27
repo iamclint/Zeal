@@ -420,7 +420,7 @@ namespace Zeal
 				CXSTR INIStorageName;
 				struct _EQINVSLOT* pEQInvSlot;
 			};
-			/*0x124*/   DWORD   Unknown0x124; /* CTextureAnimation */
+			/*0x124*/   struct CTextureAnimation*  BackgroundTexture;
 			/*0x128*/   DWORD   Unknown0x128; /* CTextureAnimation */
 			/*0x12c*/   DWORD   ContextMenu;  /* CTextureAnimation its an id for the menu*/
 			/*0x130*/	BYTE    Unknown0x130; /* CTextureAnimation */
@@ -428,11 +428,25 @@ namespace Zeal
 			/*0x132*/	BYTE    Unknown0x132; /* CTextureAnimation */
 			/*0x133*/	BYTE    Unknown0x133; /* CTextureAnimation */
 		};
-		struct BuffWindow : EQWND
+		struct BuffWindowButton : EQWND
 		{
 			/* 0x0134 */ int Unknown1;
-			/* 0x0138 */ BYTE Unknown0138[68];
-			/* 0x017C */ struct EQWND* BuffButtonWnd[EQ_NUM_BUFFS]; // CButtonWnd
+			/* 0x0138 */ struct CTextureAnimation* BuffIcon; // Background stored in 0x124
+		};
+		struct BuffWindow : EQWND
+		{
+			/* 0x0134 */ BYTE Unknown00134; // Initialization flag
+			/* 0x0135 */ BYTE Unknown00135; // Initialization flag
+			/* 0x0136 */ BYTE Unknown00136;
+			/* 0x0137 */ BYTE Unknown00137;
+			/* 0x0138 */ struct CTextureAnimation* BlueIconBackground;
+			/* 0x013C */ struct CTextureAnimation* RedIconBackground;
+			/* 0x0140 */ struct CTextureAnimation* CTextureAnimations[EQ_NUM_BUFFS];
+			/* 0x017C */ BuffWindowButton* BuffButtonWnd[EQ_NUM_BUFFS];
+			/* 0x01B8 */ DWORD NextRefreshTime;
+			/* 0x01BC */ DWORD Width;
+			/* 0x01C0 */ DWORD Height;
+			/* End    */
 		};
 		struct CharSelect : EQWND
 		{

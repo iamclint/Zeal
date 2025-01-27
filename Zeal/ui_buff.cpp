@@ -47,25 +47,32 @@ int __fastcall BuffWindow_Refresh(Zeal::EqUI::BuffWindow* this_ptr, void* not_us
 	if (!ZealService::get_instance()->ui->buffs->BuffTimers.get())
 		return result;
 	Zeal::EqStructures::EQCHARINFO* charInfo = Zeal::EqGame::get_char_info();
-
 	if (!charInfo)
 		return result;
 
+	int max_buffs = charInfo->GetMaxBuffs();
+
+	// Detects whether we are using the Normal Buff Window or the Song Window.
+	int start_buff_offset = (this_ptr == Zeal::EqGame::Windows->BuffWindowNORMAL) ? 0 : EQ_NUM_BUFFS;
+
 	for (size_t i = 0; i < EQ_NUM_BUFFS; i++)
 	{
-		int spellId = charInfo->Buff[i].SpellId;
+		int buff_slot = i + start_buff_offset;
+		if (buff_slot >= max_buffs) {
+			break;
+		}
 
-		if (spellId == kInvalidSpellId)
+		Zeal::EqStructures::_EQBUFFINFO* buff = charInfo->GetBuff(buff_slot);
+		if (buff->BuffType == 0 || !Zeal::EqGame::Spells::IsValidSpellIndex(buff->SpellId))
 			continue;
 
-		int buffTicks = charInfo->Buff[i].Ticks;
-
+		int buffTicks = buff->Ticks;
 		if (!buffTicks)
 			continue;
 
 		char buffTimeText[128];
 		std::snprintf(buffTimeText, sizeof(buffTimeText) - 1, " %s", EQ_GetShortTickTimeString(buffTicks).c_str());
-		Zeal::EqUI::EQWND* buffButtonWnd = this_ptr->BuffButtonWnd[i];
+		Zeal::EqUI::BuffWindowButton* buffButtonWnd = this_ptr->BuffButtonWnd[i];
 		if (buffButtonWnd && buffButtonWnd->ToolTipText.Data)
 			buffButtonWnd->ToolTipText.Append(buffTimeText);
 	}
@@ -81,19 +88,29 @@ int __fastcall BuffWindow_PostDraw(Zeal::EqUI::BuffWindow* this_ptr, void* not_u
 	if (!charInfo)
 		return result;
 
+	int max_buffs = charInfo->GetMaxBuffs();
+
+	// Detects whether we are using the Normal Buff Window or the Song Window.
+	int start_buff_offset = (this_ptr == Zeal::EqGame::Windows->BuffWindowNORMAL) ? 0 : EQ_NUM_BUFFS;
+
 	for (size_t i = 0; i < EQ_NUM_BUFFS; i++)
 	{
-		if (charInfo->Buff[i].SpellId == kInvalidSpellId)
+		int buff_slot = i + start_buff_offset;
+		if (buff_slot >= max_buffs) {
+			break;
+		}
+
+		Zeal::EqStructures::_EQBUFFINFO* buff = charInfo->GetBuff(buff_slot);
+		if (buff->BuffType == 0 || !Zeal::EqGame::Spells::IsValidSpellIndex(buff->SpellId))
 			continue;
 
-		int buffTicks = charInfo->Buff[i].Ticks;
-
+		int buffTicks = buff->Ticks;
 		if (!buffTicks)
 			continue;
 
 		char buffTimeText[128];
 		std::snprintf(buffTimeText, sizeof(buffTimeText) - 1, "%s", EQ_GetShortTickTimeString(buffTicks).c_str());
-		Zeal::EqUI::EQWND* buffButtonWnd = this_ptr->BuffButtonWnd[i];
+		Zeal::EqUI::BuffWindowButton* buffButtonWnd = this_ptr->BuffButtonWnd[i];
 		if (buffButtonWnd && buffButtonWnd->ToolTipText.Data)
 		{
 				std::string orig = buffButtonWnd->ToolTipText.Data->Text;

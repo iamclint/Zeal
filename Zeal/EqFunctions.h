@@ -112,6 +112,7 @@ namespace Zeal
 			void Memorize(int book_index, int gem_index);
 			void Forget(int index);
 			void UpdateGems(int index);
+			bool IsValidSpellIndex(int spellid);
 		}
 		namespace OldUI
 		{
