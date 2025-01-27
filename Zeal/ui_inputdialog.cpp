@@ -3,7 +3,6 @@
 #include "EqStructures.h"
 #include "EqAddresses.h"
 #include "EqFunctions.h"
-#include "Zeal.h"
 #include "string_util.h"
 #include <algorithm>
 

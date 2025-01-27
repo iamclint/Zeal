@@ -80,12 +80,12 @@ namespace Zeal
 		};
 		struct CXRect
 		{
-			int Left;
-			int Top;
-			int Right;
-			int Bottom;
-			CXRect() {}
-			CXRect(int l, int t, int r, int b) { Left = l; Top = t; Right = r; Bottom = b; }
+			int Left = 0;
+			int Top = 0;
+			int Right = 0;
+			int Bottom = 0;
+			//CXRect() {}
+			//CXRect(int l, int t, int r, int b) { Left = l; Top = t; Right = r; Bottom = b; }
 		};
 		struct SidlScreenWndVTable : BaseVTable  // VTable for EQWND
 		{
@@ -155,6 +155,14 @@ namespace Zeal
 			void Append(const std::string data)
 			{
 				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x577310)(this, data.c_str());
+			}
+			void Set(const std::string data)
+			{
+				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x576190)(this, data.c_str());
+			}
+			void Set(const char* data)
+			{
+				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x576190)(this, data);
 			}
 			operator std::string() const {
 				const char* result = CastToCharPtr();
@@ -277,6 +285,16 @@ namespace Zeal
 
 				return { x + (w / 2), y + (h / 2) };
 			}
+			CXRect GetScreenRect()
+			{
+				return reinterpret_cast<CXRect(__thiscall*)(const BasicWnd*)>(0x005751C0)(this);
+			}
+
+			void DrawTooltipAtPoint(int left, int top)
+			{
+				reinterpret_cast<void(__thiscall*)(const BasicWnd*, int, int)>(0x00574800)(this, left, top);
+			}
+
 			void LeftClickDown(int mouse_x, int mouse_y, unsigned int flags = 0)
 			{
 				reinterpret_cast<int(__thiscall*)(const BasicWnd*, int x, int y, uint32_t)>(vtbl->HandleLButtonDown)(this, mouse_x, mouse_y, flags);
@@ -409,6 +427,12 @@ namespace Zeal
 			/*0x131*/	BYTE    Unknown0x131; /* CTextureAnimation */
 			/*0x132*/	BYTE    Unknown0x132; /* CTextureAnimation */
 			/*0x133*/	BYTE    Unknown0x133; /* CTextureAnimation */
+		};
+		struct BuffWindow : EQWND
+		{
+			/* 0x0134 */ int Unknown1;
+			/* 0x0138 */ BYTE Unknown0138[68];
+			/* 0x017C */ struct EQWND* BuffButtonWnd[EQ_NUM_BUFFS]; // CButtonWnd
 		};
 		struct CharSelect : EQWND
 		{

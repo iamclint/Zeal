@@ -25,6 +25,7 @@
 #include "nameplate.h"
 #include "tellwindows.h"
 #include "helm_manager.h"
+#include "music.h"
 // other features
 #include "NPCGive.h"
 #include "cycle_target.h"
@@ -44,6 +45,7 @@
 #include "crash_handler.h"
 #include "EntityManager.h"
 #include "patches.h"
+
 //#include "ZealSettings.h"
 //#include "Zeal.h" 
 

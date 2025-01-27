@@ -58,6 +58,8 @@ ZealService::ZealService()
 	tells = std::make_shared<TellWindows>(this, ini.get());
 	mem_check(__LINE__);
 	helm = std::make_shared<HelmManager>(this);
+	music = std::make_shared<MusicManager>(this);
+	
 	mem_check(__LINE__);
 	entity_manager = std::make_shared<EntityManager>(this, ini.get());
 	mem_check(__LINE__);
