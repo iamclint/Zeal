@@ -1733,6 +1733,14 @@ namespace Zeal
 			reinterpret_cast<void(__thiscall*)(Zeal::EqUI::ChatWnd*, Zeal::EqUI::CXSTR msg, short channel)>(ZealService::get_instance()->hooks->hook_map["AddOutputText"]->trampoline)(wnd, cxBuff, color);
 			cxBuff.FreeRep();
 		}
+		void destroy_held()
+		{
+			// Call void CInventoryWnd::DestroyHeld(void) which is effectively a static and doesn't use the
+			// class pointer. This will either destroy the cursor item immediately if fast destroy is set
+			// or it will pop up a confirmation dialog.
+			auto inventory_wnd = Zeal::EqGame::Windows->Inventory;
+			reinterpret_cast<void(__fastcall*)(Zeal::EqUI::EQWND*, int unused_edx)>(0x00421637)(inventory_wnd, 0);
+		}
 		int get_gamestate()
 		{
 			if (get_eq())

@@ -114,7 +114,7 @@ void ui_options::LoadColors()
 	if (!ini->exists("ZealColors", "Color10")) //Adds default Nameplate Color to Button11 for new users
 	{
 		if (color_buttons.count(10))
-			color_buttons[10]->TextColor.ARGB = 0xFF000000; //Npc Corpse - Black
+			color_buttons[10]->TextColor.ARGB = 0xFF202020; //Npc Corpse - Dark gray
 	}
 	if (!ini->exists("ZealColors", "Color11")) //Adds default Nameplate Color to Button12 for new users
 	{

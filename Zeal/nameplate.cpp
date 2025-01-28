@@ -195,6 +195,33 @@ static float get_nameplate_z_offset(const Zeal::EqStructures::Entity& entity)
 
 }
 
+// The server currently only sends reliable HP updates for target, self, self pet,
+// and group members.  See Mob::SendHPUpdate().
+static bool is_hp_updated(const Zeal::EqStructures::Entity* entity)
+{
+	if (!entity)
+		return false;
+	if (entity->Type != Zeal::EqEnums::EntityTypes::NPC &&
+		entity->Type != Zeal::EqEnums::EntityTypes::Player)
+		return false;  // No hp bars on corpses.
+	if (entity == Zeal::EqGame::get_target())
+		return true;
+	const auto self = Zeal::EqGame::get_self();
+	if (entity == self)
+		return true;
+	if (self && self->SpawnId && (entity->PetOwnerSpawnId == self->SpawnId))
+		return true;
+	if (Zeal::EqGame::GroupInfo->is_in_group())
+		for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; i++)
+		{
+			auto member = Zeal::EqGame::GroupInfo->EntityList[i];
+			if (entity == member)
+				return true;
+			if (member && (entity->PetOwnerSpawnId == member->SpawnId))
+				return true;
+		}
+	return false;
+}
 
 void NamePlate::render_ui()
 {
@@ -240,9 +267,8 @@ void NamePlate::render_ui()
 		// Support an optional healthbar for zeal font mode only.
 		const char* text_c_str = info.text.c_str();
 		std::string new_text;
-		if (setting_health_bars.get() &&
-			(entity->Type == Zeal::EqEnums::EntityTypes::NPC ||
-				entity->Type == Zeal::EqEnums::EntityTypes::Player)) {
+		if (setting_health_bars.get() && is_hp_updated(entity))
+		{
 			const char healthbar[4] = { '\n', BitmapFontBase::kHealthBarBackground,
 				BitmapFontBase::kHealthBarValue, 0 };
 			new_text = info.text + healthbar;

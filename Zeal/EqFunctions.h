@@ -223,6 +223,7 @@ namespace Zeal
 		void do_auction(std::string data);
 		void do_ooc(std::string data);
 		void send_raid_chat(std::string data);
+		void destroy_held();
 		int get_region_from_pos(Vec3* pos);
 		EqUI::CXWndManager* get_wnd_manager();
 		bool is_player_pet(const Zeal::EqStructures::Entity& entity);

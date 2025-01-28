@@ -20,6 +20,9 @@
 
 namespace {
 
+// Simple hack to identify queued glyphs for drop shadows using a very close to black color.
+static constexpr D3DCOLOR kDropShadowColor = D3DCOLOR_XRGB(0x01, 0x01, 0x01);
+
 static constexpr int kVertexBufferMaxBatchCount = 1000;
 static constexpr int kVertexBufferMinBatchCount = 100;
 static constexpr int kNumGlyphVertices = 4;  // Four per glyph using D3DPT_TRIANGLELIST with indices.
@@ -332,7 +335,6 @@ RECT BitmapFontBase::create_texture(uint32_t width, uint32_t height,
     // is going to be unused in all likely scenarios due to the power of two ceiling above.
     int last_row = height_pow2 / 4 - 1;  // Rows = height / 4 since 4x4 block compression.
     int last_block = 4 * width_pow2  - 16;
-    Zeal::EqGame::print_chat("(%i, %i), %i, %i", height_pow2, width_pow2, last_row, last_block);
     if (last_block + 16 <= locked_rect.Pitch)
         memset(&texture_data[last_row * locked_rect.Pitch + last_block], 0xff, 16);
     else
@@ -392,7 +394,7 @@ void BitmapFontBase::queue_lines(const std::vector<Lines>& lines, D3DCOLOR color
         for_each_glyph(line.text.c_str(),
             [&](const Glyph* glyph, float x, float y) {
                 if ((glyph->character == kHealthBarBackground || glyph->character == kHealthBarValue)
-                    && color == D3DCOLOR_XRGB(0, 0, 0))
+                    && color == kDropShadowColor)
                     return;  // Skip drop shadow for the health bar.
                 glyph_queue.push_back({ glyph, upper_left + Vec2(x,y), color });
             });
@@ -444,10 +446,10 @@ void BitmapFontBase::queue_string(const char* text, const Vec3& position, bool c
     }
     if (drop_shadow || outlined) {
         float shadow_offset = calculate_shadow_offset();
-        queue_lines(lines, D3DCOLOR_XRGB(0, 0, 0), Vec2(shadow_offset, shadow_offset));
+        queue_lines(lines, kDropShadowColor, Vec2(shadow_offset, shadow_offset));
         if (outlined) {
             // Technically would be cleaner with left, right, top, bottom adjusts (4 passes).
-            queue_lines(lines, D3DCOLOR_XRGB(0, 0, 0), Vec2(-shadow_offset, -shadow_offset));
+            queue_lines(lines, kDropShadowColor, Vec2(-shadow_offset, -shadow_offset));
         }
     }
     queue_lines(lines, color);
@@ -760,6 +762,7 @@ void SpriteFont::render_queue() {
     texture_state.store_and_modify({ D3DTSS_ALPHAOP, D3DTOP_MODULATE });  // Support color alpha.
     texture_state.store_and_modify({ D3DTSS_ALPHAARG1, D3DTA_TEXTURE });
     texture_state.store_and_modify({ D3DTSS_ALPHAARG2, D3DTA_DIFFUSE });
+    texture_state.store_and_modify({ D3DTSS_MINFILTER, D3DTEXF_LINEAR });
 
     // Note: Not preserving shader, texture, source, or indices to avoid reference counting.
     device.SetVertexShader(Glyph3DVertex::kFvfCode);
@@ -845,7 +848,7 @@ void SpriteFont::calculate_glyph_vertices(const GlyphQueueEntry& entry,
     static_assert(kNumGlyphVertices == 4);
     float width = static_cast<float>(entry.glyph->sub_rect.right - entry.glyph->sub_rect.left);
     float height = static_cast<float>(entry.glyph->sub_rect.bottom - entry.glyph->sub_rect.top);
-    float z = (entry.color == 0xff000000) ? +1.f : 0.0f;  // Note: Hacky way to detect drop shadow.
+    float z = (entry.color == kDropShadowColor) ? +1.f : 0.0f;
     auto color = entry.color;
     if (entry.glyph->character == kHealthBarBackground) {
         z = -0.25f;  // Slightly in front of normal text.
