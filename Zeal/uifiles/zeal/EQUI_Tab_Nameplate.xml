@@ -377,7 +377,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Blink rate set by TargetRing rate slider</TooltipReference>
+    <TooltipReference>Requires Zeal Con or Target Color; Blink rate set by TargetRing slider</TooltipReference>
     <Text>Enable target blinking</Text>
     <TextColor>
       <R>255</R>

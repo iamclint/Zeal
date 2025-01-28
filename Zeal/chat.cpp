@@ -235,20 +235,15 @@ void move_caret(Zeal::EqUI::EditWnd* active_edit, caret_dir dir) {
     }
 }
 
-static std::string get_tab_completion_target(const std::string& text, const char* prefix) {
+static std::string get_tab_completion_target(const std::string& text,
+    const std::string& prefix_with_space) {
     // Only process if the correct prefix and some characters after the prefix's trailing space.
-    std::string prefix_with_space = std::string(prefix) + " ";
     int length = prefix_with_space.length();
     if (text.starts_with(prefix_with_space) && text.length() > length)
     {
-        // Valid target if either no second space or the space is the final character.
-        auto second_space = text.find(' ', length);
-        bool no_space = (second_space == std::string::npos);
-        if (no_space || (second_space == text.length() - 1))
-        {
-            auto count = no_space ? std::string::npos : (second_space - length);
-            return text.substr(length, count);  // Return with stripped trailing space.
-        }
+        // Valid tab completion target fragment if no second space.
+        if (text.find(' ', length) == std::string::npos)
+            return text.substr(length);  // Return just the target phrase.
     }
     return std::string();
 }
@@ -308,19 +303,13 @@ static std::vector<std::string> get_all_matches(const std::string& start_of_name
     return matches;
 }
 
-// Returns true if prefix or prefix + " ".
-static bool is_tell_list_cycle_trigger(const std::string& text, const char* prefix) {
-    return text == std::string(prefix) || text == std::string(prefix) + " ";
-}
-
-
 // Enhance the /tell tab completion to include the raid and zone player list and also enable
 // it for /t and /consent.
 static bool handle_tell_tab_completion(Zeal::EqUI::EditWnd* active_edit, int modifier,
     std::vector<std::string>& matches)
 {
     // First check if there is an in-progress /command match list.
-    if (!matches.empty() && matches[0].starts_with("/"))
+    if (!matches.empty() && matches.front().starts_with("/"))
         return false;  // Not targets, so bail out.
 
     // First check if the start of the text is one that supports tab completion.
@@ -329,19 +318,15 @@ static bool handle_tell_tab_completion(Zeal::EqUI::EditWnd* active_edit, int mod
     std::string text = std::string(active_edit->InputText);
     for (const char* prefix : prefix_list)
     {
-        if (!text.starts_with(prefix))
-            continue;
+        std::string prefix_with_space = std::string(prefix) + " ";
+        if (text != prefix && !text.starts_with(prefix_with_space))
+            continue;  // Not a valid tab-triggered command.
 
         if (matches.empty())
         {
-            if (is_tell_list_cycle_trigger(text, prefix))
-                matches = get_tell_list_matches("");
-            else
+            auto target = get_tab_completion_target(text, prefix_with_space);
+            if (!target.empty())
             {
-                auto target = get_tab_completion_target(text, prefix);
-                if (target.empty())
-                    continue; // Didn't match a valid tab action for this prefix.
-
                 matches = get_all_matches(target);
                 if (matches.size() > 1)
                 {
@@ -349,17 +334,23 @@ static bool handle_tell_tab_completion(Zeal::EqUI::EditWnd* active_edit, int mod
                     for (const auto& match : matches)
                         Zeal::EqGame::print_chat("  %s", match.c_str());
                 }
-                else if (matches.size() == 1)
-                {
-                    // Add the tell list to the back.
-                    std::vector tell_list = get_tell_list_matches("");
-                    for (const auto& name : tell_list)
-                        if (name != matches[0])
-                            matches.push_back(name);
-                }
-                if (matches.size() > 1 && target == matches[0])
-                    std::rotate(matches.begin(), matches.begin() + 1, matches.end());
+                else if (matches.empty())
+                    Zeal::EqGame::print_chat("No matching targets found for %s", target.c_str());
             }
+
+            // Add the tell list to the back.
+            if (matches.empty())
+                matches = get_tell_list_matches("");
+            else
+            {
+                std::vector tell_list = get_tell_list_matches("");
+                for (const auto& name : tell_list)
+                    if (std::find(matches.begin(), matches.end(), name) == matches.end())
+                        matches.push_back(name);  // Add only new names.
+            }
+
+            if (matches.size() > 1 && target == matches.front())
+                std::rotate(matches.begin(), matches.begin() + 1, matches.end());
         }
         else if (matches.size() > 1)
         {
@@ -369,11 +360,11 @@ static bool handle_tell_tab_completion(Zeal::EqUI::EditWnd* active_edit, int mod
                 std::rotate(matches.rbegin(), matches.rbegin() + 1, matches.rend());
         }
         if (matches.empty())
-            Zeal::EqGame::print_chat("No matches");
+            Zeal::EqGame::print_chat("Tab cycle list empty");
         else  // Update the text with the first match in the list.
         {
             const char* end_space = strcmp(prefix, "/consent") ? " " : "";
-            std::string updated_text = std::string(prefix) + " " + matches.front() + end_space;
+            std::string updated_text = prefix_with_space + matches.front() + end_space;
             active_edit->InputText.FreeRep();
             active_edit->InputText = Zeal::EqUI::CXSTR(updated_text);
             active_edit->Caret_End = active_edit->GetInputLength();
@@ -485,11 +476,11 @@ int __fastcall EditWndHandleKey(Zeal::EqUI::EditWnd* active_edit, int u, UINT32 
     if (!ZealService::get_instance()->chat_hook->UseZealInput.get())
         return ZealService::get_instance()->hooks->hook_map["EditWndHandleKey"]->original(EditWndHandleKey)(active_edit, u, key, modifier, keydown);
    // Zeal::EqGame::print_chat("EditWnd: 0x%x key: %x modifier: %i state: %i", active_edit, key, modifier, keydown);
+    if (ZealService::get_instance()->tells->HandleKeyPress(key, keydown, modifier))
+        return 0;
     if (check_for_tab_completion(active_edit, key, modifier, keydown)) {
         return 0;
     }
-    if (ZealService::get_instance()->tells->HandleKeyPress(key, keydown, modifier))
-        return 0;
     //you can use a bitwise & operator on the modifier with eq_modifier_keys to check key states
     if (keydown)
     {
