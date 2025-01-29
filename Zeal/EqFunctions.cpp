@@ -1855,7 +1855,14 @@ namespace Zeal
 		{
 			return *(Zeal::EqStructures::Entity**)Zeal::EqGame::EntListPtr;
 		}
-
+		bool get_attack_on_assist()
+		{
+			return *Zeal::EqGame::attack_on_assist != 0;
+		}
+		void set_attack_on_assist(bool enable)
+		{
+			*Zeal::EqGame::attack_on_assist = enable;
+		}
 		long get_user_color(int index)
 		{
 			index -= 1;

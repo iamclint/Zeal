@@ -390,6 +390,8 @@ void TargetRing::callback_render() {
 	Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
 	if (!target || !target->ActorInfo || !target->ActorInfo->ViewActor_)
 		return;
+	if (disable_for_self.get() && (target == Zeal::EqGame::get_self()))
+		return;
 	float radius = 10.f;// Zeal::EqGame::CalcCombatRange(Zeal::EqGame::get_self(), target);
 
 	// ### Target Ring Color ###

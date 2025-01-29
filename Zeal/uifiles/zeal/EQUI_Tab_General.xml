@@ -722,6 +722,66 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+  <Button item="Zeal_SuppressMissedNotes">
+    <ScreenID>Zeal_SuppressMissedNotes</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>464</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Suppress missed note messages from other bards</TooltipReference>
+    <Text>No missed notes</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+  <Button item="Zeal_UseZealAssistOn">
+    <ScreenID>Zeal_UseZealAssistOn</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>486</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Enable per character /assist on settings</TooltipReference>
+    <Text>Use Zeal /assist on</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <!-- end -->
     
   <Page item="Tab_General">
@@ -768,10 +828,12 @@
     <Pieces>Zeal_ExportOnCamp</Pieces>
     <Pieces>Zeal_SelfClickThru</Pieces>
     <Pieces>Zeal_Timestamps_Combobox</Pieces>
-	<Pieces>Zeal_BuffTimers</Pieces>
-	<Pieces>Zeal_CastAutoStand</Pieces>
-	<Pieces>Zeal_BrownSkeletons</Pieces>
-	<Pieces>Zeal_ClassicMusic</Pieces>
+    <Pieces>Zeal_BuffTimers</Pieces>
+    <Pieces>Zeal_CastAutoStand</Pieces>
+    <Pieces>Zeal_BrownSkeletons</Pieces>
+    <Pieces>Zeal_ClassicMusic</Pieces>
+    <Pieces>Zeal_SuppressMissedNotes</Pieces>
+    <Pieces>Zeal_UseZealAssistOn</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>

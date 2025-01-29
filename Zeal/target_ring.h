@@ -59,6 +59,7 @@ public:
 	~TargetRing();
 
 	ZealSetting<bool> enabled = { false, "TargetRing", "Enabled", true, [](bool val) { Zeal::EqGame::print_chat("Target ring is %s", val ? "Enabled" : "Disabled"); } };
+	ZealSetting<bool> disable_for_self = { false, "TargetRing", "DisableForSelf", true };
 	ZealSetting<bool> attack_indicator = { false, "TargetRing", "AttackIndicator", true };
 	ZealSetting<bool> rotate_match_heading = { false, "TargetRing", "MatchHeading", true };
 	ZealSetting<bool> use_cone = { false, "TargetRing", "Cone", true };

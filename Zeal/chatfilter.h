@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "EqUI.h"
 #include <functional>
+#include "ZealSettings.h"
 
 #define CHANNEL_MYPETDMG 1000
 #define CHANNEL_OTHERPETDMG 1001
@@ -46,6 +47,7 @@ class chatfilter
 	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel);
 	void LoadSettings(Zeal::EqUI::CChatManager* cm);
 	void callback_clean_ui();
+	ZealSetting<bool> setting_suppress_missed_notes = { false, "Zeal", "SuppressMissedNotes", false };
 	bool isExtendedCM(int channelMap, int applyOffset = 0);
 	bool isStandardCM(int channelMap, int applyOffset = 0);
 	bool isDamage=false;

@@ -4,6 +4,7 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 #include <algorithm>
+#include "string_util.h"
 
 static size_t last_index = -1;
 static std::vector<Zeal::EqStructures::Entity*> near_ents;
@@ -113,4 +114,20 @@ CycleTarget::CycleTarget(ZealService* zeal)
 {
 	//originally this used a hook and replaced target nearest but now uses a bind
 	//	hook = zeal->hooks->Add("NearestEnt", Zeal::EqGame::EqGameInternal::fn_targetnearestnpc, get_nearest_ent, hook_type_detour, 6);
+
+	zeal->commands_hook->Add("/assist", {}, "Supports optional per character settings for /assist on/off.",
+		[this](std::vector<std::string>& args) {
+			if (setting_use_zeal_assist_on.get() && args.size() == 2) {
+				bool turn_on = Zeal::String::compare_insensitive(args[1], "on");
+				bool turn_off = !turn_on && Zeal::String::compare_insensitive(args[1], "off");
+				if (turn_on || turn_off) {
+					setting_assist_on.set(turn_on);
+					Zeal::EqGame::set_attack_on_assist(turn_on);
+					Zeal::EqGame::print_chat("Per character attack on assist: %s",
+						turn_on ? "ON" : "OFF");
+					return true;  // Skip normal /assist processing.
+				}
+			}
+			return false;  // Let normal /assist handle things.
+		});
 }
