@@ -279,6 +279,9 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
 void __fastcall serverPrintChat(int t, int unused, const char* data, short color_index, bool u)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
+    if (cf->setting_suppress_missed_notes.get() && !strncmp("A missed note brings ", data, 21))
+        return;  // Just drop missed note messages from others (String ID 1219).
+
     if (cf->isMyPetSay)
         color_index = CHANNEL_MYPETSAY;
     else if (cf->isPetMessage)

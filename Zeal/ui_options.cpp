@@ -278,7 +278,9 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_BuffTimers",				[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->buffs->BuffTimers.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_BrownSkeletons",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->game_patches->BrownSkeletons.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ClassicMusic",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->music->ClassicMusic.set(wnd->Checked); });
-		
+	ui->AddCheckboxCallback(wnd, "Zeal_SuppressMissedNotes",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chatfilter_hook->setting_suppress_missed_notes.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_UseZealAssistOn",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->cycle_target->setting_use_zeal_assist_on.set(wnd->Checked); });
+
 	
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_EnableContainerLock",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->options->setting_enable_container_lock.set(wnd->Checked); });
@@ -421,6 +423,7 @@ void ui_options::InitTargetRing()
 	ui->AddLabel(wnd, "Zeal_TargetRingTransparency_Value");
 
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRing", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->enabled.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingDisableForSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->disable_for_self.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingAttackIndicator", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->attack_indicator.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingForward", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->rotate_match_heading.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingCone", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->target_ring->use_cone.set(wnd->Checked); });
@@ -556,6 +559,8 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_BuffTimers", ZealService::get_instance()->ui->buffs->BuffTimers.get());
 	ui->SetChecked("Zeal_BrownSkeletons", ZealService::get_instance()->game_patches->BrownSkeletons.get());
 	ui->SetChecked("Zeal_ClassicMusic", ZealService::get_instance()->music->ClassicMusic.get());
+	ui->SetChecked("Zeal_SuppressMissedNotes", ZealService::get_instance()->chatfilter_hook->setting_suppress_missed_notes.get());
+	ui->SetChecked("Zeal_UseZealAssistOn", ZealService::get_instance()->cycle_target->setting_use_zeal_assist_on.get());
 }
 void ui_options::UpdateOptionsCamera()
 {
@@ -584,6 +589,7 @@ void ui_options::UpdateOptionsTargetRing()
 		return;
 
 	ui->SetChecked("Zeal_TargetRing", ZealService::get_instance()->target_ring->enabled.get());
+	ui->SetChecked("Zeal_TargetRingDisableForSelf", ZealService::get_instance()->target_ring->disable_for_self.get());
 	ui->SetChecked("Zeal_TargetRingAttackIndicator", ZealService::get_instance()->target_ring->attack_indicator.get());
 	ui->SetChecked("Zeal_TargetRingForward", ZealService::get_instance()->target_ring->rotate_match_heading.get());
 	ui->SetChecked("Zeal_TargetRingCone", ZealService::get_instance()->target_ring->use_cone.get());

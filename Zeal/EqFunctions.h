@@ -174,6 +174,8 @@ namespace Zeal
 		long get_user_color(int index);
 		void set_target(Zeal::EqStructures::Entity* target); //this will target an entity without question
 		void do_target(const char* name); //this function is used by /target and /rt with range limitations
+		bool get_attack_on_assist();
+		void set_attack_on_assist(bool enable);
 		bool can_move();
 		bool is_on_ground(Zeal::EqStructures::Entity* ent);
 		void log(std::string& data);
