@@ -10,12 +10,12 @@ public:
 	EquipItem(class ZealService* pHookWrapper);
 	~EquipItem();
 
-	void HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mouse_y);
+	bool HandleRButtonUp(Zeal::EqUI::InvSlot* inv_slot);
 
 	ZealSetting<bool> Enabled = { false, "Zeal", "RightClickToEquip", false };
 
 private:
-	bool ClickInventoryWindowSlot(int invSlot, unsigned int flags = 0);
+	Zeal::EqUI::InvSlot* GetInventorySlot(int inv_slot_id);
 	int EQUIP_PRIORITY_ORDER[21] = {
 		12, 13, 10,           // Primary, Secondary, Range
 		16, 17, 1, 6, 11, 18, // Chest, Legs, Head, Arms, Hands, Feet
