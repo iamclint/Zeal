@@ -268,33 +268,14 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*)>(vtbl->OnMinimizeBox)(this);
 			}
-			CXPoint GetScreenCenterPoint()
-			{
-				CXRect rect = this->Location;
-				int x = rect.Left;
-				int y = rect.Top;
-				int w = rect.Right - rect.Left;
-				int h = rect.Bottom - rect.Top;
-
-				BasicWnd* parent = (BasicWnd*)this->ParentWnd;
-				while (parent) {
-					x += parent->Location.Left;
-					y += parent->Location.Top;
-					parent = (BasicWnd*)parent->ParentWnd;
-				}
-
-				return { x + (w / 2), y + (h / 2) };
-			}
 			CXRect GetScreenRect()
 			{
 				return reinterpret_cast<CXRect(__thiscall*)(const BasicWnd*)>(0x005751C0)(this);
 			}
-
 			void DrawTooltipAtPoint(int left, int top)
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*, int, int)>(0x00574800)(this, left, top);
 			}
-
 			void LeftClickDown(int mouse_x, int mouse_y, unsigned int flags = 0)
 			{
 				reinterpret_cast<int(__thiscall*)(const BasicWnd*, int x, int y, uint32_t)>(vtbl->HandleLButtonDown)(this, mouse_x, mouse_y, flags);
@@ -557,15 +538,6 @@ namespace Zeal
 			/* 0x0230 */ BYTE ItemValid;  // Set to 1 if Item was populated in SetItem() else 0.
 			/* 0x0231 */ BYTE unknown0231[11];  // Operator new has a total size of 0x23c bytes.
 		};
-		struct InvSlotWnd;
-		struct InvSlot  // Operator new of 0x14 bytes.
-		{
-			/* 0x0000 */ void* destructor;  // Pointer to pointer to CInvSlot::~CInvSlot.
-			/* 0x0004 */ InvSlotWnd* invSlotWnd;  // Points back to "parent".
-			/* 0x0008 */ void* textureAnimation;  // Also copied to invSlotWnd->TextureAnimation
-			/* 0x000C */ DWORD Index;             // Index to CInvSlotMgr->invSlots[i]. This changes as containers are opened/closed.
-			/* 0x0010 */ Zeal::EqStructures::EQITEMINFOBASE* Item;
-		};
 		struct InvSlotWnd: BasicWnd  // Operator new of 0x12C bytes.
 		{
 			static constexpr BaseVTable* default_vtable = reinterpret_cast<BaseVTable*>(0x005eb774);
@@ -581,11 +553,23 @@ namespace Zeal
 			/* 0x0115 */ BYTE Unknown0015; // Passed in as param_3 to InvSlot::HandleLButtonUp().
 			/* 0x0116 */ BYTE Unknown0116;
 			/* 0x0117 */ BYTE Unknown0117;
-			/* 0x0118 */ InvSlot* invSlot;
+			/* 0x0118 */ struct InvSlot* invSlot;
 			/* 0x011C */ DWORD Unknown011c;
 			/* 0x0120 */ DWORD IsActive;  // Set to 1 when mouse has triggered an interaction, 0 when released.
 			/* 0x0124 */ DWORD Unknown0124;
 			/* 0x0128 */ DWORD Unknown0128;
+		};
+		struct InvSlot  // Operator new of 0x14 bytes.
+		{
+			int HandleLButtonUp() {
+				int flag = this->invSlotWnd ? this->invSlotWnd->Unknown0015 : 0;
+				return reinterpret_cast<int(__thiscall*)(InvSlot*, int unused_x, int unused_y, BYTE flag)>(0x421E48)(this, 0, 0, flag);
+			}
+			/* 0x0000 */ void* destructor;  // Pointer to pointer to CInvSlot::~CInvSlot.
+			/* 0x0004 */ InvSlotWnd* invSlotWnd;  // Points back to "parent".
+			/* 0x0008 */ void* textureAnimation;  // Also copied to invSlotWnd->TextureAnimation
+			/* 0x000C */ DWORD Index;             // Index to CInvSlotMgr->invSlots[i]. This changes as containers are opened/closed.
+			/* 0x0010 */ Zeal::EqStructures::EQITEMINFOBASE* Item;
 		};
 		struct SliderWnd : BasicWnd // Uses a BaseVTable.
 		{
@@ -679,6 +663,17 @@ namespace Zeal
 			/*0x04c*/   DWORD Unknown0x04c;            // in the future this is ID of container in zone, starts at one (zero?) and goes up.
 			/*0x050*/   DWORD dwTimeSpentWithWorldContainerOpen;  // Cumulative counter?
 			/*0x054*/
+		};
+
+		struct CInvSlotMgr {
+		public:
+			InvSlot* FindInvSlot(int slot_id) {
+				return reinterpret_cast<InvSlot*(__thiscall*)(CInvSlotMgr*, int)>(0x423010)(this, slot_id);
+			}
+
+			/* 0x000 */ DWORD* Unknonwn0000;
+			/* 0x004 */ InvSlot* InvSlots[450];
+			/* 0x70C */ DWORD NumInvSlots;
 		};
 
 		struct ColorPickerWnd : public EQWND
@@ -1093,7 +1088,7 @@ namespace Zeal
 			EQWND* TimeLeft;  // 0x63D6A8
 			EQWND* PetitionQ;  // 0x63D6AC
 			EQWND* Soulmark;  // 0x63D6B0
-			void* InvSlotMgr;  // 0x63D6B4
+			CInvSlotMgr* InvSlotMgr;  // 0x63D6B4
 			ContainerMgr* ContainerMgr;  // 0x63D6B8
 		};
 

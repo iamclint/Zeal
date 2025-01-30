@@ -5,65 +5,71 @@
 #include <algorithm>
 #include <vector>
 
-static int __fastcall InvSlotWnd_HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int unused_edx, int mouse_x, int mouse_y, unsigned int flags)
+static void __fastcall CInvSlot_HandleRButtonUp(Zeal::EqUI::InvSlot* inv_slot, int unused_edx, int x, int y)
 {
-	int res = wnd->HandleRButtonUp(mouse_x, mouse_y, flags);
-	ZealService::get_instance()->equip_item_hook->HandleRButtonUp(wnd, mouse_x, mouse_y);
-	return res;
+	if (ZealService::get_instance()->equip_item_hook->HandleRButtonUp(inv_slot)) {
+		return;
+	}
+	ZealService::get_instance()->hooks->hook_map["CInvSlot_HandleRButtonUp"]->original(CInvSlot_HandleRButtonUp)(inv_slot, unused_edx, x, y);
 }
 
-void EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mouse_y)
+bool EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlot* src_inv_slot)
 {
-	if (!Enabled.get() || !wnd || !wnd->invSlot || !wnd->invSlot->Item) {
-		return;
+	if (!Enabled.get() || !src_inv_slot) {
+		return false;
+	}
+
+	Zeal::EqUI::InvSlotWnd* src_wnd = src_inv_slot->invSlotWnd;
+	if (!src_wnd) {
+		return false;
 	}
 
 	// Slot ID for bagged items is 250 + (bag_i*10) + (contents_i) = [250...329]
-	int src_slot_id = wnd->SlotID;
+	int src_slot_id = src_wnd->SlotID;
 	if (src_slot_id < 250 || src_slot_id > 329) {
-		return; // Item is not in an inventory bag.
+		return false; // Item is not in an inventory bag.
 	}
 
 	int src_container_i = (src_slot_id - 250) / 10;
 	if (src_container_i < 0 || src_container_i > 7) {
-		return; // Shouldn't happen. Ensure bag is 0..7
+		return false; // Shouldn't happen. Ensure bag is 0..7
 	}
 
 	Zeal::EqUI::CXWndManager* wnd_mgr = Zeal::EqGame::get_wnd_manager();
 	if (!wnd_mgr) {
-		return;
+		return false;
 	}
 
 	Zeal::EqStructures::EQCHARINFO* c = Zeal::EqGame::get_char_info();
 	if (!c || c->CursorItem || c->CursorCopper || c->CursorGold || c->CursorPlatinum || c->CursorSilver) {
-		return; // Fast-fail. We are holding something.
+		return false; // Fast-fail. We are holding something.
 	}
 
-	Zeal::EqStructures::EQITEMINFO* container = c->InventoryPackItem[src_container_i];
-	if (!container || container->Type != 1) {
-		return; // Can't locate source bag info.
+	Zeal::EqStructures::EQITEMINFO* src_container = c->InventoryPackItem[src_container_i];
+	if (!src_container || src_container->Type != 1) {
+		return false; // Can't locate source bag info.
 	}
 
-	Zeal::EqStructures::EQITEMINFO* item = (Zeal::EqStructures::EQITEMINFO*)wnd->invSlot->Item;
-	if (item->Type != 0) {
-		return; // Item is not a common item.
+	Zeal::EqStructures::EQITEMINFO* src_item = (Zeal::EqStructures::EQITEMINFO*)src_inv_slot->Item;
+	if (src_item->Type != 0) {
+		return false; // Item is not a common item.
 	}
 
-	bool can_class_race_equip = Zeal::EqGame::can_use_item(c, item);
+	bool can_class_race_equip = Zeal::EqGame::can_use_item(c, src_item);
 	if (!can_class_race_equip) {
-		return; // Item is not usable by our race/class/deity
+		return false; // Item is not usable by our race/class/deity
 	}
 
 	// ------------------------------------------
 	// -- Find what slots will accept the item --
 	// ------------------------------------------
 
-	WORD src_item_id = item->ID;
+	WORD src_item_id = src_item->ID;
 	std::vector<std::pair<int, WORD>> dst_slots; // Pairs of {invSlot,itemID} for the valid destination slots
 
 	// First look for empty slots, prioritize those.
 	for (int i : EQUIP_PRIORITY_ORDER) {
-		if (!c->InventoryItem[i] && Zeal::EqGame::can_item_equip_in_slot(c, item, i + 1)) {
+		if (!c->InventoryItem[i] && Zeal::EqGame::can_item_equip_in_slot(c, src_item, i + 1)) {
 			dst_slots.push_back(std::make_pair<int, WORD>(i + 1, 0));
 		}
 	}
@@ -71,28 +77,28 @@ void EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mo
 	// Looks for any valid slot if no empty ones were available.
 	if (dst_slots.empty()) {
 		for (int i : EQUIP_PRIORITY_ORDER) {
-			if (c->InventoryItem[i] && Zeal::EqGame::can_item_equip_in_slot(c, item, i + 1)) {
+			if (c->InventoryItem[i] && Zeal::EqGame::can_item_equip_in_slot(c, src_item, i + 1)) {
 				if (c->InventoryItem[i]->Type != 0) {
 					continue; // Equipped item isn't a normal item? Skip it.
 				}
 				if (c->InventoryItem[i]->ID == src_item_id) {
-					if (item->Common.IsStackable) {
+					if (src_item->Common.IsStackable) {
 						if (c->InventoryItem[i]->Common.StackCount >= 20) {
 							continue; // Equipepd item is already a full stack of the same item. Skip it.
 						}
 					}
-					else if (item->Common.Charges == c->InventoryItem[i]->Common.Charges) {
+					else if (src_item->Common.Charges == c->InventoryItem[i]->Common.Charges) {
 						continue; // Equiped item is the same item. Skip it.
 					}
 				}
-				else if (container->Container.SizeCapacity < c->InventoryItem[i]->Size) {
+				else if (src_container->Container.SizeCapacity < c->InventoryItem[i]->Size) {
 					continue; // Equipped item won't fit into this bag when we swap. Skip it.
 				}
 				dst_slots.push_back(std::make_pair(i + 1, c->InventoryItem[i]->ID));
 			}
 		}
 		if (dst_slots.empty()) {
-			return; // Couldn't find any slot to equip the item in.
+			return false; // Couldn't find any slot to equip the item in.
 		}
 	}
 
@@ -112,8 +118,12 @@ void EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mo
 		i = dst_slots.size() - 1;
 	}
 
-	int dst_inv_slot = dst_slots[i].first;
+	int dst_inv_slot_id = dst_slots[i].first;
 	WORD dst_item_id = dst_slots[i].second;
+	Zeal::EqUI::InvSlot* dst_inv_slot = GetInventorySlot(dst_inv_slot_id);
+	if (!dst_inv_slot) {
+		return false; // Destination slot not found.
+	}
 
 	// --------------------
 	// -- Begin Swapping --
@@ -125,20 +135,17 @@ void EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mo
 	wnd_mgr->ShiftKeyState = 1;
 	wnd_mgr->ControlKeyState = 0;
 	wnd_mgr->AltKeyState = 0;
-	unsigned int click_flags = 0x20001;
 
 	// (1) Pickup the bagged item.
-	wnd->LeftClickDown(mouse_x, mouse_y, click_flags);
-	wnd->LeftClickUp(mouse_x, mouse_y, click_flags);
-	// Now we should be holding the item to swap
-	if (c->CursorItem == item) {
+	src_inv_slot->HandleLButtonUp();
+	// Now we should be holding the item to swap on our Cursor
+	if (c->CursorItem == src_item) {
 		// (2) Equip it in the destination slot.
-		ClickInventoryWindowSlot(dst_inv_slot, click_flags);
-		// Now we should be holding the swapped-out item instead (if any).
+		dst_inv_slot->HandleLButtonUp();
+		// Now we should be holding the swapped-out item instead (if there was one equipped).
 		if (dst_item_id && c->CursorItem && c->CursorItem->ID == dst_item_id) {
 			// (3) Put the swapped-out item in the bag slot we just emptied.
-			wnd->LeftClickDown(mouse_x, mouse_y, click_flags);
-			wnd->LeftClickUp(mouse_x, mouse_y, click_flags);
+			src_inv_slot->HandleLButtonUp();
 		}
 	}
 
@@ -146,24 +153,26 @@ void EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlotWnd* wnd, int mouse_x, int mo
 	wnd_mgr->ShiftKeyState = shift;
 	wnd_mgr->ControlKeyState = ctrl;
 	wnd_mgr->AltKeyState = alt;
+	return true;
 }
 
-bool EquipItem::ClickInventoryWindowSlot(int invSlot, unsigned int flags) {
-	// Note: Don't need to check for visible for Inventory UI. The elements are clickable even when not shown.
-	if (!Zeal::EqGame::Windows->Inventory) {
-		return false;
+Zeal::EqUI::InvSlot* EquipItem::GetInventorySlot(int inv_slot_id) {
+	if (inv_slot_id < 1 || inv_slot_id > 22) {
+		return nullptr; // Not an equippable inventory slot
 	}
-	if (invSlot < 1 || invSlot > 22) {
-		return false;
+	Zeal::EqUI::CInvSlotMgr* inv_slot_mgr = Zeal::EqGame::Windows->InvSlotMgr;
+	if (!inv_slot_mgr) {
+		return nullptr;
 	}
-	Zeal::EqUI::BasicWnd* btn = Zeal::EqGame::Windows->Inventory->GetChildItem("InvSlot" + std::to_string(invSlot));
-	if (btn) {
-		Zeal::EqUI::CXPoint point = btn->GetScreenCenterPoint();
-		btn->LeftClickDown(point.x, point.y, flags);
-		btn->LeftClickUp(point.x, point.y, flags);
-		return true;
+	Zeal::EqUI::InvSlot* inv_slot = inv_slot_mgr->FindInvSlot(inv_slot_id);
+	if (!inv_slot) {
+		return nullptr; // Slot Unavailable
 	}
-	return false;
+	Zeal::EqUI::InvSlotWnd* wnd = inv_slot->invSlotWnd;
+	if (!wnd || wnd->SlotID != inv_slot_id) {
+		return nullptr; // Invalid window
+	}
+	return inv_slot;
 }
 
 EquipItem::EquipItem(ZealService* zeal)
@@ -171,12 +180,7 @@ EquipItem::EquipItem(ZealService* zeal)
 	if (!Zeal::EqGame::is_new_ui()) {
 		return;
 	}
-
-	// Hook the Right Click event for CInvSlotWnd
-	auto* inv_slot_wnd_vtable = Zeal::EqUI::InvSlotWnd::default_vtable;
-	mem::unprotect_memory(inv_slot_wnd_vtable, sizeof(*inv_slot_wnd_vtable));
-	inv_slot_wnd_vtable->HandleRButtonUp = InvSlotWnd_HandleRButtonUp;
-	mem::reset_memory_protection(inv_slot_wnd_vtable);
+	ZealService::get_instance()->hooks->Add("CInvSlot_HandleRButtonUp", 0x422804, CInvSlot_HandleRButtonUp, hook_type_detour);
 }
 
 EquipItem::~EquipItem()
