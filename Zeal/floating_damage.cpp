@@ -253,24 +253,35 @@ void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStru
 {
 	if (!enabled.get())
 		return;
-	if ((int)dmg > 0 || heal>0)
-	{
-		if (target)
-		{
-			bool is_me = false;
-			if (source && source->SpawnId == Zeal::EqGame::get_controlled()->SpawnId)
-				is_me = true;
-			Zeal::EqStructures::SPELL* sp_data = nullptr;
-			if (spell_id > 0)
-			{
-				sp_data = Zeal::EqGame::get_spell_mgr()->Spells[spell_id];
-//				Zeal::EqGame::print_chat("%s", sp_data->CastOnAnother);
-			}
-			if (spell_id > 0 && !spells.get())
-				return;
-			damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal, sp_data));
-		}
-	}
+
+	if (!target || (dmg <= 0 && heal <= 0))
+		return;
+
+	bool is_player_damage = (source && source->Type == Zeal::EqEnums::Player);
+
+	bool is_spell = (spell_id > 0);
+	if (is_player_damage && is_spell && !show_spells.get())
+		return;
+
+	if (is_player_damage && !is_spell && !show_melee.get())
+		return;
+
+	auto self = Zeal::EqGame::get_controlled();
+	bool is_me = (source && self && source->SpawnId == self->SpawnId);
+	if (is_me && !show_self.get())
+		return;
+
+	bool is_pet = (source && source->PetOwnerSpawnId != 0);  // Just filter all pet damage.
+	if (is_pet && !show_pets.get())
+		return;
+
+	bool is_my_pet = (source && self && source->PetOwnerSpawnId == self->SpawnId);
+	bool is_others = !is_me && !is_my_pet;
+	if (is_player_damage && is_others && !show_others.get())
+		return;
+
+	auto sp_data = is_spell ? Zeal::EqGame::get_spell_mgr()->Spells[spell_id] : nullptr;
+	damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal, sp_data));
 }
 
 

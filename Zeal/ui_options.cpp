@@ -296,7 +296,11 @@ void ui_options::InitFloatingDamage()
 	if (!wnd)
 		return;
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->enabled.set(wnd->Checked); });
-	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpells", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spells.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSelf", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_self.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingPets", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_pets.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingOthers", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_others.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingMelee", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_melee.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpells", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_spells.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpellIcons", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spell_icons.set(wnd->Checked); });
 
 	ui->AddComboCallback(wnd, "Zeal_FloatingFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
@@ -641,7 +645,11 @@ void ui_options::UpdateOptionsNameplate()
 void ui_options::UpdateOptionsFloatingDamage()
 {
 	ui->SetChecked("Zeal_FloatingDamage", ZealService::get_instance()->floating_damage->enabled.get());
-	ui->SetChecked("Zeal_FloatingSpells", ZealService::get_instance()->floating_damage->spells.get());
+	ui->SetChecked("Zeal_FloatingSelf", ZealService::get_instance()->floating_damage->show_self.get());
+	ui->SetChecked("Zeal_FloatingPets", ZealService::get_instance()->floating_damage->show_pets.get());
+	ui->SetChecked("Zeal_FloatingOthers", ZealService::get_instance()->floating_damage->show_others.get());
+	ui->SetChecked("Zeal_FloatingMelee", ZealService::get_instance()->floating_damage->show_melee.get());
+	ui->SetChecked("Zeal_FloatingSpells", ZealService::get_instance()->floating_damage->show_spells.get());
 	ui->SetChecked("Zeal_FloatingSpellIcons", ZealService::get_instance()->floating_damage->spell_icons.get());
 
 	std::string current_font = ZealService::get_instance()->floating_damage->bitmap_font_filename.get();

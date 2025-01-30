@@ -36,7 +36,11 @@ public:
 	void callback_render();
 	ZealSetting<bool> enabled = { true, "FloatingDamage", "Enabled", true };
 	ZealSetting<bool> spell_icons = { true, "FloatingDamage", "Icons", true };
-	ZealSetting<bool> spells = { true, "FloatingDamage", "Spells", true };
+	ZealSetting<bool> show_spells = { true, "FloatingDamage", "Spells", true };
+	ZealSetting<bool> show_melee = { true, "FloatingDamage", "Melee", true };
+	ZealSetting<bool> show_self = { true, "FloatingDamage", "Self", true };
+	ZealSetting<bool> show_pets = { true, "FloatingDamage", "Pets", true };
+	ZealSetting<bool> show_others = { true, "FloatingDamage", "Others", true };
 	ZealSetting<std::string> bitmap_font_filename = { std::string(kUseClientFontString),
 		"FloatingDamage", "Font", true, [this](std::string val) { bitmap_font.reset(); } };
 	bool set_font(std::string font_name);
