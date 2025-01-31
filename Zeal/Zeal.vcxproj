@@ -163,6 +163,7 @@
     <ClInclude Include="assist.h" />
     <ClInclude Include="autofire.h" />
     <ClInclude Include="bitmap_font.h" />
+    <ClInclude Include="character_select.h" />
     <ClInclude Include="chatfilter.h" />
     <ClInclude Include="crash_handler.h" />
     <ClInclude Include="default_spritefont.h" />
@@ -237,6 +238,7 @@
     <ClCompile Include="assist.cpp" />
     <ClCompile Include="autofire.cpp" />
     <ClCompile Include="bitmap_font.cpp" />
+    <ClCompile Include="character_select.cpp" />
     <ClCompile Include="chatfilter.cpp" />
     <ClCompile Include="crash_handler.cpp" />
     <ClCompile Include="default_spritefont.cpp" />
