@@ -12,19 +12,22 @@ DWORD GetRandomZone()
 	return distribution(generator);
 }
 
-void __fastcall StartWorldDisplay(DWORD t, DWORD unk, DWORD zone_index, DWORD uhh)
+void __fastcall StartWorldDisplay(DWORD t, DWORD unused, DWORD zone_index, DWORD uhh)
 {
 	if (zone_index == 0xB9) //loading (character select)
 		zone_index = GetRandomZone();
-	ZealService::get_instance()->hooks->hook_map["StartWorldDisplay"]->original(StartWorldDisplay)(t, unk, zone_index, uhh);
-	reinterpret_cast<void(__stdcall*)(void)>(0x4B459C)(); //moveplayerlocalsafecoords
+	ZealService::get_instance()->hooks->hook_map["StartWorldDisplay"]->original(StartWorldDisplay)(t, unused, zone_index, uhh);
 }
-
-
+void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD unk1, DWORD unk2)
+{
+	ZealService::get_instance()->hooks->hook_map["SelectCharacter"]->original(SelectCharacter)(t, unused, unk1, unk2);
+	reinterpret_cast<void(__stdcall*)(void)>(0x4B459C)();
+}
 
 CharacterSelect::CharacterSelect(ZealService* zeal)
 {
 	zeal->hooks->Add("StartWorldDisplay", 0x4A849E, StartWorldDisplay, hook_type_detour);
+	zeal->hooks->Add("SelectCharacter", 0x40F56D, SelectCharacter, hook_type_detour);
 }
 CharacterSelect::~CharacterSelect()
 {

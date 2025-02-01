@@ -2358,6 +2358,8 @@ namespace Zeal
 		}
 		bool is_in_game()
 		{
+			if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && Zeal::EqGame::Windows->CharacterSelect->Explore) //allow most zeal features to work while in explore mode
+				return true;
 			if (get_gamestate() != -1)
 				return get_gamestate() == GAMESTATE_INGAME;
 			else
