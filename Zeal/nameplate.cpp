@@ -252,7 +252,9 @@ void NamePlate::render_ui()
 	for (const auto& entity : visible_entities)
 	{
 		// Added Unknown0003 check due to some bad results with 0x05 at startup causing a crash.
-		if (!entity || entity->StructType != 0x03 || !entity->ActorInfo || !entity->ActorInfo->DagHeadPoint)
+		if (!entity || entity->StructType != 0x03 || !entity->ActorInfo ||
+			!entity->ActorInfo->DagHeadPoint || !entity->ActorInfo->ViewActor_ ||
+			entity->ActorInfo->ViewActor_->Flags & 0x20000000)  // Empirically found flag for incomplete actor.
 			continue;
 		auto it = nameplate_info_map.find(entity);
 		if (it == nameplate_info_map.end())
@@ -260,8 +262,6 @@ void NamePlate::render_ui()
 
 		NamePlateInfo& info = it->second;
 		Vec3 position = entity->ActorInfo->DagHeadPoint->Position;
-		if (position.x == 0 && position.y == 0 && position.z == 0) // TODO: Experimental suppression of misplaced DagHeadpoints.
-			continue;  // Some entity positions have a delay after spawn before updating. Skip.
 		position.z += get_nameplate_z_offset(*entity);
 
 		// Support an optional healthbar for zeal font mode only.
