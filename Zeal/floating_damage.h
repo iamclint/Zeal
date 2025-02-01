@@ -2,6 +2,7 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include <stdint.h>
+#include "EqPackets.h"
 #include "EqStructures.h"
 #include "EqUI.h"
 #include "d3dx8/d3d8.h"
@@ -17,13 +18,13 @@ struct DamageData
 	bool needs_removed;
 	float opacity;
 	void tick(int active_number_count);
-	bool is_my_damage;
-	bool is_spell;
 	std::string str_dmg;
-	int damage;
-	int heal;
 	Zeal::EqStructures::SPELL* spell;
-	DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _heal, Zeal::EqStructures::SPELL* sp = nullptr);
+	D3DCOLOR color;
+	bool highlight;
+
+	// Damage is positive, heals are negative. Percent adds a % suffix.
+	DamageData(int dmg, bool percent, Zeal::EqStructures::SPELL* spell, D3DCOLOR color, bool highlight);
 };
 
 class FloatingDamage
@@ -31,7 +32,9 @@ class FloatingDamage
 public:
 	static constexpr char kUseClientFontString[] = "Use client /fcd #";
 
-	void add_damage(struct Zeal::EqStructures::Entity* source, struct  Zeal::EqStructures::Entity* target, short dmg, int heal, short spell_id);
+	void add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type,
+		short spell_id, short damage, char output_text);
+	void handle_hp_update_packet(const Zeal::Packets::SpawnHPUpdate_Struct* packet);
 	void callback_deferred();
 	void callback_render();
 	ZealSetting<bool> enabled = { true, "FloatingDamage", "Enabled", true };
@@ -41,9 +44,9 @@ public:
 	ZealSetting<bool> show_self = { true, "FloatingDamage", "Self", true };
 	ZealSetting<bool> show_pets = { true, "FloatingDamage", "Pets", true };
 	ZealSetting<bool> show_others = { true, "FloatingDamage", "Others", true };
+	ZealSetting<int> big_hit_threshold = { 100, "FloatingDamage", "BigHitThreshold", true };
 	ZealSetting<std::string> bitmap_font_filename = { std::string(kUseClientFontString),
 		"FloatingDamage", "Font", true, [this](std::string val) { bitmap_font.reset(); } };
-	bool set_font(std::string font_name);
 	std::vector<std::string> get_available_fonts() const;
 	void init_ui();
 	void clean_ui();

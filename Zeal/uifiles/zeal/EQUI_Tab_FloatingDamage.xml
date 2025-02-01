@@ -256,7 +256,62 @@
     <Style_Border>true</Style_Border>
     <Choices>default</Choices>
   </Combobox>
-
+  <!-- Bit hit value slider -->
+  <Label item="Zeal_FloatingBigHit_Label">
+    <ScreenID>Zeal_FloatingBigHit_Label</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>200</X>
+      <Y>70</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>14</CY>
+    </Size>
+    <Text>Big hit threshold value</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>false</AlignRight>
+  </Label>
+  <Slider item="Zeal_FloatingBigHit_Slider">
+    <ScreenID>Zeal_FloatingBigHit_Slider</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>197</X>
+      <Y>90</Y>
+    </Location>
+    <Size>
+      <CX>100</CX>
+      <CY>16</CY>
+    </Size>
+    <SliderArt>SDT_DefSlider</SliderArt>
+  </Slider>
+  <Label item="Zeal_FloatingBigHit_Value">
+    <ScreenID>Zeal_FloatingBigHit_Value</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>297</X>
+      <Y>90</Y>
+    </Location>
+    <Size>
+      <CX>50</CX>
+      <CY>16</CY>
+    </Size>
+    <Text>0</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>true</AlignRight>
+  </Label>
   <Page item="Tab_FloatingDamage">
     <ScreenID>Tab_FloatingDamage</ScreenID>
     <RelativePosition>true</RelativePosition>
@@ -284,6 +339,9 @@
     <Pieces>Zeal_FloatingMelee</Pieces>
     <Pieces>Zeal_FloatingSpells</Pieces>
     <Pieces>Zeal_FloatingSpellIcons</Pieces>
+    <Pieces>Zeal_FloatingBigHit_Label</Pieces>
+    <Pieces>Zeal_FloatingBigHit_Slider</Pieces>
+    <Pieces>Zeal_FloatingBigHit_Value</Pieces>
     <Pieces>Zeal_FloatingFont_Label</Pieces>
     <Pieces>Zeal_FloatingFont_Combobox</Pieces>
     <Location>

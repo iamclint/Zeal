@@ -286,11 +286,12 @@ void __fastcall OutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR ms
 ///*00E*/	float	sequence; // see above notes in Action_Struct
 ///*012*/	float	pushup_angle; // associated with force.  Sine of this angle, multiplied by force, will be z push.
 /// 
-void CallbackManager::AddReportSuccessfulHit(std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text)> callback_function)
+void CallbackManager::AddReportSuccessfulHit(std::function<void(struct Zeal::EqStructures::Entity* source,
+	struct Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, char output_text)> callback_function)
 {
 	ReportSuccessfulHit_functions.push_back(callback_function);
 }
-void CallbackManager::invoke_ReportSuccessfulHit(Zeal::Packets::Damage_Struct* dmg, int heal, char output_text)
+void CallbackManager::invoke_ReportSuccessfulHit(Zeal::Packets::Damage_Struct* dmg, char output_text)
 {
 	auto em = ZealService::get_instance()->entity_manager.get();
 	Zeal::EqStructures::Entity* target = em->Get(dmg->target);
@@ -298,14 +299,14 @@ void CallbackManager::invoke_ReportSuccessfulHit(Zeal::Packets::Damage_Struct* d
 	if (target && source)
 	{
 		for (auto& fn : ReportSuccessfulHit_functions)
-			fn(source, target, dmg->type, dmg->spellid, dmg->damage, heal, output_text);
+			fn(source, target, dmg->type, dmg->spellid, dmg->damage, output_text);
 	}
 }
 
-void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int heal)
+static void __fastcall ReportSuccessfulHit(int t, int u, Zeal::Packets::Damage_Struct* dmg, char output_text, int always_zero)
 {
-	ZealService::get_instance()->callbacks->invoke_ReportSuccessfulHit(dmg, heal, output_text);
-	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, heal);
+	ZealService::get_instance()->callbacks->invoke_ReportSuccessfulHit(dmg, output_text);
+	ZealService::get_instance()->hooks->hook_map["ReportSuccessfulHit"]->original(ReportSuccessfulHit)(t, u, dmg, output_text, always_zero);
 	chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
 	if (cf)
 	{

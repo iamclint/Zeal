@@ -35,7 +35,6 @@ struct damage_data
 	WORD type = 0;
 	short spell_id = 0; 
 	short damage = 0; 
-	int heal = 0;
 };
 
 class chatfilter

@@ -173,13 +173,53 @@ void ui_options::LoadColors()
 	}
 	if (!ini->exists("ZealColors", "Color21")) //My Pet Say
 	{
-		if (color_buttons.count(19))
+		if (color_buttons.count(21))
 			color_buttons[21]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
 	}
 	if (!ini->exists("ZealColors", "Color22")) //Other Pet Say
 	{
-		if (color_buttons.count(20))
+		if (color_buttons.count(22))
 			color_buttons[22]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
+	}
+	if (!ini->exists("ZealColors", "Color32")) // FCD: My melee damage
+	{
+		if (color_buttons.count(32))
+			color_buttons[32]->TextColor.ARGB = D3DCOLOR_XRGB(0x00, 0xf0, 0xf0); // Light blue
+	}
+	if (!ini->exists("ZealColors", "Color33")) // FCD: My spell damage
+	{
+		if (color_buttons.count(33))
+			color_buttons[33]->TextColor.ARGB = D3DCOLOR_XRGB(0x00, 0xf0, 0xf0); // Light blue
+	}
+	if (!ini->exists("ZealColors", "Color34")) // FCD: Melee hitting me
+	{
+		if (color_buttons.count(34))
+			color_buttons[34]->TextColor.ARGB = D3DCOLOR_XRGB(0xf0, 0x00, 0x00);  // Red
+	}
+	if (!ini->exists("ZealColors", "Color35")) // FCD: Spells hitting me
+	{
+		if (color_buttons.count(35))
+			color_buttons[35]->TextColor.ARGB = D3DCOLOR_XRGB(0xf0, 0x00, 0x00);  // Red
+	}
+	if (!ini->exists("ZealColors", "Color36")) // FCD: Melee hitting others
+	{
+		if (color_buttons.count(36))
+			color_buttons[36]->TextColor.ARGB = D3DCOLOR_XRGB(0xff, 0x80, 0x00);  // Orange
+	}
+	if (!ini->exists("ZealColors", "Color37")) // FCD: Spells hitting others
+	{
+		if (color_buttons.count(37))
+			color_buttons[37]->TextColor.ARGB = D3DCOLOR_XRGB(0xff, 0x80, 0x00);  // Orange
+	}
+	if (!ini->exists("ZealColors", "Color38")) // FCD: Melee hitting NPCs
+	{
+		if (color_buttons.count(38))
+			color_buttons[38]->TextColor.ARGB = D3DCOLOR_XRGB(0xf0, 0xf0, 0xf0);  // White
+	}
+	if (!ini->exists("ZealColors", "Color39")) // FCD: Spells hitting NPCs
+	{
+		if (color_buttons.count(39))
+			color_buttons[39]->TextColor.ARGB = D3DCOLOR_XRGB(0xf0, 0xf0, 0xf0);  // White
 	}
 
 	for (auto& [index, btn] : color_buttons)
@@ -301,8 +341,12 @@ void ui_options::InitFloatingDamage()
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingOthers", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_others.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingMelee", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_melee.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpells", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_spells.set(wnd->Checked); });
+	ui->AddLabel(wnd, "Zeal_FloatingBigHit_Value");
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSpellIcons", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->spell_icons.set(wnd->Checked); });
-
+	ui->AddSliderCallback(wnd, "Zeal_FloatingBigHit_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
+		ZealService::get_instance()->floating_damage->big_hit_threshold.set(value * 10);
+		ui->SetLabelValue("Zeal_FloatingBigHit_Value", "%i", value * 10);
+		});
 	ui->AddComboCallback(wnd, "Zeal_FloatingFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		std::string font_name("");
 		if (value >= 0) {
@@ -651,6 +695,9 @@ void ui_options::UpdateOptionsFloatingDamage()
 	ui->SetChecked("Zeal_FloatingMelee", ZealService::get_instance()->floating_damage->show_melee.get());
 	ui->SetChecked("Zeal_FloatingSpells", ZealService::get_instance()->floating_damage->show_spells.get());
 	ui->SetChecked("Zeal_FloatingSpellIcons", ZealService::get_instance()->floating_damage->spell_icons.get());
+	int big_hit_threshold = ZealService::get_instance()->floating_damage->big_hit_threshold.get();
+	ui->SetLabelValue("Zeal_FloatingBigHit_Value", "%i", big_hit_threshold);
+	ui->SetSliderValue("Zeal_FloatingBigHit_Slider", big_hit_threshold / 10);
 
 	std::string current_font = ZealService::get_instance()->floating_damage->bitmap_font_filename.get();
 	UpdateComboBox("Zeal_FloatingFont_Combobox", current_font, FloatingDamage::kUseClientFontString);
