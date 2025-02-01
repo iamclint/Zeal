@@ -5,6 +5,7 @@
 #include "Zeal.h"
 #include "string_util.h"
 #include "EqPackets.h"
+#include <fstream>
 //void __fastcall finalize_loot(int uk, int lootwnd_ptr)
 //{
 //	Zeal::EqStructures::Entity* corpse =  Zeal::EqGame::get_active_corpse();
@@ -123,6 +124,7 @@ looting::~looting()
 
 void looting::init_ui()
 {
+	load_protected_items();
 }
 
 //struct formatted_msg
@@ -204,6 +206,187 @@ void looting::looted_item()
 		loot_all = false;
 }
 
+static void __fastcall DropHeldItemOnGround(void* ceverquest_this, int unused_edx, int print_message)
+{
+	auto zeal = ZealService::get_instance();
+	if (zeal->looting_hook->is_cursor_protected(Zeal::EqGame::get_char_info()))
+		return;  // Item or money were blocked from dropping.
+	zeal->hooks->hook_map["DropHeldItemOnGround"]->original(DropHeldItemOnGround)(ceverquest_this,
+		unused_edx, print_message);
+}
+
+// Not even sure if this is possible with client ui but just in case.
+static void __fastcall DropHeldMoneyOnGround(void* ceverquest_this, int unused_edx, int print_message)
+{
+	auto zeal = ZealService::get_instance();
+	if (zeal->looting_hook->is_cursor_protected(Zeal::EqGame::get_char_info()))
+		return;  // Item or money were blocked from dropping.
+	zeal->hooks->hook_map["DropHeldMoneyOnGround"]->original(DropHeldMoneyOnGround)(ceverquest_this,
+		unused_edx, print_message);
+}
+
+static void __fastcall DestroyHeldItemOrMoney(Zeal::EqStructures::EQCHARINFO* char_info, int unused_edx)
+{
+	ZealService* zeal = ZealService::get_instance();
+	if (zeal->looting_hook->is_cursor_protected(char_info))
+		return;  // Item or money were blocked from destruction.
+	zeal->hooks->hook_map["DestroyHeldItemOrMoney"]->original(DestroyHeldItemOrMoney)(char_info, unused_edx);
+}
+
+bool looting::is_cursor_protected(Zeal::EqStructures::EQCHARINFO* char_info)
+{
+	if (!setting_protect_enable.get() || !char_info)
+		return false;
+
+	// If no item on cursor, check for money.
+	if (!char_info->CursorItem) {
+		int value = char_info->CursorPlatinum * 1000 + char_info->CursorGold * 100
+			+ char_info->CursorSilver * 10 + char_info->CursorCopper;
+		bool block = value >= setting_protect_value.get() * 1000;
+		if (block)
+			Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal /protect blocked action: Use /protect off or change /protect value");
+		return block;
+	}
+
+	// Next check the item versus the protected list.
+	const auto item_info = char_info->CursorItem;
+	int item_id = item_info->ID;
+	if (std::find_if(protected_items.begin(), protected_items.end(),
+		[item_id](ProtectedItem item) {return item.id == item_id;}) != protected_items.end()) {
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal /protect blocked action: Use /protect off or disable protection with /protect %d", item_id);
+		return true;
+	}
+
+	// Then check if it is a non-empty container (protect against Silchas maneuver).
+	if (item_info->Type == 1) { // Container
+		for (int i = 0; i < EQ_NUM_CONTAINER_SLOTS; ++i)
+			if (item_info->Container.Item[i]) {
+				Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal /protect blocked non-empty container: Use /protect off");
+				return true;
+			}
+	}
+
+	// And then check for value.
+	int value = item_info->Cost;  // In copper.
+	if (item_info->Type == 0 && item_info->Common.IsStackable && item_info->Common.StackCount)
+		value *= item_info->Common.StackCount;
+	if (value >= setting_protect_value.get() * 1000) {
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal /protect blocked action: Use /protect off or change /protect value");
+		return true;
+	}
+	return false;
+}
+
+static std::string get_protected_items_filename()
+{
+	if (!Zeal::EqGame::get_char_info())
+		return "";
+	return std::format("./{0}_protected.ini", Zeal::EqGame::get_char_info()->Name);
+}
+
+void looting::load_protected_items()
+{
+	std::string filename = get_protected_items_filename();
+	if (filename.empty() || !std::filesystem::exists(filename))
+		return;  // Game not initialized yet or no protected file.
+
+	std::ifstream input_file(filename);
+	if (!input_file.is_open()) {
+		Zeal::EqGame::print_chat("Error opening protect file: %s", filename.c_str());
+		return;
+	}
+
+	protected_items.clear();
+	std::string line;
+	while (std::getline(input_file, line))
+	{
+		auto fields = Zeal::String::split_text(line, ",");
+		if (fields.size() == 2) {
+			int item_id = std::stoi(fields.front());
+			if (item_id > 0) {
+				protected_items.push_back({ item_id, fields.back() });
+				continue;  // Keep going.
+			}
+		}
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal protect error parsing line: %s", line.c_str());
+		return;
+
+	}
+}
+
+void looting::update_protected_item(int item_id, const std::string& name)
+{
+	auto it = std::find_if(protected_items.begin(), protected_items.end(),
+		[item_id](ProtectedItem item) {return item.id == item_id; });
+	if (it == protected_items.end()) {
+		Zeal::EqGame::print_chat("protect: Adding item %d (%s) to the list", item_id, name.c_str());
+		protected_items.push_back({ item_id, name });
+	}
+	else {
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "protect: Removing item %d (%s) from the list",
+			item_id, name.c_str());
+		protected_items.erase(it);
+	}
+	std::sort(protected_items.begin(), protected_items.end(),
+		[](ProtectedItem a, ProtectedItem b) {return a.id < b.id; });
+
+	std::ofstream output_file(get_protected_items_filename());
+	if (output_file.is_open())
+		for (const auto& item : protected_items) 
+			output_file << item.id << "," << item.name << "\n";
+	else
+		Zeal::EqGame::print_chat("Error: Failed to save protected item list");
+}
+
+bool looting::parse_protect(const std::vector<std::string>& args)
+{
+	const char kMarker = 0x12;  // Link marker.
+	int new_value = 0;
+	if (args.size() == 2 && args[1] == "on")
+		setting_protect_enable.set(true);
+	else if (args.size() == 2 && args[1] == "off")
+		setting_protect_enable.set(false);
+	else if (args.size() == 2 && args[1] == "list") {
+		Zeal::EqGame::print_chat("Protected items: %d", protected_items.size());
+		for (const auto& item : protected_items)
+			Zeal::EqGame::print_chat("%d: %s", item.id, item.name.c_str());
+	}
+	else if (args.size() == 3 && args[1] == "value" && Zeal::String::tryParse(args[2], &new_value)
+		&& new_value >= 0)
+		setting_protect_value.set(new_value);
+	else if (args.size() == 3 && args[1] == "item" && Zeal::String::tryParse(args[2], &new_value)
+		&& new_value > 0)
+		update_protected_item(new_value, "IdOnly");
+	else if (args.size() >= 2 && args[1].size() >= 8 && args[1].front() == kMarker) {
+		std::string link = args[1];  // Need to re-assemble possibly split link names.
+		for (int i = 2; i < args.size(); ++i)
+			link += " " + args[i];
+		std::string item_id = link.substr(2, 6);
+		std::string item_name = link.substr(8, link.length() - 1 - 8);
+		if (link.back() == kMarker && Zeal::String::tryParse(item_id, &new_value) && new_value > 0)
+			update_protected_item(new_value, item_name);
+		else
+			Zeal::EqGame::print_chat("Error: Invalid link item id: %s", item_id.c_str());
+	}
+	else {
+		Zeal::EqGame::print_chat("Usage: /protect on, off: enables or disables protection");
+		Zeal::EqGame::print_chat("Usage: /protect list: prints the list of protected item_ids");
+		Zeal::EqGame::print_chat("Usage: /protect value #: blocks destruction of items with a value > # pp");
+		Zeal::EqGame::print_chat("Usage: /protect item #: toggles protection of item_id == #");
+		Zeal::EqGame::print_chat("Usage: /protect <item_link>: toggles item protection from a link");
+	}
+
+	if (setting_protect_enable.get())
+		Zeal::EqGame::print_chat("protect: ON, Value: %d pp, ItemCount: %d",
+			setting_protect_value.get(), protected_items.size());
+	else
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "protect: OFF");
+
+	return true;
+
+}
+
+
 looting::looting(ZealService* zeal)
 {
 	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
@@ -264,7 +447,10 @@ looting::looting(ZealService* zeal)
 		});
 	zeal->hooks->Add("ReleaseLoot", 0x426576, release_loot, hook_type_detour);
 	zeal->hooks->Add("CLootWndDeactivate", 0x426559, CLootWndDeactivate, hook_type_detour);
-	
-	if (Zeal::EqGame::is_in_game())
-		init_ui();
+
+	zeal->commands_hook->Add("/protect", {}, "Controls secondary protection of item destruction",
+		[this](const std::vector<std::string>& args) { return parse_protect(args); });
+	zeal->hooks->Add("DestroyHeldItemOrMoney", 0x004d0d88, DestroyHeldItemOrMoney, hook_type_detour);
+	zeal->hooks->Add("DropHeldItemOnGround", 0x00530d7e, DropHeldItemOnGround, hook_type_detour);
+	zeal->hooks->Add("DropHeldMoneyOnGround", 0x005313b3, DropHeldMoneyOnGround, hook_type_detour);
 }

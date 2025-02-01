@@ -494,6 +494,11 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 				for (const auto& font : fonts)
 					Zeal::EqGame::print_chat("  %s", font.c_str());
 			}
+			else if (args.size() == 3 && args[1] == "bighit" && Zeal::String::tryParse(args[2], &new_size)
+				&& new_size > 0) {
+				big_hit_threshold.set(new_size);
+				Zeal::EqGame::print_chat("Floating combat big hit threshold is now %i", new_size);
+			}
 			else if (args.size() == 2 && Zeal::String::tryParse(args[1], &new_size))
 			{
 				font_size = new_size;
@@ -510,6 +515,7 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 				Zeal::EqGame::print_chat("Usage: `/fcd <#>` selects the client font size (1 to 6)");
 				Zeal::EqGame::print_chat("Usage: `/fcd font` prints the available fonts");
 				Zeal::EqGame::print_chat("Usage: `/fcd font <fontname>` selects the zeal font <fontname>");
+				Zeal::EqGame::print_chat("Usage: `/fcd bighit <threshold>` sets the big hit threshold");
 			}
 
 			return true;

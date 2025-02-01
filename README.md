@@ -156,7 +156,20 @@ ___
   - **Arguments:** `ms delay`, `none`
   - **Example:** `/pandelay 200`
   - **Description:** changes the amount of delay before left click panning will start to happen
-    
+
+- `/protect`
+  - **Arguments:** `on`, `off`, `value`, `item`, `<item_link>`, `list`
+  - **Example:** `/protect value 10` Protects against dropping or destroying items >= 10 pp
+  - **Example:** `/protect list` Prints the list of currently protected items
+  - **Example:** `/protect item 10931` Toggles protection from dropping or destroying Crown of Rile (10931)
+  - **Example:** `/protect <item_link>` Toggles protection from dropping or destroying the item_link item.
+  - **Description:** Secondary protection against accidental loss of items. This should *not* be relied
+          upon as the primary method of protection and you will not be reimbursed if it doesn't protect
+          you from your own mistake.  Zeal intercepts the client calls to destroy or drop cursor
+          contents and blocks the action if it is a non-empty container, the item_value is >= value,
+          or the item is on the protect list. The enable, value, and protected list are stored per
+          character with the list stored in the `./<character_name>_protected.ini` file.
+
 - `/hidecorpse`
   - **Arguments:** `looted`, `none`
   - **Aliases:** `/hideco`, `/hidec`, `/hc`
