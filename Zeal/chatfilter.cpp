@@ -361,15 +361,15 @@ char* __fastcall serverGetString(int stringtable, int unused, int string_id, boo
 chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
 {
     zeal->hooks->Add("DamageOutputText", 0x52A8C1, CChatManager, hook_type_replace_call);
-    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { 
+    zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, char output_text) { 
         if (output_text) { 
             isDamage = true; 
-            damageData = { source, target, type, spell_id, damage, heal }; 
+            damageData = { source, target, type, spell_id, damage }; 
         }
         if (spell_id > 0 && damage > 0 && source != Zeal::EqGame::get_self() && target != Zeal::EqGame::get_self())
         {
             isDamage = true;
-            damageData = { source, target, type, spell_id, damage, heal };
+            damageData = { source, target, type, spell_id, damage };
             if (source->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500 || target->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500)
                 Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::strip_name(source->Name), Zeal::EqGame::strip_name(target->Name), damage);
         }

@@ -13,6 +13,7 @@ namespace Zeal
             CorpseDrag = 0x4114,
             CorpseDrop = 0x1337,
             TargetMouse = 0x4162,
+            HPUpdate = 0x40b2, // Note: Shared with MobHealth.
             RequestTrade = 0x40D1,
             WearChange = 0x4092,
             Illusion = 0x4091
@@ -60,6 +61,13 @@ namespace Zeal
         {
             /*000*/	UINT16	new_target; // Target spawn ID.
             /*002*/
+        };
+        struct SpawnHPUpdate_Struct  // Server encodes MobHealth's OP_MobHealth SpawnHPUpdate_Struct2 to this.
+        {
+            /*000*/ UINT32 spawn_id;  // Comment: Id of spawn to update
+            /*004*/ INT32 cur_hp;     // Comment:  Current hp of spawn
+            /*008*/ INT32 max_hp;     // Comment: Maximum hp of spawn
+            /*012*/
         };
         struct Tint_Struct {
             union {

@@ -41,8 +41,8 @@ public:
 	void AddDelayed(std::function<void()> callback_function, int ms);
 	void AddEntity(std::function<void(struct Zeal::EqStructures::Entity*)> callback_function, callback_type cb);
 	void AddOutputText(std::function<void(struct Zeal::EqUI::ChatWnd*& wnd, std::string& msg, short& channel)> callback_function);
-	void AddReportSuccessfulHit(std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text)> callback_function);
-	void invoke_ReportSuccessfulHit(struct Zeal::Packets::Damage_Struct* dmg, int heal, char output_text);
+	void AddReportSuccessfulHit(std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, char output_text)> callback_function);
+	void invoke_ReportSuccessfulHit(struct Zeal::Packets::Damage_Struct* dmg, char output_text);
 	void invoke_player(struct Zeal::EqStructures::Entity* ent, callback_type cb);
 	void invoke_generic(callback_type fn);
 	bool invoke_packet(callback_type fn, UINT opcode, char* buffer, UINT len);
@@ -60,6 +60,6 @@ private:
 	std::unordered_map<callback_type, std::vector<std::function<bool(UINT, BOOL)>>> cmd_functions;
 	std::unordered_map<callback_type, std::vector<std::function<void(struct Zeal::EqStructures::Entity*)>>> player_spawn_functions;
 	std::vector<std::function<void(struct Zeal::EqUI::ChatWnd*& wnd,std::string& msg, short& channel)>> output_text_functions;
-	std::vector<std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* victim, WORD type, short spell_id, short damage, int heal, char output_text)>> ReportSuccessfulHit_functions;
+	std::vector<std::function<void(struct Zeal::EqStructures::Entity* source, struct Zeal::EqStructures::Entity* victim, WORD type, short spell_id, short damage, char output_text)>> ReportSuccessfulHit_functions;
 };
 

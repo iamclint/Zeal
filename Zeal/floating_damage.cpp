@@ -52,7 +52,9 @@ int getRandomIntBetween(int min, int max) {
 
 void DamageData::tick(int active_number_count)
 {
-	if (GetTickCount64() - start_time > 2500)
+	unsigned int duration = highlight ? 3000 : 2500;
+
+	if (GetTickCount64() - start_time > duration)
 	{
 		needs_removed = true;
 		return;
@@ -62,29 +64,35 @@ void DamageData::tick(int active_number_count)
 		float speed_offset = (float)active_number_count / 20.f;
 		float opacity_offset = (float)active_number_count / 200.f;
 		y_offset -= 2 + speed_offset;
-		opacity -= 0.01f + opacity_offset;
+		if (highlight)
+			opacity -= 0.005f;  // Fade half as fast, no congestion fading.
+		else
+			opacity -= 0.01f + opacity_offset;
 		if (opacity < 0)
 			needs_removed = true;
 		last_tick = GetTickCount64();
 	}
 }
-DamageData::DamageData(int dmg, bool _is_my_damage_dealt, bool _is_spell, int _heal, Zeal::EqStructures::SPELL* sp)
+DamageData::DamageData(int dmg, bool percent, Zeal::EqStructures::SPELL* _spell, D3DCOLOR _color,
+	bool _highlight)
 {
-	is_spell = _is_spell;
-	is_my_damage = _is_my_damage_dealt;
-	if (dmg>0)
+	if (dmg < 0)
+		str_dmg = "+" + std::to_string(-dmg);
+	else
 		str_dmg = std::to_string(dmg);
-	else if (_heal>0)
-		str_dmg = "+" + std::to_string(_heal);
-	damage = dmg;
+
+	if (percent)
+		str_dmg += "%";
+
 	opacity = 1.0f;
 	y_offset = static_cast<float>(getRandomIntBetween(-20, 20));
 	x_offset = static_cast<float>(getRandomIntBetween(-40, 40));
 	needs_removed = false;
 	last_tick = GetTickCount64();
 	start_time = GetTickCount64();
-	heal = _heal;
-	spell = sp;
+	spell = _spell;
+	color = _color;
+	highlight = _highlight;
 }
 
 long FloatRGBAtoLong(float r, float g, float b, float a) {
@@ -192,44 +200,14 @@ void FloatingDamage::render_text()
 						Vec2 screen_pos = { 0,0 };
 						if (ZealService::get_instance()->dx->WorldToScreen({ target->Position.x,target->Position.y,target->Position.z }, screen_pos))
 						{
-							long color = FloatRGBAtoLong(1.0f, 1.0f, 1.0f, dmg.opacity);
-							if (dmg.is_my_damage) //if the damage is dealt by me
-							{
-								if (dmg.is_spell) 
-									color = Zeal::EqGame::get_user_color(28);
-								else
-									color = Zeal::EqGame::get_user_color(10);
-							}
-							else if (target == Zeal::EqGame::get_controlled()) //if the target is me
-							{
-								if (dmg.is_spell)
-									color = Zeal::EqGame::get_user_color(28);
-								else
-									color = Zeal::EqGame::get_user_color(11);
-							}
-							else if (target->Type==Zeal::EqEnums::EntityTypes::Player)
-							{
-								if (dmg.is_spell)
-									color = Zeal::EqGame::get_user_color(28);
-								else
-									color = Zeal::EqGame::get_user_color(17); //player being hit
-							}
-							else
-							{
-								if (dmg.is_spell)
-									color = Zeal::EqGame::get_user_color(28);
-								else
-									color = Zeal::EqGame::get_user_color(24); //npc being hit
-							}
-							if (dmg.heal > 0)
-								color = 0xFFFF00FF;
+							long color = ModifyAlpha(dmg.color, dmg.opacity);
 							if (bitmap_font)
 								bitmap_font->queue_string(dmg.str_dmg.c_str(), Vec3(screen_pos.y + dmg.x_offset,
-									screen_pos.x + dmg.y_offset, 0), false, ModifyAlpha(color, dmg.opacity));
+									screen_pos.x + dmg.y_offset, 0), false, color);
 							else 
 								fnt->DrawWrappedText(dmg.str_dmg.c_str(),
 									Zeal::EqUI::CXRect((int)(screen_pos.x + dmg.y_offset),(int)(screen_pos.y + dmg.x_offset), (int)(screen_pos.x + 150),
-										(int)(screen_pos.y + 150)), Zeal::EqUI::CXRect(0, 0, (int)(screen_size.x * 2), (int)(screen_size.y * 2)), ModifyAlpha(color, dmg.opacity), 1, 0);
+										(int)(screen_pos.y + 150)), Zeal::EqUI::CXRect(0, 0, (int)(screen_size.x * 2), (int)(screen_size.y * 2)), color, 1, 0);
 						}
 					}
 				}
@@ -249,12 +227,73 @@ void FloatingDamage::render_text()
 	}
 }
 
-void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, short dmg, int heal, short spell_id)
+static D3DCOLOR get_color(bool is_my_damage, bool is_damage_to_me, bool is_damage_to_player,
+	bool is_spell)
+{
+	int color_index = 0;
+	if (is_my_damage)
+		color_index = is_spell ? 33 : 32;  // Me creating damage.
+	else if (is_damage_to_me)
+		color_index = is_spell ? 35 : 34;  // Me getting hit.
+	else if (is_damage_to_player)
+		color_index = is_spell ? 37 : 36;  // Player being hit.
+	else
+		color_index = is_spell ? 39 : 38;  // NPC being hit.
+
+	return ZealService::get_instance()->ui->options->GetColor(static_cast<int>(color_index));
+}
+
+void FloatingDamage::handle_hp_update_packet(const Zeal::Packets::SpawnHPUpdate_Struct* packet) {
+	if (!packet)
+		return;
+	auto entity = Zeal::EqGame::get_entity_by_id(packet->spawn_id);
+	if (!entity)
+		return;
+
+	auto color = D3DCOLOR_XRGB(0x00, 0xff, 0x00);
+	// Self hp updates are in hitpoints.
+	if (entity == Zeal::EqGame::get_self()) {
+		int delta_hps = packet->cur_hp - entity->HpCurrent;
+		if (delta_hps > 0)
+			damage_numbers[entity].push_back(DamageData(-delta_hps, false, nullptr, color, false));
+		return;
+	}
+
+
+	// NPCs are sent in percent.
+	const int kMinPercent = 5;  // Do not report HP updates < 5% since those can be normal tick regens.
+	if (entity->Type == Zeal::EqEnums::NPC) {
+		if (packet->cur_hp <= 100 && packet->max_hp == 100) {
+			int delta_percent = packet->cur_hp - entity->HpCurrent;
+			int min_limit = (entity->PetOwnerSpawnId == 0) ? 0 : kMinPercent;  // Don't show pet regen ticks.
+			if (delta_percent > min_limit && packet->cur_hp > 0)
+				damage_numbers[entity].push_back(DamageData(-delta_percent, true, nullptr, color, false));
+		}
+		return;
+	}
+
+	if (entity->Type != Zeal::EqEnums::Player)
+		return;  // corpses
+
+	// The server should be sending percents for other players based on the translation of
+	// the OP_MobHealth packets, but we normalize it since that's what the client does.
+	if (!packet->max_hp || !entity->HpMax)
+		return;
+	
+	int current_percent = entity->HpCurrent * 100 / entity->HpMax;
+	int new_percent = packet->cur_hp * 100 / packet->max_hp;
+	int delta_percent = new_percent - current_percent;
+	if (new_percent > 0 && delta_percent >= kMinPercent)
+		damage_numbers[entity].push_back(DamageData(-delta_percent, true, nullptr, color, false));
+}
+
+void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target,
+	WORD type, short spell_id, short damage, char output_text)
 {
 	if (!enabled.get())
 		return;
 
-	if (!target || (dmg <= 0 && heal <= 0))
+	if (!target || damage <= 0)
 		return;
 
 	bool is_player_damage = (source && source->Type == Zeal::EqEnums::Player);
@@ -267,8 +306,8 @@ void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStru
 		return;
 
 	auto self = Zeal::EqGame::get_controlled();
-	bool is_me = (source && self && source->SpawnId == self->SpawnId);
-	if (is_me && !show_self.get())
+	bool is_my_damage = (source && self && source->SpawnId == self->SpawnId);
+	if (is_my_damage && !show_self.get())
 		return;
 
 	bool is_pet = (source && source->PetOwnerSpawnId != 0);  // Just filter all pet damage.
@@ -276,12 +315,16 @@ void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStru
 		return;
 
 	bool is_my_pet = (source && self && source->PetOwnerSpawnId == self->SpawnId);
-	bool is_others = !is_me && !is_my_pet;
+	bool is_others = !is_my_damage && !is_my_pet;
 	if (is_player_damage && is_others && !show_others.get())
 		return;
 
+	bool is_damage_to_me = (target == Zeal::EqGame::get_controlled());
+	bool is_damage_to_player = (target->Type == Zeal::EqEnums::Player);
+	auto color = get_color(is_my_damage, is_damage_to_me, is_damage_to_player, is_spell);
 	auto sp_data = is_spell ? Zeal::EqGame::get_spell_mgr()->Spells[spell_id] : nullptr;
-	damage_numbers[target].push_back(DamageData(dmg, is_me, spell_id > 0, heal, sp_data));
+	bool highlight = (damage >= big_hit_threshold.get()) || (type == 8); // Backstab as starting point.
+	damage_numbers[target].push_back(DamageData(damage, false, sp_data, color, highlight));
 }
 
 
@@ -423,10 +466,18 @@ FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
 	//mem::write<BYTE>(0x4A594B, 0x14);
 	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::DrawWindows);
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
-	zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, int heal, char output_text) { add_damage(source, target, damage, heal, spell_id); });
+	zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source,
+		Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage,
+		char out_text) { add_damage(source, target, type, spell_id, damage, out_text); });
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::DXReset);  // Just release all resources.
+
+	zeal->callbacks->AddPacket([this](UINT opcode, char* buffer, UINT len) {
+		if (opcode == Zeal::Packets::HPUpdate && len >= sizeof(Zeal::Packets::SpawnHPUpdate_Struct))
+			handle_hp_update_packet(reinterpret_cast<Zeal::Packets::SpawnHPUpdate_Struct*>(buffer));
+		return false; // continue processing
+		}, callback_type::WorldMessage);
 
 	zeal->commands_hook->Add("/fcd", {}, "Toggles floating combat text or adjusts the fonts with arguments",
 		[this](std::vector<std::string>& args) {
