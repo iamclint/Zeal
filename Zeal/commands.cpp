@@ -365,6 +365,10 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			if (args.size() == 2 && args[1] == "check")  // Report state and do basic debug integrity checks.
 			{
 				ZealService::get_instance()->entity_manager.get()->Dump();
+				int heap_valid1 = HeapValidate(GetProcessHeap(), 0, NULL);
+				Zeal::EqGame::print_chat("Process HeapValidate: %s", heap_valid1 ? "Pass" : "Fail");
+				int heap_valid2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
+				Zeal::EqGame::print_chat("Game HeapValidate: %s", heap_valid2 ? "Pass" : "Fail");
 				return true;
 			}
 			if (args.size() == 3 && args[1] == "get_command")

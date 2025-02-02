@@ -12,6 +12,7 @@ namespace Zeal
 			T* ptr;
 		};
 
+		static HANDLE* Heap = Zeal::EqUI::Heap;
 		static EqStructures::Entity* Self = (Zeal::EqStructures::Entity*)0x7F94CC;
 		static EqStructures::Entity* Target = (Zeal::EqStructures::Entity*)0x7F94EC;
 		static EqStructures::Entity* Active_Corpse = (Zeal::EqStructures::Entity*)0x7f9500;

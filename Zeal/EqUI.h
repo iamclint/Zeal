@@ -6,6 +6,8 @@ namespace Zeal
 {
 	namespace EqUI
 	{
+		static HANDLE* Heap = (HANDLE*)0x0080b420;
+
 		struct BaseVTable  // Equivalent to CXWnd's VTable in eqmac.exe
 		{
 			/*0000*/ LPVOID  IsValid;
@@ -493,7 +495,7 @@ namespace Zeal
 
 			// Inspired by ui_manager::create_sidl to use the same heap for destructor deletion support.
 			static ItemDisplayWnd* Create(BasicWnd* parent_wnd = nullptr) {
-				ItemDisplayWnd* wnd = reinterpret_cast<ItemDisplayWnd*>(HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(ItemDisplayWnd)));
+				ItemDisplayWnd* wnd = reinterpret_cast<ItemDisplayWnd*>(HeapAlloc(*Zeal::EqUI::Heap, 0, sizeof(ItemDisplayWnd)));
 				mem::set((int)wnd, 0, sizeof(ItemDisplayWnd));
 				reinterpret_cast<void(__fastcall*)(ItemDisplayWnd*, int, BasicWnd*)>(0x00423331)(wnd, 0, parent_wnd);
 				return wnd;
@@ -758,7 +760,7 @@ namespace Zeal
 			// Inspired by ui_manager::create_sidl to use the same heap for destructor deletion support.
 			// Useful for classes that require custom vtables but not custom destructors in that table.
 			static ContextMenu* Create(int cxwnd, int a1, CXRect r) {
-				ContextMenu* menu = reinterpret_cast<ContextMenu*>(HeapAlloc(*(HANDLE*)0x80B420, 0, sizeof(ContextMenu)));
+				ContextMenu* menu = reinterpret_cast<ContextMenu*>(HeapAlloc(*Zeal::EqUI::Heap, 0, sizeof(ContextMenu)));
 				if (!menu)
 					return nullptr;
 				mem::set((int)menu, 0, sizeof(ContextMenu));
