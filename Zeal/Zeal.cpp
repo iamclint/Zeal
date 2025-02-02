@@ -13,8 +13,9 @@ ZealService* ZealService::ptr_service = nullptr;
 
 // Add simple heap integrity check.
 static void mem_check(int line_number = 0) {
-	int result = _heapchk();
-	if (result != _HEAPOK) {
+	int result1 = HeapValidate(GetProcessHeap(), 0, NULL);
+	int result2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
+	if (!result1 || !result2) {
 		std::string message = std::format("Zeal {0} ({1}) detected heap corruption ({2}). EqGame will terminate.",
 			ZEAL_VERSION, ZEAL_BUILD_VERSION, line_number);
 		MessageBoxA(NULL, message.c_str(),
@@ -33,12 +34,11 @@ ZealService::ZealService()
 	//hooks->Add("SetUnhandledExceptionFilter", (int)SetUnhandledExceptionFilter, SetUnhandledExceptionFilter_Hook, hook_type_detour);
 	ini = std::make_shared<IO_ini>(ZealSetting<bool>::kIniFilename, true); //other functions rely on this hook
 	dx = std::make_shared<directx>();
-//initialize the hooked function classes
+	//initialize the hooked function classes
 	commands_hook = std::make_shared<ChatCommands>(this); //other classes below rely on this class on initialize
 	callbacks = std::make_shared<CallbackManager>(this); //other functions rely on this hook
 	looting_hook = std::make_shared<looting>(this);
 	labels_hook = std::make_shared<labels>(this);
-	mem_check(__LINE__);
 	pipe = std::make_shared<named_pipe>(this, ini.get()); //other classes below rely on this class on initialize
 	binds_hook = std::make_shared<Binds>(this);
 	raid_hook = std::make_shared<raid>(this);
@@ -48,48 +48,29 @@ ZealService::ZealService()
 	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
 	tooltips = std::make_shared<tooltip>(this, ini.get());
 	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
-	mem_check(__LINE__);
 	give = std::make_shared<NPCGive>(this, ini.get());
-	mem_check(__LINE__);  // TODO: Added add'l mem_checks between NPCGive and Alarm after seeing coarser checks trip once.
 	game_patches = std::make_shared<patches>();
-	mem_check(__LINE__);
 	nameplate = std::make_shared<NamePlate>(this, ini.get());
-	mem_check(__LINE__);
 	tells = std::make_shared<TellWindows>(this, ini.get());
-	mem_check(__LINE__);
 	helm = std::make_shared<HelmManager>(this);
 	music = std::make_shared<MusicManager>(this);
-	
-	mem_check(__LINE__);
 	entity_manager = std::make_shared<EntityManager>(this, ini.get());
-	mem_check(__LINE__);
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());
-	mem_check(__LINE__);
 	cycle_target = std::make_shared<CycleTarget>(this);
-	mem_check(__LINE__);
 	experience = std::make_shared<Experience>(this);
-	mem_check(__LINE__);
 	chat_hook = std::make_shared<chat>(this, ini.get());
-	mem_check(__LINE__);
 	chatfilter_hook = std::make_shared<chatfilter>(this, ini.get());
-	mem_check(__LINE__);
 	outputfile = std::make_shared<OutputFile>(this);
-	mem_check(__LINE__);
 	buff_timers = std::make_shared<BuffTimers>(this);
-	mem_check(__LINE__);
 	movement = std::make_shared<PlayerMovement>(this, binds_hook.get(), ini.get());
-	mem_check(__LINE__);
 	alarm = std::make_shared<Alarm>(this);
-	mem_check(__LINE__);
 	netstat = std::make_shared<Netstat>(this, ini.get());
 	ui = std::make_shared<ui_manager>(this, ini.get());
 	melody = std::make_shared<Melody>(this, ini.get());
 	autofire = std::make_shared<AutoFire>(this, ini.get());
-	mem_check(__LINE__);
 	physics = std::make_shared<Physics>(this, ini.get());
 	target_ring = std::make_shared<TargetRing>(this, ini.get());
 	zone_map = std::make_shared<ZoneMap>(this, ini.get());
-	mem_check(__LINE__);
 
 	callbacks->AddGeneric([this]() {
 		if (Zeal::EqGame::is_in_game() && print_buffer.size())
