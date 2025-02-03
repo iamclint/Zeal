@@ -573,6 +573,22 @@ namespace Zeal
 			/* 0x000C */ DWORD Index;             // Index to CInvSlotMgr->invSlots[i]. This changes as containers are opened/closed.
 			/* 0x0010 */ Zeal::EqStructures::EQITEMINFOBASE* Item;
 		};
+		struct MerchantWnd : EQWND  // operator_new(0x3e4)
+		{
+			/*0x134*/  BYTE   Activated;         // 1 = activated, 0 = deactivated
+			/*0x135*/  BYTE   Unknown0x135[0xb];
+			/*0x140*/  DWORD  Unknown0x140[0x50];  // Likely ItemInfo*. Deleted when deactivated.
+			/*0x280*/  DWORD  Unknown0x280;
+			/*0x284*/  DWORD  InventoryItemSlot;
+			/*0x288*/  Zeal::EqStructures::EQITEMINFO** ItemInfo;  // Item used in selling.
+			/*0x28C*/  EQWND* MerchantName;      // MW_MerchantName
+			/*0x290*/  EQWND* SelectedItem;      // MW_SelectedItem
+			/*0x294*/  EQWND* BuyButton;         // MW_Buy_Button
+			/*0x298*/  EQWND* SellButton;        // MW_Sell_Button
+			/*0x29c*/  EQWND* InvSlotWnd[0x50];  // Unsure if InvSlot vs InvSlotWnd
+			/*0x3dc*/  EQWND* DoneButton;
+			/*0x3e0*/  EQWND* MerchantSlotsWnd;  // MerchantSlotsWnd
+		};
 		struct SliderWnd : BasicWnd // Uses a BaseVTable.
 		{
 			SliderWnd() {};

@@ -233,7 +233,52 @@ static void __fastcall DestroyHeldItemOrMoney(Zeal::EqStructures::EQCHARINFO* ch
 	zeal->hooks->hook_map["DestroyHeldItemOrMoney"]->original(DestroyHeldItemOrMoney)(char_info, unused_edx);
 }
 
-bool looting::is_cursor_protected(Zeal::EqStructures::EQCHARINFO* char_info)
+static void __fastcall RequestSellItem(Zeal::EqUI::MerchantWnd* this_wnd, int unused_edx, int param)
+{
+	ZealService* zeal = ZealService::get_instance();
+	Zeal::EqStructures::EQITEMINFO* item_info =
+		(this_wnd && this_wnd->ItemInfo && *this_wnd->ItemInfo) ? *this_wnd->ItemInfo : nullptr;
+	if (item_info && zeal->looting_hook->is_item_protected_from_selling(item_info))
+		return;  // Item was protected.
+	zeal->hooks->hook_map["RequestSellItem"]->original(RequestSellItem)(this_wnd, unused_edx, param);
+}
+
+// Added for reference. This appears to be primarily used by old UI and is untested, so commented out.
+//static void __fastcall SellItem(void* this_eq_main, int unused_edx, Zeal::EqStructures::EQITEMINFO** item_info, int param)
+//{
+//	ZealService* zeal = ZealService::get_instance();
+//	if (item_info && *item_info && zeal->looting_hook->is_item_protected_from_selling(*item_info))
+//		return;  // Item was protected.
+//	zeal->hooks->hook_map["SellItem"]->original(SellItem)(this_eq_main, unused_edx, item_info, param);
+//}
+
+bool looting::is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINFO* item_info) const
+{
+	if (!setting_protect_enable.get() || !item_info)
+		return false;
+
+	// First check the item versus the protected list.
+	int item_id = item_info->ID;
+	if (std::find_if(protected_items.begin(), protected_items.end(),
+		[item_id](ProtectedItem item) {return item.id == item_id; }) != protected_items.end()) {
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT,
+			"Zeal /protect blocked action: Use /protect off or disable protection with /protect item %d", item_id);
+		return true;
+	}
+
+	// Then check if it is a non-empty container (client already does this, but extra layer).
+	if (item_info->Type == 1) { // Container
+		for (int i = 0; i < EQ_NUM_CONTAINER_SLOTS; ++i)
+			if (item_info->Container.Item[i]) {
+				Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal /protect blocked non-empty container: Use /protect off");
+				return true;
+			}
+	}
+
+	return false;
+}
+
+bool looting::is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_info) const
 {
 	if (!setting_protect_enable.get() || !char_info)
 		return false;
@@ -253,7 +298,8 @@ bool looting::is_cursor_protected(Zeal::EqStructures::EQCHARINFO* char_info)
 	int item_id = item_info->ID;
 	if (std::find_if(protected_items.begin(), protected_items.end(),
 		[item_id](ProtectedItem item) {return item.id == item_id;}) != protected_items.end()) {
-		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal /protect blocked action: Use /protect off or disable protection with /protect %d", item_id);
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT,
+			"Zeal /protect blocked action: Use /protect off or disable protection with /protect item %d", item_id);
 		return true;
 	}
 
@@ -453,4 +499,6 @@ looting::looting(ZealService* zeal)
 	zeal->hooks->Add("DestroyHeldItemOrMoney", 0x004d0d88, DestroyHeldItemOrMoney, hook_type_detour);
 	zeal->hooks->Add("DropHeldItemOnGround", 0x00530d7e, DropHeldItemOnGround, hook_type_detour);
 	zeal->hooks->Add("DropHeldMoneyOnGround", 0x005313b3, DropHeldMoneyOnGround, hook_type_detour);
+	zeal->hooks->Add("RequestSellItem", 0x00427c83, RequestSellItem, hook_type_detour);  // CMerchantWnd::RequestSellItem
+	// Old UI path: zeal->hooks->Add("SellItem", 0x0047e0af, SellItem, hook_type_detour);  // EQ_Main::SellItem 
 }

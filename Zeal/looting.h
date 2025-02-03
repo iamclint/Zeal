@@ -19,7 +19,9 @@ public:
 	ZealSetting<bool> setting_alt_delimiter = { false, "Zeal", "LinkAllAltDelimiter", false };
 
 	// /protect functionality.  Command line-only for now.
-	bool is_cursor_protected(Zeal::EqStructures::EQCHARINFO* char_info);
+	bool is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_info) const;
+	bool is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINFO* item_info) const;
+
 protected:
 	ZealSetting<bool> setting_protect_enable = { false, "Protect", "Enabled", true };
 	ZealSetting<int> setting_protect_value = { 10, "Protect", "Value", true };
