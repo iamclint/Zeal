@@ -51,7 +51,7 @@ bool EquipItem::HandleRButtonUp(Zeal::EqUI::InvSlot* src_inv_slot)
 	}
 
 	Zeal::EqStructures::EQITEMINFO* src_item = (Zeal::EqStructures::EQITEMINFO*)src_inv_slot->Item;
-	if (src_item->Type != 0) {
+	if (!src_item || src_item->Type != 0) {
 		return false; // Item is not a common item.
 	}
 
