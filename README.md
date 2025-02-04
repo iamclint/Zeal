@@ -55,6 +55,13 @@ guide above if your `Zeal.asi` file keeps disappearing.
    - The files in `uifiles/zeal` override `uifiles/default` and `uifiles/<your_skin>`
 5. `crashes/`: Folder with optional crash reporter that will send any captured crash zip logs for review 
 
+#### Storage location of Zeal settings (in eqgame.exe folder)
+1. `zeal.ini`: Contains most of the zeal settings (some common, some per character)
+2. `eqclient.ini`: Contains extended key binds
+3. `UI_<name>_pq.ini`: Configuration of Zeal client windows (map, extra item display, options)
+4. `<name>_spellsets.ini`: Per character saved spell sets
+5. `<name>_protected.ini`: Per character saved /protect item list
+
 ### Compatible UI's
 - https://github.com/NilliP/NillipussUI_1080p
 - https://github.com/NilliP/NillipussUI_1440p
