@@ -251,7 +251,7 @@ namespace Zeal
 			DWORD Unk;
 			DWORD expansion;
 			DWORD zone_id;
-			char name_short[0x80];
+			char name_short[0x81];
 			char name_long[0x80];
 		};
 		struct EQWorldData

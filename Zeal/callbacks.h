@@ -30,7 +30,9 @@ enum class callback_type
 	EntityDespawn,
 	AddOutputText,
 	ReportSuccessfulHit,
-	DeactivateUI
+	DeactivateUI,
+	CharacterSelectLoop,
+	InitCharSelectUI
 };
 class CallbackManager
 {

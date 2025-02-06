@@ -582,6 +582,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     fps = 0;
     height = 0;
     zeal->callbacks->AddGeneric([this]() { callback_main();  });
+    zeal->callbacks->AddGeneric([this]() { callback_main();  }, callback_type::CharacterSelectLoop);
     zeal->callbacks->AddGeneric([this]() { callback_render();  }, callback_type::Render);
     zeal->callbacks->AddGeneric([this]() { callback_endmainloop(); }, callback_type::EndMainLoop);
 
