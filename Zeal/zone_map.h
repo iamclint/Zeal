@@ -102,6 +102,8 @@ public:
 	void add_dynamic_label(const std::string& label, int loc_y, int loc_x,
 		unsigned int duration_ms = 0, D3DCOLOR font_color = D3DCOLOR_XRGB(250, 250, 51));
 
+	Zeal::EqUI::EQWND* get_internal_window() { return wnd; }  // For short-term use only.
+
 	// Private methods exposed for callback use only.
 	void process_mouse_wheel(int16_t mouse_delta, uint16_t flags, int16_t x, int16_t y);
 	void process_left_mouse_button_down(int16_t x, int16_t y);

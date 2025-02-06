@@ -238,6 +238,10 @@ ___
   - **Arguments:** `on`, `off`
   - **Description:** Disables (on) click on self in third person and allows 'u' to activate doors.
 
+- `/uilock`
+  - **Arguments:** `on`, `off`
+  - **Description:** Sets (on) or clears (off) the UI Lock value on primary game windows. Bag windows must be open to take effect.
+
 - `/useitem`
   - **Arguments:** `slot_#` (+ optional `quiet` that suppresses warnings if no click effect)
   - **Description:** Activates a click effect on item in slot_#.
