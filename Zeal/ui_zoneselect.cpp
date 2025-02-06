@@ -28,7 +28,10 @@ void ui_zoneselect::Hide()
 void ui_zoneselect::Show()
 {
 	if (wnd)
+	{
+		MessageBoxA(nullptr, "Show", "ZoneSelect", 0);
 		wnd->show(1, 1);
+	}
 }
 void ui_zoneselect::InitUI()
 {
@@ -46,7 +49,7 @@ void ui_zoneselect::InitUI()
 	}
 	Zeal::EqUI::ListWnd* lst = (Zeal::EqUI::ListWnd*)wnd->GetChildItem("Zeal_ZoneSelect_ListBox");
 	ZealService::get_instance()->ui->AddButtonCallback(wnd, "Zeal_ZoneSelect_Apply", [this, lst](Zeal::EqUI::BasicWnd* btn) { 
-		
+
 		std::string str_zone_id = lst->GetItemText(lst->SelectedIndex, 0);
 		int zone_id = 0;
 		Zeal::String::tryParse(str_zone_id, &zone_id);
@@ -61,12 +64,12 @@ void ui_zoneselect::InitUI()
 		for (int i = 0; i < 225; i++)
 		{
 			if (world->Zones[i])
-			{
+		{
 				if (!std::filesystem::exists(std::string(world->Zones[i]->name_short) + ".s3d"))
 					continue;
 				zones[world->Zones[i]->name_long] = world->Zones[i]->zone_id;
 				if (world->Zones[i]->zone_id == ZealService::get_instance()->charselect->ZoneIndex.get())
-				{
+			{
 					lst->SelectedIndex = i;
 					Zeal::EqUI::BasicWnd* lbl = (Zeal::EqUI::BasicWnd*)wnd->GetChildItem("Zeal_ZoneSelect_CurrentZone");
 					if (lbl)
@@ -77,7 +80,7 @@ void ui_zoneselect::InitUI()
 		}
 		std::sort(zone_list.begin(), zone_list.end(), [](const std::vector<std::string>& a, const std::vector<std::string>& b) {
 			return a[2] < b[2]; // Compare second elements
-			});
+	});
 
 		lst->DeleteAll();
 		ZealService::get_instance()->ui->AddListItems(lst, zone_list);
