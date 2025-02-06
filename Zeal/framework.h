@@ -29,6 +29,7 @@
 // other features
 #include "NPCGive.h"
 #include "cycle_target.h"
+#include "assist.h"
 #include "outputfile.h"
 #include "experience.h"
 #include "buff_timers.h"

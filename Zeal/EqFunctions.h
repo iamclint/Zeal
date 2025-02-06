@@ -125,6 +125,7 @@ namespace Zeal
 		float CalcZOffset(Zeal::EqStructures::Entity* ent);
 		float CalcBoundingRadius(Zeal::EqStructures::Entity* ent);
 		void DoPercentConvert(std::string& str);
+		Zeal::EqStructures::Entity* get_player_partial_name(const char* name);
 		void move_item(int a1, int slot, int a2, int a3);
 		bool can_inventory_item(Zeal::EqStructures::EQITEMINFO* item);
 		// Checks if the race/class/deity etc can equip this item

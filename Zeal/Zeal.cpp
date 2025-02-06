@@ -57,6 +57,7 @@ ZealService::ZealService()
 	entity_manager = std::make_shared<EntityManager>(this, ini.get());
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());
 	cycle_target = std::make_shared<CycleTarget>(this);
+	assist = std::make_shared<Assist>(this);
 	experience = std::make_shared<Experience>(this);
 	chat_hook = std::make_shared<chat>(this, ini.get());
 	chatfilter_hook = std::make_shared<chatfilter>(this, ini.get());
@@ -259,6 +260,9 @@ ZealService::~ZealService()
 	hooks.reset();
 	autofire.reset();
 	melody.reset();
+	nameplate.reset();
+	target_ring.reset();
+	zone_map.reset();
 	ui.reset();
 	netstat.reset();
 	alarm.reset();
@@ -269,6 +273,7 @@ ZealService::~ZealService()
 	chatfilter_hook.reset();
 	experience.reset();
 	cycle_target.reset();
+	assist.reset();
 	camera_mods.reset();
 	item_displays.reset();
 	spell_sets.reset();
@@ -282,5 +287,5 @@ ZealService::~ZealService()
 	helm.reset();
 	commands_hook.reset();
 	ini.reset();
-	
+
 }

@@ -18,7 +18,8 @@ Nameplates
   - Due to client data limitations, only applies to self, group, pet, target
 
 Targetring:
-* Add target_color option that uses targer color instead of con color
+* Add target_color option that uses target color instead of con color
+* Add option to disable self target ring
 
 Map:
 * Added a small dull yellow position marker for self-pet if show group members is enabled

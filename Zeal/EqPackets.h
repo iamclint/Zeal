@@ -16,7 +16,8 @@ namespace Zeal
             HPUpdate = 0x40b2, // Note: Shared with MobHealth.
             RequestTrade = 0x40D1,
             WearChange = 0x4092,
-            Illusion = 0x4091
+            Illusion = 0x4091,
+            Assist = 0x4200,
         };
         struct TradeRequest_Struct {
             /*000*/	UINT16 to_id;
@@ -56,6 +57,11 @@ namespace Zeal
             /*016*/	UINT8   is_PC;
             /*017*/	UINT8   unknown015[3];
             /*020*/
+        };
+        struct EntityId_Struct
+        {
+            /*000*/	INT16 entity_id;
+            /*002*/
         };
         struct ClientTarget_Struct
         {
