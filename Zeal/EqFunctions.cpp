@@ -444,6 +444,10 @@ namespace Zeal
 			reinterpret_cast<void(__thiscall*)(int everquest, const char* name, int len)>(0x538110)(*(int*)0x809478, temp_buffer, 1);
 			data = temp_buffer;
 		}
+		Zeal::EqStructures::Entity* get_player_partial_name(const char* name)
+		{
+			return reinterpret_cast<Zeal::EqStructures::Entity * (__cdecl*)(const char* name)>(0x0050820e)(name);
+		}
 		void log(std::string& data)
 		{
 			reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data.c_str());
@@ -1839,7 +1843,7 @@ namespace Zeal
 		void set_target(Zeal::EqStructures::Entity* target)
 		{
 			auto old_target = Zeal::EqGame::get_target();
-			if (!target)
+			if (old_target && !target)
 				print_chat(get_string(0x3057)); //you no longer have a target
 			*(Zeal::EqStructures::Entity**)Zeal::EqGame::Target = target;
 

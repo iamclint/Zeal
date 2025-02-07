@@ -176,6 +176,7 @@ void looting::looted_item()
 			loot_all = false;
 			return;
 		}
+		bool skipped_loot_last = false;  // Only skip the first item (make sure it can count down to 1).
 		for (int i = 0; i < kMaxItemCount; i++)
 		{
 			bool loot = false;
@@ -193,6 +194,13 @@ void looting::looted_item()
 					loot = false;
 				}
 
+				if (loot && is_me && !skipped_loot_last && setting_loot_last_item.get() > 0 &&
+					Zeal::EqGame::Windows->Loot->Item[i]->ID == setting_loot_last_item.get())
+				{
+					loot = false;
+					skipped_loot_last = true;  // Prevent more skips.
+				}
+
 				if (loot)
 				{
 					Zeal::EqGame::Windows->Loot->RequestLootSlot(i, true);
@@ -204,6 +212,36 @@ void looting::looted_item()
 	}
 	else
 		loot_all = false;
+}
+
+bool looting::parse_loot_last(const std::vector<std::string>& args)
+{
+	const char kMarker = 0x12;  // Link marker.
+	int new_value = 0;
+	if (args.size() >= 2 && args[1].size() >= 8 && args[1].front() == kMarker) {
+		std::string link = args[1];  // Need to re-assemble possibly split link names.
+		for (int i = 2; i < args.size(); ++i)
+			link += " " + args[i];
+		std::string item_id = link.substr(2, 6);
+		std::string item_name = link.substr(8, link.length() - 1 - 8);
+		if (link.back() == kMarker && Zeal::String::tryParse(item_id, &new_value) && new_value > 0)
+			setting_loot_last_item.set(new_value);
+		else
+			Zeal::EqGame::print_chat("Error: Invalid link item id: %s", item_id.c_str());
+	}
+	else if (args.size() == 2 && Zeal::String::tryParse(args[1], &new_value)) {
+		new_value = max(0, new_value);
+		setting_loot_last_item.set(new_value);
+	}
+	else
+		Zeal::EqGame::print_chat("Usage: /lootlast <item#> (0 to disable) or /lootlast <itemlink>");
+
+	if (setting_loot_last_item.get() == 0)
+		Zeal::EqGame::print_chat("Loot last item disabled");
+	else
+		Zeal::EqGame::print_chat("Loot last item set to %d", setting_loot_last_item.get());
+
+	return true;
 }
 
 static void __fastcall DropHeldItemOnGround(void* ceverquest_this, int unused_edx, int print_message)
@@ -231,6 +269,14 @@ static void __fastcall DestroyHeldItemOrMoney(Zeal::EqStructures::EQCHARINFO* ch
 	if (zeal->looting_hook->is_cursor_protected(char_info))
 		return;  // Item or money were blocked from destruction.
 	zeal->hooks->hook_map["DestroyHeldItemOrMoney"]->original(DestroyHeldItemOrMoney)(char_info, unused_edx);
+}
+
+static void __fastcall ClickedTradeButton(Zeal::EqUI::TradeWnd* wnd, int unused_edx)
+{
+	ZealService* zeal = ZealService::get_instance();
+	if (zeal->looting_hook->is_trade_protected(wnd))
+		return;  // Trading was blocked (click will be ignored).
+	zeal->hooks->hook_map["ClickedTradeButton"]->original(ClickedTradeButton)(wnd, unused_edx);
 }
 
 static void __fastcall RequestSellItem(Zeal::EqUI::MerchantWnd* this_wnd, int unused_edx, int param)
@@ -319,6 +365,33 @@ bool looting::is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_inf
 	if (value >= setting_protect_value.get() * 1000) {
 		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal /protect blocked action: Use /protect off or change /protect value");
 		return true;
+	}
+	return false;
+}
+
+bool looting::is_trade_protected(Zeal::EqUI::TradeWnd* wnd) const
+{
+	if (!setting_protect_enable.get() || !wnd)
+		return false;
+
+	// Trades with other players are not protected.
+	auto trade_target = *reinterpret_cast<Zeal::EqStructures::Entity**>(0x007f94c8);
+	if (!trade_target || trade_target->Type == Zeal::EqEnums::Player)
+		return false;
+
+	// Trades to bankers are blocked by default (to prevent accidents).
+	if (trade_target->Class == Zeal::EqEnums::ClassTypes::Banker) {
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT,
+			"Zeal blocked trading with banker: use /protect off");
+		return true;
+	}
+
+	// Then just check all items versus the protected list (also checks for non-empty bags).
+	const int kNpcTradeSize = 4;
+	for (int i = 0; i < kNpcTradeSize; ++i)  {
+		const auto item_info = wnd->Item[i];
+		if (item_info && is_item_protected_from_selling(item_info))
+			return true;  // The call above emits the blocked message.
 	}
 	return false;
 }
@@ -479,8 +552,8 @@ looting::looting(ZealService* zeal)
 				Zeal::EqGame::print_chat("Looting window not visible");
 			else
 			{
-				ZealService::get_instance()->looting_hook->loot_all = true;
-				ZealService::get_instance()->looting_hook->looted_item();
+				loot_all = true;
+				looted_item();
 			}
 			return true;
 		});
@@ -488,9 +561,12 @@ looting::looting(ZealService* zeal)
 		"Link all items (opt param: say, gs, rs, gu, ooc, auc)",
 		[this](std::vector<std::string>& args) {
 			const char* channel = (args.size() == 2) ? args[1].c_str() : nullptr;
-			ZealService::get_instance()->looting_hook->link_all(channel);
+			link_all(channel);
 			return true;
 		});
+	zeal->commands_hook->Add("/lootlast", {}, "Set an item to loot last when self looting.",
+		[this](std::vector<std::string>& args) { return parse_loot_last(args); });
+
 	zeal->hooks->Add("ReleaseLoot", 0x426576, release_loot, hook_type_detour);
 	zeal->hooks->Add("CLootWndDeactivate", 0x426559, CLootWndDeactivate, hook_type_detour);
 
@@ -499,6 +575,7 @@ looting::looting(ZealService* zeal)
 	zeal->hooks->Add("DestroyHeldItemOrMoney", 0x004d0d88, DestroyHeldItemOrMoney, hook_type_detour);
 	zeal->hooks->Add("DropHeldItemOnGround", 0x00530d7e, DropHeldItemOnGround, hook_type_detour);
 	zeal->hooks->Add("DropHeldMoneyOnGround", 0x005313b3, DropHeldMoneyOnGround, hook_type_detour);
+	zeal->hooks->Add("ClickedTradeButton", 0x0043964e, ClickedTradeButton, hook_type_detour);  // CTradeWnd::ClickedTradeButton
 	zeal->hooks->Add("RequestSellItem", 0x00427c83, RequestSellItem, hook_type_detour);  // CMerchantWnd::RequestSellItem
 	// Old UI path: zeal->hooks->Add("SellItem", 0x0047e0af, SellItem, hook_type_detour);  // EQ_Main::SellItem 
 }

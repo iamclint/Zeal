@@ -785,8 +785,8 @@ namespace Zeal
 			/* 0x0090 */ FLOAT ModelHeightOffset;
 			/* 0x0094 */ WORD SpawnId;
 			/* 0x0096 */ WORD PetOwnerSpawnId; // spawn id of the owner of this pet spawn
-			/* 0x0098 */ DWORD HpMax;
-			/* 0x009C */ DWORD HpCurrent;
+			/* 0x0098 */ INT HpMax;
+			/* 0x009C */ INT HpCurrent;  // Can go negative (unconscious).
 			/* 0x00A0 */ short GuildId;  // -1 is unguilded
 			/* 0x00A2 */ BYTE Unknown00A2[6];
 			/* 0x00A8 */ BYTE Type; // EQ_SPAWN_TYPE_x

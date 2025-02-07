@@ -672,11 +672,11 @@ namespace Zeal
 			/*0x17c*/
 		};
 
-		// Actual Size 0x54  eqmac fixed
+		// Actual Size 0x54 in eqgame.
 		class ContainerMgr {
 		public:
 			/*0x000*/   DWORD pvfTable; // NOT based on CXWnd.  Contains only destructor
-			/*0x004*/   ContainerWnd pPCContainers[0x11];  // All open containers, including World, in order of opening...
+			/*0x004*/   ContainerWnd* pPCContainers[0x11];  // All open containers, including World, in order of opening...
 			/*0x048**/  DWORD*   pWorldItems;            // Pointer to the contents of the world   If NULL, world container isn't open;
 			/*0x04c*/   DWORD Unknown0x04c;            // in the future this is ID of container in zone, starts at one (zero?) and goes up.
 			/*0x050*/   DWORD dwTimeSpentWithWorldContainerOpen;  // Cumulative counter?

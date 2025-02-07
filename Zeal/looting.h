@@ -21,15 +21,18 @@ public:
 	// /protect functionality.  Command line-only for now.
 	bool is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_info) const;
 	bool is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINFO* item_info) const;
+	bool is_trade_protected(struct Zeal::EqUI::TradeWnd* wnd) const;
 
 protected:
 	ZealSetting<bool> setting_protect_enable = { false, "Protect", "Enabled", true };
 	ZealSetting<int> setting_protect_value = { 10, "Protect", "Value", true };
+	ZealSetting<int> setting_loot_last_item = { 0, "Zeal", "LootLastItem", true };
 
 	struct ProtectedItem {
 		int id;
 		std::string name;
 	};
+	bool parse_loot_last(const std::vector<std::string>& args);
 	bool parse_protect(const std::vector<std::string>& args);
 	void update_protected_item(int item_id, const std::string& name);
 	void load_protected_items();

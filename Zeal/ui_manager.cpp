@@ -3,6 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
+#include "string_util.h"
 #include <algorithm>
 Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name)
 {
@@ -476,10 +477,82 @@ static int __fastcall SkillsWnd_WndNotification(Zeal::EqUI::EQWND* wnd, int unus
 	return 0;
 }
 
+// Supports batch locking or unlocking of primary UI windows.
+bool ui_manager::handle_uilock(const std::vector<std::string>& args)
+{
+	if (args.size() == 2) {
+		bool turn_on = Zeal::String::compare_insensitive(args[1], "on");
+		bool turn_off = !turn_on && Zeal::String::compare_insensitive(args[1], "off");
+		if (turn_on || turn_off) {
+			Zeal::EqGame::print_chat("Setting Lock of primary windows to: %s",
+				turn_on ? "ON" : "OFF");
+			std::vector<Zeal::EqUI::EQWND*> windows = {
+				 Zeal::EqGame::Windows->ItemWnd,
+				 Zeal::EqGame::Windows->PetInfo,
+				 Zeal::EqGame::Windows->Group,
+				 Zeal::EqGame::Windows->Raid,
+				 Zeal::EqGame::Windows->Target,
+				 Zeal::EqGame::Windows->Options,
+				 Zeal::EqGame::Windows->HotButton,
+				 Zeal::EqGame::Windows->Player,
+				 Zeal::EqGame::Windows->BuffWindowNORMAL,
+				 Zeal::EqGame::Windows->Casting,
+				 Zeal::EqGame::Windows->SpellGems,
+				 Zeal::EqGame::Windows->SpellBook,
+				 Zeal::EqGame::Windows->Inventory,
+				 Zeal::EqGame::Windows->Actions,
+				 Zeal::EqGame::Windows->Compass,
+				 Zeal::EqGame::Windows->Selector,
+				 Zeal::EqGame::Windows->Tracking,
+			};
+			auto chat_mgr = Zeal::EqGame::Windows->ChatManager;
+			if (chat_mgr) {
+				for (int i = 0; i < chat_mgr->MaxChatWindows; i++)
+					if (chat_mgr->ChatWindows[i])
+						windows.push_back(chat_mgr->ChatWindows[i]);
+			}
+			// Locking / unlocking bags will be hit and miss depending on whether they
+			// are cached in the ContainerMgr.
+			auto container_mgr = Zeal::EqGame::Windows->ContainerMgr;
+			if (container_mgr) {
+				for (int i = 0; i < 0x11; ++i) {
+					auto wnd = container_mgr->pPCContainers[i];
+					if (!wnd)
+						continue;
+					if (wnd->INIStorageName.Data &&
+						!_strnicmp(wnd->INIStorageName.CastToCharPtr(), "BagInv", 6))
+						windows.push_back(wnd);
+				}
+			}
+			if (options)
+				windows.push_back(options->GetZealOptionsWindow());
+			auto zeal = ZealService::get_instance();
+			if (zeal && zeal->zone_map)
+				windows.push_back(zeal->zone_map->get_internal_window());
+			if (zeal && zeal->item_displays) {
+				std::vector<Zeal::EqUI::ItemDisplayWnd*> item_wnds = zeal->item_displays->get_windows();
+				for (auto wnd : item_wnds)
+					windows.push_back(wnd);
+			}
+			for (Zeal::EqUI::EQWND* wnd : windows) {
+				if (wnd && wnd->LockEnable)
+					wnd->IsLocked = turn_on;
+			}
+
+			return true;
+		}
+	}
+	Zeal::EqGame::print_chat("Usage: /uilock on or /uilock off");
+	return true;
+}
+
 ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	//zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
+
+	zeal->commands_hook->Add("/uilock", {}, "Sets (on) or clears (off) the Lock value in primary ui windows.",
+		[this](std::vector<std::string>& args) { return handle_uilock(args); });
 
 	bank = std::make_shared<ui_bank>(zeal, ini, this);
 	options = std::make_shared<ui_options>(zeal, ini, this);

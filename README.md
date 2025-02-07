@@ -148,6 +148,10 @@ ___
 - `/lootall`
   - **Description:** loots all items from a corpse if looting window is open.
 
+- `/lootlast`
+  - **Arguments:** `item_id_#`, `item_link`, or `0` to disable_
+  - **Description:** specifies an item ID that will be left as the last item when using /lootall on your corpse 
+ 
 - `/melody`
   - **Arguments:** `song gem #'s (maximum of 5)`
   - **Aliases:** `/mel`
@@ -174,8 +178,10 @@ ___
           upon as the primary method of protection and you will not be reimbursed if it doesn't protect
           you from your own mistake.  Zeal intercepts the client calls to sell, destroy, or drop cursor
           contents and blocks the action if it is a non-empty container, the item_value is >= value (not
-          checked for sell), or the item is on the protect list. The enable, value, and protected list
-          are stored per character with the list stored in the `./<character_name>_protected.ini` file.
+          checked for sell), or the item is on the protect list. It also protects against all trades to
+          banker NPCs and trades of protected items or non-empty bags to NPCs (including pets). The
+          enable, value, and protected list are stored per character with the list stored in the
+          `./<character_name>_protected.ini` file.
 
 - `/hidecorpse`
   - **Arguments:** `looted`, `none`
@@ -237,6 +243,10 @@ ___
 - `/selfclickthru`
   - **Arguments:** `on`, `off`
   - **Description:** Disables (on) click on self in third person and allows 'u' to activate doors.
+
+- `/uilock`
+  - **Arguments:** `on`, `off`
+  - **Description:** Sets (on) or clears (off) the UI Lock value on primary game windows. Bag windows must be open to take effect.
 
 - `/useitem`
   - **Arguments:** `slot_#` (+ optional `quiet` that suppresses warnings if no click effect)

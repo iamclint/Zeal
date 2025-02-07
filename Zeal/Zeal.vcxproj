@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="alarm.h" />
+    <ClInclude Include="assist.h" />
     <ClInclude Include="autofire.h" />
     <ClInclude Include="bitmap_font.h" />
     <ClInclude Include="chatfilter.h" />
@@ -232,6 +233,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="alarm.cpp" />
+    <ClCompile Include="assist.cpp" />
     <ClCompile Include="autofire.cpp" />
     <ClCompile Include="bitmap_font.cpp" />
     <ClCompile Include="chatfilter.cpp" />

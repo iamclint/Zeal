@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-#define ZEAL_VERSION "0.6.4"
+#define ZEAL_VERSION "0.6.5-alpha0"
 #ifndef ZEAL_BUILD_VERSION  // Set by github actions
 #define ZEAL_BUILD_VERSION "UNOFFICIAL"  // Local build
 #endif
@@ -40,6 +40,7 @@ public:
 	std::shared_ptr<OutputFile> outputfile = nullptr;
 	std::shared_ptr<Experience> experience = nullptr;
 	std::shared_ptr<CycleTarget> cycle_target = nullptr;
+	std::shared_ptr<Assist> assist = nullptr;
 	std::shared_ptr<BuffTimers> buff_timers = nullptr;
 	std::shared_ptr<PlayerMovement> movement = nullptr;
 	std::shared_ptr<Alarm> alarm = nullptr;

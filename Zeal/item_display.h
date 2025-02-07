@@ -10,6 +10,7 @@ public:
 	ItemDisplay(class ZealService* pHookWrapper, class IO_ini* ini);
 	~ItemDisplay();
 	Zeal::EqUI::ItemDisplayWnd* get_available_window(Zeal::EqStructures::EQITEMINFOBASE* item = nullptr);
+	std::vector<Zeal::EqUI::ItemDisplayWnd*> get_windows() { return windows; }  // For short-term use only.
 	bool close_latest_window();
 private:
 	void InitUI();

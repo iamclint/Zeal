@@ -61,6 +61,8 @@ public:
 	void CreateTmpXML();
 
 private:
+	bool handle_uilock(const std::vector<std::string>& args);
+
 	std::vector<std::string> XMLIncludes;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> checkbox_names;
 	std::unordered_map<std::string, Zeal::EqUI::BasicWnd*> button_names;
