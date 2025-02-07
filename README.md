@@ -148,6 +148,10 @@ ___
 - `/lootall`
   - **Description:** loots all items from a corpse if looting window is open.
 
+- `/lootlast`
+  - **Arguments:** `item_id_#`, `item_link`, or `0` to disable_
+  - **Description:** specifies an item ID that will be left as the last item when using /lootall on your corpse 
+ 
 - `/melody`
   - **Arguments:** `song gem #'s (maximum of 5)`
   - **Aliases:** `/mel`

@@ -176,6 +176,7 @@ void looting::looted_item()
 			loot_all = false;
 			return;
 		}
+		bool skipped_loot_last = false;  // Only skip the first item (make sure it can count down to 1).
 		for (int i = 0; i < kMaxItemCount; i++)
 		{
 			bool loot = false;
@@ -193,6 +194,13 @@ void looting::looted_item()
 					loot = false;
 				}
 
+				if (loot && is_me && !skipped_loot_last && setting_loot_last_item.get() > 0 &&
+					Zeal::EqGame::Windows->Loot->Item[i]->ID == setting_loot_last_item.get())
+				{
+					loot = false;
+					skipped_loot_last = true;  // Prevent more skips.
+				}
+
 				if (loot)
 				{
 					Zeal::EqGame::Windows->Loot->RequestLootSlot(i, true);
@@ -204,6 +212,36 @@ void looting::looted_item()
 	}
 	else
 		loot_all = false;
+}
+
+bool looting::parse_loot_last(const std::vector<std::string>& args)
+{
+	const char kMarker = 0x12;  // Link marker.
+	int new_value = 0;
+	if (args.size() >= 2 && args[1].size() >= 8 && args[1].front() == kMarker) {
+		std::string link = args[1];  // Need to re-assemble possibly split link names.
+		for (int i = 2; i < args.size(); ++i)
+			link += " " + args[i];
+		std::string item_id = link.substr(2, 6);
+		std::string item_name = link.substr(8, link.length() - 1 - 8);
+		if (link.back() == kMarker && Zeal::String::tryParse(item_id, &new_value) && new_value > 0)
+			setting_loot_last_item.set(new_value);
+		else
+			Zeal::EqGame::print_chat("Error: Invalid link item id: %s", item_id.c_str());
+	}
+	else if (args.size() == 2 && Zeal::String::tryParse(args[1], &new_value)) {
+		new_value = max(0, new_value);
+		setting_loot_last_item.set(new_value);
+	}
+	else
+		Zeal::EqGame::print_chat("Usage: /lootlast <item#> (0 to disable) or /lootlast <itemlink>");
+
+	if (setting_loot_last_item.get() == 0)
+		Zeal::EqGame::print_chat("Loot last item disabled");
+	else
+		Zeal::EqGame::print_chat("Loot last item set to %d", setting_loot_last_item.get());
+
+	return true;
 }
 
 static void __fastcall DropHeldItemOnGround(void* ceverquest_this, int unused_edx, int print_message)
@@ -479,8 +517,8 @@ looting::looting(ZealService* zeal)
 				Zeal::EqGame::print_chat("Looting window not visible");
 			else
 			{
-				ZealService::get_instance()->looting_hook->loot_all = true;
-				ZealService::get_instance()->looting_hook->looted_item();
+				loot_all = true;
+				looted_item();
 			}
 			return true;
 		});
@@ -488,9 +526,12 @@ looting::looting(ZealService* zeal)
 		"Link all items (opt param: say, gs, rs, gu, ooc, auc)",
 		[this](std::vector<std::string>& args) {
 			const char* channel = (args.size() == 2) ? args[1].c_str() : nullptr;
-			ZealService::get_instance()->looting_hook->link_all(channel);
+			link_all(channel);
 			return true;
 		});
+	zeal->commands_hook->Add("/lootlast", {}, "Set an item to loot last when self looting.",
+		[this](std::vector<std::string>& args) { return parse_loot_last(args); });
+
 	zeal->hooks->Add("ReleaseLoot", 0x426576, release_loot, hook_type_detour);
 	zeal->hooks->Add("CLootWndDeactivate", 0x426559, CLootWndDeactivate, hook_type_detour);
 
