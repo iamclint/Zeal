@@ -271,6 +271,14 @@ static void __fastcall DestroyHeldItemOrMoney(Zeal::EqStructures::EQCHARINFO* ch
 	zeal->hooks->hook_map["DestroyHeldItemOrMoney"]->original(DestroyHeldItemOrMoney)(char_info, unused_edx);
 }
 
+static void __fastcall ClickedTradeButton(Zeal::EqUI::TradeWnd* wnd, int unused_edx)
+{
+	ZealService* zeal = ZealService::get_instance();
+	if (zeal->looting_hook->is_trade_protected(wnd))
+		return;  // Trading was blocked (click will be ignored).
+	zeal->hooks->hook_map["ClickedTradeButton"]->original(ClickedTradeButton)(wnd, unused_edx);
+}
+
 static void __fastcall RequestSellItem(Zeal::EqUI::MerchantWnd* this_wnd, int unused_edx, int param)
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -357,6 +365,33 @@ bool looting::is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_inf
 	if (value >= setting_protect_value.get() * 1000) {
 		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal /protect blocked action: Use /protect off or change /protect value");
 		return true;
+	}
+	return false;
+}
+
+bool looting::is_trade_protected(Zeal::EqUI::TradeWnd* wnd) const
+{
+	if (!setting_protect_enable.get() || !wnd)
+		return false;
+
+	// Trades with other players are not protected.
+	auto trade_target = *reinterpret_cast<Zeal::EqStructures::Entity**>(0x007f94c8);
+	if (!trade_target || trade_target->Type == Zeal::EqEnums::Player)
+		return false;
+
+	// Trades to bankers are blocked by default (to prevent accidents).
+	if (trade_target->Class == Zeal::EqEnums::ClassTypes::Banker) {
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT,
+			"Zeal blocked trading with banker: use /protect off");
+		return true;
+	}
+
+	// Then just check all items versus the protected list (also checks for non-empty bags).
+	const int kNpcTradeSize = 4;
+	for (int i = 0; i < kNpcTradeSize; ++i)  {
+		const auto item_info = wnd->Item[i];
+		if (item_info && is_item_protected_from_selling(item_info))
+			return true;  // The call above emits the blocked message.
 	}
 	return false;
 }
@@ -540,6 +575,7 @@ looting::looting(ZealService* zeal)
 	zeal->hooks->Add("DestroyHeldItemOrMoney", 0x004d0d88, DestroyHeldItemOrMoney, hook_type_detour);
 	zeal->hooks->Add("DropHeldItemOnGround", 0x00530d7e, DropHeldItemOnGround, hook_type_detour);
 	zeal->hooks->Add("DropHeldMoneyOnGround", 0x005313b3, DropHeldMoneyOnGround, hook_type_detour);
+	zeal->hooks->Add("ClickedTradeButton", 0x0043964e, ClickedTradeButton, hook_type_detour);  // CTradeWnd::ClickedTradeButton
 	zeal->hooks->Add("RequestSellItem", 0x00427c83, RequestSellItem, hook_type_detour);  // CMerchantWnd::RequestSellItem
 	// Old UI path: zeal->hooks->Add("SellItem", 0x0047e0af, SellItem, hook_type_detour);  // EQ_Main::SellItem 
 }

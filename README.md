@@ -178,8 +178,10 @@ ___
           upon as the primary method of protection and you will not be reimbursed if it doesn't protect
           you from your own mistake.  Zeal intercepts the client calls to sell, destroy, or drop cursor
           contents and blocks the action if it is a non-empty container, the item_value is >= value (not
-          checked for sell), or the item is on the protect list. The enable, value, and protected list
-          are stored per character with the list stored in the `./<character_name>_protected.ini` file.
+          checked for sell), or the item is on the protect list. It also protects against all trades to
+          banker NPCs and trades of protected items or non-empty bags to NPCs (including pets). The
+          enable, value, and protected list are stored per character with the list stored in the
+          `./<character_name>_protected.ini` file.
 
 - `/hidecorpse`
   - **Arguments:** `looted`, `none`

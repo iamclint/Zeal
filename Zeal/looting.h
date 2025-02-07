@@ -21,6 +21,7 @@ public:
 	// /protect functionality.  Command line-only for now.
 	bool is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_info) const;
 	bool is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINFO* item_info) const;
+	bool is_trade_protected(struct Zeal::EqUI::TradeWnd* wnd) const;
 
 protected:
 	ZealSetting<bool> setting_protect_enable = { false, "Protect", "Enabled", true };

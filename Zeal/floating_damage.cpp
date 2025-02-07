@@ -253,12 +253,13 @@ void FloatingDamage::handle_hp_update_packet(const Zeal::Packets::SpawnHPUpdate_
 	auto color = D3DCOLOR_XRGB(0x00, 0xff, 0x00);
 	// Self hp updates are in hitpoints.
 	if (entity == Zeal::EqGame::get_self()) {
-		int delta_hps = packet->cur_hp - entity->HpCurrent;
-		if (delta_hps > 0)
-			damage_numbers[entity].push_back(DamageData(-delta_hps, false, nullptr, color, false));
+		// Disabling since the cur_hp does not include various HP modifications (like armor)
+		// and the client updates itself from spells and buffs.
+		// int delta_hps = packet->cur_hp - entity->HpCurrent;
+		// if (delta_hps > 0)
+		//	damage_numbers[entity].push_back(DamageData(-delta_hps, false, nullptr, color, false));
 		return;
 	}
-
 
 	// NPCs are sent in percent.
 	const int kMinPercent = 5;  // Do not report HP updates < 5% since those can be normal tick regens.
