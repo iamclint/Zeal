@@ -2428,6 +2428,9 @@ namespace Zeal
 					return;
 				Windows->SpellGems->UpdateSpellGems(index);
 			}
+			bool IsValidSpellIndex(int spellid) {
+				return reinterpret_cast<bool(__cdecl*)(int)>(0x004D79EA)(spellid);
+			}
 		}
 
 		namespace OldUI

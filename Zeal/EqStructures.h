@@ -551,7 +551,7 @@ namespace Zeal
 		} EQINVENTORY, * PEQINVENTORY;
 		struct _EQBUFFINFO
 		{
-			/* 0x0000 */ BYTE Valid; // Whether this buff slot is active or empty
+			/* 0x0000 */ BYTE BuffType; // Active buffs have a non-zero value
 			/* 0x0001 */ BYTE CasterLevel; // level of player who casted the buff
 			/* 0x0002 */ BYTE Modifier; // divide by 10 to get Bard song modifier
 			/* 0x0003 */ BYTE Activated; // Copied from spell data to buff struct.  Only a few spells have this set to 1, the rest are 0
@@ -623,6 +623,12 @@ namespace Zeal
 			bool can_i_see_invis() // CanISeeInvis()
 			{
 				return reinterpret_cast<bool(__thiscall*)(EQCHARINFO*)>(0x004c0d02)(this);
+			}
+			_EQBUFFINFO* GetBuff(WORD buff_slot) { // Supports 0..29
+				return reinterpret_cast<_EQBUFFINFO*(__thiscall*)(EQCHARINFO*, WORD)>(0x004C465A)(this, buff_slot);
+			}
+			int GetMaxBuffs() {
+				return reinterpret_cast<BYTE(__thiscall*)(EQCHARINFO*)>(0x004C4637)(this);
 			}
 			/* 0x0000 */ BYTE Unknown0000[2];
 			/* 0x0002 */ CHAR Name[64]; // [0x40]

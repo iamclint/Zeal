@@ -86,6 +86,22 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 		}
 		return true;
 	}
+	case 135: // Buff 16
+	case 136: // Buff 17
+	case 137: // Buff 18
+	case 138: // Buff 19
+	case 139: // Buff 20
+	case 140: // Buff 21
+	case 141: // Buff 22
+	case 142: // Buff 23
+	case 143: // Buff 24
+	case 144: // Buff 25
+	case 145: // Buff 26
+	case 146: // Buff 27
+	case 147: // Buff 28
+	case 148: // Buff 29
+	case 149: // Buff 30
+		break; // Reserved - These labels are supported by the eqgame.dll
 	case 255: //debug label
 	{
 		Zeal::EqGame::CXStr_PrintString(str, "%s", ZealService::get_instance()->labels_hook->debug_info.c_str());
