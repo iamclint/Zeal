@@ -812,7 +812,7 @@ void ZoneMap::render_label_text(const char * label, int map_y, int map_x, D3DCOL
     }
     bool center = (label_type != LabelType::LeftJustified);
     if (center && label_type != LabelType::Normal) {
-        Vec2 size = bitmap_font->measure_string(short_label);
+        Vec3 size = bitmap_font->measure_string(short_label);
         const float half_width = size.x * 0.5f;
         const float half_height = size.y * 0.5f;
         label_x = max(view_left + half_width, min(view_right - half_width, label_x));
