@@ -276,11 +276,37 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
     ZealService::get_instance()->hooks->hook_map["PrintAutoSplit"]->original(PrintAutoSplit)(t, unused, data, USERCOLOR_ECHO_AUTOSPLIT, u);
 }
 
+// Returns true if the fizzle message is not from a group member.
+static bool is_non_group_fizzle(const char* data)
+{
+    if (!data)
+        return false;  
+    std::string message(data);
+    const std::string suffix("'s spell fizzles!");
+    if (!message.ends_with(suffix))
+        return false;
+    if (!Zeal::EqGame::GroupInfo->is_in_group())
+        return true;
+    std::string name = message.substr(0, message.length() - suffix.length());
+    for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; i++)
+        if (name == Zeal::EqGame::GroupInfo->Names[i])
+            return false;
+    return true;
+}
+
 void __fastcall serverPrintChat(int t, int unused, const char* data, short color_index, bool u)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
-    if (cf->setting_suppress_missed_notes.get() && !strncmp("A missed note brings ", data, 21))
-        return;  // Just drop missed note messages from others (String ID 1219).
+    if (cf->current_string_id == 1219 && cf->setting_suppress_missed_notes.get()
+        && !strncmp("A missed note brings ", data, 21)) {
+        cf->current_string_id = 0;
+        return;  // Just drop missed note messages from others.
+    }
+    else if (cf->current_string_id == 1218 && cf->setting_suppress_other_fizzles.get()
+        && is_non_group_fizzle(data)) {
+        cf->current_string_id = 0;
+        return;  // Just drop fizzles from others.
+    }
 
     if (cf->isMyPetSay)
         color_index = CHANNEL_MYPETSAY;
@@ -289,6 +315,7 @@ void __fastcall serverPrintChat(int t, int unused, const char* data, short color
     ZealService::get_instance()->hooks->hook_map["serverPrintChat"]->original(serverPrintChat)(t, unused, data, color_index, u);
     cf->isMyPetSay = false;
     cf->isPetMessage = false;
+    cf->current_string_id = 0;
 }
 
 char* __fastcall serverGetString(int stringtable, int unused, int string_id, bool* valid)
@@ -323,6 +350,7 @@ char* __fastcall serverGetString(int stringtable, int unused, int string_id, boo
     char* t2_string = args[1];
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
 
+    cf->current_string_id = string_id;
     for (const int& i : pet_sayings)
     {
         if (string_id == i)

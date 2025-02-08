@@ -319,6 +319,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_BrownSkeletons",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->game_patches->BrownSkeletons.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ClassicMusic",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->music->ClassicMusic.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SuppressMissedNotes",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chatfilter_hook->setting_suppress_missed_notes.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_SuppressOtherFizzles",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chatfilter_hook->setting_suppress_other_fizzles.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_UseZealAssistOn",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_use_zeal_assist_on.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_DetectAssistFailure",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_detect_assist_failure.set(wnd->Checked); });
 
@@ -608,6 +609,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_BrownSkeletons", ZealService::get_instance()->game_patches->BrownSkeletons.get());
 	ui->SetChecked("Zeal_ClassicMusic", ZealService::get_instance()->music->ClassicMusic.get());
 	ui->SetChecked("Zeal_SuppressMissedNotes", ZealService::get_instance()->chatfilter_hook->setting_suppress_missed_notes.get());
+	ui->SetChecked("Zeal_SuppressOtherFizzles", ZealService::get_instance()->chatfilter_hook->setting_suppress_other_fizzles.get());
 	ui->SetChecked("Zeal_UseZealAssistOn", ZealService::get_instance()->assist->setting_use_zeal_assist_on.get());
 	ui->SetChecked("Zeal_DetectAssistFailure", ZealService::get_instance()->assist->setting_detect_assist_failure.get());
 }
