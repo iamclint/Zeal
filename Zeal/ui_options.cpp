@@ -181,6 +181,16 @@ void ui_options::LoadColors()
 		if (color_buttons.count(22))
 			color_buttons[22]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
 	}
+	if (!ini->exists("ZealColors", "Color23")) //My Melee Special
+	{
+		if (color_buttons.count(23))
+			color_buttons[23]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
+	}
+	if (!ini->exists("ZealColors", "Color24")) //Other Melee Special
+	{
+		if (color_buttons.count(24))
+			color_buttons[24]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
+	}
 	if (!ini->exists("ZealColors", "Color32")) // FCD: My melee damage
 	{
 		if (color_buttons.count(32))

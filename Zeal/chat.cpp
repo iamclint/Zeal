@@ -110,6 +110,10 @@ UINT32  __fastcall GetRGBAFromIndex(int t, int u, USHORT index)
             return options->GetColor(21);
         case CHANNEL_OTHERPETSAY:
             return options->GetColor(22);
+        case CHANNEL_MYMELEESPECIAL:
+            return options->GetColor(23);
+        case CHANNEL_OTHERMELEESPECIAL:
+            return options->GetColor(24);
     }
     return ZealService::get_instance()->hooks->hook_map["GetRGBAFromIndex"]->original(GetRGBAFromIndex)(t, u, index);
 }

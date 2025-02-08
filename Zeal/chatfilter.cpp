@@ -276,6 +276,34 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
     ZealService::get_instance()->hooks->hook_map["PrintAutoSplit"]->original(PrintAutoSplit)(t, unused, data, USERCOLOR_ECHO_AUTOSPLIT, u);
 }
 
+void PrintPlayerMeleeAttack(char* buffer, const char* s1, const char* s2, const char* s3, int strlen)
+{
+    if (strcmp(s1, "backstab") == 0 ||
+        strcmp(s1, "kick") == 0 ||
+        strcmp(s1, "strike") == 0)
+    {
+        Zeal::EqGame::print_chat(CHANNEL_MYMELEESPECIAL, buffer);
+    }
+    else
+    {
+        ZealService::get_instance()->hooks->hook_map["PrintPlayerMeleeAttack"]->original(PrintPlayerMeleeAttack)(buffer, s1, s2, s3, strlen);
+    }
+}
+
+void PrintOtherMeleeAttack(char* buffer, const char* s1, const char* s2, const char* s3, int strlen)
+{
+    if (strcmp(s1, "backstabs") == 0 ||
+        strcmp(s1, "kicks") == 0 ||
+        strcmp(s1, "strikes") == 0)
+    {
+        Zeal::EqGame::print_chat(CHANNEL_OTHERMELEESPECIAL, buffer);
+    }
+    else
+    {
+        ZealService::get_instance()->hooks->hook_map["PrintOtherMeleeAttack"]->original(PrintOtherMeleeAttack)(buffer, s1, s2, s3, strlen);
+    }
+}
+
 void __fastcall serverPrintChat(int t, int unused, const char* data, short color_index, bool u)
 {
     chatfilter* cf = ZealService::get_instance()->chatfilter_hook.get();
@@ -408,6 +436,8 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
             return false;
         }));
     Extended_ChannelMaps.push_back(CustomFilter("/who", 0x10007, [this, zeal](short& color, std::string data) { return color == USERCOLOR_WHO; }));
+    Extended_ChannelMaps.push_back(CustomFilter("My Melee Special", 0x10008, [this, zeal](short& color, std::string data) { return color == CHANNEL_MYMELEESPECIAL; }));
+    Extended_ChannelMaps.push_back(CustomFilter("Other Melee Special", 0x10009, [this, zeal](short& color, std::string data) { return color == CHANNEL_OTHERMELEESPECIAL; }));
 
     //Callbacks
     zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel) { this->AddOutputText(wnd, msg, channel); });
@@ -422,6 +452,8 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("ClearChannelMap", 0x41140C, ClearChannelMap, hook_type_detour);
     zeal->hooks->Add("ClearChannelMaps", 0x411638, ClearChannelMaps, hook_type_detour);
     zeal->hooks->Add("UpdateContextMenus", 0x412f9b, UpdateContextMenus, hook_type_detour);
+    zeal->hooks->Add("PrintPlayerMeleeAttack", 0x500f86, PrintPlayerMeleeAttack, hook_type_detour);
+    zeal->hooks->Add("PrintOtherMeleeAttack", 0x501168, PrintOtherMeleeAttack, hook_type_detour);
 
     //Individiual Modifications
     zeal->hooks->Add("PrintSplit", 0x54755b, PrintSplit, hook_type_replace_call); //fix up money split

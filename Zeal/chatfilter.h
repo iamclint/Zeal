@@ -9,6 +9,8 @@
 #define CHANNEL_OTHERPETDMG 1001
 #define CHANNEL_MYPETSAY 1002
 #define CHANNEL_OTHERPETSAY 1003
+#define CHANNEL_MYMELEESPECIAL 1004
+#define CHANNEL_OTHERMELEESPECIAL 1005
 
 struct CustomFilter {
 	std::string name; //String name - Appears in the Menu
