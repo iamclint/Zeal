@@ -49,8 +49,10 @@ class chatfilter
 	void LoadSettings(Zeal::EqUI::CChatManager* cm);
 	void callback_clean_ui();
 	ZealSetting<bool> setting_suppress_missed_notes = { false, "Zeal", "SuppressMissedNotes", false };
+	ZealSetting<bool> setting_suppress_other_fizzles = { false, "Zeal", "SupressOtherFizzles", false };
 	bool isExtendedCM(int channelMap, int applyOffset = 0);
 	bool isStandardCM(int channelMap, int applyOffset = 0);
+	int current_string_id = 0;
 	bool isDamage=false;
 	bool isMyPetSay=false;
 	bool isPetMessage=false;
