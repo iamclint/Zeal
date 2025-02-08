@@ -107,6 +107,8 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"attackonly", &setting_attack_only },
 		{"inlineguild", &setting_inline_guild },
 		{"healthbars", &setting_health_bars },
+		{"manabars", &setting_mana_bars },
+		{"staminabars", &setting_stamina_bars },
 		{"zealfont", &setting_zeal_fonts },
 		{"dropshadow", &setting_drop_shadow },
 	};
@@ -138,7 +140,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	Zeal::EqGame::print_chat("Usage: /nameplate option where option is one of");
 	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, attackonly, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, showpetownername, targetmarker, targethealth, inlineguild");
-	Zeal::EqGame::print_chat("font:  zealfont, dropshadow, healthbars");
+	Zeal::EqGame::print_chat("font:  zealfont, dropshadow, healthbars, manabars, staminabars");
 }
 
 std::vector<std::string> NamePlate::get_available_fonts() const {
@@ -223,6 +225,35 @@ static bool is_hp_updated(const Zeal::EqStructures::Entity* entity)
 	return false;
 }
 
+// Returns -1 if mana is not available to display.
+static int get_mana_percent(const Zeal::EqStructures::Entity* entity)
+{
+	if (!entity || entity->Type != Zeal::EqEnums::Player ||	!entity->CharInfo)
+		return -1;
+
+	if (entity == Zeal::EqGame::get_self()) {
+		int mana = entity->CharInfo->mana();
+		int max_mana = entity->CharInfo->max_mana();
+		return (max_mana >= 0) ?
+			max(0, min(100, (mana * 100 / max_mana))) : -1;
+	}
+
+	return -1;  // TODO: Support entities besides self.
+}
+
+// Returns -1 if stamina is not available to display.
+static int get_stamina_percent(const Zeal::EqStructures::Entity* entity)
+{
+	if (!entity || entity->Type != Zeal::EqEnums::Player || !entity->CharInfo)
+		return -1;
+
+	if (entity == Zeal::EqGame::get_self())
+		return max(0, min(100, 100 - entity->CharInfo->Stamina));  // 100 = empty, 0 = full.
+
+	return -1;  // TODO: Support entities besides self.
+}
+
+
 void NamePlate::render_ui()
 {
 	if (!setting_zeal_fonts.get() || Zeal::EqGame::get_gamestate() != GAMESTATE_INGAME)
@@ -265,22 +296,36 @@ void NamePlate::render_ui()
 		position.z += get_nameplate_z_offset(*entity);
 
 		// Support an optional healthbar for zeal font mode only.
-		const char* text_c_str = info.text.c_str();
-		std::string new_text;
+		std::string full_text = info.text;
 		if (setting_health_bars.get() && is_hp_updated(entity))
 		{
-			const char healthbar[4] = { '\n', BitmapFontBase::kHealthBarBackground,
+			const char healthbar[4] = { '\n', BitmapFontBase::kStatsBarBackground,
 				BitmapFontBase::kHealthBarValue, 0 };
-			new_text = info.text + healthbar;
-			text_c_str = new_text.c_str();
+			full_text += healthbar;
 			int hp_percent = entity->HpCurrent;	// NPC value is stored as a percent.
 			if (entity->Type == Zeal::EqEnums::EntityTypes::Player)
 				hp_percent = (entity->HpCurrent > 0 && entity->HpMax > 0) ?
 					(entity->HpCurrent * 100) / entity->HpMax : 0;
 			sprite_font->set_hp_percent(hp_percent);
 		}
+		int mana_percent = setting_mana_bars.get() ? get_mana_percent(entity) : -1;
+		if (mana_percent >= 0)
+		{
+			const char manabar[4] = { '\n', BitmapFontBase::kStatsBarBackground,
+				BitmapFontBase::kManaBarValue, 0 };
+			full_text += manabar;
+			sprite_font->set_mana_percent(mana_percent);
+		}
+		int stamina_percent = setting_stamina_bars.get() ? get_stamina_percent(entity) : -1;
+		if (stamina_percent >= 0)
+		{
+			const char staminabar[4] = { '\n', BitmapFontBase::kStatsBarBackground,
+				BitmapFontBase::kStaminaBarValue, 0 };
+			full_text += staminabar;
+			sprite_font->set_stamina_percent(stamina_percent);
+		}
 
-		sprite_font->queue_string(text_c_str, position, true, info.color | 0xff000000);
+		sprite_font->queue_string(full_text.c_str(), position, true, info.color | 0xff000000);
 	}
 	sprite_font->flush_queue_to_screen();
 }

@@ -220,17 +220,21 @@ BitmapFontBase::BitmapFontBase(IDirect3DDevice8& device, std::span<const uint8_t
         return;
     }
 
-    // We customize two special glyph indices to support the healthbar. The background glyph's
+    // We customize four special glyph indices to support the stats bars. The background glyph's
     // advance is set to measure "zero" width so the value bar starts at the same location while
-    // the value glyph's advance is set to the full width size for the centering calcs.
-    // The create_texture has created a solid 4x4 block at the end for the health bar to use.
+    // the value glyphs' advance is set to the full width size for the centering calcs.
+    // The create_texture has created a solid 4x4 block at the end for the stats bars to use.
     RECT sub_rect = { texture_rect.right - 3, texture_rect.bottom - 2, texture_rect.right - 1,
                     texture_rect.bottom - 1};
-    glyph_table[kHealthBarBackground] = { .character = kHealthBarBackground,
+    glyph_table[kStatsBarBackground] = { .character = kStatsBarBackground,
         .sub_rect = sub_rect, .x_offset = 0, .y_offset = 1,
         .x_advance = static_cast<float>(sub_rect.left - sub_rect.right) };
     glyph_table[kHealthBarValue] = { .character = kHealthBarValue,
-        .sub_rect = sub_rect, .x_offset = 0, .y_offset = 1, .x_advance = kHealthBarWidth };
+        .sub_rect = sub_rect, .x_offset = 0, .y_offset = 1, .x_advance = kStatsBarWidth };
+    glyph_table[kManaBarValue] = { .character = kManaBarValue,
+        .sub_rect = sub_rect, .x_offset = 0, .y_offset = 1, .x_advance = kStatsBarWidth };
+    glyph_table[kStaminaBarValue] = { .character = kStaminaBarValue,
+        .sub_rect = sub_rect, .x_offset = 0, .y_offset = 1, .x_advance = kStatsBarWidth };
 }
 
 // Ensure all resources are released in the destructor.
@@ -393,7 +397,8 @@ void BitmapFontBase::queue_lines(const std::vector<Lines>& lines, D3DCOLOR color
         Vec2 upper_left = line.upper_left + offset;
         for_each_glyph(line.text.c_str(),
             [&](const Glyph* glyph, float x, float y) {
-                if ((glyph->character == kHealthBarBackground || glyph->character == kHealthBarValue)
+                if ((glyph->character == kStatsBarBackground || glyph->character == kHealthBarValue
+                    || glyph->character == kManaBarValue || glyph->character == kStaminaBarValue)
                     && color == kDropShadowColor)
                     return;  // Skip drop shadow for the health bar.
                 glyph_queue.push_back({ glyph, upper_left + Vec2(x,y), color });
@@ -414,15 +419,15 @@ void BitmapFontBase::queue_string(const char* text, const Vec3& position, bool c
         auto text_lines = Zeal::String::split_text(std::string(text));
         float x_max = 0;
         float y_height = 0;
-        float y_final = 0;
+        float y_advance = 0;
         for (const auto& line : text_lines) {
-            Vec2 size = measure_string(line.c_str());
+            y_height += y_advance;
+            Vec3 size = measure_string(line.c_str());
             x_max = std::max(x_max, size.x);
             lines.push_back({ line, Vec2(size.x, y_height) });
-            y_final = size.y;
-            y_height += line_spacing;
+            y_height += size.y;
+            y_advance = std::max(0.f, size.z - size.y);  // Save if needed for next line.
         }
-        y_height -= (line_spacing - y_final);  // Adjust for final line height.
         float x_offset = -x_max * 0.5f;  // Common base offset for all lines.
         float y_offset = align_bottom ? -y_height : -y_height * 0.5f;
         for (auto& line : lines) {
@@ -433,7 +438,7 @@ void BitmapFontBase::queue_string(const char* text, const Vec3& position, bool c
     }
     else {
         if (center) {
-            Vec2 size = measure_string(text);
+            Vec3 size = measure_string(text);
             upper_left -= Vec2(0.5f * size.x, align_bottom ? size.y : 0.5 * size.y);
         }
         lines.push_back({ std::string(text), upper_left });
@@ -455,10 +460,11 @@ void BitmapFontBase::queue_string(const char* text, const Vec3& position, bool c
     queue_lines(lines, color);
 }
 
-// Returns the height and width of the string. Does not include line spacing.
-Vec2 BitmapFontBase::measure_string(const char* text) const
+// Returns the height and width of the string. Does not include line spacing, which is returned as z.
+Vec3 BitmapFontBase::measure_string(const char* text) const
 {
-    Vec2 result{ 0, 0 };
+    float line_height = line_spacing;  // Default line height.
+    Vec3 result{ 0, 0, 0 };
     if (!text || !(*text))
         return result;  // Skip nullptr or empty strings.
 
@@ -467,11 +473,13 @@ Vec2 BitmapFontBase::measure_string(const char* text) const
         [&](Glyph const* glyph, float x, float y) {
             float w = static_cast<float>(glyph->sub_rect.right - glyph->sub_rect.left);
             float h = static_cast<float>(glyph->sub_rect.bottom - glyph->sub_rect.top);
-            if (glyph->character == kHealthBarValue) {
+            if (glyph->character == kHealthBarValue || glyph->character == kManaBarValue ||
+                glyph->character == kStaminaBarValue) {
                 w = glyph->x_advance;
-                h = kHealthBarHeight;
+                h = kStatsBarHeight;
+                line_height = kStatsBarHeight + 1;
             }
-            result = Vec2(std::max(result.x, x + w), std::max(result.y, y + h));
+            result = Vec3(std::max(result.x, x + w), std::max(result.y, y + h), line_height);
         });
 
     return result;
@@ -722,7 +730,8 @@ void SpriteFont::queue_string(const char* text, const Vec3& position, bool cente
     BitmapFontBase::queue_string(text, Vec3(0, 0, 0), center, color, grid_align);
     int stop_index = glyph_queue.size();
     glyph_string_queue.push_back({ .position = position, .start_index = start_index,
-        .stop_index = stop_index, .hp_percent = hp_percent });
+        .stop_index = stop_index, .hp_percent = hp_percent, .mana_percent = mana_percent,
+        .stamina_percent = stamina_percent});
 }
 
 // Renders all queued glyphs to the screen.
@@ -791,7 +800,9 @@ void SpriteFont::render_queue() {
         D3DXMatrixTranslation(&translationMatrix, entry.position.x, entry.position.y, entry.position.z);
         worldMatrix = mat_font_to_face_camera * translationMatrix;
         device.SetTransform(D3DTS_WORLD, &worldMatrix);
-        hp_percent = entry.hp_percent;  // Recall the hp state.
+        hp_percent = entry.hp_percent;  // Recall the stats for access in a sub-method.
+        mana_percent = entry.mana_percent;
+        stamina_percent = entry.stamina_percent; 
 
         int read_index = entry.start_index;
         while (read_index < entry.stop_index) {
@@ -850,19 +861,32 @@ void SpriteFont::calculate_glyph_vertices(const GlyphQueueEntry& entry,
     float height = static_cast<float>(entry.glyph->sub_rect.bottom - entry.glyph->sub_rect.top);
     float z = (entry.color == kDropShadowColor) ? +1.f : 0.0f;
     auto color = entry.color;
-    if (entry.glyph->character == kHealthBarBackground) {
+    if (entry.glyph->character == kStatsBarBackground) {
         z = -0.25f;  // Slightly in front of normal text.
-        width = kHealthBarWidth;
-        height = kHealthBarHeight;
+        width = kStatsBarWidth;
+        height = kStatsBarHeight;
         color = D3DCOLOR_ARGB(128, 128, 128, 128);
-    } else if (entry.glyph->character == kHealthBarValue) {
+    }
+    else if (entry.glyph->character == kHealthBarValue) {
         z = -0.5f;  // Slightly more in front.
-        width = hp_percent * ((1.f / 100.f) * kHealthBarWidth);
-        height = kHealthBarHeight;
+        width = hp_percent * ((1.f / 100.f) * kStatsBarWidth);
+        height = kStatsBarHeight;
         color = (hp_percent > 75) ? D3DCOLOR_XRGB(0, 192, 0) :  // Green
             (hp_percent > 50) ? D3DCOLOR_XRGB(192, 192, 0) :  // Yellow
             (hp_percent > 25) ? D3DCOLOR_XRGB(192, 96, 40) :  // Orange
             D3DCOLOR_XRGB(192, 0, 0);  // Red
+    }
+    else if (entry.glyph->character == kManaBarValue) {
+        z = -0.5f;  // Slightly more in front.
+        width = mana_percent * ((1.f / 100.f) * kStatsBarWidth);
+        height = kStatsBarHeight;
+        color = D3DCOLOR_XRGB(0, 0x40, 0xf0); // Use default CON_BLUE color.
+    }
+    else if (entry.glyph->character == kStaminaBarValue) {
+        z = -0.5f;  // Slightly more in front.
+        width = stamina_percent * ((1.f / 100.f) * kStatsBarWidth);
+        height = kStatsBarHeight;
+        color = D3DCOLOR_XRGB(240, 190, 11); // Yellow / honey.
     }
 
     glyph_vertices[0].x = entry.position.x;

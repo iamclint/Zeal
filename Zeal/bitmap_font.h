@@ -24,8 +24,10 @@ public:
     static constexpr char kDefaultFontName[] = "default";
 
     // Support display of a health bar using non-visible ASCII values.
-    static constexpr char kHealthBarBackground = 1;  // ASCII '\x01' draws the background.
+    static constexpr char kStatsBarBackground = 1;  // ASCII '\x01' draws the background.
     static constexpr char kHealthBarValue = 2;  // ASCII '\x02' draws the health value.
+    static constexpr char kManaBarValue = 3;  // ASCII '\x03' draws the mana value
+    static constexpr char kStaminaBarValue = 4;  // ASCII '\x04' draws the stamina value.
 
     // Utility method to report the available fonts.
     static std::vector<std::string> get_available_fonts();
@@ -42,7 +44,7 @@ public:
     bool is_valid() const { return texture != nullptr; }
 
     // Utilities for adjusting the string position (sizes in screen pixels).
-    Vec2 measure_string(const char* text) const;
+    Vec3 measure_string(const char* text) const;
     RECT measure_draw_rect(const char* text, const Vec2& position) const;
     float get_line_spacing() const { return line_spacing; }
 
@@ -51,8 +53,12 @@ public:
     void set_drop_shadow(bool enable) { drop_shadow = enable; }
     void set_outlined(bool enable) { outlined = enable; }
     void set_align_bottom(bool enable) { align_bottom = enable; }
-    void set_hp_percent(int value) { hp_percent = value; }  // Set before queue_string().
-    
+
+    // Set these stats bar values before calling queue_string() which contains their glyphs.
+    void set_hp_percent(int value) { hp_percent = value; }
+    void set_mana_percent(int value) { mana_percent = value; } 
+    void set_stamina_percent(int value) { stamina_percent = value; }
+
     // Primary interface for drawing text. The position is in screen pixel coordinates
     // and specifies the center (true) or the upper left (false).
     virtual void queue_string(const char* text, const Vec3& position, bool center = true,
@@ -73,7 +79,6 @@ protected:
     struct Lines {
         std::string text;
         Vec2 upper_left;
-        int hp_percent;
     };
 
     // Describes a single character bitmap glyph.
@@ -94,8 +99,8 @@ protected:
     };
 
     static constexpr int kNumGlyphs = 128;  // Support ASCII 0 - 127.
-    static constexpr float kHealthBarHeight = 6;
-    static constexpr float kHealthBarWidth = 120;
+    static constexpr float kStatsBarHeight = 6;
+    static constexpr float kStatsBarWidth = 120;
 
     void queue_lines(const std::vector<Lines>& lines, D3DCOLOR color, Vec2 offset = Vec2(0,0));
     const Glyph* get_glyph(char character) const;
@@ -113,7 +118,9 @@ protected:
     bool drop_shadow = false;
     bool outlined = false;
     bool align_bottom = false;  // Applies only when text is queued with center flag.
-    int hp_percent = 0;
+    char hp_percent = 0;
+    char mana_percent = 0;
+    char stamina_percent = 0;
 
     IDirect3DDevice8& device;
     Glyph glyph_table[kNumGlyphs] = {};
@@ -202,7 +209,9 @@ protected:
         Vec3 position;  // Origin anchor point for a string of glyphs.
         int start_index;
         int stop_index;  // Exclusive.
-        int hp_percent;  // Value of internal hp_percent when queued.
+        char hp_percent;  // Value of internal hp_percent when queued.
+        char mana_percent;
+        char stamina_percent;
     };
 
     // Vertices allow texturing and color modulation.
