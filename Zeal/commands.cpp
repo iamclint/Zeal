@@ -323,6 +323,21 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
+	Add("/run", {}, "Sets run mode (toggle, on, off (walk)).",
+		[](const std::vector<std::string>& args) {
+			BYTE* run_mode = reinterpret_cast<BYTE*>(0x0079856d);
+			if (args.size() == 2 && Zeal::String::compare_insensitive(args[1], "on"))
+				*run_mode = 1;
+			else if (args.size() == 2 && Zeal::String::compare_insensitive(args[1], "off"))
+				*run_mode = 0;
+			else if (args.size() == 1) {
+				*run_mode = (*run_mode == 0);
+				Zeal::EqGame::print_chat("%s", *run_mode ? "Run on" : "Walk on");
+			}
+			else
+				Zeal::EqGame::print_chat("Usage: /run (toggles), /run on, /run off");
+			return true;
+		});
 	Add("/showhelm", { "/helm" }, "Toggles your show helm setting on/off.",
 		[](std::vector<std::string>& args) {
 			if (args.size() == 1) {
