@@ -234,7 +234,7 @@ static int get_mana_percent(const Zeal::EqStructures::Entity* entity)
 	if (entity == Zeal::EqGame::get_self()) {
 		int mana = entity->CharInfo->mana();
 		int max_mana = entity->CharInfo->max_mana();
-		return (max_mana >= 0) ?
+		return (max_mana > 0) ?
 			max(0, min(100, (mana * 100 / max_mana))) : -1;
 	}
 
