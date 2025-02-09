@@ -14,8 +14,6 @@
 // Possible enhancements and issues:
 // - Look into intermittent z-depth clipping due to walls or heads/faces
 // - External map window issues:
-//   - Window message queue was not receiving expected window resize messages,
-//     so using fixed window sizes set by the options tab
 //   - Was unable to transfer focus to the main window for keyboard input, so using an internal
 //     command router for hotkeys. This does not allow typing chat messages currently.
 // - Interactive mode:
@@ -79,13 +77,13 @@ static constexpr int kMarkerCount = 4;  // Four triangles per marker.
 static constexpr int kPositionCount = 2;  // Two triangles.
 static constexpr int kPositionVertices = kPositionCount * 3; // Fixed triangle list.
 static constexpr int kRaidMaxMembers = Zeal::EqStructures::RaidInfo::kRaidMaxMembers;
-static constexpr int kRaidPositionVertices = 3; // Fixed triangle list with one triangle.
+static constexpr int kRaidPositionVertices = 3; // Simple single triangle default option.
 static constexpr int kMaxDynamicLabels = 10;
 static constexpr int kRingLineSegments = 72;  // Every 5 degrees.
 static constexpr int kRingVertices = kRingLineSegments + 1; // N + 1 for D3DPT_LINESTRIP
 static constexpr int kMaxNonAllyTriangles = 500;  // Markers use 1 or 2 triangles each.
 static constexpr int kPositionBufferSize = sizeof(ZoneMap::MapVertex) * (kPositionVertices
-       * (EQ_NUM_GROUP_MEMBERS + 1) + kRaidPositionVertices * kRaidMaxMembers +
+       * (EQ_NUM_GROUP_MEMBERS + 1) + kPositionVertices * kRaidMaxMembers +
         kRaidPositionVertices * kMaxNonAllyTriangles + kRingVertices);
 
 static constexpr DWORD kMapVertexFvfCode = (D3DFVF_XYZ | D3DFVF_DIFFUSE);
@@ -1200,6 +1198,8 @@ void ZoneMap::render_non_ally_labels(IDirect3DDevice8& device,
         int loc_x = static_cast<int>(entity->Position.y + 0.5f);  // Also need to negate it below.
         auto color = (entity == target) ? get_target_color() :
                 (entity->Type == Zeal::EqEnums::Player) ? player_color : npc_color;
+        if (entity->Position.z < clip_min_z || entity->Position.z > clip_max_z)
+            color = color & 0x80ffffff;  // Set alpha to 50% to fade for z.
         // Future: Append the class type for player characters.
         char label[kMaxNameLength + 1] = { 0 };  // Null-terminate.
         for (int j = 0; j < short_name_length; ++j)
@@ -1322,7 +1322,11 @@ void ZoneMap::add_raid_member_position_vertices(std::vector<MapVertex>& vertices
             (member.GroupNumber == kUngrouped ? kColorUngrouped :
                 D3DCOLOR_XRGB(224, 224, 128 + member.GroupNumber * 8));
         // Position is y,x,z.
-        add_raid_marker_vertices(entity->Position, size, color, vertices);
+        if (setting_show_all_player_headings.get())
+            add_position_marker_vertices(-entity->Position.x, -entity->Position.y, entity->Heading,
+                size * 0.7f, color, vertices);
+        else
+            add_raid_marker_vertices(entity->Position, size, color, vertices);
     }
 }
 
@@ -1399,10 +1403,16 @@ void ZoneMap::add_non_ally_position_vertices(std::vector<MapVertex>&vertices,
     const int kVertexLimit = (kMaxNonAllyTriangles - 2) * kRaidPositionVertices;  // Room for two more.
     for (const auto& entity : entities)
     {
-        const D3DCOLOR color = (entity == target) ? get_target_color() :
+        D3DCOLOR color = (entity == target) ? get_target_color() :
                          (Zeal::EqGame::GetLevelCon(entity) | 0xff000000);
+        if (entity->Position.z < clip_min_z || entity->Position.z > clip_max_z)
+            color = color & 0x80ffffff;  // Set alpha to 50% to fade for z.
         if (entity->Type == Zeal::EqEnums::Player)
-            add_non_ally_player_marker_vertices(entity->Position, size, color, vertices);
+            if (setting_show_all_player_headings.get())
+                add_position_marker_vertices(-entity->Position.x, -entity->Position.y, entity->Heading,
+                    size * 0.7f, color, vertices);
+            else
+                add_non_ally_player_marker_vertices(entity->Position, size, color, vertices);
         else
             add_npc_marker_vertices(entity->Position, size, color, vertices);
         if ((vertices.size() - start) > kVertexLimit)

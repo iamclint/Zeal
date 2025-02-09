@@ -68,6 +68,7 @@ public:
 	bool set_font(std::string font_name, bool update_default = true);
 	void set_marauders_map(bool enable) { map_show_all = enable; }  // Resets to false on zone.
 	ZealSetting<bool> setting_add_loc_text = { false, "Zeal", "MapAddLocText", false };
+	ZealSetting<bool> setting_show_all_player_headings = { false, "Zeal", "MapShowPlayerHeadings", false };
 
 	bool is_external_enabled() const { return external_enabled; }
 	bool is_show_raid_enabled() const { return map_show_raid; }
