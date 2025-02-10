@@ -32,6 +32,7 @@ namespace mem
 		VirtualProtect(reinterpret_cast<PVOID*>(target), size, PAGE_EXECUTE_READWRITE, &oldprotect);
 		memcpy(reinterpret_cast<T*>(target), &value, size);
 		VirtualProtect(reinterpret_cast<PVOID*>(target), size, oldprotect, &oldprotect);
+		FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<PVOID*>(target), size);
 	}
 
 	template<typename T, size_t N>
@@ -42,6 +43,7 @@ namespace mem
 		VirtualProtect(reinterpret_cast<PVOID*>(target), size, PAGE_EXECUTE_READWRITE, &oldprotect);
 		memcpy(reinterpret_cast<T*>(target), value, size);
 		VirtualProtect(reinterpret_cast<PVOID*>(target), size, oldprotect, &oldprotect);
+		FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<PVOID*>(target), size);
 	}
 
 	void set(int target, int val, int size, BYTE* orig_buffer = nullptr);

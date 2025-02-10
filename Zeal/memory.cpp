@@ -100,8 +100,10 @@ namespace mem
 	}
 	void reset_memory_protection(PVOID target)
 	{
-		if (protections[target].size)
+		if (protections[target].size) {
 			VirtualProtect((PVOID*)target, protections[target].size, protections[target].orig, nullptr);
+			FlushInstructionCache(GetCurrentProcess(), (PVOID*)target, protections[target].size);
+		}
 	}
 	void set(int target, int val, int size, BYTE* buffer)
 	{
@@ -111,6 +113,7 @@ namespace mem
 			memcpy(buffer, (void*)target, size);
 		memset((void*)target, val, size);
 		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
+		FlushInstructionCache(GetCurrentProcess(), (PVOID*)target, size);
 	}
 	void copy(int target, int source, int size, BYTE* buffer)
 	{
@@ -120,6 +123,7 @@ namespace mem
 			memcpy((void*)buffer, (const void*)target, size);
 		memcpy((void*)target, (const void*)source, size);
 		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
+		FlushInstructionCache(GetCurrentProcess(), (PVOID*)target, size);
 	}
 	void copy(int target, BYTE* source, int size, BYTE* buffer)
 	{
@@ -129,6 +133,7 @@ namespace mem
 			memcpy((void*)buffer, (const void*)target, size);
 		memcpy((void*)target, (const void*)source, size);
 		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
+		FlushInstructionCache(GetCurrentProcess(), (PVOID*)target, size);
 	}
 	void get(int target, int size, BYTE* buffer)
 	{

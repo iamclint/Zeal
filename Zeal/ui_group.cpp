@@ -73,7 +73,7 @@ ui_group::~ui_group()
 ui_group::ui_group(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
 	ui = mgr;
-	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
+	//zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	zeal->commands_hook->Add("/sortgroup", {"/sg"}, "Sort your group members example usages: /sg or /sg 1 2 where /sg alpha sorts the group and /sg 1 2 switches players 1 and 2 in your group window ",
 		[this](std::vector<std::string>& args) 
 		{
@@ -85,5 +85,5 @@ ui_group::ui_group(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 				sort();
 			return true;
 		});
-	if (Zeal::EqGame::is_in_game()) InitUI();
+	//if (Zeal::EqGame::is_in_game()) InitUI();
 }
