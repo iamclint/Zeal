@@ -399,6 +399,13 @@ ChatCommands::ChatCommands(ZealService* zeal)
 
 				return true;
 			}
+			if (args.size() == 2 && args[1] == "list_keybinds")  // Just a utility to check native keybind mapping.
+			{
+				const char** cmd = reinterpret_cast<const char**>(0x00611220);
+				for (int i = 0; cmd[i] != nullptr; ++i)
+					Zeal::EqGame::print_chat("[%d]: %s", i, cmd[i]);
+				return true;
+			}
 			if (args.size() == 2 && args[1] == "target_name")  // Report name parsing of current target.
 			{
 				Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();

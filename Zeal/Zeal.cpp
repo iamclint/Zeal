@@ -16,8 +16,8 @@ static void mem_check(int line_number = 0) {
 	int result1 = HeapValidate(GetProcessHeap(), 0, NULL);
 	int result2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
 	if (!result1 || !result2) {
-		std::string message = std::format("Zeal {0} ({1}) detected heap corruption ({2}). EqGame will terminate.",
-			ZEAL_VERSION, ZEAL_BUILD_VERSION, line_number);
+		std::string message = std::format("Zeal {0} ({1}) detected heap corruption ({2}:{3}). EqGame will terminate.",
+			ZEAL_VERSION, ZEAL_BUILD_VERSION, line_number, result1 * 2 + result2);
 		MessageBoxA(NULL, message.c_str(),
 			"Zeal heap monitor", MB_OK | MB_ICONERROR);
 		throw std::bad_alloc();  // Will crash out the program.
@@ -47,6 +47,7 @@ ZealService::ZealService()
 	spell_sets = std::make_shared<SpellSets>(this);
 	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
 	tooltips = std::make_shared<tooltip>(this, ini.get());
+	mem_check(__LINE__);
 	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
 	give = std::make_shared<NPCGive>(this, ini.get());
 	game_patches = std::make_shared<patches>();
@@ -59,6 +60,7 @@ ZealService::ZealService()
 	cycle_target = std::make_shared<CycleTarget>(this);
 	assist = std::make_shared<Assist>(this);
 	experience = std::make_shared<Experience>(this);
+	mem_check(__LINE__);
 	chat_hook = std::make_shared<chat>(this, ini.get());
 	chatfilter_hook = std::make_shared<chatfilter>(this, ini.get());
 	outputfile = std::make_shared<OutputFile>(this);

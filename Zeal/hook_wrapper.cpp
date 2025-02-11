@@ -20,6 +20,7 @@ void hook::replace(int addr, int dest)
 		memcpy(original_bytes, (LPVOID)addr, 5);
 		*(DWORD*)(addr + 1) = dest - addr - 5;
 		VirtualProtect((LPVOID)addr, 0x5, old, NULL);
+		FlushInstructionCache(GetCurrentProcess(), (LPVOID)addr, 0x5);
 	}
 }
 
