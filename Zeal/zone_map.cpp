@@ -1414,7 +1414,7 @@ void ZoneMap::add_non_ally_position_vertices(std::vector<MapVertex>&vertices,
             else
                 add_non_ally_player_marker_vertices(entity->Position, size, color, vertices);
         else
-            add_npc_marker_vertices(entity->Position, size, color, vertices);
+            add_npc_marker_vertices(entity->Position, size * 0.5, color, vertices);
         if ((vertices.size() - start) > kVertexLimit)
             break;  // Note: Dropping markers, but names will still show up.
     }

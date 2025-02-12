@@ -332,6 +332,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_SuppressOtherFizzles",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chatfilter_hook->setting_suppress_other_fizzles.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_UseZealAssistOn",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_use_zeal_assist_on.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_DetectAssistFailure",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_detect_assist_failure.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_SingleClickGiveEnable",  [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->give->setting_enable_give.set(wnd->Checked); });
 
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_EnableContainerLock",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->options->setting_enable_container_lock.set(wnd->Checked); });
@@ -625,6 +626,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_SuppressOtherFizzles", ZealService::get_instance()->chatfilter_hook->setting_suppress_other_fizzles.get());
 	ui->SetChecked("Zeal_UseZealAssistOn", ZealService::get_instance()->assist->setting_use_zeal_assist_on.get());
 	ui->SetChecked("Zeal_DetectAssistFailure", ZealService::get_instance()->assist->setting_detect_assist_failure.get());
+	ui->SetChecked("Zeal_SingleClickGiveEnable", ZealService::get_instance()->give->setting_enable_give.get());
 }
 void ui_options::UpdateOptionsCamera()
 {
