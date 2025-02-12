@@ -675,8 +675,8 @@ namespace Zeal
 		class  ContainerWnd : public EQWND {
 		public:
 			/*0x134*/ DWORD   something;     // dont know maybe type or a counter/ID?;
-			/*0x138*/ DWORD* pIteminfo;     // Pointer to the contents of the container;// Matches the pointer in CHARINFO.Inventory/Bank/World
-			/*0x13c*/ EQWND* pSlots[0x0a];
+			/*0x138*/ Zeal::EqStructures::EQITEMINFO* pContainerInfo;  // Type, capacity, etc.
+			/*0x13c*/ InvSlotWnd* pSlotWnds[0x0a];
 			/*0x164*/ EQWND* pCombine;
 			/*0x168*/ EQWND* pDone;
 			/*0x16c*/ EQWND* pIcon;

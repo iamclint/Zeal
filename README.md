@@ -206,6 +206,9 @@ ___
   - **Aliases:** `/showlootlockout`, `/showlockout`, `/sll`
   - **Description:** Shows you your current loot lockouts on Quarm.
 
+- `/singleclick`
+  - **Description:** Toggles on and off the single click auto-transfer of stackable items to open give, trade, or crafting windows.
+
 - `/zealcam`
   - **Aliases:** `/smoothing`
   - **Arguments:** `x y 3rdperson_x 3rdperson_y`
