@@ -307,7 +307,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		[](std::vector<std::string>& args) {
 			if (args.size() > 1 && args.size() < 3) {
 				if (Zeal::String::compare_insensitive(args[1], "on") || Zeal::String::compare_insensitive(args[1], "down")) {
-					Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
+					Zeal::EqGame::sit();
 					return true;
 				}
 			}
@@ -316,7 +316,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 	Add("/camp", {}, "Adds auto sit when attempting to camp.",
 		[](std::vector<std::string>& args) {
 			if (Zeal::EqGame::is_in_game() && !Zeal::EqGame::EqGameInternal::IsNoSlashWndActive())
-				Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
+				Zeal::EqGame::sit();
 			if (ZealService::get_instance()->outputfile->setting_export_on_camp.get()) {
 				ZealService::get_instance()->outputfile->export_inventory();
 				ZealService::get_instance()->outputfile->export_spellbook();
