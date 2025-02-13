@@ -28,10 +28,7 @@ void ui_zoneselect::Hide()
 void ui_zoneselect::Show()
 {
 	if (wnd)
-	{
-		MessageBoxA(nullptr, "Show", "ZoneSelect", 0);
 		wnd->show(1, 1);
-	}
 }
 void ui_zoneselect::InitUI()
 {
