@@ -119,7 +119,7 @@ NPCGive::NPCGive(ZealService* zeal, IO_ini* ini)
     zeal->commands_hook->Add("/singleclick", {},
         "Toggles on and off the single click auto-transfer of stackable items to open give, trade, or crafting windows.",
         [this](std::vector<std::string>& args) {
-            setting_enable_give.set(!setting_enable_give.get());
+            setting_enable_give.toggle();
             Zeal::EqGame::print_chat("Single click give: %s", setting_enable_give.get() ? "ON" : "OFF");
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });

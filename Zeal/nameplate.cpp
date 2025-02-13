@@ -125,6 +125,16 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 			return;
 		}
 	}
+	else if (args.size() == 3 && args[1] == "shadowfactor") {
+		float factor;
+		if (Zeal::String::tryParse(args[2], &factor)) {
+			factor = max(0.005f, min(0.1f, factor));
+			setting_shadow_offset_factor.set(factor);
+			if (sprite_font)
+				sprite_font->set_shadow_offset_factor(setting_shadow_offset_factor.get());
+			return;
+		}
+	}
 
 	if (args.size() == 2 && command_map.find(args[1]) != command_map.end())
 	{
@@ -141,6 +151,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, attackonly, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, showpetownername, targetmarker, targethealth, inlineguild");
 	Zeal::EqGame::print_chat("font:  zealfont, dropshadow, healthbars, manabars, staminabars");
+	Zeal::EqGame::print_chat("shadows: /nameplate shadowfactor <float> (0.005 to 0.1 range)");
 }
 
 std::vector<std::string> NamePlate::get_available_fonts() const {
@@ -165,6 +176,7 @@ void NamePlate::load_sprite_font() {
 		return;  // Let caller deal with the failure.
 	sprite_font->set_drop_shadow(setting_drop_shadow.get());
 	sprite_font->set_align_bottom(true);  // Bottom align for multi-line and font sizes.
+	sprite_font->set_shadow_offset_factor(setting_shadow_offset_factor.get());
 }
 
 void NamePlate::clean_ui()
@@ -177,24 +189,6 @@ void NamePlate::clean_ui()
 static float get_nameplate_z_offset(const Zeal::EqStructures::Entity& entity)
 {
 	return z_position_offset;
-
-#if 0  // Adonis formula (before fix to bottom alignment).
-	const float scale_factor = (entity.ActorInfo && entity.ActorInfo->ViewActor_) ?
-		entity.ActorInfo->ViewActor_->ScaleFactor : 1.f;
-	const float base_offset = entity.Height + entity.ModelHeightOffset;
-
-	if (scale_factor > 3)
-		return base_offset * 0.08f;
-	if (scale_factor > 2)
-		return base_offset * 0.1f;
-	if (scale_factor > 1)
-		return base_offset * 0.11f;
-	if (scale_factor > 0.8)
-		return base_offset * 0.12f;
-
-	return base_offset * 0.14f;
-#endif
-
 }
 
 // The server currently only sends reliable HP updates for target, self, self pet,

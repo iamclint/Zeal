@@ -137,8 +137,8 @@ std::vector<std::string> BitmapFontBase::get_available_fonts() {
 
 // Calculates the default shadow offset for this font size.
 float BitmapFontBase::calculate_shadow_offset() const {
-    float offset = std::roundf(get_line_spacing() * 0.05f);  // Round to integer offsets.
-    return std::max(1.f, offset);
+    float offset = std::roundf(get_line_spacing() * shadow_offset_factor);
+    return std::max(1.f, offset);  // Rounded, integer offset >= 1.
 }
 
 // Reads a font from files created with the MakeSpriteFont utility.
@@ -243,8 +243,8 @@ BitmapFontBase::~BitmapFontBase() {
 }
 
 void BitmapFontBase::dump() const {
-    Zeal::EqGame::print_chat("drop_shadow: %d, outlined: %d, align_bottom: %d",
-        drop_shadow, outlined, align_bottom);
+    Zeal::EqGame::print_chat("drop_shadow: %d, offset_factor: %.3f, outlined: %d, align_bottom: %d",
+        drop_shadow, shadow_offset_factor, outlined, align_bottom);
     Zeal::EqGame::print_chat("line_spacing: %f, default_character: %c",
         line_spacing, default_character);
 

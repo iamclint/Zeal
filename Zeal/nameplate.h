@@ -50,7 +50,8 @@ public:
 	ZealSetting<bool> setting_attack_only = { false, "Zeal", "NameplateAttackOnly", false };
 	ZealSetting<bool> setting_inline_guild = { false, "Zeal", "NameplateInlineGuild", false };
 	
-	ZealSetting<bool> setting_extended_nameplate = { true, "Zeal", "NameplateExtended", false, [this](bool& val) { mem::write<BYTE>(0x4B0B3D, val ? 0 : 1); }, true };
+	ZealSetting<bool> setting_extended_nameplate = { true, "Zeal", "NameplateExtended", false,
+		[this](bool& val) { mem::write<BYTE>(0x4B0B3D, val ? 0 : 1); }, true };
 
 	// Advanced fonts
 	ZealSetting<bool> setting_health_bars = { false, "Zeal", "NameplateHealthBars", false };
@@ -60,6 +61,8 @@ public:
 		[this](bool val) { clean_ui(); } };
 	ZealSetting<bool> setting_drop_shadow = { false, "Zeal", "NamePlateDropShadow", false,
 		[this](bool val) { clean_ui(); } };
+	ZealSetting<float> setting_shadow_offset_factor = { BitmapFontBase::kDefaultShadowOffsetFactor,
+		"Zeal", "NamePlateShadowOffsetFactor", false };
 	ZealSetting<std::string> setting_fontname = { std::string(BitmapFont::kDefaultFontName),
 		"Zeal", "NamePlateFontname", false, [this](std::string val) { clean_ui(); } };
 
