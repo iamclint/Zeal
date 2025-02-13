@@ -14,8 +14,8 @@ DWORD GetRandomZone()
 
 void __fastcall StartWorldDisplay(DWORD t, DWORD unused, DWORD zone_index, DWORD uhh)
 {
-	if (zone_index == 0xB9) //loading (character select)
-		zone_index = GetRandomZone();
+	if (zone_index == 0xB9 && ZealService::get_instance()->charselect->ZoneIndex.get()!=-1) //loading (character select)
+		zone_index = ZealService::get_instance()->charselect->ZoneIndex.get();
 	ZealService::get_instance()->hooks->hook_map["StartWorldDisplay"]->original(StartWorldDisplay)(t, unused, zone_index, uhh);
 }
 void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD unk1, DWORD unk2)

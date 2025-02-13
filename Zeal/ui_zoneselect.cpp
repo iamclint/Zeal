@@ -28,10 +28,7 @@ void ui_zoneselect::Hide()
 void ui_zoneselect::Show()
 {
 	if (wnd)
-	{
-		MessageBoxA(nullptr, "Show", "ZoneSelect", 0);
 		wnd->show(1, 1);
-	}
 }
 void ui_zoneselect::InitUI()
 {
@@ -50,34 +47,33 @@ void ui_zoneselect::InitUI()
 	Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_ZoneSelect_Combobox");
 	if (cmb) {
 
-		Zeal::EqStructures::EQWorldData*  tmp = (Zeal::EqStructures::EQWorldData*)(*(DWORD*)0x7F9494);
-		std::vector<std::string> zones;
+		Zeal::EqStructures::EQWorldData*  world = (Zeal::EqStructures::EQWorldData*)(*(DWORD*)0x7F9494);
+		std::vector<std::string> tmp_zones;
 		for (int i = 0;i<77;i++)
-			if (tmp->Zones[i])
-				zones.push_back(tmp->Zones[i]->name_long);
+			if (world->Zones[i])
+			{
+				zones[world->Zones[i]->name_long] = world->Zones[i]->zone_id;
+				tmp_zones.push_back(world->Zones[i]->name_long);
+			}
 		cmb->DeleteAll();
-		if (zones.size() > kMaxComboBoxItems)
-			zones.resize(kMaxComboBoxItems);
-		ZealService::get_instance()->ui->AddListItems(cmb, zones);
+		if (tmp_zones.size() > kMaxComboBoxItems)
+			tmp_zones.resize(kMaxComboBoxItems);
+		ZealService::get_instance()->ui->AddListItems(cmb, tmp_zones);
 	}
 
 	ui->AddComboCallback(wnd, "Zeal_ZoneSelect_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		if (value >= 0)
 		{
-			Zeal::EqUI::CXSTR texture_name;
-			wnd->CmbListWnd->GetItemText(&texture_name, value, 0);
-			if (texture_name.Data)
+			Zeal::EqUI::CXSTR zone_name;
+			wnd->CmbListWnd->GetItemText(&zone_name, value, 0);
+			if (zone_name.Data)
 			{
-				MessageBoxA(nullptr, texture_name.CastToCharPtr(), "Zone Select", 0);
-				//ZealService::get_instance()->target_ring->texture_name.set(std::string(texture_name));
-				texture_name.FreeRep();
+				ZealService::get_instance()->charselect->ZoneIndex.set(zones[zone_name]);
+				ZealService::get_instance()->ui->inputDialog->show("Character Select Zone", "You must reconnect to server for this setting to take affect", "OK", "", nullptr, nullptr, false);
+				zone_name.FreeRep();
 			}
 		}
 	});
-	//button1 = wnd->GetChildItem("ZealDialogButton1");
-	//button2 = wnd->GetChildItem("ZealDialogButton2");
-	//label = wnd->GetChildItem("ZealDialogMessage");
-	//input = (Zeal::EqUI::EditWnd*)wnd->GetChildItem("ZealDialogInput");
 }
 ui_zoneselect::~ui_zoneselect()
 {

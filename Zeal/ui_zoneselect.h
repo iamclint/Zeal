@@ -7,6 +7,7 @@ class ui_zoneselect
 public:
 	void Show();
 	void Hide();
+	std::unordered_map<std::string, int> zones;
 	ui_zoneselect(class ZealService* zeal, class ui_manager* mgr);
 	~ui_zoneselect();
 private:

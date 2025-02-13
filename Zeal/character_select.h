@@ -13,5 +13,6 @@ class CharacterSelect
 public:
 	CharacterSelect(class ZealService* zeal);
 	~CharacterSelect();
+	ZealSetting<int> ZoneIndex = { -1, "CharacterSelect", "ZoneIndex", false };
 };
 

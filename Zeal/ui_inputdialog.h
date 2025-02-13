@@ -6,7 +6,7 @@ using InputDialogCallback = std::function<void(std::string input)>;
 class ui_inputdialog
 {
 public:
-	bool show(const std::string& title, const std::string& message, const std::string& button1, const std::string button2, InputDialogCallback button1_callback, InputDialogCallback button2_callback, bool show_input_field = true);
+	bool show(const std::string& title, const std::string& message, const std::string& button1, const std::string button2, InputDialogCallback button1_callback = nullptr, InputDialogCallback button2_callback = nullptr, bool show_input_field = true);
 	void hide();
 	bool isVisible();
 	std::pair<InputDialogCallback, InputDialogCallback> button_callbacks;
