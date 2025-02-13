@@ -29,6 +29,8 @@ public:
     static constexpr char kManaBarValue = 3;  // ASCII '\x03' draws the mana value
     static constexpr char kStaminaBarValue = 4;  // ASCII '\x04' draws the stamina value.
 
+    static constexpr float kDefaultShadowOffsetFactor = 0.01f;
+
     // Utility method to report the available fonts.
     static std::vector<std::string> get_available_fonts();
 
@@ -48,8 +50,8 @@ public:
     RECT measure_draw_rect(const char* text, const Vec2& position) const;
     float get_line_spacing() const { return line_spacing; }
 
-    // Utilities for drop shadow effects.
-    float calculate_shadow_offset() const;
+    // Drop shadow and alignment configuration.
+    void set_shadow_offset_factor(float factor) { shadow_offset_factor = factor; }
     void set_drop_shadow(bool enable) { drop_shadow = enable; }
     void set_outlined(bool enable) { outlined = enable; }
     void set_align_bottom(bool enable) { align_bottom = enable; }
@@ -115,6 +117,9 @@ protected:
     template<typename TAction>
     void for_each_glyph(const char* text, TAction action) const;
 
+    float calculate_shadow_offset() const;
+
+    float shadow_offset_factor = kDefaultShadowOffsetFactor;
     bool drop_shadow = false;
     bool outlined = false;
     bool align_bottom = false;  // Applies only when text is queued with center flag.
