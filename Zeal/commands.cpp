@@ -35,6 +35,20 @@ void ChatCommands::print_commands()
 	Zeal::EqGame::print_chat(ss.str());
 }
 
+// This replaces the previous /camp command with a direct hook of the EverQuest::Camp() client
+// method in order to support all camping pathways (buttons, hotkeyed button, and /camp).
+static void __fastcall EverquestCamp(void* this_everquest, int unused_edx)
+{
+	// Support auto-sitting (but peek ahead to see if the /camp command is going to succeed).
+	if (Zeal::EqGame::is_in_game() && !Zeal::EqGame::EqGameInternal::IsNoSlashWndActive())
+		Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
+	if (ZealService::get_instance()->outputfile->setting_export_on_camp.get()) {
+		ZealService::get_instance()->outputfile->export_inventory();
+		ZealService::get_instance()->outputfile->export_spellbook();
+	}
+	ZealService::get_instance()->hooks->hook_map["EverquestCamp"]->original(EverquestCamp)(this_everquest, unused_edx);
+}
+
 void __fastcall InterpretCommand(int c, int unused, Zeal::EqStructures::Entity* player, const char* cmd)
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -313,16 +327,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
-	Add("/camp", {}, "Adds auto sit when attempting to camp.",
-		[](std::vector<std::string>& args) {
-			if (Zeal::EqGame::is_in_game() && !Zeal::EqGame::EqGameInternal::IsNoSlashWndActive())
-				Zeal::EqGame::get_self()->ChangeStance(Stance::Sit);
-			if (ZealService::get_instance()->outputfile->setting_export_on_camp.get()) {
-				ZealService::get_instance()->outputfile->export_inventory();
-				ZealService::get_instance()->outputfile->export_spellbook();
-			}
-			return false;
-		});
 	Add("/run", {}, "Sets run mode (toggle, on, off (walk)).",
 		[](const std::vector<std::string>& args) {
 			BYTE* run_mode = reinterpret_cast<BYTE*>(0x0079856d);
@@ -556,5 +560,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			return false;
 		});
 	zeal->hooks->Add("commands", Zeal::EqGame::EqGameInternal::fn_interpretcmd, InterpretCommand, hook_type_detour);
+	zeal->hooks->Add("EverquestCamp", 0x00530c7b, EverquestCamp, hook_type_detour);
 }
 

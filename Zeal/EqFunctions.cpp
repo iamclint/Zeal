@@ -229,9 +229,10 @@ namespace Zeal
 			}
 			return false;
 		}
-		void move_item(int a1, int slot, int a2, int a3)
+		// See EQMacEmu/common/patches/mac_limits.h namespace invslot for valid slot numbers. 0 = Cursor.
+		void move_item(int from_slot, int to_slot, int print_error, int a3)
 		{
-			reinterpret_cast<bool (__thiscall*)(int t, int a1, int slot, int a2, int a3)>(0x422b1c)(*(int*)0x63d6b4, a1, slot, a2, a3);
+			reinterpret_cast<bool (__thiscall*)(int t, int a1, int slot, int a2, int a3)>(0x422b1c)(*(int*)0x63d6b4, from_slot, to_slot, print_error, a3);
 		}
 		bool is_on_ground(Zeal::EqStructures::Entity* ent)
 		{
