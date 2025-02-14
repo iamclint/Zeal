@@ -2529,6 +2529,24 @@ namespace Zeal
 					list_wnd->SetItemText(data[r][c], r, c);
 			}
 		}
-
+		short total_spell_affects(Zeal::EqStructures::EQCHARINFO* char_info, BYTE affect_type, BYTE a3, int* per_buff_values)
+		{
+			return reinterpret_cast<short(__thiscall*)(Zeal::EqStructures::EQCHARINFO*, BYTE, BYTE, int*)>(0x4C6B6D)(char_info, affect_type, a3, per_buff_values);
+		}
+		void sit() // Using CEverquest::Sit() logic here, but without the sit/stand toggle
+		{
+			if (!Zeal::EqGame::is_in_game())
+				return;
+			Zeal::EqStructures::Entity* entity = get_self();
+			Zeal::EqStructures::EQCHARINFO* char_info = get_char_info();
+			if (!entity || !char_info)
+				return;
+			if (total_spell_affects(char_info, 31, 1, 0) != 0) // SE_Mez (31)
+				return;
+			if (entity->StandingState == Stance::NotInControl)
+				return;
+			if (char_info->StandingState == Stance::Stand || char_info->StandingState == Stance::Duck)
+				entity->ChangeStance(Stance::Sit);
+		}
 	}
 }

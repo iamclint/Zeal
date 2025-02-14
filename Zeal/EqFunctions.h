@@ -14,6 +14,7 @@
 enum Stance
 {
 	Stand = 0x64,
+	NotInControl = 0x66, // Fear, Charm, etc
 	Bind = 0x69,
 	Sit = 0x6E,
 	Duck = 0x6F,
@@ -245,5 +246,7 @@ namespace Zeal
 		enum class SortType {Ascending, Descending, Toggle};
 		void sort_list_wnd(Zeal::EqUI::ListWnd* list_wnd, int sort_column,
 			SortType sort_type = SortType::Ascending);
+		short total_spell_affects(Zeal::EqStructures::EQCHARINFO* char_info, BYTE affect_type, BYTE a3, int* per_buff_values);
+		void sit();
 	}
 }
