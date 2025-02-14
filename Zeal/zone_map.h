@@ -244,6 +244,7 @@ private:
 	void update_succor_label();
 	int get_zlevel_scale() const;
 	bool is_zlevel_change() const;
+	void set_window_title(const char* title = nullptr);
 
 	const ZoneMapData* get_zone_map(int zone_id);
 	int find_zone_id(const std::string& zone_name) const;
