@@ -206,12 +206,6 @@ void ZealService::basic_binds()
 		}); // spellcasting auto-stand
 	}
 
-	binds_hook->replace_cmd(72, [this](int state) 
-	{
-		Zeal::EqGame::sit();
-		return false;
-	}); // hotkey camp auto-sit
-
 	binds_hook->replace_cmd(0xC8, [this](int state) 
 	{
 		if (ZealService::get_instance()->ui->inputDialog->isVisible())

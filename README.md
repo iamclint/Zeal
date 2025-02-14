@@ -18,6 +18,7 @@ from the repo using github actions, providing full transparency on the contents.
 - Third party tool support (silent log messages, direct ZealPipes)
 - Integrated map (see In-game Map section below)
 - Various client bug fixes and patches (fix crashes and helm graphical glitches, skill window sorting, etc)
+- Autosit on camp (with option to export inventory and spellbook files)
 
 ### Installation
 #### The easy way
@@ -243,9 +244,6 @@ ___
 
 - `/sit`
   - **Description:** The /sit command now accepts "on" as an argument. Using "/sit on" will always make you sit, even if you are currently sitting. This matches the game's native "/sit off" which always makes you stand even if you are currently standing. The "/sit" command will continue to toggle sit/stand state if no argument is provided or if the argument provided is not on or off. Additionally, "/sit down" now works as well and will always make you sit, even if already sitting.
-
-- `/camp`
-  - **Description:** Auto sits before camping.
 
 - `/selfclickthru`
   - **Arguments:** `on`, `off`
