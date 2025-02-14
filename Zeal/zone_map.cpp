@@ -422,6 +422,10 @@ void ZoneMap::render_load_map(IDirect3DDevice8& device, const ZoneMapData& zone_
     line_vertex_buffer->Unlock();
 
     render_load_labels(device, zone_map_data);
+
+    std::string description = std::format("{0}: {1}", zone_map_data.name,
+        Zeal::EqGame::get_full_zone_name(zone_id));
+    set_window_title(description.c_str());
 }
 
 std::vector<ZoneMap::MapVertex> ZoneMap::calculate_grid_vertices(
@@ -706,7 +710,7 @@ void ZoneMap::render_markers(IDirect3DDevice8& device) {
 void ZoneMap::render_labels(IDirect3DDevice8& device) {
 
     std::string label;
-    if (show_zone_id != kInvalidZoneId) {
+    if (show_zone_id != kInvalidZoneId && !ui_is_visible() && !external_enabled) {
         const ZoneMapData* zone_map_data = get_zone_map(zone_id);
         label += (zone_map_data) ? zone_map_data->name : "Unknown";
         label += " ";
@@ -3157,11 +3161,20 @@ void ZoneMap::callback_zone() {
     if (!wnd)
         return;  // Block calls until init_ui has been called.
 
+    set_window_title();  // Reset the title to default until loaded.
     map_show_all = false;  // Disable marauders mode on a zone.
     reset_zone_state();
     if (enabled || reenable_on_zone)
         set_enabled(true, false);  // Calls ui_show() and syncs enable state.
     reenable_on_zone = false;
+}
+
+void ZoneMap::set_window_title(const char* title) {
+    title = title ? title : "Zeal Map";
+    if (wnd)
+        wnd->Text = Zeal::EqUI::CXSTR(title); // Reset to default name until loaded.
+    if (external_hwnd)
+        SetWindowTextA(external_hwnd, title);
 }
 
 void ZoneMap::release_font() {
