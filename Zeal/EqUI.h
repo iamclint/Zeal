@@ -114,12 +114,6 @@ namespace Zeal
 			/*0x118*/ LPVOID  Compare;
 			/*0x11c*/ LPVOID  Sort;
 		};
-		struct SpellGem {
-			/*0x000*/ BYTE    Unknown0000[0x168];
-			/*0x168*/ DWORD   spellicon;//same as in lucys db if this is equal to FFFFFFFF there is no spell memmed in this slot...
-			/*0x16c*/ DWORD   spellstate;// 1 = cast in progress or refreshtime not met or gem is empty 2 means we ducked or aborted cast, 0 means its ok to cast
-			/*0x170*/
-		};
 		struct pCXSTR
 		{
 			/*0x00*/   DWORD   Font;            // maybe, dont know.  04 = Window 01 = button
@@ -1032,31 +1026,67 @@ namespace Zeal
 
 		};
 
-		class SpellGemsWnd : public EQWND  // Aka CastSpellWnd in eqmac
+		// TODO: The current BasicWnd definition is not the true base class and should probably be
+		// truncated down to 0xfc bytes. Instead of refactoring all of the classes, just repeating
+		// the necessary fields and methods in SpellGemWnd to enable recast time tip functionality.
+		struct SpellGemWnd {  // Total allocated size of 0x188 bytes.
+
+			CXRect GetScreenRect()
+			{
+				return reinterpret_cast<CXRect(__thiscall*)(const SpellGemWnd*)>(0x005751C0)(this);
+			}
+			void DrawTooltipAtPoint(int left, int top)
+			{
+				reinterpret_cast<void(__thiscall*)(const SpellGemWnd*, int, int)>(0x00574800)(this, left, top);
+			}
+
+			/*0x000*/ BaseVTable* vtbl;
+			/*0x004*/ BYTE  unknown0004[0x60];  // Likely BasicWnd up to 0x0fc.
+			/*0x064*/ CXSTR ToolTipText;
+			/*0x068*/ BYTE  unknown0068[0x94];  // Likely BasicWnd up to 0x0fc.
+			/*0x0fc*/ DWORD unknown00fc;  // Set to 0 in Init().
+			/*0x100*/ DWORD unknown0100;  // Set to 0 in Init(). Enables mouse over brightness boost.
+			/*0x104*/ DWORD unknown0104;  // Set to 0 in Init().
+			/*0x108*/ DWORD fadeBackground[0x0b];   // Calculated fading background tint values from SetSpellGemTint().
+			/*0x134*/ DWORD unknown0134;         // Set to 0xff. Possibly initial fadevalues2.
+			/*0x138*/ DWORD fadeIcon[0x0a];   // Linear ramp down from 0xea to 0x18 by -0x15. Alpha values for icon.
+			/*0x160*/ DWORD spellIconOffsetX;  // Set by template parameter in constructor and SetAttributesFromSidl.
+			/*0x164*/ DWORD spellIconOffsetY;  // Set by template parameter in constructor amd SetAttributesFromSidl.
+			/*0x168*/ DWORD spellicon;  //same as in lucys db if this is equal to FFFFFFFF there is no spell memmed in this slot...
+			/*0x16c*/ DWORD spellstate;  // 1 = cast in progress or refreshtime not met or gem is empty 2 means we ducked or aborted cast, 0 means its ok to cast
+			/*0x170*/ DWORD gemTintStage;  // Index into fade values. Counts up to 10 in state 1, else down to 0 and resets state to 0 at 0.
+			/*0x174*/ void* textureIcon;  // TextureAnimation for spell icon.
+			/*0x178*/ DWORD unknown0178;  // Set to 0 in constructor.
+			/*0x17c*/ void* textureBackground;  // TextureAnimation set by template parameter in constructor. Also SetAttributesFromSidl.
+			/*0x180*/ void* textureHolder;  // Empty gem texture animation. Set in SetAttributesFromSidl.
+			/*0x184*/ void* textureHighlight;  // Set by template parameter in constructor. Also SetAttributesFromSidl. Possibly Highlight.
+		};
+
+		class CastSpellWnd : public EQWND  // Aka CastSpellWnd in eqmac
 		{
 		public:
 			static constexpr SidlScreenWndVTable* default_vtable = reinterpret_cast<SidlScreenWndVTable*>(0x005e41ac);
 
 			void Forget(int index) const
 			{
-				reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a662)(this, index);
+				reinterpret_cast<void(__thiscall*)(const CastSpellWnd*, int)>(0x40a662)(this, index);
 			}
 			void UpdateSpellGems(int index) const
 			{
-				reinterpret_cast<void(__thiscall*)(const SpellGemsWnd*, int)>(0x40a8b7)(this, index);
+				reinterpret_cast<void(__thiscall*)(const CastSpellWnd*, int)>(0x40a8b7)(this, index);
 			}
 			int WndNotification(const BasicWnd* src_wnd, int param_2, void* param_3)
 			{
-				return reinterpret_cast<int(__thiscall*)(SpellGemsWnd*, const BasicWnd*, int, void*)>
+				return reinterpret_cast<int(__thiscall*)(CastSpellWnd*, const BasicWnd*, int, void*)>
 														(0x0040a32a)(this, src_wnd, param_2, param_3);
 			}
 			void HandleSpellInfoDisplay(const BasicWnd* src_wnd)
 			{
 				reinterpret_cast<int(__thiscall*)
-										(SpellGemsWnd*, const BasicWnd*)>(0x0040a480)(this, src_wnd);
+										(CastSpellWnd*, const BasicWnd*)>(0x0040a480)(this, src_wnd);
 			}
 			/*0x134*/ BYTE Unknown0x134[0x08];
-			/*0x13C*/ SpellGem* SpellSlots[0x8];
+			/*0x13C*/ SpellGemWnd* SpellSlots[0x8];
 			/*0x15C*/ EQWND* SpellBook;
 		};
 
@@ -1093,7 +1123,7 @@ namespace Zeal
 			EQWND* CharacterCreation;  // 0x63D63C
 			EQWND* CursorAttachment;  // 0x63D640
 			EQWND* Casting;  // 0x63D644
-			SpellGemsWnd* SpellGems;  // 0x63D648
+			CastSpellWnd* SpellGems;  // 0x63D648
 			SpellBookWnd* SpellBook;  // 0x63D64C
 			EQWND* Inventory;  // 0x63D650
 			EQWND* Bank;  // 0x63D654

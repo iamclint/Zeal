@@ -17,6 +17,7 @@ public:
 	ui_buff(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_buff();
 	ZealSetting<bool> BuffTimers = { true, "Zeal", "Bufftimers", false };
+	ZealSetting<bool> RecastTimers = { false, "Zeal", "Recasttimers", false };
 private:
 
 	void InitUI();

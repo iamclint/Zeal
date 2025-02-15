@@ -267,7 +267,7 @@ static int __stdcall SpellsMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned in
 }
 
 
-static int __fastcall SpellGemWnd_HandleRButtonUp(Zeal::EqUI::SpellGem* gem, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
+static int __fastcall SpellGemWnd_HandleRButtonUp(Zeal::EqUI::SpellGemWnd* gem, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
 {
     ZealService* zeal = ZealService::get_instance();
     if (gem->spellicon == -1)

@@ -4,7 +4,6 @@
 #include "EqFunctions.h"
 #include "EqUI.h"
 #include "Zeal.h"
-#include "json.hpp"
 
 void default_empty(Zeal::EqUI::CXSTR* str, bool* override_color, ULONG* color)
 {

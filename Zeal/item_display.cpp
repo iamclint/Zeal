@@ -305,8 +305,7 @@ static int __fastcall InvSlotWnd_HandleLButtonUp(Zeal::EqUI::InvSlotWnd* wnd, in
 	return result;
 }
 
-// SpellGemsWnd is known as CastSpellWnd in eqmac.
-static int __fastcall SpellGemsWnd_WndNotification(Zeal::EqUI::SpellGemsWnd* wnd, int unused_edx, Zeal::EqUI::BasicWnd* src_wnd, int param_2, void* param_3) {
+static int __fastcall CastSpellWnd_WndNotification(Zeal::EqUI::CastSpellWnd* wnd, int unused_edx, Zeal::EqUI::BasicWnd* src_wnd, int param_2, void* param_3) {
 	// Forward all messages except for left mouse click messages with the alt key depressed.
 	if (param_2 != 1 || !Zeal::EqGame::get_wnd_manager() || !Zeal::EqGame::get_wnd_manager()->AltKeyState)
 		return wnd->WndNotification(src_wnd, param_2, param_3);
@@ -362,10 +361,10 @@ ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
 	inv_slot_wnd_vtable->HandleLButtonUp = InvSlotWnd_HandleLButtonUp;
 	mem::reset_memory_protection(inv_slot_wnd_vtable);
 
-	// Modify the Alt + Left Mouse click SetItem() related callback of SpellGemsWnd (CCastSpell).
-	auto* spell_gems_wnd_vtable = Zeal::EqUI::SpellGemsWnd::default_vtable;
+	// Modify the Alt + Left Mouse click SetItem() related callback of CastSpellWnd.
+	auto* spell_gems_wnd_vtable = Zeal::EqUI::CastSpellWnd::default_vtable;
 	mem::unprotect_memory(spell_gems_wnd_vtable, sizeof(*spell_gems_wnd_vtable));
-	spell_gems_wnd_vtable->WndNotification = SpellGemsWnd_WndNotification;
+	spell_gems_wnd_vtable->WndNotification = CastSpellWnd_WndNotification;
 	mem::reset_memory_protection(spell_gems_wnd_vtable);
 
 	// Modify the Alt + Left Mouse click SetItem() related callback of SpellBookWnd.

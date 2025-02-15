@@ -124,10 +124,58 @@ int __fastcall BuffWindow_PostDraw(Zeal::EqUI::BuffWindow* this_ptr, void* not_u
 	return result;
 }
 
+// Support for spell recast timers as tool tips.
+int __fastcall CastSpellWnd_PostDraw(Zeal::EqUI::CastSpellWnd* this_ptr, void* not_used)
+{
+	int result = ZealService::get_instance()->hooks->hook_map["CastSpellWnd_PostDraw"]
+		->original(CastSpellWnd_PostDraw)(this_ptr, not_used);
+
+	if (!ZealService::get_instance()->ui->buffs->RecastTimers.get() ||
+		Zeal::EqGame::get_wnd_manager()->AltKeyState)  // Skip if alt tooltip key is pressed.
+		return result;
+
+	auto self = Zeal::EqGame::get_self();
+	auto actor_info = self ? self->ActorInfo : nullptr;
+	auto char_info = Zeal::EqGame::get_char_info();
+	int* this_display = *(int**)Zeal::EqGame::Display;
+	if (!self || !actor_info || !char_info || !this_display)
+		return result;
+	int game_time = this_display[200 / 4];  // The client uses this display offset as a timestamp.
+
+	for (size_t i = 0; i < EQ_NUM_SPELL_GEMS; i++)
+	{
+		if (!Zeal::EqGame::Spells::IsValidSpellIndex(char_info->MemorizedSpell[i]) ||
+			actor_info->CastingSpellGemNumber == i)
+			continue;
+		if (actor_info->RecastTimeout[i] <= game_time)
+			continue;
+
+		int time_left = actor_info->RecastTimeout[i] - game_time;
+		int secs_left = (time_left + 500) / 1000;
+		if (secs_left <= 0)
+			continue;
+
+		auto time_text = (secs_left > 11) ? EQ_GetShortTickTimeString((secs_left + 5) / 6) :
+			std::format("{}s", secs_left);
+		auto gem_wnd = this_ptr->SpellSlots[i];
+		if (!gem_wnd || !gem_wnd->ToolTipText.Data)
+			continue;
+
+		std::string orig = gem_wnd->ToolTipText.Data->Text;
+		gem_wnd->ToolTipText.Set(time_text);
+		Zeal::EqUI::CXRect relativeRect = gem_wnd->GetScreenRect();
+		gem_wnd->DrawTooltipAtPoint(relativeRect.Right + 2, relativeRect.Top + 2);  // Match alt tip.
+		gem_wnd->ToolTipText.Set(orig);
+	}
+
+	return result;
+}
+
 ui_buff::ui_buff(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 {
 	zeal->hooks->Add("BuffWindow_PostDraw", 0x4095FE, BuffWindow_PostDraw, hook_type_detour);
 	zeal->hooks->Add("BuffWindow_Refresh", 0x409334, BuffWindow_Refresh, hook_type_detour);
+	zeal->hooks->Add("CastSpellWnd_PostDraw", 0x0040a2a4, CastSpellWnd_PostDraw, hook_type_detour);
 	ui = mgr;
 	//zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	//zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
