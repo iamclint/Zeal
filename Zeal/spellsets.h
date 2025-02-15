@@ -38,7 +38,7 @@ public:
 	std::map<int, Zeal::EqUI::ContextMenu*> MenuMap;
 	std::map<int, std::string> spellset_map;
 	std::vector<std::string> spellsets;
-	Zeal::EqUI::SpellGem* last_gem_clicked=0;
+	Zeal::EqUI::SpellGemWnd* last_gem_clicked=0;
 	std::vector<std::pair<int, int>> mem_buffer;
 	void handle_menu_mem(int book_index, int gem_index);
 	SpellSets(class ZealService* zeal);
