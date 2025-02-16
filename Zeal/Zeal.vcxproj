@@ -173,6 +173,7 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="helm_manager.h" />
     <ClInclude Include="music.h" />
+    <ClInclude Include="tick.h" />
     <ClInclude Include="ui_buff.h" />
     <ClInclude Include="ui_group.h" />
     <ClInclude Include="ui_inputdialog.h" />
@@ -245,6 +246,7 @@
     <ClCompile Include="floating_damage.cpp" />
     <ClCompile Include="helm_manager.cpp" />
     <ClCompile Include="music.cpp" />
+    <ClCompile Include="tick.cpp" />
     <ClCompile Include="ui_buff.cpp" />
     <ClCompile Include="ui_group.cpp" />
     <ClCompile Include="ui_inputdialog.cpp" />

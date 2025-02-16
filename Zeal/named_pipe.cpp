@@ -91,6 +91,12 @@ const std::map<int, std::string> LabelNames = {
 	{124, "Mana"},
 	{125, "MaxMana"},
 	{134, "CastingName"},
+	{135, "Buff15"},
+	{136, "Buff16"},
+	{137, "Buff17"},
+	{138, "Buff18"},
+	{139, "Buff19"},
+	{140, "Buff20"},
 };
 const std::map<int, std::string> GaugeNames = {
    {1, "HP"},
@@ -114,7 +120,8 @@ const std::map<int, std::string> GaugeNames = {
    {19, "Group3PetHP"},
    {20, "Group4PetHP"},
    {21, "Group5PetHP"},
-   {23, "ExpPerHR"}
+   {23, "ExpPerHR"},
+   {24, "ServerTick"},
 };
 
 

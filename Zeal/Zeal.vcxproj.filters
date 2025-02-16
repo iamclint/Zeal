@@ -261,6 +261,9 @@
     <ClInclude Include="assist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tick.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -445,6 +448,9 @@
     </ClCompile>
     <ClCompile Include="assist.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tick.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

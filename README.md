@@ -296,6 +296,8 @@ ___
   - **Arguments:** `colors`, `concolors`, `targetcolor`, `charselect`, `hideself`, `x`, `hideraidpets`, `showpetownername`, `targetmarker`, `targethealth`, `inlineguild`
   - **Description:** toggles nameplate modes for adjusting colors (tints) and text
 
+- `/tickreverse`
+  - **Description:** Swaps the direction of the server tick gauge.
 ___
 ### Binds
 - Cycle through nearest NPCs
@@ -358,6 +360,7 @@ ___
 ### UI
 - **Gauge EqType's**
   - `23` EXP Per Hour
+  - `24` Server tick timer
 
 - **Label EqType's**
   - `80` Mana/Max Mana
@@ -365,6 +368,12 @@ ___
   - `124` Current Mana
   - `125` Max Mana
   - `134` Spell being casted
+  - `135` Song Window Buff 1
+  - `136` Song Window Buff 2
+  - `137` Song Window Buff 3
+  - `138` Song Window Buff 4
+  - `139` Song Window Buff 5
+  - `140` Song Window Buff 6
 
 - **LootAllButton**
 - **LinkAllButton** (w/option to select either `, ` or ` | ` delimiter)
@@ -377,6 +386,16 @@ ___
 ### Zeal pipes
 - Zeal supports creating a namedpipe for streaming game updates to third party applications
 - C# example: https://github.com/OkieDan/ZealPipes
+
+---
+### Tick Timer
+
+Adds a Gauge (EQType 24) that supports drawing a server tick timer natively in the EQUI.
+
+The gauge drain/fill style can be swapped using `/tickreverse`.
+
+The tick event is also logged to the Zeal Pipe, in addition to the gauge value:
+- `{ "type": 0, "text": "Tick" }`
 
 ---
 ### Building
