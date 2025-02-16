@@ -114,6 +114,58 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 	return ZealService::get_instance()->hooks->hook_map["GetLabel"]->original(GetLabelFromEq)(EqType, str, override_color, color);
 }
 
+static int get_remaining_cast_recovery_time()
+{
+	auto self = Zeal::EqGame::get_self();
+	auto actor_info = self ? self->ActorInfo : nullptr;
+	int* this_display = *(int**)Zeal::EqGame::Display;
+	if (!self || !actor_info || !this_display)
+		return 0;
+
+	int game_time = this_display[200 / 4];  // The client uses this display offset as a timestamp.
+	if (actor_info->FizzleTimeout <= game_time)
+		return 0;  // Idle state.
+
+	int time_left = max(0, actor_info->FizzleTimeout - game_time);
+	return time_left;
+}
+
+static int get_recast_time_gauge(int index, Zeal::EqUI::CXSTR* str)
+{
+	bool invalid_index = index < 0 || index >= EQ_NUM_SPELL_GEMS;
+
+	auto self = Zeal::EqGame::get_self();
+	auto actor_info = self ? self->ActorInfo : nullptr;
+	auto char_info = Zeal::EqGame::get_char_info();
+	int* this_display = *(int**)Zeal::EqGame::Display;
+	if (invalid_index || !self || !actor_info || !char_info || !this_display) {
+		if (str) *str = Zeal::EqUI::CXSTR("0");
+		return 0;
+	}
+
+	// Empty gauge if recast timeout is < current game time or the fizzle timeout (GCD).
+	int game_time = this_display[200 / 4];  // The client uses this display offset as a timestamp.
+	int spell_id = char_info->MemorizedSpell[index];
+	if (!Zeal::EqGame::Spells::IsValidSpellIndex(spell_id) ||
+		actor_info->CastingSpellId == spell_id ||
+		actor_info->RecastTimeout[index] <= game_time ||
+		actor_info->RecastTimeout[index] <= actor_info->FizzleTimeout) {
+		if (str) *str = Zeal::EqUI::CXSTR("0");
+		return 0;
+	}
+
+	int time_left = actor_info->RecastTimeout[index] - game_time;
+	if (str) {
+		int secs_left = (time_left + 500) / 1000;
+		Zeal::EqGame::CXStr_PrintString(str, "%i", secs_left);
+	}
+
+	auto sp_mgr = Zeal::EqGame::get_spell_mgr();
+	int full_duration = sp_mgr ? sp_mgr->Spells[spell_id]->RecastTime : 0;
+	full_duration = max(1000, full_duration);  // Ensure non-zero and reasonable number.
+	return max(0, min(1000, 1000 * time_left / full_duration));
+}
+
 int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -132,6 +184,23 @@ int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 				return zeal->tick->GetTickGauge(str);
 			return 0;
 		}
+		case 25:  // Global cast recovery gauge.
+		{
+			static constexpr int kNominalMaxRecoveryTime = 2500; // In milliseconds.
+			int recovery_time = get_remaining_cast_recovery_time();
+			int value = max(0, min(1000, recovery_time * 1000 / kNominalMaxRecoveryTime));
+			Zeal::EqGame::CXStr_PrintString(str, "%i", (recovery_time + 500) / 1000);
+			return value;
+		}
+		case 26:  // Spell0 recast time.
+		case 27:  // Spell1 recast time.
+		case 28:  // Spell2 recast time.
+		case 29:  // Spell3 recast time.
+		case 30:  // Spell4 recast time.
+		case 31:  // Spell5 recast time.
+		case 32:  // Spell6 recast time.
+		case 33:  // Spell7 recast time.
+			return get_recast_time_gauge(EqType - 26, str);
 		default:
 			break;
 	}

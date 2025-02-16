@@ -145,7 +145,7 @@ int __fastcall CastSpellWnd_PostDraw(Zeal::EqUI::CastSpellWnd* this_ptr, void* n
 	for (size_t i = 0; i < EQ_NUM_SPELL_GEMS; i++)
 	{
 		if (!Zeal::EqGame::Spells::IsValidSpellIndex(char_info->MemorizedSpell[i]) ||
-			actor_info->CastingSpellGemNumber == i)
+			actor_info->CastingSpellId == char_info->MemorizedSpell[i])
 			continue;
 		if (actor_info->RecastTimeout[i] <= game_time)
 			continue;
