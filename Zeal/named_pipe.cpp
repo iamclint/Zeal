@@ -122,6 +122,15 @@ const std::map<int, std::string> GaugeNames = {
    {21, "Group5PetHP"},
    {23, "ExpPerHR"},
    {24, "ServerTick"},
+   {25, "SpellCooldown"},
+   {26, "Spell0Recast"},
+   {27, "Spell1Recast"},
+   {28, "Spell2Recast"},
+   {29, "Spell3Recast"},
+   {30, "Spell4Recast"},
+   {31, "Spell5Recast"},
+   {32, "Spell6Recast"},
+   {33, "Spell6Recast"},
 };
 
 

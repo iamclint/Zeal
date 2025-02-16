@@ -361,6 +361,8 @@ ___
 - **Gauge EqType's**
   - `23` EXP Per Hour
   - `24` Server tick timer
+  - `25` Global cast recovery countdown timer
+  - `26` to `33` Recast recovery countdown timers for spell0 - spell7
 
 - **Label EqType's**
   - `80` Mana/Max Mana
