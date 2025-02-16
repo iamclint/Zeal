@@ -126,6 +126,12 @@ int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 			float fpct = zeal->experience->exp_per_hour_pct_tot / 100.f;
 			return (int)(1000.f * fpct);
 		}
+		case 24: // Server Tick
+		{
+			if (zeal->tick)
+				return zeal->tick->GetTickGauge(str);
+			return 0;
+		}
 		default:
 			break;
 	}

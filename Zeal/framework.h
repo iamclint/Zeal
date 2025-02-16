@@ -26,6 +26,7 @@
 #include "tellwindows.h"
 #include "helm_manager.h"
 #include "music.h"
+#include "tick.h"
 // other features
 #include "NPCGive.h"
 #include "cycle_target.h"

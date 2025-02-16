@@ -18,6 +18,7 @@ namespace Zeal
             WearChange = 0x4092,
             Illusion = 0x4091,
             Assist = 0x4200,
+            Stamina = 0x4157,
         };
         struct TradeRequest_Struct {
             /*000*/	UINT16 to_id;
@@ -110,6 +111,12 @@ namespace Zeal
             /*014*/ short   unknown_void;
             /*016*/ int     size;
             /*020*/
+        };
+        struct Stamina_Struct
+        {
+            /*00*/ INT16 food;    // clamped to 0 - 32000
+            /*02*/ INT16 water;   // clamped to 0 - 32000
+            /*04*/ INT8 fatigue;  // clamped to 0 - 100
         };
     }
 }

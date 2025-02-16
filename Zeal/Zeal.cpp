@@ -74,6 +74,7 @@ ZealService::ZealService()
 	physics = std::make_shared<Physics>(this, ini.get());
 	target_ring = std::make_shared<TargetRing>(this, ini.get());
 	zone_map = std::make_shared<ZoneMap>(this, ini.get());
+	tick = std::make_shared<Tick>(this);
 
 	callbacks->AddGeneric([this]() {
 		if (Zeal::EqGame::is_in_game() && print_buffer.size())
@@ -278,6 +279,7 @@ ZealService::~ZealService()
 	binds_hook.reset();
 	labels_hook.reset();
 	looting_hook.reset();
+	tick.reset();
 	callbacks.reset();
 	helm.reset();
 	commands_hook.reset();

@@ -444,8 +444,8 @@ namespace Zeal
 			/* 0x0050 */ PVOID Unknown0050; // EqMobileEmitter*
 			/* 0x0054 */ DWORD Unknown0054;
 			/* 0x0058 */ DWORD PhysicsTimer;
-			/* 0x005C */ DWORD LastTick;
-			/* 0x0060 */ DWORD UnknownTimer3;
+			/* 0x005C */ DWORD LastTick; // Last 1000ms Tick
+			/* 0x0060 */ DWORD Last6000msTick;
 			/* 0x0064 */ DWORD UnknownTimer4;
 			/* 0x0068 */ DWORD AttackTimer;
 			/* 0x006C */ DWORD DeathTimer;
