@@ -276,32 +276,68 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
     ZealService::get_instance()->hooks->hook_map["PrintAutoSplit"]->original(PrintAutoSplit)(t, unused, data, USERCOLOR_ECHO_AUTOSPLIT, u);
 }
 
-void PrintPlayerMeleeAttack(char* buffer, const char* s1, const char* s2, const char* s3, int strlen)
+static void HandleMyHitsMode(const char* buffer, const char* s1, const char* s2, const char* s3, int damage)
 {
-    if (strcmp(s1, "backstab") == 0 ||
+    // Support re-routing special melee attacks to the special chat color index.
+    if (Zeal::EqGame::is_new_ui() && 
+        (strcmp(s1, "backstab") == 0 ||
         strcmp(s1, "kick") == 0 ||
-        strcmp(s1, "strike") == 0)
+        strcmp(s1, "strike") == 0))
     {
-        Zeal::EqGame::print_chat(CHANNEL_MYMELEESPECIAL, buffer);
+        const char* output = buffer;
+        char new_buffer[512];
+        int hitmode = Zeal::EqGame::Windows->ChatManager->MyHitsMode;
+        if (hitmode == 1) {
+            snprintf(new_buffer, sizeof(new_buffer), "%s %s for %d", s1, s2, damage);
+            output = new_buffer;
+        }
+        else if (hitmode == 2) {
+            snprintf(new_buffer, sizeof(new_buffer), "%d", damage);
+            output = new_buffer;
+        }
+        else if (hitmode != 0) {
+            if (*(int*)0x007cf1e0 == 1 && damage > -0x29)  // Straight from client code.
+                reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(buffer); // eqlog().
+            return;
+        }
+
+        Zeal::EqGame::print_chat(CHANNEL_MYMELEESPECIAL, output);  // Also handles add to log.
+        return;
     }
-    else
-    {
-        ZealService::get_instance()->hooks->hook_map["PrintPlayerMeleeAttack"]->original(PrintPlayerMeleeAttack)(buffer, s1, s2, s3, strlen);
-    }
+
+    ZealService::get_instance()->hooks->hook_map["HandleMyHitsMode"]->original(HandleMyHitsMode)(buffer, s1, s2, s3, damage);
 }
 
-void PrintOtherMeleeAttack(char* buffer, const char* s1, const char* s2, const char* s3, int strlen)
+void HandleOtherHitsOtherMode(char* buffer, const char* s1, const char* s2, const char* s3, int damage)
 {
-    if (strcmp(s1, "backstabs") == 0 ||
-        strcmp(s1, "kicks") == 0 ||
-        strcmp(s1, "strikes") == 0)
+    // Support re-routing special melee attacks to the special chat color index.
+    if (Zeal::EqGame::is_new_ui() &&
+        (strcmp(s1, "backstabs") == 0 ||
+            strcmp(s1, "kicks") == 0 ||
+            strcmp(s1, "strikes") == 0))
     {
-        Zeal::EqGame::print_chat(CHANNEL_OTHERMELEESPECIAL, buffer);
+        const char* output = buffer;
+        char new_buffer[512];
+        int hitmode = Zeal::EqGame::Windows->ChatManager->OthersHitsMode;
+        if (hitmode == 1) {
+            snprintf(new_buffer, sizeof(new_buffer), "%s %s %s for %d", s3, s1, s2, damage);
+            output = new_buffer;
+        }
+        else if (hitmode == 2) {
+            snprintf(new_buffer, sizeof(new_buffer), "%d", damage);
+            output = new_buffer;
+        }
+        else if (hitmode != 0) {
+            if (*(int*)0x007cf1e0 == 1 && damage > -0x29)  // Straight from client code.
+                reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(buffer); // eqlog().
+            return;
+        }
+
+        Zeal::EqGame::print_chat(CHANNEL_OTHERMELEESPECIAL, output);  // Also handles add to log.
+        return;
     }
-    else
-    {
-        ZealService::get_instance()->hooks->hook_map["PrintOtherMeleeAttack"]->original(PrintOtherMeleeAttack)(buffer, s1, s2, s3, strlen);
-    }
+
+    ZealService::get_instance()->hooks->hook_map["HandleOtherHitsOtherMode"]->original(HandleOtherHitsOtherMode)(buffer, s1, s2, s3, damage);
 }
 
 // Returns true if the fizzle message is not from a group member.
@@ -480,8 +516,8 @@ chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("ClearChannelMap", 0x41140C, ClearChannelMap, hook_type_detour);
     zeal->hooks->Add("ClearChannelMaps", 0x411638, ClearChannelMaps, hook_type_detour);
     zeal->hooks->Add("UpdateContextMenus", 0x412f9b, UpdateContextMenus, hook_type_detour);
-    zeal->hooks->Add("PrintPlayerMeleeAttack", 0x500f86, PrintPlayerMeleeAttack, hook_type_detour);
-    zeal->hooks->Add("PrintOtherMeleeAttack", 0x501168, PrintOtherMeleeAttack, hook_type_detour);
+    zeal->hooks->Add("HandleMyHitsMode", 0x500f86, HandleMyHitsMode, hook_type_detour);
+    zeal->hooks->Add("HandleOtherHitsOtherMode", 0x501168, HandleOtherHitsOtherMode, hook_type_detour);
 
     //Individiual Modifications
     zeal->hooks->Add("PrintSplit", 0x54755b, PrintSplit, hook_type_replace_call); //fix up money split

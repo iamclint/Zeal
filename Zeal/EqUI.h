@@ -971,6 +971,12 @@ namespace Zeal
 			/*0x088*/	int AlwaysChatHereIndex;
 			/*0x08C*/   int unknown;
 			/*0x090*/   ChatWnd* ChannelMapWnd[0x29];
+			/*0x134*/   BYTE unknown0x134[0xa4];
+			/*0x1d8*/   int MyHitsMode;
+			/*0x1dc*/   BYTE unknown0x1dc[0xc];
+			/*0x1e8*/   int OthersHitsMode;
+			/*0x1ec*/   BYTE unknown0x1ec[0xc];  
+			/*0x1f8*/  // Operator new of 0x1f8 in eqgame.exe
 		};
 
 
