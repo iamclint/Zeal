@@ -257,7 +257,7 @@ namespace Zeal
 		struct EQWorldData
 		{
 			BYTE Unknown[0x1C];
-			ZoneInfo* Zones[77];
+			ZoneInfo* Zones[225];
 		};
 		typedef struct _EQITEMCOMMONINFO
 		{

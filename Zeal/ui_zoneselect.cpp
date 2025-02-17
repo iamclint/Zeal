@@ -44,36 +44,39 @@ void ui_zoneselect::InitUI()
 		Zeal::EqGame::print_chat("Error: Failed to load %s", xml_file);
 		return;
 	}
-	Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_ZoneSelect_Combobox");
-	if (cmb) {
+	Zeal::EqUI::ListWnd* lst = (Zeal::EqUI::ListWnd*)wnd->GetChildItem("Zeal_ZoneSelect_ListBox");
+	ZealService::get_instance()->ui->AddButtonCallback(wnd, "Zeal_ZoneSelect_Apply", [this, lst](Zeal::EqUI::BasicWnd* btn) { 
+		
+		Zeal::EqUI::CXSTR _buff_zone_id;
+		lst->GetItemText(&_buff_zone_id, lst->SelectedIndex, 0);
+		int zone_id = 0;
+		std::string str_zone_id = _buff_zone_id;
+		Zeal::String::tryParse(str_zone_id, &zone_id);
+		ZealService::get_instance()->charselect->ZoneIndex.set(zone_id);
+		_buff_zone_id.FreeRep();
+		ZealService::get_instance()->ui->inputDialog->show("Character Select Zone", "You must reconnect to server for this setting to take affect", "OK", "", nullptr, nullptr, false);
+	});
+	if (lst) {
 
 		Zeal::EqStructures::EQWorldData*  world = (Zeal::EqStructures::EQWorldData*)(*(DWORD*)0x7F9494);
-		std::vector<std::string> tmp_zones;
-		for (int i = 0;i<77;i++)
+		std::vector<std::vector<std::string>> zone_list;
+		for (int i = 0; i < 225; i++)
+		{
 			if (world->Zones[i])
 			{
 				zones[world->Zones[i]->name_long] = world->Zones[i]->zone_id;
-				tmp_zones.push_back(world->Zones[i]->name_long);
-			}
-		cmb->DeleteAll();
-		if (tmp_zones.size() > kMaxComboBoxItems)
-			tmp_zones.resize(kMaxComboBoxItems);
-		ZealService::get_instance()->ui->AddListItems(cmb, tmp_zones);
-	}
-
-	ui->AddComboCallback(wnd, "Zeal_ZoneSelect_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
-		if (value >= 0)
-		{
-			Zeal::EqUI::CXSTR zone_name;
-			wnd->CmbListWnd->GetItemText(&zone_name, value, 0);
-			if (zone_name.Data)
-			{
-				ZealService::get_instance()->charselect->ZoneIndex.set(zones[zone_name]);
-				ZealService::get_instance()->ui->inputDialog->show("Character Select Zone", "You must reconnect to server for this setting to take affect", "OK", "", nullptr, nullptr, false);
-				zone_name.FreeRep();
+				if (i == ZealService::get_instance()->charselect->ZoneIndex.get())
+					lst->SelectedIndex = i;
+				zone_list.push_back({ std::to_string(world->Zones[i]->zone_id), world->Zones[i]->name_short, world->Zones[i]->name_long });
 			}
 		}
-	});
+		std::sort(zone_list.begin(), zone_list.end(), [](const std::vector<std::string>& a, const std::vector<std::string>& b) {
+			return a[2] < b[2]; // Compare second elements
+			});
+
+		lst->DeleteAll();
+		ZealService::get_instance()->ui->AddListItems(lst, zone_list);
+	}
 }
 ui_zoneselect::~ui_zoneselect()
 {
