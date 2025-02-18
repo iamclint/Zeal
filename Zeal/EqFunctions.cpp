@@ -449,6 +449,10 @@ namespace Zeal
 		{
 			return reinterpret_cast<Zeal::EqStructures::Entity * (__cdecl*)(const char* name)>(0x0050820e)(name);
 		}
+		void log(const char* data)
+		{
+			reinterpret_cast<void(__cdecl*)(const char* data)>(0x005240dc)(data);
+		}
 		void log(std::string& data)
 		{
 			reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data.c_str());
@@ -1653,15 +1657,13 @@ namespace Zeal
 			}
 			std::vector<std::string> vd = splitStringByNewLine(data);
 			for (auto& d : vd)
-				EqGameInternal::print_chat(*(int*)0x809478, 0, d.c_str(), 0, true);
+				print_chat(d.c_str());
 		}
 		void print_chat(const char* format, ...)
 		{
-
 			va_list argptr;
 			char buffer[512];
 			va_start(argptr, format);
-			//printf()
 			vsnprintf(buffer, 511, format, argptr);
 			va_end(argptr);
 			if (!is_in_game())
@@ -1670,23 +1672,6 @@ namespace Zeal
 				return;
 			}			
 			EqGameInternal::print_chat(*(int*)0x809478, 0, buffer, 0, true);
-		}
-		void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool u) {};
-
-		void print_chat_hook(const char* format, ...)
-		{
-			va_list argptr;
-			char buffer[512];
-			va_start(argptr, format);
-			//printf()
-			vsnprintf(buffer, 511, format, argptr);
-			va_end(argptr);
-			if (!is_in_game())
-			{
-				ZealService::get_instance()->print_buffer.push_back(buffer);
-				return;
-			}
-			ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(*(int*)0x809478, 0, buffer, 0, true);
 		}
 		void print_debug(const char* format, ...)
 		{

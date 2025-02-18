@@ -276,7 +276,7 @@ void __fastcall PrintAutoSplit(int t, int unused, const char* data, short color_
     ZealService::get_instance()->hooks->hook_map["PrintAutoSplit"]->original(PrintAutoSplit)(t, unused, data, USERCOLOR_ECHO_AUTOSPLIT, u);
 }
 
-static void HandleMyHitsMode(const char* buffer, const char* s1, const char* s2, const char* s3, int damage)
+static void HandleMyHitsMode(char* buffer, const char* s1, const char* s2, const char* s3, int damage)
 {
     // Support re-routing special melee attacks to the special chat color index.
     if (Zeal::EqGame::is_new_ui() && 
@@ -284,7 +284,7 @@ static void HandleMyHitsMode(const char* buffer, const char* s1, const char* s2,
         strcmp(s1, "kick") == 0 ||
         strcmp(s1, "strike") == 0))
     {
-        const char* output = buffer;
+        char* output = buffer;
         char new_buffer[512];
         int hitmode = Zeal::EqGame::Windows->ChatManager->MyHitsMode;
         if (hitmode == 1) {
@@ -295,13 +295,13 @@ static void HandleMyHitsMode(const char* buffer, const char* s1, const char* s2,
             snprintf(new_buffer, sizeof(new_buffer), "%d", damage);
             output = new_buffer;
         }
-        else if (hitmode != 0) {
-            if (*(int*)0x007cf1e0 == 1 && damage > -0x29)  // Straight from client code.
-                reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(buffer); // eqlog().
-            return;
-        }
 
-        Zeal::EqGame::print_chat(CHANNEL_MYMELEESPECIAL, output);  // Also handles add to log.
+        if (hitmode >= 0 && hitmode <= 2)  // Print with logging disabled (for abbreviated cases).
+            Zeal::EqGame::EqGameInternal::print_chat(*(int*)0x809478, 0, output, CHANNEL_MYMELEESPECIAL, false);
+
+        if (*Zeal::EqGame::is_logging_enabled && damage > -0x29)  // Comparison copied from client code.
+            Zeal::EqGame::log(buffer);
+
         return;
     }
 
@@ -316,7 +316,7 @@ void HandleOtherHitsOtherMode(char* buffer, const char* s1, const char* s2, cons
             strcmp(s1, "kicks") == 0 ||
             strcmp(s1, "strikes") == 0))
     {
-        const char* output = buffer;
+        char* output = buffer;
         char new_buffer[512];
         int hitmode = Zeal::EqGame::Windows->ChatManager->OthersHitsMode;
         if (hitmode == 1) {
@@ -327,13 +327,13 @@ void HandleOtherHitsOtherMode(char* buffer, const char* s1, const char* s2, cons
             snprintf(new_buffer, sizeof(new_buffer), "%d", damage);
             output = new_buffer;
         }
-        else if (hitmode != 0) {
-            if (*(int*)0x007cf1e0 == 1 && damage > -0x29)  // Straight from client code.
-                reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(buffer); // eqlog().
-            return;
-        }
 
-        Zeal::EqGame::print_chat(CHANNEL_OTHERMELEESPECIAL, output);  // Also handles add to log.
+        if (hitmode >= 0 && hitmode <= 2)  // Print with logging disabled (for abbreviated cases).
+            Zeal::EqGame::EqGameInternal::print_chat(*(int*)0x809478, 0, output, CHANNEL_OTHERMELEESPECIAL, false);
+
+        if (*Zeal::EqGame::is_logging_enabled && damage > -0x29)  // Comparison copied from client code.
+            Zeal::EqGame::log(buffer);
+
         return;
     }
 

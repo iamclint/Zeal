@@ -46,8 +46,9 @@ namespace Zeal
 			/*inline int fn_loadoptions = 0x536CE0;*/
 			static int fn_KeyboardPageHandleKeyboardMsg = 0x42c4fb;
 
-			static mem::function<void __fastcall(int t, int unused, const char* data, short color, bool un)> print_chat = 0x537f99;
-			//static mem::function<void __stdcall(const char* data)> log = 0x5240dc;
+			static mem::function<void __fastcall(int t, int unused, char* data, short color, bool un)> print_chat = 0x537f99;
+			static mem::function<void __fastcall(int t, int unused, char* data, int unknown)> DoPercentConvert = 0x00538110;
+			static mem::function<void __cdecl(const char* data)> eqlog = 0x005240dc;
 			static mem::function<char __stdcall(Zeal::EqStructures::Entity* viewer, Zeal::EqStructures::Entity* target)> is_invisible = 0x4afa90;  // can_target
 			static mem::function<char __fastcall(int, int, int, int, float*, float, UINT32)> get_world_visible_actor_list = 0x7f9850;
 			static mem::function<char __fastcall(int, int, int, int, float*, float, UINT32)> get_camera_location = 0x7f99d4;
@@ -169,7 +170,6 @@ namespace Zeal
 		Zeal::EqStructures::ActorLocation get_actor_location(int actor);
 		float get_target_blink_fade_factor(float speed_factor, bool auto_attack_only);  // Returns 0 to 1.0f.
 		bool is_view_actor_me();
-		void print_chat_hook(const char* format, ...);
 		void print_chat(std::string data);
 		void print_chat(const char* format, ...);
 		void print_chat(short color, const char* format, ...);
@@ -181,6 +181,7 @@ namespace Zeal
 		void set_attack_on_assist(bool enable);
 		bool can_move();
 		bool is_on_ground(Zeal::EqStructures::Entity* ent);
+		void log(const char* data);
 		void log(std::string& data);
 		Zeal::EqStructures::EQCHARINFO* get_char_info();
 		Zeal::EqStructures::Entity* get_active_corpse();

@@ -118,46 +118,38 @@ UINT32  __fastcall GetRGBAFromIndex(int t, int u, USHORT index)
     return ZealService::get_instance()->hooks->hook_map["GetRGBAFromIndex"]->original(GetRGBAFromIndex)(t, u, index);
 }
 
-
-void __fastcall PrintChat(int t, int unused, const char* data, short color_index, bool add_log)
+// Note that the client PrintChat does modify the data parameter (percent converts) so it is not
+// a const char* parameter, but we are adding internal buffer copies in this calls so that this
+// wrapper effectively treats it like it is and makes print_chat safer to use in general.
+static void __fastcall PrintChat(int t, int unused, char* data, short color_index, bool add_log)
 {
-    if (!data || strlen(data) == 0)
+    if (!data || strlen(data) == 0)  // Skip phantom prints like the client does.
         return;
-    chat* c = ZealService::get_instance()->chat_hook.get();
     ZealService::get_instance()->pipe->chat_msg(data, color_index);
 
-    std::string data_str = data; //keeping this here for future use to strip out the unique identifiers _208 in names in the commented regex below.
-    //if (data_str.length())
-    //{
-    //    data_str.erase(std::remove(data_str.begin(), data_str.end(), '#'), data_str.end());
-    //    std::regex pattern("\\b(?=\\w*)([a-zA-Z_]\\w+)(\\d{3})\\b");
-    //    data_str = std::regex_replace(data_str, pattern, "$1");
-    //    std::replace(data_str.begin(), data_str.end(), '_', ' ');
-    //}
-
-    if (c->TimeStampsStyle.get() && strlen(data) > 0) //remove phantom prints (the game also checks this, no idea why they are sending blank data in here sometimes
+    // Perform extra copies to protect unwary callers against the potential buffer size growth.
+    char buffer[2048];  // Client maximum buffer size for print chat calls.
+    const auto& timestamp_style = ZealService::get_instance()->chat_hook->TimeStampsStyle;
+    if (timestamp_style.get())
     {
-        std::string timestamp_buffer = generateTimestampedString(data_str, c->TimeStampsStyle.get() == 1);
-        timestamp_buffer.resize(2048);
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, timestamp_buffer.data(), color_index, false);
-        if (add_log)
+        std::string timestamp_buffer = generateTimestampedString(data, timestamp_style.get() == 1);
+        strncpy_s(buffer, timestamp_buffer.c_str(), sizeof(buffer));
+        ZealService::get_instance()->hooks->
+            hook_map["PrintChat"]->original(PrintChat)(t, unused, buffer, color_index, false);
+
+        if (add_log && *Zeal::EqGame::is_logging_enabled)  // Repeat without timestamping.
         {
-            reinterpret_cast<bool(__thiscall*)(int t, const char* data, int)>(0x538110)(t, data, 0); // do the percent convert for logging
-            reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data); //add to log
+            strncpy_s(buffer, data, sizeof(buffer));
+            Zeal::EqGame::EqGameInternal::DoPercentConvert(t, unused, buffer, 0);
+            Zeal::EqGame::log(buffer);
         }
     }
     else
     {
-        data_str.resize(2048);
-        ZealService::get_instance()->hooks->hook_map["PrintChat"]->original(PrintChat)(t, unused, data_str.c_str(), color_index, false);
-        if (add_log)
-        {
-            reinterpret_cast<bool(__thiscall*)(int t, const char* data, int)>(0x538110)(t, data, 0); // do the percent convert for logging
-            reinterpret_cast<void(__cdecl*)(const char* data)>(0x5240dc)(data); //add to log
-        }
+        strncpy_s(buffer, data, sizeof(buffer));
+        ZealService::get_instance()->hooks->
+            hook_map["PrintChat"]->original(PrintChat)(t, unused, buffer, color_index, add_log);
     }
-
-
 }
 
 char* __fastcall StripName(int t, int unused, char* data)
