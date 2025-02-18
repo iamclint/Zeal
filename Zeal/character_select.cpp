@@ -2,6 +2,8 @@
 #include "Zeal.h"
 #include <random>
 
+
+
 DWORD GetRandomZone()
 {
 	// Seed with a random device for better randomness
@@ -18,10 +20,14 @@ void __fastcall StartWorldDisplay(DWORD t, DWORD unused, DWORD zone_index, DWORD
 		zone_index = ZealService::get_instance()->charselect->ZoneIndex.get();
 	ZealService::get_instance()->hooks->hook_map["StartWorldDisplay"]->original(StartWorldDisplay)(t, unused, zone_index, uhh);
 }
+
 void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD unk1, DWORD unk2)
 {
 	ZealService::get_instance()->hooks->hook_map["SelectCharacter"]->original(SelectCharacter)(t, unused, unk1, unk2);
+	Vec3* SafeCoords = (Vec3*)(0x79896C);
+	*SafeCoords = ZealService::get_instance()->charselect->ZoneSafeCoords[ZealService::get_instance()->charselect->ZoneIndex.get()];
 	reinterpret_cast<void(__stdcall*)(void)>(0x4B459C)();
+
 }
 
 CharacterSelect::CharacterSelect(ZealService* zeal)

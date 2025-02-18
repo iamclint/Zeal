@@ -65,8 +65,13 @@ void ui_zoneselect::InitUI()
 			if (world->Zones[i])
 			{
 				zones[world->Zones[i]->name_long] = world->Zones[i]->zone_id;
-				if (i == ZealService::get_instance()->charselect->ZoneIndex.get())
+				if (world->Zones[i]->zone_id == ZealService::get_instance()->charselect->ZoneIndex.get())
+				{
 					lst->SelectedIndex = i;
+					Zeal::EqUI::BasicWnd* lbl = (Zeal::EqUI::BasicWnd*)wnd->GetChildItem("Zeal_ZoneSelect_CurrentZone");
+					if (lbl)
+						lbl->Text.Set(world->Zones[i]->name_long);
+				}
 				zone_list.push_back({ std::to_string(world->Zones[i]->zone_id), world->Zones[i]->name_short, world->Zones[i]->name_long });
 			}
 		}
