@@ -34,6 +34,7 @@ CharacterSelect::CharacterSelect(ZealService* zeal)
 {
 	zeal->hooks->Add("StartWorldDisplay", 0x4A849E, StartWorldDisplay, hook_type_detour);
 	zeal->hooks->Add("SelectCharacter", 0x40F56D, SelectCharacter, hook_type_detour);
+	mem::set(0x55B4A1, 0x90, 2); //ignore connection state for mouse wheel
 }
 CharacterSelect::~CharacterSelect()
 {
