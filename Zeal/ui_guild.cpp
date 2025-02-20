@@ -22,7 +22,8 @@ void ui_guild::InitUI()
 {
 	guild = new Zeal::EqUI::BasicWnd();
 	guild->vtbl = (Zeal::EqUI::BaseVTable*)0x5e60f0;
-	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(guild, 0, Zeal::EqUI::CXSTR("GuildManagementWnd"), -1, 0);
+	Zeal::EqUI::CXSTR name_cxstr("GuildManagementWnd");  // Constructor calls FreeRep() internally.
+	reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::BasicWnd*, Zeal::EqUI::BasicWnd*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(guild, 0, name_cxstr, -1, 0);
 	guild->CreateChildren();
 	members = (Zeal::EqUI::ListWnd*)guild->GetChildItem("MemberList");
 }
@@ -40,13 +41,10 @@ ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 
 					for (int i = 1; i < members->ItemCount; i++)
 					{
-						Zeal::EqUI::CXSTR name;
-						Zeal::EqUI::CXSTR level;
-						Zeal::EqUI::CXSTR _class;
-						members->GetItemText(&name, i, 0);
-						members->GetItemText(&level, i, 1);
-						members->GetItemText(&_class, i, 2);
-						Zeal::EqGame::print_chat("%s %s %s", name.CastToCharPtr(), level.CastToCharPtr(), _class.CastToCharPtr());
+						auto name = members->GetItemText(i, 0);
+						auto level = members->GetItemText(i, 1);
+						auto _class = members->GetItemText(i, 2);
+						Zeal::EqGame::print_chat("%s %s %s", name.c_str(), level.c_str(), _class.c_str());
 					}
 				}
 				return true;

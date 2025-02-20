@@ -1719,9 +1719,9 @@ namespace Zeal
 				return;
 			}
 			//eal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR msg, short channel)
-			Zeal::EqUI::CXSTR cxBuff = Zeal::EqUI::CXSTR(buffer);
+			Zeal::EqUI::CXSTR cxBuff(buffer);  // Callers of AddOutputText() must FreeRep().
 			reinterpret_cast<void(__thiscall*)(Zeal::EqUI::ChatWnd*, Zeal::EqUI::CXSTR msg, short channel)>(ZealService::get_instance()->hooks->hook_map["AddOutputText"]->trampoline)(wnd, cxBuff, color);
-			cxBuff.FreeRep();
+			cxBuff.FreeRep();  // Required here to match client behavior calling AddOutputText.
 		}
 		void destroy_held()
 		{
@@ -2478,7 +2478,6 @@ namespace Zeal
 
 			// Copy data into a standard 2-D structure for sorting.
 			std::vector<std::vector<std::string>> data;
-			Zeal::EqUI::CXSTR temp;
 			for (int r = 0; r < num_rows; ++r)
 			{
 				// Temporary logging / sanity check that there are equal number of columns for each row.
@@ -2489,12 +2488,8 @@ namespace Zeal
 				}
 				data.push_back(std::vector<std::string>());
 				for (int c = 0; c < num_cols; ++c)
-				{
-					list_wnd->GetItemText(&temp, r, c);
-					data[r].push_back(std::string(temp));
-				}
+					data[r].push_back(list_wnd->GetItemText(r, c));
 			}
-			temp.FreeRep();  // Need to release the temporary reference count.
 
 			bool ascending = (sort_type == SortType::Ascending) ||
 				(sort_type == SortType::Toggle &&

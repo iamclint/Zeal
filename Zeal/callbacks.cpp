@@ -271,10 +271,10 @@ void __fastcall OutputText(Zeal::EqUI::ChatWnd* wnd, int u, Zeal::EqUI::CXSTR ms
 		if (!wnd)
 			wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[0];
 
-		msg.FreeRep();
-		msg = Zeal::EqUI::CXSTR(msg_data);
+		msg.Set(msg_data);
 	}
-	zeal->hooks->hook_map["AddOutputText"]->original(OutputText)(wnd, u, msg, new_channel); //msg is freed in this function so no need to free it after
+	// Note: The top-level caller of OutputText will handle FreeRep() of msg (unlike in print_chat_wnd).
+	zeal->hooks->hook_map["AddOutputText"]->original(OutputText)(wnd, u, msg, new_channel);
 }
 
 ///*000*/	UINT16	target;

@@ -9,8 +9,8 @@ Zeal::EqUI::EQWND* ui_manager::CreateSidlScreenWnd(const std::string& name)
 {
 	Zeal::EqUI::EQWND* wnd = (Zeal::EqUI::EQWND*)HeapAlloc(*Zeal::EqGame::Heap, 0, sizeof(Zeal::EqUI::EQWND));
 	mem::set((int)wnd, 0, sizeof(Zeal::EqUI::EQWND));
-	Zeal::EqGame::EqGameInternal::CSidlScreenWndConstructor(wnd, 0, nullptr, Zeal::EqUI::CXSTR(name));
-	//reinterpret_cast<int* (__thiscall*)(Zeal::EqUI::EQWND*, Zeal::EqUI::EQWND*, Zeal::EqUI::CXSTR name, int, int)>(0x56e1e0)(wnd, 0, Zeal::EqUI::CXSTR(name), -1, 0);
+	Zeal::EqUI::CXSTR name_cxstr(name);  // Constructor calls FreeRep() internally.
+	Zeal::EqGame::EqGameInternal::CSidlScreenWndConstructor(wnd, 0, nullptr, name_cxstr);
 	wnd->SetupCustomVTable();
 	wnd->CreateChildren();
 	return wnd;
@@ -176,11 +176,8 @@ void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::s
 }
 void ui_manager::AddListItems(Zeal::EqUI::ComboWnd* wnd, const std::vector<std::string> data)
 {
-
 	for (auto & current_row : data)
-	{
 		wnd->InsertChoice(current_row);
-	}
 }
 void ui_manager::AddListItems(Zeal::EqUI::ListWnd* wnd, const std::vector<std::vector<std::string>>data)
 {
@@ -368,7 +365,7 @@ void __fastcall LoadSidlHk(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::E
 			file_path = default_file;
 
 		ui->WriteTemporaryUI(file_path, path1);
-		filename = Zeal::EqUI::CXSTR("EQUI_Zeal.xml");
+		filename.Set("EQUI_Zeal.xml");
 	}
 	ZealService::get_instance()->hooks->hook_map["LoadSidl"]->original(LoadSidlHk)(t, unused, path1, path2, filename);
 
@@ -412,14 +409,14 @@ int __fastcall XMLRead(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI:
 	std::string str_filename = filename;
 	std::string file = ui_manager::ui_path + str_filename;
 	if (std::filesystem::exists(file))
-		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
+		path1.Set(ui_manager::ui_path);
 	else
-		path1 = Zeal::EqUI::CXSTR((char*)0x63D3C0);
+		path1.Set((char*)0x63D3C0);
 
 	if (ui->AlreadyLoadedXml(filename))
 	{
-		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
-		filename = "EQUI_TMP.xml";
+		path1.Set(ui_manager::ui_path);
+		filename.Set("EQUI_TMP.xml");
 	}
 
 	return ZealService::get_instance()->hooks->hook_map["XMLRead"]->original(XMLRead)(t, unused, path1, path2, filename);
@@ -430,14 +427,14 @@ int __fastcall XMLReadNoValidate(void* t, int unused, Zeal::EqUI::CXSTR path1, Z
 	std::string str_filename = filename;
 	std::string file = ui_manager::ui_path + str_filename;
 	if (std::filesystem::exists(file))
-		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
+		path1.Set(ui_manager::ui_path);
 	else
-		path1 = Zeal::EqUI::CXSTR((char*)0x63D3C0);
+		path1.Set((char*)0x63D3C0);
 
 	if (ui->AlreadyLoadedXml(filename))
 	{
-		path1 = Zeal::EqUI::CXSTR(ui_manager::ui_path);
-		filename = "EQUI_TMP.xml";
+		path1.Set(ui_manager::ui_path);
+		filename.Set("EQUI_TMP.xml");
 	}
 
 	return ZealService::get_instance()->hooks->hook_map["XMLReadNoValidate"]->original(XMLReadNoValidate)(t, unused, path1, path2, filename);

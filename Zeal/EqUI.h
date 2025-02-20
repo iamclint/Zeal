@@ -126,11 +126,13 @@ namespace Zeal
 		struct CXSTR {
 			CXSTR() { Data = nullptr; };
 
-			CXSTR(const char* data)
+			// These constructors are explicit since currently the destructor is commented out so
+			// that any implicit construction will likely cause a reference count leak.
+			explicit CXSTR(const char* data)
 			{
 				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x575F30)(this, data);
 			}
-			CXSTR(std::string data)
+			explicit CXSTR(std::string data)
 			{
 				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x575F30)(this, data.c_str());
 			}
@@ -143,6 +145,7 @@ namespace Zeal
 			{
 				if (Data)
 					reinterpret_cast<void(__thiscall*)(const CXSTR*, pCXSTR*)>(0x575DC0)(this, Data);
+				Data = nullptr;
 			}
 			char* CastToCharPtr() const
 			{
@@ -160,6 +163,12 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const CXSTR*, const char*)>(0x576190)(this, data);
 			}
+			CXSTR& operator=(const CXSTR& other)
+			{
+				// Client operator= handles nullptrs, reference counting, and FreeRep() of old value.
+				reinterpret_cast<pCXSTR* (__thiscall*)(CXSTR*, const CXSTR*)>(0x576140)(this, &other);
+				return *this;
+			}
 			operator std::string() const {
 				const char* result = CastToCharPtr();
 				if (result)
@@ -167,6 +176,8 @@ namespace Zeal
 				else
 					return "";
 			}
+			// To enable the destructor we likely need to delete the copy constructors and rely on
+			// move operations to properly track the reference count (like across call by values).
 			//~CXSTR()
 			//{
 			//	FreeRep();
@@ -243,6 +254,7 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const BasicWnd*, int, bool)>(0x572310)(this, make_visible_flag, bring_to_top);
 			}
+		protected:  // Block external use of the CXSTR argument version to "encourage" std::string.
 			BasicWnd* GetChildItem(CXSTR name, bool log_error = true)
 			{
 				if (!log_error)
@@ -251,6 +263,13 @@ namespace Zeal
 				if (!log_error)
 					mem::write<BYTE>(0x570378, 0x75); //restore the ui error logging
 				return wnd;
+			}
+		public:
+			BasicWnd* GetChildItem(const std::string& name, bool log_error = true)
+			{
+				CXSTR name_cxstr(name);  // GetChildItem calls FreeRep() internally.
+				auto result = GetChildItem(name_cxstr, log_error);
+				return result;
 			}
 			void CreateChildren()
 			{
@@ -448,8 +467,9 @@ namespace Zeal
 			{
 				reinterpret_cast<int(__thiscall*)(const ComboWnd*)>(0x5a18e0)(this);
 			}
-			void InsertChoice(CXSTR data)
+			void InsertChoice(const std::string& text)
 			{
+				CXSTR data(text);  // InsertChoice calls FreeRep() internally.
 				reinterpret_cast<void(__thiscall*)(const ComboWnd*, CXSTR)>(0x5A1750)(this, data);
 			}
 			void SetChoice(int index)
@@ -462,11 +482,13 @@ namespace Zeal
 			ListWnd() {};
 			int AddString(std::string str)
 			{
-				return reinterpret_cast<int (__thiscall*)(const ListWnd*, CXSTR, UINT, UINT, UINT)>(0x5797A0)(this, CXSTR(str), 0xffffffff, 0, 0);
+				CXSTR str_cxstr(str);  // AddString calls FreeRep() internally.
+				return reinterpret_cast<int (__thiscall*)(const ListWnd*, CXSTR, UINT, UINT, UINT)>(0x5797A0)(this, str_cxstr, 0xffffffff, 0, 0);
 			}
 			void SetItemText(std::string str, int row, int column)
 			{
-				reinterpret_cast<void(__thiscall*)(const ListWnd*, int, int, CXSTR)>(0x579DC0)(this, row, column, CXSTR(str));
+				CXSTR str_cxstr(str);  // SetItemText calls FreeRep() internally.
+				reinterpret_cast<void(__thiscall*)(const ListWnd*, int, int, CXSTR)>(0x579DC0)(this, row, column, str_cxstr);
 			}
 			void SetItemData(int row) //not sure why this is needed
 			{
@@ -484,10 +506,20 @@ namespace Zeal
 			{
 				return reinterpret_cast<int (__thiscall*)(const ListWnd*, int)>(0x578E80)(this, row);
 			}
+			std::string GetItemText(int row, int col)
+			{
+				Zeal::EqUI::CXSTR text;
+				GetItemText(&text, row, col);
+				std::string result = std::string(text);
+				text.FreeRep();
+				return result;
+			}
+		protected:  // Allow only internal use of the CXSTR* parameter verison.
 			ListWnd* GetItemText(CXSTR* buffer, int row, int col)
 			{
 				return reinterpret_cast<ListWnd*(__thiscall*)(const ListWnd*, CXSTR*, int, int)>(0x578ed0)(this, buffer, row, col);
 			}
+		public:
 			/* 0x0114 */  BYTE Unknown0114[0x08];
 			/* 0x011c */  int  SelectedIndex;
 			// Incomplete list.
@@ -633,16 +665,18 @@ namespace Zeal
 			//{
 			//	reinterpret_cast<void(__thiscall*)(const EditWnd*, const char*, int)>(0x5a41b0)(this, data, length);
 			//}
-			void ReplaceSelection(CXSTR data, bool filter_input)
+			void ReplaceSelection(const char* data, bool filter_input)
 			{
-				reinterpret_cast<void(__thiscall*)(const EditWnd*, CXSTR, int)>(0x5a3f00)(this, data, filter_input);
+				CXSTR data_cxstr(data);  // ReplaceSelection calls FreeRep() internally.
+				reinterpret_cast<void(__thiscall*)(const EditWnd*, CXSTR, int)>(0x5a3f00)(this, data_cxstr, filter_input);
 			}
 			int GetInputLength()
 			{
 				return this->InputText.Data->Length - (this->item_link_count * 9);
 			}
-			void SetText(CXSTR data)
+			void SetText(const std::string& text)
 			{
+				CXSTR data(text);  // SetText calls FreeRep() internally.
 				reinterpret_cast<void(__thiscall*)(const EditWnd*, CXSTR)>(0x5a3d00)(this, data);
 			}
 			void AddItemTag(int item_id, const char* name)
@@ -724,8 +758,8 @@ namespace Zeal
 
 		struct CTextureFont
 		{
-			int DrawWrappedText(CXSTR str, CXRect rect1, CXRect rect2, unsigned long color, unsigned short unk1, int unk2) const {
-
+			int DrawWrappedText(const char* text, CXRect rect1, CXRect rect2, unsigned long color, unsigned short unk1, int unk2) const {
+				CXSTR str(text);  // DrawWrappedText calls FreeRep() internally.
 				return reinterpret_cast<int(__thiscall*)(const CTextureFont*, CXSTR, int, int , int, CXRect, unsigned long, unsigned short, int)>(0x5A4970)(this, str, rect1.Top, rect1.Left, rect1.Right, rect2, color, unk1, unk2);
 			}
 			int GetHeight() { return reinterpret_cast<int(__thiscall*)(const CTextureFont*)>(0x5A4930)(this); }
@@ -813,8 +847,11 @@ namespace Zeal
 			{
 				reinterpret_cast<void(__thiscall*)(const ContextMenu*, int, bool)>(0x579f90)(this, index, toggle);
 			}
-			int AddMenuItem(CXSTR data, int index, bool disp_activated=false, bool has_children = false) const {
-				return reinterpret_cast<int(__thiscall*)(const ContextMenu*, CXSTR, int, bool)>(0x417910)(this, data, has_children ? index | 0x80000000 : index, disp_activated);
+			int AddMenuItem(const std::string& data, int index, bool disp_activated = false, bool has_children = false) const {
+				CXSTR data_cxstr(data);  // AddMenuItem calls FreeRep() internally.
+				int result = reinterpret_cast<int(__thiscall*)(const ContextMenu*, CXSTR, int, bool)>(0x417910)
+					(this, data_cxstr, has_children ? index | 0x80000000 : index, disp_activated);
+				return result;
 			}
 			void SetItemColor(int index, ARGBCOLOR color)
 			{
