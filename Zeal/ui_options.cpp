@@ -362,14 +362,8 @@ void ui_options::InitFloatingDamage()
 		});
 	ui->AddComboCallback(wnd, "Zeal_FloatingFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		std::string font_name("");
-		if (value >= 0) {
-			Zeal::EqUI::CXSTR selected_name;
-			wnd->CmbListWnd->GetItemText(&selected_name, value, 0);
-			if (selected_name.Data) {
-				font_name = std::string(selected_name);
-				selected_name.FreeRep();
-			}
-		}
+		if (value >= 0)
+			font_name = wnd->CmbListWnd->GetItemText(value, 0);
 		ZealService::get_instance()->floating_damage->bitmap_font_filename.set(font_name);
 		});
 }
@@ -433,14 +427,8 @@ void ui_options::InitMap()
 
 	ui->AddComboCallback(wnd, "Zeal_MapFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		std::string font_name("");
-		if (value > 0) {  // Note: Assuming first value is the default, which "" selects anyways.
-			Zeal::EqUI::CXSTR selected_name;
-			wnd->CmbListWnd->GetItemText(&selected_name, value, 0);
-			if (selected_name.Data) {
-				font_name = std::string(selected_name);
-				selected_name.FreeRep();
-			}
-		}
+		if (value > 0)  // Note: Assuming first value is the default, which "" selects anyways.
+			font_name = wnd->CmbListWnd->GetItemText(value, 0);
     	ZealService::get_instance()->zone_map->set_font(font_name);
 		});
 
@@ -492,20 +480,11 @@ void ui_options::InitTargetRing()
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingColor", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->target_ring->target_color.set(wnd->Checked); });
 	
 	ui->AddComboCallback(wnd, "Zeal_TargetRingTexture_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
+		std::string texture_name("None");
 		if (value >= 0)
-		{
-			Zeal::EqUI::CXSTR texture_name;
-			wnd->CmbListWnd->GetItemText(&texture_name, value, 0);
-			if (texture_name.Data)
-			{
-				ZealService::get_instance()->target_ring->texture_name.set(std::string(texture_name));
-				texture_name.FreeRep();
-			}
-		}
-		else
-		{
-			ZealService::get_instance()->target_ring->texture_name.set("None");
-		}
+			texture_name = wnd->CmbListWnd->GetItemText(value, 0);
+
+		ZealService::get_instance()->target_ring->texture_name.set(texture_name);
 	});
 	
 	ui->AddSliderCallback(wnd, "Zeal_TargetRingFlash_Slider", [this](Zeal::EqUI::SliderWnd* wnd, int value) {
@@ -569,14 +548,8 @@ void ui_options::InitNameplate()
 
 	ui->AddComboCallback(wnd, "Zeal_NameplateFont_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		std::string font_name("");
-		if (value >= 0) {
-			Zeal::EqUI::CXSTR selected_name;
-			wnd->CmbListWnd->GetItemText(&selected_name, value, 0);
-			if (selected_name.Data) {
-				font_name = std::string(selected_name);
-				selected_name.FreeRep();
-			}
-		}
+		if (value >= 0)
+			font_name = wnd->CmbListWnd->GetItemText(value, 0);
 		ZealService::get_instance()->nameplate->setting_fontname.set(font_name);
 		});
 }
@@ -787,13 +760,9 @@ int ui_options::FindComboIndex(std::string combobox, std::string text_value) {
 
 	int value = 0;
 	for (int value = 0; value < kMaxComboBoxItems; ++value) {
-		Zeal::EqUI::CXSTR selected_name;
-		cmb->CmbListWnd->GetItemText(&selected_name, value, 0);  // Assumption: value > rows is safe.
-		if (!selected_name.Data)
+		auto value_label = cmb->CmbListWnd->GetItemText(value, 0);  // Assumption: value > rows is safe.
+		if (value_label.empty())
 			return -1;  // End of list.
-
-		std::string value_label = std::string(selected_name);
-		selected_name.FreeRep();
 		if (Zeal::String::compare_insensitive(value_label, text_value))
 			return value;
 	}

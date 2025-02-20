@@ -35,7 +35,7 @@ void ItemDisplay::InitUI()
 
 		// Set up independent ini settings for these new windows and reload using the new name.
 		new_wnd->EnableINIStorage = 0x19;  // Magic value to use the INIStorageName.
-		new_wnd->INIStorageName = Zeal::EqUI::CXSTR(std::format("ZealItemDisplay{}", i).c_str());
+		new_wnd->INIStorageName.Set(std::format("ZealItemDisplay{}", i));
 		auto vtable = static_cast<Zeal::EqUI::ItemDisplayVTable*>(new_wnd->vtbl);
 		auto load_ini = reinterpret_cast<void(__fastcall*)(Zeal::EqUI::ItemDisplayWnd*, int unused)>(vtable->LoadIniInfo);
 		load_ini(new_wnd, 0);
@@ -127,8 +127,7 @@ static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructure
 	// Split the existing text into separate lines, release it, and then update line by line.
 	const std::string stml_line_break = "<BR>";
 	auto strings = Zeal::String::split_text(std::string(wnd->DisplayText), stml_line_break);
-	wnd->DisplayText.FreeRep();
-	wnd->DisplayText = Zeal::EqUI::CXSTR("");
+	wnd->DisplayText.Set("");
 	for (auto& s : strings) {
 		// Perform partial iteminfo filtering in combination with substrings.
 		if (item->Type == 0 && item->Common.Skill != 0x14 && item->Common.IsStackable > 1 &&

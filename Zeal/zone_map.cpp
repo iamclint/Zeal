@@ -3172,7 +3172,7 @@ void ZoneMap::callback_zone() {
 void ZoneMap::set_window_title(const char* title) {
     title = title ? title : "Zeal Map";
     if (wnd)
-        wnd->Text = Zeal::EqUI::CXSTR(title); // Reset to default name until loaded.
+        wnd->Text.Set(title);
     if (external_hwnd)
         SetWindowTextA(external_hwnd, title);
 }

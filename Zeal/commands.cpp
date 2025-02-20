@@ -388,6 +388,14 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::print_chat("Process HeapValidate: %s", heap_valid1 ? "Pass" : "Fail");
 				int heap_valid2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
 				Zeal::EqGame::print_chat("Game HeapValidate: %s", heap_valid2 ? "Pass" : "Fail");
+
+				HEAP_SUMMARY heap_summary;
+				memset(&heap_summary, 0, sizeof(heap_summary));
+				heap_summary.cb = sizeof(heap_summary);
+				HeapSummary(*Zeal::EqGame::Heap, 0, &heap_summary);
+				Zeal::EqGame::print_chat("Game Heap: Alloc: 0x%08x, Commit: 0x%08x",
+					heap_summary.cbAllocated, heap_summary.cbCommitted);
+
 				return true;
 			}
 			if (args.size() == 3 && args[1] == "get_command")

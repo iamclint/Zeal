@@ -361,8 +361,7 @@ static bool handle_tell_tab_completion(Zeal::EqUI::EditWnd* active_edit, int mod
         {
             const char* end_space = strcmp(prefix, "/consent") ? " " : "";
             std::string updated_text = prefix_with_space + matches.front() + end_space;
-            active_edit->InputText.FreeRep();
-            active_edit->InputText = Zeal::EqUI::CXSTR(updated_text);
+            active_edit->InputText.Set(updated_text);
             active_edit->Caret_End = active_edit->GetInputLength();
             active_edit->Caret_Start = active_edit->Caret_End;
         }
@@ -433,8 +432,7 @@ static bool handle_command_tab_completion(Zeal::EqUI::EditWnd* active_edit, int 
     else  // Update the text with the first match in the list.
     {
         std::string updated_text = prefix.empty() ? matches.front() : prefix;
-        active_edit->InputText.FreeRep();
-        active_edit->InputText = Zeal::EqUI::CXSTR(updated_text);
+        active_edit->InputText.Set(updated_text);
         active_edit->Caret_End = active_edit->GetInputLength();
         active_edit->Caret_Start = active_edit->Caret_End;
     }

@@ -150,10 +150,7 @@ int32_t __fastcall AddMenu(int this_, int u, Zeal::EqUI::ContextMenu* menu)
     cf->ZealMenu = InitializeMenu();
 
     for (auto& ec : cf->Extended_ChannelMaps)
-    {
-        Zeal::EqUI::CXSTR cstr(ec.name);
-        cf->ZealMenu->AddMenuItem(cstr, ec.channelMap);
-    }
+        cf->ZealMenu->AddMenuItem(ec.name, ec.channelMap);
     cf->menuIndex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(cf->ZealMenu);
 
     menu->AddMenuItem("Zeal", cf->menuIndex, true, true);

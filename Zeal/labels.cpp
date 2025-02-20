@@ -139,7 +139,8 @@ static int get_recast_time_gauge(int index, Zeal::EqUI::CXSTR* str)
 	auto char_info = Zeal::EqGame::get_char_info();
 	int* this_display = *(int**)Zeal::EqGame::Display;
 	if (invalid_index || !self || !actor_info || !char_info || !this_display) {
-		if (str) *str = Zeal::EqUI::CXSTR("0");
+		if (str)
+			str->Set("0");
 		return 0;
 	}
 
@@ -150,7 +151,8 @@ static int get_recast_time_gauge(int index, Zeal::EqUI::CXSTR* str)
 		actor_info->CastingSpellId == spell_id ||
 		actor_info->RecastTimeout[index] <= game_time ||
 		actor_info->RecastTimeout[index] <= actor_info->FizzleTimeout) {
-		if (str) *str = Zeal::EqUI::CXSTR("0");
+		if (str)
+			str->Set("0");
 		return 0;
 	}
 
@@ -219,8 +221,7 @@ int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 			if (group_info->is_in_group() && strcmp(str->CastToCharPtr(), group_info->LeaderName) == 0)
 			{
 				std::string name = std::string(*str) + "*";
-				str->FreeRep();
-				*str = Zeal::EqUI::CXSTR(name.c_str());
+				str->Set(name.c_str());
 			}
 		}
 		break;
@@ -296,8 +297,10 @@ labels::labels(ZealService* zeal)
 				bool override = false;
 				ULONG color = 0;
 				GetLabelFromEq(i, (Zeal::EqUI::CXSTR*)&tmp, &override, &color);
-				if (tmp.Data)
+				if (tmp.Data) {
 					Zeal::EqGame::print_chat("label: %i value: %s", i, tmp.CastToCharPtr());
+					tmp.FreeRep();
+				}
 			}
 			return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
 		});
