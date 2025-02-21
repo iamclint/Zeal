@@ -389,7 +389,7 @@ bool looting::is_trade_protected(Zeal::EqUI::TradeWnd* wnd) const
 	// Then just check all items versus the protected list (also checks for non-empty bags).
 	const int kNpcTradeSize = 4;
 	for (int i = 0; i < kNpcTradeSize; ++i)  {
-		const auto item_info = wnd->Item[i];
+		const auto item_info = wnd->GiveItems[i];
 		if (item_info && is_item_protected_from_selling(item_info))
 			return true;  // The call above emits the blocked message.
 	}

@@ -197,20 +197,10 @@ ChatCommands::ChatCommands(ZealService* zeal)
 		[](std::vector<std::string>& args) {
 			if (args.size() == 1)
 			{
-				if ((Zeal::EqGame::Windows->Trade->IsVisible || Zeal::EqGame::Windows->Give->IsVisible) && Zeal::EqGame::get_char_info()->CursorItem)
+				if (Zeal::EqGame::Windows->Trade->IsVisible || Zeal::EqGame::Windows->Give->IsVisible)
 				{
-					int trade_size = 4;
-					int ptr1 = *(int*)0x7f94c8;
-					if (*(BYTE*)(ptr1 + 0xa8) == 0)
-						trade_size = 8;
-					for (int i = 0; i < trade_size; i++) //look for an empty slot
-					{
-						if (!Zeal::EqGame::Windows->Trade->Item[i])
-						{
-							Zeal::EqGame::move_item(0, i + 0xbb8, 0, 1); //move item
-							break;
-						}
-					}
+					// Disabled the auto-drop from the cursor since it needs more work (see /singlegive notes).
+					Zeal::EqGame::print_chat("Trade window already open");
 				}
 				else
 				{

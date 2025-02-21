@@ -3,6 +3,7 @@
 #include "EqAddresses.h"
 #include "EqFunctions.h"
 #include "Zeal.h"
+#include "string_util.h"
 
 
 void __fastcall QtyPickupItem(int cquantitywnd, int unused)
@@ -17,31 +18,47 @@ static bool is_give_or_trade_window_active()
         (Zeal::EqGame::Windows->Trade && Zeal::EqGame::Windows->Trade->IsVisible);
 }
 
-static Zeal::EqUI::ContainerWnd* get_active_tradeskill_container()
+static Zeal::EqUI::ContainerWnd* get_active_tradeskill_container(int bag_index)
 {
-    // Tradeskill combine containers are just a differently labeled "worldbag". To detect if one
-    // is open, we just search the titles of all active tables to see if it contains any of
-    // the substrings below.
-    // Note: The EQITEMCONTAINERINFO::Combine field maps to the EqPacket::Combine_Struct::worldobjecttype
-    // field, and that field is used to check versus race and class so it is another possible check.
-    static std::vector<std::string> craftbags = { "Pottery Wheel", "Medicine Bag", "Mixing Bowl",
-            "Oven", "Sewing Kit", "Forge", "Fletching Kit", "Brew Barrel", "Jeweler's Kit", "Kiln" };
+    // Scan the open container windows for tradeskill ones.
+    static int kFirstCombineType = 9;  // Types < 7 are bags.
 
+    // If a world container is open, focus on that only.
     auto container_mgr = Zeal::EqGame::Windows->ContainerMgr;
     if (!container_mgr)
         return nullptr;
 
+    if (container_mgr->pWorldItems)
+    {
+        // Return the world window if open, combinable, and visible.
+        if (container_mgr->pWorldItems->Container.IsOpen && 
+            container_mgr->pWorldItems->Container.Combine >= kFirstCombineType)
+            for (int i = 0; i < 0x11; ++i)
+            {
+                auto wnd = container_mgr->pPCContainers[i];
+                if (wnd->pContainerInfo == container_mgr->pWorldItems)
+                    return (wnd->IsVisible) ? wnd : nullptr;
+            }
+        return nullptr;
+    }
+
+    // World container isn't open. Check for the /singleclick bag <target #>
+    if (bag_index < 1 || bag_index > 8)
+        return nullptr;
+
+    auto char_info = Zeal::EqGame::get_char_info();
+    if (!char_info)
+        return nullptr;
+    auto item_info = char_info->InventoryPackItem[bag_index - 1];
+
+    Zeal::EqUI::ContainerWnd* inventory_bag = nullptr;
     for (int i = 0; i < 0x11; ++i)
     {
         auto wnd = container_mgr->pPCContainers[i];
-        if (!wnd || !wnd->IsVisible || !wnd->pContainerInfo)  // Note: ItemInfo.Type != 1 for some reason.
-            continue;
-        const char* name = wnd->pLabel->Text.CastToCharPtr();
-        if (!name)
-            continue;
-        if (std::find_if(craftbags.begin(), craftbags.end(),
-            [name](const std::string& craft) {return std::string(name).find(craft) != std::string::npos; })
-            != craftbags.end())
+        if (wnd && wnd->IsVisible && wnd->pContainerInfo &&
+            wnd->pContainerInfo == item_info &&
+            wnd->pContainerInfo->Container.IsOpen &&
+            wnd->pContainerInfo->Container.Combine >= kFirstCombineType)
             return wnd;
     }
     return nullptr;
@@ -49,8 +66,9 @@ static Zeal::EqUI::ContainerWnd* get_active_tradeskill_container()
 
 void NPCGive::HandleItemPickup()
 {
-    if (setting_enable_give.get() &&
-        (is_give_or_trade_window_active() || get_active_tradeskill_container()))
+    if (setting_enable_give.get() && Zeal::EqGame::is_new_ui() &&
+        (Zeal::EqGame::KeyMods->Shift || Zeal::EqGame::KeyMods->Ctrl) &&
+        (is_give_or_trade_window_active() || get_active_tradeskill_container(bag_index)))
         wait_cursor_item = true;
 }
 
@@ -62,32 +80,45 @@ void NPCGive::tick()
     wait_cursor_item = false;  // Only make a single attempt whenever set.
 
     // Must be a non-container item on the cursor and still be in the game.
-    if (!Zeal::EqGame::get_char_info() ||
-        !Zeal::EqGame::get_char_info()->CursorItem || 
-        Zeal::EqGame::get_char_info()->CursorItem->Type != 0 ||
+    auto char_info = Zeal::EqGame::get_char_info();
+    if (!char_info || !char_info->CursorItem || char_info->CursorItem->Type != 0 ||
+        char_info->CursorItem->NoDrop == 0 ||  // Extra filtering.
         !Zeal::EqGame::is_in_game())
         return;
 
     if (ZealService::get_instance()->looting_hook->is_item_protected_from_selling(
-        Zeal::EqGame::get_char_info()->CursorItem))
+        char_info->CursorItem))
     {
         Zeal::EqGame::print_chat("Zeal disabled the single click move to trade or craft");
         return;
     }
 
-    // First check for the NPC give and trade windows as highest priority.
+    // If the give/trade window is open, that is the only possible destination.
     if (is_give_or_trade_window_active())
     {
         auto trade_target = *reinterpret_cast<Zeal::EqStructures::Entity**>(0x007f94c8);
-        if (!trade_target || !Zeal::EqGame::Windows->Trade)
-            return;   // Should have one, but just bail if not.
+        if (!trade_target || !Zeal::EqGame::Windows->Trade) 
+            return;   // Needs a clear target and the trade window to be available for xfer.
+
+        // TODO: We are disabling singleclick into player trade windows until more logic is added.
+        // The client path goes through DropItemIntoTrade() that calls methods like CanDrop() and
+        // UpdateTradeDisplay().
+        if (trade_target->Type != Zeal::EqEnums::NPC)  // No trading to corpses either.
+            return;
+
+        if ((trade_target->Type == Zeal::EqEnums::NPC &&
+            (!Zeal::EqGame::Windows->Give || !Zeal::EqGame::Windows->Give->IsVisible))
+            || (trade_target->Type == Zeal::EqEnums::Player && !Zeal::EqGame::Windows->Trade->IsVisible))
+            return;  // Need clear destination with expected window.
 
         const int trade_size = (trade_target->Type == Zeal::EqEnums::Player) ? 8 : 4;
         for (int i = 0; i < trade_size; i++) // Look for an empty slot.
-        {
-            if (!Zeal::EqGame::Windows->Trade->Item[i])
+        {   // Both Give and Trade windows use the Trade window slots.
+            if (!Zeal::EqGame::Windows->Trade->GiveItems[i])
             {
                 Zeal::EqGame::move_item(0, i + 0xbb8, 0, 1);  // Put in first free slot.
+                // TODO: For players need to call UpdateTradeDisplay() and reset accept status.
+                // Possibly also should be adjusting the cursor visibility based on success.
                 break;
             }
         }
@@ -95,9 +126,9 @@ void NPCGive::tick()
     }
 
     // Next check if there is a tradeskill container window open that can accept the item.
-    auto wnd = get_active_tradeskill_container();
-    if (!wnd || !wnd->pContainerInfo ||  // Note: Trade station ItemInfo.Type != 1 for some reason.
-        wnd->pContainerInfo->Container.SizeCapacity < Zeal::EqGame::get_char_info()->CursorItem->Size)
+    auto wnd = get_active_tradeskill_container(bag_index);
+    if (!wnd || !wnd->pContainerInfo ||
+        wnd->pContainerInfo->Container.SizeCapacity < char_info->CursorItem->Size)
         return;
 
     const int num_slots = wnd->pContainerInfo->Container.Capacity;
@@ -106,7 +137,7 @@ void NPCGive::tick()
         auto invslot = wnd->pSlotWnds[i];
         if (invslot->invSlot && !invslot->invSlot->Item)
         {
-            Zeal::EqGame::move_item(0, i + 4000, 0, 1);  // Put in free slot of world bag (4000).
+            Zeal::EqGame::move_item(0, invslot->SlotID, 0, 1);
             break;
         }
     }
@@ -119,8 +150,19 @@ NPCGive::NPCGive(ZealService* zeal, IO_ini* ini)
     zeal->commands_hook->Add("/singleclick", {},
         "Toggles on and off the single click auto-transfer of stackable items to open give, trade, or crafting windows.",
         [this](std::vector<std::string>& args) {
-            setting_enable_give.toggle();
-            Zeal::EqGame::print_chat("Single click give: %s", setting_enable_give.get() ? "ON" : "OFF");
+            int value = 0;
+            if (args.size() == 1) {
+                setting_enable_give.toggle();
+                Zeal::EqGame::print_chat("Single click give: %s", setting_enable_give.get() ? "ON" : "OFF");
+            }
+            else if (args.size() == 3 && args[1] == "bag" && Zeal::String::tryParse(args[2], &value))
+            {
+                bag_index = value;
+                Zeal::EqGame::print_chat("Single click bag index set to %d", bag_index);
+            }
+            else {
+                Zeal::EqGame::print_chat("Usage: /singleclick to toggle, /singleclick bag # (1-8, 0 disables)");
+            }
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
 }

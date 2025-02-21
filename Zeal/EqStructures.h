@@ -299,15 +299,15 @@ namespace Zeal
 			/* 0x0164 */ WORD BardValue;  // Bard Skill Amount (instrument modifier)
 			/* 0x0166 */ BYTE Unknown0166[18];  // Total item struct size looks like 0x178.
 		} EQITEMCOMMONINFO, * PEQITEMCOMMONINFO;
-		typedef struct _EQITEMCONTAINERINFO
+		typedef struct _EQITEMCONTAINERINFO  // EQ_Container class.
 		{
 			/* 0x00E4 */ struct _EQITEMINFO* Item[EQ_NUM_CONTAINER_SLOTS];
-			/* 0x010C */ BYTE Combine;
+			/* 0x010C */ BYTE Combine;  // Type. 0-7 are bags, 9+ support combines.
 			/* 0x010D */ BYTE Capacity; // num slots
 			/* 0x010E */ BYTE IsOpen;
 			/* 0x010F */ BYTE SizeCapacity;
 			/* 0x0110 */ BYTE WeightReduction; // percent
-			/* ...... */
+			/* 0x0111 */ BYTE Unknown0111[3];  // Operator new of 0x114 bytes.
 		} EQITEMCONTAINERINFO, * PEQITEMCONTAINERINFO;
 		typedef struct _EQITEMBOOKINFO
 		{

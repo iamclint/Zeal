@@ -208,7 +208,12 @@ ___
   - **Description:** Shows you your current loot lockouts on Quarm.
 
 - `/singleclick`
-  - **Description:** Toggles on and off the single click auto-transfer of stackable items to open give, trade, or crafting windows.
+  - **Arguments:** none, `bag #` where 0 disables and 1-8 sets inventory bag #
+  - **Description:** Toggles on and off the single click auto-transfer of stackable items to open
+    give, trade, or crafting windows. It only activates when either ctrl or shift are held down.
+    The `bag #` sets the target tradeskill inventory target if no world trade/tradeskill windows
+    are open. Set # to zero to disable (default). The # is not a persistent setting (clears on camp).
+  - **Example:** `/singleclick bag 2` will set inventory slot bag 2 (1-8) as the target.
 
 - `/zealcam`
   - **Aliases:** `/smoothing`
