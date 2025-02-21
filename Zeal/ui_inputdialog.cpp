@@ -25,12 +25,12 @@ bool ui_inputdialog::show(const std::string& title, const std::string& message, 
 	if (button1)
 	{
 		button1->IsVisible = button1_name.length()>0;
-		button1->Text = button1_name;
+		button1->Text.Set(button1_name);
 	}
 	if (button2)
 	{
 		button2->IsVisible = button2_name.length() > 0;
-		button2->Text = button2_name;
+		button2->Text.Set(button2_name);
 	}
 
 	if (label)
