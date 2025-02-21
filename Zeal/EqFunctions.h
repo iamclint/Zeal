@@ -243,6 +243,7 @@ namespace Zeal
 		void print_raid_ungrouped();
 		void dump_raid_state();
 		std::string generateTimestamp();
+		int get_effect_required_level(Zeal::EqStructures::EQITEMINFO* item);
 		bool use_item(int item_index, bool quiet = false);
 		enum class SortType {Ascending, Descending, Toggle};
 		void sort_list_wnd(Zeal::EqUI::ListWnd* list_wnd, int sort_column,

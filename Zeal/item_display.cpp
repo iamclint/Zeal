@@ -130,18 +130,54 @@ static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructure
 	wnd->DisplayText.Set("");
 	for (auto& s : strings) {
 		// Perform partial iteminfo filtering in combination with substrings.
-		if (item->Type == 0 && item->Common.Skill != 0x14 && item->Common.IsStackable > 1 &&
-			item->Common.IsStackable < 5)
+		if (item->Type == 0 && item->Common.Skill != 0x14 && item->Common.IsStackable > 1 && item->Common.IsStackable < 5)
 		{
-			if (item->Common.IsStackableEx == 0 && s.find(" (Combat)") != std::string::npos)
+			// Items with Clicky/Proc/Worn Spells
+			if (item->Common.IsStackableEx >= Zeal::EqEnums::ItemEffectCombatProc && item->Common.IsStackableEx <= Zeal::EqEnums::ItemEffectCanEquipClick
+				&& item->Common.SpellIdEx > 0 && item->Common.SpellIdEx < 4000)
 			{
-				size_t end = s.find(" (Combat)");
-				s = std::string("Combat ") + s.substr(0, end) + " (Required level: "
-					+ std::to_string(item->Common.CastingLevel) + ")";
-			}
-			else if (item->Common.IsStackableEx == 2 && s.find("Effect: Haste (Worn)") != std::string::npos)
-			{
-				s = std::string("Effect: Haste: +") + std::to_string(item->Common.CastingLevel + 1) + "%";
+				int effect_level_req = Zeal::EqGame::get_effect_required_level(item);
+
+				if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCombatProc && s.find(" (Combat)") != std::string::npos)
+				{
+					// Combat Effect: Spell Name (Level 10)
+					s = std::string("Combat ") + s.substr(0, s.find(" (Combat)"));
+					if (effect_level_req > 1)
+					{
+						s += " (Level ";
+						s += std::to_string(effect_level_req);
+						s += ")";
+					}
+				}
+				else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectWorn && s.find("Effect: Haste (Worn)") != std::string::npos)
+				{
+					s = std::string("Effect: Haste: +") + std::to_string(item->Common.CastingLevel + 1) + "%";
+				}
+				else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectClick && s.find("Casting Time:") != std::string::npos)
+				{
+					if (effect_level_req > 1)
+					{
+						std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
+						s = s.insert(s.find("Casting Time:"), effect_level_str);
+					}
+				}
+				else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectMustEquipClick && s.find("(Must Equip") != std::string::npos)
+				{
+					if (effect_level_req > 1)
+					{
+						std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
+						s = s.insert(s.find("(Must Equip") + 1, effect_level_str);
+					}
+				}
+				else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCanEquipClick && s.find("Casting Time:") != std::string::npos)
+				{
+					if (effect_level_req > 1)
+					{
+						std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
+						s = s.insert(s.find("Casting Time:"), effect_level_str);
+					}
+					s = s.insert(s.find("Casting Time:"), "Can Equip. ");
+				}
 			}
 		}
 		if (item->Type == 0 && item->Common.Skill == 0x14 && s.starts_with("Class: "))

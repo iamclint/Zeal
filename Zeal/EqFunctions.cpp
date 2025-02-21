@@ -1763,6 +1763,25 @@ namespace Zeal
 			oss << std::put_time(&timeinfo, "%Y-%m-%d_%H-%M-%S");
 			return oss.str();
 		}
+		int get_effect_required_level(Zeal::EqStructures::EQITEMINFO* item)
+		{
+			if (!item || item->Type != 0)
+				return 0;
+			if (item->Common.Skill == 21 || item->Common.Skill == 42 || item->Common.Skill == 20) // potion, poison, scroll
+				return 0;
+			if (item->Common.SpellIdEx < 1 || item->Common.SpellIdEx >= 4000)
+				return 0;
+			switch (item->Common.IsStackableEx) {
+			case Zeal::EqEnums::ItemEffectCombatProc:
+			case Zeal::EqEnums::ItemEffectMustEquipClick:
+			case Zeal::EqEnums::ItemEffectCanEquipClick:
+				return item->Common.CastingLevelEx;
+			case Zeal::EqEnums::ItemEffectClick:
+			case Zeal::EqEnums::ItemEffectExpendable:
+				return 0;
+			}
+			return 0;
+		}
 		bool use_item(int item_index, bool quiet)
 		{
 			Zeal::EqStructures::EQCHARINFO* chr = Zeal::EqGame::get_char_info();
@@ -1798,8 +1817,8 @@ namespace Zeal
 			// List of checks copied from eqemu/zone/client_packet.cpp:
 			if ((item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectClick) &&
 				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectExpendable) &&
-				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectEquipClick) &&
-				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectClick2))
+				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectMustEquipClick) &&
+				(item->Common.EffectType != Zeal::EqEnums::ItemEffect::ItemEffectCanEquipClick))
 			{
 				if (!quiet)
 					Zeal::EqGame::print_chat("Item %s does not have a click effect.", item->Name);

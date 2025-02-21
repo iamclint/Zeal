@@ -221,8 +221,8 @@ namespace Zeal
 			ItemEffectClick,
 			ItemEffectWorn,
 			ItemEffectExpendable,
-			ItemEffectEquipClick,
-			ItemEffectClick2, //5		//name unknown
+			ItemEffectMustEquipClick,
+			ItemEffectCanEquipClick,
 			ItemEffectFocus,
 			ItemEffectScroll,
 			ItemEffectCount
@@ -268,9 +268,9 @@ namespace Zeal
 			/* 0x00F8 */ BYTE Light;
 			/* 0x00F9 */ BYTE AttackDelay;    // Atk Delay
 			/* 0x00FA */ BYTE Damage;         // DMG
-			/* 0x00FB */ BYTE IsStackableEx;
+			/* 0x00FB */ BYTE IsStackableEx;  // Effect Type: 0=Combat 1=ClickyAny 2=Worn 3=Expendable 4=ClickyMustEquip 5=ClickyCanEquip
 			/* 0x00FC */ BYTE Range;
-			/* 0x00FD */ BYTE Skill;
+			/* 0x00FD */ BYTE Skill;          // 21 = Expendable Potion
 			/* 0x00FE */ BYTE Magic;
 			/* 0x00FF */ BYTE CastingLevelEx;
 			/* 0x0100 */ BYTE Material; // 0=None, 1=Leather, 2=Chain, 3=Plate, 4=Silk, etc
@@ -292,9 +292,18 @@ namespace Zeal
 			/* 0x0117 */ BYTE EffectType;
 			/* 0x0118 */ WORD SpellId;
 			/* 0x011A */ BYTE Unknown0123[10];
-			/* 0x0124 */ WORD SkillModId;
-			/* 0x0126 */ INT8 SkillModPercent;
-			/* 0x0127 */ BYTE Unknown0127[59];
+			/* 0x0124 */ union
+			{
+				struct {
+					/* 0x0124 */ WORD SkillModId;
+					/* 0x0126 */ INT8 SkillModPercent;
+					/* 0x0127 */ BYTE Unknown0127;
+				} SkillMod;
+				/* 0x0124 */ int CastTime;
+			};
+			/* 0x0128 */ BYTE Unknown0128[52];
+			/* 0x015C */ DWORD Deity;
+			/* 0x0160 */ short RequiredLevel;
 			/* 0x0162 */ WORD BardType;   // Bard Skill Type (instrument type)
 			/* 0x0164 */ WORD BardValue;  // Bard Skill Amount (instrument modifier)
 			/* 0x0166 */ BYTE Unknown0166[18];  // Total item struct size looks like 0x178.
