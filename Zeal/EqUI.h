@@ -641,8 +641,22 @@ namespace Zeal
 		};
 		struct TradeWnd : public EQWND
 		{
-			/* 0x0134 */ DWORD Unk1[39];
-			/* 0x01D0 */ Zeal::EqStructures::_EQITEMINFO* Item[8];
+			/* 0x0134 */ BYTE Activated;
+			/* 0x0135 */ BYTE Unknown0135[0xb];
+			/* 0x0140 */ EQWND* HisMoneyButtons[4];
+			/* 0x0150 */ EQWND* MyMoneyButtons[4];
+			/* 0x0160 */ EQWND* TradeButton;
+			/* 0x0164 */ EQWND* CancelButton;
+			/* 0x0168 */ EQWND* HisNameLabel;
+			/* 0x016C */ EQWND* MyNameLabel;
+			/* 0x0170 */ InvSlotWnd* TradeSlots[0x10];
+			/* 0x01B0 */ DWORD  Unknown01b0[0x4];  // Probably My or Their Money slots.
+			/* 0x01C0 */ DWORD  Unknown01c0[0x4];  // Probably My or Their money slots.
+			/* 0x01D0 */ Zeal::EqStructures::_EQITEMINFO* GiveItems[8];  // My item giving array.
+			/* 0x01F0 */ Zeal::EqStructures::_EQITEMINFO* ReceiveItems[8];  // Probably their item array.
+			/* 0x0210 */ BYTE Unknown0210;  // Set to 0 in constructor. Possibly accept status.
+			/* 0x0211 */ BYTE Unknown0211;  // Set to 0 in constructor. Possibly accept status.
+			/* 0x0212 */ BYTE Unknown0212[2];  // Operator new of 0x214 bytes.
 		};
 		struct LootWnd : public EQWND
 		{
@@ -719,7 +733,7 @@ namespace Zeal
 		public:
 			/*0x000*/   DWORD pvfTable; // NOT based on CXWnd.  Contains only destructor
 			/*0x004*/   ContainerWnd* pPCContainers[0x11];  // All open containers, including World, in order of opening...
-			/*0x048**/  DWORD*   pWorldItems;            // Pointer to the contents of the world   If NULL, world container isn't open;
+			/*0x048**/  Zeal::EqStructures::EQITEMINFO* pWorldItems;  // Only EQITEMCONTAINERINFO section is valid. Pointer to world bags, crafting stations. Null if none open.
 			/*0x04c*/   DWORD Unknown0x04c;            // in the future this is ID of container in zone, starts at one (zero?) and goes up.
 			/*0x050*/   DWORD dwTimeSpentWithWorldContainerOpen;  // Cumulative counter?
 			/*0x054*/

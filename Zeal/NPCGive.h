@@ -15,6 +15,7 @@ public:
 
 private:
 	bool wait_cursor_item=false;
+	int bag_index = 0;  // /singleclick bag <#> with 1-8 valid values. 0 disables.
 	void tick();
 };
 
