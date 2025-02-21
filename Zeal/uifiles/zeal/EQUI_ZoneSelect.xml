@@ -1,13 +1,40 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <XML ID="EQInterfaceDefinitionLanguage">
   <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
+  <Label item="Zeal_ZoneSelect_CurrentZone">
+    <ScreenID>Zeal_ZoneSelect_CurrentZone</ScreenID>
+    <Font>3</Font>
+    <Text></Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <Size>
+      <CX>220</CX>
+      <CY>24</CY>
+    </Size>
+    <AlignCenter>true</AlignCenter>
+    <Location>
+      <X>4</X>
+      <Y>4</Y>
+    </Location>
+    <AutoStretch>true</AutoStretch>
+    <RelativePosition>true</RelativePosition>
+    <RightAnchorToLeft>false</RightAnchorToLeft>
+    <TopAnchorToTop>true</TopAnchorToTop>
+    <LeftAnchorToLeft>true</LeftAnchorToLeft>
+    <BottomAnchorToTop>false</BottomAnchorToTop>
+	<TopAnchorOffset>4</TopAnchorOffset>
+    <BottomAnchorOffset>4</BottomAnchorOffset>
+  </Label>
   <Listbox item="Zeal_ZoneSelect_ListBox">
     <ScreenID>Zeal_ZoneSelect_ListBox</ScreenID>
     <DrawTemplate>WDT_Inner</DrawTemplate>
     <TooltipReference>List of Zones.</TooltipReference>
     <AutoStretch>true</AutoStretch>
     <LeftAnchorOffset>4</LeftAnchorOffset>
-    <TopAnchorOffset>4</TopAnchorOffset>
+    <TopAnchorOffset>24</TopAnchorOffset>
     <RightAnchorOffset>4</RightAnchorOffset>
     <BottomAnchorOffset>44</BottomAnchorOffset>
     <TopAnchorToTop>true</TopAnchorToTop>
@@ -84,5 +111,6 @@
     <Style_Sizable>true</Style_Sizable>
     <Pieces>Zeal_ZoneSelect_ListBox</Pieces>
 	<Pieces>Zeal_ZoneSelect_Apply</Pieces>
+	<Pieces>Zeal_ZoneSelect_CurrentZone</Pieces>
   </Screen>
 </XML>
