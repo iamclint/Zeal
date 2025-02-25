@@ -18,6 +18,7 @@ public:
 	~ui_buff();
 	ZealSetting<bool> BuffTimers = { true, "Zeal", "Bufftimers", false };
 	ZealSetting<bool> RecastTimers = { false, "Zeal", "Recasttimers", false };
+	ZealSetting<bool> RecastTimersLeftAlign = { false, "Zeal", "RecasttimersLeftAlign", false };
 private:
 
 	void InitUI();
