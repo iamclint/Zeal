@@ -164,7 +164,9 @@ int __fastcall CastSpellWnd_PostDraw(Zeal::EqUI::CastSpellWnd* this_ptr, void* n
 		std::string orig = gem_wnd->ToolTipText.Data->Text;
 		gem_wnd->ToolTipText.Set(time_text);
 		Zeal::EqUI::CXRect relativeRect = gem_wnd->GetScreenRect();
-		gem_wnd->DrawTooltipAtPoint(relativeRect.Right + 2, relativeRect.Top + 2);  // Match alt tip.
+		int x = ZealService::get_instance()->ui->buffs->RecastTimersLeftAlign.get() ?
+			relativeRect.Left : relativeRect.Right;
+		gem_wnd->DrawTooltipAtPoint(x + 2, relativeRect.Top + 2);  // Match alt tip.
 		gem_wnd->ToolTipText.Set(orig);
 	}
 

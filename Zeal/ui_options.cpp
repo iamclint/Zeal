@@ -327,6 +327,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_TellWindowsHist",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->tells->SetHist(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_BuffTimers",				[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->buffs->BuffTimers.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_RecastTimers",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->buffs->RecastTimers.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_RecastTimersLeftAlign",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->buffs->RecastTimersLeftAlign.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_BrownSkeletons",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->game_patches->BrownSkeletons.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ClassicMusic",			[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->music->ClassicMusic.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SuppressMissedNotes",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->chatfilter_hook->setting_suppress_missed_notes.set(wnd->Checked); });
@@ -595,6 +596,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_RightClickToEquip", ZealService::get_instance()->equip_item_hook->Enabled.get());
 	ui->SetChecked("Zeal_BuffTimers", ZealService::get_instance()->ui->buffs->BuffTimers.get());
 	ui->SetChecked("Zeal_RecastTimers", ZealService::get_instance()->ui->buffs->RecastTimers.get());
+	ui->SetChecked("Zeal_RecastTimersLeftAlign", ZealService::get_instance()->ui->buffs->RecastTimersLeftAlign.get());
 	ui->SetChecked("Zeal_BrownSkeletons", ZealService::get_instance()->game_patches->BrownSkeletons.get());
 	ui->SetChecked("Zeal_ClassicMusic", ZealService::get_instance()->music->ClassicMusic.get());
 	ui->SetChecked("Zeal_SuppressMissedNotes", ZealService::get_instance()->chatfilter_hook->setting_suppress_missed_notes.get());
