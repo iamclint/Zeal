@@ -121,8 +121,13 @@ int handle_mouse_wheel(int delta)
 {
     CameraMods* c = ZealService::get_instance()->camera_mods.get();
     DWORD camera_view = get_camera_view();
-    DWORD character_select = *(DWORD*)0x63D5D8;
-    BYTE explore_mode = *(BYTE*)(character_select + 0x171);
+    BYTE explore_mode = 0;
+    if (Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT)
+    {
+        DWORD character_select = *(DWORD*)0x63D5D8;
+        if (character_select)
+            explore_mode = *(BYTE*)(character_select + 0x171);
+    }
     if ((explore_mode || !Zeal::EqGame::is_mouse_hovering_window()) && c->enabled.get() && (camera_view == Zeal::EqEnums::CameraView::FirstPerson || camera_view == Zeal::EqEnums::CameraView::ZealCam))
     {
         c->mouse_wheel(delta);
