@@ -2,6 +2,98 @@
 
 Summarizes notable changes to Zeal
 
+## [0.6.5] - 2025/02/27
+
+### New features:
+* Additional chat filter and color options for melee specials
+  - backstabs, kicks, strikes
+
+* New /run command that controls run versus walk mode
+    - /run (toggles), /run on, /run off (walk)
+
+* New zeal general tab option to detect /assist failures
+  - Clears current target and emits warning
+
+* New zeal general tab option to suppress fizzles messages from non-grouped casters
+
+* New /uilock command that supports on and off toggling
+  of the UI Lock state for primary game windows
+  - Bags must be open to take effect
+
+* New /lootlast command that specifies an item ID (either
+  by a direct number or using an item link) that will be looted
+  last during /lootall of your own corpse (and thus not looted
+  since /lootall leaves an item on your own corpse)
+
+* Extended /protect to also cover NPC / pet trades
+   - /protect on now blocks all trades to bankers (money, items)
+   - Item and non-empty bag protection now applies to trades to NPCs
+     and pets (value is not checked)
+
+* New nameplate options to enable mana and stamina bars
+  - Self-only for now until server provides more information to client
+  - Also added another sample font: segoeui_bold_24
+
+* Map:
+  - Added the short and long zone names to the internal and external window title bars
+  - Add map option to show raid member headings (versus triangles)
+
+* Added a new spell recast timer option in zeal general tab that adds buff timer-like
+  tooltip countdowns for each spell gem
+  - Similar text-only information to EqTypes 26-33 above but should not require xml updates
+  - Has extra option to left align the timer display instead of default location
+
+* New UI Gauges to support server tick timer and spell cast recovery times (requires XML updates)
+  - Added a new gauge (EqType 24) that shows a server synced 6 second timer tick gauge
+  - Added a new gauge (EqType 25) that shows the global cooldown (recovery) after casting
+  - Added new gauges (EqTypes 26-33) for each spell gem slot that show the recast countdown time
+
+Note: UISkin authors, if you want to hide the gauge text number, make it go offscreen
+with something like:
+```
+<TextOffsetX>-500</TextOffsetX>
+<TextOffsetY>-500</TextOffsetY>
+```
+
+* Reduced the nameplate drop shadow offset for sharper text
+  -  Added a /nameplate shadowfactor <float> to allow users to adjust the offset
+
+* Added a new /singleclick command and linked zeal general option that toggles the
+ single click automatic transfer of stacked items to an open give, trade, or crafting
+ station container window as unstacked items
+  - If ctrl+left click, transfers 1 item from stack over
+  - If shift+left click, transfers entire stack
+  - To simplify things for now, singleclick is a no-op on nodrop item stacks
+  - Note: Singleclick transfers to other players is disabled until more testing
+    is done (npcs still work for quests)
+  - Singleclick transfer to inventory tradeskill bags requires them to be explicitly
+    targeted with a /singleclick bag # command.  This is a non-persistent setting.
+    0 disables, bags 1-8. Intended for use only during intensive tradeskilling sessions.
+
+* Support auto-sit and automatic inventory / spell export across all camp pathways
+  - The camp button did not support auto-sit or exports.  Binds did not support export.
+  - Hook the common camp call so that /camp, keybind, button, and hotkeys all support
+    both auto-sit and exports
+
+* ItemDisplay windows updated to report the required level for clickies
+
+
+## Fixes and infrastructure
+* Patches to song window to support the updated eqgame.dll
+  - Add Song Window support to ui_buff
+  - Added Song Window label range to labels.cpp to avoid future conflicts
+
+* Added instruction cache flushes when modifying code
+
+* Fix: Prevent /sit while in loss of control
+
+* Fix: Designed out potential memory leaks in the CXSTR (client string) handling
+  - The refactoring cleanup should make it "harder" to leak in the future,
+
+* Fix: The /log off command has not been working properly since the print_chat
+  hook for timestamping was added. Setting /log off will now disable logging.
+
+
 ## [0.6.4] - 2025/02/04
 
 ### New features:
