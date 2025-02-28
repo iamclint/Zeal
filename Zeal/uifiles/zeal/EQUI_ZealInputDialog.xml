@@ -134,7 +134,7 @@
     <Style_Transparent>false</Style_Transparent>
     <DrawTemplate>WDT_Def2</DrawTemplate>
     <Style_Titlebar>true</Style_Titlebar>
-    <Style_Closebox>false</Style_Closebox>
+    <Style_Closebox>true</Style_Closebox>
     <Style_Minimizebox>false</Style_Minimizebox>
     <Style_Border>true</Style_Border>
     <Style_Sizable>false</Style_Sizable>

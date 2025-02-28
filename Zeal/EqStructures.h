@@ -98,6 +98,7 @@
 #define USERCOLOR_ECHO_CHAT_8           0xFF +  67 //  67 - chat 8 echo
 #define USERCOLOR_ECHO_CHAT_9           0xFF +  68 //  68 - chat 9 echo
 #define USERCOLOR_ECHO_CHAT_10          0xFF +  69 //  69 - chat 10 echo
+#define USERCOLOR_RAID_SAY              0xFF +  72 //  72 - raid say
 #define USERCOLOR_ECHO_AUTOSPLIT        0xFF +  73 
 
 constexpr WORD kInvalidSpellId = 0xffff; // spell_id used when not casting or empty spell gem
@@ -766,7 +767,9 @@ namespace Zeal
 			{
 				return reinterpret_cast<BYTE(__thiscall*)(Everquest*)>(0x54825C)(this);
 			}
-			/*0x000*/ BYTE Unknown[0x5AC];
+			/*0x000*/ BYTE Unknown0000[0x288];
+			/*0x288*/ void* ChannelServerApi; // Pointer to ChannelServerApi object.
+			/*0x28C*/ BYTE Unknown028c[0x320];
 			/*0x5AC*/ int game_state;
 		};
 

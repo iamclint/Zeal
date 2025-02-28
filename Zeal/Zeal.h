@@ -36,6 +36,7 @@ public:
 	std::shared_ptr<HelmManager> helm = nullptr;
 	std::shared_ptr<MusicManager> music = nullptr;
 	std::shared_ptr<Tick> tick = nullptr;
+	std::shared_ptr<Survey> survey = nullptr;
 
 	//other features
 	std::shared_ptr<OutputFile> outputfile = nullptr;

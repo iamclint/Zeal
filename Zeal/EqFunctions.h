@@ -145,9 +145,12 @@ namespace Zeal
 		bool CanIHitTarget(float dist);
 		bool do_attack(uint8_t type, uint8_t p2);
 		void do_inspect(Zeal::EqStructures::Entity* player);
+		void do_join(Zeal::EqStructures::Entity* player, const char* name);
+		void send_to_channel(int chat_channel_zero_based, const char* message);
 		void execute_cmd(UINT cmd, bool isdown, int unk2);
 		EqStructures::Everquest* get_eq();
 		int get_gamestate();
+		int get_channel_number(const char* name);  // Zero-based channel number.
 		void SetMusicSelection(int number, bool enabled);
 		bool is_new_ui();
 		HWND get_game_window();

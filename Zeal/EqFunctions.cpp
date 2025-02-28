@@ -1741,6 +1741,23 @@ namespace Zeal
 		{
 			return *(EqStructures::Everquest**)0x809478;
 		}
+		int get_channel_number(const char* name)  // ChannelServerApi::GetChannelNumber()
+		{
+			auto eq = get_eq();
+			if (!eq || !eq->ChannelServerApi)
+				return -1;
+			return reinterpret_cast<int(__fastcall*)(void* ChannelServerApi, int unused_edx, const char* name)>(0x0049cdaf)
+				(eq->ChannelServerApi, 0, name);
+		}
+		void do_join(Zeal::EqStructures::Entity* player, const char* name)
+		{
+			reinterpret_cast<void(__cdecl*)(Zeal::EqStructures::Entity*, const char*)>(0x00500106)
+				(player, name);
+		}
+		void send_to_channel(int chat_channel_zero_based, const char* message)
+		{
+			reinterpret_cast<void(__cdecl*)(int, const char*)>(0x00500266)(chat_channel_zero_based + 1, message);
+		}
 		void do_inspect(Zeal::EqStructures::Entity* player)
 		{
 			reinterpret_cast<void(__thiscall*)(EqStructures::Everquest*, Zeal::EqStructures::Entity*)>(0x54390E)(get_eq(), player);
