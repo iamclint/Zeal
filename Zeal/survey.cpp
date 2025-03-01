@@ -197,7 +197,7 @@ void Survey::send_response(const std::string& response)
 }
 
 // Report the accumulated results of the latest survey.
-void Survey::print_results() const
+void Survey::print_results(bool send_to_raidsay) const
 {
 	if (survey_question.empty() || survey_channel.empty()) {
 		Zeal::EqGame::print_chat("No active survey");
@@ -213,6 +213,8 @@ void Survey::print_results() const
 	// Report the counts (and initial names) of unique responses.
 	for (const auto& pair : survey_responses) {
 		int count = pair.second.size();
+		if (!count)
+			continue;  // Answer could have been changed / erased, so skip.
 		std::string names;
 		int num_names = min(25, pair.second.size());  // Limit # of names for now (buffer size < 2048).
 		for (int i = 0; i < num_names; ++i) {
@@ -220,7 +222,11 @@ void Survey::print_results() const
 			if (i < pair.second.size() - 1)
 				names += ",";
 		}
-		Zeal::EqGame::print_chat("Response: %s = %d (%s)", pair.first.c_str(), count, names.c_str());
+		std::string message = std::format("Response: {0} = {1}", pair.first, count);
+		if (send_to_raidsay)
+			Zeal::EqGame::send_raid_chat(message.c_str());
+		else
+			Zeal::EqGame::print_chat((message + " (" + names + ")").c_str());
 	}
 
 	// Create a list of all non-responding raid members.
@@ -248,10 +254,15 @@ void Survey::print_results() const
 		if (i < no_responses.size() - 1)
 			names += ",";
 	}
-	if (no_responses.empty())
-		Zeal::EqGame::print_chat("Everyone has responded");
+
+	std::string message = no_responses.empty() ? std::string("Everyone has responded") :
+		std::string("Not yet responded: ") + std::to_string(no_responses.size());
+	if (send_to_raidsay)
+		Zeal::EqGame::send_raid_chat(message.c_str());
+	else if (no_responses.empty())
+		Zeal::EqGame::print_chat(message.c_str());
 	else
-		Zeal::EqGame::print_chat("Not yet responded: %d (%s)", no_responses.size(), names.c_str());
+		Zeal::EqGame::print_chat((message + " (" + names + ")").c_str());
 }
 
 bool Survey::parse_command(const std::vector<std::string>& args)
@@ -274,11 +285,21 @@ bool Survey::parse_command(const std::vector<std::string>& args)
 				setting_response_channel.get().c_str());
 		}
 	}
-	else if (args.size() == 3 && args[1] == "response") {
-		send_response(args[2]);  // Support only single-word response for now.
+	else if (args.size() > 2 && args[1] == "response") {
+		std::string response = std::string();  // Need to stitch response with spaces back together.
+		for (size_t i = 2; i < args.size(); ++i) {
+			response += args[i];
+			if (i < args.size() - 1)
+				response += " ";
+		}
+		send_response(response);
+		ZealService::get_instance()->ui->inputDialog->hide();  // Close if open.
 	}
 	else if (args.size() == 2 && args[1] == "results") {
-		print_results();
+		print_results(false);
+	}
+	else if (args.size() == 2 && args[1] == "share") {
+		print_results(true);
 	}
 	else if (args.size() == 2 && args[1] == "on") {
 		setting_enable.set(true);
@@ -295,7 +316,7 @@ bool Survey::parse_command(const std::vector<std::string>& args)
 		Zeal::EqGame::print_chat("Usage: /survey channel <response_channel_name>");
 		Zeal::EqGame::print_chat("Usage: /survey new <question>");
 		Zeal::EqGame::print_chat("Usage: /survey response <answer>");
-		Zeal::EqGame::print_chat("Usage: /survey results");
+		Zeal::EqGame::print_chat("Usage: /survey results (local chat), /survey share (to raid)");
 	}
 	return true;
 }

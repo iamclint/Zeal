@@ -43,8 +43,10 @@ bool ui_inputdialog::show(const std::string& title, const std::string& message, 
 		input->SetText("");
 	}
 
-	wnd->show(1, input != nullptr);
-	if (input)
+	bool bring_to_top = (button1 && button1->IsVisible) || (button2 && button2->IsVisible)
+		|| (input && input->IsVisible);
+	wnd->show(1, bring_to_top);
+	if (input && input->IsVisible)
 		input->SetFocus();
 	return true;
 }

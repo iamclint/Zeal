@@ -19,7 +19,7 @@ protected:
 	void send_survey(const std::string& channel, const std::string& question);
 	void handle_start_of_survey(const std::string& channel, const std::string& question);
 	void send_response(const std::string& response);
-	void print_results() const;
+	void print_results(bool send_to_raidsay = false) const;
 	bool parse_command(const std::vector<std::string>& args);
 
 	std::string survey_channel;  // The reponse chat channel name for the most recent survey.

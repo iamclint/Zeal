@@ -216,7 +216,7 @@ ___
   - **Example:** `/singleclick bag 2` will set inventory slot bag 2 (1-8) as the target.
 
 - `/survey`
-  - **Arguments:** `on`, `off`, `channel`, `new`, `response`, `results`
+  - **Arguments:** `on`, `off`, `channel`, `new`, `response`, `results`, `share`
   - **Description:** Survey helper for polling raid groups. See /survey section below.
 
 - `/zealcam`
@@ -386,9 +386,11 @@ ___
     - Answers besides yes/no from the dialog can be sent with `/survey response <answer>`
   - Zeal monitors the survey chat channel and accumulates the responses (and snuffs all messages)
 
- `/survey results` will print the results of the poll
+`/survey results` will print the results of the poll to local chat
   - Counts up each unique response with a list of first 25 names
   - Also reports a count and list of up to 25 raid members who didn't respond
+
+`/survey share` prints the summary results (no names) to /raidsay
 
 ### Usage by non-Zeal raidmembers
 In order to participate, they can manually watch for the ZEAL_SURVEY raid messages and then
