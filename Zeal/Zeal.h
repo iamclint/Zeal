@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h"
-#define ZEAL_VERSION "0.6.5"
+#define ZEAL_VERSION "0.6.6-alpha0"
 #ifndef ZEAL_BUILD_VERSION  // Set by github actions
 #define ZEAL_BUILD_VERSION "UNOFFICIAL"  // Local build
 #endif
@@ -37,6 +37,7 @@ public:
 	std::shared_ptr<MusicManager> music = nullptr;
 	std::shared_ptr <CharacterSelect> charselect = nullptr;
 	std::shared_ptr<Tick> tick = nullptr;
+	std::shared_ptr<Survey> survey = nullptr;
 
 	//other features
 	std::shared_ptr<OutputFile> outputfile = nullptr;

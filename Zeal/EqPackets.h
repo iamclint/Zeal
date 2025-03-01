@@ -25,6 +25,16 @@ namespace Zeal
             /*002*/	UINT16 from_id;
             /*004*/
         };
+        struct ChannelMessage_Struct
+        {
+            /*000*/	char	targetname[64];		// Tell recipient
+            /*064*/	char	sender[64];			// The senders name
+            /*128*/	UINT16	language;			// Language
+            /*130*/	UINT16	chan_num;			// Channel
+            /*132*/	UINT16	unused_align132;	// struct alignment padding
+            /*134*/	UINT16	skill_in_language;	// The players skill in this language? might be wrong
+            /*136*/	char	message[1];			// Variable length message (up to 2048 bytes).
+        };
         struct CorpseDrag_Struct
         {
             /*000*/ char CorpseName[64];

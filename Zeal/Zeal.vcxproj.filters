@@ -270,6 +270,9 @@
     <ClInclude Include="tick.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="survey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -454,6 +457,9 @@
     </ClCompile>
     <ClCompile Include="character_select.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="survey.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -28,6 +28,7 @@
 #include "music.h"
 #include "tick.h"
 #include "character_select.h"
+#include "survey.h"
 // other features
 #include "NPCGive.h"
 #include "cycle_target.h"

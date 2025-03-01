@@ -79,6 +79,7 @@ ZealService::ZealService()
 	target_ring = std::make_shared<TargetRing>(this, ini.get());
 	zone_map = std::make_shared<ZoneMap>(this, ini.get());
 	tick = std::make_shared<Tick>(this);
+	survey = std::make_shared<Survey>(this);
 
 
 	callbacks->AddGeneric([this]() {
@@ -285,6 +286,7 @@ ZealService::~ZealService()
 	labels_hook.reset();
 	looting_hook.reset();
 	tick.reset();
+	survey.reset();
 	callbacks.reset();
 	helm.reset();
 	commands_hook.reset();

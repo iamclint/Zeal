@@ -234,17 +234,6 @@ void executecmd_hk(UINT cmd, bool isdown, int unk2)
 	zeal->hooks->hook_map["ExecuteCmd"]->original(executecmd_hk)(cmd, isdown, unk2);
 }
 
-void msg_new_text(char* msg)
-{
-	ZealService* zeal = ZealService::get_instance();
-	if (!Zeal::EqGame::get_self())
-	{
-	//	Zeal::EqGame::print_chat("self was null during new text");
-		return;
-	}
-	zeal->hooks->hook_map["MsgNewText"]->original(msg_new_text)(msg);
-}
-
 int __fastcall DrawWindows(int t, int u)
 {
 	CallbackTrace trace("DrawWindows");
@@ -341,7 +330,6 @@ void DeactivateMainUI()
 CallbackManager::CallbackManager(ZealService* zeal)
 {
 	zeal->hooks->Add("DrawWindows", 0x59E000, DrawWindows, hook_type_detour); //render in this hook so damage is displayed behind ui
-	zeal->hooks->Add("MsgNewText", 0x4e25a1, msg_new_text, hook_type_detour);
 	zeal->hooks->Add("ExecuteCmd", 0x54050c, executecmd_hk, hook_type_detour);
 	zeal->hooks->Add("MainLoop", 0x5473c3, main_loop_hk, hook_type_detour);
 	zeal->hooks->Add("CharSelectLoop", 0x4D54E4, charselect_loop_hk, hook_type_detour);

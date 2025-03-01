@@ -215,6 +215,10 @@ ___
     are open. Set # to zero to disable (default). The # is not a persistent setting (clears on camp).
   - **Example:** `/singleclick bag 2` will set inventory slot bag 2 (1-8) as the target.
 
+- `/survey`
+  - **Arguments:** `on`, `off`, `channel`, `new`, `response`, `results`, `share`
+  - **Description:** Survey helper for polling raid groups. See /survey section below.
+
 - `/zealcam`
   - **Aliases:** `/smoothing`
   - **Arguments:** `x y 3rdperson_x 3rdperson_y`
@@ -360,6 +364,40 @@ ___
   RingRight, Ammo
 - Can hold Shift (2nd) / Ctrl (3rd) / Shift+Ctrl (4th) to equip the item to alternate slots
   if it can be equipped in several slots in the list.
+
+## Polling of raid using /survey
+### Usage by Zeal-enabled raidmembers:
+#### Configuration:
+- All raid members should execute `/survey on` to enable (persistent setting only needed once)
+  - When on, Zeal monitors for the special survey message to enable auto channel joining & auto
+    opening of the dialog box as well as accumulate poll results.
+- The originator of questions needs to specify the response chat channel using `/survey channel <name>`
+  - The `<name>` must start with a `survey` prefix (e.g., `/survey channel survey123`)
+  - The channel name is also persistent and only needs to be set once
+  - Use a unique suffix to avoid response collisions with other /survey parties
+  
+#### Polling:
+`/survey new <question>` starts a new survey.
+  - This generates a raidsay message `ZEAL_SURVEY | <channel> | <question>` that is detected by
+    Zeal when in the raid
+  - If /survey is enabled, Zeal will join the chat channel to send the response
+  - Zeal then opens a dialog box for raid members to respond and sends the answer to the chat channel
+    as `ZEAL_RESPONSE | <answer>`
+    - Answers besides yes/no from the dialog can be sent with `/survey response <answer>`
+  - Zeal monitors the survey chat channel and accumulates the responses (and snuffs all messages)
+
+`/survey results` will print the results of the poll to local chat
+  - Counts up each unique response with a list of first 25 names
+  - Also reports a count and list of up to 25 raid members who didn't respond
+
+`/survey share` prints the summary results (no names) to /raidsay
+
+### Usage by non-Zeal raidmembers
+In order to participate, they can manually watch for the ZEAL_SURVEY raid messages and then
+manually join the chat channel and send their response by sending a message to the channel:
+`/# ZEAL_RESPONSE | <answer>` where # is the chat channel. Zeal users can share the tallied results.
+Note that the joined response chat channel will not be filtered by Zeal so it will get spammy.
+They could leave after submitting their response to avoid it.
 
 ___
 ### UI
