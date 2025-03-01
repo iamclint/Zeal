@@ -37,7 +37,6 @@ namespace Zeal
 			static int* fn_s_s3dGetWorldVisibleActorList = (int*)0x7f9850;
 			static int* fn_s_s3dGetCameraLocation = (int*)0x7f99D4;
 			static int* fn_s_t3dSetCameraLocation = (int*)0x7f9ae4;
-			static int fn_handle_mouseweheel = 0x55B2E0;
 			static int fn_handle_mouselook = 0x4DB384;
 			static int fn_initkeyboardassignments = 0x42A9D7;
 			static int fn_executecmd = 0x54050c;

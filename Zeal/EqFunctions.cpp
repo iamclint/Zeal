@@ -531,7 +531,11 @@ namespace Zeal
 		}
 		Zeal::EqStructures::Entity* get_view_actor_entity()
 		{
-			return get_view_actor()->Entity;
+			Zeal::EqStructures::ViewActor* Actor = get_view_actor();
+			if (ViewActor)
+				return Actor->Entity;
+			else
+				return nullptr;
 		}
 		const char* trim_name(const char* name)  // aka trimName in eqmac.exe
 		{
@@ -2394,6 +2398,8 @@ namespace Zeal
 		}
 		bool is_in_game()
 		{
+			if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && Zeal::EqGame::Windows->CharacterSelect->Explore) //allow most zeal features to work while in explore mode
+				return true;
 			if (get_gamestate() != -1)
 				return get_gamestate() == GAMESTATE_INGAME;
 			else

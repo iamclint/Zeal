@@ -27,6 +27,7 @@
 #include "helm_manager.h"
 #include "music.h"
 #include "tick.h"
+#include "character_select.h"
 #include "survey.h"
 // other features
 #include "NPCGive.h"

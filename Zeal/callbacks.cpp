@@ -36,6 +36,14 @@ CallbackManager::~CallbackManager()
 
 }
 
+void __fastcall charselect_loop_hk(int t, int unused)
+{
+	CallbackTrace trace("CharSelectLoop");
+	ZealService* zeal = ZealService::get_instance();
+	zeal->callbacks->invoke_generic(callback_type::CharacterSelectLoop);
+	zeal->callbacks->invoke_delayed();
+	zeal->hooks->hook_map["CharSelectLoop"]->original(charselect_loop_hk)(t, unused);
+}
 void __fastcall main_loop_hk(int t, int unused)
 {
 	CallbackTrace trace("MainLoopHook");
@@ -117,6 +125,15 @@ void __fastcall initgameui_hk(int t, int u)
 	zeal->hooks->hook_map["InitGameUI"]->original(initgameui_hk)(t, u);
 	zeal->callbacks->invoke_generic(callback_type::InitUI);
 }
+
+void __fastcall initcharselectui_hk(int t, int u)
+{
+	CallbackTrace trace("InitCharSelectUI");
+	ZealService* zeal = ZealService::get_instance();
+	zeal->hooks->hook_map["InitCharSelectUI"]->original(initcharselectui_hk)(t, u);
+	zeal->callbacks->invoke_generic(callback_type::InitCharSelectUI);
+}
+
 void __stdcall clean_up_ui()
 {
 	CallbackTrace trace("CleanUpUI");
@@ -315,6 +332,7 @@ CallbackManager::CallbackManager(ZealService* zeal)
 	zeal->hooks->Add("DrawWindows", 0x59E000, DrawWindows, hook_type_detour); //render in this hook so damage is displayed behind ui
 	zeal->hooks->Add("ExecuteCmd", 0x54050c, executecmd_hk, hook_type_detour);
 	zeal->hooks->Add("MainLoop", 0x5473c3, main_loop_hk, hook_type_detour);
+	zeal->hooks->Add("CharSelectLoop", 0x4D54E4, charselect_loop_hk, hook_type_detour);
 	zeal->hooks->Add("Render", 0x4AA8BC, render_hk, hook_type_detour);
 	HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
 	if (eqfx)
@@ -324,6 +342,7 @@ CallbackManager::CallbackManager(ZealService* zeal)
 	zeal->hooks->Add("CleanUpUI", 0x4A6EBC, clean_up_ui, hook_type_detour);
 	zeal->hooks->Add("DoCharacterSelection", 0x53b9cf, charselect_hk, hook_type_detour);
 	zeal->hooks->Add("InitGameUI", 0x4a60b5, initgameui_hk, hook_type_detour);
+	zeal->hooks->Add("InitCharSelectUI", 0x4a5f85, initcharselectui_hk, hook_type_detour);
 	zeal->hooks->Add("HandleWorldMessage", 0x4e829f, handleworldmessage_hk, hook_type_detour);
 	zeal->hooks->Add("SendMessage", 0x54e51a, send_message_hk, hook_type_detour);
 	zeal->hooks->Add("EQPlayer", 0x506802, EQPlayer, hook_type_detour);
@@ -331,4 +350,5 @@ CallbackManager::CallbackManager(ZealService* zeal)
 	zeal->hooks->Add("AddOutputText", 0x4139A2, OutputText, hook_type_detour);
 	zeal->hooks->Add("ReportSuccessfulHit", 0x5297D2, ReportSuccessfulHit, hook_type_detour);
 	zeal->hooks->Add("DeactivateMainUI", 0x4A7705, DeactivateMainUI, hook_type_detour);
+	
 }

@@ -55,6 +55,10 @@ ZealService::ZealService()
 	tells = std::make_shared<TellWindows>(this, ini.get());
 	helm = std::make_shared<HelmManager>(this);
 	music = std::make_shared<MusicManager>(this);
+	charselect = std::make_shared<CharacterSelect>(this);
+
+
+	mem_check(__LINE__);
 	entity_manager = std::make_shared<EntityManager>(this, ini.get());
 	camera_mods = std::make_shared<CameraMods>(this, ini.get());
 	cycle_target = std::make_shared<CycleTarget>(this);
@@ -76,6 +80,7 @@ ZealService::ZealService()
 	zone_map = std::make_shared<ZoneMap>(this, ini.get());
 	tick = std::make_shared<Tick>(this);
 	survey = std::make_shared<Survey>(this);
+
 
 	callbacks->AddGeneric([this]() {
 		if (Zeal::EqGame::is_in_game() && print_buffer.size())

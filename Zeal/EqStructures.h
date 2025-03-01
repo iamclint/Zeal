@@ -247,7 +247,19 @@ namespace Zeal
 			int right;
 			int left;
 		};
-
+		struct ZoneInfo
+		{
+			DWORD Unk;
+			DWORD expansion;
+			DWORD zone_id;
+			char name_short[0x81];
+			char name_long[0x80];
+		};
+		struct EQWorldData
+		{
+			BYTE Unknown[0x1C];
+			ZoneInfo* Zones[225];
+		};
 		typedef struct _EQITEMCOMMONINFO
 		{
 			/* 0x00E4 */ INT8 Strength;       // STR
@@ -396,6 +408,7 @@ namespace Zeal
 			/* 0x00EC */ struct _EQDAGCHILDREN* Children;
 			/* ...... */
 		};
+
 		struct _EQMODELINFO
 		{
 			/* 0x0000 */ BYTE Unknown0000[64];

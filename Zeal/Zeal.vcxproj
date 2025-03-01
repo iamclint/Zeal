@@ -163,6 +163,7 @@
     <ClInclude Include="assist.h" />
     <ClInclude Include="autofire.h" />
     <ClInclude Include="bitmap_font.h" />
+    <ClInclude Include="character_select.h" />
     <ClInclude Include="chatfilter.h" />
     <ClInclude Include="crash_handler.h" />
     <ClInclude Include="default_spritefont.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="ui_buff.h" />
     <ClInclude Include="ui_group.h" />
     <ClInclude Include="ui_inputdialog.h" />
+    <ClInclude Include="ui_zoneselect.h" />
     <ClInclude Include="ZealSettings.h" />
     <ClInclude Include="zone_map.h" />
     <ClInclude Include="miniz.h" />
@@ -238,6 +240,7 @@
     <ClCompile Include="assist.cpp" />
     <ClCompile Include="autofire.cpp" />
     <ClCompile Include="bitmap_font.cpp" />
+    <ClCompile Include="character_select.cpp" />
     <ClCompile Include="chatfilter.cpp" />
     <ClCompile Include="crash_handler.cpp" />
     <ClCompile Include="default_spritefont.cpp" />
@@ -252,6 +255,7 @@
     <ClCompile Include="ui_buff.cpp" />
     <ClCompile Include="ui_group.cpp" />
     <ClCompile Include="ui_inputdialog.cpp" />
+    <ClCompile Include="ui_zoneselect.cpp" />
     <ClCompile Include="zone_map.cpp" />
     <ClCompile Include="miniz.c" />
     <ClCompile Include="named_pipe.cpp" />
