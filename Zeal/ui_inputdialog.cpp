@@ -23,9 +23,16 @@ bool ui_inputdialog::show(const std::string& title, const std::string& message, 
 		return false;
 	button_callbacks = { button1_callback, button2_callback };
 	if (button1)
+	{
+		button1->IsVisible = button1_name.length()>0;
 		button1->Text.Set(button1_name);
+	}
 	if (button2)
+	{
+		button2->IsVisible = button2_name.length() > 0;
 		button2->Text.Set(button2_name);
+	}
+
 	if (label)
 		label->Text.Set(message);
 	if (wnd)
@@ -114,6 +121,7 @@ ui_inputdialog::ui_inputdialog(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
 		});
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
+	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitCharSelectUI);
 	zeal->callbacks->AddGeneric([this]() { Deactivate(); }, callback_type::DeactivateUI);
 
 	ui->AddXmlInclude("EQUI_ZealInputDialog.xml");

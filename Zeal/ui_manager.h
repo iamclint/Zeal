@@ -8,6 +8,7 @@
 #include "ui_group.h"
 #include "ui_inputdialog.h"
 #include "ui_buff.h"
+#include "ui_zoneselect.h"
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
@@ -57,6 +58,7 @@ public:
 	std::shared_ptr<ui_group> group = nullptr;
 	std::shared_ptr<ui_inputdialog> inputDialog = nullptr;
 	std::shared_ptr<ui_buff> buffs = nullptr;
+	std::shared_ptr<ui_zoneselect> zoneselect = nullptr;
 	std::vector<std::string> included_files;
 	void CreateTmpXML();
 

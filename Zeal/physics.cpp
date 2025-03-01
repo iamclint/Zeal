@@ -8,6 +8,11 @@ static float lev_fall_multiplier = 0.15f;
 
 void ProcessPhysics(Zeal::EqStructures::Entity* ent, int missile, int effect)
 {
+	if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && Zeal::EqGame::Windows->CharacterSelect->Explore)
+	{
+		ZealService::get_instance()->hooks->hook_map["ProcessPhysics"]->original(ProcessPhysics)(ent, missile, effect);
+		return;
+	}
 	if (ent && ent->ActorInfo && missile==0 && ent==Zeal::EqGame::get_self())
 	{
 		static int prev_time = Zeal::EqGame::get_eq_time();
@@ -48,6 +53,8 @@ bool Physics::can_move(short spawn_id)
 
 int __fastcall MovePlayer(int t, int u, Zeal::EqStructures::Entity* ent)
 {
+	if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && Zeal::EqGame::Windows->CharacterSelect->Explore)
+		return ZealService::get_instance()->hooks->hook_map["MovePlayer"]->original(MovePlayer)(t, u, ent);
 	if (!ent)
 		return 1;
 	if (ZealService::get_instance()->physics->can_move(ent->SpawnId))

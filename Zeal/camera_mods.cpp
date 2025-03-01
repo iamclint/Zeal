@@ -121,7 +121,14 @@ int handle_mouse_wheel(int delta)
 {
     CameraMods* c = ZealService::get_instance()->camera_mods.get();
     DWORD camera_view = get_camera_view();
-    if (!Zeal::EqGame::is_mouse_hovering_window() && c->enabled.get() &&  (camera_view == Zeal::EqEnums::CameraView::FirstPerson || camera_view == Zeal::EqEnums::CameraView::ZealCam))
+    BYTE explore_mode = 0;
+    if (Zeal::EqGame::get_gamestate() == GAMESTATE_CHARSELECT)
+    {
+        DWORD character_select = *(DWORD*)0x63D5D8;
+        if (character_select)
+            explore_mode = *(BYTE*)(character_select + 0x171);
+    }
+    if ((explore_mode || !Zeal::EqGame::is_mouse_hovering_window()) && c->enabled.get() && (camera_view == Zeal::EqEnums::CameraView::FirstPerson || camera_view == Zeal::EqEnums::CameraView::ZealCam))
     {
         c->mouse_wheel(delta);
         return 0;
@@ -582,12 +589,13 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
     fps = 0;
     height = 0;
     zeal->callbacks->AddGeneric([this]() { callback_main();  });
+    zeal->callbacks->AddGeneric([this]() { callback_main();  }, callback_type::CharacterSelectLoop);
     zeal->callbacks->AddGeneric([this]() { callback_render();  }, callback_type::Render);
     zeal->callbacks->AddGeneric([this]() { callback_endmainloop(); }, callback_type::EndMainLoop);
 
     //zeal->main_loop_hook->add_callback([this]() { callback_characterselect();  }, callback_fn::CharacterSelect);
     zeal->callbacks->AddGeneric([this]() { callback_characterselect(); }, callback_type::EndMainLoop);
-    zeal->hooks->Add("HandleMouseWheel", Zeal::EqGame::EqGameInternal::fn_handle_mouseweheel, handle_mouse_wheel, hook_type_detour);
+    zeal->hooks->Add("HandleMouseWheel", 0x55B2E0, handle_mouse_wheel, hook_type_detour);
     zeal->hooks->Add("procMouse", 0x537707, procMouse, hook_type_detour);
     zeal->hooks->Add("procRightMouse", 0x54699d, procRightMouse, hook_type_detour);
     zeal->hooks->Add("DoCamAI", 0x4db384, DoCamAI, hook_type_detour);
