@@ -13,6 +13,7 @@ public:
 	bool loot_all=false;
 	ULONGLONG loot_next_item_time = 0;
 	void looted_item();
+	void set_last_hidden_corpse(Zeal::EqStructures::Entity* corpse);
 	looting(class ZealService* zeal);
 	~looting();
 
@@ -34,9 +35,13 @@ protected:
 	};
 	bool parse_loot_last(const std::vector<std::string>& args);
 	bool parse_protect(const std::vector<std::string>& args);
-	void update_protected_item(int item_id, const std::string& name);
+	void update_protected_item(int item_id, const std::string& name, bool add_only = false);
 	void load_protected_items();
+	void unhide_last_hidden();
+
 	std::vector<ProtectedItem> protected_items;
+	Zeal::EqStructures::Entity* last_hidden_entity = nullptr;
+	int last_hidden_spawnid = 0;
 
 private:
 	int last_looted = -1;

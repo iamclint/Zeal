@@ -51,7 +51,8 @@ void ui_zoneselect::InitUI()
 		int zone_id = 0;
 		Zeal::String::tryParse(str_zone_id, &zone_id);
 		ZealService::get_instance()->charselect->ZoneIndex.set(zone_id);
-		ZealService::get_instance()->ui->inputDialog->show("Character Select Zone", "You must reconnect to server for this setting to take affect", "OK", "", nullptr, nullptr, false);
+		ZealService::get_instance()->ui->inputDialog->show("Character Select Zone",
+			"The change in zone will take effect the next time you enter character select", "OK", "", nullptr, nullptr, false);
 	});
 	if (lst) {
 

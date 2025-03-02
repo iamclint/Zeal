@@ -170,7 +170,7 @@ ___
   - **Description:** changes the amount of delay before left click panning will start to happen
 
 - `/protect`
-  - **Arguments:** `on`, `off`, `value`, `item`, `<item_link>`, `list`
+  - **Arguments:** `on`, `off`, `value`, `item`, `<item_link>`, `list`, `cursor`, `worn`
   - **Example:** `/protect value 10` Protects against dropping or destroying items >= 10 pp
   - **Example:** `/protect list` Prints the list of currently protected items
   - **Example:** `/protect item 10931` Toggles protection from dropping, destroying, or selling the Crown of Rile (10931)
@@ -185,7 +185,7 @@ ___
           `./<character_name>_protected.ini` file.
 
 - `/hidecorpse`
-  - **Arguments:** `looted`, `none`
+  - **Arguments:** `looted` (hides after looting), `showlast` (unhides last hidden corpse)
   - **Aliases:** `/hideco`, `/hidec`, `/hc`
   - **Example:** `/hidecorpse looted`
   - **Description:** `looted` Hides a corpse after you have looted it., `none` reveals all hidden corpses
