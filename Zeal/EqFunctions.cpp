@@ -2488,6 +2488,37 @@ namespace Zeal
 			}
 		}
 
+		namespace Graphics
+		{
+			bool IsWorldInitialized() {
+				return Zeal::EqGame::get_display() && Zeal::EqGame::get_display()[1] && *(int*)0x7F9A24 != 0;
+			}
+			DWORD s3dGetNumSkinsAttachedToHierarchicalSprite(Zeal::EqStructures::_EQMODELINFO* actorModelInfo) {
+				return reinterpret_cast<DWORD(__cdecl*)(Zeal::EqStructures::_EQMODELINFO*)>(*(int*)0x7F9844)(actorModelInfo);
+			}
+			Zeal::EqStructures::DMSprite* s3dGetSkinAttachedToHierarchicalSprite(int index, Zeal::EqStructures::_EQMODELINFO* actorModelInfo) {
+				return reinterpret_cast<Zeal::EqStructures::DMSprite*(__cdecl*)(int, Zeal::EqStructures::_EQMODELINFO*)>(*(int*)0x7F9848)(index, actorModelInfo);
+			}
+			Zeal::EqStructures::DMSprite* s3dGetSkinAttachedToHierarchicalSpriteLinkUpdatesToDAGIndex(int index, Zeal::EqStructures::_EQMODELINFO* actorModelInfo) {
+				return reinterpret_cast<Zeal::EqStructures::DMSprite*(__cdecl*)(int, Zeal::EqStructures::_EQMODELINFO*)>(*(int*)0x7F984C)(index, actorModelInfo);
+			}
+			Zeal::EqStructures::DMSpriteDefinition* s3dGetDMSpriteDefinition(Zeal::EqStructures::DMSprite* element) {
+				return reinterpret_cast<Zeal::EqStructures::DMSpriteDefinition*(__cdecl*)(Zeal::EqStructures::DMSprite*)>(*(int*)0x7F9830)(element);
+			}
+			Zeal::EqStructures::MaterialPalette* s3dDuplicateMaterialPalette(Zeal::EqStructures::MaterialPalette* material_palette) {
+				return reinterpret_cast<Zeal::EqStructures::MaterialPalette*(__cdecl*)(int, Zeal::EqStructures::MaterialPalette*)>(*(int*)0x7F9824)(Zeal::EqGame::get_display()[1], material_palette);
+			}
+			Zeal::EqStructures::MaterialPalette* s3dGetDMSpriteMaterialPalette(Zeal::EqStructures::DMSprite* dmsprite) {
+				return reinterpret_cast<Zeal::EqStructures::MaterialPalette*(__cdecl*)(void*)>(*(int*)0x7F9834)(dmsprite);
+			}
+			int t3dGetObjectTag(void* graphics_object, char* out_tag) {
+				return reinterpret_cast<int(__cdecl*)(void*, char*)>(*(int*)0x7F9A20)(graphics_object, out_tag);
+			}
+			Zeal::EqStructures::GraphicsObject* t3dGetPointerFromDictionary(const char* key) {
+				return reinterpret_cast<Zeal::EqStructures::GraphicsObject*(__cdecl*)(int, const char*)>(*(int*)0x7F9A24)(Zeal::EqGame::get_display()[1], key);
+			}
+		}
+
 		// Primitive comparison with simple numeric string support.
 		static bool sort_list_wnd_compare(const std::vector<std::string>& a,
 			const std::vector<std::string>& b, int sort_column)
@@ -2570,6 +2601,13 @@ namespace Zeal
 				return;
 			if (char_info->StandingState == Stance::Stand || char_info->StandingState == Stance::Duck)
 				entity->ChangeStance(Stance::Sit);
+		}
+		Zeal::EqStructures::EQDAGINFO* get_dag(Zeal::EqStructures::Entity* entity, int wear_slot, bool alternate)
+		{
+			return reinterpret_cast<Zeal::EqStructures::EQDAGINFO*(__stdcall*)(Zeal::EqStructures::Entity*, int, bool)>(0x4A00D9)(entity, wear_slot, alternate);
+		}
+		int set_dag_sprite_tint(Zeal::EqStructures::EQDAGINFO* dag, DWORD tint) {
+			return reinterpret_cast<int(__thiscall*)(int*, void*, DWORD*)>(0x49FF51)(Zeal::EqGame::get_display(), dag, &tint);
 		}
 	}
 }

@@ -14,8 +14,10 @@ class IO_ini {
 private:
     std::string filename;
 public:
+
+    static constexpr char kClientFilename[] = ".\\eqclient.ini";
+
     IO_ini(const std::string& filename, bool import_check = false) : filename(filename) {
-        static constexpr char kClientFilename[] = ".\\eqclient.ini";
         if (import_check  && filename != std::string(kClientFilename) && !std::filesystem::exists(filename)) {
             static constexpr int kMaxSectionSize = 32767;  // Maximum size for a section read.
             auto buffer = std::make_unique<char[]>(kMaxSectionSize);
