@@ -231,6 +231,11 @@ void ui_options::LoadColors()
 		if (color_buttons.count(39))
 			color_buttons[39]->TextColor.ARGB = D3DCOLOR_XRGB(0xf0, 0xf0, 0xf0);  // White
 	}
+	if (!ini->exists("ZealColors", "Color40")) // Nameplate: PvP Ally
+	{
+		if (color_buttons.count(40))
+			color_buttons[40]->TextColor.ARGB = 0xFF3D6BDC; // Default Blue
+	}
 
 	for (auto& [index, btn] : color_buttons)
 	{
