@@ -10,14 +10,15 @@ public:
 	HelmManager(class ZealService* zeal);
 	~HelmManager();
 
+    static int GetHeadID(Zeal::EqStructures::Entity* entity, int default_value = 0);
     static WORD GetHelmMaterial(Zeal::EqStructures::EQITEMINFO* item);
-    static WORD ToCanonicalHelmID(WORD material, WORD race);
-    static WORD ToRacialHelmMaterial(WORD material, WORD race, BYTE gender);
+    static WORD GetItemMaterial(Zeal::EqStructures::EQITEMINFO* item);
+    static WORD ToCanonicalHelmMaterial(WORD material, WORD race);
 
     // Hook implementations
-    void HandleWearChangeArmor(int cDisplay, Zeal::EqStructures::Entity* spawn, int wear_slot, WORD new_material, WORD old_material, DWORD color_tint, int local_only);
-    int HandleSwapHead(int cDisplay, Zeal::EqStructures::Entity* entity, int new_material, int old_material, DWORD color, int local_only);
-    int HandleIllusion(Zeal::EqStructures::Entity* entity, Zeal::Packets::Illusion_Struct* illusion);
+    void HandleWearChangeArmor(int* cDisplay, Zeal::EqStructures::Entity* spawn, int wear_slot, WORD new_material, WORD old_material, DWORD color_tint, bool from_server);
+    int HandleSwapHead(int* cDisplay, Zeal::EqStructures::Entity* entity, int new_material, int old_material, DWORD color, bool from_server);
+    int HandleSwapModel(int* cdisplay, Zeal::EqStructures::Entity* entity, BYTE wear_slot, char* ITstr, bool from_server);
 
     // Refreshes your helmet graphics to your current equipment and ShowHelm toggle.
     void RefreshHelm(bool local_only = false, int delay_ms = 64);    
@@ -30,8 +31,8 @@ private:
     bool Handle_In_OP_WearChange(Zeal::Packets::WearChange_Struct* data);
     bool Handle_Out_OP_WearChange(Zeal::Packets::WearChange_Struct * data);
 
-    // Checks if this race/gender combination needs special handling for Velious helms
-    bool IsHelmBuggedOldModel(WORD race, BYTE gender);
+    // Checks if this race/gender combination can be fixed
+    bool IsPatchedOldModel(WORD race, BYTE gender);
 
     void RefreshHelmCallback(bool local_only);
 
@@ -39,11 +40,11 @@ private:
     void OnZone();
 
     // Sends the '#showhelm' command to the server with our current toggle.
-    void SyncShowHelm(bool server_silent);
+    void SyncShowHelm(bool hide_response);
 
     // This call generally doesn't succeed until partway into the enter-world process.
     // So we do just-in-time detection when the first SwapHead() hook is called.
-    void DetectInstalledFixes();
+    bool DetectInstalledFixes();
 
     // Suppresses outbound helm WearChange packets from being sent when positive.
     // Sometimes enabled when we are internally manipulating things and don't want that to generate uncessary outbound packets.
@@ -52,7 +53,6 @@ private:
 
     // Used by RefreshHelmetCallback to prevent running multiple times if queued in succession.
     bool refresh_helm_pending = false;
-    Zeal::Packets::WearChange_Struct last_wc = { 0 };
 
     // We do some initialization on enter world once per-character
     std::string last_seen_character = "";

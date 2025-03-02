@@ -119,6 +119,18 @@ namespace Zeal
 		{
 			bool spellbook_window_open();
 		}
+		namespace Graphics {
+			// Checks for CDisplay->World and the 't3dGetPointerFromDictionary' function pointer existing
+			bool IsWorldInitialized();
+			DWORD s3dGetNumSkinsAttachedToHierarchicalSprite(Zeal::EqStructures::_EQMODELINFO* actorModelInfo);
+			struct Zeal::EqStructures::DMSprite* s3dGetSkinAttachedToHierarchicalSprite(int index, Zeal::EqStructures::_EQMODELINFO* actorModelInfo);
+			struct Zeal::EqStructures::DMSprite* s3dGetSkinAttachedToHierarchicalSpriteLinkUpdatesToDAGIndex(int index, Zeal::EqStructures::_EQMODELINFO* actorModelInfo);
+			struct Zeal::EqStructures::DMSpriteDefinition* s3dGetDMSpriteDefinition(struct Zeal::EqStructures::DMSprite* DMSprite);
+			struct Zeal::EqStructures::MaterialPalette* s3dDuplicateMaterialPalette(struct Zeal::EqStructures::MaterialPalette* material_palette);
+			struct Zeal::EqStructures::MaterialPalette* s3dGetDMSpriteMaterialPalette(struct Zeal::EqStructures::DMSprite* dmsprite);
+			int t3dGetObjectTag(void* graphics_object, char* out_tag);
+			Zeal::EqStructures::GraphicsObject* t3dGetPointerFromDictionary(const char* tag);
+		}
 		int GetSpellCastingTime();  // Used by CCastingWnd. Returns -1 if done otherwise in units of 0.1% of time left.
 		DWORD GetLevelCon(Zeal::EqStructures::Entity* ent);
 		bool IsPlayableRace(WORD race);
@@ -252,5 +264,7 @@ namespace Zeal
 			SortType sort_type = SortType::Ascending);
 		short total_spell_affects(Zeal::EqStructures::EQCHARINFO* char_info, BYTE affect_type, BYTE a3, int* per_buff_values);
 		void sit();
+		Zeal::EqStructures::EQDAGINFO* get_dag(Zeal::EqStructures::Entity* entity, int wear_slot, bool alternate = false); // GetDag() - alternate is used for left/right arm,bracer,leg,etc
+		int set_dag_sprite_tint(Zeal::EqStructures::EQDAGINFO* dag, DWORD tint); // CDisplay::SetDagSpriteTint()
 	}
 }

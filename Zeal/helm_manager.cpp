@@ -5,264 +5,272 @@
 #include "Zeal.h"
 
 constexpr BYTE kMaterialSlotHead = 0;
+constexpr BYTE kMaterialSlotPrimary = 7;
+constexpr BYTE kMaterialSlotSecondary = 8; // Shared with 'ranged'
 
 constexpr WORD kMaterialNone = 0;
 constexpr WORD kMaterialLeather = 1;
 constexpr WORD kMaterialChain = 2;
 constexpr WORD kMaterialPlate = 3;
 constexpr WORD kMaterialVeliousHelm = 240;
-constexpr WORD kMaterialVeliousHelmOgreRZ = 241;
+constexpr WORD kMaterialVeliousHelmAlternate = 241; // A couple races support alternate helms
 
-// For race/gender combinations that have bugged Velious helms, we've patch in a head (4) material that we use whenever they would normally show the default (0) head.
-// If the patch installed, we used material (4) whenever they are showing the default head, rather than material (0).
-constexpr WORD kMaterialDefaultHeadOverride = 4;
+// We install 'Bald' variation of heads with ID 05: "{racetag}HE05_DMSPRITEDEF". We swap to this head only when wearing a Velious Helm, to ensure hair clipping is fixed.
+constexpr WORD kMaterialBaldHead = 5;
+constexpr char kHumanFemaleBaldHead[] = "HUFHE05_DMSPRITEDEF";
+constexpr char kBarbarianFemaleBaldHead[] = "BAFHE05_DMSPRITEDEF";
+constexpr char kEruditeFemaleBaldHead[] = "ERFHE05_DMSPRITEDEF";
+constexpr char kEruditeMaleBaldHead[] = "ERMHE05_DMSPRITEDEF";
+constexpr char kWoodElfFemaleBaldHead[] = "ELFHE05_DMSPRITEDEF";
+constexpr char kDarkElfFemaleBaldHead[] = "DAFHE05_DMSPRITEDEF";
 
-// Whether or not we trust the server to send us the correct helmet after illusions and stuff.
-// If we don't trust the server, the HelmManager will do the proper helm fixing/showing after an illusion is applied.
-constexpr bool TRUST_SERVER_TO_FIX_HELMS_AFTER_ILLUSION = true;
+constexpr DWORD kColorNone = 0;
+constexpr DWORD kColorDefault = 0x00FFFFFF;
 
 // Enables debug logging
 constexpr bool HELM_MANAGER_LOG_DEBUG = false;
 
-// The internal hook name for CDisplay::SwapHead
-static const std::string SwapHeadHook = "CDisplaySwapHead";
-
-// Callback any time the head is changing
-int __fastcall SwapHead_hk(int cDisplay, int unused_edx, Zeal::EqStructures::Entity* entity, int new_material, int old_material, DWORD color, int local_only) {
-    return ZealService::get_instance()->helm->HandleSwapHead(cDisplay, entity, new_material, old_material, color, local_only);
-}
-
-// Callback when we get illusioned
-int __fastcall EntityChangeForm_hk(Zeal::EqStructures::Entity* entity, int unused_edx, Zeal::Packets::Illusion_Struct* illusion) {
-    return ZealService::get_instance()->helm->HandleIllusion(entity, illusion);
-}
-
-// Callback when Server (local_only=true) or UI (local_only=false) is changing our armor appearance
-void __fastcall WearChangeArmor_hk(int cDisplay, int unused_edx, Zeal::EqStructures::Entity* spawn, int wear_slot, WORD new_material, WORD old_material, DWORD colors, bool local_only) {
-    ZealService::get_instance()->helm->HandleWearChangeArmor(cDisplay, spawn, wear_slot, new_material, old_material, colors, local_only);
-}
-
-// Helper Function
-int SwapHeadOriginal(Zeal::EqStructures::Entity* entity, int new_material, int old_material, DWORD color, int local_only) {
-    return ZealService::get_instance()->hooks->hook_map[SwapHeadHook]->original(SwapHead_hk)(*(int*)Zeal::EqGame::Display, 0, entity, new_material, old_material, color, local_only);
-}
-
-// Helper function
-int SwapHead(Zeal::EqStructures::Entity* entity, int new_material, int old_material, DWORD color, int local_only) {
-    return SwapHead_hk(*(int*)Zeal::EqGame::Display, 0, entity, new_material, old_material, color, local_only);
-}
-
-// This is the main hook that handles 80% of fixing Velious Helms. For context, the issue with Velious helms is the client had buggy logic
-// that was not able to correctly hide some races' hair from clipping through the helmets. Or when it did manage to hide the hair from clipping,
-// it also hides the hair on all characters with the same face in the zone, even if they didn't have helms on, making their heads become see-through.
-// 
-// The key elements to the Velious helm fix are:
-// - Uses the raw IT### number for Velious Helms, which bypasses the logic that flags hair meshes to become transparent.
-// - We also have a custom s3d where the base head (material 0) is patched to not have hair at all. Instead we use head/material (4) when they wear nothing.
-// - The base head (material 0) ends up only being used while wearing a Velious Helm, so that their hair doesn't clip through, because we deleted all the hair.
-int HelmManager::HandleSwapHead(int cDisplay, Zeal::EqStructures::Entity* entity, int new_material, int old_material, DWORD color, int local_only)
+// Called when an DAG-attached model is changing for a slot (weapons, shields, velious helmets)
+int __fastcall SwapModel_hk(int* cdisplay, int unused, Zeal::EqStructures::Entity* entity, BYTE wear_slot, char* ITstr, bool from_server)
 {
-    ZealService* zeal = ZealService::get_instance();
+    return ZealService::get_instance()->helm->HandleSwapModel(cdisplay, entity, wear_slot, ITstr, from_server);
+}
 
-    // (1) Respect the ShowHelm toggle:
-    if (entity == Zeal::EqGame::get_self()) {
-        if (HELM_MANAGER_LOG_DEBUG) {
-            Zeal::EqGame::print_chat("[HelmManager] [SwapHead_hk] RECV SwapHead (%i -> %i) %s Race:%u Gender:%u", old_material, new_material, entity->Name, entity->Race, entity->Gender);
-        }
-        if (!zeal->helm->ShowHelmEnabled.get() && Zeal::EqGame::IsPlayableRace(entity->Race)) {
+// Called when changing helms.
+int __fastcall SwapHead_hk(int* cDisplay, int unused_edx, Zeal::EqStructures::Entity* entity, int new_material, int old_material, DWORD color, bool from_server)
+{
+    return ZealService::get_instance()->helm->HandleSwapHead(cDisplay, entity, new_material, old_material, color, from_server);
+}
+
+// Called when changing armor textures (head chest arms legs feet hands).
+// On character select screen, also called for weapons slots.
+void __fastcall WearChangeArmor_hk(int* cDisplay, int unused_edx, Zeal::EqStructures::Entity* spawn, int wear_slot, WORD new_material, WORD old_material, DWORD colors, bool from_server)
+{
+    ZealService::get_instance()->helm->HandleWearChangeArmor(cDisplay, spawn, wear_slot, new_material, old_material, colors, from_server);
+}
+
+void SaveMaterialColor(Zeal::EqStructures::Entity* entity, int wear_slot, DWORD color)
+{
+    if (wear_slot >= kMaterialSlotHead && wear_slot <= kMaterialSlotSecondary)
+        entity->EquipmentMaterialColor[wear_slot] = color;
+}
+
+// This is the main hook that fixes pretty much all of the weird helmet behaviors, as noted in the comments below.
+int HelmManager::HandleSwapHead(int* cDisplay, Zeal::EqStructures::Entity* entity, int new_material, int old_material_or_head, DWORD color, bool from_server)
+{
+    bool use_bald_head = false; // On races with buggy Velious helms, we will try to use the bald head underneath the helm to fix clipping (see 3a).
+    bool playable_race = Zeal::EqGame::IsPlayableRace(entity->Race); // Most logic only needs to apply on playable races.
+
+    if (playable_race)
+    {
+        // (1) Fixes the old head from getting desync'd/stuck. We can manually detect the current head which ensures that SwapHead always works (requires the old head value to be accurate).
+        old_material_or_head = GetHeadID(entity, old_material_or_head);
+
+        // (2) Respect the ShowHelm toggle.
+        if (entity == Zeal::EqGame::get_self() && !ShowHelmEnabled.get())
+        {
             new_material = kMaterialNone;
+            color = kColorNone;
         }
-    }
 
-    // (2) Fix broken Velious races by using their patched head model numbers:
-    if (zeal->helm->IsHelmBuggedOldModel(entity->Race, entity->Gender)) {
-        // For bugged races we convert the canonical material to the special ones:
-        // - Convert the generic Velious Helm Material (240), to their racial IT### model number.
-        // - Convert the default Head Material (0) to a custom Head Material (4). We use (4) as the default head for these bugged races.
-        new_material = HelmManager::ToRacialHelmMaterial(new_material, entity->Race, entity->Gender);
-
-        // The 'old_material' param MUST match the current head state, or the head will become locked to its current form.
-        // EQ passes in the Item->Material/IDFile value (e.g. '0'), which is inconsistent with the head state when we're using head overrides, so we have to correct for this,
-        if (entity->EquipmentMaterialType[kMaterialSlotHead] == kMaterialDefaultHeadOverride) {
-            old_material = kMaterialDefaultHeadOverride;
+        // (3a) Fix broken Velious races by using a special head with no hair/hood graphics underneath their helmet. This stops their hair/hood clipping through the helm.
+        use_bald_head = new_material >= kMaterialVeliousHelm && IsPatchedOldModel(entity->Race, entity->Gender);
+        if (use_bald_head)
+        {
+            mem::write(0x4A1C65 + 1, (BYTE)kMaterialBaldHead); // Changes default head 0 -> 5
         }
+
+        // (4) Fixes a bug that double-sends packets on materials below 240. Suppresses the extra packet (which also contains the wrong value).
+        if (new_material < kMaterialVeliousHelm || block_outbound_wearchange > 0)
+        {
+            from_server = true; // This flag only controls whether the client generates a WearChange packet after swapping gear (true = local only, false = send packet)
+        }
+
+        // (5) Save the helmet color for tinting. SwapHead() calls SwapModel(), where we apply the tint. But the default SwapHead() saves the color too late, after calling SwapModel().
+        SaveMaterialColor(entity, kMaterialSlotHead, color);
     }
 
-    // (3) Fix a packet bug sending wrong values:
-    // - When equipping a non-Velious Helm when local_only=false, this causes a double-send with a wrong value in the first packet. Suppressing this causes it to single-send the correct value only.
-    // - But we don't want to suppress Velious Helms, as those do no exhibit the double-send bug, and it would instead cause nothing to be sent.
-    if (new_material < kMaterialVeliousHelm || block_outbound_wearchange > 0) {
-        local_only = true;
-    }
+    // Call SwapHead()
+    int result = ZealService::get_instance()->hooks->hook_map["SwapHead"]->original(SwapHead_hk)(cDisplay, 0, entity, new_material, old_material_or_head, color, from_server);
 
-    if (HELM_MANAGER_LOG_DEBUG && entity == Zeal::EqGame::get_self()) {
-        Zeal::EqGame::print_chat("[HelmManager] [SwapHead_hk] APPLY SwapHead (%i -> %i) %s Race:%u Gender:%u Silent:%s", old_material, new_material, entity->Name, entity->Race, entity->Gender, local_only ? "true" : "false");
-    }
-    int result = zeal->hooks->hook_map[SwapHeadHook]->original(SwapHead_hk)(cDisplay, 0, entity, new_material, old_material, color, local_only);
-
-    // (4) Fix CDisplay::SwapHead() overflow:
-    // The original call only writes the lo-byte of the 'new_material' value to entity->EquipmentMaterialType[0] in some code paths.
-    // Because of our new logic, we can overflow this when custom IT### numbers are introduced (in the 500-600).
-    // Simply overwriting this value after the call works fine.
+    // (6) Fixes SwapHead() to save material values correctly when material >255. The original method only sets the lo-byte, but the storage supports uint16.
     entity->EquipmentMaterialType[kMaterialSlotHead] = new_material;
 
+    // (3b) Unpatch the Change from (3a)
+    if (use_bald_head)
+    {
+        mem::write(0x4A1C65 + 1, (BYTE)kMaterialNone); // Changes default head 5 -> 0
+    }
+
     return result;
 }
 
-// Illusions are the other place where we need to clean up the material numbers and fix our helm during an illusion.
-int HelmManager::HandleIllusion(Zeal::EqStructures::Entity* entity, Zeal::Packets::Illusion_Struct* is) {
+// Fixes tinting on Velious helmets. Supports Weapon tints too.
+int HelmManager::HandleSwapModel(int* cdisplay, Zeal::EqStructures::Entity* entity, BYTE wear_slot, char* ITstr, bool from_server)
+{
+    int material = ITstr && strlen(ITstr) > 2 ? atoi(&ITstr[2]) : 0;
+    bool is_weapon_slot = wear_slot == kMaterialSlotPrimary || wear_slot == kMaterialSlotSecondary;
+    bool is_tint_slot = is_weapon_slot || (wear_slot == kMaterialSlotHead && Zeal::EqGame::IsPlayableRace(entity->Race));
 
-    if (HELM_MANAGER_LOG_DEBUG) {
-        Zeal::EqGame::print_chat("[HelmManager] [Illusion] RECV race=%i gender=%u head=%u (hi=%u)", is->race, is->gender, is->helmtexture, is->unknown007);
-    }
-
-    auto* self = Zeal::EqGame::get_self();
-    last_wc = { 0 }; // Reset any cached helm state since we're swapping.
-
-    bool refresh_helm = false;
-    WORD set_helm_material_before_illusion = 0xFFFF;
-    WORD set_helm_material_after_illusion = 0xFFFF;
-    WORD color = 0;
-    WORD old_material = entity->EquipmentMaterialType[kMaterialSlotHead]; // '4' or some Velious ID are the ones we need to clean up
-    WORD old_material_generic = ToCanonicalHelmID(old_material, entity->Race); // 0 or 240
-
-    // (1) Cleanup any custom material values prior to illusion, so we don't leak them to the new illusion.
-    if (IsHelmBuggedOldModel(entity->Race, entity->Gender)) {
-        if (old_material == kMaterialDefaultHeadOverride || old_material_generic >= kMaterialVeliousHelm) {
-            set_helm_material_before_illusion = kMaterialNone;
-        }
-    }
-
-    // (2) Let's do the logic to figure out our helmet after the illusion
-    if (Zeal::EqGame::IsPlayableRace(is->race)) {
-        if (entity == self && is->helmtexture == 0 && !TRUST_SERVER_TO_FIX_HELMS_AFTER_ILLUSION)
-        {
-            // If we don't trust the server, just always refresh our helm after illusion.
-            refresh_helm = true;
-        }
-        else if (is->helmtexture != 0xFF)
-        {
-            // If the server gives us a non-0xFF helm texture to use, just trust that and apply it.
-            set_helm_material_after_illusion = is->helmtexture;
-        }
-        else if (entity == self)
-        {
-            // Server gave us 0xFF helm texture ("use current" instruction).
-            // Since the target is us, we can refresh our helm by refreshing it using our equipment data.
-            refresh_helm = true;
-        }
-        else
-        {
-            // Server gave us 0xFF helm texture for some other player.
-            // Carry over their current texture/color.
-            set_helm_material_after_illusion = old_material_generic;
-            color = entity->EquipmentMaterialColor[kMaterialSlotHead];
-        }
-    }
-
-    block_outbound_wearchange++;
-
-    // (3) Cleanup head state before illusion
-    if (set_helm_material_before_illusion != 0xFFFF) {
-        if (HELM_MANAGER_LOG_DEBUG) {
-            Zeal::EqGame::print_chat("[HelmManager] [Illusion] PRE-ILLUSION SwapHead (%i -> %i) %s Race:%u Gender:%u", old_material, set_helm_material_before_illusion, entity->Name, entity->Race, entity->Gender);
-        }
-        // Calling directly to the original function here because we want to bypass our Velious-fix logic, to actually set their material to potentially 0 (not 4).        
-        SwapHeadOriginal(entity, set_helm_material_before_illusion, old_material, 0, true);
-        entity->EquipmentMaterialType[kMaterialSlotHead] = set_helm_material_before_illusion;
-    }
-
-    // (4) Process the illusion change
-    int result = ZealService::get_instance()->hooks->hook_map["EntityChangeForm"]->original(EntityChangeForm_hk)(entity, 0, is);
-
-    // (5) Setup the head state after the illusion
-    if (refresh_helm)
+    if (!from_server && is_weapon_slot && entity == Zeal::EqGame::get_self() && Zeal::EqGame::get_char_info())
     {
-        refresh_helm_pending = true;
-        RefreshHelmCallback(true);
-    }
-    else if (set_helm_material_after_illusion != 0xFFFF)
-    {
-        if (HELM_MANAGER_LOG_DEBUG) {
-            Zeal::EqGame::print_chat("[HelmManager] [Illusion] POST-ILLUSION SwapHead (%i -> %i) %s Race:%u Gender:%u", kMaterialNone, set_helm_material_after_illusion, entity->Name, entity->Race, entity->Gender);
-        }
-        // Call our Velious-hook after the illusion to setup their new head
-        SwapHead(entity, set_helm_material_after_illusion, kMaterialNone, color, true);
+        // This is reached when an item was swapped by the user equipping a new item through the UI.
+        // We aren't given the color of the item in this scenario, so we have to look it up by matching the IT# to the equipped item in primary/secondary/range slot.
+        // In all other Scenarios, we already know the color because we got an OP_WearChange event, so we can skip this logic.
+        Zeal::EqStructures::EQINVENTORY& inv = Zeal::EqGame::get_char_info()->Inventory;
+        if (material == kMaterialNone)
+            SaveMaterialColor(entity, wear_slot, kColorNone);
+        else if (wear_slot == kMaterialSlotPrimary)
+            SaveMaterialColor(entity, wear_slot, inv.Primary ? inv.Primary->Common.Color : kColorNone);
+        else if (HelmManager::GetItemMaterial(inv.Secondary) == material)
+            SaveMaterialColor(entity, wear_slot, inv.Secondary ? inv.Secondary->Common.Color : kColorNone);
+        else if (HelmManager::GetItemMaterial(inv.Ranged) == material)
+            SaveMaterialColor(entity, wear_slot, inv.Ranged ? inv.Ranged->Common.Color : kColorNone);
     }
 
-    block_outbound_wearchange--;
+    // Swaps the model
+    int result = ZealService::get_instance()->hooks->hook_map["SwapModel"]->original(SwapModel_hk)(cdisplay, 0, entity, wear_slot, ITstr, from_server);
+
+    // After models are swapped, apply tint to the Helm and Weapon slots.
+    if (material > kMaterialNone && is_tint_slot)
+    {
+        DWORD color = entity->EquipmentMaterialColor[wear_slot];
+        DWORD tint = color == kColorNone ? kColorDefault : color;
+        Zeal::EqStructures::EQDAGINFO* dag = Zeal::EqGame::get_dag(entity, wear_slot);
+        if (dag)
+            Zeal::EqGame::set_dag_sprite_tint(dag, tint);
+        if (wear_slot == kMaterialSlotSecondary && entity->ActorInfo && entity->ActorInfo->DagShieldPoint) // Also tint shields
+            Zeal::EqGame::set_dag_sprite_tint(entity->ActorInfo->DagShieldPoint, tint);
+    }
+
     return result;
 }
 
-// Callback when Server (local_only=true) or UI (local_only=false) is changing our armor appearance
-void HelmManager::HandleWearChangeArmor(int cDisplay, Zeal::EqStructures::Entity* spawn, int wear_slot, WORD new_material, WORD old_material, DWORD colors, int local_only) {
+// Callback when Server (local_only=true) or UI (local_only=false) is changing our armor texture
+void HelmManager::HandleWearChangeArmor(int* cDisplay, Zeal::EqStructures::Entity* entity, int wear_slot, WORD new_material, WORD old_material, DWORD colors, bool from_server)
+{
     int block_wearchange = 0;
-    if (wear_slot == kMaterialSlotHead && local_only && spawn == Zeal::EqGame::get_self()) {
-        // Check for any showhelm violation.
-        if (new_material != kMaterialNone && !ShowHelmEnabled.get()) {
-            if (HELM_MANAGER_LOG_DEBUG) {
-                Zeal::EqGame::print_chat("[HelmManager] [WearChange] Got inbound helm while our helm is hidden, hiding our helm.");
-            }
+    if (from_server && entity == Zeal::EqGame::get_self() && Zeal::EqGame::IsPlayableRace(entity->Race))
+    {
+        // Inbound WearChanges from the server shouldn't generate a response. However, the client doesn't respect 'from_server' flag on some helmets and replies anyway.
+        block_wearchange = 1;
+
+        // Update tint cache (This line is needed for character select scren tints)
+        SaveMaterialColor(entity, wear_slot, colors);
+
+        // Prevent any showhelm violation.
+        if (wear_slot == kMaterialSlotHead && new_material != kMaterialNone && !ShowHelmEnabled.get())
+        {
+            if (HELM_MANAGER_LOG_DEBUG)
+                Zeal::EqGame::print_chat("[HelmManager] [WearChange] Got inbound helm while our helm is hidden. Refreshing our helm to hide.");
             RefreshHelm(false, 0);
         }
-        // Inbound WearChanges from the server shouldn't generate a response. However, the client doesn't respect 'local_only' flag on some helmets.
-        block_wearchange = 1;
     }
     block_outbound_wearchange += block_wearchange;
-    ZealService::get_instance()->hooks->hook_map["WearChangeArmor"]->original(WearChangeArmor_hk)(cDisplay, 0, spawn, wear_slot, new_material, old_material, colors, local_only);
+    ZealService::get_instance()->hooks->hook_map["WearChangeArmor"]->original(WearChangeArmor_hk)(cDisplay, 0, entity, wear_slot, new_material, old_material, colors, from_server);
     block_outbound_wearchange -= block_wearchange;
 }
 
-// Callback for server WearChange packets. It immediately calls HandleWearChangeArmor after for non-weapon slots.
-bool HelmManager::Handle_In_OP_WearChange(Zeal::Packets::WearChange_Struct* wc) {
-    if (wc && wc->wear_slot_id == kMaterialSlotHead) {
-        Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-        if (self && wc->spawn_id == self->SpawnId) {
-            last_wc = *wc;
-        }
-        if (HELM_MANAGER_LOG_DEBUG) {
-            Zeal::EqStructures::Entity* spawn = (self && self->SpawnId == wc->spawn_id) ? self : Zeal::EqGame::get_entity_by_id(wc->spawn_id);
-            Zeal::EqGame::print_chat("[HelmManager] [OP_WearChange] RECV WearChange from %s Material=%u Color=0x%08x", spawn ? spawn->Name : "Unknown", wc->material, wc->color.Color);
-        }
-    }
-    return false; // Continue processing the OP_WearChange.
+// Callback for server WearChange packets. It immediately calls HandleWearChangeArmor for non-weapon slots.
+bool HelmManager::Handle_In_OP_WearChange(Zeal::Packets::WearChange_Struct* wc)
+{
+    if (!wc)
+        return false;
+
+    Zeal::EqStructures::Entity* entity = Zeal::EqGame::get_entity_by_id(wc->spawn_id);
+    if (!entity)
+        return false;
+
+    // Weapon color is not passed from OP_WearChange to any called method, so we have to save it from here.
+    if (wc->wear_slot_id == kMaterialSlotPrimary || wc->wear_slot_id == kMaterialSlotSecondary)
+        SaveMaterialColor(entity, wc->wear_slot_id, wc->color.Color);
+
+    if (HELM_MANAGER_LOG_DEBUG)
+        Zeal::EqGame::print_chat("[HelmManager] [OP_WearChange] RECV WearChange from %s Slot=%u Material=%u Color=0x%08x", entity->Name, wc->wear_slot_id, wc->material, wc->color.Color);
+
+    return false; // Continue processing the OP_WearChange. Either calls WearChange_Armor or WearChange_Model hooks.
 }
 
 // Process outbound helm WearChanges to make sure the right material value is sent out
-bool HelmManager::Handle_Out_OP_WearChange(Zeal::Packets::WearChange_Struct* wc) {
-    if (wc && wc->wear_slot_id == kMaterialSlotHead) {
-        if (block_outbound_wearchange > 0) {
+bool HelmManager::Handle_Out_OP_WearChange(Zeal::Packets::WearChange_Struct* wc)
+{
+    if (!wc)
+        return false;
+
+    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+    if (!self)
+        return false;
+
+    if (wc->wear_slot_id == kMaterialSlotHead)
+    {
+        if (block_outbound_wearchange > 0)
             return true; // Stop processing this OP_WearChange, preventing the message from being sent.
-        }
-        auto* self = Zeal::EqGame::get_self();
-        if (self) {
-            // Ensure the ShowHelm toggle is respected.
-            WORD material = ShowHelmEnabled.get() ? wc->material : kMaterialNone;
-            // Always use the canonical material for server communication.
-            wc->material = ToCanonicalHelmID(material, self->Race);
-            // Remember the last thing we've sent out, can avoid duplicating if RefreshHelm() is pending.
-            last_wc = *wc;
-            if (HELM_MANAGER_LOG_DEBUG) {
-                Zeal::EqGame::print_chat("[HelmManager] [OP_WearChange] SEND WearChange Material=%u Color=0x%08x", wc->material, wc->color.Color);
+
+        // Respect ShowHelm toggle
+        if (Zeal::EqGame::IsPlayableRace(self->Race))
+        {
+            if (ShowHelmEnabled.get())
+            {
+                wc->material = ToCanonicalHelmMaterial(wc->material, self->Race); // Uses the proper outbound helm ID (may be unecessary now)
+                wc->color.Color = self->EquipmentMaterialColor[kMaterialSlotHead];
+            }
+            else
+            {
+                wc->material = kMaterialNone;
+                wc->color.Color = kColorNone;
             }
         }
     }
+    else if (wc->wear_slot_id == kMaterialSlotPrimary || wc->wear_slot_id == kMaterialSlotSecondary)
+    {
+        // Fixes outbound weapons to include the current tint
+        wc->color.Color = self->EquipmentMaterialColor[wc->wear_slot_id];
+    }
+
+    if (HELM_MANAGER_LOG_DEBUG)
+        Zeal::EqGame::print_chat("[HelmManager] [OP_WearChange] SEND WearChange Slot=%u Material=%u Color=0x%08x", wc->wear_slot_id, wc->material, wc->color.Color);
+
     return false; // Continue processing this OP_WearChange, sending the message.
 }
 
-// Helper function. Converts our overrides back to their canonical values.
+// Detect the Head ID from our current in-game model (0=default, 1=leather, etc...)
+int HelmManager::GetHeadID(Zeal::EqStructures::Entity* entity, int default_value)
+{
+    if (!entity || !entity->ActorInfo || !entity->ActorInfo->ModelInfo)
+        return default_value;
+
+    char tag[32];
+    int num_skins = Zeal::EqGame::Graphics::s3dGetNumSkinsAttachedToHierarchicalSprite(entity->ActorInfo->ModelInfo);
+    for (int i = 0; i < num_skins; i++)
+    {
+        auto* sprite = Zeal::EqGame::Graphics::s3dGetSkinAttachedToHierarchicalSprite(i, entity->ActorInfo->ModelInfo);
+        if (sprite && sprite->Type == Zeal::EqStructures::DMSprite::kType)
+        {
+            auto* sprite_definition = Zeal::EqGame::Graphics::s3dGetDMSpriteDefinition(sprite);
+            if (sprite_definition)
+            {
+                Zeal::EqGame::Graphics::t3dGetObjectTag(sprite_definition, tag);
+                if (strlen(tag) > 7 && tag[3] == 'H' && tag[4] == 'E' && isdigit(tag[5]) && isdigit(tag[6]) && tag[7] == '_') // e.g. "ELFHE01_DMSPRITEDEF"
+                {
+                    tag[7] = '\0';
+                    int head = atoi(&tag[5]);
+                    return head;
+                }
+            }
+        }
+    }
+    return default_value;
+}
+
+// Helper function. Converts Velious Helms to their common values.
 // We only send the canonical values to the server and other players.
-// - [4] -> [0]         Swaps our custom head '4' back to the standard '0'
 // - [5xx/6xx] -> [240] Swaps our racial Velious head model IT### back to the generic '240' value used by all Velious helms.
-// - etc..
-WORD HelmManager::ToCanonicalHelmID(WORD material, WORD race) {
-    if (Zeal::EqGame::IsPlayableRace(race)) {
-        switch (material) {
-
-        // Converts our custom Zeal/Quarm Head ID back to the normal default head
-        case kMaterialDefaultHeadOverride: // (4)
-            return kMaterialNone; // (0)
-
+WORD HelmManager::ToCanonicalHelmMaterial(WORD material, WORD race)
+{
+    if (Zeal::EqGame::IsPlayableRace(race))
+    {
+        switch (material)
+        {
         // Vah Shir have their own material IDs when they equip leather/chain/plate helms, but no custom helm.
         case 661: // VAH (F) Leather Helm
         case 666: // VAH (M) Leather Helm
@@ -303,91 +311,40 @@ WORD HelmManager::ToCanonicalHelmID(WORD material, WORD race) {
         case 580: // gnm
         case 635: // iks
         case 630: // iks
-            if (race == 130) { // vah
+            if (race == 130) // vah
                 return kMaterialPlate;
-            }
             return kMaterialVeliousHelm;
         case 641: // OGR (F) Alternate Helm (Barbarian/RZ look)
         case 646: // OGR (M) Alternate Helm (Barbarian/RZ look)
-            if (race == 10) {
-                return kMaterialVeliousHelmOgreRZ;
-            }
+            if (race == 10) // ogre
+                return kMaterialVeliousHelmAlternate;
             return kMaterialVeliousHelm;
         }
     }
-    return material;
-}
-
-// Only call this when IsHelmBuggedOldModel() is true.
-// - Converts canonical helmet materials to their internal/racial overrides that we use for these fixes.
-// - We only need to do this for the bugged race/gender combinations.
-// - Normally the client is fine using the canonical helm ID (e.g. 240) for Velious helms.
-//   But the bugged races we must set them via their racial IT### number to bypass the helm from triggering the hair transparency toggles.
-//   If we don't do it, then hair becomes transparent for people without the helm on.
-WORD HelmManager::ToRacialHelmMaterial(WORD material, WORD race, BYTE gender) {
-
-    if (material == kMaterialNone) {
-        // For bugged races, we swap their default head (0) to the patched override (4).
-        switch (race) {
-        case 1: // HUM
-            return gender ? kMaterialDefaultHeadOverride : material;
-        case 2: // BAR
-            return gender ? kMaterialDefaultHeadOverride : material;
-        case 3: // ERU
-            return kMaterialDefaultHeadOverride;
-        case 4: // ELF
-            return gender ? kMaterialDefaultHeadOverride : material;
-        case 6: // DEF
-            return gender ? kMaterialDefaultHeadOverride : material;
-        }
-    }
-
-    // Material 241 exists but only gives Ogres an alternate looking helmet.
-    // Treat the rest like regular Velious helms for now.
-    if (material == kMaterialVeliousHelmOgreRZ) {
-        if (race == 10) {
-            return kMaterialVeliousHelmOgreRZ;
-        } else if (Zeal::EqGame::IsPlayableRace(race)) {
-            material = kMaterialVeliousHelm;
-        }
-    }
-
-    // For bugged races, convert Velious Helm to their racial IT### number
-    if (material == kMaterialVeliousHelm) {
-        switch (race) {
-        case 1: // HUM
-            return gender ? 620 : material;
-        case 2: // BAR
-            return gender ? 530 : material;
-        case 3: // ERU
-            return gender ? 570 : 575;
-        case 4: // ELF
-            return gender ? 561 : material;
-        case 6: // DEF
-            return gender ? 540 : material;
-        }
-    }
-
     return material;
 }
 
 // Detects whether the given race/gender model needs the special material logic applied.
 // Checks whether you have the Luclin models enabled or not.
-bool HelmManager::IsHelmBuggedOldModel(WORD race, BYTE gender) {
-
-    if (!DetectInstalledFixesComplete) {
-        DetectInstalledFixes(); // Have to lazy-loid this here because this is reached before OnZone() is called during initial login.
+bool HelmManager::IsPatchedOldModel(WORD race, BYTE gender)
+{
+    if (!DetectInstalledFixesComplete)
+    {
+        DetectInstalledFixes(); // Have to lazy-load this here because this is reached before OnZone() is called during initial login.
     }
 
     // Bugged male races
-    if (gender == 0) {
+    if (gender == 0)
+    {
         // Erudite
         return race == 3 ? UseEruditeMaleFix : false;
     }
 
     // Bugged female races
-    if (gender == 1) {
-        switch (race) {
+    if (gender == 1)
+    {
+        switch (race)
+        {
         case 1: // Human
             return UseHumanFemaleFix;
         case 2: // Barbarian
@@ -404,15 +361,17 @@ bool HelmManager::IsHelmBuggedOldModel(WORD race, BYTE gender) {
     return false;
 }
 
-// Gets the material/model ID from an item.
-WORD HelmManager::GetHelmMaterial(Zeal::EqStructures::EQITEMINFO* item) {
-    if (!item || item->Type != 0) {
+// Gets the material/model ID for a helmet
+WORD HelmManager::GetHelmMaterial(Zeal::EqStructures::EQITEMINFO* item)
+{
+    if (!item || item->Type != 0)
         return 0;
-    }
-    if (item->Common.Material) {
+
+    if (item->Common.Material)
         return item->Common.Material;
-    }
-    if (item->IDFile[0] == 'I' && item->IDFile[1] == 'T' && item->IDFile[2] != '\0') {
+
+    if (item->IDFile[0] == 'I' && item->IDFile[1] == 'T' && item->IDFile[2] != '\0')
+    {
         int material = atoi(&item->IDFile[2]);
         if (material >= kMaterialVeliousHelm) {
             return material;
@@ -421,137 +380,168 @@ WORD HelmManager::GetHelmMaterial(Zeal::EqStructures::EQITEMINFO* item) {
     return 0;
 }
 
-void HelmManager::RefreshHelm(bool local_only, int delay_ms) {
-    if (!refresh_helm_pending) {
+// Gets the material/model ID from an item.
+WORD HelmManager::GetItemMaterial(Zeal::EqStructures::EQITEMINFO* item)
+{
+    if (!item || item->Type != 0)
+        return 0;
+
+    if (item->Common.Material)
+        return item->Common.Material;
+
+    if (item->IDFile[0] == 'I' && item->IDFile[1] == 'T' && item->IDFile[2] != '\0')
+        return atoi(&item->IDFile[2]);
+
+    return 0;
+}
+
+void HelmManager::RefreshHelm(bool local_only, int delay_ms)
+{
+    if (!refresh_helm_pending)
+    {
         refresh_helm_pending = true;
         ZealService::get_instance()->callbacks->AddDelayed([this, local_only]() { RefreshHelmCallback(local_only); }, delay_ms);
     }
 }
 
-void HelmManager::RefreshHelmCallback(bool local_only) {
+void HelmManager::RefreshHelmCallback(bool local_only)
+{
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
     Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
-    if (self && char_info && refresh_helm_pending) {
-        refresh_helm_pending = false;
-        if (Zeal::EqGame::IsPlayableRace(self->Race)) {
-            WORD old_material = self->EquipmentMaterialType[kMaterialSlotHead];
-            WORD material = 0;
-            DWORD color = 0;
-            if (ShowHelmEnabled.get() && char_info->Inventory.Head) {
-                material = GetHelmMaterial(char_info->Inventory.Head);
-                color = char_info->Inventory.Head->Common.Color;
-                if (HELM_MANAGER_LOG_DEBUG) {
-                    Zeal::EqGame::print_chat("[HelmManager] [UpdateHelm] Current helm is %u color %u", material, color);
-                }
-            }
+    if (!self || !char_info || !refresh_helm_pending)
+        return;
 
-            // CDisplay isn't sending the right wearchange via this call. We'll do it ourselves after.
-            block_outbound_wearchange++;
-            SwapHead(self, material, old_material, color, true);
-            block_outbound_wearchange--;
+    refresh_helm_pending = false;
 
-            if (!local_only) {
-                if (HELM_MANAGER_LOG_DEBUG) {
-                    Zeal::EqGame::print_chat("[HelmManager] [UpdateHelm] Manually sending WearChange %u color %u", material, color);
-                }
-                material = ToCanonicalHelmID(material, self->Race);
-                if (self->SpawnId != last_wc.spawn_id || material != last_wc.material || color != last_wc.color.Color)
-                {
-                    Zeal::Packets::WearChange_Struct wc;
-                    memset(&wc, 0, sizeof(Zeal::Packets::WearChange_Struct));
-                    wc.spawn_id = self->SpawnId;
-                    wc.wear_slot_id = kMaterialSlotHead;
-                    wc.material = material;
-                    wc.color.Color = color;
-                    Zeal::EqGame::send_message(Zeal::Packets::WearChange, (int*)&wc, sizeof(Zeal::Packets::WearChange_Struct), 0);
-                }
-                else if (HELM_MANAGER_LOG_DEBUG)
-                {
-                    Zeal::EqGame::print_chat("[HelmManager] [UpdateHelm] Skipping sending WearCchange, we already are in sync with server.");
-                }
-            }
-        }
+    if (!Zeal::EqGame::IsPlayableRace(self->Race))
+        return;
+
+    WORD old_material = self->EquipmentMaterialType[kMaterialSlotHead];
+    WORD material = kMaterialNone;
+    DWORD color = kColorNone;
+
+    if (ShowHelmEnabled.get() && char_info->Inventory.Head)
+    {
+        material = GetHelmMaterial(char_info->Inventory.Head);
+        color = char_info->Inventory.Head->Common.Color;
+    }
+
+    if (HELM_MANAGER_LOG_DEBUG)
+        Zeal::EqGame::print_chat("[HelmManager] [RefreshHelm] Current helm is %u color %08x", material, color);
+
+    // SwapHead isn't sending the right wearchange via this call. We'll do it ourselves after.
+    block_outbound_wearchange++;
+    HandleSwapHead(Zeal::EqGame::get_display(), self, material, old_material, color, true);
+    block_outbound_wearchange--;
+
+    if (!local_only)
+    {
+        material = ToCanonicalHelmMaterial(material, self->Race);
+        if (HELM_MANAGER_LOG_DEBUG)
+            Zeal::EqGame::print_chat("[HelmManager] [RefreshHelm] Manually sending WearChange %u color %08x", material, color);
+        Zeal::Packets::WearChange_Struct wc;
+        memset(&wc, 0, sizeof(Zeal::Packets::WearChange_Struct));
+        wc.spawn_id = self->SpawnId;
+        wc.wear_slot_id = kMaterialSlotHead;
+        wc.material = material;
+        wc.color.Color = color;
+        Zeal::EqGame::send_message(Zeal::Packets::WearChange, (int*)&wc, sizeof(Zeal::Packets::WearChange_Struct), 0);
     }
 }
 
-// With the helm manager system, we can fully handle the ShowHelm behavior on the client-side.
-// Just make sure the server-side is sending us helms.
-void HelmManager::OnZone() {
+void HelmManager::OnZone()
+{
+    DetectInstalledFixes();
 
-    last_wc = { 0 };
-
-    auto* char_info = Zeal::EqGame::get_char_info();
-    if (!char_info || !Zeal::EqGame::is_in_game()) {
-        // Wait and try again
+    Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+    if (!char_info || !Zeal::EqGame::is_in_game())
+    {
         ZealService::get_instance()->callbacks->AddDelayed([this]() { OnZone(); }, 1000);
         return;
     }
 
     std::string name = char_info->Name;
-    if (name != last_seen_character) {
+    if (name != last_seen_character)
+    {
         last_seen_character = name;
         SyncShowHelm(true);
     }
 }
 
-void HelmManager::SyncShowHelm(bool server_silent) {
-    Zeal::EqGame::do_say(true, "#showhelm %s%s", ShowHelmEnabled.get() ? "on" : "off", server_silent ? " silent" : "");
-}
-
-void HelmManager::DetectInstalledFixes()
+void HelmManager::SyncShowHelm(bool hide_response)
 {
-    int* this_display = *(int**)Zeal::EqGame::Display;
-    if (this_display) {
-        int dictionary = this_display[1];
-        if (dictionary) {
-            FARPROC fn = GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dGetPointerFromDictionary");
-            if (fn) {
-                using FunctionType = uintptr_t(__cdecl*)(int _dictionary, const char* _key);
-                FunctionType t3dGetPointerFromDictionary = reinterpret_cast<FunctionType>(fn);
-                uintptr_t initialized = t3dGetPointerFromDictionary(dictionary, "ELFHE00_DMSPRITEDEF"); // Use a known-good value to ensure stuff is loaded
-                if (initialized) {
-                    IO_ini ini(".\\eqclient.ini");
-                    UseHumanFemaleFix = !ini.getValue<bool>("Defaults", "UseLuclinHumanFemale") && t3dGetPointerFromDictionary(dictionary, "HUFHE04_DMSPRITEDEF");
-                    UseBarbarianFemaleFix = !ini.getValue<bool>("Defaults", "UseLuclinBarbarianFemale") && t3dGetPointerFromDictionary(dictionary, "BAFHE04_DMSPRITEDEF");
-                    UseEruditeFemaleFix = !ini.getValue<bool>("Defaults", "UseLuclinEruditeFemale") && t3dGetPointerFromDictionary(dictionary, "ERFHE04_DMSPRITEDEF");
-                    UseEruditeMaleFix = !ini.getValue<bool>("Defaults", "UseLuclinEruditeMale") && t3dGetPointerFromDictionary(dictionary, "ERMHE04_DMSPRITEDEF");
-                    UseWoodElfFemaleFix = !ini.getValue<bool>("Defaults", "UseLuclinWoodElfFemale") && t3dGetPointerFromDictionary(dictionary, "ELFHE04_DMSPRITEDEF");
-                    UseDarkElfFemaleFix = !ini.getValue<bool>("Defaults", "UseLuclinDarkElfFemale") && t3dGetPointerFromDictionary(dictionary, "DAFHE04_DMSPRITEDEF");
-                    if (HELM_MANAGER_LOG_DEBUG) {
-                        Zeal::EqGame::print_chat("[HelmManager] [DetectInstalledFixes] Complete");
-                    }
-                    DetectInstalledFixesComplete = true;
-                    return;
-                }
-            }
-        }
-    }
-    return;
+    Zeal::EqGame::do_say(true, "#showhelm %s%s", ShowHelmEnabled.get() ? "on" : "off", hide_response ? " silent" : "");
 }
 
-HelmManager::HelmManager(ZealService* zeal) {
+bool HelmManager::DetectInstalledFixes()
+{
+    if (DetectInstalledFixesComplete)
+        return true;
 
-    zeal->hooks->Add(SwapHeadHook, 0x004a1735, SwapHead_hk, hook_type_detour);
-    zeal->hooks->Add("EntityChangeForm", 0x005074FA, EntityChangeForm_hk, hook_type_detour);
+    if (!Zeal::EqGame::Graphics::IsWorldInitialized())
+        return false;
+
+    auto* sprite_definition = Zeal::EqGame::Graphics::t3dGetPointerFromDictionary("ELFHE00_DMSPRITEDEF"); // Check a known-good value to ensure assets are ready
+    if (!sprite_definition)
+        return false;
+
+    IO_ini ini(IO_ini::kClientFilename);
+    bool AllLuclinPcModelsOff = ini.getValue<bool>("Defaults", "AllLuclinPcModelsOff");
+    bool UseLuclinHumanFemale = ini.getValue<bool>("Defaults", "UseLuclinHumanFemale");
+    bool UseLuclinBarbarianFemale = ini.getValue<bool>("Defaults", "UseLuclinBarbarianFemale");
+    bool UseLuclinEruditeFemale = ini.getValue<bool>("Defaults", "UseLuclinEruditeFemale");
+    bool UseLuclinEruditeMale = ini.getValue<bool>("Defaults", "UseLuclinEruditeMale");
+    bool UseLuclinWoodElfFemale = ini.getValue<bool>("Defaults", "UseLuclinWoodElfFemale");
+    bool UseLuclinDarkElfFemale = ini.getValue<bool>("Defaults", "UseLuclinDarkElfFemale");
+    UseHumanFemaleFix     = (AllLuclinPcModelsOff || !UseLuclinHumanFemale)     && Zeal::EqGame::Graphics::t3dGetPointerFromDictionary(kHumanFemaleBaldHead);
+    UseBarbarianFemaleFix = (AllLuclinPcModelsOff || !UseLuclinBarbarianFemale) && Zeal::EqGame::Graphics::t3dGetPointerFromDictionary(kBarbarianFemaleBaldHead);
+    UseEruditeFemaleFix   = (AllLuclinPcModelsOff || !UseLuclinEruditeFemale)   && Zeal::EqGame::Graphics::t3dGetPointerFromDictionary(kEruditeFemaleBaldHead);
+    UseEruditeMaleFix     = (AllLuclinPcModelsOff || !UseLuclinEruditeMale)     && Zeal::EqGame::Graphics::t3dGetPointerFromDictionary(kEruditeMaleBaldHead);
+    UseWoodElfFemaleFix   = (AllLuclinPcModelsOff || !UseLuclinWoodElfFemale)   && Zeal::EqGame::Graphics::t3dGetPointerFromDictionary(kWoodElfFemaleBaldHead);
+    UseDarkElfFemaleFix   = (AllLuclinPcModelsOff || !UseLuclinDarkElfFemale)   && Zeal::EqGame::Graphics::t3dGetPointerFromDictionary(kDarkElfFemaleBaldHead);
+
+    if (HELM_MANAGER_LOG_DEBUG)
+        Zeal::EqGame::print_chat("[HelmManager] [DetectInstalledFixes] Complete");
+
+    DetectInstalledFixesComplete = true;
+    return true;
+}
+
+HelmManager::HelmManager(ZealService* zeal)
+{
+    zeal->hooks->Add("SwapHead", 0x004a1735, SwapHead_hk, hook_type_detour);
+    zeal->hooks->Add("SwapModel", 0x4A9EB3, SwapModel_hk, hook_type_detour);
     zeal->hooks->Add("WearChangeArmor", 0x004A2A7A, WearChangeArmor_hk, hook_type_detour);
 
     zeal->callbacks->AddGeneric([this]() { OnZone(); }, callback_type::Zone);
 
     zeal->callbacks->AddPacket([this](UINT opcode, char* buffer, UINT len) {
-        if (opcode == Zeal::Packets::WearChange && len >= sizeof(Zeal::Packets::WearChange_Struct)) {
+        if (opcode == Zeal::Packets::WearChange && len >= sizeof(Zeal::Packets::WearChange_Struct))
             return Handle_Out_OP_WearChange((Zeal::Packets::WearChange_Struct*)buffer);
-        }
         return false; // continue processing
         }, callback_type::SendMessage_);
 
     zeal->callbacks->AddPacket([this](UINT opcode, char* buffer, UINT len) {
-        if (opcode == Zeal::Packets::WearChange && len >= sizeof(Zeal::Packets::WearChange_Struct)) {
+        if (opcode == Zeal::Packets::WearChange && len >= sizeof(Zeal::Packets::WearChange_Struct))
             return Handle_In_OP_WearChange((Zeal::Packets::WearChange_Struct*)buffer);
-        }
         return false; // continue processing
-    }, callback_type::WorldMessage);
+        }, callback_type::WorldMessage);
 
-    if (HELM_MANAGER_LOG_DEBUG) {
+    // 0x4A1512 - GetVeliousHelmMaterialIT(entity, material, *show_hair)
+    // - (1) Disables hair becoming invisible on the shared default head. Prevents "show_hair = false" happening with Velious helms.
+    mem::fill_with_nop(0x4A159B, 0x4A159D); // '*show_hair = 0' -> No-OP
+    mem::fill_with_nop(0x4A16D2, 0x4A16D4); // '*show_hair = 0' -> No-OP
+    // - (2) Enables Velious Helms showing on Character Select. Prevents returning early if char_info is null.
+    mem::fill_with_nop(0x4A152B, 0x4A1533); // 'if (!char_info) return 3'; -> No-OP
+    mem::fill_with_nop(0x4A153E, 0x4A154B); // 'if ((char_info->Unknown0D3C & 0x1E) == 0) return 3;' -> No-OP
+
+    // ChangeDag()
+    // Unlocks proper tinting for IT# model helms/weapons below IT# number 1000:
+    // - IT# models under ID 1000 used shared memory their tint storage, so setting the tint on one model affected all models in the zone.
+    mem::write(0x4B094E + 3, (DWORD)1); // 'if IT_num >= 1000' changed to 'if IT_num >= 1'
+
+    if (HELM_MANAGER_LOG_DEBUG)
+    {
         zeal->commands_hook->Add("/helmconfig", {}, "Prints/Toggles HelmManager configuration (for testing).", [this](std::vector<std::string>& args) {
             if (args.size() > 1) {
                 int p;

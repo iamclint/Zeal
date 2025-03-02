@@ -373,6 +373,46 @@ namespace Zeal
 			/* ...... */
 		} EQITEMINFO, * PEQITEMINFO;
 
+		// Common Header for most of the s3d/t3d related objects. Not used by DAGs, though they do have Type at 0x000.
+		struct GraphicsObject
+		{
+			/* 0x000 */  DWORD Type;
+			/* 0x004 */  DWORD Unknown004;
+			/* 0x008 */  char* Tag;
+			/* 0x00C */  DWORD Flags;
+			/* 0x010 */  DWORD RefCount;
+		};
+		struct MaterialDefinition : GraphicsObject
+		{
+			/* 0x0014 */ DWORD Unknown0014;
+			/* 0x0018 */ DWORD ConstantIntensity;
+			/* 0x001C */ DWORD AmbientScalar;
+			/* 0x0020 */ DWORD TwoSided;
+			/* 0x0024 */ struct SimpleSprite* SimpleSprite;
+			/* 0x0028 */ DWORD Unknown0028;
+			/* 0x002C */ DWORD Unknown002C;
+			/* 0x0030 */ DWORD UVShift; // Unsure if swapped with UVShiftMs
+			/* 0x0034 */ DWORD UVShiftMs;
+			/* 0x0038 */ DWORD Unknown0038;
+			/* 0x003C */ DWORD Unknown003C;
+			/* 0x0040 */ char Name[1]; // Object is allocated to fit the name
+		};
+		struct MaterialPalette : GraphicsObject
+		{
+			/* 0x014 */ DWORD NumEntries;
+			/* 0x018 */ MaterialDefinition** Entries;
+			/* 0x01C */ DWORD* Colors;
+			/* 0x020 */ DWORD Unknown020;
+			/* 0x024 */ DWORD CDisplay_0x04_0x08; // CDisplay->World->Unknown008
+		};
+		struct DMSpriteDefinition : GraphicsObject {
+			/* 0x0014 */
+		};
+		struct DMSprite : GraphicsObject {
+			static constexpr DWORD kType = 0x48;
+			/* 0x0014 */
+		};
+
 		struct ViewActor
 		{
 			/* 0x0000 */ DWORD Type;  // Checked if it is set to 0x18 in GetClickedActor()
