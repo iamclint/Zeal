@@ -96,6 +96,29 @@ void looting::set_hide_looted(bool val)
 		Zeal::EqGame::print_chat("Corpses will no longer be hidden after looting.");
 }
 
+void looting::unhide_last_hidden()
+{
+	Zeal::EqStructures::Entity* corpse = nullptr;
+	if (last_hidden_entity && last_hidden_spawnid) {
+		if (Zeal::EqGame::get_entity_by_id(last_hidden_spawnid) == last_hidden_entity)
+			corpse = last_hidden_entity;
+	}
+
+	if (corpse && corpse->Type == Zeal::EqEnums::NPCCorpse && corpse->ActorInfo &&
+		corpse->ActorInfo->IsInvisible)
+		corpse->ActorInfo->IsInvisible = 0;
+	else
+		Zeal::EqGame::print_chat("No valid last hidden corpse to unhide");
+	set_last_hidden_corpse(nullptr);
+
+}
+
+void looting::set_last_hidden_corpse(Zeal::EqStructures::Entity* corpse)
+{
+	last_hidden_entity = corpse;
+	last_hidden_spawnid = corpse ? corpse->SpawnId : 0;
+}
+
 void __fastcall CLootWndDeactivate(int uk, int unused, int lootwnd_ptr)
 {
 	ZealService* zeal = ZealService::get_instance();
@@ -103,6 +126,7 @@ void __fastcall CLootWndDeactivate(int uk, int unused, int lootwnd_ptr)
 	if (corpse && corpse->ActorInfo && zeal->looting_hook->hide_looted && corpse->Type == 2)
 	{
 		corpse->ActorInfo->IsInvisible = 1; //this is the flag set by /hidecorpse all (so /hidecorpse none will reshow these hidden corpses)
+		zeal->looting_hook->set_last_hidden_corpse(corpse);
 	}
 	zeal->hooks->hook_map["CLootWndDeactivate"]->original(CLootWndDeactivate)(uk, unused, lootwnd_ptr);
 }
@@ -433,13 +457,17 @@ void looting::load_protected_items()
 	}
 }
 
-void looting::update_protected_item(int item_id, const std::string& name)
+void looting::update_protected_item(int item_id, const std::string& name, bool add_only)
 {
 	auto it = std::find_if(protected_items.begin(), protected_items.end(),
 		[item_id](ProtectedItem item) {return item.id == item_id; });
 	if (it == protected_items.end()) {
 		Zeal::EqGame::print_chat("protect: Adding item %d (%s) to the list", item_id, name.c_str());
 		protected_items.push_back({ item_id, name });
+	}
+	else if (add_only) {
+		Zeal::EqGame::print_chat("protect: Item %d (%s) already protected", item_id, name.c_str());
+		return;
 	}
 	else {
 		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "protect: Removing item %d (%s) from the list",
@@ -470,6 +498,21 @@ bool looting::parse_protect(const std::vector<std::string>& args)
 		for (const auto& item : protected_items)
 			Zeal::EqGame::print_chat("%d: %s", item.id, item.name.c_str());
 	}
+	else if (args.size() == 2 && args[1] == "cursor") {
+		auto info = Zeal::EqGame::get_char_info();
+		if (info && info->CursorItem)
+			update_protected_item(info->CursorItem->ID, info->CursorItem->Name);
+		else
+			Zeal::EqGame::print_chat("No valid item in cursor to toggle protect");
+	}
+	else if (args.size() == 2 && args[1] == "worn") {
+		auto info = Zeal::EqGame::get_char_info();
+		if (info) {
+			for (int i = 0; i < EQ_NUM_INVENTORY_SLOTS; i++)
+				if (info->InventoryItem[i])
+					update_protected_item(info->InventoryItem[i]->ID, info->InventoryItem[i]->Name, true);
+		}
+	}
 	else if (args.size() == 3 && args[1] == "value" && Zeal::String::tryParse(args[2], &new_value)
 		&& new_value >= 0)
 		setting_protect_value.set(new_value);
@@ -493,6 +536,8 @@ bool looting::parse_protect(const std::vector<std::string>& args)
 		Zeal::EqGame::print_chat("Usage: /protect value #: blocks destruction of items with a value > # pp");
 		Zeal::EqGame::print_chat("Usage: /protect item #: toggles protection of item_id == #");
 		Zeal::EqGame::print_chat("Usage: /protect <item_link>: toggles item protection from a link");
+		Zeal::EqGame::print_chat("Usage: /protect cursor: toggles protection of item in cursor");
+		Zeal::EqGame::print_chat("Usage: /protect worn: enables protection of all equipped items");
 	}
 
 	if (setting_protect_enable.get())
@@ -510,6 +555,10 @@ looting::looting(ZealService* zeal)
 {
 	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);
+	zeal->callbacks->AddEntity([this](Zeal::EqStructures::Entity* ent) {
+		if (ent == last_hidden_entity)
+			set_last_hidden_corpse(nullptr);
+		}, callback_type::EntityDespawn);
 	zeal->callbacks->AddGeneric([this]() {
 		if (loot_next_item_time == 0)
 			return;
@@ -539,11 +588,11 @@ looting::looting(ZealService* zeal)
 				set_hide_looted(!hide_looted);
 				return true;
 			}
-			//if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "none"))
-			//{
-			//	set_hide_looted(false);
-			//	return false; 
-			//}
+			else if (args.size() == 2 && args[1] == "showlast")
+			{
+				unhide_last_hidden();
+				return true;
+			}
 			return false;
 		});
 	zeal->commands_hook->Add("/lootall", {}, "Loot all items",
