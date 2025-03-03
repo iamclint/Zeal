@@ -336,6 +336,41 @@ void Binds::add_binds()
 	add_bind(243, "Cycle through near PC corpses", "CycleTargetPCCorpses", key_category::Target, [](int key_down) {
 			cycle_targets(key_down, Zeal::EqEnums::PlayerCorpse);
 		});
+	add_bind(244, "Buy/Sell Stack", "BuySell", key_category::UI, [](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+		{
+			if (Zeal::EqGame::is_in_game() && Zeal::EqGame::Windows && Zeal::EqGame::Windows->Merchant && Zeal::EqGame::Windows->Merchant->IsVisible)
+			{
+				Zeal::EqUI::CXWndManager* wnd_mgr = Zeal::EqGame::get_wnd_manager();
+				if (!wnd_mgr)
+					return;
+				DWORD selected_slot = Zeal::EqGame::Windows->Merchant->InventoryItemSlot;
+				if (selected_slot >= 6000 && selected_slot < 6080)
+				{
+					// Buying an item
+					if (!Zeal::EqGame::Windows->Merchant->BuyButton || !Zeal::EqGame::Windows->Merchant->BuyButton->IsEnabled)
+						return;
+				}
+				else
+				{
+					// Selling an Item
+					if (!Zeal::EqGame::Windows->Merchant->SellButton || !Zeal::EqGame::Windows->Merchant->SellButton->IsEnabled)
+						return;
+				}
+				BYTE shift = wnd_mgr->ShiftKeyState;
+				BYTE ctrl = wnd_mgr->ControlKeyState;
+				BYTE alt = wnd_mgr->AltKeyState;
+				wnd_mgr->ShiftKeyState = 1;
+				wnd_mgr->ControlKeyState = 0;
+				wnd_mgr->AltKeyState = 0;
+				int quantity = -1;
+				Zeal::EqGame::Windows->Merchant->WndNotification((int)Zeal::EqGame::Windows->Merchant, 29, (int) &quantity);
+				wnd_mgr->ShiftKeyState = shift;
+				wnd_mgr->ControlKeyState = ctrl;
+				wnd_mgr->AltKeyState = alt;
+			}
+		}
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)
