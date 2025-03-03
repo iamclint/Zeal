@@ -324,12 +324,51 @@ void NamePlate::render_ui()
 	sprite_font->flush_queue_to_screen();
 }
 
+bool NamePlate::is_group_member(const Zeal::EqStructures::Entity& entity) const
+{
+	for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; i++)
+	{
+		Zeal::EqStructures::Entity* groupmember = Zeal::EqGame::GroupInfo->EntityList[i];
+		if (groupmember && &entity == groupmember)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool NamePlate::is_raid_member(const Zeal::EqStructures::Entity& entity) const
+{
+	const char* spawn_name = entity.Name;
+	for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i)
+	{
+		const Zeal::EqStructures::RaidMember& member = Zeal::EqGame::RaidInfo->MemberList[i];
+		if ((strlen(member.Name) != 0) && (strcmp(member.Name, entity.Name) == 0))
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 // Helper function for selecting the player color.
 NamePlate::ColorIndex NamePlate::get_player_color_index(const Zeal::EqStructures::Entity& entity) const
 {
 	if (entity.IsPlayerKill == 1)
+	{
+		// Your color is always red/pvp
+		if (&entity == Zeal::EqGame::get_self())
+			return ColorIndex::PVP;
+		// Friendly PVP Targets
+		if (entity.GuildId != -1 && entity.GuildId == Zeal::EqGame::get_self()->GuildId)
+			return ColorIndex::PvpAlly;
+		if (Zeal::EqGame::GroupInfo->is_in_group() && is_group_member(entity))
+			return ColorIndex::PvpAlly;
+		if (Zeal::EqGame::RaidInfo->is_in_raid() && is_raid_member(entity))
+			return ColorIndex::PvpAlly;
+		// Enemy PVP Target
 		return ColorIndex::PVP;
+	}
 
 	if (entity.IsAwayFromKeyboard == 1)
 		return ColorIndex::AFK;
@@ -345,23 +384,14 @@ NamePlate::ColorIndex NamePlate::get_player_color_index(const Zeal::EqStructures
 		if (&entity == Zeal::EqGame::get_self())
 			return ColorIndex::Group;
 
-		for (int i = 0; i < EQ_NUM_GROUP_MEMBERS; i++)
-		{
-			Zeal::EqStructures::Entity* groupmember = Zeal::EqGame::GroupInfo->EntityList[i];
-			if (groupmember && &entity == groupmember)
-				return ColorIndex::Group;
-		}
+		if (is_group_member(entity))
+			return ColorIndex::Group;
 	}
 
 	if (Zeal::EqGame::RaidInfo->is_in_raid())
 	{
-		const char* spawn_name = entity.Name;
-		for (int i = 0; i < Zeal::EqStructures::RaidInfo::kRaidMaxMembers; ++i)
-		{
-			const Zeal::EqStructures::RaidMember& member = Zeal::EqGame::RaidInfo->MemberList[i];
-			if ((strlen(member.Name) != 0) && (strcmp(member.Name, entity.Name) == 0))
-				return ColorIndex::Raid;
-		}
+		if (is_raid_member(entity))
+			return ColorIndex::Raid;
 	}
 
 	if (entity.AnonymousState == 2) // Roleplay

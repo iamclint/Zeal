@@ -28,6 +28,7 @@ public:
 		NpcCorpse = 10,
 		PlayerCorpse = 11,
 		Target = 18,
+		PvpAlly = 31,
 	};
 
 	NamePlate(class ZealService* zeal, class IO_ini* ini);
@@ -91,6 +92,8 @@ private:
 	std::string generate_nameplate_text(const Zeal::EqStructures::Entity& entity, int show) const;
 	std::string generate_target_postamble(const Zeal::EqStructures::Entity& entity) const;
 	bool is_nameplate_hidden_by_race(const Zeal::EqStructures::Entity& entity) const;
+	bool is_group_member(const Zeal::EqStructures::Entity& entity) const;
+	bool is_raid_member(const Zeal::EqStructures::Entity& entity) const;
 
 	void clean_ui();
 	void render_ui();
