@@ -402,8 +402,8 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
-  <Button item="Zeal_Color40">
-    <ScreenID>Zeal_Color40</ScreenID>
+  <Button item="Zeal_Color31">
+    <ScreenID>Zeal_Color31</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
@@ -417,7 +417,7 @@
     <Style_HScroll>false</Style_HScroll>
     <Style_Transparent>false</Style_Transparent>
     <Style_Checkbox>false</Style_Checkbox>
-    <Text>41 - PVP Ally</Text>
+    <Text>32 - PVP Ally</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -1245,6 +1245,7 @@
 	<Pieces>Zeal_Color24</Pieces>
     <Pieces>Section_FloatingCombat</Pieces>
     <Pieces>Zeal_BtnDividerFloating</Pieces>
+    <Pieces>Zeal_Color31</Pieces>
     <Pieces>Zeal_Color32</Pieces>
     <Pieces>Zeal_Color33</Pieces>
     <Pieces>Zeal_Color34</Pieces>
@@ -1253,7 +1254,6 @@
     <Pieces>Zeal_Color37</Pieces>
     <Pieces>Zeal_Color38</Pieces>
     <Pieces>Zeal_Color39</Pieces>
-    <Pieces>Zeal_Color40</Pieces>
 
     <Location>
       <X>0</X>

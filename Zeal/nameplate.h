@@ -28,7 +28,7 @@ public:
 		NpcCorpse = 10,
 		PlayerCorpse = 11,
 		Target = 18,
-		PvpAlly = 40,
+		PvpAlly = 31,
 	};
 
 	NamePlate(class ZealService* zeal, class IO_ini* ini);

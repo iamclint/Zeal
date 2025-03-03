@@ -191,6 +191,17 @@ void ui_options::LoadColors()
 		if (color_buttons.count(24))
 			color_buttons[24]->TextColor.ARGB = D3DCOLOR_ARGB(0xff, 0xf0, 0xf0, 0xf0); //Default White
 	}
+	// Color25: Unused
+	// Color26: Unused
+	// Color27: Unused
+	// Color28: Unused
+	// Color29: Unused
+	// Color30: Unused
+	if (!ini->exists("ZealColors", "Color31")) // Nameplate: PvP Ally
+	{
+		if (color_buttons.count(31))
+			color_buttons[31]->TextColor.ARGB = 0xFF3D6BDC; // Default Blue
+	}
 	if (!ini->exists("ZealColors", "Color32")) // FCD: My melee damage
 	{
 		if (color_buttons.count(32))
@@ -230,11 +241,6 @@ void ui_options::LoadColors()
 	{
 		if (color_buttons.count(39))
 			color_buttons[39]->TextColor.ARGB = D3DCOLOR_XRGB(0xf0, 0xf0, 0xf0);  // White
-	}
-	if (!ini->exists("ZealColors", "Color40")) // Nameplate: PvP Ally
-	{
-		if (color_buttons.count(40))
-			color_buttons[40]->TextColor.ARGB = 0xFF3D6BDC; // Default Blue
 	}
 
 	for (auto& [index, btn] : color_buttons)
