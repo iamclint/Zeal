@@ -275,9 +275,9 @@ namespace Zeal
 			{
 				reinterpret_cast<BasicWnd*(__thiscall*)(const BasicWnd*)>(0x56f4f0)(this);
 			}
-			int WndNotification(int a1, int a2, int a3)
+			int WndNotification(int sender, int event, int userdata)
 			{
-				return reinterpret_cast<int(__thiscall*)(const BasicWnd*, int,int,int)>(vtbl->WndNotification)(this, a1, a2, a3);
+				return reinterpret_cast<int(__thiscall*)(const BasicWnd*, int,int,int)>(vtbl->WndNotification)(this, sender, event, userdata);
 			}
 			void MinimizeToggle()
 			{
@@ -618,7 +618,7 @@ namespace Zeal
 			/*0x134*/  BYTE   Activated;         // 1 = activated, 0 = deactivated
 			/*0x135*/  BYTE   Unknown0x135[0xb];
 			/*0x140*/  DWORD  Unknown0x140[0x50];  // Likely ItemInfo*. Deleted when deactivated.
-			/*0x280*/  DWORD  Unknown0x280;
+			/*0x280*/  float  MerchantGreed;
 			/*0x284*/  DWORD  InventoryItemSlot;
 			/*0x288*/  Zeal::EqStructures::EQITEMINFO** ItemInfo;  // Item used in selling.
 			/*0x28C*/  EQWND* MerchantName;      // MW_MerchantName
@@ -1187,7 +1187,7 @@ namespace Zeal
 			EQWND* Quantity;  // 0x63D658
 			LootWnd* Loot;  // 0x63D65C
 			EQWND* Actions;  // 0x63D660
-			EQWND* Merchant;  // 0x63D664
+			MerchantWnd* Merchant;  // 0x63D664
 			TradeWnd* Trade;  // 0x63D668
 			EQWND* Selector;  // 0x63D66C
 			EQWND* Bazaar;  // 0x63D670
