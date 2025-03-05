@@ -174,11 +174,6 @@ HelmManager::HelmManager(ZealService* zeal)
             return Handle_Out_OP_WearChange((Zeal::Packets::WearChange_Struct*)buffer);
         return false; // continue processing
         }, callback_type::SendMessage_);
-
-    // 0x4A1512 - GetVeliousHelmMaterialIT(entity, material, *show_hair)
-    // - (1) Disables hair becoming invisible on the shared default head. Prevents "show_hair = false" happening with Velious helms.
-    mem::fill_with_nop(0x4A159B, 0x4A159D); // '*show_hair = 0' -> No-OP
-    mem::fill_with_nop(0x4A16D2, 0x4A16D4); // '*show_hair = 0' -> No-OP
 }
 
 HelmManager::~HelmManager() {

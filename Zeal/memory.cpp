@@ -144,30 +144,4 @@ namespace mem
 		memcpy((void*)buffer, (const void*)target, size);
 		VirtualProtect((PVOID*)target, size, oldprotect, &oldprotect);
 	}
-	void fill_with_nop(int start_address, int until_address, BYTE* buffer) {
-
-		int size = until_address - start_address;
-		if (size <= 0) {
-			return;
-		}
-
-		int target = start_address;
-		BYTE nop2[] = { 0x66, 0x90 }; // 0x66 0x99 (safe, officially recognized as a 2-byte NOP).
-
-		DWORD oldprotect;
-		VirtualProtect((PVOID*)start_address, size, PAGE_EXECUTE_READWRITE, &oldprotect);
-		if (buffer)
-			memcpy((void*)buffer, (const void*)target, size);
-
-		while (size >= 2) {
-			memcpy((void*)target, nop2, 2); 
-			size -= 2;
-			target += 2;
-		}
-		if (size == 1) {
-			memcpy((void*)target, &nop2[1], 1);
-		}
-
-		VirtualProtect((PVOID*)start_address, size, oldprotect, &oldprotect);
-	}
 }
