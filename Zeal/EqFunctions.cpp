@@ -532,7 +532,7 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_view_actor_entity()
 		{
 			Zeal::EqStructures::ViewActor* Actor = get_view_actor();
-			if (ViewActor)
+			if (Actor)
 				return Actor->Entity;
 			else
 				return nullptr;

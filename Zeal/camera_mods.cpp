@@ -128,6 +128,7 @@ int handle_mouse_wheel(int delta)
         if (character_select)
             explore_mode = *(BYTE*)(character_select + 0x171);
     }
+
     if ((explore_mode || !Zeal::EqGame::is_mouse_hovering_window()) && c->enabled.get() && (camera_view == Zeal::EqEnums::CameraView::FirstPerson || camera_view == Zeal::EqEnums::CameraView::ZealCam))
     {
         c->mouse_wheel(delta);
