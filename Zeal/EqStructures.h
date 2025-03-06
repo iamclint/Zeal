@@ -122,6 +122,7 @@ namespace Zeal
 			ThirdPerson2,
 			ThirdPerson3,
 			ThirdPerson4,
+			CharacterSelect,
 			ZealCam,
 			TotalCameras
 		};
