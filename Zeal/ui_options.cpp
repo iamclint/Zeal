@@ -8,6 +8,7 @@
 #include "ZealSettings.h"
 
 static constexpr int kMaxComboBoxItems = 50;  // Maximum length of dynamic combobox lists.
+static constexpr char kDefaultSoundNone[] = "None";
 
 float GetSensitivityFromSlider(int value)
 {
@@ -26,6 +27,26 @@ int GetSensitivityForSlider(ZealSetting<float>& value)
 		return static_cast<int>(value.get() * 100.f);
 	else
 		return 0;
+}
+
+void ui_options::PlayInviteSound() const
+{
+	const auto& sound_name = setting_invite_sound.get();
+	if (sound_name.empty() || sound_name == kDefaultSoundNone)
+		return;
+	const auto it = std::find_if(sound_list.begin(), sound_list.end(),
+		[sound_name](const auto& entry) {return entry.second == sound_name; });
+	if (it != sound_list.end() && it->first >= 0)
+		Zeal::EqGame::WavePlay(it->first);
+}
+
+static void __fastcall EqPlayerSetInvited(Zeal::EqStructures::Entity* this_entity, int unused_edx, int flag)
+{
+	if (flag && ZealService::get_instance()->ui)
+		ZealService::get_instance()->ui->options->PlayInviteSound();
+
+	ZealService::get_instance()->hooks->hook_map["EqPlayerSetInvited"]
+		->original(EqPlayerSetInvited)(this_entity, unused_edx, flag);
 }
 
 int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI::BasicWnd* sender, int message, int data)
@@ -355,6 +376,14 @@ void ui_options::InitGeneral()
 	ui->AddSliderCallback(wnd,	 "Zeal_HoverTimeout_Slider",	[this](Zeal::EqUI::SliderWnd* wnd, int value) {	int val = value * 5; ZealService::get_instance()->tooltips->set_timer(val); ui->SetLabelValue("Zeal_HoverTimeout_Value", "%i ms", val); });
 	ui->AddLabel(wnd, "Zeal_HoverTimeout_Value");
 	ui->AddLabel(wnd, "Zeal_VersionValue");
+
+	ui->AddComboCallback(wnd, "Zeal_InviteSound_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
+		std::string sound_name("");
+		if (value >= 0)
+			sound_name = wnd->CmbListWnd->GetItemText(value, 0);
+		setting_invite_sound.set(sound_name);
+		});
+
 }
 void ui_options::InitFloatingDamage()
 {
@@ -615,6 +644,8 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_UseZealAssistOn", ZealService::get_instance()->assist->setting_use_zeal_assist_on.get());
 	ui->SetChecked("Zeal_DetectAssistFailure", ZealService::get_instance()->assist->setting_detect_assist_failure.get());
 	ui->SetChecked("Zeal_SingleClickGiveEnable", ZealService::get_instance()->give->setting_enable_give.get());
+
+	UpdateComboBox("Zeal_InviteSound_Combobox", setting_invite_sound.get(), kDefaultSoundNone);
 }
 void ui_options::UpdateOptionsCamera()
 {
@@ -831,6 +862,16 @@ void ui_options::UpdateDynamicUI() {
 		ZealService::get_instance()->ui->AddListItems(cmb, fonts);
 	}
 
+	cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_InviteSound_Combobox");
+	if (cmb) {
+		std::vector<std::string> sounds;
+		for (const auto& pair : sound_list)
+			sounds.push_back(pair.second);
+		if (sounds.size() > kMaxComboBoxItems)
+			sounds.resize(kMaxComboBoxItems);
+		cmb->DeleteAll();
+		ZealService::get_instance()->ui->AddListItems(cmb, sounds);
+	}
 }
 
 void ui_options::CleanDynamicUI() {
@@ -838,7 +879,8 @@ void ui_options::CleanDynamicUI() {
 		return;
 
 	std::vector<std::string> box_list = { "Zeal_TargetRingTexture_Combobox", "Zeal_MapFont_Combobox",
-											"Zeal_FloatingFont_Combobox", "Zeal_NameplateFont_Combobox"};
+											"Zeal_FloatingFont_Combobox", "Zeal_NameplateFont_Combobox",
+											"Zeal_InviteSound_Combobox"};
 	for (const auto& box_name : box_list) {
 		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem(box_name.c_str());
 		if (cmb)
@@ -890,7 +932,26 @@ ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr) : ui(mgr
 	ui->AddXmlInclude("EQUI_ZealOptions.xml");
 	
 	zeal->hooks->Add("ContainerWndSetContainer", 0x0041717d, ContainerWndSetContainer, hook_type_detour);
+
+	zeal->hooks->Add("EqPlayerSetInvited", 0x0050c216, EqPlayerSetInvited, hook_type_detour);
+	sound_list.push_back({ -1, kDefaultSoundNone });
+	sound_list.push_back({ 137, "Gate" });
+	sound_list.push_back({ 138, "Ka-ching!" });
+	sound_list.push_back({ 139, "Ding!" });
+	sound_list.push_back({ 140, "Zoom" });
+	sound_list.push_back({ 141, "Trumpet" });
+	sound_list.push_back({ 143, "Lightning1" });
+	sound_list.push_back({ 144, "Lightning2" });
+	sound_list.push_back({ 99, "Fishing" });
+	sound_list.push_back({ 116, "Arrow" });
+	sound_list.push_back({ 64, "Uh" });
+	sound_list.push_back({ 66, "Aa-uh" });
+	sound_list.push_back({ 76, "Oof" });
+	sound_list.push_back({ 41, "Gurgle" });
+	sound_list.push_back({ 134, "OpenBox" });
+	sound_list.push_back({ 145, "OpenBag" });
 }
+
 ui_options::~ui_options()
 {
 }

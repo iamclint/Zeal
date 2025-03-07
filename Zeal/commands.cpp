@@ -425,6 +425,12 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				}
 				return true;
 			}
+			int sound_index = 0;
+			if (args.size() == 3 && args[1] == "wave_play" && Zeal::String::tryParse(args[2], &sound_index))
+			{
+				Zeal::EqGame::WavePlay(sound_index);
+				return true;
+			}
 			if (args.size() > 1 && Zeal::String::compare_insensitive(args[1], "help"))
 			{
 				print_commands();

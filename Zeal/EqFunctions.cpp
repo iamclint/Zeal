@@ -520,6 +520,12 @@ namespace Zeal
 			if (sound_manager)
 				reinterpret_cast<void(__thiscall*)(int*, int, bool)>(0x4d54c1)(get_sound_manager(), number, enabled);
 		}
+		void WavePlay(int index)
+		{
+			if (get_sound_manager())
+				reinterpret_cast<void(__thiscall*)(int*, int, int)>(0x004d518b)(get_sound_manager(), index, 0);
+		}
+
 		bool CanIHitTarget(float dist)
 		{
 			return reinterpret_cast<bool(__thiscall*)(Zeal::EqStructures::Entity*, Zeal::EqStructures::Entity*, float )>(0x509E09)(get_self(), get_target(), dist);

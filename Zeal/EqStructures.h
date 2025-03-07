@@ -524,7 +524,8 @@ namespace Zeal
 			/* 0x0268 */ DWORD IsHoldingPrimary;
 			/* 0x026C */ BYTE Unknown026C[4];
 			/* 0x0270 */ BYTE Unknown0270[4];
-			/* 0x0274 */ BYTE Unknown0274[4];
+			/* 0x0274 */ BYTE IsInvited;  // Set to True in EQPlayer::SetInvited()
+			/* 0x0275 */ BYTE Unknown0275[3];
 			/* 0x0278 */ BYTE Unknown0278[4];
 			/* 0x027C */ WORD CastingSpellId;  // Set in StartCasting. Set to -1 (kInvalidSpell) in stop.
 			/* 0x027E */ BYTE CastingSpellGemNumber; // StartCasting:Gem #, OP_MemorizeSpell handler: 0xff. Stop: 0x0.

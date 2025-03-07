@@ -316,7 +316,49 @@
     <Choices>Long</Choices>
     <Choices>Short</Choices>
   </Combobox>
-   <Label item="Zeal_VersionLabel">
+  <Label item="Zeal_InviteSound_Label">
+    <ScreenID>Zeal_InviteSound_Label</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>194</X>
+      <Y>125</Y>
+    </Location>
+    <Size>
+      <CX>145</CX>
+      <CY>14</CY>
+    </Size>
+    <Text>Invite sound</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>false</AlignRight>
+  </Label>
+  <Combobox item="Zeal_InviteSound_Combobox">
+    <ScreenID>Zeal_InviteSound_Combobox</ScreenID>
+    <DrawTemplate>WDT_Inner</DrawTemplate>
+    <Location>
+      <X>194</X>
+      <Y>145</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>24</CY>
+    </Size>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ListHeight>70</ListHeight>
+    <Button>BDT_Combo</Button>
+    <Style_Border>true</Style_Border>
+    <Choices>None</Choices>
+  </Combobox>
+  <Label item="Zeal_VersionLabel">
     <ScreenID>Zeal_VersionLabel</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
@@ -977,7 +1019,6 @@
     <Pieces>Zeal_EnableContainerLock</Pieces>
     <Pieces>Zeal_ExportOnCamp</Pieces>
     <Pieces>Zeal_SelfClickThru</Pieces>
-    <Pieces>Zeal_Timestamps_Combobox</Pieces>
     <Pieces>Zeal_BuffTimers</Pieces>
     <Pieces>Zeal_RecastTimers</Pieces>
     <Pieces>Zeal_RecastTimersLeftAlign</Pieces>
@@ -989,6 +1030,9 @@
     <Pieces>Zeal_UseZealAssistOn</Pieces>
     <Pieces>Zeal_DetectAssistFailure</Pieces>
     <Pieces>Zeal_SingleClickGiveEnable</Pieces>
+    <Pieces>Zeal_InviteSound_Label</Pieces>
+    <Pieces>Zeal_InviteSound_Combobox</Pieces>
+    <Pieces>Zeal_Timestamps_Combobox</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>
