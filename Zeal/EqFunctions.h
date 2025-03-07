@@ -151,6 +151,7 @@ namespace Zeal
 		int get_gamestate();
 		int get_channel_number(const char* name);  // Zero-based channel number.
 		void SetMusicSelection(int number, bool enabled);
+		void WavePlay(int index);
 		bool is_new_ui();
 		HWND get_game_window();
 		bool show_context_menu();
