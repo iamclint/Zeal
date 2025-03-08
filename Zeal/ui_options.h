@@ -18,6 +18,7 @@ public:
 	void LoadColors();
 	DWORD GetColor(int index) const;
 	void PlayInviteSound() const;
+	void PlayTellSound() const;
 	Zeal::EqUI::EQWND* GetZealOptionsWindow() { return wnd; }  // Only use for short-term access.
 	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
 	~ui_options();
@@ -25,6 +26,8 @@ public:
 	ZealSetting<bool> setting_enable_container_lock = { false, "Zeal", "EnableContainerLock", false };
 	ZealSetting<std::string> setting_invite_sound = { "", "Zeal", "InviteSound", false,
 		[this](const std::string&) { PlayInviteSound(); } };
+	ZealSetting<std::string> setting_tell_sound = { "", "Zeal", "TellSound", false,
+		[this](const std::string&) { PlayTellSound(); } };
 
 private:
 	void InitUI();

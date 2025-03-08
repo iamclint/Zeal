@@ -29,6 +29,19 @@ int GetSensitivityForSlider(ZealSetting<float>& value)
 		return 0;
 }
 
+void ui_options::PlayTellSound() const
+{
+	// For now at least just copy the same sound list from invites. A future goal is to
+	// support custom wave sounds for tells.
+	const auto& sound_name = setting_tell_sound.get();
+	if (sound_name.empty() || sound_name == kDefaultSoundNone)
+		return;
+	const auto it = std::find_if(sound_list.begin(), sound_list.end(),
+		[sound_name](const auto& entry) {return entry.second == sound_name; });
+	if (it != sound_list.end() && it->first >= 0)
+		Zeal::EqGame::WavePlay(it->first);
+}
+
 void ui_options::PlayInviteSound() const
 {
 	const auto& sound_name = setting_invite_sound.get();
@@ -377,6 +390,13 @@ void ui_options::InitGeneral()
 	ui->AddLabel(wnd, "Zeal_HoverTimeout_Value");
 	ui->AddLabel(wnd, "Zeal_VersionValue");
 
+	ui->AddComboCallback(wnd, "Zeal_TellSound_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
+		std::string sound_name("");
+		if (value >= 0)
+			sound_name = wnd->CmbListWnd->GetItemText(value, 0);
+		setting_tell_sound.set(sound_name);
+		});
+
 	ui->AddComboCallback(wnd, "Zeal_InviteSound_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		std::string sound_name("");
 		if (value >= 0)
@@ -645,6 +665,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_DetectAssistFailure", ZealService::get_instance()->assist->setting_detect_assist_failure.get());
 	ui->SetChecked("Zeal_SingleClickGiveEnable", ZealService::get_instance()->give->setting_enable_give.get());
 
+	UpdateComboBox("Zeal_TellSound_Combobox", setting_tell_sound.get(), kDefaultSoundNone);
 	UpdateComboBox("Zeal_InviteSound_Combobox", setting_invite_sound.get(), kDefaultSoundNone);
 }
 void ui_options::UpdateOptionsCamera()
@@ -862,6 +883,17 @@ void ui_options::UpdateDynamicUI() {
 		ZealService::get_instance()->ui->AddListItems(cmb, fonts);
 	}
 
+	cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_TellSound_Combobox");
+	if (cmb) {
+		std::vector<std::string> sounds;
+		for (const auto& pair : sound_list)
+			sounds.push_back(pair.second);
+		if (sounds.size() > kMaxComboBoxItems)
+			sounds.resize(kMaxComboBoxItems);
+		cmb->DeleteAll();
+		ZealService::get_instance()->ui->AddListItems(cmb, sounds);
+	}
+
 	cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem("Zeal_InviteSound_Combobox");
 	if (cmb) {
 		std::vector<std::string> sounds;
@@ -880,7 +912,7 @@ void ui_options::CleanDynamicUI() {
 
 	std::vector<std::string> box_list = { "Zeal_TargetRingTexture_Combobox", "Zeal_MapFont_Combobox",
 											"Zeal_FloatingFont_Combobox", "Zeal_NameplateFont_Combobox",
-											"Zeal_InviteSound_Combobox"};
+											"Zeal_TellSound_Combobox", "Zeal_InviteSound_Combobox"};
 	for (const auto& box_name : box_list) {
 		Zeal::EqUI::ComboWnd* cmb = (Zeal::EqUI::ComboWnd*)wnd->GetChildItem(box_name.c_str());
 		if (cmb)
@@ -932,6 +964,9 @@ ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr) : ui(mgr
 	ui->AddXmlInclude("EQUI_ZealOptions.xml");
 	
 	zeal->hooks->Add("ContainerWndSetContainer", 0x0041717d, ContainerWndSetContainer, hook_type_detour);
+
+	zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, const std::string& msg,
+		const short& channel) { if (channel == USERCOLOR_TELL) this->PlayTellSound(); });
 
 	zeal->hooks->Add("EqPlayerSetInvited", 0x0050c216, EqPlayerSetInvited, hook_type_detour);
 	sound_list.push_back({ -1, kDefaultSoundNone });
