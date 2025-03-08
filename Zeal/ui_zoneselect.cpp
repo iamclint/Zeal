@@ -62,6 +62,8 @@ void ui_zoneselect::InitUI()
 		{
 			if (world->Zones[i])
 			{
+				if (!std::filesystem::exists(std::string(world->Zones[i]->name_short) + ".s3d"))
+					continue;
 				zones[world->Zones[i]->name_long] = world->Zones[i]->zone_id;
 				if (world->Zones[i]->zone_id == ZealService::get_instance()->charselect->ZoneIndex.get())
 				{
