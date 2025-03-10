@@ -48,12 +48,9 @@ void ui_zoneselect::InitUI()
 	ZealService::get_instance()->ui->AddButtonCallback(wnd, "Zeal_ZoneSelect_Apply", [this, lst](Zeal::EqUI::BasicWnd* btn) { 
 
 		std::string str_zone_id = lst->GetItemText(lst->SelectedIndex, 0);
-		lst->GetItemText(&_buff_zone_id, lst->SelectedIndex, 0);
 		int zone_id = 0;
 		Zeal::String::tryParse(str_zone_id, &zone_id);
-		ZealService::get_instance()->ui->inputDialog->show("Character Select Zone",
-			"The change in zone will take effect the next time you enter character select", "OK", "", nullptr, nullptr, false);
-		ZealService::get_instance()->ui->inputDialog->show("Character Select Zone", "You must reconnect to server for this setting to take affect", "OK", "", nullptr, nullptr, false);
+		ZealService::get_instance()->ui->inputDialog->show("Character Select Zone", "The change in zone will take effect the next time you enter character select", "OK", "", nullptr, nullptr, false);
 	});
 	if (lst) {
 
