@@ -22,7 +22,7 @@ from the repo using github actions, providing full transparency on the contents.
 
 ### Installation
 #### The easy way
-1. [Download](https://github.com/iamclint/Zeal/releases) the latest Zeal
+1. [Download](https://github.com/iamclint/Zeal/releases/latest) the latest official (non-beta) Zeal
    - Scroll down past the list of changes to the `Assets` section and download the `zeal_v#.#.#_*.zip` file
    - Ignore the `Source code` files
 2. Quit Everquest and extract the zip file contents into your EQ game root directory
