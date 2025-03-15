@@ -260,7 +260,7 @@ LONG CALLBACK VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
     crashes++;
     if (crashes > 1)
     {
-        WriteMiniDump(pExceptionInfo, "Mutliple Crashes", false);
+        WriteMiniDump(pExceptionInfo, "Multiple Crashes", false);
     }
     else if (crashes >= 3)
     {
