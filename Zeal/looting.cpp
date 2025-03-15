@@ -26,40 +26,54 @@ void looting::link_all(const char* channel) const
 		return;
 	}
 
-	const char* delimiter = setting_alt_delimiter.get() ? " | " : ", ";
-	if (channel)
+	std::vector<std::pair<int, std::string>> items;
+	for (int i = 0; i < kMaxItemCount; i++)
 	{
-		std::string link_text;
+		const auto item = Zeal::EqGame::Windows->Loot->Item[i];
+		if (item)
+			items.push_back({ item->ID, item->Name });
+	}
+
+	if (items.empty())
+		return;
+
+	std::sort(items.begin(), items.end(),
+		[](const std::pair<int, std::string>& a, const std::pair<int, std::string>& b) {
+		return a.second < b.second; });
+
+	const char* delimiter = setting_alt_delimiter.get() ? " | " : ", ";
+
+	if (channel)  // Support outputting multiple lines if there's an explicit channel.
+	{
 		int link_count = 0;
-		for (int i = 0; i < kMaxItemCount; i++)
+		std::string link_text;
+		for (int i = 0; i < items.size(); ++i)
 		{
-			if (Zeal::EqGame::Windows->Loot->Item[i] && link_count < kMaxLinkCount)
+			if (link_count)
+				link_text += delimiter;
+			link_count++;
+			// The AddItemTag performs an sprintf("%c%d%06d%s%c", 0x12, 0, item_id, item_name, 0x12).
+			const char kMarker = 0x12;
+			link_text += std::format("{0:c}0{1:06d}{2}{3:c}", kMarker, items[i].first, items[i].second, kMarker);
+			if (link_count == kMaxLinkCount || i == items.size() - 1)
 			{
-				if (link_count)
-					link_text += delimiter;
-				link_count++;
-				// The AddItemTag performs an sprintf("%c%d%06d%s%c", 0x12, 0, item_id, item_name, 0x12).
-				const char kMarker = 0x12;
-				WORD item_id = Zeal::EqGame::Windows->Loot->Item[i]->ID;
-				const char* item_name = Zeal::EqGame::Windows->Loot->Item[i]->Name;
-				link_text += std::format("{0:c}0{1:06d}{2}{3:c}", kMarker, item_id, item_name, kMarker);
+				std::string select = channel;
+				if (select.starts_with("rs"))
+					Zeal::EqGame::send_raid_chat(link_text.c_str());
+				else if (select.starts_with("gs"))
+					Zeal::EqGame::do_gsay(link_text.c_str());
+				else if (select.starts_with("gu"))
+					Zeal::EqGame::do_guildsay(link_text.c_str());
+				else if (select.starts_with("ooc"))
+					Zeal::EqGame::do_ooc(link_text.c_str());
+				else if (select.starts_with("auc"))
+					Zeal::EqGame::do_auction(link_text.c_str());
+				else
+					Zeal::EqGame::do_say(false, link_text.c_str());
+				link_text = "";
+				link_count = 0;
 			}
 		}
-		if (link_text.empty())
-			return;
-		std::string select = channel;
-		if (select.starts_with("rs"))
-			Zeal::EqGame::send_raid_chat(link_text.c_str());
-		else if (select.starts_with("gs"))
-			Zeal::EqGame::do_gsay(link_text.c_str());
-		else if (select.starts_with("gu"))
-			Zeal::EqGame::do_guildsay(link_text.c_str());
-		else if (select.starts_with("ooc"))
-			Zeal::EqGame::do_ooc(link_text.c_str());
-		else if (select.starts_with("auc"))
-			Zeal::EqGame::do_auction(link_text.c_str());
-		else
-			Zeal::EqGame::do_say(false, link_text.c_str());
 		return;
 	}
 
@@ -71,16 +85,14 @@ void looting::link_all(const char* channel) const
 	}
 
 	Zeal::EqUI::EditWnd* input_wnd = (Zeal::EqUI::EditWnd*)wnd->edit;
-	bool has_added_link = false;
-	for (int i = 0; i < kMaxItemCount; i++)
+	for (int i = 0; i < items.size(); ++i)
 	{
-		if (Zeal::EqGame::Windows->Loot->Item[i] && input_wnd->item_link_count < kMaxLinkCount)
-		{
-			if (has_added_link)
-				input_wnd->ReplaceSelection(delimiter, false);
-			input_wnd->AddItemTag(Zeal::EqGame::Windows->Loot->Item[i]->ID, Zeal::EqGame::Windows->Loot->Item[i]->Name);
-			has_added_link = true;
-		}
+		if (i > 0)
+			input_wnd->ReplaceSelection(delimiter, false);
+		if (input_wnd->item_link_count < kMaxLinkCount)
+			input_wnd->AddItemTag(items[i].first, items[i].second.c_str());
+		else  // Append the name as text (not a link). Skipped the ID so log parsing is the same.
+			input_wnd->ReplaceSelection(items[i].second.c_str(), false);
 	}
 	input_wnd->SetFocus();
 }
