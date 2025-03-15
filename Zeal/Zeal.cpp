@@ -11,17 +11,25 @@ ZealService* ZealService::ptr_service = nullptr;
 //	return 0;
 //}
 
-// Add simple heap integrity check.
-static void mem_check(int line_number = 0) {
+// Add simple heap integrity check.  Returns true if passes the checks.
+static bool mem_check(int line_number = 0, bool fatal_if_fails = false) {
+	static int first_line_number = 0;
 	int result1 = HeapValidate(GetProcessHeap(), 0, NULL);
 	int result2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
-	if (!result1 || !result2) {
+	if (result1 && result2)
+		return true;
+
+	if (!first_line_number)
+		first_line_number = line_number;  // Latch the first reported error point.
+
+	if (fatal_if_fails) {
 		std::string message = std::format("Zeal {0} ({1}) detected heap corruption ({2}:{3}). EqGame will terminate.",
-			ZEAL_VERSION, ZEAL_BUILD_VERSION, line_number, result1 * 2 + result2);
+			ZEAL_VERSION, ZEAL_BUILD_VERSION, first_line_number, result1 * 2 + result2);
 		MessageBoxA(NULL, message.c_str(),
 			"Zeal heap monitor", MB_OK | MB_ICONERROR);
 		throw std::bad_alloc();  // Will crash out the program.
 	}
+	return false;
 }
 
 ZealService::ZealService()
@@ -95,7 +103,8 @@ ZealService::ZealService()
 	this->basic_binds();
 	
 	configuration_check();
-	mem_check(__LINE__);
+	if (!mem_check(__LINE__))
+		mem_check(__LINE__, true);  // Fatal error if it fails twice in a row on the final line.
 }
 
 void ZealService::configuration_check()
