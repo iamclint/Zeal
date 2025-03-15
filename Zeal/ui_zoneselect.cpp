@@ -50,6 +50,7 @@ void ui_zoneselect::InitUI()
 		std::string str_zone_id = lst->GetItemText(lst->SelectedIndex, 0);
 		int zone_id = 0;
 		Zeal::String::tryParse(str_zone_id, &zone_id);
+		ZealService::get_instance()->charselect->ZoneIndex.set(zone_id);
 		ZealService::get_instance()->ui->inputDialog->show("Character Select Zone", "The change in zone will take effect the next time you enter character select", "OK", "", nullptr, nullptr, false);
 	});
 	if (lst) {
