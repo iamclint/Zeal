@@ -132,6 +132,7 @@ private:
 	};
 
 	struct CustomMapData {
+		std::string name;  // Storage for short zone name.
 		std::vector<ZoneMapLine> lines;  // Contains heap memory for zone_map_data.
 		std::vector<ZoneMapLabel> labels;
 		std::list<std::string> label_strings;  // Used as heap for const char* in labels.
