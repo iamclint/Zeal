@@ -1844,6 +1844,7 @@ const ZoneMapData* ZoneMap::get_zone_map(int zone_id) {
 
     // Note the internal_map->name field is required.
     auto new_map = std::make_unique<CustomMapData>();
+    new_map->name = short_name;
 
     // Primary file must exist.
     std::string filename = "map_files/" + short_name + ".txt";
@@ -1955,7 +1956,7 @@ void ZoneMap::assemble_zone_map(const char* zone_name, CustomMapData& map_data) 
     // Assemble and assign the zone_map_data.
     map_data.zone_map_data = std::make_unique<ZoneMapData>(ZoneMapData(
         {
-            .name = zone_name,
+            .name = map_data.name.c_str(),
             .max_x = max_x,
             .min_x = min_x,
             .max_y = max_y,
