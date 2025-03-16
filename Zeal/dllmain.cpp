@@ -2,8 +2,6 @@
 #include <thread>
 #include "Zeal.h"
 static HINSTANCE this_module{};
-static std::thread MainLoop{};
-
 
 static void zeal_lifetime_thread(std::unique_ptr<ZealService> zeal)
 {
@@ -40,6 +38,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                        LPVOID lpReserved
                      )
 {
+    static std::thread MainLoop{}; // Empty constructor, no thread is started.
+
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
@@ -51,7 +51,11 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         {
             this_module = hModule;
             DisableThreadLibraryCalls(hModule);
+            // Experimental use of critical section to try and reduce HeapValidate() failures.
+            // Copy critical section protection used in ProcessMbox() and DoMainLoop().
+            EnterCriticalSection((LPCRITICAL_SECTION)(0x007914b8));
             auto zeal = std::make_unique<ZealService>();  // Construct before eqgame thread is started.
+            LeaveCriticalSection((LPCRITICAL_SECTION)(0x007914b8));
             MainLoop = std::thread(zeal_lifetime_thread, std::move(zeal));
             MainLoop.detach();
         }

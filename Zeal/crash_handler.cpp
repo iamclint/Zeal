@@ -118,14 +118,6 @@ std::string ZipCrash(const std::string& folderName, const std::string& dumpFileP
 
 
 void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason, bool extra_data = true) {
-    // Check for non-crash exceptions and return early if detected
-    if (pep != nullptr && pep->ExceptionRecord != nullptr) {
-        DWORD exceptionCode = pep->ExceptionRecord->ExceptionCode;
-        for (DWORD nonCrashCode : nonCrashExceptionCodes) {
-            if (exceptionCode == nonCrashCode)                 
-                return;
-        }
-    }
     // Get the current time for a unique folder name
     EnsureCrashesFolderExists();
     std::time_t t = std::time(nullptr);
@@ -255,22 +247,41 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason, bool extr
     }
 }
 
+void ShowCrashDialog(PEXCEPTION_POINTERS pep) {
+    std::string message = "Fatal crash loop.";
+    if (pep != nullptr && pep->ExceptionRecord != nullptr) {
+        const auto& record = pep->ExceptionRecord;
+        message += std::format(" Exception code: {:#x}, Address: {:#x}, Module: {}",
+            record->ExceptionCode, reinterpret_cast<DWORD>(record->ExceptionAddress),
+            GetModuleNameFromAddress(record->ExceptionAddress));
+    }
+    MessageBoxA(NULL, message.c_str(), "EqGame.exe", MB_OK | MB_ICONERROR);
+}
 
 LONG CALLBACK VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
     static int crashes = 0;
+
+    // Check for non-crash exceptions and return early if detected
+    if (pExceptionInfo != nullptr && pExceptionInfo->ExceptionRecord != nullptr) {
+        DWORD exceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
+        for (DWORD nonCrashCode : nonCrashExceptionCodes) {
+            if (exceptionCode == nonCrashCode)
+                return EXCEPTION_CONTINUE_SEARCH; // Continue searching for other handlers.
+        }
+    }
+
+    // Count crashes to avoid infinite crash looping.
     crashes++;
-    if (crashes == 2)
-    {
+    if (crashes == 1)
+        WriteMiniDump(pExceptionInfo, "Initial Handler");
+    else if (crashes == 2)
         WriteMiniDump(pExceptionInfo, "Multiple Crashes", false);
-    }
-    else if (crashes >= 3)
-    {
-        std::cerr << "Crash loop detected exiting process" << std::endl;
-        ExitProcess(1);
-    }
     else
     {
-        WriteMiniDump(pExceptionInfo, "Initial Handler");
+        std::cerr << "Crash loop detected exiting process" << std::endl;
+        if (crashes == 3)
+            ShowCrashDialog(pExceptionInfo);
+        ExitProcess(1);
     }
     return EXCEPTION_CONTINUE_SEARCH; // Continue searching for other handlers
 }
