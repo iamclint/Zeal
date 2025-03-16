@@ -11,25 +11,39 @@ ZealService* ZealService::ptr_service = nullptr;
 //	return 0;
 //}
 
+static int s_first_fail_line_number = 0;
+
+int ZealService::get_heap_check_fail_linenumber() {
+	return s_first_fail_line_number;
+}
+
 // Add simple heap integrity check.  Returns true if passes the checks.
-static bool mem_check(int line_number = 0, bool fatal_if_fails = false) {
-	static int first_line_number = 0;
-	int result1 = HeapValidate(GetProcessHeap(), 0, NULL);
-	int result2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
-	if (result1 && result2)
-		return true;
+static bool mem_check(int line_number = 0, bool dialog_if_fails = false) {
 
-	if (!first_line_number)
-		first_line_number = line_number;  // Latch the first reported error point.
+	// Enter the retry loop for the dialog. Exits by early return or thrown exception.
+	while (true) {
+		int result1 = HeapValidate(GetProcessHeap(), 0, NULL);
+		int result2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
+		if (result1 && result2)
+			return true;
 
-	if (fatal_if_fails) {
-		std::string message = std::format("Zeal {0} ({1}) detected heap corruption ({2}:{3}). EqGame will terminate.",
-			ZEAL_VERSION, ZEAL_BUILD_VERSION, first_line_number, result1 * 2 + result2);
-		MessageBoxA(NULL, message.c_str(),
-			"Zeal heap monitor", MB_OK | MB_ICONERROR);
-		throw std::bad_alloc();  // Will crash out the program.
+		if (!s_first_fail_line_number)
+			s_first_fail_line_number = line_number;  // Latch the first reported error point.
+
+		if (!dialog_if_fails)
+			return false;
+
+		std::string instructions = "This may be a false positive or it may be real and the game *might* crash later.";
+		instructions += " You can choose to either abort so you can restart eqgame.exe, retry the check, or ignore this and continue.";
+		std::string message = std::format("Zeal {0} ({1}) *may* have detected heap corruption ({2}:{3}). {4}",
+			ZEAL_VERSION, ZEAL_BUILD_VERSION, s_first_fail_line_number, result1 * 2 + result2, instructions);
+
+		int result_id = MessageBoxA(NULL, message.c_str(), "Zeal boot heap check", MB_ABORTRETRYIGNORE | MB_ICONWARNING);
+		if (result_id == IDABORT)
+			throw std::bad_alloc();  // Will crash out the program.
+		else if (result_id == IDIGNORE)
+			return false;
 	}
-	return false;
 }
 
 ZealService::ZealService()
