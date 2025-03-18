@@ -80,7 +80,7 @@ void CharacterSelect::render()
 		if (self)
 		{
 			
-			Location << std::fixed << std::setprecision(3) << std::dec << self->Position.toString() << " Heading: " << self->Heading << " Cam Pitch: " << ZealService::get_instance()->camera_mods->zeal_cam_pitch << " Cam Yaw: " << ZealService::get_instance()->camera_mods->zeal_cam_yaw << " Min Clip: " << Zeal::EqGame::ZoneInfo->MinClip << " Max " << Zeal::EqGame::ZoneInfo->MaxClip << " sky " << Zeal::EqGame::ZoneInfo->SkyType << std::endl;
+			Location << std::fixed << std::setprecision(0) << std::dec << "[" << self->Position.x << ", " << self->Position.y << ", " << self->Position.z << "] Heading: " << self->Heading << std::endl;
 			bmp_font->queue_string(Location.str().c_str(), { 10, 50, 0 }, false, D3DCOLOR_XRGB(0x00, 0xff, 0x00) | 0xff000000);
 			bmp_font->flush_queue_to_screen();
 		}
