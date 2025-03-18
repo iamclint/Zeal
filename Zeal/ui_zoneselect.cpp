@@ -23,18 +23,43 @@ void ui_zoneselect::Deactivate()
 void ui_zoneselect::Hide()
 {
 	if (wnd)
+	{
 		wnd->show(0, 0);
+	}
+	
 }
 void ui_zoneselect::Show()
 {
 	if (wnd)
+	{
 		wnd->show(1, 1);
+	}
 }
 void ui_zoneselect::InitUI()
 {
 	static constexpr int kMaxComboBoxItems = 50;
 	if (wnd)
 		Zeal::EqGame::print_chat("Warning: Init out of sync for ui_zoneselect");
+
+	if (Zeal::EqGame::Windows->CharacterSelect)
+	{
+		ui->AddButtonCallback(Zeal::EqGame::Windows->CharacterSelect, "Zeal_ZoneSelect", [this](Zeal::EqUI::BasicWnd* btnwnd) {
+
+			if (wnd->IsVisible)
+				Hide();
+			else
+				Show();
+		});
+		ui->AddButtonCallback(Zeal::EqGame::Windows->CharacterSelect, "Explore_Button", [this](Zeal::EqUI::BasicWnd* btnwnd) {
+			Hide();
+		});
+		
+	}
+	else
+	{
+		MessageBoxA(NULL, "Character Select Not Loaded", "UI Error", 1);
+	}
+
 	static const char* xml_file = "./uifiles/zeal/EQUI_ZoneSelect.xml";
 	if (!wnd && ui && std::filesystem::exists(xml_file))
 		wnd = ui->CreateSidlScreenWnd("ZealZoneSelect");
@@ -45,18 +70,18 @@ void ui_zoneselect::InitUI()
 		return;
 	}
 	Zeal::EqUI::ListWnd* lst = (Zeal::EqUI::ListWnd*)wnd->GetChildItem("Zeal_ZoneSelect_ListBox");
-	ZealService::get_instance()->ui->AddButtonCallback(wnd, "Zeal_ZoneSelect_Apply", [this, lst](Zeal::EqUI::BasicWnd* btn) { 
+	ui->AddButtonCallback(wnd, "Zeal_ZoneSelect_Apply", [this, lst](Zeal::EqUI::BasicWnd* btn) { 
 
 		std::string str_zone_id = lst->GetItemText(lst->SelectedIndex, 0);
 		int zone_id = 0;
 		Zeal::String::tryParse(str_zone_id, &zone_id);
 		ZealService::get_instance()->charselect->ZoneIndex.set(zone_id);
-		ZealService::get_instance()->ui->inputDialog->show("Character Select Zone", "The change in zone will take effect the next time you enter character select", "OK", "", nullptr, nullptr, false);
+		ui->inputDialog->show("Character Select Zone", "The change in zone will take effect the next time you enter character select", "OK", "", nullptr, nullptr, false);
 	});
 	if (lst) {
 
 		Zeal::EqStructures::EQWorldData*  world = (Zeal::EqStructures::EQWorldData*)(*(DWORD*)0x7F9494);
-		std::vector<std::vector<std::string>> zone_list;
+		std::deque<std::vector<std::string>> zone_list;
 		for (int i = 0; i < 225; i++)
 		{
 			if (world->Zones[i])
@@ -74,12 +99,14 @@ void ui_zoneselect::InitUI()
 				zone_list.push_back({ std::to_string(world->Zones[i]->zone_id), world->Zones[i]->name_short, world->Zones[i]->name_long });
 			}
 		}
+
 		std::sort(zone_list.begin(), zone_list.end(), [](const std::vector<std::string>& a, const std::vector<std::string>& b) {
 			return a[2] < b[2]; // Compare second elements
-	});
-
+		});
+		zone_list.push_front({ "185","CharSelect", "Character Select" });
+		std::vector<std::vector<std::string>> vec_zone_list(zone_list.begin(), zone_list.end());
 		lst->DeleteAll();
-		ZealService::get_instance()->ui->AddListItems(lst, zone_list);
+		ZealService::get_instance()->ui->AddListItems(lst, vec_zone_list);
 	}
 }
 ui_zoneselect::~ui_zoneselect()
@@ -92,7 +119,7 @@ ui_zoneselect::ui_zoneselect(ZealService* zeal, ui_manager* mgr)
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	//zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);
 	zeal->callbacks->AddGeneric([this]() { Deactivate(); }, callback_type::DeactivateUI);
-	zeal->callbacks->AddGeneric([this]() { InitUI();  Show(); }, callback_type::InitCharSelectUI);
+	zeal->callbacks->AddGeneric([this]() { InitUI(); Hide(); }, callback_type::InitCharSelectUI);
 
 	ui->AddXmlInclude("EQUI_ZoneSelect.xml");
 }

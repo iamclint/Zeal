@@ -8,14 +8,32 @@
 #include "bitmap_font.h"
 #include "ZealSettings.h"
 #include <unordered_map>
+struct ExploreZoneData
+{
+	Vec3 Position;
+	float Heading;
+	ExploreZoneData(Vec3 _Position, float _Heading)
+	{
+		Heading = _Heading;
+		Position = _Position;
+	}
+	ExploreZoneData() { Position = { 0,0,0 }; Heading = 0; }
+};
 
 class CharacterSelect
 {
+private:
+	std::unique_ptr<BitmapFont> bmp_font;
+	void load_bmp_font();
+	void render();
 public:
 	CharacterSelect(class ZealService* zeal);
 	~CharacterSelect();
 	ZealSetting<int> ZoneIndex = { -1, "CharacterSelect", "ZoneIndex", false };
-	std::unordered_map<int, Vec3> ZoneSafeCoords = 
+	std::unordered_map<int, ExploreZoneData> ZoneData;
+	
+
+	/*std::unordered_map<int, Vec3> ZoneSafeCoords = 
 	{
 		{1, {0.f, 10.f, 5.f} },
 		{2, {-74.f, 428.f, 3.f} },
@@ -202,5 +220,5 @@ public:
 		{221, {1608.f, 30.f, -327.f} },
 		{222, {-762.f, 328.f, -56.f} },
 		{223, {851.f, -141.f, 396.f } }
-	};
+	};*/
 };
