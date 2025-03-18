@@ -36,6 +36,7 @@ void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD unk1, DWORD unk2)
 	Vec3* SafeCoords = (Vec3*)(0x79896C);
 	*SafeCoords = ZealService::get_instance()->charselect->ZoneData[ZealService::get_instance()->charselect->ZoneIndex.get()].Position;
 	ZealService::get_instance()->hooks->hook_map["MovePlayerLocalSafeCoords"]->original(MovePlayerLocalSafeCoords)();
+	*Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::CharacterSelect;
 	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 	if (self)
 	{
@@ -71,13 +72,15 @@ void CharacterSelect::render()
 		return;
 	if (Zeal::EqGame::get_gamestate() != GAMESTATE_CHARSELECT)
 		return;
+	Zeal::EqGame::get_camera()->DrawDistance = 2500.f;
 	if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && Zeal::EqGame::Windows->CharacterSelect->Explore)
 	{
 		std::stringstream Location;
 		Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 		if (self)
 		{
-			Location << std::fixed << std::setprecision(3) << std::dec << self->Position.toString() << " Heading: " << self->Heading << " Cam Pitch: " << ZealService::get_instance()->camera_mods->zeal_cam_pitch << " Cam Yaw: " << ZealService::get_instance()->camera_mods->zeal_cam_yaw << std::endl;
+			
+			Location << std::fixed << std::setprecision(3) << std::dec << self->Position.toString() << " Heading: " << self->Heading << " Cam Pitch: " << ZealService::get_instance()->camera_mods->zeal_cam_pitch << " Cam Yaw: " << ZealService::get_instance()->camera_mods->zeal_cam_yaw << " Min Clip: " << Zeal::EqGame::ZoneInfo->MinClip << " Max " << Zeal::EqGame::ZoneInfo->MaxClip << " sky " << Zeal::EqGame::ZoneInfo->SkyType << std::endl;
 			bmp_font->queue_string(Location.str().c_str(), { 10, 50, 0 }, false, D3DCOLOR_XRGB(0x00, 0xff, 0x00) | 0xff000000);
 			bmp_font->flush_queue_to_screen();
 		}
@@ -274,6 +277,10 @@ CharacterSelect::CharacterSelect(ZealService* zeal)
 	zeal->callbacks->AddGeneric([this]() { bmp_font.reset(); }, callback_type::CleanUI);
 	zeal->callbacks->AddGeneric([this]() { bmp_font.reset(); }, callback_type::DXReset);  // Just release all resources.
 	zeal->callbacks->AddGeneric([this]() { render(); }, callback_type::RenderUI);
+	zeal->callbacks->AddGeneric([this]() {
+		if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && !Zeal::EqGame::Windows->CharacterSelect->Explore)
+			*Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::CharacterSelect; //this fixes the camera when camping
+	}, callback_type::CharacterSelectLoop);
 	zeal->hooks->Add("StartWorldDisplay", 0x4A849E, StartWorldDisplay, hook_type_detour);
 	zeal->hooks->Add("SelectCharacter", 0x40F56D, SelectCharacter, hook_type_detour);
 	zeal->hooks->Add("MovePlayerLocalSafeCoords", 0x4B459C, MovePlayerLocalSafeCoords, hook_type_detour);
