@@ -455,12 +455,6 @@
     <ClCompile Include="music.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
-    <ClCompile Include="character_select.cpp">
-      <Filter>Source Files\hooks</Filter>
-    </ClCompile>
-    <ClCompile Include="survey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="assist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
