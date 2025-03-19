@@ -53,9 +53,12 @@ BOOL APIENTRY DllMain( HMODULE hModule,
             DisableThreadLibraryCalls(hModule);
             // Experimental use of critical section to try and reduce HeapValidate() failures.
             // Copy critical section protection used in ProcessMbox() and DoMainLoop().
-            EnterCriticalSection((LPCRITICAL_SECTION)(0x007914b8));
+            int critical_section = *(int*)0x007914b8;
+            if (critical_section)
+                EnterCriticalSection((LPCRITICAL_SECTION)(0x007914b8));
             auto zeal = std::make_unique<ZealService>();  // Construct before eqgame thread is started.
-            LeaveCriticalSection((LPCRITICAL_SECTION)(0x007914b8));
+            if (critical_section)
+                LeaveCriticalSection((LPCRITICAL_SECTION)(0x007914b8));
             MainLoop = std::thread(zeal_lifetime_thread, std::move(zeal));
             MainLoop.detach();
         }

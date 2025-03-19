@@ -192,17 +192,11 @@
     <ClInclude Include="crash_handler.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
-    <ClInclude Include="miniz.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="patches.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
     <ClInclude Include="directx.h">
       <Filter>Header Files\hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="NPCGive.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="nameplate.h">
       <Filter>Header Files\hooks</Filter>
@@ -228,17 +222,8 @@
     <ClInclude Include="chatfilter.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
-    <ClInclude Include="bitmap_font.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="default_spritefont.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ui_inputdialog.h">
       <Filter>Header Files\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="ZealSettings.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="json.hpp">
       <Filter>Header Files</Filter>
@@ -246,32 +231,47 @@
     <ClInclude Include="EqPackets.h">
       <Filter>Header Files\everquest</Filter>
     </ClInclude>
-    <ClInclude Include="equip_item.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helm_manager.h">
       <Filter>Header Files\hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_buff.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="music.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
-    <ClInclude Include="character_select.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ui_zoneselect.h">
       <Filter>Header Files\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="assist.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tick.h">
       <Filter>Header Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="NPCGive.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_buff.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="character_select.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
     <ClInclude Include="survey.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="equip_item.h">
+      <Filter>Header Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="default_spritefont.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="bitmap_font.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="assist.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="ZealSettings.h">
+      <Filter>Header Files\other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -283,9 +283,6 @@
     </ClCompile>
     <ClCompile Include="memory.cpp">
       <Filter>Source Files\memory</Filter>
-    </ClCompile>
-    <ClCompile Include="EqFunctions.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="vectors.cpp">
       <Filter>Source Files\helpers</Filter>
@@ -434,17 +431,11 @@
     <ClCompile Include="chatfilter.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
-    <ClCompile Include="bitmap_font.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="default_spritefont.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ui_inputdialog.cpp">
       <Filter>Source Files\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="equip_item.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="helm_manager.cpp">
       <Filter>Source Files\hooks</Filter>
@@ -455,14 +446,29 @@
     <ClCompile Include="music.cpp">
       <Filter>Source Files\hooks</Filter>
     </ClCompile>
+    <ClCompile Include="ui_zoneselect.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="character_select.cpp">
+      <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="bitmap_font.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
     <ClCompile Include="assist.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="EqFunctions.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="survey.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
     <ClCompile Include="tick.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\other</Filter>
     </ClCompile>
-    <ClCompile Include="ui_zoneselect.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="equip_item.cpp">
+      <Filter>Source Files\hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
