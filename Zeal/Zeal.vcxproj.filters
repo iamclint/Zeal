@@ -458,8 +458,14 @@
     <ClCompile Include="assist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="assist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="tick.cpp">
-      <Filter>Source Files\hooks</Filter>
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_zoneselect.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

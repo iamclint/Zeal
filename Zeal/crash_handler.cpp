@@ -117,15 +117,7 @@ std::string ZipCrash(const std::string& folderName, const std::string& dumpFileP
 }
 
 
-void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
-    // Check for non-crash exceptions and return early if detected
-    if (pep != nullptr && pep->ExceptionRecord != nullptr) {
-        DWORD exceptionCode = pep->ExceptionRecord->ExceptionCode;
-        for (DWORD nonCrashCode : nonCrashExceptionCodes) {
-            if (exceptionCode == nonCrashCode)                 
-                return;
-        }
-    }
+void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason, bool extra_data = true) {
     // Get the current time for a unique folder name
     EnsureCrashesFolderExists();
     std::time_t t = std::time(nullptr);
@@ -183,22 +175,25 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
                         reasonFile << "Module information not available." << std::endl;
                     }
                     // Add more details as needed from pep->ExceptionRecord and pep->ContextRecord
-
-                    Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
-                    Zeal::EqStructures::Entity* spawn_info = (char_info ? char_info->SpawnInfo : nullptr);
-                    Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
-                    reasonFile << "EQCHARINFO: 0x" << std::hex << (uint32_t)(char_info) << std::endl;
-                    reasonFile << "SpawnInfo: 0x" << std::hex << (uint32_t)(spawn_info) << std::endl;
-                    reasonFile << "Self: 0x" << std::hex << (uint32_t)(self) << std::dec << std::endl;
-                    reasonFile << "Character: " << (char_info ? char_info->Name : "Unknown") << std::endl;
-                    std::string ui_skin = (char*)0x63D3C0;
-                    reasonFile << "UI Skin: " << ui_skin << std::endl;
-                    int zone_id = self ? self->ZoneId : -1;
-                    reasonFile << "Zone ID: " << zone_id << std::endl;
-                    reasonFile << "Game state: " << Zeal::EqGame::get_gamestate() << std::endl;
-                    reasonFile << "ShowSpellEffects: " << *reinterpret_cast<unsigned int*>(0x007cf290) << std::endl;
-                    if (ZealService::get_instance() && ZealService::get_instance()->callbacks)
-                        reasonFile << "Callbacks: " << ZealService::get_instance()->callbacks->get_trace();
+                    if (extra_data)
+                    {
+                        Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+                        Zeal::EqStructures::Entity* spawn_info = (char_info ? char_info->SpawnInfo : nullptr);
+                        Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+                        reasonFile << "EQCHARINFO: 0x" << std::hex << (uint32_t)(char_info) << std::endl;
+                        reasonFile << "SpawnInfo: 0x" << std::hex << (uint32_t)(spawn_info) << std::endl;
+                        reasonFile << "Self: 0x" << std::hex << (uint32_t)(self) << std::dec << std::endl;
+                        reasonFile << "Character: " << (char_info ? char_info->Name : "Unknown") << std::endl;
+                        std::string ui_skin = (char*)0x63D3C0;
+                        reasonFile << "UI Skin: " << ui_skin << std::endl;
+                        int zone_id = self ? self->ZoneId : -1;
+                        reasonFile << "Zone ID: " << zone_id << std::endl;
+                        reasonFile << "Game state: " << Zeal::EqGame::get_gamestate() << std::endl;
+                        reasonFile << "ShowSpellEffects: " << *reinterpret_cast<unsigned int*>(0x007cf290) << std::endl;
+                        reasonFile << "BootHeapCheck: " << ZealService::get_heap_check_fail_linenumber() << std::endl;
+                        if (ZealService::get_instance() && ZealService::get_instance()->callbacks)
+                            reasonFile << "Callbacks: " << ZealService::get_instance()->callbacks->get_trace();
+                    }
                 }
                 reasonFile.close();
             }
@@ -252,9 +247,42 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason) {
     }
 }
 
+void ShowCrashDialog(PEXCEPTION_POINTERS pep) {
+    std::string message = "Fatal crash loop.";
+    if (pep != nullptr && pep->ExceptionRecord != nullptr) {
+        const auto& record = pep->ExceptionRecord;
+        message += std::format(" Exception code: {:#x}, Address: {:#x}, Module: {}",
+            record->ExceptionCode, reinterpret_cast<DWORD>(record->ExceptionAddress),
+            GetModuleNameFromAddress(record->ExceptionAddress));
+    }
+    MessageBoxA(NULL, message.c_str(), "EqGame.exe", MB_OK | MB_ICONERROR);
+}
 
 LONG CALLBACK VectoredExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
-    WriteMiniDump(pExceptionInfo, "VEH");
+    static int crashes = 0;
+
+    // Check for non-crash exceptions and return early if detected
+    if (pExceptionInfo != nullptr && pExceptionInfo->ExceptionRecord != nullptr) {
+        DWORD exceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
+        for (DWORD nonCrashCode : nonCrashExceptionCodes) {
+            if (exceptionCode == nonCrashCode)
+                return EXCEPTION_CONTINUE_SEARCH; // Continue searching for other handlers.
+        }
+    }
+
+    // Count crashes to avoid infinite crash looping.
+    crashes++;
+    if (crashes == 1)
+        WriteMiniDump(pExceptionInfo, "Initial Handler");
+    else if (crashes == 2)
+        WriteMiniDump(pExceptionInfo, "Multiple Crashes", false);
+    else
+    {
+        std::cerr << "Crash loop detected exiting process" << std::endl;
+        if (crashes == 3)
+            ShowCrashDialog(pExceptionInfo);
+        ExitProcess(1);
+    }
     return EXCEPTION_CONTINUE_SEARCH; // Continue searching for other handlers
 }
 

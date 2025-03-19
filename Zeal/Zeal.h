@@ -63,6 +63,7 @@ public:
 	static ZealService* ptr_service;
 	//static data/functions to get a base ptr since some hook callbacks don't have the information required
 	static ZealService* get_instance();
+	static int get_heap_check_fail_linenumber();  // Non-zero if heap check failed during boot.
 	void configuration_check();
 
 	bool exit = false;

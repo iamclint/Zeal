@@ -11,6 +11,8 @@ Support scripts and data files for producing the auto-generated zone_map_data.h 
   to copy out only Quarm PoP related maps, which reduced the `map_files` down to 36 MB.
 * Note: The `bazaar.txt` and `bazaar_1.txt` were out of era maps without any `_original` versions
   - Deleted them manually and copied over a correct `bazaar.txt` into the `map_files` folder
+* Note: The `arena.txt` and `arena_1.txt` were out of era maps without any `_original` versions
+  - Deleted them manually and copied over a correct `arena.txt` into the `map_files` folder
 
 ## Integer zone_id to short zone name lookup (zone_id_lut.csv)
 * Zeal has access to the current zone with an integer zone_id

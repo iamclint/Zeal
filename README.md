@@ -11,18 +11,23 @@ from the repo using github actions, providing full transparency on the contents.
 
 ### Features
 - Camera motion improvements (major improvements to third person view)
-- Additional key binds (tab targeting, strafe, pet)
-- Additional commands (melody, useitem, autoinventory)
-- Additional ui support (new gauges, bag control & locking, looting, spellsets, targetrings, nameplates, right click to equip)
-- Enhanced chat (additional filters and colors, tell windows, tab completion)
-- Third party tool support (silent log messages, direct ZealPipes)
+- Additional key binds (tab targeting, corpse cycling, strafe, pet, map,
+  autoinventory, autofire, buy/sell stacks)
+- Additional commands (melody, autofire, useitem, autoinventory, autobank,
+  link all, loot all, raid survey, singleclick, show loot lockouts, etc)
 - Integrated map (see In-game Map section below)
-- Various client bug fixes and patches (fix crashes and helm graphical glitches, skill window sorting, etc)
-- Autosit on camp (with option to export inventory and spellbook files)
+- Additional ui support (new gauges, bag control & locking, looting, spellsets, targetrings,
+  nameplates, right click to equip, skill window sorting, etc)
+- Autostand on move/cast, autosit on camp with export inventory/spellbook option
+- Enhanced chat (% replacements, additional filters and colors, tell windows,
+  tab completion, copy and paste)
+- Notification sounds (tells, group invites)
+- Third party tool support (silent log messages, direct ZealPipes)
+- Various client bug fixes and patches (crashe fixes, helm graphical glitches, etc)
 
 ### Installation
 #### The easy way
-1. [Download](https://github.com/iamclint/Zeal/releases) the latest Zeal
+1. [Download](https://github.com/iamclint/Zeal/releases/latest) the latest official (non-beta) Zeal
    - Scroll down past the list of changes to the `Assets` section and download the `zeal_v#.#.#_*.zip` file
    - Ignore the `Source code` files
 2. Quit Everquest and extract the zip file contents into your EQ game root directory

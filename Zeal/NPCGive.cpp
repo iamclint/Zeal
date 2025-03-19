@@ -36,7 +36,7 @@ static Zeal::EqUI::ContainerWnd* get_active_tradeskill_container(int bag_index)
             for (int i = 0; i < 0x11; ++i)
             {
                 auto wnd = container_mgr->pPCContainers[i];
-                if (wnd->pContainerInfo == container_mgr->pWorldItems)
+                if (wnd && (wnd->pContainerInfo == container_mgr->pWorldItems))
                     return (wnd->IsVisible) ? wnd : nullptr;
             }
         return nullptr;
