@@ -24,6 +24,8 @@ void __fastcall StartWorldDisplay(DWORD t, DWORD unused, DWORD zone_index, DWORD
 		zone_index = 0xB9;
 
 	ZealService::get_instance()->hooks->hook_map["StartWorldDisplay"]->original(StartWorldDisplay)(t, unused, zone_index, uhh);
+	Zeal::EqGame::ZoneInfo->MaxClip = 2000;
+	Zeal::EqGame::ZoneInfo->MinClip = 2000;
 }
 void MovePlayerLocalSafeCoords()
 {
@@ -42,8 +44,9 @@ void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD unk1, DWORD unk2)
 	{
 		self->Heading = ZealService::get_instance()->charselect->ZoneData[ZealService::get_instance()->charselect->ZoneIndex.get()].Heading;
 		self->Position = ZealService::get_instance()->charselect->ZoneData[ZealService::get_instance()->charselect->ZoneIndex.get()].Position;
+		self->MovementForwardSpeedMultiplier = 2.5f;
+		self->MovementBackwardSpeedMultiplier = 2.5f;
 	}
-
 }
 
 void CharacterSelect::load_bmp_font() {
