@@ -60,28 +60,25 @@ void CharacterSelect::load_bmp_font() {
 	if (!bmp_font)
 		return;  // Let caller deal with the failure.
 	bmp_font->set_drop_shadow(true);
-	bmp_font->set_align_bottom(false);  // Bottom align for multi-line and font sizes.
 	bmp_font->set_shadow_offset_factor(0.03f);
 }
 
 void CharacterSelect::render()
 {
-	if (!bmp_font)
-		load_bmp_font();
-	if (!bmp_font)
-		return;
 	if (Zeal::EqGame::get_gamestate() != GAMESTATE_CHARSELECT)
 		return;
-	Zeal::EqGame::get_camera()->DrawDistance = 2500.f;
 	if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && Zeal::EqGame::Windows->CharacterSelect->Explore)
 	{
 		std::stringstream Location;
 		Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 		if (self)
 		{
-			
+			if (!bmp_font)
+				load_bmp_font();
+			if (!bmp_font)
+				return;
 			Location << std::fixed << std::setprecision(0) << std::dec << "[" << self->Position.x << ", " << self->Position.y << ", " << self->Position.z << "] Heading: " << self->Heading << std::endl;
-			bmp_font->queue_string(Location.str().c_str(), { 10, 50, 0 }, false, D3DCOLOR_XRGB(0x00, 0xff, 0x00) | 0xff000000);
+			bmp_font->queue_string(Location.str().c_str(), { 10, 50, 0 }, false, D3DCOLOR_XRGB(0x00, 0xff, 0x00));
 			bmp_font->flush_queue_to_screen();
 		}
 	}
