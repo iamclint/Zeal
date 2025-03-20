@@ -28,6 +28,7 @@ public:
 		NpcCorpse = 10,
 		PlayerCorpse = 11,
 		Target = 18,
+		GuildLFG = 30,
 		PvpAlly = 31,
 	};
 
