@@ -230,7 +230,11 @@ void ui_options::LoadColors()
 	// Color27: Unused
 	// Color28: Unused
 	// Color29: Unused
-	// Color30: Unused
+	if (!ini->exists("ZealColors", "Color30")) // Nameplate: Guild LFG
+	{
+		if (color_buttons.count(30))
+			color_buttons[30]->TextColor.ARGB = 0xFFCFFF00; //LFG - Yellow
+	}
 	if (!ini->exists("ZealColors", "Color31")) // Nameplate: PvP Ally
 	{
 		if (color_buttons.count(31))

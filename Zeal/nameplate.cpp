@@ -377,7 +377,11 @@ NamePlate::ColorIndex NamePlate::get_player_color_index(const Zeal::EqStructures
 		return ColorIndex::LD;
 
 	if (entity.ActorInfo && entity.ActorInfo->IsLookingForGroup)
+	{
+		if (entity.GuildId && (entity.GuildId == Zeal::EqGame::get_self()->GuildId))
+			return ColorIndex::GuildLFG;
 		return ColorIndex::LFG;
+	}
 
 	if (Zeal::EqGame::GroupInfo->is_in_group())
 	{
