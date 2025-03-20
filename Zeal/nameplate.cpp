@@ -318,7 +318,8 @@ void NamePlate::render_ui()
 			full_text += staminabar;
 			sprite_font->set_stamina_percent(stamina_percent);
 		}
-
+		if (entity!= Zeal::EqGame::get_self())
+			full_text += " " + std::to_string(Zeal::EqGame::get_self()->Position.Dist2D(entity->Position));
 		sprite_font->queue_string(full_text.c_str(), position, true, info.color | 0xff000000);
 	}
 	sprite_font->flush_queue_to_screen();

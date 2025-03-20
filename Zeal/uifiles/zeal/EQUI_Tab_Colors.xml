@@ -402,35 +402,6 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
-  <Button item="Zeal_Color31">
-    <ScreenID>Zeal_Color31</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>164</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>32 - PVP Ally</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
   <Label item="Section_NameplateNPC">
     <ScreenID>Section_NameplateNPC</ScreenID>
     <RelativePosition>true</RelativePosition>
@@ -852,7 +823,7 @@
 			<PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
 		</ButtonDrawTemplate>
 	</Button>
-    <Button item="Zeal_Color23">
+	<Button item="Zeal_Color23">
 		<ScreenID>Zeal_Color23</ScreenID>
 		<RelativePosition>true</RelativePosition>
 		<Location>
@@ -867,7 +838,7 @@
 		<Style_HScroll>false</Style_HScroll>
 		<Style_Transparent>false</Style_Transparent>
 		<Style_Checkbox>false</Style_Checkbox>
-		<Text>24 - My Melee Special</Text>
+		<Text>24 - Radius 1</Text>
 		<TextColor>
 			<R>255</R>
 			<G>255</G>
@@ -896,7 +867,7 @@
 		<Style_HScroll>false</Style_HScroll>
 		<Style_Transparent>false</Style_Transparent>
 		<Style_Checkbox>false</Style_Checkbox>
-		<Text>25 - Other Melee Special</Text>
+		<Text>25 - Radius 2</Text>
 		<TextColor>
 			<R>255</R>
 			<G>255</G>
@@ -910,288 +881,6 @@
 			<PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
 		</ButtonDrawTemplate>
 	</Button>
-  <Label item="Section_FloatingCombat">
-    <ScreenID>Section_FloatingCombat</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>136</X>
-      <Y>447</Y>
-    </Location>
-    <Size>
-      <CX>160</CX>
-      <CY>16</CY>
-    </Size>
-    <Text>Floating combat damage</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <NoWrap>true</NoWrap>
-    <AlignCenter>false</AlignCenter>
-    <AlignRight>false</AlignRight>
-  </Label>
-  <Button item="Zeal_BtnDividerFloating">
-    <ScreenID>Zeal_BtnDividerFloating</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>0</X>
-      <Y>460</Y>
-    </Location>
-    <Size>
-      <CX>380</CX>
-      <CY>2</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>-</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_Color32">
-    <ScreenID>Zeal_Color32</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>470</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>33 - My melee</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_Color33">
-    <ScreenID>Zeal_Color33</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>200</X>
-      <Y>470</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>34 - My spells</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_Color34">
-    <ScreenID>Zeal_Color34</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>492</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>35 - Me hit by melee</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_Color35">
-    <ScreenID>Zeal_Color35</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>200</X>
-      <Y>492</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>36 - Me hit by spells</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_Color36">
-    <ScreenID>Zeal_Color36</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>514</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>37 - Player hit by melee</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_Color37">
-    <ScreenID>Zeal_Color37</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>200</X>
-      <Y>514</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>38 - Player hit by spells</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_Color38">
-    <ScreenID>Zeal_Color38</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>536</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>39 - NPC hit by meleee</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_Color39">
-    <ScreenID>Zeal_Color39</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>200</X>
-      <Y>536</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>false</Style_Checkbox>
-    <Text>40 - NPC hit by spells</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
   <Page item="Tab_Colors">
 	<ScreenID>Tab_Colors</ScreenID>
 	 <RelativePosition>true</RelativePosition>
@@ -1243,18 +932,6 @@
 	<Pieces>Zeal_Color22</Pieces>
 	<Pieces>Zeal_Color23</Pieces>
 	<Pieces>Zeal_Color24</Pieces>
-    <Pieces>Section_FloatingCombat</Pieces>
-    <Pieces>Zeal_BtnDividerFloating</Pieces>
-    <Pieces>Zeal_Color31</Pieces>
-    <Pieces>Zeal_Color32</Pieces>
-    <Pieces>Zeal_Color33</Pieces>
-    <Pieces>Zeal_Color34</Pieces>
-    <Pieces>Zeal_Color35</Pieces>
-    <Pieces>Zeal_Color36</Pieces>
-    <Pieces>Zeal_Color37</Pieces>
-    <Pieces>Zeal_Color38</Pieces>
-    <Pieces>Zeal_Color39</Pieces>
-
     <Location>
       <X>0</X>
       <Y>22</Y>

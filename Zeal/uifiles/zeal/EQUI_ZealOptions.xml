@@ -8,6 +8,7 @@
 	<Include>EQUI_Tab_TargetRing.xml</Include>
 	<Include>EQUI_Tab_Nameplate.xml</Include>
 	<Include>EQUI_Tab_FloatingDamage.xml</Include>
+	<Include>EQUI_Tab_ZoneDev.xml</Include>
 </Composite>
 <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
   <TabBox item="ZealOptionsTabs">
@@ -27,6 +28,7 @@
 	<Pages>Tab_Nameplate</Pages>
 	<Pages>Tab_FloatingDamage</Pages>
 	<Pages>Tab_Colors</Pages>
+	<Pages>Tab_ZoneDev</Pages>
   </TabBox>
   <Screen item="ZealOptions">
     <ScreenID>ZealOptions</ScreenID>

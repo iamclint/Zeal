@@ -388,44 +388,13 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
-  <!-- Zeal Map Show Player Headings-->
-  <Button item="Zeal_MapShowPlayerHeadings">
-    <ScreenID>Zeal_MapShowPlayerHeadings</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>401</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Shows all player headings</TooltipReference>
-    <Text>Show Headings</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
   <!-- Zeal Map Names Length -->
   <Label item="Zeal_MapNamesLength_Label">
     <ScreenID>Zeal_MapNamesLength_Label</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>431</Y>
+      <Y>409</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -446,7 +415,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>451</Y>
+      <Y>429</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -459,7 +428,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>110</X>
-      <Y>451</Y>
+      <Y>429</Y>
     </Location>
     <Size>
       <CX>40</CX>
@@ -481,7 +450,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>474</Y>
+      <Y>452</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -512,7 +481,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>504</Y>
+      <Y>482</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -533,7 +502,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>524</Y>
+      <Y>502</Y>
     </Location>
     <Size>
       <CX>100</CX>
@@ -546,7 +515,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>110</X>
-      <Y>524</Y>
+      <Y>502</Y>
     </Location>
     <Size>
       <CX>40</CX>
@@ -1022,7 +991,6 @@
     <Style_Sizable>true</Style_Sizable>
     <Pieces>Zeal_Map</Pieces>
     <Pieces>Zeal_MapShowRaid</Pieces>
-    <Pieces>Zeal_MapShowPlayerHeadings</Pieces>
     <Pieces>Zeal_MapShowGrid</Pieces>
     <Pieces>Zeal_MapInteractiveEnable</Pieces>
     <Pieces>Zeal_MapExternalWindow</Pieces>

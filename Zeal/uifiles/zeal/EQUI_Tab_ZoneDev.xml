@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<XML ID="EQInterfaceDefinitionLanguage">
+  <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
+  <Editbox item="ZealRadius1">
+    <ScreenID>ZealRadius1</ScreenID>
+    <DrawTemplate>WDT_Inner</DrawTemplate>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>24</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Border>true</Style_Border>
+    <TextColor>
+      <Alpha>255</Alpha>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+  </Editbox>
+  <Label item="ZealRadius1Label1">
+    <ScreenID>ZealRadius1Label1</ScreenID>
+    <Font>3</Font>
+    <Text>Radius 1</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <Size>
+      <CX>100</CX>
+      <CY>80</CY>
+    </Size>
+    <Location>
+      <X>160</X>
+      <Y>24</Y>
+    </Location>
+    <RelativePosition>true</RelativePosition>
+  </Label>
+  <Editbox item="ZealRadius2">
+    <ScreenID>ZealRadius2</ScreenID>
+    <DrawTemplate>WDT_Inner</DrawTemplate>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>46</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Border>true</Style_Border>
+    <TextColor>
+      <Alpha>255</Alpha>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+  </Editbox>
+    <Label item="ZealRadius1Label2">
+    <ScreenID>ZealRadius1Label2</ScreenID>
+    <Font>3</Font>
+    <Text>Radius 2</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <Size>
+      <CX>100</CX>
+      <CY>80</CY>
+    </Size>
+    <Location>
+      <X>160</X>
+      <Y>46</Y>
+    </Location>
+    <RelativePosition>true</RelativePosition>
+  </Label>
+  <Button item="ZealRadiusApply">
+    <ScreenID>ZealRadiusApply</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <AutoStretch>true</AutoStretch>
+    <LeftAnchorOffset>4</LeftAnchorOffset>
+    <TopAnchorOffset>40</TopAnchorOffset>
+    <RightAnchorOffset>100</RightAnchorOffset>
+    <BottomAnchorOffset>4</BottomAnchorOffset>
+    <TopAnchorToTop>false</TopAnchorToTop>
+    <BottomAnchorToTop>false</BottomAnchorToTop>
+    <LeftAnchorToLeft>true</LeftAnchorToLeft>
+    <RightAnchorToLeft>true</RightAnchorToLeft>
+    <Style_Checkbox>false</Style_Checkbox>
+    <TooltipReference>Applies the radius settings</TooltipReference>
+    <Text>Apply</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_SmallBtnNormal</Normal>
+      <Pressed>A_SmallBtnPressed</Pressed>
+      <Flyby>A_SmallBtnFlyby</Flyby>
+      <Disabled>A_SmallBtnDisabled</Disabled>
+      <PressedFlyby>A_SmallBtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+  <Page item="Tab_ZoneDev">
+    <ScreenID>Tab_ZoneDev</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <!-- Pages are sized and positioned by their parent tab -->
+    <Style_VScroll>true</Style_VScroll>
+    <Style_HScroll>true</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <DrawTemplate>WDT_Def</DrawTemplate>
+    <TabText>Zone Dev</TabText>
+    <TabTextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TabTextColor>
+    <TabTextActiveColor>
+      <R>255</R>
+      <G>255</G>
+      <B>0</B>
+    </TabTextActiveColor>
+    <Style_Sizable>true</Style_Sizable>
+	<Pieces>ZealRadius1</Pieces>
+    <Pieces>ZealRadius1Label1</Pieces>
+	<Pieces>ZealRadius2</Pieces>
+    <Pieces>ZealRadius1Label2</Pieces>
+	<Pieces>ZealRadiusApply</Pieces>
+    <Location>
+      <X>0</X>
+      <Y>22</Y>
+    </Location>
+    <Size>
+      <CX>380</CX>
+      <CY>339</CY>
+    </Size>
+  </Page>
+  </XML>

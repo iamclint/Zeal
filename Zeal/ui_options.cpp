@@ -539,6 +539,22 @@ void ui_options::InitTargetRing()
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingForward", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->rotate_match_heading.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingCone", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->target_ring->use_cone.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingColor", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->target_ring->target_color.set(wnd->Checked); });
+	ui->AddButtonCallback(wnd, "ZealRadiusApply", [](Zeal::EqUI::BasicWnd* wnd) { 
+		Zeal::EqUI::EditWnd* r1 = (Zeal::EqUI::EditWnd*)wnd->ParentWnd->GetChildItem("ZealRadius1");
+		Zeal::EqUI::EditWnd* r2 = (Zeal::EqUI::EditWnd*)wnd->ParentWnd->GetChildItem("ZealRadius2");
+		if (r1 && r2)
+		{
+			float r_val1 = 20.f;
+			float r_val2 = 20.f;
+			Zeal::String::tryParse(r1->InputText.CastToCharPtr(), &r_val1);
+			Zeal::String::tryParse(r2->InputText.CastToCharPtr(), &r_val2);
+			if (r_val1 > 0 && r_val2 > 0)
+			{
+				ZealService::get_instance()->target_ring->radius1.set(r_val1);
+				ZealService::get_instance()->target_ring->radius2.set(r_val2);
+			}
+		}
+		});
 	
 	ui->AddComboCallback(wnd, "Zeal_TargetRingTexture_Combobox", [this](Zeal::EqUI::BasicWnd* wnd, int value) {
 		std::string texture_name("None");
@@ -712,7 +728,12 @@ void ui_options::UpdateOptionsTargetRing()
 	ui->SetLabelValue("Zeal_TargetRingRotation_Value", "%.2f", ZealService::get_instance()->target_ring->rotation_speed.get());
 	ui->SetLabelValue("Zeal_TargetRingSize_Value", "%.2f", ZealService::get_instance()->target_ring->outer_size.get());
 	ui->SetLabelValue("Zeal_TargetRingTransparency_Value", "%.2f", ZealService::get_instance()->target_ring->transparency.get());
-
+	Zeal::EqUI::EditWnd* r1 = (Zeal::EqUI::EditWnd*)wnd->GetChildItem("ZealRadius1");
+	Zeal::EqUI::EditWnd* r2 = (Zeal::EqUI::EditWnd*)wnd->GetChildItem("ZealRadius2");
+	if (r1)
+		r1->InputText.Set(std::to_string(ZealService::get_instance()->target_ring->radius1.get()));
+	if (r2)
+		r2->InputText.Set(std::to_string(ZealService::get_instance()->target_ring->radius2.get()));
 	std::string current_texture = ZealService::get_instance()->target_ring->texture_name.get();
 	UpdateComboBox("Zeal_TargetRingTexture_Combobox", current_texture, "None");
 }

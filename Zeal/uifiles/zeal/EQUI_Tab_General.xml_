@@ -481,133 +481,12 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
-   
-  <Button item="Zeal_LinkAllAltDelimiter">
-    <ScreenID>Zeal_LinkAllAltDelimiter</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>288</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Enables alternative link all delimiter</TooltipReference>
-    <Text>Alt LinkAll Delimiter</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_EnableContainerLock">
-    <ScreenID>Zeal_EnableContainerLock</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>310</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Enables lock in container context menu (requires the bag to be re-opened to take effect)</TooltipReference>
-    <Text>Enable container lock</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_ExportOnCamp">
-    <ScreenID>Zeal_ExportOnCamp</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>332</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Exports current inventory and spellbook to files when /camp is executed</TooltipReference>
-    <Text>Export data on /camp</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_SelfClickThru">
-    <ScreenID>Zeal_SelfClickThru</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>354</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Disables third person click on self (/selfclickthru)</TooltipReference>
-    <Text>Self-click thru</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-   <Button item="Zeal_BuffTimers">
+    <Button item="Zeal_BuffTimers">
     <ScreenID>Zeal_BuffTimers</ScreenID>
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>376</Y>
+      <Y>288</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -637,7 +516,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>398</Y>
+      <Y>310</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -667,7 +546,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>420</Y>
+      <Y>332</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -697,7 +576,7 @@
     <RelativePosition>true</RelativePosition>
     <Location>
       <X>10</X>
-      <Y>442</Y>
+      <Y>354</Y>
     </Location>
     <Size>
       <CX>150</CX>
@@ -709,66 +588,6 @@
     <Style_Checkbox>true</Style_Checkbox>
     <TooltipReference>Toggle Classic Music</TooltipReference>
     <Text>Classic Music</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_SuppressMissedNotes">
-    <ScreenID>Zeal_SuppressMissedNotes</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>464</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Suppress missed note messages from other bards</TooltipReference>
-    <Text>No missed notes</Text>
-    <TextColor>
-      <R>255</R>
-      <G>255</G>
-      <B>255</B>
-    </TextColor>
-    <ButtonDrawTemplate>
-      <Normal>A_BtnNormal</Normal>
-      <Pressed>A_BtnPressed</Pressed>
-      <Flyby>A_BtnFlyby</Flyby>
-      <Disabled>A_BtnDisabled</Disabled>
-      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
-    </ButtonDrawTemplate>
-  </Button>
-  <Button item="Zeal_UseZealAssistOn">
-    <ScreenID>Zeal_UseZealAssistOn</ScreenID>
-    <RelativePosition>true</RelativePosition>
-    <Location>
-      <X>10</X>
-      <Y>486</Y>
-    </Location>
-    <Size>
-      <CX>150</CX>
-      <CY>20</CY>
-    </Size>
-    <Style_VScroll>false</Style_VScroll>
-    <Style_HScroll>false</Style_HScroll>
-    <Style_Transparent>false</Style_Transparent>
-    <Style_Checkbox>true</Style_Checkbox>
-    <TooltipReference>Enable per character /assist on settings</TooltipReference>
-    <Text>Use Zeal /assist on</Text>
     <TextColor>
       <R>255</R>
       <G>255</G>
@@ -815,25 +634,19 @@
     <Pieces>Zeal_HoverTimeout_Value</Pieces>
     <Pieces>Zeal_AltContainerTooltips</Pieces>
     <Pieces>Zeal_SpellbookAutoStand</Pieces>
-    <Pieces>Zeal_RightClickToEquip</Pieces>
+	<Pieces>Zeal_RightClickToEquip</Pieces>
     <Pieces>Zeal_Timestamps_Label</Pieces>
     <Pieces>Zeal_VersionLabel</Pieces>
     <Pieces>Zeal_VersionValue</Pieces>
     <Pieces>Zeal_RaidEscapeLock</Pieces>
     <Pieces>Zeal_ClassicClasses</Pieces>
     <Pieces>Zeal_TellWindows</Pieces>
-    <Pieces>Zeal_TellWindowsHist</Pieces>
-    <Pieces>Zeal_LinkAllAltDelimiter</Pieces>
-    <Pieces>Zeal_EnableContainerLock</Pieces>
-    <Pieces>Zeal_ExportOnCamp</Pieces>
-    <Pieces>Zeal_SelfClickThru</Pieces>
+	<Pieces>Zeal_TellWindowsHist</Pieces>
     <Pieces>Zeal_Timestamps_Combobox</Pieces>
-    <Pieces>Zeal_BuffTimers</Pieces>
-    <Pieces>Zeal_CastAutoStand</Pieces>
-    <Pieces>Zeal_BrownSkeletons</Pieces>
-    <Pieces>Zeal_ClassicMusic</Pieces>
-    <Pieces>Zeal_SuppressMissedNotes</Pieces>
-    <Pieces>Zeal_UseZealAssistOn</Pieces>
+	<Pieces>Zeal_BuffTimers</Pieces>
+	<Pieces>Zeal_CastAutoStand</Pieces>
+	<Pieces>Zeal_BrownSkeletons</Pieces>
+	<Pieces>Zeal_ClassicMusic</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>

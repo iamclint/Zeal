@@ -70,6 +70,8 @@ public:
 	ZealSetting<float> flash_speed = { 1.0f, "TargetRing", "FlashSpeed", true };
 	ZealSetting<float> transparency = { 0.7f, "TargetRing", "Transparency", true };
 	ZealSetting<int> num_segments = { 128, "TargetRing", "Segments", true };
+	ZealSetting<float> radius1 = { 10.f, "ZoneDev", "Radius1", true };
+	ZealSetting<float> radius2 = { 20.f, "ZoneDev", "Radius2", true };
 	ZealSetting<std::string> texture_name = { "None", "TargetRing", "Texture", true, [this](std::string name) { load_texture(name); }};
 
 	void setup_render_states();

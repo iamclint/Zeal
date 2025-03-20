@@ -5,6 +5,7 @@
 #include "EqAddresses.h"
 #include "string_util.h"
 #include "d3dx8\d3dx8.h"
+#include "EntityManager.h"
 #include <random>
 #include <algorithm>
 #define NUM_VERTICES 4
@@ -422,30 +423,43 @@ void TargetRing::callback_render() {
 		}
 	}
 
-	if (targetRingTexture) {
+	//if (targetRingTexture) {
 
-		// ### Rotate Target Ring ###
-		static constexpr float kMathPi = static_cast<float>(M_PI);
-		static float rotationAngle = 0.0f;
-		// Calculate the increment for a full rotation every 6 seconds
-		static const float rotationIncrement = (2.0f * kMathPi) / (6.0f * 1000.0f); // radians per millisecond
-		// Update the rotation angle based on the elapsed time
-		static ULONGLONG lastRotationTime = GetTickCount64();
-		ULONGLONG currentRotationTime = GetTickCount64();
-		ULONGLONG elapsedRotationTime = currentRotationTime - lastRotationTime;
-		rotationAngle += (rotationIncrement * elapsedRotationTime) * rotation_speed.get();
-		lastRotationTime = currentRotationTime;
-		// Reset the rotation angle after a full rotation
-		if (rotationAngle >= 2.0f * kMathPi) {
-			rotationAngle -= 2.0f * kMathPi;
-		}
-		float direction = static_cast<float>(target->Heading * kMathPi / 256);
-		// ### Render Target Ring ###
-		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size.get(), Color, targetRingTexture, rotate_match_heading.get() ? direction : rotationAngle);
-	}
-	else
+	//	// ### Rotate Target Ring ###
+	//	static constexpr float kMathPi = static_cast<float>(M_PI);
+	//	static float rotationAngle = 0.0f;
+	//	// Calculate the increment for a full rotation every 6 seconds
+	//	static const float rotationIncrement = (2.0f * kMathPi) / (6.0f * 1000.0f); // radians per millisecond
+	//	// Update the rotation angle based on the elapsed time
+	//	static ULONGLONG lastRotationTime = GetTickCount64();
+	//	ULONGLONG currentRotationTime = GetTickCount64();
+	//	ULONGLONG elapsedRotationTime = currentRotationTime - lastRotationTime;
+	//	rotationAngle += (rotationIncrement * elapsedRotationTime) * rotation_speed.get();
+	//	lastRotationTime = currentRotationTime;
+	//	// Reset the rotation angle after a full rotation
+	//	if (rotationAngle >= 2.0f * kMathPi) {
+	//		rotationAngle -= 2.0f * kMathPi;
+	//	}
+	//	float direction = static_cast<float>(target->Heading * kMathPi / 256);
+	//	// ### Render Target Ring ###
+	//	render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size.get(), Color, targetRingTexture, rotate_match_heading.get() ? direction : rotationAngle);
+	//}
+	//else
+	//{
+	//	render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size.get(), Color, nullptr, rotate_match_heading.get() ? target->Heading : 0);
+	//}
+	std::vector<Zeal::EqStructures::Entity*> ring_ents;
+	Zeal::EqStructures::Entity* current_ent = Zeal::EqGame::get_entity_list();
+	while (current_ent != nullptr)
 	{
-		render_ring({ target->Position.x, target->Position.y,  target->ActorInfo->Z }, outer_size.get(), Color, nullptr, rotate_match_heading.get() ? target->Heading : 0);
+		if (current_ent->Position.Dist2D(target->Position) < (radius2.get() * 2) || current_ent == target)
+			ring_ents.push_back(current_ent);
+		current_ent = current_ent->Next;
+	}
+	for (auto& ent : ring_ents)
+	{
+		render_ring({ ent->Position.x, ent->Position.y,  ent->ActorInfo->Z }, radius1.get(), ZealService::get_instance()->ui->options->GetColor(23), nullptr, 0);
+		render_ring({ ent->Position.x, ent->Position.y,  ent->ActorInfo->Z }, radius2.get(), ZealService::get_instance()->ui->options->GetColor(24), nullptr, 0);
 	}
 }
 
@@ -483,7 +497,16 @@ TargetRing::TargetRing(ZealService* zeal, IO_ini* ini)
 {
 	zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
 	zeal->callbacks->AddGeneric([this]() { callback_initui(); }, callback_type::InitUI);
-
+	zeal->commands_hook->Add("/dist", {}, "Gets distance to target",
+		[this](std::vector<std::string>& args) {
+			if (Zeal::EqGame::get_target())
+			{
+				std::stringstream ss;
+				ss << "Target: " << Zeal::EqGame::get_target()->Name << " Dist: " << Zeal::EqGame::get_target()->Position.Dist2D(Zeal::EqGame::get_self()->Position);
+				Zeal::EqGame::print_chat(ss.str());
+			}
+			return true;
+		});
 	zeal->commands_hook->Add("/targetring", {}, "Toggles target ring",
 		[this](std::vector<std::string>& args) {
 
