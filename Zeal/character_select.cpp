@@ -1,52 +1,97 @@
 #include "character_select.h"
 #include "Zeal.h"
 #include "EqAddresses.h"
+#include "IO_ini.h"
 #include <random>
 
 
 
-DWORD GetRandomZone()
-{
-	// Seed with a random device for better randomness
-	static std::random_device rd;
-	static std::mt19937 generator(rd());  // Mersenne Twister engine
-	static std::uniform_int_distribution<DWORD> distribution(1, 77);
+//DWORD GetRandomZone()
+//{
+//	// Seed with a random device for better randomness
+//	static std::random_device rd;
+//	static std::mt19937 generator(rd());  // Mersenne Twister engine
+//	static std::uniform_int_distribution<DWORD> distribution(1, 77);
+//
+//	return distribution(generator);
+//}
 
-	return distribution(generator);
+static const float max_view_distance = 5000.f;
+
+static int get_zone_index_setting()
+{
+	if (ZealService::get_instance()->charselect)
+	{
+		int zone_index = ZealService::get_instance()->charselect->ZoneIndex.get();
+		if (zone_index > 0 && zone_index != 0xb9 &&
+			ZealService::get_instance()->charselect->ZoneData.count(zone_index) &&
+			Zeal::EqGame::get_zone_name_from_index(zone_index).length())
+			return zone_index;
+	}
+	return 0;
 }
 
-void __fastcall StartWorldDisplay(DWORD t, DWORD unused, DWORD zone_index, DWORD uhh)
+static void __fastcall StartWorldDisplay(DWORD t, DWORD unused, DWORD zone_index, DWORD uhh)
 {
-	if (zone_index == 0xB9 && ZealService::get_instance()->charselect->ZoneIndex.get()!=-1) //loading (character select)
-		zone_index = ZealService::get_instance()->charselect->ZoneIndex.get();
-	
-	if (Zeal::EqGame::get_zone_name_from_index(zone_index).length() == 0) //validate the zone id by checking the name
-		zone_index = 0xB9;
-
+	if (zone_index == 0xB9 && get_zone_index_setting() > 0)
+		zone_index = get_zone_index_setting();
 	ZealService::get_instance()->hooks->hook_map["StartWorldDisplay"]->original(StartWorldDisplay)(t, unused, zone_index, uhh);
-	Zeal::EqGame::ZoneInfo->MaxClip = 2000;
-	Zeal::EqGame::ZoneInfo->MinClip = 2000;
 }
-void MovePlayerLocalSafeCoords()
+
+static void SetSafeCoordsAndMovePlayer(const Vec3& position)
 {
-	if (Zeal::EqGame::get_gamestate() != GAMESTATE_CHARSELECT)
-		ZealService::get_instance()->hooks->hook_map["MovePlayerLocalSafeCoords"]->original(MovePlayerLocalSafeCoords)();
+	auto* zone_info = Zeal::EqGame::ZoneInfo;
+	zone_info->SafeCoordsY = position[0];
+	zone_info->SafeCoordsX = position[1];
+	zone_info->SafeCoordsZ = position[2];
+	reinterpret_cast<void(*)()>(0x004B459C)();  // Call MovePlayerLocalSafeCoords().
 }
-void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD unk1, DWORD unk2)
+
+static void SetDayPeriod(int period)
 {
-	ZealService::get_instance()->hooks->hook_map["SelectCharacter"]->original(SelectCharacter)(t, unused, unk1, unk2);
-	Vec3* SafeCoords = (Vec3*)(0x79896C);
-	*SafeCoords = ZealService::get_instance()->charselect->ZoneData[ZealService::get_instance()->charselect->ZoneIndex.get()].Position;
-	ZealService::get_instance()->hooks->hook_map["MovePlayerLocalSafeCoords"]->original(MovePlayerLocalSafeCoords)();
-	*Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::CharacterSelect;
+	// CDisplay::SetDayPeriod()
+	reinterpret_cast<void(__fastcall*)(int display, int unused_edx, int period)>(0x004b177f)(*Zeal::EqGame::Display, 0, period);
+}
+
+static void SetSunLight()
+{
+	// CDisplay::SetSunLight()
+	reinterpret_cast<void(__fastcall*)(int display, int unused_edx)>(0x004b18b1)(*Zeal::EqGame::Display, 0);
+}
+
+static void SetYon(float clip)
+{
+	// CDisplay::SetYon().
+	reinterpret_cast<void(__fastcall*)(int display, int unused_edx, float clip)>(0x004aca7f)(*Zeal::EqGame::Display, 0, clip);
+}
+
+static void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD character_slot, DWORD unk2)
+{
+	int prev_cam = *Zeal::EqGame::camera_view;
+	ZealService::get_instance()->hooks->hook_map["SelectCharacter"]->original(SelectCharacter)(t, unused, character_slot, unk2);
+	int zone_index = get_zone_index_setting();
+	if (zone_index <= 0)
+		return;
+	SetSafeCoordsAndMovePlayer(ZealService::get_instance()->charselect->ZoneData[zone_index].Position);
+	
+	if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && Zeal::EqGame::Windows->CharacterSelect->Explore)
+		*Zeal::EqGame::camera_view = prev_cam; // if you happen to click yourself this keeps the camera from going to the straight out char select cam
+	else
+		*Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::CharacterSelect;
+
 	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 	if (self)
 	{
-		self->Heading = ZealService::get_instance()->charselect->ZoneData[ZealService::get_instance()->charselect->ZoneIndex.get()].Heading;
-		self->Position = ZealService::get_instance()->charselect->ZoneData[ZealService::get_instance()->charselect->ZoneIndex.get()].Position;
+		self->Heading = ZealService::get_instance()->charselect->ZoneData[zone_index].Heading;
+		self->Position = ZealService::get_instance()->charselect->ZoneData[zone_index].Position;
 		self->MovementForwardSpeedMultiplier = 2.5f;
 		self->MovementBackwardSpeedMultiplier = 2.5f;
 	}
+	Zeal::EqGame::ZoneInfo->Unknown0184 = max_view_distance-100.f;
+	Zeal::EqGame::ZoneInfo->Unknown0194 = max_view_distance;
+	SetDayPeriod(0x10);  // Fix lighting to bright daytime.
+	SetSunLight();
+	SetYon(max_view_distance+100.f);
 }
 
 void CharacterSelect::load_bmp_font() {
@@ -88,6 +133,31 @@ void CharacterSelect::render()
 }
 
 CharacterSelect::CharacterSelect(ZealService* zeal)
+{
+	load_zonedata();
+	zeal->callbacks->AddGeneric([this]() { bmp_font.reset(); }, callback_type::InitUI);  // Just release all resources.
+	zeal->callbacks->AddGeneric([this]() { bmp_font.reset(); }, callback_type::CleanUI);
+	zeal->callbacks->AddGeneric([this]() { bmp_font.reset(); }, callback_type::DXReset);  // Just release all resources.
+	zeal->callbacks->AddGeneric([this]() { render(); }, callback_type::RenderUI);
+	zeal->callbacks->AddGeneric([this]() {
+		if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && !Zeal::EqGame::Windows->CharacterSelect->Explore)
+			*Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::CharacterSelect; //this fixes the camera when camping
+		}, callback_type::CharacterSelectLoop);
+	zeal->hooks->Add("StartWorldDisplay", 0x4A849E, StartWorldDisplay, hook_type_detour);
+	zeal->hooks->Add("SelectCharacter", 0x40F56D, SelectCharacter, hook_type_detour);
+
+	mem::set(0x55B4A1, 0x90, 2); //ignore connection state for mouse wheel
+
+	//Disable enter key from entering world while in explore mode
+	mem::set(0x525ab1, 0x90, 2); //enter key down while exploring
+	mem::set(0x525aaa, 0x90, 2); //enter key up while exploring
+
+}
+CharacterSelect::~CharacterSelect()
+{
+
+}
+void CharacterSelect::load_zonedata()
 {
 	//Credits for location cleanup to thetimberowl
 	ZoneData =
@@ -271,23 +341,14 @@ CharacterSelect::CharacterSelect(ZealService* zeal)
 		{222, {{256.f, 2050.f, -218.3f}, 252 }}, //poearthb
 		{223, {{3.f, 124.f, 3.7f}, 130 }}, //potimeb
 	};
-	mem::set(0x40f83d, 0x90, 5);
-	mem::set(0x40c20a, 0x90, 5);
-	zeal->callbacks->AddGeneric([this]() { bmp_font.reset(); }, callback_type::InitUI);  // Just release all resources.
-	zeal->callbacks->AddGeneric([this]() { bmp_font.reset(); }, callback_type::CleanUI);
-	zeal->callbacks->AddGeneric([this]() { bmp_font.reset(); }, callback_type::DXReset);  // Just release all resources.
-	zeal->callbacks->AddGeneric([this]() { render(); }, callback_type::RenderUI);
-	zeal->callbacks->AddGeneric([this]() {
-		if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && !Zeal::EqGame::Windows->CharacterSelect->Explore)
-			*Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::CharacterSelect; //this fixes the camera when camping
-	}, callback_type::CharacterSelectLoop);
-	zeal->hooks->Add("StartWorldDisplay", 0x4A849E, StartWorldDisplay, hook_type_detour);
-	zeal->hooks->Add("SelectCharacter", 0x40F56D, SelectCharacter, hook_type_detour);
-	zeal->hooks->Add("MovePlayerLocalSafeCoords", 0x4B459C, MovePlayerLocalSafeCoords, hook_type_detour);
-	
-	mem::set(0x55B4A1, 0x90, 2); //ignore connection state for mouse wheel
 }
-CharacterSelect::~CharacterSelect()
-{
 
-}
+
+//Stuck here for future reference
+//static void set_clear_view()
+//{
+//	// CDisplay::SetFog() with some parameters to set a clear view.
+//	reinterpret_cast<void(__fastcall*)
+//		(int display, int unused_edx, int toggle, float distance, float unknown, char r, char g, char b)>(0x004add26)
+//		(*Zeal::EqGame::Display, 0, 1, 0, 0, 0x0c, 0x0c, 0x0c);
+//}

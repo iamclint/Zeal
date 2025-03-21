@@ -226,6 +226,9 @@ void executecmd_hk(UINT cmd, bool isdown, int unk2)
 	CallbackTrace trace("ExecuteCmd");
 	ZealService* zeal = ZealService::get_instance();
 	//Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Cmd: %i", cmd);
+
+	if (cmd == 0x8 && Zeal::EqGame::Windows && !Zeal::EqGame::Windows->SpellBook)
+		return; //don't allow auto attack to happen when spellbook is nullptr (happens in explore mode).. will cause a crash
 	if (cmd == 0xd2)
 		zeal->callbacks->invoke_generic(callback_type::EndMainLoop);
 	if (zeal->callbacks->invoke_command(callback_type::ExecuteCmd, cmd, isdown))
