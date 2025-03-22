@@ -5,6 +5,8 @@
 #include "memory.h"
 #include <algorithm>
 #include "string_util.h"
+#include <format>
+#include <regex>
 
 void ItemDisplay::InitUI()
 {
@@ -118,6 +120,87 @@ static std::string GetSpellClassLevels(const Zeal::EqStructures::_EQITEMINFO& it
 	return result;
 }
 
+
+static void ApplySpellInfo(Zeal::EqStructures::_EQITEMINFO* item, std::string& s)
+{
+	if (item->Type == 0 && item->Common.Skill != 0x14 && item->Common.IsStackable > 1 && item->Common.IsStackable < 5)
+	{
+		// Items with Clicky/Proc/Worn Spells
+		if (item->Common.IsStackableEx >= Zeal::EqEnums::ItemEffectCombatProc && item->Common.IsStackableEx <= Zeal::EqEnums::ItemEffectCanEquipClick
+			&& item->Common.SpellIdEx > 0 && item->Common.SpellIdEx < 4000)
+		{
+			int effect_level_req = Zeal::EqGame::get_effect_required_level(item);
+
+			if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCombatProc && s.find(" (Combat)") != std::string::npos)
+			{
+				// Combat Effect: Spell Name (Level 10)
+				s = std::string("Combat ") + s.substr(0, s.find(" (Combat)"));
+				if (effect_level_req > 1)
+				{
+					s += std::format(" (Level {})", effect_level_req);
+				}
+			}
+			else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectWorn && s.find("Effect: Haste (Worn)") != std::string::npos)
+			{
+				s = std::format("Effect: Haste: +{}%", item->Common.CastingLevel + 1);
+			}
+			else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectClick && s.find("Casting Time:") != std::string::npos)
+			{
+				if (effect_level_req > 1)
+				{
+					std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
+					s = s.insert(s.find("Casting Time:"), effect_level_str);
+				}
+			}
+			else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectMustEquipClick && s.find("(Must Equip") != std::string::npos)
+			{
+				if (effect_level_req > 1)
+				{
+					std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
+					s = s.insert(s.find("(Must Equip") + 1, effect_level_str);
+				}
+			}
+			else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCanEquipClick && s.find("Casting Time:") != std::string::npos)
+			{
+				if (effect_level_req > 1)
+				{
+					std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
+					s = s.insert(s.find("Casting Time:"), effect_level_str);
+				}
+				s = s.insert(s.find("Casting Time:"), "Can Equip. ");
+			}
+		}
+	}
+	if (item->Type == 0 && item->Common.Skill == 0x14 && s.starts_with("Class: "))
+	{
+		s = GetSpellClassLevels(*item, s);
+	}
+}
+static void ApplyInstrumentModifiers(Zeal::EqStructures::_EQITEMINFO* item, std::string& s)
+{
+	if (item->Type == 0 && item->Common.BardType != 0 && item->Common.BardValue > 10 &&
+		s.ends_with("Instruments") || s.ends_with("Instrument Types"))
+	{
+		int modifier = (item->Common.BardValue - 10) * 10;  // 18 = +80%, 24 = +140%
+		//s += (std::string(": ") + std::to_string(modifier) + std::string("%"));
+		s += std::format(": {}%", modifier);
+	}
+}
+static void ApplyWeaponRatio(Zeal::EqStructures::_EQITEMINFO* item, std::string& s)
+{
+
+	//remove atk delay from skill line
+	if (s.find("Atk Delay") != std::string::npos);
+		s = std::regex_replace(s, std::regex(R"(Atk Delay:\s*\d+)"), ""); 
+
+	if (item->Common.Damage > 0 && item->Common.AttackDelay > 0 && s.find("DMG: ") != std::string::npos)
+	{
+		float ratio = (float)item->Common.Damage / (float)item->Common.AttackDelay;
+		float dps = ratio * 10.f;
+		s = std::format("DMG: {} Delay: {} DPS: {:.2f}", item->Common.Damage, item->Common.AttackDelay, dps);
+	}
+	
+}
 // Generate our customized item description text.
 static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQITEMINFO* item) {
 
@@ -130,66 +213,9 @@ static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructure
 	wnd->DisplayText.Set("");
 	for (auto& s : strings) {
 		// Perform partial iteminfo filtering in combination with substrings.
-		if (item->Type == 0 && item->Common.Skill != 0x14 && item->Common.IsStackable > 1 && item->Common.IsStackable < 5)
-		{
-			// Items with Clicky/Proc/Worn Spells
-			if (item->Common.IsStackableEx >= Zeal::EqEnums::ItemEffectCombatProc && item->Common.IsStackableEx <= Zeal::EqEnums::ItemEffectCanEquipClick
-				&& item->Common.SpellIdEx > 0 && item->Common.SpellIdEx < 4000)
-			{
-				int effect_level_req = Zeal::EqGame::get_effect_required_level(item);
-
-				if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCombatProc && s.find(" (Combat)") != std::string::npos)
-				{
-					// Combat Effect: Spell Name (Level 10)
-					s = std::string("Combat ") + s.substr(0, s.find(" (Combat)"));
-					if (effect_level_req > 1)
-					{
-						s += " (Level ";
-						s += std::to_string(effect_level_req);
-						s += ")";
-					}
-				}
-				else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectWorn && s.find("Effect: Haste (Worn)") != std::string::npos)
-				{
-					s = std::string("Effect: Haste: +") + std::to_string(item->Common.CastingLevel + 1) + "%";
-				}
-				else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectClick && s.find("Casting Time:") != std::string::npos)
-				{
-					if (effect_level_req > 1)
-					{
-						std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
-						s = s.insert(s.find("Casting Time:"), effect_level_str);
-					}
-				}
-				else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectMustEquipClick && s.find("(Must Equip") != std::string::npos)
-				{
-					if (effect_level_req > 1)
-					{
-						std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
-						s = s.insert(s.find("(Must Equip") + 1, effect_level_str);
-					}
-				}
-				else if (item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCanEquipClick && s.find("Casting Time:") != std::string::npos)
-				{
-					if (effect_level_req > 1)
-					{
-						std::string effect_level_str = std::string("Level: ") + std::to_string(effect_level_req) + std::string(". ");
-						s = s.insert(s.find("Casting Time:"), effect_level_str);
-					}
-					s = s.insert(s.find("Casting Time:"), "Can Equip. ");
-				}
-			}
-		}
-		if (item->Type == 0 && item->Common.Skill == 0x14 && s.starts_with("Class: "))
-		{
-			s = GetSpellClassLevels(*item, s);
-		}
-		if (item->Type == 0 && item->Common.BardType != 0 && item->Common.BardValue > 10 && 
-			s.ends_with("Instruments") || s.ends_with("Instrument Types"))
-		{
-			int modifier = (item->Common.BardValue - 10) * 10;  // 18 = +80%, 24 = +140%
-			s += (std::string(": ") + std::to_string(modifier) + std::string("%"));
-		}
+		ApplySpellInfo(item, s);
+		ApplyInstrumentModifiers(item, s);
+		ApplyWeaponRatio(item, s);
 		s += stml_line_break;
 		wnd->DisplayText.Append(s.c_str());
 	}
