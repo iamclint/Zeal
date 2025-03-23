@@ -371,6 +371,10 @@ void Binds::add_binds()
 			}
 		}
 		});
+	add_bind(245, "Close all tell windows", "CloseAllTellWindows", key_category::Chat, [](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			ZealService::get_instance()->tells->CloseAllWindows();
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)
