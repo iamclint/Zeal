@@ -16,6 +16,7 @@ public:
 	void SetHist(bool val);
 	Zeal::EqUI::ChatWnd* FindTellWnd(std::string& name);
 	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string& msg, short channel);
+	void CloseAllWindows();
 	bool enabled = false;
 	bool hist_enabled = true;
 private:

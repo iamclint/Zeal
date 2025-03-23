@@ -260,6 +260,18 @@ bool TellWindows::IsTellWindow(Zeal::EqUI::ChatWnd* wnd)
     return false;
 }
 
+void TellWindows::CloseAllWindows()
+{
+    if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager || !enabled)
+        return;
+    for (int i = 0; i < Zeal::EqGame::Windows->ChatManager->MaxChatWindows; i++)
+    {
+        Zeal::EqUI::ChatWnd* cwnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[i];
+        if (cwnd && cwnd->IsVisible && IsTellWindow(cwnd))
+            reinterpret_cast<void(__thiscall*)(const Zeal::EqUI::ChatWnd*)>(cwnd->vtbl->Deactivate)(cwnd);
+    }
+}
+
 void TellWindows::CleanUI()
 {
     if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->ChatManager || !enabled)
