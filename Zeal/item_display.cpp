@@ -189,11 +189,14 @@ static void ApplyInstrumentModifiers(Zeal::EqStructures::_EQITEMINFO* item, std:
 static void ApplyWeaponRatio(Zeal::EqStructures::_EQITEMINFO* item, std::string& s)
 {
 
+	if (item->Common.Damage <= 0 || item->Common.AttackDelay <= 0)
+		return;
+
 	//remove atk delay from skill line
-	if (s.find("Atk Delay") != std::string::npos);
+	if (s.find("Atk Delay") != std::string::npos)
 		s = std::regex_replace(s, std::regex(R"(Atk Delay:\s*\d+)"), ""); 
 
-	if (item->Common.Damage > 0 && item->Common.AttackDelay > 0 && s.find("DMG: ") != std::string::npos)
+	if (s.find("DMG: ") != std::string::npos)
 	{
 		float ratio = (float)item->Common.Damage / (float)item->Common.AttackDelay;
 		float dps = ratio * 10.f;
