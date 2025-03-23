@@ -130,6 +130,70 @@ static int get_remaining_cast_recovery_time()
 	return time_left;
 }
 
+// EQPlayer::ModifyAttackSpeed()
+static UINT ModifyAttackSpeed(Zeal::EqStructures::Entity* eq_player, UINT raw_delay, UINT is_bow)
+{
+	return reinterpret_cast<UINT(__fastcall*)(void* eq_player, int unused_edx, UINT raw_delay, UINT is_bow)>(0x0050a039)(eq_player, 0, raw_delay, is_bow);
+}
+
+static int get_attack_timer_gauge(Zeal::EqUI::CXSTR* str)
+{
+	// Logic for the attack recovery timer was copied from DoProcessTime() which sets 0x007cd844.
+	auto self = Zeal::EqGame::get_self();
+	auto actor_info = self ? self->ActorInfo : nullptr;
+	auto char_info = Zeal::EqGame::get_char_info();
+	bool ready_to_attack = *reinterpret_cast<bool*>(0x007cd844);  // 0 = attacking, 1 = ready.
+	if (!self || !actor_info || !char_info || ready_to_attack) {
+		if (str)
+			str->Set("");
+		return 0;
+	}
+
+	UINT range_delay = 0;
+	bool is_bow = false;
+	if (actor_info->LastAttack == 11) {  // Ranged.
+		// Calculate ranged time.
+		auto range_item = char_info->InventoryItem[10];  // Ranged slot.
+		if (range_item && range_item->Common.AttackDelay) {
+			if (range_item->Common.Skill < 6 || range_item->Common.Skill == 0xd)
+				range_delay = range_item->Common.AttackDelay * 100;
+			else if (range_item->Common.Skill == 0x16)
+				range_delay = reinterpret_cast<UINT**>(0x007f7aec)[range_item->Common.AttackDelay][1];
+			is_bow = range_delay && (range_item->Common.Skill == 5);
+		}
+	}
+
+	UINT attack_delay = range_delay;  // Use range_delay if it was set non-zero above.
+	if (attack_delay == 0) {
+		auto primary_item = char_info->InventoryItem[12];  // Primary slot.
+		if (!primary_item || !primary_item->Common.AttackDelay)  // No weapon or not a weapon.
+			attack_delay = 3500;  // Assuming _CombatEQ Skill was set to 0x16 and AttackDelay = 0x1c.
+		else if (primary_item->Common.Skill < 6 || primary_item->Common.Skill == 0xd)
+			attack_delay = primary_item->Common.AttackDelay * 100;
+		else if (primary_item->Common.Skill == 0x16)  // Hand-to-hand skilldict lookup.
+			attack_delay = reinterpret_cast<UINT**>(0x007f7aec)[primary_item->Common.AttackDelay][1];
+	}
+
+	if (attack_delay)
+		attack_delay = ModifyAttackSpeed(self, attack_delay, is_bow);
+
+	UINT delay_time = Zeal::EqGame::get_eq_time() - actor_info->AttackTimer;
+	if (attack_delay == 0 || attack_delay <= delay_time) {
+		if (str)
+			str->Set("");
+		return 0;
+	}
+
+	int time_left = attack_delay - delay_time;
+	if (str) {
+		int secs_left = (time_left + 999) / 1000;  // Show 3, 2, 1, 0 countdown effectively.
+		Zeal::EqGame::CXStr_PrintString(str, "%i", secs_left);
+	}
+
+	const int full_duration = attack_delay;  // Use 4 seconds as the normalization factor.
+	return max(0, min(1000, 1000 * time_left / attack_delay));
+}
+
 static int get_recast_time_gauge(int index, Zeal::EqUI::CXSTR* str)
 {
 	bool invalid_index = index < 0 || index >= EQ_NUM_SPELL_GEMS;
@@ -203,6 +267,8 @@ int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 		case 32:  // Spell6 recast time.
 		case 33:  // Spell7 recast time.
 			return get_recast_time_gauge(EqType - 26, str);
+		case 34:  // Attack recovery timer.
+			return get_attack_timer_gauge(str);
 		default:
 			break;
 	}
