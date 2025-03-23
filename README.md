@@ -411,6 +411,7 @@ ___
   - `24` Server tick timer
   - `25` Global cast recovery countdown timer
   - `26` to `33` Recast recovery countdown timers for spell0 - spell7
+  - `34` Attack (melee/range) recovery timer
 
 - **Label EqType's**
   - `80` Mana/Max Mana
