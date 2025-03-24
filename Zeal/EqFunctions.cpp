@@ -1917,7 +1917,7 @@ namespace Zeal
 		Zeal::EqStructures::Entity* get_entity_by_parent_id(short parent_id)
 		{
 			Zeal::EqStructures::Entity* current_ent = get_entity_list();
-			while (current_ent->Next)
+			while (current_ent)
 			{
 				if (current_ent->PetOwnerSpawnId == parent_id)
 					return current_ent;
