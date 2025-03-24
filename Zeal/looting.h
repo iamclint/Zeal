@@ -13,6 +13,7 @@ public:
 	bool loot_all=false;
 	ULONGLONG loot_next_item_time = 0;
 	void looted_item();
+	void handle_hide_looted();
 	void set_last_hidden_corpse(Zeal::EqStructures::Entity* corpse);
 	looting(class ZealService* zeal);
 	~looting();

@@ -190,10 +190,10 @@ ___
           `./<character_name>_protected.ini` file.
 
 - `/hidecorpse`
-  - **Arguments:** `looted` (hides after looting), `showlast` (unhides last hidden corpse)
+  - **Arguments:** `looted` (hides after looting), `npc` (hides npcs only), `showlast` (unhides last hidden corpse)
   - **Aliases:** `/hideco`, `/hidec`, `/hc`
   - **Example:** `/hidecorpse looted`
-  - **Description:** `looted` Hides a corpse after you have looted it., `none` reveals all hidden corpses
+  - **Description:** Adds extra arguments and aliases to built in /hidecorpses command.
 
 - `/spellset`
   - **Arguments:** `save`, `load`, `delete`

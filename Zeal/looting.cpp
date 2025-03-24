@@ -118,7 +118,7 @@ void looting::unhide_last_hidden()
 
 	if (corpse && corpse->Type == Zeal::EqEnums::NPCCorpse && corpse->ActorInfo &&
 		corpse->ActorInfo->IsInvisible)
-		corpse->ActorInfo->IsInvisible = 0;
+		corpse->ActorInfo->IsInvisible = 0;  // Note: Let client update the ViewActor_->Flags field.
 	else
 		Zeal::EqGame::print_chat("No valid last hidden corpse to unhide");
 	set_last_hidden_corpse(nullptr);
@@ -131,27 +131,54 @@ void looting::set_last_hidden_corpse(Zeal::EqStructures::Entity* corpse)
 	last_hidden_spawnid = corpse ? corpse->SpawnId : 0;
 }
 
+
+// Hides a corpse if it is a valid NPC corpse. Returns true if a valid corpse.
+static bool hide_npc_corpse(Zeal::EqStructures::Entity* corpse)
+{
+	if (corpse && corpse->Type == Zeal::EqEnums::NPCCorpse && 
+		corpse->ActorInfo && corpse->ActorInfo->ViewActor_)
+	{
+		corpse->ActorInfo->IsInvisible = 1; // Flag set by /hidecorpse all.
+		corpse->ActorInfo->ViewActor_->Flags |= 0x40000000;  // t3dSetActorInvisible(true).
+		return true;
+	}
+	return false;
+}
+
+// Hides all valid NPC corpses in the entity list.
+static void hide_npc_corpses()
+{
+	Zeal::EqGame::print_chat("Hiding all existing npc corpses.");
+	Zeal::EqStructures::Entity* current_ent = Zeal::EqGame::get_entity_list();
+	while (current_ent)
+	{
+		hide_npc_corpse(current_ent);
+		current_ent = current_ent->Next;
+	}
+}
+
 void __fastcall CLootWndDeactivate(int uk, int unused, int lootwnd_ptr)
 {
 	ZealService* zeal = ZealService::get_instance();
-	Zeal::EqStructures::Entity* corpse = Zeal::EqGame::get_active_corpse();
-	if (corpse && corpse->ActorInfo && zeal->looting_hook->hide_looted && corpse->Type == 2)
-	{
-		corpse->ActorInfo->IsInvisible = 1; //this is the flag set by /hidecorpse all (so /hidecorpse none will reshow these hidden corpses)
-		zeal->looting_hook->set_last_hidden_corpse(corpse);
-	}
+	zeal->looting_hook->handle_hide_looted();
 	zeal->hooks->hook_map["CLootWndDeactivate"]->original(CLootWndDeactivate)(uk, unused, lootwnd_ptr);
 }
 
 void __fastcall release_loot(int uk, int lootwnd_ptr)
 {
 	ZealService* zeal = ZealService::get_instance();
-	Zeal::EqStructures::Entity* corpse = Zeal::EqGame::get_active_corpse();
-	if (corpse && corpse->ActorInfo && zeal->looting_hook->hide_looted && corpse->Type==2)
-	{
-		corpse->ActorInfo->IsInvisible = 1; //this is the flag set by /hidecorpse all (so /hidecorpse none will reshow these hidden corpses)
-	}
+	zeal->looting_hook->handle_hide_looted();
 	zeal->hooks->hook_map["ReleaseLoot"]->original(release_loot)(uk, lootwnd_ptr);
+}
+
+void looting::handle_hide_looted()
+{
+	if (!hide_looted)
+		return;
+
+	Zeal::EqStructures::Entity* corpse = Zeal::EqGame::get_active_corpse();
+	if (hide_npc_corpse(corpse))
+		set_last_hidden_corpse(corpse);
 }
 
 looting::~looting()
@@ -604,6 +631,16 @@ looting::looting(ZealService* zeal)
 			{
 				unhide_last_hidden();
 				return true;
+			}
+			else if (args.size() == 2 && args[1] == "npc")
+			{
+				hide_npc_corpses();
+				return true;
+			}
+			else if (args.size() == 1)
+			{
+				// Print out new usage instructions. Return false so default usage prints.
+				Zeal::EqGame::print_chat("/hidecorpse zeal options: looted, showlast, npc");
 			}
 			return false;
 		});
