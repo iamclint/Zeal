@@ -38,27 +38,19 @@ void ui_zoneselect::Show()
 void ui_zoneselect::InitUI()
 {
 	static constexpr int kMaxComboBoxItems = 50;
-	if (wnd)
-		Zeal::EqGame::print_chat("Warning: Init out of sync for ui_zoneselect");
-
-	if (Zeal::EqGame::Windows->CharacterSelect)
-	{
-		ui->AddButtonCallback(Zeal::EqGame::Windows->CharacterSelect, "Zeal_ZoneSelect", [this](Zeal::EqUI::BasicWnd* btnwnd) {
-
-			if (wnd->IsVisible)
-				Hide();
-			else
-				Show();
-		});
-		ui->AddButtonCallback(Zeal::EqGame::Windows->CharacterSelect, "Explore_Button", [this](Zeal::EqUI::BasicWnd* btnwnd) {
-			Hide();
-		});
-		
-	}
-	else
+	if (!Zeal::EqGame::Windows->CharacterSelect)
 	{
 		MessageBoxA(NULL, "Character Select Not Loaded", "UI Error", 1);
+		return;
 	}
+
+	// The ZoneSelect is optional in the XML files so support the case where it is not found.
+	if (!Zeal::EqGame::Windows->CharacterSelect->GetChildItem("Zeal_ZoneSelect"))
+		return;
+
+	// Initialize Zone select window.
+	if (wnd)
+		Zeal::EqGame::print_chat("Warning: Init out of sync for ui_zoneselect");
 
 	static const char* xml_file = "./uifiles/zeal/EQUI_ZoneSelect.xml";
 	if (!wnd && ui && std::filesystem::exists(xml_file))
@@ -69,14 +61,32 @@ void ui_zoneselect::InitUI()
 		Zeal::EqGame::print_chat("Error: Failed to load %s", xml_file);
 		return;
 	}
+
+	ui->AddButtonCallback(Zeal::EqGame::Windows->CharacterSelect, "Explore_Button", [this](Zeal::EqUI::BasicWnd* btnwnd) {
+		Hide();  // Close the window when entering explore mode.
+		});
+
+	ui->AddButtonCallback(Zeal::EqGame::Windows->CharacterSelect, "Zeal_ZoneSelect", [this](Zeal::EqUI::BasicWnd* btnwnd) {
+		if (wnd && wnd->IsVisible)
+			Hide();  // Makes the button act as a toggle to hide the window.
+		else
+			Show();  // Opens the window for selecting a zone.
+		});
+
 	Zeal::EqUI::ListWnd* lst = (Zeal::EqUI::ListWnd*)wnd->GetChildItem("Zeal_ZoneSelect_ListBox");
 	ui->AddButtonCallback(wnd, "Zeal_ZoneSelect_Apply", [this, lst](Zeal::EqUI::BasicWnd* btn) { 
 
 		std::string str_zone_id = lst->GetItemText(lst->SelectedIndex, 0);
 		int zone_id = 0;
 		Zeal::String::tryParse(str_zone_id, &zone_id);
-		ZealService::get_instance()->charselect->ZoneIndex.set(zone_id);
-		ui->inputDialog->show("Character Select Zone", "The change in zone will take effect the next time you enter character select", "OK", "", nullptr, nullptr, false);
+		if (zone_id <= 0)
+			ui->inputDialog->show("Character Select Zone", "Please select a valid zone", "OK", "", nullptr, nullptr, false);
+		else {
+			ZealService::get_instance()->charselect->ZoneIndex.set(zone_id);
+			ui->inputDialog->show("Character Select Zone",
+				"The change in zone will take effect the next time you enter character select", "OK", "", nullptr, nullptr, false);
+			Hide();
+		}
 	});
 	if (lst) {
 

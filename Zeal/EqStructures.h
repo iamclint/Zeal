@@ -774,7 +774,7 @@ namespace Zeal
 			/* 0x1709 */ BYTE Unknown1709[2475];
 
 			// Note: The unmodified client EQCHARINFO has 8 bank slots with the rest of the structure
-			//       effectively unused to the original size of 0x2014. If the Quarm eqgame.dll patch
+			//       effectively unused to the original size of 0x2104. If the Quarm eqgame.dll patch
 			//       is active, the structure is modified to the layout below. The code must check
 			//       for the presence of the patch before accessing beyond EQ_NUM_INVENTORY_BANK_SLOTS.
 			//       Currently this is the get_num_total_bank_slots() which returns 60 if patched.
