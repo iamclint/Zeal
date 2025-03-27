@@ -2577,5 +2577,44 @@ namespace Zeal
 			if (char_info->StandingState == Stance::Stand || char_info->StandingState == Stance::Duck)
 				entity->ChangeStance(Stance::Sit);
 		}
+
+		// eqgame.dll patch support that expanded the number of available bank slots.
+		int get_num_personal_bank_slots()
+		{
+			// The following patch modification could be used to dynamically check the number
+			// of available bank slots:
+			// Displays contents of bank bags past 8
+			//PatchT(0x423191 + 2, (BYTE)MAX_BANK_SLOTS); // CInvSlotMgr::UpdateSlots_423089
+
+			// For the short-term, we are relying on the total call to check for the patch.
+			if (get_num_total_bank_slots() == 60)
+				return 30;
+			return EQ_NUM_INVENTORY_BANK_SLOTS;  // Fallback to the safe default.
+		}
+
+		int get_num_shared_bank_slots()
+		{
+			return max(0, min(30, get_num_total_bank_slots() - get_num_personal_bank_slots()));
+		}
+
+		int get_num_total_bank_slots()
+		{
+			// Sanity check the eqcharinfo structure is the patched version.
+			if (sizeof(Zeal::EqStructures::EQCHARINFO) != 0x21a4)
+				return EQ_NUM_INVENTORY_BANK_SLOTS;  // Fallback to the safe default.
+
+			// First read the patched total number of bank slots.
+			// PatchT(0x4CE982 + 3, (int)TotalBagSlotsAtEndOfPlayerProfile); // EQCharInfo Destructor
+			int total_number = *reinterpret_cast<int*>(0x4ce985);
+
+			// And also sanity check the char_info_size allocation matches.
+			// PatchT(0x40B036 + 1, (int)new_charinfo_size); // CCharacterCreation::CCharacterCreation_40AB77
+			int char_info_size = *reinterpret_cast<int*>(0x40b037);
+
+			if (total_number == 60 && char_info_size == sizeof(Zeal::EqStructures::EQCHARINFO))
+				return 60;
+
+			return EQ_NUM_INVENTORY_BANK_SLOTS;  // Fallback to the safe default.
+		}
 	}
 }

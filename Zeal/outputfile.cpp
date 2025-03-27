@@ -159,30 +159,33 @@ void OutputFile::export_inventory(const std::vector<std::string>& args)
   }
 
   { // Process Bank Items
-    for (size_t i = 0; i < EQ_NUM_INVENTORY_BANK_SLOTS; ++i) {
+    int num_bank_slots = Zeal::EqGame::get_num_personal_bank_slots();
+    for (int i = 0; i < Zeal::EqGame::get_num_total_bank_slots(); ++i) {
       Zeal::EqStructures::EQITEMINFO* item = self->CharInfo->InventoryBankItem[i];
+      const char* label = (i < num_bank_slots) ? "Bank" : "SharedBank";
+      int slot = (i < num_bank_slots) ? (i + 1) : (i + 1 - num_bank_slots);
       if (item) {
         if (ItemIsContainer(item)) {
           int capacity = static_cast<int>(item->Container.Capacity);
-          oss << "Bank" << i + 1 << t << item->Name << t << item->ID << t << 1 << t << capacity << std::endl;
+          oss << label << slot << t << item->Name << t << item->ID << t << 1 << t << capacity << std::endl;
           for (int j = 0; j < capacity; ++j) {
             Zeal::EqStructures::EQITEMINFO* bag_item = item->Container.Item[j];
             if (bag_item) {
               int stack_count = ItemIsStackable(bag_item) ? static_cast<int>(bag_item->Common.StackCount) : 1;
-              oss << "Bank" << i + 1 << "-Slot" << j + 1 << t << bag_item->Name << t << bag_item->ID << t << stack_count << t << 0 << std::endl;
+              oss << label << slot << "-Slot" << j + 1 << t << bag_item->Name << t << bag_item->ID << t << stack_count << t << 0 << std::endl;
             }
             else {
-              oss << "Bank" << i + 1 << "-Slot" << j + 1 << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
+              oss << label << slot << "-Slot" << j + 1 << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
             }
           }
         }
         else {
           int stack_count = ItemIsStackable(item) ? static_cast<int>(item->Common.StackCount) : 1;
-          oss << "Bank" << i + 1 << t << item->Name << t << item->ID << t << stack_count << t << 0 << std::endl;
+          oss << label << slot << t << item->Name << t << item->ID << t << stack_count << t << 0 << std::endl;
         }
       }
       else {
-        oss << "Bank" << i + 1 << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
+        oss << label << slot << t << "Empty" << t << 0 << t << 0 << t << 0 << std::endl;
       }
     }
     ULONGLONG coin = 0;

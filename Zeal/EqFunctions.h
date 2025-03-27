@@ -253,5 +253,10 @@ namespace Zeal
 			SortType sort_type = SortType::Ascending);
 		short total_spell_affects(Zeal::EqStructures::EQCHARINFO* char_info, BYTE affect_type, BYTE a3, int* per_buff_values);
 		void sit();
+
+		// eqgame.dll patch support that expanded the number of available bank slots.
+		int get_num_personal_bank_slots();
+		int get_num_shared_bank_slots();
+		int get_num_total_bank_slots();
 	}
 }

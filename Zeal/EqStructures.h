@@ -772,9 +772,20 @@ namespace Zeal
 			/* 0x152C */ BYTE Unknown152C[476];
 			/* 0x1708 */ BYTE AirSupply; // air remaining while swimming underwater
 			/* 0x1709 */ BYTE Unknown1709[2475];
-			/* 0x20B4 */ struct _EQITEMINFO* InventoryBankItem[EQ_NUM_INVENTORY_BANK_SLOTS];
-			/* ...... */
-		};
+
+			// Note: The unmodified client EQCHARINFO has 8 bank slots with the rest of the structure
+			//       effectively unused to the original size of 0x2014. If the Quarm eqgame.dll patch
+			//       is active, the structure is modified to the layout below. The code must check
+			//       for the presence of the patch before accessing beyond EQ_NUM_INVENTORY_BANK_SLOTS.
+			//       Currently this is the get_num_total_bank_slots() which returns 60 if patched.
+			// Original structure:
+			// 0x20B4 */ struct _EQITEMINFO* InventoryBankItem[EQ_NUM_INVENTORY_BANK_SLOTS];
+			// 0x20D4 */ DWORD UnusedSpace[12]; (Index '4' is set to 1 but unused, patched out).
+			// };  /* 0x2104 (total size) */
+			// Patched layout:
+			/* 0x20B4 */ struct _EQITEMINFO* InventoryBankItem[30];
+			/* 0x212C */ struct _EQITEMINFO* SharedBankItem[30];
+		};  /* 0x21A4 (total size) */
 
 		struct Everquest
 		{

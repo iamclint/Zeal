@@ -371,6 +371,13 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				Zeal::EqGame::print_chat(ss.str());
 				return true;
 			}
+			if (args.size() == 2 && args[1] == "bank") // Temporary for bank patch testing.
+			{
+				Zeal::EqGame::print_chat("total: %i, personal: %i, shared: %i, size: 0x%x",
+					Zeal::EqGame::get_num_total_bank_slots(), Zeal::EqGame::get_num_personal_bank_slots(),
+					Zeal::EqGame::get_num_shared_bank_slots(), sizeof(Zeal::EqStructures::EQCHARINFO));
+				return true;
+			}
 			if (args.size() == 2 && args[1] == "check")  // Report state and do basic debug integrity checks.
 			{
 				ZealService::get_instance()->entity_manager.get()->Dump();
