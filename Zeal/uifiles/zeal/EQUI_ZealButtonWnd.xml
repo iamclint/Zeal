@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<XML ID="EQInterfaceDefinitionLanguage">
+  <Schema xmlns="EverQuestData" xmlns:dt="EverQuestDataTypes" />
+  <Button item="Zeal_Button">
+    <ScreenID>Zeal_Button</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>1</X>
+      <Y>1</Y>
+    </Location>
+    <Size>
+      <CX>98</CX>
+      <CY>24</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>false</Style_Checkbox>
+    <Text>Button</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+    <AutoStretch>false</AutoStretch>
+    <TopAnchorToTop>false</TopAnchorToTop>
+    <RightAnchorToLeft>false</RightAnchorToLeft>
+    <LeftAnchorToLeft>false</LeftAnchorToLeft>
+    <BottomAnchorToTop>false</BottomAnchorToTop>
+    <BottomAnchorOffset>1</BottomAnchorOffset>
+  </Button>
+  <Screen item="ZealButtonWnd">
+    <RelativePosition>false</RelativePosition>
+    <Location>
+      <X>2</X>
+      <Y>2</Y>
+    </Location>
+    <Size>
+      <CX>100</CX>
+      <CY>26</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <DrawTemplate>WDT_Def</DrawTemplate>
+    <Style_Titlebar>false</Style_Titlebar>
+    <Style_Closebox>false</Style_Closebox>
+    <Style_Minimizebox>false</Style_Minimizebox>
+    <Style_Border>false</Style_Border>
+    <Style_Sizable>false</Style_Sizable>
+    <Pieces>Zeal_Button</Pieces>
+  </Screen>
+</XML>

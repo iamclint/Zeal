@@ -79,6 +79,10 @@ static void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD character_sl
 	else
 		*Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::CharacterSelect;
 
+	if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && !Zeal::EqGame::Windows->CharacterSelect->Explore &&
+					ZealService::get_instance()->ui->zoneselect)
+		ZealService::get_instance()->ui->zoneselect->ShowButton();  // Put dynamic button (if present) on top.
+
 	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 	if (self)
 	{
