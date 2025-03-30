@@ -12,7 +12,7 @@ public:
 	~ui_zoneselect();
 private:
 	Zeal::EqUI::EQWND* wnd = nullptr;
-	void InitUI();
+	void InitUI();  // Called in InitCharSelectUI().
 	void Deactivate();
 	void CleanUI();
 	ui_manager* ui;
