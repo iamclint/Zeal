@@ -3,7 +3,9 @@
 #include "d3dx8/d3d8.h"
 #include "d3dx8/d3d8types.h"
 #include "d3dx8/d3dx8math.h"
+#include "ZealSettings.h"
 #include <vector>
+
 
 class directx
 {
@@ -11,6 +13,7 @@ public:
 	bool WorldToScreen(Vec3 worldPos, Vec2& screenPos);
 	Vec2 GetScreenRect();
 	IDirect3DDevice8* GetDevice();
+    ZealSetting<int> fps_limit = { true, "Zeal", "FPS", 0 };
 	directx();
 private:
 	IDirect3DDevice8* device;
