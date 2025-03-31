@@ -390,6 +390,35 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_ExportOnCamp",           [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->outputfile->setting_export_on_camp.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SelfClickThru",          [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->setting_selfclickthru.set(wnd->Checked); });
 	ui->AddComboCallback(wnd,	 "Zeal_Timestamps_Combobox",	[](Zeal::EqUI::BasicWnd* wnd, int value) { ZealService::get_instance()->chat_hook->TimeStampsStyle.set(value); });
+	ui->AddComboCallback(wnd,	 "Zeal_FPS_Combobox",			[](Zeal::EqUI::BasicWnd* wnd, int value) {
+		switch (value)
+		{
+			case 0:
+				ZealService::get_instance()->dx->fps_limit.set(0);
+				break;
+			case 1:
+				ZealService::get_instance()->dx->fps_limit.set(30);
+				break;
+			case 2:
+				ZealService::get_instance()->dx->fps_limit.set(60);
+				break;
+			case 3:
+				ZealService::get_instance()->dx->fps_limit.set(120);
+				break;
+			case 4:
+				ZealService::get_instance()->dx->fps_limit.set(144);
+				break;
+			case 5:
+				ZealService::get_instance()->dx->fps_limit.set(165);
+				break;
+			case 6:
+				ZealService::get_instance()->dx->fps_limit.set(240);
+				break;
+			default:
+				ZealService::get_instance()->dx->fps_limit.set(0);
+				break;
+		}
+	});
 	ui->AddSliderCallback(wnd,	 "Zeal_HoverTimeout_Slider",	[this](Zeal::EqUI::SliderWnd* wnd, int value) {	int val = value * 5; ZealService::get_instance()->tooltips->set_timer(val); ui->SetLabelValue("Zeal_HoverTimeout_Value", "%i ms", val); });
 	ui->AddLabel(wnd, "Zeal_HoverTimeout_Value");
 	ui->AddLabel(wnd, "Zeal_VersionValue");
@@ -637,6 +666,35 @@ void ui_options::UpdateOptionsGeneral()
 	if (!wnd)
 		return;
 
+	int fps_limit_selection = 0;
+	switch (ZealService::get_instance()->dx->fps_limit.get())
+	{
+		case 0:
+			fps_limit_selection = 0;
+			break;
+		case 30:
+			fps_limit_selection = 1;
+			break;
+		case 60:
+			fps_limit_selection = 2;
+			break;
+		case 120:
+			fps_limit_selection = 3;
+			break;
+		case 144:
+			fps_limit_selection = 4;
+			break;
+		case 165:
+			fps_limit_selection = 5;
+			break;
+		case 240:
+			fps_limit_selection = 6;
+			break;
+		default:
+			fps_limit_selection = 0;
+			break;
+	}
+	ui->SetComboValue("Zeal_FPS_Combobox", fps_limit_selection);
 	ui->SetComboValue("Zeal_Timestamps_Combobox", ZealService::get_instance()->chat_hook->TimeStampsStyle.get());
 	ui->SetSliderValue("Zeal_HoverTimeout_Slider", ZealService::get_instance()->tooltips->hover_timeout > 0 ? ZealService::get_instance()->tooltips->hover_timeout / 5 : 0);
 	ui->SetLabelValue("Zeal_HoverTimeout_Value", "%d ms", ZealService::get_instance()->tooltips->hover_timeout);

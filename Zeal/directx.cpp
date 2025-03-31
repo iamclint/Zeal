@@ -2,17 +2,52 @@
 #include "Zeal.h"
 #pragma comment(lib, "d3dx8/d3d8.lib")
 #pragma comment(lib, "d3dx8/d3dx8.lib")
+#include <chrono>
+HRESULT WINAPI Local_BeginScene(LPDIRECT3DDEVICE8 pDevice)
+{
+
+    if (pDevice)
+    {
+        static LARGE_INTEGER last_frame = {};
+        static LARGE_INTEGER frequency = {};
+
+        if (frequency.QuadPart == 0)
+            QueryPerformanceFrequency(&frequency);
+
+        int fps_limit_val = ZealService::get_instance()->dx->fps_limit.get();
+        HRESULT ret = ZealService::get_instance()->hooks->hook_map["BeginScene"]->original(Local_BeginScene)(pDevice);
+
+        if (fps_limit_val > 0)
+        {
+            double frame_time = 1.0 / fps_limit_val; // Desired frame time in seconds
+            LARGE_INTEGER current_time;
+            QueryPerformanceCounter(&current_time);
+
+            double elapsed_time = (double)(current_time.QuadPart - last_frame.QuadPart) / frequency.QuadPart;
+            double sleep_time = frame_time - elapsed_time;
+
+            //Use this while loop for precise waiting, sleep has too much variation
+            if (sleep_time > 0)
+            {
+                LARGE_INTEGER wait_until;
+                QueryPerformanceCounter(&wait_until);
+                while (((double)(wait_until.QuadPart - current_time.QuadPart) / frequency.QuadPart) < sleep_time)
+                    QueryPerformanceCounter(&wait_until);
+            }
+        }
+
+        QueryPerformanceCounter(&last_frame);
+        return ret;
+    }
+    return ZealService::get_instance()->hooks->hook_map["BeginScene"]->original(Local_BeginScene)(pDevice);
+}
+
 
 HRESULT WINAPI Local_EndScene(LPDIRECT3DDEVICE8 pDevice)
 {
     HRESULT ret = ZealService::get_instance()->hooks->hook_map["EndScene"]->original(Local_EndScene)(pDevice);
-    __asm { pushad };
-    if (pDevice)
-    {
-        if (ZealService::get_instance()->callbacks)
-            ZealService::get_instance()->callbacks->invoke_generic(callback_type::EndScene);
-    }
-    __asm { popad };
+    if (ZealService::get_instance()->callbacks)
+        ZealService::get_instance()->callbacks->invoke_generic(callback_type::EndScene);
     return ret;
 }
 
@@ -40,9 +75,12 @@ void directx::update_device()
         if (vtable)
         {
             DWORD endscene_addr = (DWORD)vtable[35];
+            DWORD beginscene_addr = (DWORD)vtable[34];
             DWORD reset_addr = (DWORD)vtable[14];
-   /*         if (!ZealService::get_instance()->hooks->hook_map.count("EndScene"))
-                ZealService::get_instance()->hooks->Add("EndScene", endscene_addr, Local_EndScene, hook_type_detour);*/
+            if (!ZealService::get_instance()->hooks->hook_map.count("EndScene"))
+                ZealService::get_instance()->hooks->Add("EndScene", endscene_addr, Local_EndScene, hook_type_detour);
+            if (!ZealService::get_instance()->hooks->hook_map.count("BeginScene"))
+                ZealService::get_instance()->hooks->Add("BeginScene", beginscene_addr, Local_BeginScene, hook_type_detour);
             if (!ZealService::get_instance()->hooks->hook_map.count("Reset"))
                 ZealService::get_instance()->hooks->Add("Reset", reset_addr, Local_Reset, hook_type_detour);
         }

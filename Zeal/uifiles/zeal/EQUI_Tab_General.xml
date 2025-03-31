@@ -1016,6 +1016,53 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+  <Label item="Zeal_FPS_Label">
+    <ScreenID>Zeal_FPS_Label</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>194</X>
+      <Y>396</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>14</CY>
+    </Size>
+    <Text>FPS Limit</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <NoWrap>true</NoWrap>
+    <AlignCenter>false</AlignCenter>
+    <AlignRight>false</AlignRight>
+  </Label>
+  <Combobox item = "Zeal_FPS_Combobox">
+		<ScreenID>Zeal_FPS_Combobox</ScreenID>
+		<Location>
+			<X>194</X>
+			<Y>416</Y>
+		</Location>
+		<Size>
+			<CX>140</CX>
+			<CY>25</CY>
+		</Size>
+		<TextColor>
+			<R>255</R>
+			<G>255</G>
+			<B>255</B>
+		</TextColor>
+		<ListHeight>60</ListHeight>
+		<Button>BDT_Combo</Button>
+		<Style_Border>true</Style_Border>
+		<Choices>Unlimited</Choices>
+		<Choices>30</Choices>
+		<Choices>60</Choices>
+		<Choices>120</Choices>
+		<Choices>144</Choices>
+		<Choices>165</Choices>
+		<Choices>240</Choices>
+	</Combobox>
   <!-- end -->
     
   <Page item="Tab_General">
@@ -1077,6 +1124,8 @@
     <Pieces>Zeal_InviteSound_Label</Pieces>
     <Pieces>Zeal_InviteSound_Combobox</Pieces>
     <Pieces>Zeal_Timestamps_Combobox</Pieces>
+	<Pieces>Zeal_FPS_Combobox</Pieces>
+	<Pieces>Zeal_FPS_Label</Pieces>
     <Location>
       <X>0</X>
       <Y>22</Y>
