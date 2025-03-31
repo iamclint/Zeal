@@ -429,6 +429,7 @@ ___
 - **LootAllButton**
 - **LinkAllButton** (w/option to select either `, ` or ` | ` delimiter)
 
+- Option to select background zone at character select w/explore mode.
 
 ### Options UI 
 - Separate Zeal options window that opens in parallel with the client window

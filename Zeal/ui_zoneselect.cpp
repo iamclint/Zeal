@@ -12,6 +12,12 @@ void ui_zoneselect::CleanUI()
 		ui->DestroySidlScreenWnd(wnd);
 		wnd = nullptr;
 	}
+	if (btn_wnd)
+	{
+		ui->DestroySidlScreenWnd(btn_wnd);
+		btn_wnd = nullptr;
+	}
+
 }
 void ui_zoneselect::Deactivate()
 {
@@ -19,6 +25,9 @@ void ui_zoneselect::Deactivate()
 	{
 		wnd->show(0, false);
 	}
+
+	if (btn_wnd)
+		btn_wnd->show(0, false);
 }
 void ui_zoneselect::Hide()
 {
@@ -26,7 +35,6 @@ void ui_zoneselect::Hide()
 	{
 		wnd->show(0, 0);
 	}
-	
 }
 void ui_zoneselect::Show()
 {
@@ -34,6 +42,16 @@ void ui_zoneselect::Show()
 	{
 		wnd->show(1, 1);
 	}
+}
+void ui_zoneselect::HideButton()
+{
+	if (btn_wnd)
+		btn_wnd->show(0, false);
+}
+void ui_zoneselect::ShowButton()
+{
+	if (btn_wnd)
+		btn_wnd->show(1, true);  /// Show and put on top.
 }
 void ui_zoneselect::InitUI()
 {
@@ -44,9 +62,26 @@ void ui_zoneselect::InitUI()
 		return;
 	}
 
-	// The ZoneSelect is optional in the XML files so support the case where it is not found.
+	// The ZoneSelect is optional in the XML files so support the case where it is not found
+	// by adding a simple button wnd.
 	if (!Zeal::EqGame::Windows->CharacterSelect->GetChildItem("Zeal_ZoneSelect"))
-		return;
+	{
+		if (!btn_wnd)
+		{
+			static const char* xml_file = "./uifiles/zeal/EQUI_ZealButtonWnd.xml";
+			if (ui && std::filesystem::exists(xml_file))
+				btn_wnd = ui->CreateSidlScreenWnd("ZealButtonWnd");
+		}
+
+		if (!btn_wnd)  // Bail out since failed to create a button to select zones.
+			return;
+
+		Zeal::EqUI::BasicWnd* btn = btn_wnd->GetChildItem("Zeal_Button", true);
+		if (btn)
+			btn->Text.Set("Zone Select");
+
+		// ShowButton() is deferred to SelectCharacter() to support returning from Explore.
+	}
 
 	// Initialize Zone select window.
 	if (wnd)
@@ -64,9 +99,12 @@ void ui_zoneselect::InitUI()
 
 	ui->AddButtonCallback(Zeal::EqGame::Windows->CharacterSelect, "Explore_Button", [this](Zeal::EqUI::BasicWnd* btnwnd) {
 		Hide();  // Close the window when entering explore mode.
+		HideButton();  // Also hide the zone select toggle button.
 		});
 
-	ui->AddButtonCallback(Zeal::EqGame::Windows->CharacterSelect, "Zeal_ZoneSelect", [this](Zeal::EqUI::BasicWnd* btnwnd) {
+	Zeal::EqUI::EQWND* btn_parent = btn_wnd ? btn_wnd : Zeal::EqGame::Windows->CharacterSelect;
+	const char* label = btn_wnd ? "Zeal_Button" : "Zeal_ZoneSelect";
+	ui->AddButtonCallback(btn_parent, label, [this](Zeal::EqUI::BasicWnd* btnwnd) {
 		if (wnd && wnd->IsVisible)
 			Hide();  // Makes the button act as a toggle to hide the window.
 		else
@@ -132,4 +170,5 @@ ui_zoneselect::ui_zoneselect(ZealService* zeal, ui_manager* mgr)
 	zeal->callbacks->AddGeneric([this]() { InitUI(); Hide(); }, callback_type::InitCharSelectUI);
 
 	ui->AddXmlInclude("EQUI_ZoneSelect.xml");
+	ui->AddXmlInclude("EQUI_ZealButtonWnd.xml");
 }
