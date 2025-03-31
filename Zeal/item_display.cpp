@@ -192,15 +192,13 @@ static void ApplyWeaponRatio(Zeal::EqStructures::_EQITEMINFO* item, std::string&
 	if (item->Common.Damage <= 0 || item->Common.AttackDelay <= 0)
 		return;
 
-	//remove atk delay from skill line
-	if (s.find("Atk Delay") != std::string::npos)
-		s = std::regex_replace(s, std::regex(R"(Atk Delay:\s*\d+)"), ""); 
-
-	if (s.find("DMG: ") != std::string::npos)
+	size_t pos = s.find("DMG: ");
+	if (pos != std::string::npos)
 	{
+		pos = s.find(" ", pos + strlen("DMG: "));  // Find next space (if any) after dmg.
+		pos = (pos == std::string::npos) ? s.length() : pos;
 		float ratio = (float)item->Common.Damage / (float)item->Common.AttackDelay;
-		float dps = ratio * 10.f;
-		s = std::format("DMG: {} Delay: {} DPS: {:.2f}", item->Common.Damage, item->Common.AttackDelay, dps);
+		s = s.insert(pos, std::format(" ({:.3f})", ratio));
 	}
 	
 }
