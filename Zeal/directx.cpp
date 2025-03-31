@@ -14,9 +14,6 @@ HRESULT WINAPI Local_BeginScene(LPDIRECT3DDEVICE8 pDevice)
         if (frequency.QuadPart == 0)
             QueryPerformanceFrequency(&frequency);
 
-        LARGE_INTEGER frame_start;
-        QueryPerformanceCounter(&frame_start);
-
         int fps_limit_val = ZealService::get_instance()->dx->fps_limit.get();
         HRESULT ret = ZealService::get_instance()->hooks->hook_map["BeginScene"]->original(Local_BeginScene)(pDevice);
 
