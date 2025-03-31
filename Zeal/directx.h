@@ -13,7 +13,7 @@ public:
 	bool WorldToScreen(Vec3 worldPos, Vec2& screenPos);
 	Vec2 GetScreenRect();
 	IDirect3DDevice8* GetDevice();
-    ZealSetting<int> fps_limit = { true, "Zeal", "FPS", 0 };
+    ZealSetting<int> fps_limit = { 0, "Zeal", "FPS", false };
 	directx();
 private:
 	IDirect3DDevice8* device;
