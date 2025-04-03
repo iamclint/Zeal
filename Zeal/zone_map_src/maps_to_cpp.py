@@ -271,6 +271,8 @@ def export_lookup_function(all_zone_data: dict, fp):
         fp.write(f'      case {zone_data["id"]}:\n')
         if zone_data['id_instanced']:
             fp.write(f'      case {zone_data["id_instanced"]}:\n')
+        if zone_data['id'] == '110':  # Hack override for Quarm iceclad2 [id == 230].
+            fp.write('      case 230:\n')
         fp.write(f'        return &{zone_name}_data;\n')
     fp.write('      default:\n')
     fp.write('        return nullptr;\n')
