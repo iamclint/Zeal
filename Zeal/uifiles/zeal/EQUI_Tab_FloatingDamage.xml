@@ -213,6 +213,37 @@
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
   </Button>
+  <Button item="Zeal_FloatingHideWithGui">
+    <ScreenID>Zeal_FloatingHideWithGui</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>178</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Hides FCD when GUI is hidden (Default fonts are always hidden)</TooltipReference>
+    <Text>Hide with GUI</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
+
   <!-- Font Combobox -->
   <Label item="Zeal_FloatingFont_Label">
     <ScreenID>Zeal_FloatingFont_Label</ScreenID>
@@ -339,6 +370,7 @@
     <Pieces>Zeal_FloatingMelee</Pieces>
     <Pieces>Zeal_FloatingSpells</Pieces>
     <Pieces>Zeal_FloatingSpellIcons</Pieces>
+    <Pieces>Zeal_FloatingHideWithGui</Pieces>
     <Pieces>Zeal_FloatingBigHit_Label</Pieces>
     <Pieces>Zeal_FloatingBigHit_Slider</Pieces>
     <Pieces>Zeal_FloatingBigHit_Value</Pieces>

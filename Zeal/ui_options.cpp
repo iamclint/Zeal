@@ -443,6 +443,7 @@ void ui_options::InitFloatingDamage()
 	if (!wnd)
 		return;
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingDamage", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->enabled.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_FloatingHideWithGui", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->hide_with_gui.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingSelf", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_self.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingPets", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_pets.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_FloatingOthers", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->floating_damage->show_others.set(wnd->Checked); });
@@ -567,6 +568,7 @@ void ui_options::InitTargetRing()
 	ui->AddLabel(wnd, "Zeal_TargetRingTransparency_Value");
 
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRing", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->enabled.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingHideWithGui", [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->target_ring->hide_with_gui.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingDisableForSelf", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->disable_for_self.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingAttackIndicator", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->attack_indicator.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_TargetRingForward", [](Zeal::EqUI::BasicWnd* wnd) {ZealService::get_instance()->target_ring->rotate_match_heading.set(wnd->Checked); });

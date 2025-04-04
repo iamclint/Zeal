@@ -38,6 +38,7 @@ public:
 	void callback_deferred();
 	void callback_render();
 	ZealSetting<bool> enabled = { true, "FloatingDamage", "Enabled", true };
+	ZealSetting<bool> hide_with_gui = { false, "FloatingDamage", "HideWithGui", true };
 	ZealSetting<bool> spell_icons = { true, "FloatingDamage", "Icons", true };
 	ZealSetting<bool> show_spells = { true, "FloatingDamage", "Spells", true };
 	ZealSetting<bool> show_melee = { true, "FloatingDamage", "Melee", true };
@@ -56,6 +57,7 @@ public:
 	~FloatingDamage();
 private:
 
+	bool is_visible() const;
 	bool add_texture(std::string path);
 	std::vector<IDirect3DTexture8*> textures;
 	IDirect3DTexture8* load_texture(std::string path);

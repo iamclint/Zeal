@@ -222,6 +222,7 @@ namespace Zeal
 		std::string get_class_desc(int class_id);  // CEverQuest::GetClassDesc()
 		std::string get_title_desc(int class_id, int aa_rank, int gender);  // CEverQuest::GetTitleDesc()
 		std::string get_player_guild_name(short guild_id); // GetPlayerGuildName()
+		bool is_gui_visible();  // Returns true if DrawWindows() will be called.
 		bool is_game_ui_window_hovered();
 		bool is_targetable(Zeal::EqStructures::Entity* ent);
 		bool is_in_game();
