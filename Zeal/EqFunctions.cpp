@@ -377,6 +377,9 @@ namespace Zeal
 		{
 			return *(EqUI::CXWndManager**)0x809db4;
 		}
+		bool is_gui_visible() {
+			return *(reinterpret_cast<int*>(0x0063b918)) != 3;  // ScreenMode == 3 when F10 is pressed.
+		}
 		bool is_game_ui_window_hovered()
 		{
 			EqUI::CXWndManager* mgr = *(EqUI::CXWndManager**)0x809db4;

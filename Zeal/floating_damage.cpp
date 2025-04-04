@@ -138,9 +138,17 @@ int  FloatingDamage::get_active_damage_count(Zeal::EqStructures::Entity* ent)
 	return damage_numbers[ent].size();
 }
 
+bool FloatingDamage::is_visible() const
+{
+	// In default text mode FCD visibility follows the GUI windows since the text uses that
+	// rendering path while in ZealFonts text mode it is visible unless explicitly told to hide.
+	return ((bitmap_font && !hide_with_gui.get()) ||
+		Zeal::EqGame::is_gui_visible());
+}
+
 void FloatingDamage::callback_render()
 {
-	if (!enabled.get() || !Zeal::EqGame::is_in_game())
+	if (!enabled.get() || !Zeal::EqGame::is_in_game() || !is_visible())
 		return;
 
 	load_bitmap_font();
@@ -177,6 +185,7 @@ void FloatingDamage::render_spells()
 
 void FloatingDamage::callback_deferred()
 {
+	// This callback only happens if is_gui_visible().
 	if (enabled.get() && Zeal::EqGame::is_in_game() && bitmap_font == nullptr)
 		render_text();  // Bitmap fonts were disabled, so use the client CTextureFont.
 }
@@ -195,7 +204,7 @@ void FloatingDamage::render_text()
 				for (auto& dmg : dmg_vec)
 				{
 					dmg.tick(get_active_damage_count(target));
-					if (std::find(visible_ents.begin(), visible_ents.end(), target) != visible_ents.end() || target == Zeal::EqGame::get_self())
+					if (!dmg.needs_removed && (std::find(visible_ents.begin(), visible_ents.end(), target) != visible_ents.end() || target == Zeal::EqGame::get_self()))
 					{
 						Vec2 screen_pos = { 0,0 };
 						if (ZealService::get_instance()->dx->WorldToScreen({ target->Position.x,target->Position.y,target->Position.z }, screen_pos))
@@ -291,7 +300,7 @@ void FloatingDamage::handle_hp_update_packet(const Zeal::Packets::SpawnHPUpdate_
 void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target,
 	WORD type, short spell_id, short damage, char output_text)
 {
-	if (!enabled.get())
+	if (!enabled.get() || !is_visible())
 		return;
 
 	if (!target || damage <= 0)

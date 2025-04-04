@@ -385,7 +385,7 @@ void TargetRing::render_ring(Vec3 pos, float radius, DWORD color, IDirect3DTextu
 }
 
 void TargetRing::callback_render() {
-	if (!enabled.get())
+	if (!enabled.get() || (hide_with_gui.get() && !Zeal::EqGame::is_gui_visible()))
 		return;
 	Zeal::EqStructures::Entity* target = Zeal::EqGame::get_target();
 	if (!target || !target->ActorInfo || !target->ActorInfo->ViewActor_)
