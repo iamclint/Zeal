@@ -164,6 +164,13 @@ char* __fastcall StripName(int t, int unused, char* data)
     return data;
 }
 
+void  __fastcall RezConfirmationDialogActivate(int t, int u, int unknown1, int unknown2, const char* message)
+{
+    if (message)
+        Zeal::EqGame::print_chat(message);
+    return ZealService::get_instance()->hooks->hook_map["RezConfirmationDialogActivate"]->
+        original(RezConfirmationDialogActivate)(t, u, unknown1, unknown2, message);
+}
 
 enum class caret_dir : int
 {
@@ -765,7 +772,8 @@ chat::chat(ZealService* zeal, IO_ini* ini)
     zeal->hooks->Add("DoPercentConvert", 0x538110, DoPercentConvert, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("PrintChat", 0x537f99, PrintChat, hook_type_detour); //add extra prints for new loot types
     zeal->hooks->Add("EditWndHandleKey", 0x5A3010, EditWndHandleKey, hook_type_detour); //this makes more sense than the hook I had previously
-    
+    zeal->hooks->Add("RezConfirmationDialogActivate", 0x004e206a, RezConfirmationDialogActivate, hook_type_replace_call); //add rez dialog to chat
+
 
 
     //My function for getting instruction length was failing on this function, couldn't be bothered to look into it too deeply atm so just replaced all the calls to it
