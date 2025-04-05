@@ -2,6 +2,80 @@
 
 Summarizes notable changes to Zeal
 
+## [0.6.6] - 2025/04/05
+
+### New features:
+*  Character select screen now allows zone selection and explore mode
+   - Selected zone becomes the future char select background
+   - Adds a dynamic Zeal_ZoneSelect button that will appear if the
+     EQUI_CharacterSelect.xml lacks it
+   - Custom skins can control the button location and appearance by adding the button
+   - The uifiles/zeal/optional has an xml that can be copied to the uifiles/default folder
+     to control it in the default screen (which always appears at first startup)
+   - Known issues w/explore:
+      - Applying a new zone, then exploring, then exiting has issues
+      - No jumping and a few other similar UI limitations
+
+* Added options to play sounds upon group invite or a new incoming tell
+  - Controlled by combobox Zeal general options.
+  - Setting to None disables (default).
+
+* Nameplate enhancements:
+  - Added a 'Guild LFG' nameplate color
+  - Added a 'PVP Ally' nameplate color (applies to raid, group, and guild members in PVP)
+
+* New [/survey command](https://github.com/iamclint/Zeal?tab=readme-ov-file#polling-of-raid-using-survey) for polling raid group with yes/no questions
+
+* Existing command enhancements:
+  - Added `/protect cursor`: toggles protection of cursor item
+  - Added `/protect worn`: enables protection of all equipped items
+  - Added `/hidecorpse showlast`: unhides the last hidden corpse
+  - Added `/hidecorpse npc`: hides all existing NPC corpses (excludes players)
+
+* `/linkall` improvements
+  - Now sorted alphabetically
+  - Supports displaying more than 10 items
+    - Active chat window: Add active links until there are 10
+      and then it will just add remaining item as text names
+    - `/linkall <channel>`: Split the item links across
+      multiple channel messages to stay below the 10 link limit.
+
+* Map
+  - Corrected out of area map data for arena (hat tip to Talodar)
+  - Added iceclad2 map and default Brewall maps for future zones
+
+* Added weapon (ratio) to item display
+
+* New keybinds:
+  - Added a new UI hotkey option (244) that duplicates clicking on the buy or sell button
+    with the shift key held down
+  - Added a new Keyboard->Chat keybind that will deactivate all visible tell windows.
+    Note that if history is enabled, unnoticed messages could be dropped. Sending a new
+    tell to the person or /r will pop back up the tell window (with history if enabled).
+
+* Added new gauge type 34 (attack recovery timer)
+  - New gauge provides a countdown gauge / string tracking the
+    attack (range/melee) recovery countdown
+
+* /outputfile inventory support for expanded bank slots
+
+* New fps limiter option in Zeal General options
+
+* Added the resurrection dialog message to chat and log to support 
+  external triggers
+
+* Changes to boot heap corruption check
+  - Made the checks more conservative (multiple check failures required)
+  - Added a speculative crit section wrapper
+  - Added dialog options to retry and ignore so user can bypass
+
+### Fixes / infrastructure:
+  - Fix a possible nullptr crash in singleclick when accessing a world container
+  - Removed unused build Visual Studio project build configurations
+  - Add better detection of and handling for infinite crash loops
+  - Added additional camera view to the enum since character select already uses type 5
+
+
 ## [0.6.5] - 2025/02/27
 
 ### New features:
