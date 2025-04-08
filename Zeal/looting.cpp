@@ -361,6 +361,16 @@ static void __fastcall RequestSellItem(Zeal::EqUI::MerchantWnd* this_wnd, int un
 //	zeal->hooks->hook_map["SellItem"]->original(SellItem)(this_eq_main, unused_edx, item_info, param);
 //}
 
+// Replace the CEverquest::LootCorpse() call in the new UI's RightClickedOnPlayer() method to check for ctrl key.
+static void __fastcall RightClickedOnPlayerLootCorpse(void* ceverquest_this, int unused_edx, void* entity, int param)
+{
+	ZealService* zeal = ZealService::get_instance();
+	if (zeal->looting_hook->setting_ctrl_rightclick_loot.get() && Zeal::EqGame::get_wnd_manager()
+			 && !Zeal::EqGame::get_wnd_manager()->ControlKeyState)
+		return;  // Control was not held down while right clicking on a player object.
+	zeal->hooks->hook_map["RightClickedOnPlayerLootCorpse"]->original(RightClickedOnPlayerLootCorpse)(ceverquest_this, unused_edx, entity, param);
+}
+
 bool looting::is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINFO* item_info) const
 {
 	if (!setting_protect_enable.get() || !item_info)
@@ -664,7 +674,20 @@ looting::looting(ZealService* zeal)
 		});
 	zeal->commands_hook->Add("/lootlast", {}, "Set an item to loot last when self looting.",
 		[this](std::vector<std::string>& args) { return parse_loot_last(args); });
-
+	zeal->commands_hook->Add("/lootctrl", {}, "Sets requirement for ctrl key with right click loot (toggle, on, off)",
+		[this](std::vector<std::string>& args) {
+			if (args.size() == 1)
+				this->setting_ctrl_rightclick_loot.toggle();
+			else if (args[1] == "on")
+				this->setting_ctrl_rightclick_loot.set(true);
+			else if (args[1] == "off")
+				this->setting_ctrl_rightclick_loot.set(false);
+			else
+				Zeal::EqGame::print_chat("Usage: /lootctrl, /lootctrl on, /lootctrl off");
+			Zeal::EqGame::print_chat("Ctrl right click loot: %s",
+				this->setting_ctrl_rightclick_loot.get() ? "On" : "Off");
+			return true;
+		});
 	zeal->hooks->Add("ReleaseLoot", 0x426576, release_loot, hook_type_detour);
 	zeal->hooks->Add("CLootWndDeactivate", 0x426559, CLootWndDeactivate, hook_type_detour);
 
@@ -676,4 +699,9 @@ looting::looting(ZealService* zeal)
 	zeal->hooks->Add("ClickedTradeButton", 0x0043964e, ClickedTradeButton, hook_type_detour);  // CTradeWnd::ClickedTradeButton
 	zeal->hooks->Add("RequestSellItem", 0x00427c83, RequestSellItem, hook_type_detour);  // CMerchantWnd::RequestSellItem
 	// Old UI path: zeal->hooks->Add("SellItem", 0x0047e0af, SellItem, hook_type_detour);  // EQ_Main::SellItem 
+
+	zeal->hooks->Add("RightClickedOnPlayerLootCorpse", 0x00532981, RightClickedOnPlayerLootCorpse,
+		hook_type_replace_call);
+	// Old UI path: zeal->hooks->Add("RightClickedOnPlayerLootCorpse", 0x0043cd58, RightClickedOnPlayerLootCorpse,
+	//	hook_type_replace_call);
 }

@@ -159,8 +159,12 @@ ___
 - `/lootall`
   - **Description:** loots all items from a corpse if looting window is open.
 
+- `/lootctrl`
+  - **Arguments:** none (toggles), `on`, `off`
+  - **Description:** controls the requirement to hold ctrl down to enable right click looting
+
 - `/lootlast`
-  - **Arguments:** `item_id_#`, `item_link`, or `0` to disable_
+  - **Arguments:** `item_id_#`, `item_link`, or `0` to disable.
   - **Description:** specifies an item ID that will be left as the last item when using /lootall on your corpse 
  
 - `/melody`
