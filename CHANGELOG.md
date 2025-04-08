@@ -59,6 +59,12 @@ Summarizes notable changes to Zeal
 
 * /outputfile inventory support for expanded bank slots
 
+* Added option checkboxes to enable linking the visibility of the
+  target ring or the floating combat damage with the F10 UI
+  visibility toggle ("Hide with Gui")
+  - Fixed an issue with FCD where the spell icons remained visible
+    but the text were hidden with the GUI
+
 * New fps limiter option in Zeal General options
 
 * Added the resurrection dialog message to chat and log to support 

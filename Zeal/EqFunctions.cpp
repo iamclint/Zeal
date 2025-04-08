@@ -2619,5 +2619,703 @@ namespace Zeal
 
 			return EQ_NUM_INVENTORY_BANK_SLOTS;  // Fallback to the safe default.
 		}
+
+		// Returns the avoidance value used in combat calculations. The server includes the combat
+		// agility AA bonus for combat, while the displayed client AC does not.
+		int get_avoidance(bool include_combat_agility)
+		{
+			auto char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return 0;
+			int avoidance = char_info->compute_defense();  // Does not include CombatAgility AA.
+
+			if (!include_combat_agility)
+				return avoidance;
+
+			auto self = char_info->SpawnInfo;
+			auto actor_info = self ? self->ActorInfo : nullptr;
+			if (!actor_info)
+				return avoidance;
+
+			UINT combat_agility = actor_info->AAAbilities[0x22];  // Combat Agility AA skill = 0x22.
+			int boost_percent = (combat_agility == 3) ? 10 : (combat_agility == 2) ? 5 : (combat_agility == 1) ? 2 : 0;
+			int extra_avoidance = avoidance * boost_percent / 100;
+
+			// The server code adds the extra avoidance before the drunk derating, so we have to
+			// apply that here before adding.
+			int drunk_factor = char_info->Drunkness / 2;
+			if (drunk_factor > 20)
+				extra_avoidance = extra_avoidance * (110 - drunk_factor) / 100;
+			return avoidance + extra_avoidance;
+		}
+
+		// Mitigation has era dependence.
+		Era get_era() {
+			auto char_info = Zeal::EqGame::get_char_info();
+			BYTE expansions = char_info ? char_info->Expansions : 0;
+			// TODO: Quarm is setting both the char_info field and global values so that all
+			// expansions are active instead of the currently active expansion.
+			expansions = 0x03; // TODO: Hard-code to Velious.
+
+			// Alternative: Use globals set by OP_ExpansionInfo to determine expansion:
+			//expansions = 0;
+			//if (*reinterpret_cast<DWORD*>(0x007cf1e8))  // gKunarkEnabled_007cf1e8
+			//	expansions = expansions | 0x01;
+			//if (*reinterpret_cast<DWORD*>(0x007cf1ec))  // gVeliousEnabled_007cf1ec
+			//	expansions = expansions | 0x02;
+			//if (*reinterpret_cast<DWORD*>(0x007cf1f0))  // gLuclinEnabled_007cf1f0
+			//	expansions = expansions | 0x04;
+			//if (*reinterpret_cast<DWORD*>(0x007cf1f4))  // gPlanesOfPowerEnabled_007cf1f4
+			//	expansions = expansions | 0x08;
+
+			if (expansions & 0x08)
+				return Era::PlanesOfPower;
+			if (expansions & 0x04)
+				return Era::Luclin;
+			if (expansions & 0x02)
+				return Era::Velious;
+			if (expansions & 0x01)
+				return Era::Kunark;
+			return Era::Classic;
+		}
+
+		// Helper function to calculate the softcap value based on class and era.
+		int get_mitigation_softcap()
+		{
+			int softcap = 350; // AC cap is 350 for all classes in Classic era and for levels 50 and under
+
+			auto char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return 350; // Return classic by default.
+
+			if (char_info->Level > 50) {
+				if (get_era() >= Era::Velious) {
+					switch (char_info->Class) {
+					case Zeal::EqEnums::ClassTypes::Warrior:
+						softcap = 430;
+						break;
+					case Zeal::EqEnums::ClassTypes::Paladin:
+					case Zeal::EqEnums::ClassTypes::Shadowknight:
+					case Zeal::EqEnums::ClassTypes::Cleric:
+					case Zeal::EqEnums::ClassTypes::Bard:
+						softcap = 403;
+						break;
+					case Zeal::EqEnums::ClassTypes::Ranger:
+					case Zeal::EqEnums::ClassTypes::Shaman:
+						softcap = 375;
+						break;
+					case Zeal::EqEnums::ClassTypes::Monk:
+						softcap = 350;  // Assuming RuleB(AlKabor, ReducedMonkAC) is false.
+						break;
+					default:
+						softcap = 350;  // dru, rog, wiz, ench, nec, mag, bst
+						break;
+					}
+				}
+				else if (get_era() >= Era::Kunark &&
+					char_info->Class == Zeal::EqEnums::ClassTypes::Warrior)
+					softcap = 405;
+			}
+
+			// Combat Stability related AA's that raise the softcap
+			auto alt_adv_mgr = Zeal::EqStructures::AltAdvManager::get_manager();
+			if (alt_adv_mgr)
+				softcap += alt_adv_mgr->CalculateMitigationBoost(char_info, softcap);
+
+			// Shield AC is not capped in Luclin. It is directly added w/out the 4/3 factor.
+			if (get_era() >= Era::Luclin && char_info->InventoryItem[0xd] && char_info->InventoryItem[0xd]->Type == 0 &&
+				char_info->InventoryItem[0xd]->Common.Skill == 8) {
+				softcap += char_info->InventoryItem[0xd]->Common.ArmorClass;
+			}
+
+			return softcap;
+		}
+
+		// Applies the era dependent softcap and overcap calcs to the ac_sum for the final mitigation.
+		static int apply_mitigation_softcap(Zeal::EqStructures::EQCHARINFO* char_info, int ac_sum, int softcap)
+		{
+			if (ac_sum <= softcap)
+				return ac_sum;
+
+			if (char_info->Level <= 50 || get_era() < Era::Luclin)
+				return softcap;		// Hard-cap <= level 50 and pre-luclin.
+
+			int overcap = ac_sum - softcap;
+			int returns = 20;
+
+			using Zeal::EqEnums::ClassTypes;
+			int cls = char_info->Class;
+			int level = char_info->Level;
+
+			if (get_era() < Era::PlanesOfPower) {
+				returns = 12;  // Fixed /12 for all melee in Luclin.
+
+				if (cls == ClassTypes::Cleric || cls == ClassTypes::Druid || cls == ClassTypes::Shaman ||
+					cls == ClassTypes::Wizard ||cls == ClassTypes::Magician || cls == ClassTypes::Enchanter ||
+					cls == ClassTypes::Necromancer)
+					overcap = 0; // melee only until PoP
+			}
+			else {
+				if (cls == ClassTypes::Warrior)
+					returns = (level <= 61) ? 5 : (level <= 63) ? 4 : 3;
+				else if (cls == ClassTypes::Paladin || cls == ClassTypes::Shadowknight)
+					returns = (level <= 61) ? 6 : (level <= 63) ? 5 : 4;
+				else if (cls == ClassTypes::Bard)
+					returns = (level <= 61) ? 8 : (level <= 63) ? 7 : 6;
+				else if (cls == ClassTypes::Monk || cls == ClassTypes::Rogue)
+					returns = 20 - max(0, (level - 61) * 2);
+				else if (cls == ClassTypes::Ranger || cls == ClassTypes::Beastlord)
+					returns = (level <= 61) ? 10 : (level <= 62) ? 9 : (level <= 63) ? 8 : 7;
+			}
+			return softcap + overcap / returns;
+		}
+
+		int get_mitigation(bool include_cap)
+		{
+			// The client ac call is hard-coded with planes_of_power soft-capping. Instead of trying
+			// to patch that, we just call it with the cap ignored and then duplicate the server
+			// code for the appropriate era.
+			// 
+			// Note: There may be some anti-twink discrepancy for levels < 50. The client relies on a 
+			// per item cap using AntiTwinkLevel and AntiTwinkSkill while the server has it's own
+			// formula.
+
+			auto char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return 0;
+			int ac_sum = char_info->ac(false);  // Called w/out applying any cap.
+
+			if (!include_cap)
+				return ac_sum;
+
+			int softcap = get_mitigation_softcap();
+			int mitigation = apply_mitigation_softcap(char_info, ac_sum, softcap);
+			return mitigation;
+		}
+
+		// This is the value displayed in the UI (ignores the softcap) and is not used in combat calcs.
+		int get_display_AC()
+		{
+			// Equivalent to EQ_Main::CalcDefense() at 0x004712bc and is just here for reference.
+			return  (get_avoidance() + get_mitigation()) * 1000 / 847;
+		}
+
+		// Returns the level vs recommended level derating factor (typically negative "bonus").
+		static int calc_recommended_level_bonus(BYTE level, BYTE reclevel, int basestat)
+		{
+			if ((reclevel > 0) && (level < reclevel))
+			{
+				int statmod = (level * 10000 / reclevel) * basestat;
+				int round = (statmod < 0) ? -5000 : 5000;
+				return (statmod + round) / 10000;
+			}
+
+			return 0;
+		}
+
+		// Returns the skill associated with the weapon. Defaults to hand to hand.
+		static Zeal::EqEnums::SkillType get_weapon_skill(const Zeal::EqStructures::EQITEMINFO* weapon)
+		{
+			if (weapon && weapon->Type == 0) {
+				switch (weapon->Common.Skill)
+				{
+				case Zeal::EqEnums::ItemTypes::ItemType1HSlash:
+					return Zeal::EqEnums::SkillType::Skill1HSlashing;
+				case Zeal::EqEnums::ItemTypes::ItemType2HSlash:
+					return Zeal::EqEnums::SkillType::Skill2HSlashing;
+				case Zeal::EqEnums::ItemTypes::ItemType1HPiercing:
+					return Zeal::EqEnums::SkillType::Skill1HPiercing;
+				case Zeal::EqEnums::ItemTypes::ItemType1HBlunt:
+					return Zeal::EqEnums::SkillType::Skill1HBlunt;
+				case Zeal::EqEnums::ItemTypes::ItemType2HBlunt:
+					return Zeal::EqEnums::SkillType::Skill2HBlunt;
+				case Zeal::EqEnums::ItemTypes::ItemType2HPiercing:
+					return Zeal::EqEnums::SkillType::Skill1HPiercing; // change to Skill2HPiercing once activated
+				case Zeal::EqEnums::ItemTypes::ItemTypeMartial:
+					return Zeal::EqEnums::SkillType::SkillHandtoHand;
+				default:
+					break;
+				}
+			}
+			return Zeal::EqEnums::SkillType::SkillHandtoHand;
+		}
+
+
+		// Returns the default weaponless base damage.
+		static int get_hand_to_hand_damage(const Zeal::EqStructures::EQCHARINFO& char_info)
+		{
+			static BYTE mnk_dmg[] = { 99,
+				4, 4, 4, 4, 5, 5, 5, 5, 5, 6,           // 1-10
+				6, 6, 6, 6, 7, 7, 7, 7, 7, 8,           // 11-20
+				8, 8, 8, 8, 9, 9, 9, 9, 9, 10,          // 21-30
+				10, 10, 10, 10, 11, 11, 11, 11, 11, 12, // 31-40
+				12, 12, 12, 12, 13, 13, 13, 13, 13, 14, // 41-50
+				14, 14, 14, 14, 14, 14, 14, 14, 14, 14, // 51-60
+				14, 14 };                                // 61-62
+			static BYTE bst_dmg[] = { 99,
+				4, 4, 4, 4, 4, 5, 5, 5, 5, 5,        // 1-10
+				5, 6, 6, 6, 6, 6, 6, 7, 7, 7,        // 11-20
+				7, 7, 7, 8, 8, 8, 8, 8, 8, 9,        // 21-30
+				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
+				10, 11, 11, 11, 11, 11, 11, 12, 12 }; // 41-49
+
+			if (char_info.Class == Zeal::EqEnums::ClassTypes::Monk)
+			{
+				auto primary = char_info.InventoryItem[Zeal::EqEnums::EquipSlot::Primary];
+				if (primary && primary->ID == 10652 && char_info.Level > 50)		// Celestial Fists, monk epic
+					return 9;
+				if (char_info.Level > 62)
+					return 15;
+				return mnk_dmg[char_info.Level];
+			}
+			else if (char_info.Class == Zeal::EqEnums::ClassTypes::Beastlord)
+			{
+				if (char_info.Level > 49)
+					return 13;
+				return bst_dmg[char_info.Level];
+			}
+			return 2;
+		}
+
+
+		// returns the client's weapon (or hand to hand) damage
+		// calling this with SlotRange will also add the arrow damage
+		// Note: No target specific damage in this calc (bane or the like).
+		static int get_base_damage(int slot, const Zeal::EqStructures::EQITEMINFO* weapon)
+		{
+			Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+			Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
+			if (!char_info || !self)
+			{
+				Zeal::EqGame::print_chat("Error: invalid self or char_info. Output will be wrong.");
+				return 0;
+			}
+
+			using Zeal::EqEnums::EquipSlot::EquipSlot;
+			if (slot != EquipSlot::Secondary && slot != EquipSlot::Range && slot != EquipSlot::Ammo)
+				slot = EquipSlot::Primary;
+
+			int dmg = 0;
+
+			if (weapon)
+			{
+				if (char_info->Level < weapon->Common.RecLevel)
+					dmg = calc_recommended_level_bonus(char_info->Level, weapon->Common.RecLevel, weapon->Common.Damage);
+				else
+					dmg = weapon->Common.Damage;
+
+				if (slot == EquipSlot::Range && char_info->InventoryItem[EquipSlot::Ammo])
+					dmg += get_base_damage(EquipSlot::Ammo, char_info->InventoryItem[EquipSlot::Ammo]);
+			}
+			else if (slot == EquipSlot::Primary || slot == EquipSlot::Secondary)
+				dmg = get_hand_to_hand_damage(*char_info);
+
+			return dmg;
+		}
+
+		// Returns true if the item is a weapon capable of generating damage.
+		static bool is_weapon(const Zeal::EqStructures::EQITEMINFO* weapon)
+		{
+			if (!weapon || weapon->Type != 0) {
+				return false;
+			}
+
+			if (weapon->Common.Skill == Zeal::EqEnums::ItemTypes::ItemTypeArrow && weapon->Common.Damage != 0) {
+				return true;
+			}
+			else {
+				return ((weapon->Common.Damage != 0) && (weapon->Common.AttackDelay != 0));
+			}
+		}
+
+		static bool is_melee_class(BYTE eqclass) {
+			switch (eqclass)
+			{
+			case Zeal::EqEnums::ClassTypes::Warrior:
+			case Zeal::EqEnums::ClassTypes::Paladin:
+			case Zeal::EqEnums::ClassTypes::Ranger:
+			case Zeal::EqEnums::ClassTypes::Shadowknight:
+			case Zeal::EqEnums::ClassTypes::Monk:
+			case Zeal::EqEnums::ClassTypes::Bard:
+			case Zeal::EqEnums::ClassTypes::Rogue:
+			case Zeal::EqEnums::ClassTypes::Beastlord:
+				return true;
+			default:
+				return false;
+			}
+		}
+
+		static int get_damage_bonus(const Zeal::EqStructures::EQITEMINFO* weapon)
+		{
+			Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return 0;
+
+			if (char_info->Level < 28 || !is_melee_class(char_info->Class))
+				return 0;
+
+			int bonus = 1 + (char_info->Level - 28) / 3;
+
+			const BYTE* item_type = weapon ? &(weapon->Common.Skill) : nullptr;
+			if (item_type && (*item_type == Zeal::EqEnums::ItemType2HSlash || 
+				*item_type == Zeal::EqEnums::ItemType2HBlunt || *item_type == Zeal::EqEnums::ItemType2HPiercing))
+			{
+				int delay = weapon->Common.AttackDelay;
+				if (delay <= 27)
+					return bonus + 1;
+
+				int level = char_info->Level;
+				if (level > 29)
+				{
+					int level_bonus = (level - 30) / 5 + 1;
+					if (level > 50)
+					{
+						level_bonus++;
+						int level_bonus2 = level - 50;
+						if (level > 67)
+							level_bonus2 += 5;
+						else if (level > 59)
+							level_bonus2 += 4;
+						else if (level > 58)
+							level_bonus2 += 3;
+						else if (level > 56)
+							level_bonus2 += 2;
+						else if (level > 54)
+							level_bonus2++;
+						level_bonus += level_bonus2 * delay / 40;
+					}
+					bonus += level_bonus;
+				}
+				if (delay >= 40)
+				{
+					int delay_bonus = (delay - 40) / 3 + 1;
+					if (delay >= 45)
+						delay_bonus += 2;
+					else if (delay >= 43)
+						delay_bonus++;
+					bonus += delay_bonus;
+				}
+				return bonus;
+			}
+			return bonus;
+		}
+
+
+		int get_anti_twink_damage(int base_damage)
+		{
+			Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return base_damage;
+
+			// anti-twink damage caps.  Taken from decompiles
+			int level = char_info->Level;
+			if (level < 10)
+			{
+				switch (char_info->Class)
+				{
+				case Zeal::EqEnums::ClassTypes::Druid:
+				case Zeal::EqEnums::ClassTypes::Cleric:
+				case Zeal::EqEnums::ClassTypes::Shaman:
+					if (base_damage > 9)
+						base_damage = 9;
+					break;
+				case Zeal::EqEnums::ClassTypes::Wizard:
+				case Zeal::EqEnums::ClassTypes::Magician:
+				case Zeal::EqEnums::ClassTypes::Necromancer:
+				case Zeal::EqEnums::ClassTypes::Enchanter:
+					if (base_damage > 6)
+						base_damage = 6;
+					break;
+				default:
+					if (base_damage > 10)
+						base_damage = 10;
+				}
+			}
+			else if (level < 20)
+			{
+				switch (char_info->Class)
+				{
+				case Zeal::EqEnums::ClassTypes::Druid:
+				case Zeal::EqEnums::ClassTypes::Cleric:
+				case Zeal::EqEnums::ClassTypes::Shaman:
+					if (base_damage > 12)
+						base_damage = 12;
+					break;
+				case Zeal::EqEnums::ClassTypes::Wizard:
+				case Zeal::EqEnums::ClassTypes::Magician:
+				case Zeal::EqEnums::ClassTypes::Necromancer:
+				case Zeal::EqEnums::ClassTypes::Enchanter:
+					if (base_damage > 10)
+						base_damage = 10;
+					break;
+				default:
+					if (base_damage > 14)
+						base_damage = 14;
+				}
+			}
+			else if (level < 30)
+			{
+				switch (char_info->Class)
+				{
+				case Zeal::EqEnums::ClassTypes::Druid:
+				case Zeal::EqEnums::ClassTypes::Cleric:
+				case Zeal::EqEnums::ClassTypes::Shaman:
+					if (base_damage > 20)
+						base_damage = 20;
+					break;
+				case Zeal::EqEnums::ClassTypes::Wizard:
+				case Zeal::EqEnums::ClassTypes::Magician:
+				case Zeal::EqEnums::ClassTypes::Necromancer:
+				case Zeal::EqEnums::ClassTypes::Enchanter:
+					if (base_damage > 12)
+						base_damage = 12;
+					break;
+				default:
+					if (base_damage > 30)
+						base_damage = 30;
+				}
+			}
+			else if (level < 40)
+			{
+				switch (char_info->Class)
+				{
+				case Zeal::EqEnums::ClassTypes::Druid:
+				case Zeal::EqEnums::ClassTypes::Cleric:
+				case Zeal::EqEnums::ClassTypes::Shaman:
+					if (base_damage > 26)
+						base_damage = 26;
+					break;
+				case Zeal::EqEnums::ClassTypes::Wizard:
+				case Zeal::EqEnums::ClassTypes::Magician:
+				case Zeal::EqEnums::ClassTypes::Necromancer:
+				case Zeal::EqEnums::ClassTypes::Enchanter:
+					if (base_damage > 18)
+						base_damage = 18;
+					break;
+				default:
+					if (base_damage > 60)
+						base_damage = 60;
+				}
+			}
+			return base_damage;
+		}
+
+		static int get_offense(const Zeal::EqEnums::SkillType skill, bool verbose = false)
+		{
+			auto char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return 0;
+
+			bool ranged = (skill == Zeal::EqEnums::SkillArchery || skill == Zeal::EqEnums::SkillThrowing);
+			int stat_for_bonus = ranged ? char_info->dex() : char_info->str();
+			int stat_bonus = max(0, (stat_for_bonus - 75) * 2 / 3);
+			const int SE_ATK = 2;  // Spell Effect ID for attack boosts.
+			int spell_atk = char_info->total_spell_affects(SE_ATK, false, nullptr);
+			int item_atk = char_info->total_item_spell_affects(SE_ATK);
+			int skill_value = char_info->i_have_skill(skill) ? char_info->skill(skill) : 0;
+
+			// Client (and server) transfers the primal avatar +100 from spell atk to item atk.
+			if (char_info->is_spell_affecting_pc(0x982)) {
+				spell_atk -= 100;
+				item_atk += 100;
+				item_atk = min(250, item_atk);  //  RuleI(Character, ItemATKCap), client == 250.
+			}
+
+			int offense = skill_value + spell_atk + item_atk + stat_bonus;
+
+			int class_bonus = (char_info->Class == Zeal::EqEnums::ClassTypes::Ranger) ?
+				(max(0, (char_info->Level - 54) * 4)) : 0;
+			offense += class_bonus;
+			offense = max(1, offense);
+
+			if (verbose)
+				Zeal::EqGame::print_chat("Offense: %d (Skill %d + Stat %d + SpellAtk %d + ItemAtk %d + Class %d)",
+					offense, skill_value, stat_bonus, spell_atk, item_atk, class_bonus);
+
+			int client_offense = char_info->offense(skill);
+			if (client_offense != offense)
+				Zeal::EqGame::print_chat("--- Issue: Client offense %d does not match Zeal offense %d ----",
+					client_offense, offense);
+
+			return offense;
+		}
+
+		float get_damage_multiplier(int offense, Zeal::EqEnums::SkillType skill, bool max_value)
+		{
+			auto char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return 1;
+
+			int level = char_info->Level;
+			int eqclass = char_info->Class;
+			int roll_chance = 51;
+			int max_extra = 210;
+			int minus_factor = 105;
+
+			if (eqclass == Zeal::EqEnums::ClassTypes::Monk && level >= 65)
+			{
+				roll_chance = 83;
+				max_extra = 300;
+				minus_factor = 50;
+			}
+			else if (level >= 65 || (eqclass == Zeal::EqEnums::ClassTypes::Monk && level >= 63))
+			{
+				roll_chance = 81;
+				max_extra = 295;
+				minus_factor = 55;
+			}
+			else if (level >= 63 || (eqclass == Zeal::EqEnums::ClassTypes::Monk && level >= 60))
+			{
+				roll_chance = 79;
+				max_extra = 290;
+				minus_factor = 60;
+			}
+			else if (level >= 60 || (eqclass == Zeal::EqEnums::ClassTypes::Monk && level >= 56))
+			{
+				roll_chance = 77;
+				max_extra = 285;
+				minus_factor = 65;
+			}
+			else if (level >= 56)
+			{
+				roll_chance = 72;
+				max_extra = 265;
+				minus_factor = 70;
+			}
+			else if (level >= 51 || eqclass == Zeal::EqEnums::ClassTypes::Monk)
+			{
+				roll_chance = 65;
+				max_extra = 245;
+				minus_factor = 80;
+			}
+
+			int base_bonus = (static_cast<int>(offense) - minus_factor) / 2;
+			if (base_bonus < 10)
+				base_bonus = 10;
+
+			// Either max value or the average value = the chance of a bonus * average bonus.
+			int roll = (max_value) ? base_bonus : (roll_chance * base_bonus / 2 / 100);
+			roll = min(max_extra, roll + 100);
+			return static_cast<float>(roll) * (1.f / 100);
+		}
+
+		static int get_hand_to_hand_delay()
+		{
+			const int default_delay = 35;
+			auto char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)  // Unlikely so just bail to prevent corner-case crash.
+				return default_delay;
+
+			static BYTE mnk_hum_delay[] = { 99,
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 1-10
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 11-20
+				35, 35, 35, 35, 35, 35, 35, 34, 34, 34, // 21-30
+				34, 33, 33, 33, 33, 32, 32, 32, 32, 31, // 31-40
+				31, 31, 31, 30, 30, 30, 30, 29, 29, 29, // 41-50
+				29, 28, 28, 28, 28, 27, 27, 27, 27, 26, // 51-60
+				24, 22 };								// 61-62
+			static BYTE mnk_iks_delay[] = { 99,
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 1-10
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 11-20
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 34, // 21-30
+				34, 34, 34, 34, 34, 33, 33, 33, 33, 33, // 31-40
+				33, 32, 32, 32, 32, 32, 32, 31, 31, 31, // 41-50
+				31, 31, 31, 30, 30, 30, 30, 30, 30, 29, // 51-60
+				25, 23 };								// 61-62
+			static BYTE bst_delay[] = { 99,
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 1-10
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 11-20
+				35, 35, 35, 35, 35, 35, 35, 35, 34, 34, // 21-30
+				34, 34, 34, 33, 33, 33, 33, 33, 32, 32, // 31-40
+				32, 32, 32, 31, 31, 31, 31, 31, 30, 30, // 41-50
+				30, 30, 30, 29, 29, 29, 29, 29, 28, 28, // 51-60
+				28, 28, 28 };							// 61-63
+
+			const BYTE iksar = 128;
+			int level = char_info->Level;
+			if (char_info->Class == Zeal::EqEnums::ClassTypes::Monk)
+			{
+				auto primary = char_info->InventoryItem[Zeal::EqEnums::EquipSlot::Primary];
+				if (primary && primary->ID == 10652 && level > 50)		// Celestial Fists, monk epic
+					return 16;
+
+				if (level > 62)
+					return char_info->Race == iksar ? 21 : 20;
+
+				return char_info->Race == iksar ? mnk_iks_delay[level] : mnk_hum_delay[level];
+			}
+			else if (char_info->Class == Zeal::EqEnums::ClassTypes::Beastlord)
+			{
+				if (level > 63)
+					return 27;
+				return bst_delay[level];
+			}
+			return default_delay;
+		}
+
+
+		void print_melee_attack_stats(bool primary, const Zeal::EqStructures::EQITEMINFO* weapon)
+		{
+			auto char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)  // Unlikely so just bail to prevent corner-case crash.
+				return;
+
+			if (!primary && !char_info->Skills[Zeal::EqEnums::SkillDualWield])
+				return;  // Secondary can't attack w/out dual wield.
+
+			const Zeal::EqEnums::EquipSlot::EquipSlot slot = primary ?
+				Zeal::EqEnums::EquipSlot::Primary : Zeal::EqEnums::EquipSlot::Secondary;
+
+			if (!weapon)
+				weapon = char_info->InventoryItem[slot];
+
+			Zeal::EqGame::print_chat("---- Melee %s: %s ----",
+				primary ? "Primary" : "Secondary",
+				weapon ? weapon->Name : "HandToHand");
+
+			// Now figure out damage
+			int base_damage_raw = get_base_damage(slot, weapon);
+			int base_damage = get_anti_twink_damage(base_damage_raw);
+			if (base_damage != base_damage_raw)
+				Zeal::EqGame::print_chat("Anti-twink: base_damage reduced from %d to %d",
+					base_damage_raw, base_damage);
+
+			int bonus_damage = primary ? get_damage_bonus(weapon) : 0;
+
+			Zeal::EqEnums::SkillType skill = get_weapon_skill(weapon);
+			int to_hit = char_info->compute_to_hit(skill);
+			int offense = get_offense(skill, true); // Print out offense.
+			Zeal::EqGame::print_chat("To Hit: %d", to_hit);
+			float dmg_multiplier_max = get_damage_multiplier(offense, skill, true);
+			float dmg_multiplier_ave = get_damage_multiplier(offense, skill, false);
+			float min_damage = bonus_damage + base_damage * 0.1f * 1;
+			float max_damage = bonus_damage + base_damage * 2.0f * dmg_multiplier_max
+				+ is_melee_class(char_info->Class);  // dmg_multiplier has a +1 bonus for melee classes.
+			float ave_damage = bonus_damage + base_damage * 1.0f * dmg_multiplier_ave;
+			int delay = weapon ? weapon->Common.AttackDelay : get_hand_to_hand_delay();
+			if (primary) {  // Reduce log spam.
+				Zeal::EqGame::print_chat("Display ATK: %d = (offense + to hit) * 1000 / 744",
+					(offense + to_hit) * 1000 / 744);
+				Zeal::EqGame::print_chat("Dmg = BonusDmg + BaseDmg * MitFactor * DmgMultiplier");
+			}
+			Zeal::EqGame::print_chat("Dmg = %d + %d * (0.1 to 2.0x) * (1 to %.2f, ave = %.2f)",
+				bonus_damage, base_damage, dmg_multiplier_max, dmg_multiplier_ave);
+			Zeal::EqGame::print_chat("Dmg = %.2f to %.2f, ave = %.2f",
+				min_damage, max_damage, ave_damage);
+			if (delay > 0) {
+				Zeal::EqGame::print_chat("DPS = %.2f to %.2f, ave = %.2f",
+					10 * min_damage / delay, 10 * max_damage / delay, 10 * ave_damage / delay);
+				const int SE_AttackSpeed = 11;  // Spell Effect ID for haste (> 100).
+				int haste = char_info->total_spell_affects(SE_AttackSpeed, true, nullptr);
+				auto self = Zeal::EqGame::get_self();
+				if (self && haste > 100) {
+					int haste_delay = self->ModifyAttackSpeed(delay, false);
+					if (haste_delay > 0)
+						Zeal::EqGame::print_chat("DPS = %.2f to %.2f, ave = %.2f (%d%% haste)",
+							10 * min_damage / haste_delay, 10 * max_damage / haste_delay,
+							10 * ave_damage / haste_delay, haste - 100);
+				}
+			}
+		}
 	}
 }

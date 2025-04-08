@@ -130,12 +130,6 @@ static int get_remaining_cast_recovery_time()
 	return time_left;
 }
 
-// EQPlayer::ModifyAttackSpeed()
-static UINT ModifyAttackSpeed(Zeal::EqStructures::Entity* eq_player, UINT raw_delay, UINT is_bow)
-{
-	return reinterpret_cast<UINT(__fastcall*)(void* eq_player, int unused_edx, UINT raw_delay, UINT is_bow)>(0x0050a039)(eq_player, 0, raw_delay, is_bow);
-}
-
 static int get_attack_timer_gauge(Zeal::EqUI::CXSTR* str)
 {
 	// Logic for the attack recovery timer was copied from DoProcessTime() which sets 0x007cd844.
@@ -175,7 +169,7 @@ static int get_attack_timer_gauge(Zeal::EqUI::CXSTR* str)
 	}
 
 	if (attack_delay)
-		attack_delay = ModifyAttackSpeed(self, attack_delay, is_bow);
+		attack_delay = self->ModifyAttackSpeed(attack_delay, is_bow);
 
 	UINT delay_time = Zeal::EqGame::get_eq_time() - actor_info->AttackTimer;
 	if (attack_delay == 0 || attack_delay <= delay_time) {

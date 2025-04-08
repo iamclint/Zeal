@@ -230,6 +230,164 @@ namespace Zeal
 			ItemEffectCount
 		};
 
+		namespace EquipSlot {  // Avoids 'Back' collision; enum class is inconvenient.
+		enum EquipSlot
+		{
+			LeftEar = 0,
+			Head,
+			Face,
+			RightEar,
+			Neck,
+			Shoulder,
+			Arms,
+			Back,
+			LeftWrist,
+			RightWrist,
+			Range,
+			Hands,
+			Primary,
+			Secondary,
+			LeftFinger,
+			RightFinger,
+			Chest,
+			Legs,
+			Feet,
+			Waist,
+			Ammo
+		};
+		}  // namespace EquipGroup
+
+		enum ItemTypes  // From EQMacEmu/common/item_data.h
+		{
+			/*9138*/	ItemType1HSlash = 0,
+			/*9141*/	ItemType2HSlash,
+			/*9140*/	ItemType1HPiercing,
+			/*9139*/	ItemType1HBlunt,
+			/*9142*/	ItemType2HBlunt,
+			/*5504*/	ItemTypeBow,
+			/*----*/	ItemTypeUnknown1,
+			/*----*/	ItemTypeLargeThrowing,
+			/*5505*/	ItemTypeShield,
+			/*5506*/	ItemTypeScroll,
+			/*5507*/	ItemTypeArmor,
+			/*5508*/	ItemTypeMisc,			// a lot of random crap has this item use.
+			/*7564*/	ItemTypeLockPick,
+			/*----*/	ItemTypeUnknown2,
+			/*5509*/	ItemTypeFood,
+			/*5510*/	ItemTypeDrink,
+			/*5511*/	ItemTypeLight,
+			/*5512*/	ItemTypeCombinable,		// not all stackable items are this use...
+			/*5513*/	ItemTypeBandage,
+			/*----*/	ItemTypeSmallThrowing,
+			/*----*/	ItemTypeSpell,			// spells and tomes
+			/*5514*/	ItemTypePotion,
+			/*----*/	ItemTypeFletchedArrows,
+			/*0406*/	ItemTypeWindInstrument,
+			/*0407*/	ItemTypeStringedInstrument,
+			/*0408*/	ItemTypeBrassInstrument,
+			/*0405*/	ItemTypePercussionInstrument,
+			/*5515*/	ItemTypeArrow,
+			/*----*/	ItemTypeUnknown4,
+			/*5521*/	ItemTypeJewelry,
+			/*----*/	ItemTypeSkull,
+			/*5516*/	ItemTypeBook,
+			/*5517*/	ItemTypeNote,
+			/*5518*/	ItemTypeKey,
+			/*----*/	ItemTypeCoin,
+			/*5520*/	ItemType2HPiercing,
+			/*----*/	ItemTypeFishingPole,
+			/*----*/	ItemTypeFishingBait,
+			/*5519*/	ItemTypeAlcohol,
+			/*----*/	ItemTypeKey2,
+			/*----*/	ItemTypeCompass,
+			/*----*/	ItemTypeUnknown5,
+			/*----*/	ItemTypePoison,			// might be wrong, but includes poisons
+			/*----*/	ItemTypeUnknown6,
+			/*----*/	ItemTypeUnknown7,
+			/*5522*/	ItemTypeMartial,
+			/*----*/	ItemTypeCount
+		};
+
+		enum SkillType  // From EQMacEmu/common/skills.h
+		{
+			/*13855*/	Skill1HBlunt = 0,
+			/*13856*/	Skill1HSlashing,
+			/*13857*/	Skill2HBlunt,
+			/*13858*/	Skill2HSlashing,
+			/*13859*/	SkillAbjuration,
+			/*13861*/	SkillAlteration,
+			/*13862*/	SkillApplyPoison,
+			/*13863*/	SkillArchery,
+			/*13864*/	SkillBackstab,
+			/*13866*/	SkillBindWound,
+			/*13867*/	SkillBash,
+			/*13871*/	SkillBlock,
+			/*13872*/	SkillBrassInstruments,
+			/*13874*/	SkillChanneling,
+			/*13875*/	SkillConjuration,
+			/*13876*/	SkillDefense,
+			/*13877*/	SkillDisarm,
+			/*13878*/	SkillDisarmTraps,
+			/*13879*/	SkillDivination,
+			/*13880*/	SkillDodge,
+			/*13881*/	SkillDoubleAttack,
+			/*13882*/	SkillDragonPunch,
+			/*13924*/	SkillTailRake = SkillDragonPunch, // Iksar Monk equivilent
+			/*13883*/	SkillDualWield,
+			/*13884*/	SkillEagleStrike,
+			/*13885*/	SkillEvocation,
+			/*13886*/	SkillFeignDeath,
+			/*13888*/	SkillFlyingKick,
+			/*13889*/	SkillForage,
+			/*13890*/	SkillHandtoHand,
+			/*13891*/	SkillHide,
+			/*13893*/	SkillKick,
+			/*13894*/	SkillMeditate,
+			/*13895*/	SkillMend,
+			/*13896*/	SkillOffense,
+			/*13897*/	SkillParry,
+			/*13899*/	SkillPickLock,
+			/*13900*/	Skill1HPiercing,				// Changed in RoF2(05-10-2013)
+			/*13903*/	SkillRiposte,
+			/*13904*/	SkillRoundKick,
+			/*13905*/	SkillSafeFall,
+			/*13906*/	SkillSenseHeading,
+			/*13908*/	SkillSinging,
+			/*13909*/	SkillSneak,
+			/*13910*/	SkillSpecializeAbjure,			// No idea why they truncated this one..especially when there are longer ones...
+			/*13911*/	SkillSpecializeAlteration,
+			/*13912*/	SkillSpecializeConjuration,
+			/*13913*/	SkillSpecializeDivination,
+			/*13914*/	SkillSpecializeEvocation,
+			/*13915*/	SkillPickPockets,
+			/*13916*/	SkillStringedInstruments,
+			/*13917*/	SkillSwimming,
+			/*13919*/	SkillThrowing,
+			/*13920*/	SkillTigerClaw,
+			/*13921*/	SkillTracking,
+			/*13923*/	SkillWindInstruments,
+			/*13854*/	SkillFishing,
+			/*13853*/	SkillMakePoison,
+			/*13852*/	SkillTinkering,
+			/*13851*/	SkillResearch,
+			/*13850*/	SkillAlchemy,
+			/*13865*/	SkillBaking,
+			/*13918*/	SkillTailoring,
+			/*13907*/	SkillSenseTraps,
+			/*13870*/	SkillBlacksmithing,
+			/*13887*/	SkillFletching,
+			/*13873*/	SkillBrewing,
+			/*13860*/	SkillAlcoholTolerance,
+			/*13868*/	SkillBegging,
+			/*13892*/	SkillJewelryMaking,
+			/*13901*/	SkillPottery,
+			/*13898*/	SkillPercussionInstruments,
+			/*13922*/	SkillIntimidation,
+			/*13869*/	SkillBerserking,
+			/*13902*/	SkillTaunt,
+			/*00000*/	SkillCount					// move to last position of active enumeration labels
+		};
+
 	}
 	namespace EqStructures
 	{
@@ -315,7 +473,10 @@ namespace Zeal
 				} SkillMod;
 				/* 0x0124 */ int CastTime;
 			};
-			/* 0x0128 */ BYTE Unknown0128[52];
+			/* 0x0128 */ BYTE Unknown0128[28];
+			/* 0x0144 */ BYTE RecLevel;  // Used in EQ_Character::AntiTwinkAdj.
+			/* 0x0145 */ BYTE RecSkill;  // Client: Adjusted if Level < RecLevel, Skill < RecSkill.
+			/* 0x0146 */ BYTE Unknown0146[22];
 			/* 0x015C */ DWORD Deity;
 			/* 0x0160 */ short RequiredLevel;
 			/* 0x0162 */ WORD BardType;   // Bard Skill Type (instrument type)
@@ -543,7 +704,9 @@ namespace Zeal
 			/* 0x0320 */ BYTE MovementType; // 0 = None, 4 = Walking, 6 = Running, 7 = Swimming
 			/* 0x0321 */ BYTE Unknown0321[12];
 			/* 0x032D */ BYTE IsMovingTimer; // 0 = Moving, 1-6 = Recently Stopped Moving, 200 = Not Moving
-			/* 0x032E */ BYTE Unknown032E[0xf6];
+			/* 0x032E */ BYTE Unknown032E[0xa];
+			/* 0x0338 */ BYTE AAAbilities[0xe3];  // Current AA value (used by EQ_Character::GetAbility().
+			/* 0x041B */ BYTE Unknown041B[0x9];
 			/* 0x0424 */ DWORD CastingSpellCastTime;  // Set in StartCasting. Used in GetSpellCastingTime().
 			/* 0x0428 */ BYTE Unknown0428[0x10];
 			/* 0x0438 */ DWORD IsLookingForGroup;
@@ -623,7 +786,7 @@ namespace Zeal
 			/* 0x0200 */ FLOAT MaxClip; // draw distance (maximum Far Clip Plane), set to 4*(0x0194) if < 51 or 4*0x01fc
 			/* ...... */
 		};
-		struct EQCHARINFO
+		struct EQCHARINFO  // EqMacEmu/common/patches/mac_structs.h::PlayerProfile_Struct
 		{
 			float encum_factor()
 			{
@@ -636,6 +799,50 @@ namespace Zeal
 			short mana()
 			{
 				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*)>(0x4b9450)(this);
+			}
+			short str()
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*)>(0x004bafcb)(this);
+			}
+			short dex()
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*)>(0x004bb34e)(this);
+			}
+			short compute_to_hit(char skill_type)
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*, char)>(0x004b9b96)(this, skill_type);
+			}
+			short offense(char skill_type)  // skill_type == -1 defaults to hand-to-hand.
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*, char)>(0x004b9dda)(this, skill_type);
+			}
+			short i_have_skill(int skill_type)
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*, char)>(0x004bfff5)(this, skill_type);
+			}
+			int skill(int skill_type)
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*, char)>(0x004b8efd)(this, skill_type);
+			}
+			short ac(bool apply_cap)
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*, bool)>(0x004b9b8a)(this, apply_cap);
+			}
+			int compute_defense()
+			{
+				return reinterpret_cast<int(__thiscall*)(EQCHARINFO*)>(0x004b9d19)(this);
+			}
+			short total_spell_affects(int category, bool unknown1, short* unknown2)
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*, int, bool, short*)>(0x004c6b6d)(this, category, unknown1, unknown2);
+			}
+			short total_item_spell_affects(int category)
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*, int)>(0x004c1235)(this, category);
+			}
+			bool is_spell_affecting_pc(short spell_id)
+			{
+				return reinterpret_cast<short(__thiscall*)(EQCHARINFO*, short)>(0x004c70e7)(this, spell_id);
 			}
 			int cast(UINT gem, WORD spell_id, int* item, short item_slot)
 			{
@@ -713,7 +920,7 @@ namespace Zeal
 			/* 0x0D0C */ BYTE Unknown0D0C[4];
 			/* 0x0D10 */ BYTE IsAutoSplitEnabled;
 			/* 0x0D11 */ BYTE Unknown0D11[43];
-			/* 0x0D3C */ DWORD Unknown0D3C;
+			/* 0x0D3C */ DWORD Expansions;  // Bit field: 1 = Kun, 2 = Vel, 4 = Luc, 8 = PoP.
 			/* 0x0D40 */ BYTE Unknown0D40[20];
 			/* 0x0D54 */ DWORD Hunger;
 			/* 0x0D58 */ DWORD Thirst;
@@ -805,6 +1012,10 @@ namespace Zeal
 			{
 				if (this && this->StandingState != new_stance)
 					reinterpret_cast<void(__thiscall*)(Entity*, unsigned char)>(0x50be3c)(this, new_stance);
+			}
+			UINT ModifyAttackSpeed(UINT raw_delay, UINT is_bow)
+			{
+				return reinterpret_cast<UINT(__thiscall*)(void* eq_player, UINT raw_delay, UINT is_bow)>(0x0050a039)(this , raw_delay, is_bow);
 			}
 			/* 0x0000 */ BYTE StructType; // If != 0x03, this struct is invalid (e.g. bad ActorInfo pointer).
 			/* 0x0001 */ CHAR Name[30]; // [0x1E]
@@ -1057,6 +1268,48 @@ namespace Zeal
 		struct SPELLMGR {
 			 SPELL* Spells[EQ_NUM_SPELLS];
 		};
+		struct EQAltAbility {  // operator new of 0x38 bytes.
+			/*0x00*/ DWORD ShortLabel1Id;  // Set to 0xffffffff or to string table ID.
+			/*0x04*/ DWORD ShortLabel2Id;  // Set to 0xffffffff or to string table ID.
+			/*0x08*/ DWORD LabelId;        // AA ability label string table ID.
+			/*0x0c*/ DWORD DescriptionId;  // AA description string table ID.
+			/*0x10*/ WORD  Unknown10;  // Set to 0x33 or 0x37 or 0x3b etc.
+			/*0x12*/ WORD  Cost;  // Set to 1,5, 3, 6, 9 etc.
+			/*0x14*/ WORD  Unknown14;  // Set to 0 or 0xffff or 0x13 etc.
+			/*0x16*/ WORD  Unknown16;  // Set to 0 or 3.
+			/*0x18*/ BYTE  Unknown18;  // Set to 1 or 3 or 5. (ranks?)
+			/*0x19*/ BYTE  Unknown19;
+			/*0x1a*/ WORD  Unknown1a;  // Set to 1 or 2.
+			/*0x1c*/ BYTE  Unknown1c;  // Set to 0 or 1.
+			/*0x1d*/ BYTE  Unknown1d;
+			/*0x1e*/ WORD  Unknown1e;  // Set to 0xffff or 0xab2.
+			/*0x20*/ BYTE  Unknown20;  // Set to 0.
+			/*0x21*/ BYTE  Unknown21;  // Set to 0 or 1.
+			/*0x22*/ WORD  Unknown22;
+			/*0x24*/ DWORD Unknown24;  // Set to 0.
+			/*0x28*/ WORD  Unknown28;  // Set to 0.
+			/*0x2a*/ WORD  Unknown2a;  // Set to 0.
+			/*0x2c*/ WORD  Unknown2c;  // Set to 0.
+			/*0x2e*/ BYTE  Unknown2e;  // Set to 0 or 1.
+			/*0x2f*/ BYTE  Unknown2f;
+			/*0x30*/ DWORD Unknown30;  // Set to 0 or 7 etc.
+			/*0x34*/ DWORD Unknown34;  // Set to 0.
+		};
+
+		struct AltAdvManager {  // operator new of 0x38c bytes.
+			static AltAdvManager* get_manager() {
+				return *reinterpret_cast<AltAdvManager**>(0x0063d724); 
+			}
+
+			int CalculateMitigationBoost(EQCHARINFO* char_info, int softcap) {
+				return reinterpret_cast<int(__thiscall*)(AltAdvManager*, EQCHARINFO *, int)>(0x004b7b48)(this, char_info, softcap);
+			}
+
+			// The single class member is just an array of 227 pointers.
+			EQAltAbility* abilities[0xe3];
+		};
+
+
 		struct EQCommand
 		{
 			static constexpr int kNumCommands = 0x116;  // The array has 0x116 entries.
