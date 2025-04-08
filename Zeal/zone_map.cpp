@@ -2115,14 +2115,8 @@ static int get_tracking_distance() {
 }
 
 bool ZoneMap::set_ring_radius(int new_radius, bool update_default) {
-    if (new_radius <= 0) {
-        if (map_ring_radius > 0)
-            new_radius = 0;  // If already on, toggles off.
-        else
-            new_radius = get_tracking_distance();  // Auto-range if class supports.
-    } else
-        new_radius = max(10, min(10000, new_radius));  // Just clamp for now.
-
+    if (new_radius)
+        new_radius = max(10, min(10000, new_radius));  // Just clamp non-zero.
     map_ring_radius = new_radius;
 
     // Skip storing preferences for now.
@@ -2867,12 +2861,19 @@ void ZoneMap::parse_grid(const std::vector<std::string>& args) {
 
 void ZoneMap::parse_ring(const std::vector<std::string>& args) {
     int ring_radius = 0;
-    if (args.size() == 2) {
-        set_ring_radius(ring_radius, false);  // Toggles off or uses auto-range.
+    if ((args.size() == 2 && map_ring_radius) || (args.size() == 3 && args[2] == "off")) {
+        set_ring_radius(0, false);  // Toggle or force off.
+    }
+    else if (args.size() == 2 || (args.size() == 3 && args[2] == "on")) {
+        int ring_radius = get_tracking_distance();  // Toggle / Enable with auto-range.
+        if (ring_radius)
+            set_ring_radius(ring_radius, false);
+        else
+            Zeal::EqGame::print_chat("Use /map ring <radius> to turn on with zero tracking skill");
     }
     else if (args.size() != 3 || !Zeal::String::tryParse(args[2], &ring_radius) ||
         !set_ring_radius(ring_radius, false))
-        Zeal::EqGame::print_chat("Usage: /map ring [radius] (blank disables or uses calculated track range)");
+        Zeal::EqGame::print_chat("Usage: /map ring [on, off, radius] (blank disables or uses calculated track range)");
 }
 
 
