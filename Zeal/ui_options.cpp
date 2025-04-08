@@ -386,6 +386,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_SingleClickGiveEnable",  [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->give->setting_enable_give.set(wnd->Checked); });
 
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_CtrlRightClickCorpse",   [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_ctrl_rightclick_loot.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_EnableContainerLock",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->options->setting_enable_container_lock.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ExportOnCamp",           [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->outputfile->setting_export_on_camp.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SelfClickThru",          [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->setting_selfclickthru.set(wnd->Checked); });
@@ -704,6 +705,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_TellWindows", ZealService::get_instance()->tells->enabled);
 	ui->SetChecked("Zeal_TellWindowsHist", ZealService::get_instance()->tells->hist_enabled);
 	ui->SetChecked("Zeal_LinkAllAltDelimiter", ZealService::get_instance()->looting_hook->setting_alt_delimiter.get());
+	ui->SetChecked("Zeal_CtrlRightClickCorpse", ZealService::get_instance()->looting_hook->setting_ctrl_rightclick_loot.get());
 	ui->SetChecked("Zeal_EnableContainerLock", ZealService::get_instance()->ui->options->setting_enable_container_lock.get());
 	ui->SetChecked("Zeal_ExportOnCamp", ZealService::get_instance()->outputfile->setting_export_on_camp.get());
 	ui->SetChecked("Zeal_SelfClickThru", ZealService::get_instance()->camera_mods->setting_selfclickthru.get());

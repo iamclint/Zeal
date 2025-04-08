@@ -19,6 +19,7 @@ public:
 	~looting();
 
 	ZealSetting<bool> setting_alt_delimiter = { false, "Zeal", "LinkAllAltDelimiter", false };
+	ZealSetting<bool> setting_ctrl_rightclick_loot = { false, "Zeal", "CtrlRightClickLoot", true };
 
 	// /protect functionality.  Command line-only for now.
 	bool is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_info) const;
