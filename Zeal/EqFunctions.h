@@ -259,5 +259,14 @@ namespace Zeal
 		int get_num_personal_bank_slots();
 		int get_num_shared_bank_slots();
 		int get_num_total_bank_slots();
+
+		// mystats details.
+		enum Era { Classic = 0, Kunark, Velious, Luclin, PlanesOfPower };
+		Era get_era();
+		int get_avoidance(bool include_combat_agility = false);
+		int get_mitigation(bool include_cap = false);
+		int get_mitigation_softcap();
+		int get_display_AC();
+		void print_melee_attack_stats(bool primary, const Zeal::EqStructures::EQITEMINFO* weapon = nullptr);
 	}
 }

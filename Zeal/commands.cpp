@@ -445,6 +445,68 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			return false;
 		});
+
+	Add("/mystats", {}, "Calculate and report your current stats.",
+		[this](std::vector<std::string>& args) {
+			using Zeal::EqGame::print_chat;
+			const char kMarker = 0x12;  // Link marker.
+			int item_id = 0;
+			if (args.size() == 2 && args[1] == "info")
+			{
+				print_chat("---- mystats Beta info ----");
+				print_chat("Known simplifications:");
+				print_chat("  - Anti-twink defensive logic may not be accurate");
+				print_chat("  - All disciplines (offensive, defensive) are ignored");
+				print_chat("  - Range weapons, duel wield, double-attack will be in future update");
+				print_chat("Stat descriptions (all values include current spell effects):");
+				print_chat("Mitigation: modifies incoming damage based on offense vs mitigation (0.1x to 2.0x factor)");
+				print_chat("Mitigation (melee) ~= item_ac*4/3 + defense_skill/3 + agility/20 + spell_ac/4 + class_ac");
+				print_chat("Avoidance: modifies probability of taking zero damage");
+				print_chat("Avoidance ~= (defense_skill*400/225 + 36 + (min(200,agi)-75)*2/15)*(1+AA_pct)");
+				print_chat("To Hit: sets probability of hitting based on to hit vs avoidance");
+				print_chat("To Hit ~= 7 + offense_skill + weap_skill + bonuses (item, spell, AA)");
+				print_chat("Offense: impacts both mitigation factor and damage multiplier");
+				print_chat("Offense ~= weap_skill_value + spell_atk + item_atk + max(0, (str-75)*2/3)");
+				print_chat("Damage multiplier: Chance for bonus damage factor based on level, weapon skill, and offense");
+				print_chat("Average damage: Mitigation factor = 1, damage multiplier = average after both rolls");
+			}
+			else if (args.size() >= 2 && args[1].size() >= 8 && args[1].front() == kMarker) {
+				std::string link = args[1];  // Only need the first item ID part of the link (name doesn't matter).
+				std::string item_id_str = link.substr(2, 6);
+				if (link.front() == kMarker && Zeal::String::tryParse(item_id_str, &item_id) && item_id > 0) {
+					auto zeal = ZealService::get_instance();
+					const Zeal::EqStructures::EQITEMINFO* weapon = nullptr;
+					if (zeal && zeal->item_displays && zeal->item_displays->get_cached_item(item_id)) {
+						const auto weapon = zeal->item_displays->get_cached_item(item_id);
+						Zeal::EqGame::print_melee_attack_stats(true, weapon);
+						Zeal::EqGame::print_melee_attack_stats(false, weapon);
+					}
+					else
+						print_chat("Unable to locate a local copy of information for item %d", item_id);
+				}
+				else
+					print_chat("Failed to parse item link.");
+			}
+			else if (args.size() == 1) {
+				bool is_luclin_enabled = (Zeal::EqGame::get_era() >= Zeal::EqGame::Era::Luclin);
+				auto char_info = Zeal::EqGame::get_char_info();
+				Zeal::EqGame::print_chat("---- Defensive stats ----");
+				print_chat("AC (display): %i = (Mit: %i  + Avoidance: %i) * 1000/847",
+					Zeal::EqGame::get_display_AC(), Zeal::EqGame::get_mitigation(),
+					Zeal::EqGame::get_avoidance());
+				print_chat("Mitigation: %i (%s: %i)", Zeal::EqGame::get_mitigation(true),
+					is_luclin_enabled ? "softcap" : "hardcap",
+					Zeal::EqGame::get_mitigation_softcap());
+				print_chat("Avoidance: %i (with AAs)",
+					Zeal::EqGame::get_avoidance(true));  // Includes combat_agility.
+				Zeal::EqGame::print_melee_attack_stats(true);
+				Zeal::EqGame::print_melee_attack_stats(false);
+			}
+			else
+				print_chat("Usage: /mystats, /mystats info, /mystats <item_id>, /mystats <item_link>");
+
+			return true;
+		});
 	
 	Add("/clientmanatick", { "/cmt" }, "Toggle client mana tick (disabled by default in this client).",
 		[this](std::vector<std::string>& args) {

@@ -3,55 +3,32 @@
 #include "string_util.h"
 #include <fstream>
 
-enum EquipSlot
-{
-  LeftEar,
-  Head,
-  Face,
-  RightEar,
-  Neck,
-  Shoulder,
-  Arms,
-  Back,
-  LeftWrist,
-  RightWrist,
-  Range,
-  Hands,
-  Primary,
-  Secondary,
-  LeftFinger,
-  RightFinger,
-  Chest,
-  Legs,
-  Feet,
-  Waist,
-  Ammo
-};
+using Zeal::EqEnums::EquipSlot::EquipSlot;
 
 static std::string IDToEquipSlot(int equipSlot)
 {
   switch (equipSlot) {
-    case LeftEar:
-    case RightEar:    return "Ear";
-    case Head:        return "Head";
-    case Face:        return "Face";
-    case Neck:        return "Neck";
-    case Shoulder:    return "Shoulders";
-    case Arms:        return "Arms";
-    case Back:        return "Back";
-    case LeftWrist:
-    case RightWrist:  return "Wrist";
-    case Range:       return "Range";
-    case Hands:       return "Hands";
-    case Primary:     return "Primary";
-    case Secondary:   return "Secondary";
-    case LeftFinger:
-    case RightFinger: return "Fingers";
-    case Chest:       return "Chest";
-    case Legs:        return "Legs";
-    case Feet:        return "Feet";
-    case Waist:       return "Waist";
-    case Ammo:        return "Ammo";
+    case EquipSlot::LeftEar:
+    case EquipSlot::RightEar:    return "Ear";
+    case EquipSlot::Head:        return "Head";
+    case EquipSlot::Face:        return "Face";
+    case EquipSlot::Neck:        return "Neck";
+    case EquipSlot::Shoulder:    return "Shoulders";
+    case EquipSlot::Arms:        return "Arms";
+    case EquipSlot::Back:        return "Back";
+    case EquipSlot::LeftWrist:
+    case EquipSlot::RightWrist:  return "Wrist";
+    case EquipSlot::Range:       return "Range";
+    case EquipSlot::Hands:       return "Hands";
+    case EquipSlot::Primary:     return "Primary";
+    case EquipSlot::Secondary:   return "Secondary";
+    case EquipSlot::LeftFinger:
+    case EquipSlot::RightFinger: return "Fingers";
+    case EquipSlot::Chest:       return "Chest";
+    case EquipSlot::Legs:        return "Legs";
+    case EquipSlot::Feet:        return "Feet";
+    case EquipSlot::Waist:       return "Waist";
+    case EquipSlot::Ammo:        return "Ammo";
     default:{}break;
   }
   return "Unknown";

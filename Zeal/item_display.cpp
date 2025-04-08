@@ -202,6 +202,24 @@ static void ApplyWeaponRatio(Zeal::EqStructures::_EQITEMINFO* item, std::string&
 	}
 	
 }
+
+// Cache of all items displayed so we can access them later if needed.
+void ItemDisplay::add_to_cache(const Zeal::EqStructures::EQITEMINFO* item)
+{
+	// EQITEMINFO is a union of different structs with type 0 (common) the largest, so
+	// we only cache the common type to ensure the copy below is valid.
+	if (item && item->Type == 0)
+		item_cache[item->ID] = *item;
+}
+
+const Zeal::EqStructures::EQITEMINFO* ItemDisplay::get_cached_item(int item_id) const
+{
+	auto it = item_cache.find(item_id);
+	if (it != item_cache.end())
+		return &(it->second);
+	return nullptr;
+}
+
 // Generate our customized item description text.
 static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQITEMINFO* item) {
 
@@ -228,6 +246,9 @@ void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused,
 	Zeal::EqStructures::_EQITEMINFO* item, bool show)
 {
 	ZealService::get_instance()->hooks->hook_map["SetItem"]->original(SetItem)(wnd, unused, item, show);
+
+	if (ZealService::get_instance() && ZealService::get_instance()->item_displays)
+		ZealService::get_instance()->item_displays->add_to_cache(item);
 
 	// The callers of SetItem always call Activate() on it immediately after which includes
 	// a call to update the window text, so we just need to update the DisplayText here.
