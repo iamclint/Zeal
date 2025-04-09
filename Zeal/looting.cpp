@@ -362,13 +362,13 @@ static void __fastcall RequestSellItem(Zeal::EqUI::MerchantWnd* this_wnd, int un
 //}
 
 // Replace the CEverquest::LootCorpse() call in the new UI's RightClickedOnPlayer() method to check for ctrl key.
-static void __fastcall RightClickedOnPlayerLootCorpse(void* ceverquest_this, int unused_edx, void* entity, int param)
+static int __fastcall RightClickedOnPlayerLootCorpse(void* ceverquest_this, int unused_edx, void* entity, int param)
 {
 	ZealService* zeal = ZealService::get_instance();
 	if (zeal->looting_hook->setting_ctrl_rightclick_loot.get() && Zeal::EqGame::get_wnd_manager()
 			 && !Zeal::EqGame::get_wnd_manager()->ControlKeyState)
-		return;  // Control was not held down while right clicking on a player object.
-	zeal->hooks->hook_map["RightClickedOnPlayerLootCorpse"]->original(RightClickedOnPlayerLootCorpse)(ceverquest_this, unused_edx, entity, param);
+		return 0;  // Control was not held down while right clicking on a player object.
+	return zeal->hooks->hook_map["RightClickedOnPlayerLootCorpse"]->original(RightClickedOnPlayerLootCorpse)(ceverquest_this, unused_edx, entity, param);
 }
 
 bool looting::is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINFO* item_info) const
