@@ -334,8 +334,8 @@ bool ui_manager::WriteTemporaryUI(const std::string& equi_path, std::string equi
 			{
 				outfile << modifiedContent;
 				outfile.close();
+				return true;
 			}
-			return true;
 		}
 	}
 	return false;
