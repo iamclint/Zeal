@@ -293,11 +293,12 @@ void ui_manager::AddXmlInclude(const std::string& name)
 {
 	XMLIncludes.push_back(name);
 }
-void ui_manager::WriteTemporaryUI(const std::string& file_path, std::string ui_path)
+
+bool ui_manager::WriteTemporaryUI(const std::string& equi_path, std::string equi_zeal_path)
 {
-	if (!file_path.empty())
+	if (!equi_path.empty())
 	{
-		std::ifstream infile(file_path);
+		std::ifstream infile(equi_path);
 		std::stringstream buffer;
 		std::string line;
 		bool compositeFound = false;
@@ -326,7 +327,7 @@ void ui_manager::WriteTemporaryUI(const std::string& file_path, std::string ui_p
 			}
 			infile.close();
 
-			std::filesystem::path new_file_path = ui_path + "EQUI_Zeal.xml";
+			std::filesystem::path new_file_path = equi_zeal_path;
 			std::filesystem::create_directories(new_file_path.parent_path());
 			std::ofstream outfile(new_file_path);
 			if (outfile)
@@ -334,43 +335,50 @@ void ui_manager::WriteTemporaryUI(const std::string& file_path, std::string ui_p
 				outfile << modifiedContent;
 				outfile.close();
 			}
+			return true;
 		}
+	}
+	return false;
+}
+
+void ui_manager::RemoveTemporaryUI(const std::string& equi_zeal_path)
+{
+	std::filesystem::path new_file_path = equi_zeal_path;
+	if (std::filesystem::exists(new_file_path))
+	{
+		std::error_code ec;
+		if (!std::filesystem::remove(new_file_path, ec))  // No exceptions
+			Zeal::EqGame::print_chat("Error removing %s: %s", equi_zeal_path.c_str(), ec.message().c_str());
 	}
 }
 
-void ui_manager::RemoveTemporaryUI(const std::string& file_path)
-{
-	std::filesystem::path new_file_path = file_path + "EQUI_Zeal.xml";
-	if (std::filesystem::exists(new_file_path))
-	{
-		std::filesystem::remove(new_file_path);
-	}
-}
 void __fastcall LoadSidlHk(void* t, int unused, Zeal::EqUI::CXSTR path1, Zeal::EqUI::CXSTR path2, Zeal::EqUI::CXSTR filename)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
 	if (ui->included_files.size())
 		ui->included_files.clear();
 	std::string str_filename = filename;
-	std::string zeal_file = ui_manager::ui_path + str_filename;
 
-	std::string ui_file = static_cast<std::string>(path1) + str_filename;
-	std::string default_file = static_cast<std::string>(path2) + str_filename;
-	std::string file_path = "";
+	std::string equi_zeal_path = "";
 	if (str_filename == "EQUI.xml")
 	{
-		if (std::filesystem::exists(ui_file))
-			file_path = ui_file;
-		else  if (std::filesystem::exists(default_file))
-			file_path = default_file;
+		std::string active_ui_path = path1;
+		std::string active_equi_file = active_ui_path + str_filename;
+		std::string default_equi_file = static_cast<std::string>(path2) + str_filename;
+		std::string equi_path = std::filesystem::exists(active_equi_file) ? active_equi_file : default_equi_file;
 
-		ui->WriteTemporaryUI(file_path, path1);
-		filename.Set("EQUI_Zeal.xml");
+		equi_zeal_path = active_ui_path + "EQUI_Zeal.xml";
+		if (ui->WriteTemporaryUI(equi_path, equi_zeal_path))
+			filename.Set("EQUI_Zeal.xml");
+		else {
+			std::string message = std::format("Zeal failed to generate {0} from {1}", equi_zeal_path, equi_path);
+			MessageBoxA(NULL, message.c_str(), "Zeal EQUI.xml failure", MB_OK | MB_ICONERROR | MB_TOPMOST);
+		}
 	}
 	ZealService::get_instance()->hooks->hook_map["LoadSidl"]->original(LoadSidlHk)(t, unused, path1, path2, filename);
 
-	if (str_filename == "EQUI.xml" && !file_path.empty())
-		ui->RemoveTemporaryUI(path1);
+	if (!equi_zeal_path.empty())
+		ui->RemoveTemporaryUI(equi_zeal_path);
 }
 bool ui_manager::AlreadyLoadedXml(std::string name)
 {
