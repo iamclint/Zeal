@@ -53,13 +53,40 @@ void ui_options::PlayInviteSound() const
 		Zeal::EqGame::WavePlay(it->first);
 }
 
+void ui_options::ShowInviteDialog(const char* raid_invite_name) const
+{
+	if (!setting_invite_dialog.get() || !ZealService::get_instance()->ui->inputDialog)
+		return;
+
+	std::string message = raid_invite_name ? (std::string(raid_invite_name) + " invites you to join a raid.") :
+		"You have been invited to a group";
+
+	// Close / abort any open dialog and then open up a new one with the invite.
+	ZealService::get_instance()->ui->inputDialog->hide();
+	ZealService::get_instance()->ui->inputDialog->show("Invite", message, "Dismiss", "",
+		nullptr, nullptr, false);
+}
+
 static void __fastcall EqPlayerSetInvited(Zeal::EqStructures::Entity* this_entity, int unused_edx, int flag)
 {
-	if (flag && ZealService::get_instance()->ui)
+	if (flag && ZealService::get_instance()->ui) {
 		ZealService::get_instance()->ui->options->PlayInviteSound();
+		ZealService::get_instance()->ui->options->ShowInviteDialog();
+	}
 
 	ZealService::get_instance()->hooks->hook_map["EqPlayerSetInvited"]
 		->original(EqPlayerSetInvited)(this_entity, unused_edx, flag);
+}
+
+static void __fastcall RaidHandleCreateInviteRaid(void* raid, int unused_edx, char* payload)
+{
+	if (ZealService::get_instance()->ui && payload) {
+		ZealService::get_instance()->ui->options->PlayInviteSound();
+		ZealService::get_instance()->ui->options->ShowInviteDialog(payload + 0x44);
+	}
+
+	ZealService::get_instance()->hooks->hook_map["RaidHandleCreateInviteRaid"]
+		->original(RaidHandleCreateInviteRaid)(raid, unused_edx, payload);
 }
 
 int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI::BasicWnd* sender, int message, int data)
@@ -384,6 +411,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_UseZealAssistOn",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_use_zeal_assist_on.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_DetectAssistFailure",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_detect_assist_failure.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SingleClickGiveEnable",  [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->give->setting_enable_give.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_InviteDialog",           [this](Zeal::EqUI::BasicWnd* wnd) { setting_invite_dialog.set(wnd->Checked); });
 
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_CtrlRightClickCorpse",   [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_ctrl_rightclick_loot.set(wnd->Checked); });
@@ -730,6 +758,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_UseZealAssistOn", ZealService::get_instance()->assist->setting_use_zeal_assist_on.get());
 	ui->SetChecked("Zeal_DetectAssistFailure", ZealService::get_instance()->assist->setting_detect_assist_failure.get());
 	ui->SetChecked("Zeal_SingleClickGiveEnable", ZealService::get_instance()->give->setting_enable_give.get());
+	ui->SetChecked("Zeal_InviteDialog", setting_invite_dialog.get());
 
 	UpdateComboBox("Zeal_TellSound_Combobox", setting_tell_sound.get(), kDefaultSoundNone);
 	UpdateComboBox("Zeal_InviteSound_Combobox", setting_invite_sound.get(), kDefaultSoundNone);
@@ -1034,6 +1063,7 @@ ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr) : ui(mgr
 	zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, const std::string& msg,
 		const short& channel) { if (channel == USERCOLOR_TELL) this->PlayTellSound(); });
 
+	zeal->hooks->Add("RaidHandleCreateInviteRaid", 0x0049e54c, RaidHandleCreateInviteRaid, hook_type_detour);
 	zeal->hooks->Add("EqPlayerSetInvited", 0x0050c216, EqPlayerSetInvited, hook_type_detour);
 	sound_list.push_back({ -1, kDefaultSoundNone });
 	sound_list.push_back({ 137, "Gate" });

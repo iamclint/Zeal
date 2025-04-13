@@ -805,7 +805,37 @@
       <Disabled>A_BtnDisabled</Disabled>
       <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
     </ButtonDrawTemplate>
-  </Button>  
+  </Button>
+  <Button item="Zeal_InviteDialog">
+    <ScreenID>Zeal_InviteDialog</ScreenID>
+    <RelativePosition>true</RelativePosition>
+    <Location>
+      <X>10</X>
+      <Y>464</Y>
+    </Location>
+    <Size>
+      <CX>150</CX>
+      <CY>20</CY>
+    </Size>
+    <Style_VScroll>false</Style_VScroll>
+    <Style_HScroll>false</Style_HScroll>
+    <Style_Transparent>false</Style_Transparent>
+    <Style_Checkbox>true</Style_Checkbox>
+    <TooltipReference>Display a dialog when invited to a group</TooltipReference>
+    <Text>Invite Dialog</Text>
+    <TextColor>
+      <R>255</R>
+      <G>255</G>
+      <B>255</B>
+    </TextColor>
+    <ButtonDrawTemplate>
+      <Normal>A_BtnNormal</Normal>
+      <Pressed>A_BtnPressed</Pressed>
+      <Flyby>A_BtnFlyby</Flyby>
+      <Disabled>A_BtnDisabled</Disabled>
+      <PressedFlyby>A_BtnPressedFlyby</PressedFlyby>
+    </ButtonDrawTemplate>
+  </Button>
   <Button item="Zeal_CastAutoStand">
     <ScreenID>Zeal_CastAutoStand</ScreenID>
     <RelativePosition>true</RelativePosition>
@@ -1142,6 +1172,7 @@
     <Pieces>Zeal_RecastTimers</Pieces>
     <Pieces>Zeal_RecastTimersLeftAlign</Pieces>
     <Pieces>Zeal_CtrlRightClickCorpse</Pieces>
+    <Pieces>Zeal_InviteDialog</Pieces>
     <Pieces>Zeal_CastAutoStand</Pieces>
     <Pieces>Zeal_BrownSkeletons</Pieces>
     <Pieces>Zeal_ClassicMusic</Pieces>

@@ -996,6 +996,18 @@ namespace Zeal
 
 		struct Everquest
 		{
+			void Invite()
+			{
+				reinterpret_cast<void(__thiscall*)(Everquest*)>(0x005302c1)(this);
+			}
+			void Follow()
+			{
+				reinterpret_cast<void(__thiscall*)(Everquest*)>(0x0053069c)(this);
+			}
+			void Disband()
+			{
+				reinterpret_cast<void(__thiscall*)(Everquest*)>(0x00530829)(this);
+			}
 			BYTE IsOkToTransact()
 			{
 				return reinterpret_cast<BYTE(__thiscall*)(Everquest*)>(0x54825C)(this);
