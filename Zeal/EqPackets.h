@@ -19,11 +19,11 @@ namespace Zeal
             Illusion = 0x4091,
             Assist = 0x4200,
             Stamina = 0x4157,
+            ItemLinkResponse = 0x4264
         };
         struct TradeRequest_Struct {
             /*000*/	UINT16 to_id;
             /*002*/	UINT16 from_id;
-            /*004*/
         };
         struct ChannelMessage_Struct
         {
@@ -127,6 +127,11 @@ namespace Zeal
             /*00*/ INT16 food;    // clamped to 0 - 32000
             /*02*/ INT16 water;   // clamped to 0 - 32000
             /*04*/ INT8 fatigue;  // clamped to 0 - 100
+        };
+        struct	ItemViewRequest_Struct
+        {
+            /*000*/short item_id;
+            /*002*/char	item_name[64];
         };
     }
 }

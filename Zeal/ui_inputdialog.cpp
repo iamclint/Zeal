@@ -110,7 +110,7 @@ void ui_inputdialog::InitUI()
 	input = (Zeal::EqUI::EditWnd*)wnd->GetChildItem("ZealDialogInput");
 }
 
-ui_inputdialog::ui_inputdialog(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
+ui_inputdialog::ui_inputdialog(ZealService* zeal, ui_manager* mgr)
 {
 	ui = mgr;
 	zeal->commands_hook->Add("/testdialog", {}, "test",

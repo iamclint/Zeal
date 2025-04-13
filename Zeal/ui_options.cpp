@@ -1018,7 +1018,7 @@ static void __fastcall ContainerWndSetContainer(Zeal::EqUI::ContainerWnd* wnd, i
 }
 
 
-ui_options::ui_options(ZealService* zeal, IO_ini* ini, ui_manager* mgr) : ui(mgr)
+ui_options::ui_options(ZealService* zeal, ui_manager* mgr) : ui(mgr)
 {
 	wnd = nullptr;
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);

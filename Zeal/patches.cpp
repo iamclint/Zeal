@@ -105,7 +105,8 @@ patches::patches()
 	mem::set(0x4C3F93, 0x90, 7);
 	mem::set(0x4C7642, 0x90, 7);
 
-
+	mem::write<BYTE>(0x40f07a, 0); //disable character select rotation by default
+	mem::write<BYTE>(0x40f07d, 0xEB); //uncheck rotate button defaultly
 	
 
 	//the following does not work entirely needs more effort

@@ -2,14 +2,13 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
-
-class ui_bank
+class ui_inspect
 {
 public:
-	void change();
-	ui_bank(class ZealService* zeal, class ui_manager* mgr);
-	~ui_bank();
+	ui_inspect(class ZealService* zeal, class ui_manager* mgr);
+	~ui_inspect();
 private:
 	void InitUI();
 	ui_manager* ui;
 };
+
