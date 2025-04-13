@@ -25,6 +25,12 @@ static int __fastcall InspectItemClickDown(Zeal::EqUI::InvSlotWnd* pWnd, int unu
 	return 0;
 }
 
+static void __fastcall InvSlotDestructor(Zeal::EqUI::BasicWnd* pWnd, int unusedEDX, byte delete_me)
+{
+	pWnd->DeleteCustomVTable((Zeal::EqUI::BaseVTable*)ZealService::get_instance()->ui->inspect->orig_vtable); 
+	pWnd->Deconstruct(delete_me);  // Calls the vtable's destructor.
+}
+
 void ui_inspect::InitUI()
 {
 	for (int i = 1; i < 22; i++)
@@ -33,11 +39,14 @@ void ui_inspect::InitUI()
 		Zeal::EqUI::InvSlotWnd* wnd = (Zeal::EqUI::InvSlotWnd*)Zeal::EqGame::Windows->Inspect->GetChildItem(slot_name);
 		if (wnd)
 		{
+			orig_vtable = wnd->vtbl;
 			wnd->SetupCustomVTable(sizeof(Zeal::EqUI::ButtonWndVTable));
 			wnd->vtbl->HandleLButtonDown = InspectItemClickDown;
+			wnd->vtbl->Deconstructor = InvSlotDestructor;
 		}
 	}
 }
+
 ui_inspect::ui_inspect(ZealService* zeal, ui_manager* mgr)
 {
 	ui = mgr;
