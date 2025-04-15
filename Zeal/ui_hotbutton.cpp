@@ -84,7 +84,7 @@ void ui_hotbutton::Render()
 	}
 }
 
-ui_hotbutton::ui_hotbutton(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
+ui_hotbutton::ui_hotbutton(ZealService* zeal, ui_manager* mgr)
 {
 	ui = mgr;
 	zeal->callbacks->AddGeneric([this]() { Render();  }, callback_type::Render);

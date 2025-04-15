@@ -559,18 +559,17 @@ ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
 	zeal->commands_hook->Add("/uilock", {}, "Sets (on) or clears (off) the Lock value in primary ui windows.",
 		[this](std::vector<std::string>& args) { return handle_uilock(args); });
 
-	bank = std::make_shared<ui_bank>(zeal, ini, this);
-	options = std::make_shared<ui_options>(zeal, ini, this);
-	loot = std::make_shared<ui_loot>(zeal, ini, this);
-	//guild = std::make_shared<ui_guild>(zeal, ini, this);
-	raid = std::make_shared<ui_raid>(zeal, ini, this);
-	hotbutton = std::make_shared<ui_hotbutton>(zeal, ini, this);
-	group = std::make_shared<ui_group>(zeal, ini, this);
-	inputDialog = std::make_shared<ui_inputdialog>(zeal, ini, this);
-	buffs = std::make_shared<ui_buff>(zeal, ini, this);
+	bank = std::make_shared<ui_bank>(zeal, this);
+	options = std::make_shared<ui_options>(zeal,this);
+	loot = std::make_shared<ui_loot>(zeal, this);
+	//guild = std::make_shared<ui_guild>(zeal, this);
+	raid = std::make_shared<ui_raid>(zeal, this);
+	hotbutton = std::make_shared<ui_hotbutton>(zeal, this);
+	group = std::make_shared<ui_group>(zeal, this);
+	inputDialog = std::make_shared<ui_inputdialog>(zeal, this);
+	buffs = std::make_shared<ui_buff>(zeal, this);
 	zoneselect = std::make_shared<ui_zoneselect>(zeal, this);
-	mem::write<BYTE>(0x40f07a, 0); //disable rotation by default
-	mem::write<BYTE>(0x40f07d, 0xEB); //make rotate not checked by default
+	inspect = std::make_shared<ui_inspect>(zeal, this);
 
 	//zeal->hooks->Add("InitCharSelectSettings", 0x53c234, InitCharSelectSettings, hook_type_replace_call);
 	zeal->hooks->Add("ButtonClick", 0x5951E0, ButtonClick_hook, hook_type_detour);

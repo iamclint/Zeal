@@ -273,6 +273,12 @@
     <ClInclude Include="ZealSettings.h">
       <Filter>Header Files\other</Filter>
     </ClInclude>
+    <ClInclude Include="items.h">
+      <Filter>Header Files\other</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_inspect.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -469,6 +475,12 @@
     </ClCompile>
     <ClCompile Include="equip_item.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="items.cpp">
+      <Filter>Source Files\other</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_inspect.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -49,7 +49,7 @@ void ui_loot::InitUI()
 		btn->vtbl->Deconstructor = ButtonDestructor;
 	}
 }
-ui_loot::ui_loot(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
+ui_loot::ui_loot(ZealService* zeal, ui_manager* mgr)
 {
 	ui = mgr;
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);

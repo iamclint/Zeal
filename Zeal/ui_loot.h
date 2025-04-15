@@ -6,7 +6,7 @@
 class ui_loot
 {
 public:
-	ui_loot(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
+	ui_loot(class ZealService* zeal, class ui_manager* mgr);
 	~ui_loot();
 private:
 	void InitUI();

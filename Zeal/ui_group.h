@@ -5,7 +5,7 @@
 class ui_group
 {
 public:
-	ui_group(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
+	ui_group(class ZealService* zeal, class ui_manager* mgr);
 	~ui_group();
 	void sort();
 	void swap(UINT index1, UINT index2);

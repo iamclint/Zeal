@@ -70,7 +70,7 @@ ui_group::~ui_group()
 {
 
 }
-ui_group::ui_group(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
+ui_group::ui_group(ZealService* zeal, ui_manager* mgr)
 {
 	ui = mgr;
 	//zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);

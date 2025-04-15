@@ -21,7 +21,7 @@ public:
 	void PlayInviteSound() const;
 	void PlayTellSound() const;
 	Zeal::EqUI::EQWND* GetZealOptionsWindow() { return wnd; }  // Only use for short-term access.
-	ui_options(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
+	ui_options(class ZealService* zeal, class ui_manager* mgr);
 	~ui_options();
 
 	ZealSetting<bool> setting_enable_container_lock = { false, "Zeal", "EnableContainerLock", false };

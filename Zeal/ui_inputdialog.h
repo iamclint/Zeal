@@ -15,7 +15,7 @@ public:
 	Zeal::EqUI::BasicWnd* label;
 	Zeal::EqUI::EditWnd* input;
 	
-	ui_inputdialog(class ZealService* zeal, class IO_ini* ini, class ui_manager* mgr);
+	ui_inputdialog(class ZealService* zeal, class ui_manager* mgr);
 	~ui_inputdialog();
 private:
 
