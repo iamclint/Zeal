@@ -2620,6 +2620,46 @@ namespace Zeal
 			return EQ_NUM_INVENTORY_BANK_SLOTS;  // Fallback to the safe default.
 		}
 
+		// Counts up the number of open (empty)
+		int get_num_empty_inventory_slots()
+		{
+			Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return 0;
+
+			// Do not include gear slots.
+			int empty = 0;
+			for (int i = 0; i < EQ_NUM_INVENTORY_PACK_SLOTS; ++i) {
+				const auto pack_slot = char_info->InventoryPackItem[i];
+				if (!pack_slot)
+					empty++;
+				else if (pack_slot->Type == 1 && pack_slot->Container.Capacity <= EQ_NUM_CONTAINER_SLOTS)
+					for (int j = 0; j < pack_slot->Container.Capacity; ++j)
+						if (!pack_slot->Container.Item[j])
+							empty++;
+			}
+			return empty;
+		}
+
+		// Counts up the number of inventory slots.
+		int get_num_inventory_slots()
+		{
+			Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+			if (!char_info)
+				return 0;
+
+			// Do not include gear slots.
+			int count = 0;
+			for (int i = 0; i < EQ_NUM_INVENTORY_PACK_SLOTS; ++i) {
+				const auto pack_slot = char_info->InventoryPackItem[i];
+				if (!pack_slot || pack_slot->Type != 1)
+					count++;
+				else
+					count += pack_slot->Container.Capacity;
+			}
+			return count;
+		}
+
 		// Returns the avoidance value used in combat calculations. The server includes the combat
 		// agility AA bonus for combat, while the displayed client AC does not.
 		int get_avoidance(bool include_combat_agility)
