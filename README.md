@@ -430,6 +430,9 @@ ___
 - **Label EqType's**
   - `80` Mana/Max Mana
   - `81` Exp Per Hour Percentage
+  - `82` Owner of target (if pet)
+  - `83` Count of empty inventory slots
+  - `84` Count of all inventory slots
   - `124` Current Mana
   - `125` Max Mana
   - `134` Spell being casted

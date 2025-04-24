@@ -260,6 +260,9 @@ namespace Zeal
 		int get_num_shared_bank_slots();
 		int get_num_total_bank_slots();
 
+		int get_num_empty_inventory_slots();  // Not eqgame.dll related (label support).
+		int get_num_inventory_slots();  // Not eqgame.dll related (label support).
+
 		// mystats details.
 		enum Era { Classic = 0, Kunark, Velious, Luclin, PlanesOfPower };
 		Era get_era();

@@ -56,6 +56,14 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 		}
 		return true;
 	}
+	case 83:
+		Zeal::EqGame::CXStr_PrintString(str, "%d", Zeal::EqGame::get_num_empty_inventory_slots());
+		*override_color = false;
+		return true;
+	case 84:
+		Zeal::EqGame::CXStr_PrintString(str, "%d", Zeal::EqGame::get_num_inventory_slots());
+		*override_color = false;
+		return true;
 	case 124:
 	{
 		if (Zeal::EqGame::get_char_info())
