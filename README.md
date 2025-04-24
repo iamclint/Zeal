@@ -81,68 +81,80 @@ guide above if your `Zeal.asi` file keeps disappearing.
 - %loc for your location
 - %th or %targethp for your targets health %
 
-### Commands
+### Commands (`/help zeal`)
 ___
-- `/sortgroup`
-  - **Arguments:** ``
-  - **Example:** `/sq` `/sq 1 2`
-  - **Description:** sorts your current group members in the ui  using /sq 1 2 will swap players 1 and 2 in your group on your ui.
+- `/alarm`
+  - **Arguments:** `oldui`
+  - **Description:** Re-opens the alarm window, if oldui is specified it allows for an alarm on it.
 
-- `/cc`
+- `/aspectratio`
+  - **Aliases:** `/ar`
+  - **Description:** Change your aspect ratio.
+
+- `/assist`
+  - **Arguments:** `on`, `off`
+  - **Description:** Supports per character assist auto-attack on/off, also supports failure message.
+
+- `/autobank`
+  - **Aliases:** `/autoba`, `/ab`
+  - **Description:** Drops whatever is on your cursor into your bank. [requires you to be at a banker] (not fully functional atm)
+
+- `/autoinventory`
+  - **Aliases:** `/autoinv`, `/ai`
+  - **Description:** Drops whatever is on your cursor into your inventory.
+
+- `/buffs`
+  - **Description:** Outputs the players buff timers to the chat only if they are using OldUI.
+
+- `/bluecon`
+  - **Description:** Changes the blue con color to Zeal Color Button #15 which is in the Zeal Options window, Colors Tab.
+
+- `/classicclasses`
+  - **Aliases** `/cc`
   - **Example:** `/cc`
   - **Description:** toggles classic classes in who and other areas.
 
-- `/targetring`
-  - **Arguments:** `size`, `indicator`
-  - **Example:** `/targetring 0.25`
-  - **Example:** `/targetring indicator` toggles auto attack indicator.
-  - **Description:** toggles targetring on/off.
+- `/clientmanatick`
+  - **Aliases** `/cmt`
+  - **Example:** `/cc`
+  - **Description:** Toggles client mana tick (disabled by default in this client).
 
-- `/resetexp`
-  - **Arguments:** ``
-  - **Example:** `/resetexp`
-  - **Description:** resets the exp per hour calculations.
-  - 
-- `/timer`
-  - **Arguments:** `int`
-  - **Example:** `/timer 10`
-  - **Description:** holds the last hotbutton pressed down for the duration (decisecond like /pause).
-  
-- `/pipedelay`
-  - **Arguments:** `int`
-  - **Example:** `/pipedelay 500`
-  - **Description:** changes the delay between each loop of labels/gauges being sent out over the named pipe.
+- `/cls`
+  - **Description:** Adds cls alias for clearchat.
 
-- `/pipe`
-  - **Arguments:** `string`
-  - **Example:** `/pipe set a respawn timer for 30 seconds`
-  - **Description:** outputs a string through the named pipe.
-  
-- `/ttimer`
-  - **Arguments:** `int`
-  - **Example:** `/ttimer 500`
-  - **Description:** change the delay in which a tooltip pops up on mouse hover.
-  
-- `/inspect target`
-  - **Description:** adds target argument to /inspect, this just inspects your current target.
+- `/corpsedrag`
+  - **Aliases:** `/drag`
+  - **Arguments:** none, `nearest` (auto-targets nearest corpse for dragging)
+  - **Description:** Attempts to corpse drag your current target. Use `/corpsedrag nearest` to auto-target.
 
-- `/loc noprint`
-  - **Description:** adds noprint argument to /loc, this just sends loc directly to your log.
+- `/corpsedrop`
+  - **Aliases:** `/drop`
+  - **Arguments:** none, `all` (drops all corpses)
+  - **Description:** Stop dragging your currently targeted corpse. To drop all use `/corpsedrop all`.
 
-- `/reloadskin`
-  - **Description:** reloads your current skin using ini.
-    
 - `/fcd` (floating combat damage)
   - **Arguments:** none, `client font size #`, `font`
   - **Example:** `/fcd` toggles on and off
   - **Example:** `/fcd 6` sets it to use client font size 6
   - **Example:** `/fcd font arial_24` sets it to use custom font arial_24
   - **Description:** shows floating combat damage.
-  
+
 - `/fov`
   - **Arguments:** `int`
   - **Example:** `/fov 65`
   - **Description:** changes your field of view with a value between 45 and 90.
+
+- `/help zeal`
+  - **Description:** Shows the custom Zeal commands.
+
+- `/hidecorpse`
+  - **Arguments:** `looted` (hides after looting), `npc` (hides npcs only), `showlast` (unhides last hidden corpse)
+  - **Aliases:** `/hideco`, `/hidec`, `/hc`
+  - **Example:** `/hidecorpse looted`
+  - **Description:** Adds extra arguments and aliases to built in /hidecorpses command.
+
+- `/inspect target`
+  - **Description:** adds target argument to /inspect, this just inspects your current target.
 
 - `/lead`
   - **Arguments:** none, `open` (reports raid groups with open slots), `all` (lists all raid groups)
@@ -151,6 +163,9 @@ ___
 - `/linkall`
   - **Arguments:** none (pastes into active chat) or `rs` (rsay), `gs` (gsay), `gu` (guildsay), `ooc`, `auc`, `say`
   - **Description:** prints item links if looting window is open. The argument options route directly to channel for macros.
+
+- `/loc noprint`
+  - **Description:** adds noprint argument to /loc, this just sends loc directly to your log.
 
 - `/log`
   - **Arguments:** `on`, `off`, `output text message with percent converts`
@@ -166,27 +181,49 @@ ___
 - `/lootlast`
   - **Arguments:** `item_id_#`, `item_link`, or `0` to disable.
   - **Description:** specifies an item ID that will be left as the last item when using /lootall on your corpse 
- 
-- `/melody`
-  - **Arguments:** `song gem #'s (maximum of 5)`
-  - **Aliases:** `/mel`
-  - **Example:** `/melody 1 4 2 3`
-  - **Description:** plays songs in order until interrupted in any fashion.
 
 - `/map`
   - **Arguments:** `on`, `off`, `size`, `alignment`, `marker`, `background`, `zoom`, `poi`, `labels`, `level`, `ring`, `grid`
   - **Example:** See In-game map section below
   - **Description:** controls map enable, size, labels, zoom, and markers
 
+- `/melody`
+  - **Arguments:** `song gem #'s (maximum of 5)`
+  - **Aliases:** `/mel`
+  - **Example:** `/melody 1 4 2 3`
+  - **Description:** plays songs in order until interrupted in any fashion.
+
 - `/mystats`
   - **Arguments:** `none`, `info`, `<item_link>`
   - **Example:** `/mystats <item_link>` Prints out your current offensive stats if you were holding that item.
   - **Description:** prints out current stats values (mitigation, avoidance, offense, etc)
 
+- `/nameplate`
+  - **Arguments:** `colors`, `concolors`, `targetcolor`, `charselect`, `hideself`, `x`, `hideraidpets`, `showpetownername`, `targetmarker`, `targethealth`, `inlineguild`
+  - **Description:** toggles nameplate modes for adjusting colors (tints) and text
+
+- `/outputfile`
+  - **Aliases:** `/output`, `/out`
+  - **Arguments:** `inventory | spellbook` `[optional_name]`
+  - **Example:** `/outputfile inventory my_inventory`
+  - **Description:**
+    - `inventory` outputs information about your equipment, inventory bag slots, held item, and bank slots to a file.
+    - `spellbook` outputs a list of all spell ids current scribed in your spellbook.
+
 - `/pandelay`
   - **Arguments:** `ms delay`, `none`
   - **Example:** `/pandelay 200`
   - **Description:** changes the amount of delay before left click panning will start to happen
+
+- `/pipe`
+  - **Arguments:** `string`
+  - **Example:** `/pipe set a respawn timer for 30 seconds`
+  - **Description:** outputs a string through the named pipe.
+
+- `/pipedelay`
+  - **Arguments:** `int`
+  - **Example:** `/pipedelay 500`
+  - **Description:** changes the delay between each loop of labels/gauges being sent out over the named pipe.
 
 - `/protect`
   - **Arguments:** `on`, `off`, `value`, `item`, `<item_link>`, `list`, `cursor`, `worn`
@@ -203,18 +240,24 @@ ___
           enable, value, and protected list are stored per character with the list stored in the
           `./<character_name>_protected.ini` file.
 
-- `/hidecorpse`
-  - **Arguments:** `looted` (hides after looting), `npc` (hides npcs only), `showlast` (unhides last hidden corpse)
-  - **Aliases:** `/hideco`, `/hidec`, `/hc`
-  - **Example:** `/hidecorpse looted`
-  - **Description:** Adds extra arguments and aliases to built in /hidecorpses command.
+- `/reloadskin`
+  - **Description:** reloads your current skin using ini.
 
-- `/spellset`
-  - **Arguments:** `save`, `load`, `delete`
-  - **Example:** `/spellset save buffs`
-  - **Example:** `/spellset load buffs`
-  - **Example:** `/spellset delete buffs`
-  - **Description:** allows you to save and load spellsets
+- `/resetexp`
+  - **Arguments:** ``
+  - **Example:** `/resetexp`
+  - **Description:** resets the exp per hour calculations.
+
+- `/rt`
+  - **Description:** targets the last tell or active tell window player
+
+- `/run`
+  - **Arguments:** none (toggles), `on` (run), `off` (walk)
+  - **Description:** Controls run versus walk mode.
+
+- `/selfclickthru`
+  - **Arguments:** `on`, `off`
+  - **Description:** Disables (on) click on self in third person and allows 'u' to activate doors.
 
 - `/showhelm`
   - **Aliases:** `/helm`
@@ -223,7 +266,7 @@ ___
   - **Description:** Toggles your helmet.
 
 - `/showlootlockouts`
-  - **Aliases:** `/showlootlockout`, `/showlockout`, `/sll`
+  - **Aliases:** `/showlootlockout`, `/showlockouts`, `/sll`
   - **Description:** Shows you your current loot lockouts on Quarm.
 
 - `/singleclick`
@@ -234,48 +277,62 @@ ___
     are open. Set # to zero to disable (default). The # is not a persistent setting (clears on camp).
   - **Example:** `/singleclick bag 2` will set inventory slot bag 2 (1-8) as the target.
 
+- `/sit`
+  - **Description:** The /sit command now accepts "on" as an argument. Using "/sit on" will always make you sit, even if you are currently sitting. This matches the game's native "/sit off" which always makes you stand even if you are currently standing. The "/sit" command will continue to toggle sit/stand state if no argument is provided or if the argument provided is not on or off. Additionally, "/sit down" now works as well and will always make you sit, even if already sitting.
+
+- `/sortgroup`
+  - **Arguments:** ``
+  - **Example:** `/sq` `/sq 1 2`
+  - **Description:** sorts your current group members in the ui  using /sq 1 2 will swap players 1 and 2 in your group on your ui.
+
+- `/spellset`
+  - **Arguments:** `save`, `load`, `delete`
+  - **Example:** `/spellset save buffs`
+  - **Example:** `/spellset load buffs`
+  - **Example:** `/spellset delete buffs`
+  - **Description:** allows you to save and load spellsets
+
 - `/survey`
   - **Arguments:** `on`, `off`, `channel`, `new`, `response`, `results`, `share`
   - **Description:** Survey helper for polling raid groups. See /survey section below.
-
-- `/zealcam`
-  - **Aliases:** `/smoothing`
-  - **Arguments:** `x y 3rdperson_x 3rdperson_y`
-  - **Example:** `/zealcam 0.7 0.2 0.7 0.2` if 3rd person arguments are not supplied, the first x and y are applied to both
-  - **Description:** Toggles Zeal's mouse look smoothing methods, the first 2 arguments are first person sensitivity, and the last 2 are for 3rd person
-
-- `/autoinventory`
-  - **Aliases:** `/autoinv`, `/ai`
-  - **Description:** Drops whatever is on your cursor into your inventory.
-
-- `/autobank`
-  - **Aliases:** `/autoba`, `/ab`
-  - **Description:** Drops whatever is on your cursor into your bank. [requires you to be at a banker] (not fully functional atm)
-
-- `/corpsedrag`
-  - **Aliases:** `/drag`
-  - **Arguments:** none, `nearest` (auto-targets nearest corpse for dragging)
-  - **Description:** Attempts to corpse drag your current target. Use `/corpsedrag nearest` to auto-target.
-
-- `/corpsedrop`
-  - **Aliases:** `/drop`
-  - **Arguments:** none, `all` (drops all corpses)
-  - **Description:** Stop dragging your currently targeted corpse. To drop all use `/corpsedrop all`.
 
 - `/target`
   - **Aliases:** `/cleartarget`
   - **Description:** acts as normal /target unless you provide no argument in which case it will clear your target.
 
-- `/run`
-  - **Arguments:** none (toggles), `on` (run), `off` (walk)
-  - **Description:** Controls run versus walk mode.
+- `/targetring`
+  - **Arguments:** `size`, `indicator`
+  - **Example:** `/targetring 0.25`
+  - **Example:** `/targetring indicator` toggles auto attack indicator.
+  - **Description:** toggles targetring on/off.
 
-- `/sit`
-  - **Description:** The /sit command now accepts "on" as an argument. Using "/sit on" will always make you sit, even if you are currently sitting. This matches the game's native "/sit off" which always makes you stand even if you are currently standing. The "/sit" command will continue to toggle sit/stand state if no argument is provided or if the argument provided is not on or off. Additionally, "/sit down" now works as well and will always make you sit, even if already sitting.
+- `/tellwindows`
+  - **Description:** Toggle tell windows. 
 
-- `/selfclickthru`
-  - **Arguments:** `on`, `off`
-  - **Description:** Disables (on) click on self in third person and allows 'u' to activate doors.
+- `/tickreverse`
+  - **Description:** Swaps the direction of the server tick gauge.
+
+- `/timer`
+  - **Arguments:** `int`
+  - **Example:** `/timer 10`
+  - **Description:** holds the last hotbutton pressed down for the duration (decisecond like /pause).
+
+- `/timestamp`
+  - **Aliases:** `/tms`
+  - **Description:** Shows message timestamps.
+
+- `/tooltipall`
+  - **Description:** Toggle showing all open containers tooltips when holding alt.
+
+- `/tooltiptimer`
+  - **Aliases:** `/ttimer`
+  - **Arguments:** `int`
+  - **Example:** `/ttimer 500`
+  - **Description:** change the delay in which a tooltip pops up on mouse hover.
+
+- `/trade`
+  - **Aliases:** `/opentrade`, `/ot`
+  - **Description:** Opens a trade window with your current target.
 
 - `/uilock`
   - **Arguments:** `on`, `off`
@@ -290,57 +347,37 @@ ___
   - **Arguments:** `version`
   - **Description:** Shows the version of zeal.
 
+- `/zealcam`
+  - **Aliases:** `/smoothing`
+  - **Arguments:** `x y 3rdperson_x 3rdperson_y`
+  - **Example:** `/zealcam 0.7 0.2 0.7 0.2` if 3rd person arguments are not supplied, the first x and y are applied to both
+  - **Description:** Toggles Zeal's mouse look smoothing methods, the first 2 arguments are first person sensitivity, and the last 2 are for 3rd person
+
 - `/zealinput`
   - **Description:** toggles the zeal input setup for any input in game, giving you a more modern input
      - ctrl+c, ctrl+v, left, right, shift left+right for highlighting, home, end, etc
      - enhanced tab completion for /tell, /t, and /consent
 
-- `/help zeal`
-  - **Description:** Shows the custom Zeal commands.
-
-- `/timestamp`
-  - **Aliases:** `/tms`
-  - **Description:** Shows message timestamps.
-
-- `/outputfile`
-  - **Aliases:** `/output`, `/out`
-  - **Arguments:** `inventory | spellbook` `[optional_name]`
-  - **Example:** `/outputfile inventory my_inventory`
-  - **Description:**
-    - `inventory` outputs information about your equipment, inventory bag slots, held item, and bank slots to a file.
-    - `spellbook` outputs a list of all spell ids current scribed in your spellbook.
-
-- `/buffs`
-  - **Description:** Outputs the players buff timers to the chat only if they are using OldUI.
-
-- `/bluecon`
-  - **Description:** Changes the blue con color to Zeal Color Button #15 which is in the Zeal Options window, Colors Tab.
-
-- `/alarm`
-  - **Arguments:** `oldui`
-  - **Description:** Re-opens the alarm window, if oldui is specified it allows for an alarm on it.
-
-- `/nameplate`
-  - **Arguments:** `colors`, `concolors`, `targetcolor`, `charselect`, `hideself`, `x`, `hideraidpets`, `showpetownername`, `targetmarker`, `targethealth`, `inlineguild`
-  - **Description:** toggles nameplate modes for adjusting colors (tints) and text
-
-- `/tickreverse`
-  - **Description:** Swaps the direction of the server tick gauge.
 ___
-### Binds
+### Key Binds (Added to Options->Keyboard)
 - Cycle through nearest NPCs
 - Cycle through nearest PCs
 - Strafe Right
 - Strafe Left
 - Auto Inventory
+- Toggle open all containers
 - Toggle last 2 targets
 - Reply target
 - Pet Attack
 - Pet Guard
 - Pet Follow
 - Pet Back
+- Pet Sit
 - Slow turn left
 - Slow turn right
+- Auto Fire
+- Buy / sell stack
+- Close all tell windows
 - Target nearest pc corpse
 - Target nearest npc corpse
 - Cycle through nearest pc corpses
