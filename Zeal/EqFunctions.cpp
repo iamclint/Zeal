@@ -2901,8 +2901,8 @@ namespace Zeal
 
 			if (char_info.Class == Zeal::EqEnums::ClassTypes::Monk)
 			{
-				auto primary = char_info.InventoryItem[Zeal::EqEnums::EquipSlot::Primary];
-				if (primary && primary->ID == 10652 && char_info.Level > 50)		// Celestial Fists, monk epic
+				auto hands = char_info.InventoryItem[Zeal::EqEnums::EquipSlot::Hands];
+				if (hands && hands->ID == 10652 && char_info.Level > 50)		// Celestial Fists, monk epic
 					return 9;
 				if (char_info.Level > 62)
 					return 15;
@@ -3275,8 +3275,8 @@ namespace Zeal
 			int level = char_info->Level;
 			if (char_info->Class == Zeal::EqEnums::ClassTypes::Monk)
 			{
-				auto primary = char_info->InventoryItem[Zeal::EqEnums::EquipSlot::Primary];
-				if (primary && primary->ID == 10652 && level > 50)		// Celestial Fists, monk epic
+				auto hands = char_info->InventoryItem[Zeal::EqEnums::EquipSlot::Hands];
+				if (hands && hands->ID == 10652 && level > 50)		// Celestial Fists, monk epic
 					return 16;
 
 				if (level > 62)
@@ -3300,7 +3300,7 @@ namespace Zeal
 			if (!char_info)  // Unlikely so just bail to prevent corner-case crash.
 				return;
 
-			if (!primary && !char_info->Skills[Zeal::EqEnums::SkillDualWield])
+			if (!primary && (char_info->Skills[Zeal::EqEnums::SkillDualWield] == 255))
 				return;  // Secondary can't attack w/out dual wield.
 
 			const Zeal::EqEnums::EquipSlot::EquipSlot slot = primary ?
