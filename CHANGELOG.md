@@ -2,6 +2,49 @@
 
 Summarizes notable changes to Zeal
 
+## [0.6.7] - 2025/04/26
+
+### New features:
+
+* Added /mystats command
+  - New /mystats command provides a breakdown of the components of AC
+   (mitigation and avoidance) and ATK (offense and to hit) of currently
+   equipped gear melee weapons w/current buffs
+  - Supports /mystats <item_link> to report stats as if player was
+    holding the weapon
+
+* Added option to require holding the ctrl key to trigger right click loot
+  - Controlled by either /lootctrl or a Zeal settings general option
+    ('Ctrl Right Click Loot')
+  - Useful to prevent inadvertent loot trigger in third person view
+
+* Added item display when alt-left clicking on character inspect window
+  - Note: This uses an item name lookup to find the items out of a slightly
+    old db list, so a few items might be missing and some items with name
+    collisions (like Blue Diamond Electrum Earring) may show the wrong item
+
+* Add an optional invite (raid/group) dialog box (#342)
+  - Zeal general options now has an additional Invite Dialog checkbox option
+   that will enable a pop up dialog upon a raid or group invite
+  - Also extended the optional invite notification sound to also
+    play when invited to a raid (previously group only)
+
+* Map
+  - Added `on` and `off` arguments to `/map ring` for explicit control
+    - `on` works only for tracking classes and sets to max tracking range
+
+* EQ Labels
+  - Added EQType labels for reporting the # of open slots (83) and
+    the total # of inventory slots (84)
+
+
+### Fixes / infrastructure:
+* Fixed a bug first introduced around v0.5.5 that could cause a crash when
+  trying to remove the temporary EQUI_Zeal.xml file during UI initialization
+     - Hat tip to Fatrat for isolating the area with the problem 
+
+* Cleaned up README.md (audited labels, commands, keybinds)
+
 ## [0.6.6] - 2025/04/05
 
 ### New features:
