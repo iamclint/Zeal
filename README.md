@@ -139,6 +139,14 @@ ___
   - **Example:** `/fcd font arial_24` sets it to use custom font arial_24
   - **Description:** shows floating combat damage.
 
+- `/follow`
+  - **Arguments:** none, `zeal on`, `zeal off`, `distance <value>`
+  - **Example:** `/follow` toggles on and off (normal client command)
+  - **Example:** `/follow zeal on` turns on patched Zeal auto-follow mode (same as options tab)
+  - **Example:** `/follow distance 5` sets the Zeal mode follow distance to 5 (default 15)
+  - **Description:** adds /follow arguments that support enabling Zeal mode with adjustable distance. The
+    Zeal mode disables rapid toggling of run mode and slow turning to improve /follow reliability.
+
 - `/fov`
   - **Arguments:** `int`
   - **Example:** `/fov 65`
