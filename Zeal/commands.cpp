@@ -461,6 +461,7 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				print_chat("Stat descriptions (all values include current spell effects):");
 				print_chat("Mitigation: modifies incoming damage based on offense vs mitigation (0.1x to 2.0x factor)");
 				print_chat("Mitigation (melee) ~= item_ac*4/3 + defense_skill/3 + agility/20 + spell_ac/4 + class_ac");
+				print_chat("Note: The spell_ac value is an internal calc from the database. Sites like pqdi already include the /4.");
 				print_chat("Avoidance: modifies probability of taking zero damage");
 				print_chat("Avoidance ~= (defense_skill*400/225 + 36 + (min(200,agi)-75)*2/15)*(1+AA_pct)");
 				print_chat("To Hit: sets probability of hitting based on to hit vs avoidance");
@@ -469,6 +470,15 @@ ChatCommands::ChatCommands(ZealService* zeal)
 				print_chat("Offense ~= weap_skill_value + spell_atk + item_atk + max(0, (str-75)*2/3)");
 				print_chat("Damage multiplier: Chance for bonus damage factor based on level, weapon skill, and offense");
 				print_chat("Average damage: Mitigation factor = 1, damage multiplier = average after both rolls");
+			}
+			else if (args.size() == 2 && args[1] == "affects")
+			{
+				auto char_info = Zeal::EqGame::get_char_info();
+				if (char_info)
+				{
+					const int SE_ArmorClass = 1;
+					print_chat("TotalSpellAffects: AC: %d", Zeal::EqGame::total_spell_affects(char_info, SE_ArmorClass, true, nullptr));
+				}
 			}
 			else if (args.size() >= 2 && args[1].size() >= 8 && args[1].front() == kMarker) {
 				std::string link = args[1];  // Only need the first item ID part of the link (name doesn't matter).
@@ -489,7 +499,6 @@ ChatCommands::ChatCommands(ZealService* zeal)
 			}
 			else if (args.size() == 1) {
 				bool is_luclin_enabled = (Zeal::EqGame::get_era() >= Zeal::EqGame::Era::Luclin);
-				auto char_info = Zeal::EqGame::get_char_info();
 				Zeal::EqGame::print_chat("---- Defensive stats ----");
 				print_chat("AC (display): %i = (Mit: %i  + Avoidance: %i) * 1000/847",
 					Zeal::EqGame::get_display_AC(), Zeal::EqGame::get_mitigation(),

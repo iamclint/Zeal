@@ -1,6 +1,6 @@
 #include "patches.h"
 #include "Zeal.h"
-
+#include "string_util.h"
 
 void __fastcall GetZoneInfoFromNetwork(int* t, int unused, char* p1)
 {
@@ -93,6 +93,48 @@ void patches::SetBrownSkeletons()
 		mem::write<byte>(0x49f297, 0x75);
 	}
 }
+
+
+// These patches improve /follow reliability. There is logic in /follow to turn run mode on and off
+// and this actually makes your character crash out of the game if your framerate is high enough.
+// There is also a smooth turning function to circle around to the followed target which is
+// framerate dependent and causes follow failures.
+// 
+// Both of these things are disabled by this mod, and it also adds an adjustable follow distance.
+void patches::SyncAutoFollow(bool first_boot)
+{
+	// To patch the follow distance, we modify the pointer to a float in an instruction.
+	// We don't modify the value directly since that value is shared elsewhere in the code.
+	const DWORD follow_distance_address = (0x00507D92 + 2);  // FADD dword ptr[addr]
+	const float* follow_distance_default = reinterpret_cast<const float*>(0x005e44d4); // 15.0.
+	static float follow_distance_modified = 15.0f;  // Provides the static value to point to.
+
+	// Support disabling the rapid on/off toggling of run mode which can cause LDs or crashes.
+	const DWORD run_mode_address = 0x00507DB0;  // FLD dword ptr[EBP + local_8]
+	const BYTE run_mode_toggle_default[3] = { 0xd9, 0x45, 0xfc };  // Original client code.
+	const BYTE run_mode_toggle_disabled[3] = { 0xeb, 0x43, 0x90 };  // Patched to disable (jmp 0x45, nop).
+
+	// Support disabling the 'smoothing' where it only turns a little bit at a time if more than
+	// a quarter circle off course.
+	const DWORD turn_smoothing_address = 0x00507CB1;  // JNC LAB_00507cc1
+	const BYTE turn_smoothing_default[2] = { 0x73, 0x0e };  // Original client code.
+	const BYTE turn_smoothing_disabled[2] = { 0x90, 0x90 };  // Patched to disable (nop, nop).
+
+	if (AutoFollowEnable.get())
+	{
+		follow_distance_modified = max(1.f, min(50.f, AutoFollowDistance.get()));
+		mem::write(follow_distance_address, &follow_distance_modified);
+		mem::write(run_mode_address, run_mode_toggle_disabled);
+		mem::write(turn_smoothing_address, turn_smoothing_disabled);
+	}
+	else if (!first_boot)  // Do nothing at boot if Zeal mode is disabled.
+	{
+		mem::write(follow_distance_address, follow_distance_default);
+		mem::write(run_mode_address, run_mode_toggle_default);
+		mem::write(turn_smoothing_address, turn_smoothing_default);
+	}
+}
+
 patches::patches()
 {
 	const char sit_stand_patch[] = { (char)0xEB, (char)0x1A };
@@ -101,6 +143,8 @@ patches::patches()
 	//disable client sided hp ticking
 	//mem::set(0x4b9141, 0x90, 6);
 	SetBrownSkeletons();
+	SyncAutoFollow(true);  // Sync only if non-default.
+
 	//disable client sided mana ticking
 	mem::set(0x4C3F93, 0x90, 7);
 	mem::set(0x4C7642, 0x90, 7);
@@ -122,4 +166,42 @@ patches::patches()
 
 	//fonts();
 	//*(int*)0x809458 =
+
+	ZealService::get_instance()->commands_hook->Add("/follow", {}, "Additional /follow options to improve reliability.",
+		[this](std::vector<std::string>& args) {
+
+			if (args.size() == 1)
+				return false;  // No special flags, return false to let normal path handle.
+
+			float distance = 10;
+			if (args.size() == 3 && args[1] == "zeal")
+			{
+				if (args[2] == "on")
+				{
+					Zeal::EqGame::print_chat("Setting /follow mode to use Zeal patches");
+					AutoFollowEnable.set(true);
+					return true;  // Done
+				}
+				if (args[2] == "off")
+				{
+					Zeal::EqGame::print_chat("Setting /follow mode to use default client behavior");
+					AutoFollowEnable.set(false);
+					return true;  // Done
+				}
+			}
+			else if (args.size() == 3 && args[1] == "distance" && Zeal::String::tryParse(args[2], &distance))
+			{
+				distance = max(1.f, min(50.f, distance));
+				Zeal::EqGame::print_chat("Setting /follow distance in zeal mode to: %f", distance);
+				AutoFollowDistance.set(distance);
+				return true;  // Done
+			}
+
+			Zeal::EqGame::print_chat("Usage: /follow: Enable / disable auto-follow.");
+			Zeal::EqGame::print_chat("Usage: /follow zeal on, /follow zeal off: Enable / disable zeal follow mode.");
+			Zeal::EqGame::print_chat("Usage: /follow distance <value>: Sets the follow distance in zeal mode.");
+
+			return true;
+		});
+
 }

@@ -69,6 +69,11 @@ static void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD character_sl
 {
 	int prev_cam = *Zeal::EqGame::camera_view;
 	ZealService::get_instance()->hooks->hook_map["SelectCharacter"]->original(SelectCharacter)(t, unused, character_slot, unk2);
+
+	if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && !Zeal::EqGame::Windows->CharacterSelect->Explore &&
+		ZealService::get_instance()->ui->zoneselect)
+		ZealService::get_instance()->ui->zoneselect->ShowButton();  // Put dynamic button (if present) on top.
+
 	int zone_index = get_zone_index_setting();
 	if (zone_index <= 0)
 		return;
@@ -78,10 +83,6 @@ static void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD character_sl
 		*Zeal::EqGame::camera_view = prev_cam; // if you happen to click yourself this keeps the camera from going to the straight out char select cam
 	else
 		*Zeal::EqGame::camera_view = Zeal::EqEnums::CameraView::CharacterSelect;
-
-	if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->CharacterSelect && !Zeal::EqGame::Windows->CharacterSelect->Explore &&
-					ZealService::get_instance()->ui->zoneselect)
-		ZealService::get_instance()->ui->zoneselect->ShowButton();  // Put dynamic button (if present) on top.
 
 	Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
 	if (self)

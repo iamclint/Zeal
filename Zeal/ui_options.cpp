@@ -412,6 +412,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_DetectAssistFailure",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_detect_assist_failure.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SingleClickGiveEnable",  [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->give->setting_enable_give.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_InviteDialog",           [this](Zeal::EqUI::BasicWnd* wnd) { setting_invite_dialog.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_AutoFollowEnable",       [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->game_patches->AutoFollowEnable.set(wnd->Checked); });
 
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_CtrlRightClickCorpse",   [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_ctrl_rightclick_loot.set(wnd->Checked); });
@@ -759,6 +760,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_DetectAssistFailure", ZealService::get_instance()->assist->setting_detect_assist_failure.get());
 	ui->SetChecked("Zeal_SingleClickGiveEnable", ZealService::get_instance()->give->setting_enable_give.get());
 	ui->SetChecked("Zeal_InviteDialog", setting_invite_dialog.get());
+	ui->SetChecked("Zeal_AutoFollowEnable", ZealService::get_instance()->game_patches->AutoFollowEnable.get());
 
 	UpdateComboBox("Zeal_TellSound_Combobox", setting_tell_sound.get(), kDefaultSoundNone);
 	UpdateComboBox("Zeal_InviteSound_Combobox", setting_invite_sound.get(), kDefaultSoundNone);
