@@ -3239,7 +3239,7 @@ namespace Zeal
 			return static_cast<float>(roll) * (1.f / 100);
 		}
 
-		static int get_hand_to_hand_delay()
+		int get_hand_to_hand_delay()
 		{
 			const int default_delay = 35;
 			auto char_info = Zeal::EqGame::get_char_info();
