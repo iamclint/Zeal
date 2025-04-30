@@ -270,6 +270,7 @@ namespace Zeal
 		int get_mitigation(bool include_cap = false);
 		int get_mitigation_softcap();
 		int get_display_AC();
+		int get_hand_to_hand_delay();
 		void print_melee_attack_stats(bool primary, const Zeal::EqStructures::EQITEMINFO* weapon = nullptr);
 	}
 }
