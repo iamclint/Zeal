@@ -56,14 +56,27 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 		}
 		return true;
 	}
-	case 83:
-		Zeal::EqGame::CXStr_PrintString(str, "%d", Zeal::EqGame::get_num_empty_inventory_slots());
-		*override_color = false;
+	case 83:  // Number of empty inventory slots.
+	{
+		int num_empty = Zeal::EqGame::get_num_empty_inventory_slots();
+		Zeal::EqGame::CXStr_PrintString(str, "%d", num_empty);
+		*override_color = true;
+		*color = (num_empty <= 0) ? 0xffff0000 : ((num_empty == 1) ? 0xffffff00 : 0xffc0c0c0);
 		return true;
-	case 84:
+	}
+	case 84:  // Total number of inventory slots.
 		Zeal::EqGame::CXStr_PrintString(str, "%d", Zeal::EqGame::get_num_inventory_slots());
 		*override_color = false;
 		return true;
+	case 85:  // Number of filled inventory slots.
+	{
+		int total_num = Zeal::EqGame::get_num_inventory_slots();
+		int num_empty = Zeal::EqGame::get_num_empty_inventory_slots();
+		Zeal::EqGame::CXStr_PrintString(str, "%d", total_num - num_empty);
+		*override_color = true;
+		*color = (num_empty <= 0) ? 0xffff0000 : ((num_empty == 1) ? 0xffffff00 : 0xffc0c0c0);
+		return true;
+	}
 	case 124:
 	{
 		if (Zeal::EqGame::get_char_info())
