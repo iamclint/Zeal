@@ -53,6 +53,21 @@ void ui_options::PlayInviteSound() const
 		Zeal::EqGame::WavePlay(it->first);
 }
 
+// Internal helpers for ShowInviteDialog
+static constexpr char kInviteDialogTitle[] = "Invite";
+static void handle_follow()
+{
+	const auto self = Zeal::EqGame::get_self();
+	if (self && self->ActorInfo && self->ActorInfo->IsInvited)
+		Zeal::EqGame::get_eq()->Follow();
+}
+static void handle_decline()
+{
+	const auto self = Zeal::EqGame::get_self();
+	if (self && self->ActorInfo && self->ActorInfo->IsInvited)
+		Zeal::EqGame::get_eq()->Disband();
+}
+
 void ui_options::ShowInviteDialog(const char* raid_invite_name) const
 {
 	if (!setting_invite_dialog.get() || !ZealService::get_instance()->ui->inputDialog)
@@ -63,19 +78,50 @@ void ui_options::ShowInviteDialog(const char* raid_invite_name) const
 
 	// Close / abort any open dialog and then open up a new one with the invite.
 	ZealService::get_instance()->ui->inputDialog->hide();
-	ZealService::get_instance()->ui->inputDialog->show("Invite", message, "Dismiss", "",
-		nullptr, nullptr, false);
+	if (raid_invite_name)
+		ZealService::get_instance()->ui->inputDialog->show(kInviteDialogTitle, message, "Accept", "Decline",
+			[this](std::string unused) { Zeal::EqGame::do_raidaccept(); },
+			[this](std::string unused) { Zeal::EqGame::do_raiddecline(); },
+			false);
+	else
+		ZealService::get_instance()->ui->inputDialog->show(kInviteDialogTitle, message, "Follow", "Decline",
+			[this](std::string unused) { handle_follow(); },
+			[this](std::string unused) { handle_decline(); },
+			false);
+}
+
+void ui_options::HideInviteDialog() const
+{
+	// The invite dialog uses the shared input dialog window, so filter these calls to only
+	// hide when it is an invite dialog (matching title).
+	auto dialog = ZealService::get_instance()->ui->inputDialog.get();
+	if (dialog && dialog->isVisible() && dialog->getTitle() == kInviteDialogTitle)
+		dialog->hide();
 }
 
 static void __fastcall EqPlayerSetInvited(Zeal::EqStructures::Entity* this_entity, int unused_edx, int flag)
 {
-	if (flag && ZealService::get_instance()->ui) {
-		ZealService::get_instance()->ui->options->PlayInviteSound();
-		ZealService::get_instance()->ui->options->ShowInviteDialog();
+	if (ZealService::get_instance()->ui) {
+		if (flag) {
+			ZealService::get_instance()->ui->options->PlayInviteSound();
+			ZealService::get_instance()->ui->options->ShowInviteDialog();
+		}
+		else {
+			ZealService::get_instance()->ui->options->HideInviteDialog();
+		}
 	}
 
 	ZealService::get_instance()->hooks->hook_map["EqPlayerSetInvited"]
 		->original(EqPlayerSetInvited)(this_entity, unused_edx, flag);
+}
+
+static void __fastcall RaidSendInviteResponse(void* raid, int unused_edx, int flag)
+{
+	if (ZealService::get_instance()->ui)
+		ZealService::get_instance()->ui->options->HideInviteDialog();
+
+	ZealService::get_instance()->hooks->hook_map["RaidSendInviteResponse"]
+		->original(RaidSendInviteResponse)(raid, unused_edx, flag);
 }
 
 static void __fastcall RaidHandleCreateInviteRaid(void* raid, int unused_edx, char* payload)
@@ -1066,6 +1112,7 @@ ui_options::ui_options(ZealService* zeal, ui_manager* mgr) : ui(mgr)
 		const short& channel) { if (channel == USERCOLOR_TELL) this->PlayTellSound(); });
 
 	zeal->hooks->Add("RaidHandleCreateInviteRaid", 0x0049e54c, RaidHandleCreateInviteRaid, hook_type_detour);
+	zeal->hooks->Add("RaidSendInviteResponse", 0x0049debd, RaidSendInviteResponse, hook_type_detour);
 	zeal->hooks->Add("EqPlayerSetInvited", 0x0050c216, EqPlayerSetInvited, hook_type_detour);
 	sound_list.push_back({ -1, kDefaultSoundNone });
 	sound_list.push_back({ 137, "Gate" });

@@ -9,6 +9,7 @@ public:
 	bool show(const std::string& title, const std::string& message, const std::string& button1, const std::string button2, InputDialogCallback button1_callback = nullptr, InputDialogCallback button2_callback = nullptr, bool show_input_field = true);
 	void hide();
 	bool isVisible();
+	std::string getTitle() const;
 	std::pair<InputDialogCallback, InputDialogCallback> button_callbacks;
 	Zeal::EqUI::BasicWnd* button1;
 	Zeal::EqUI::BasicWnd* button2;

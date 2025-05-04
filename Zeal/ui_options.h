@@ -18,6 +18,7 @@ public:
 	void LoadColors();
 	DWORD GetColor(int index) const;
 	void ShowInviteDialog(const char* raid_invite_name = nullptr) const;
+	void HideInviteDialog() const;
 	void PlayInviteSound() const;
 	void PlayTellSound() const;
 	Zeal::EqUI::EQWND* GetZealOptionsWindow() { return wnd; }  // Only use for short-term access.
