@@ -538,6 +538,16 @@ namespace Zeal
 		{
 			return reinterpret_cast<bool(__thiscall*)(Zeal::EqStructures::Entity * player, uint8_t type, uint8_t p2, Zeal::EqStructures::Entity * target)>(0x50A0F8)(get_self(), type, p2, get_target());
 		}
+		void do_raidaccept()
+		{
+			if (get_self())
+				reinterpret_cast<void(__thiscall*)(Zeal::EqStructures::Entity * player, const char* unused)>(0x004f3be5)(get_self(), "");
+		}
+		void do_raiddecline()
+		{
+			if (get_self())
+				reinterpret_cast<void(__thiscall*)(Zeal::EqStructures::Entity * player, const char* unused)>(0x004f3bc1)(get_self(), "");
+		}
 		Zeal::EqStructures::Entity* get_view_actor_entity()
 		{
 			Zeal::EqStructures::ViewActor* Actor = get_view_actor();

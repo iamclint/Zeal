@@ -143,6 +143,8 @@ namespace Zeal
 		void do_autoattack(bool enabled);
 		bool CanIHitTarget(float dist);
 		bool do_attack(uint8_t type, uint8_t p2);
+		void do_raidaccept();
+		void do_raiddecline();
 		void do_inspect(Zeal::EqStructures::Entity* player);
 		void do_join(Zeal::EqStructures::Entity* player, const char* name);
 		void send_to_channel(int chat_channel_zero_based, const char* message);

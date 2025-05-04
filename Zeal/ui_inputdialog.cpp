@@ -51,6 +51,11 @@ bool ui_inputdialog::show(const std::string& title, const std::string& message, 
 	return true;
 }
 
+std::string ui_inputdialog::getTitle() const
+{
+	return wnd ? std::string(wnd->Text) : std::string("");
+}
+
 int __fastcall IDWndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI::BasicWnd* sender, int message, int data)
 {
 	ui_manager* ui = ZealService::get_instance()->ui.get();
