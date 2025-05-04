@@ -478,6 +478,7 @@ ___
   - `82` Owner of target (if pet)
   - `83` Count of empty inventory slots
   - `84` Count of all inventory slots
+  - `85` Count of filled inventory slots
   - `124` Current Mana
   - `125` Max Mana
   - `134` Spell being casted
