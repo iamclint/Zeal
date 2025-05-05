@@ -65,7 +65,7 @@ static void SetYon(float clip)
 	reinterpret_cast<void(__fastcall*)(int display, int unused_edx, float clip)>(0x004aca7f)(*Zeal::EqGame::Display, 0, clip);
 }
 
-static void __fastcall SelectCharacter(DWORD t, DWORD unused, DWORD character_slot, DWORD unk2)
+static void __fastcall SelectCharacter(Zeal::EqUI::CharSelect* t, DWORD unused, DWORD character_slot, DWORD unk2)
 {
 	int prev_cam = *Zeal::EqGame::camera_view;
 	ZealService::get_instance()->hooks->hook_map["SelectCharacter"]->original(SelectCharacter)(t, unused, character_slot, unk2);
