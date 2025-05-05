@@ -253,7 +253,7 @@ static D3DCOLOR get_color(bool is_my_damage, bool is_damage_to_me, bool is_damag
 }
 
 void FloatingDamage::handle_hp_update_packet(const Zeal::Packets::SpawnHPUpdate_Struct* packet) {
-	if (!packet)
+	if (!packet || !show_hp_updates.get())
 		return;
 	auto entity = Zeal::EqGame::get_entity_by_id(packet->spawn_id);
 	if (!entity)
@@ -316,17 +316,21 @@ void FloatingDamage::add_damage(Zeal::EqStructures::Entity* source, Zeal::EqStru
 		return;
 
 	auto self = Zeal::EqGame::get_controlled();
-	bool is_my_damage = (source && self && source->SpawnId == self->SpawnId);
+	bool is_my_pet = (source && self && source->PetOwnerSpawnId == self->SpawnId);
+	bool is_my_damage = is_my_pet || (source && self && source->SpawnId == self->SpawnId);
 	if (is_my_damage && !show_self.get())
 		return;
 
-	bool is_pet = (source && source->PetOwnerSpawnId != 0);  // Just filter all pet damage.
-	if (is_pet && !show_pets.get())
+	bool is_pet = (source && source->PetOwnerSpawnId != 0);  // Just filter all pet damage (except my pet).
+	if (is_pet && !is_my_pet && !show_pets.get())
 		return;
 
-	bool is_my_pet = (source && self && source->PetOwnerSpawnId == self->SpawnId);
-	bool is_others = !is_my_damage && !is_my_pet;
+	bool is_others = !is_my_damage;
 	if (is_player_damage && is_others && !show_others.get())
+		return;
+
+	bool is_npc_damage = (source && source->Type == Zeal::EqEnums::NPC);
+	if (is_npc_damage && !is_my_pet && !show_npcs.get())
 		return;
 
 	bool is_damage_to_me = (target == Zeal::EqGame::get_controlled());

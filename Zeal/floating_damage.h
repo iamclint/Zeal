@@ -45,6 +45,8 @@ public:
 	ZealSetting<bool> show_self = { true, "FloatingDamage", "Self", true };
 	ZealSetting<bool> show_pets = { true, "FloatingDamage", "Pets", true };
 	ZealSetting<bool> show_others = { true, "FloatingDamage", "Others", true };
+	ZealSetting<bool> show_npcs = { true, "FloatingDamage", "Npcs", true };
+	ZealSetting<bool> show_hp_updates = { true, "FloatingDamage", "ShowHpUpdates", true };
 	ZealSetting<int> big_hit_threshold = { 100, "FloatingDamage", "BigHitThreshold", true };
 	ZealSetting<std::string> bitmap_font_filename = { std::string(kUseClientFontString),
 		"FloatingDamage", "Font", true, [this](std::string val) { bitmap_font.reset(); } };

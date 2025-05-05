@@ -447,9 +447,20 @@ namespace Zeal
 		struct CharSelect : EQWND
 		{
 			/*0x134*/	BYTE    Activated;   // Set to 1 when activated and 0 in Deactivate().
-			/*0x135*/	BYTE    Unknown0x135[0x3B];
+			/*0x135*/	BYTE    Unknown0x135[0x3];
+			/*0x138*/   EQWND*  ExploreButton;
+			/*0x13C*/   EQWND*  RotateButton;
+			/*0x140*/   EQWND*  CharButtons[8];
+			/*0x160*/   EQWND*  EnterWorldButton;
+			/*0x164*/   EQWND*  DeleteButton;
+			/*0x168*/   EQWND*  QuitButton;
+			/*0x16C*/   EQWND*  ExploreModeWnd;
 			/*0x170*/   BYTE    Rotate;
 			/*0x171*/   BYTE    Explore;
+			/*0x172*/   BYTE    Unknown0x172[2];
+			/*0x174*/   DWORD   SelectIndex;  // Set to 0xffffffff (-1) at ActivateStart().
+			/*0x178*/   BYTE    Unknown0x178[0x8];  // 0x180 allocated.
+
 		};
 		struct RaidWnd : EQWND
 		{
