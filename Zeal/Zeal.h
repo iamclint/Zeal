@@ -1,5 +1,6 @@
 #pragma once
 #include "framework.h"
+#include "EqAddresses.h"
 #include <crtdbg.h>
 #include <typeinfo>
 #include <memory>
@@ -94,17 +95,19 @@ std::shared_ptr<T> MakeCheckedSharedImpl(const char* file, int line, Parent* par
 	else {
 		ptr = std::make_shared<T>(std::forward<Args>(args)...);
 	}
+	int result1 = HeapValidate(GetProcessHeap(), 0, NULL);
+	int result2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
+	if (result1 && result2)
+		return ptr;
 
-	if (!_CrtCheckMemory()) {
-		ZealService::heap_failed_line = line;
-		std::stringstream ss;
-		ss << "Heap corruption detected after allocating " << typeid(T).name() << " at " << file << ":" << line << "\n";
-		ss << "This may be a false positive or it may be real and the game *might* crash later.\n";
-		ss << "You can choose to either abort so you can restart eqgame.exe, retry the check, or ignore this and continue..\n";
-		int result_id = MessageBoxA(NULL, ss.str().c_str(), "Zeal boot heap check", MB_ABORTRETRYIGNORE | MB_ICONWARNING);
-		if (result_id == IDABORT)
-			throw std::bad_alloc();// Will crash out the program.
-	}
+	ZealService::heap_failed_line = line;
+	std::stringstream ss;
+	ss << "Heap corruption detected after allocating " << typeid(T).name() << " at " << file << ":" << line << "\n";
+	ss << "This may be a false positive or it may be real and the game *might* crash later.\n";
+	ss << "You can choose to either abort so you can restart eqgame.exe, retry the check, or ignore this and continue..\n";
+	int result_id = MessageBoxA(NULL, ss.str().c_str(), "Zeal boot heap check", MB_ABORTRETRYIGNORE | MB_ICONWARNING); 
+	if (result_id == IDABORT)
+		throw std::bad_alloc();// Will crash out the program.
 
 	return ptr;
 }
