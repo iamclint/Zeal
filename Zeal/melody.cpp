@@ -311,7 +311,7 @@ void Melody::handle_deactivate_ui()
     handle_stop_cast_callback(3, Zeal::EqGame::get_self()->ActorInfo->CastingSpellId);
 }
 
-Melody::Melody(ZealService* zeal, IO_ini* ini)
+Melody::Melody(ZealService* zeal)
 {
     zeal->callbacks->AddGeneric([this]() { tick();  });
     zeal->callbacks->AddGeneric([this]() { end(); }, callback_type::CharacterSelect);

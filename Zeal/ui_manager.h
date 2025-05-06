@@ -48,7 +48,7 @@ public:
 	bool WriteTemporaryUI(const std::string& file_path, std::string ui_path);
 	void RemoveTemporaryUI(const std::string& file_path);
 	void AddXmlInclude(const std::string& name);
-	ui_manager(class ZealService* zeal, class IO_ini* ini);
+	ui_manager(class ZealService* zeal);
 	bool AlreadyLoadedXml(std::string name);
 	std::shared_ptr<ui_options> options = nullptr;
 	std::shared_ptr<ui_bank> bank = nullptr;

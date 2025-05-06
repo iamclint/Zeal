@@ -9,7 +9,7 @@
 class EntityManager
 {
 public:
-	EntityManager(class ZealService* zeal, class IO_ini* ini);
+	EntityManager(class ZealService* zeal);
 	~EntityManager();
 	void Add(struct Zeal::EqStructures::Entity*);
 	void Remove(struct Zeal::EqStructures::Entity*);

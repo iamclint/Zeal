@@ -5,104 +5,56 @@
 #include <Windows.h>
 
 ZealService* ZealService::ptr_service = nullptr;
-//
-//LPTOP_LEVEL_EXCEPTION_FILTER WINAPI SetUnhandledExceptionFilter_Hook(LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
-//{
-//	return 0;
-//}
-
-static int s_first_fail_line_number = 0;
-
-int ZealService::get_heap_check_fail_linenumber() {
-	return s_first_fail_line_number;
-}
-
-// Add simple heap integrity check.  Returns true if passes the checks.
-static bool mem_check(int line_number = 0, bool dialog_if_fails = false) {
-
-	// Enter the retry loop for the dialog. Exits by early return or thrown exception.
-	while (true) {
-		int result1 = HeapValidate(GetProcessHeap(), 0, NULL);
-		int result2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
-		if (result1 && result2)
-			return true;
-
-		if (!s_first_fail_line_number)
-			s_first_fail_line_number = line_number;  // Latch the first reported error point.
-
-		if (!dialog_if_fails)
-			return false;
-
-		std::string instructions = "This may be a false positive or it may be real and the game *might* crash later.";
-		instructions += " You can choose to either abort so you can restart eqgame.exe, retry the check, or ignore this and continue.";
-		std::string message = std::format("Zeal {0} ({1}) *may* have detected heap corruption ({2}:{3}). {4}",
-			ZEAL_VERSION, ZEAL_BUILD_VERSION, s_first_fail_line_number, result1 * 2 + result2, instructions);
-
-		int result_id = MessageBoxA(NULL, message.c_str(), "Zeal boot heap check", MB_ABORTRETRYIGNORE | MB_ICONWARNING);
-		if (result_id == IDABORT)
-			throw std::bad_alloc();  // Will crash out the program.
-		else if (result_id == IDIGNORE)
-			return false;
-	}
-}
-
+int ZealService::heap_failed_line = 0;
 ZealService::ZealService()
 {
-	mem_check(__LINE__);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	//since the hooked functions are called back via a different thread, make sure the service ptr is available immediately
 	ZealService::ptr_service = this; //this setup makes it not unit testable but since the caller functions of the hooks don't know the pointers I had to make a method to retrieve the base atleast
-	crash_handler = std::make_shared<CrashHandler>();
-	hooks = std::make_shared<HookWrapper>();
-	//hooks->Add("SetUnhandledExceptionFilter", (int)SetUnhandledExceptionFilter, SetUnhandledExceptionFilter_Hook, hook_type_detour);
-	ini = std::make_shared<IO_ini>(ZealSetting<bool>::kIniFilename, true); //other functions rely on this hook
-	dx = std::make_shared<directx>();
+	crash_handler = MakeCheckedShared(CrashHandler);
+	hooks = MakeCheckedShared(HookWrapper);
+	ini = MakeCheckedShared(IO_ini, ZealSetting<bool>::kIniFilename, true); //other functions rely on this hook
+	dx = MakeCheckedShared(directx);
 	//initialize the hooked function classes
-	commands_hook = std::make_shared<ChatCommands>(this); //other classes below rely on this class on initialize
-	callbacks = std::make_shared<CallbackManager>(this); //other functions rely on this hook
-	looting_hook = std::make_shared<looting>(this);
-	labels_hook = std::make_shared<labels>(this);
-	pipe = std::make_shared<named_pipe>(this, ini.get()); //other classes below rely on this class on initialize
-	binds_hook = std::make_shared<Binds>(this);
-	raid_hook = std::make_shared<raid>(this);
-	eqstr_hook = std::make_shared<eqstr>(this);
-	equip_item_hook = std::make_shared<EquipItem>(this);
-	spell_sets = std::make_shared<SpellSets>(this);
-	item_displays = std::make_shared<ItemDisplay>(this, ini.get());
-	tooltips = std::make_shared<tooltip>(this, ini.get());
-	mem_check(__LINE__);
-	floating_damage = std::make_shared<FloatingDamage>(this, ini.get());
-	give = std::make_shared<NPCGive>(this, ini.get());
-	game_patches = std::make_shared<patches>();
-	nameplate = std::make_shared<NamePlate>(this, ini.get());
-	tells = std::make_shared<TellWindows>(this, ini.get());
-	helm = std::make_shared<HelmManager>(this);
-	music = std::make_shared<MusicManager>(this);
-	charselect = std::make_shared<CharacterSelect>(this);
-
-
-	mem_check(__LINE__);
-	entity_manager = std::make_shared<EntityManager>(this, ini.get());
-	camera_mods = std::make_shared<CameraMods>(this, ini.get());
-	cycle_target = std::make_shared<CycleTarget>(this);
-	assist = std::make_shared<Assist>(this);
-	experience = std::make_shared<Experience>(this);
-	mem_check(__LINE__);
-	chat_hook = std::make_shared<chat>(this, ini.get());
-	chatfilter_hook = std::make_shared<chatfilter>(this, ini.get());
-	outputfile = std::make_shared<OutputFile>(this);
-	buff_timers = std::make_shared<BuffTimers>(this);
-	movement = std::make_shared<PlayerMovement>(this, binds_hook.get(), ini.get());
-	alarm = std::make_shared<Alarm>(this);
-	netstat = std::make_shared<Netstat>(this, ini.get());
-	ui = std::make_shared<ui_manager>(this, ini.get());
-	melody = std::make_shared<Melody>(this, ini.get());
-	autofire = std::make_shared<AutoFire>(this, ini.get());
-	physics = std::make_shared<Physics>(this, ini.get());
-	target_ring = std::make_shared<TargetRing>(this, ini.get());
-	zone_map = std::make_shared<ZoneMap>(this, ini.get());
-	tick = std::make_shared<Tick>(this);
-	survey = std::make_shared<Survey>(this);
-
+	commands_hook = MakeCheckedShared(ChatCommands); //other classes below rely on this class on initialize
+	callbacks = MakeCheckedShared(CallbackManager); //other functions rely on this hook
+	looting_hook = MakeCheckedShared(looting);
+	labels_hook = MakeCheckedShared(labels);
+	pipe = MakeCheckedShared(named_pipe); //other classes below rely on this class on initialize
+	binds_hook = MakeCheckedShared(Binds);
+	raid_hook = MakeCheckedShared(raid);
+	eqstr_hook = MakeCheckedShared(eqstr);
+	equip_item_hook = MakeCheckedShared(EquipItem);
+	spell_sets = MakeCheckedShared(SpellSets);
+	item_displays = MakeCheckedShared(ItemDisplay);
+	tooltips = MakeCheckedShared(tooltip);
+	floating_damage = MakeCheckedShared(FloatingDamage);
+	give = MakeCheckedShared(NPCGive);
+	game_patches = MakeCheckedShared(patches);
+	nameplate = MakeCheckedShared(NamePlate);
+	tells = MakeCheckedShared(TellWindows);
+	helm = MakeCheckedShared(HelmManager);
+	music = MakeCheckedShared(MusicManager);
+	charselect = MakeCheckedShared(CharacterSelect);
+	entity_manager = MakeCheckedShared(EntityManager);
+	camera_mods = MakeCheckedShared(CameraMods);
+	cycle_target = MakeCheckedShared(CycleTarget);
+	assist = MakeCheckedShared(Assist);
+	experience = MakeCheckedShared(Experience);
+	chat_hook = MakeCheckedShared(chat);
+	chatfilter_hook = MakeCheckedShared(chatfilter);
+	outputfile = MakeCheckedShared(OutputFile);
+	buff_timers = MakeCheckedShared(BuffTimers);
+	movement = MakeCheckedShared(PlayerMovement);
+	alarm = MakeCheckedShared(Alarm);
+	netstat = MakeCheckedShared(Netstat);
+	ui = MakeCheckedShared(ui_manager);
+	melody = MakeCheckedShared(Melody);
+	autofire = MakeCheckedShared(AutoFire);
+	physics = MakeCheckedShared(Physics);
+	target_ring = MakeCheckedShared(TargetRing);
+	zone_map = MakeCheckedShared(ZoneMap);
+	survey = MakeCheckedShared(Survey);
 
 	callbacks->AddGeneric([this]() {
 		if (Zeal::EqGame::is_in_game() && print_buffer.size())
@@ -115,10 +67,7 @@ ZealService::ZealService()
 	});
 
 	this->basic_binds();
-	
 	configuration_check();
-	if (!mem_check(__LINE__))
-		mem_check(__LINE__, true);  // Fatal error if it fails twice in a row on the final line.
 }
 
 void ZealService::configuration_check()

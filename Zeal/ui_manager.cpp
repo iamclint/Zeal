@@ -551,7 +551,7 @@ bool ui_manager::handle_uilock(const std::vector<std::string>& args)
 	return true;
 }
 
-ui_manager::ui_manager(ZealService* zeal, IO_ini* ini)
+ui_manager::ui_manager(ZealService* zeal)
 {
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);
 	//zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);

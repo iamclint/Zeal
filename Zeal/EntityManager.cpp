@@ -137,7 +137,7 @@ void EntityManager::Dump() const {
 	report_missing_entities();
 }
 
-EntityManager::EntityManager(class ZealService* zeal, class IO_ini* ini)
+EntityManager::EntityManager(class ZealService* zeal)
 {
 	zeal->callbacks->AddEntity([this](struct Zeal::EqStructures::Entity* ent) { Remove(ent); }, callback_type::EntityDespawn );
 	zeal->callbacks->AddEntity([this](struct Zeal::EqStructures::Entity* ent) { Add(ent); }, callback_type::EntitySpawn);

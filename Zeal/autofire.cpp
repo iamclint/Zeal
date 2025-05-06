@@ -124,7 +124,7 @@ void AutoFire::SetAutoFire(bool enabled, bool do_print)
     do_autofire = false;
 }
 
-AutoFire::AutoFire(ZealService* zeal, IO_ini* ini)
+AutoFire::AutoFire(ZealService* zeal)
 {
   //  zeal->hooks->Add("DoAttack", 0x50A0F8, DoAttack, hook_type_detour);
    // zeal->callbacks->add_generic([this]() { SetAutoFire(false);  }, callback_type::Zone);

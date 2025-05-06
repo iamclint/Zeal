@@ -4,6 +4,7 @@
 #include <string>
 #include <mutex>
 #include <thread>
+#include "ZealSettings.h"
 enum struct pipe_data_type
 {
 	log,
@@ -34,7 +35,7 @@ struct pipe_data
 class named_pipe
 {
 public:
-	named_pipe(class ZealService* zeal, class IO_ini* ini);
+	named_pipe(class ZealService* zeal);
 	~named_pipe();
 	void chat_msg(const char* data, int color_index);
 	void write(std::string data, pipe_data_type data_type);
@@ -46,8 +47,7 @@ public:
 private:
 	void add_new_pipe_handle(const HANDLE& handle);
 	void update_pipe_handles();
-
-	int pipe_delay=500;
+	ZealSetting<int> pipe_delay = { 100, "Zeal", "PipeDelay", false };
 	bool end_thread = false;
 	std::string name = "\\\\.\\pipe\\zeal_";
 	std::vector<HANDLE> pipe_handles;

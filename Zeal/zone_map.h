@@ -37,7 +37,7 @@ public:
 	static constexpr float kMinMarkerSize = 0.0025f;
 	static constexpr float kMaxMarkerSize = 0.05f;
 
-	ZoneMap(class ZealService* zeal, class IO_ini* ini);
+	ZoneMap(class ZealService* zeal);
 	~ZoneMap();
 
 	// UI control interface.

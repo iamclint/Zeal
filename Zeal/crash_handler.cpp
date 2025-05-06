@@ -190,7 +190,7 @@ void WriteMiniDump(EXCEPTION_POINTERS* pep, const std::string& reason, bool extr
                         reasonFile << "Zone ID: " << zone_id << std::endl;
                         reasonFile << "Game state: " << Zeal::EqGame::get_gamestate() << std::endl;
                         reasonFile << "ShowSpellEffects: " << *reinterpret_cast<unsigned int*>(0x007cf290) << std::endl;
-                        reasonFile << "BootHeapCheck: " << ZealService::get_heap_check_fail_linenumber() << std::endl;
+                        reasonFile << "BootHeapCheck: " << ZealService::heap_failed_line << std::endl;
                         if (ZealService::get_instance() && ZealService::get_instance()->callbacks)
                             reasonFile << "Callbacks: " << ZealService::get_instance()->callbacks->get_trace();
                     }

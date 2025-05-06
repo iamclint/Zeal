@@ -661,7 +661,7 @@ void chat::InitPercentReplacements()
 }
 
 
-chat::chat(ZealService* zeal, IO_ini* ini)
+chat::chat(ZealService* zeal)
 {
     //zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {
 

@@ -18,13 +18,11 @@ public:
 	//bool spellbook_autostand = false;
 	ZealSetting<bool> CastAutoStand = { true, "Zeal", "CastAutoStand", false };
 	ZealSetting<bool> SpellBookAutoStand = { true, "Zeal", "SpellBookAutoStand", false };
-	PlayerMovement(class ZealService* zeal, class Binds* binds, class IO_ini* ini);
-	~PlayerMovement() {};
+	PlayerMovement(class ZealService* zeal);
 private:
 	void set_strafe(strafe_direction dir);
 	void callback_main();
 	strafe_direction current_strafe = strafe_direction::None;
 	BYTE orig_reset_strafe[7] = { 0 };
-	IO_ini* ini_handle;
 };
 

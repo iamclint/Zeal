@@ -10,7 +10,7 @@ public:
 	bool HandleKeyPress(int key, bool down, int modifier);
 	bool HandleTell(std::string& cmd_data);
 	bool IsTellWindow(struct Zeal::EqUI::ChatWnd* wnd);
-	TellWindows(class ZealService* zeal, class IO_ini* ini);
+	TellWindows(class ZealService* zeal);
 	~TellWindows();
 	void SetEnabled(bool val);
 	void SetHist(bool val);

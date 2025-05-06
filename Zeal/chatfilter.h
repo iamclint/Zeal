@@ -42,7 +42,7 @@ struct damage_data
 class chatfilter
 {
   public:
-	chatfilter(class ZealService* pHookWrapper, class IO_ini* ini);
+	chatfilter(class ZealService* pHookWrapper);
 	std::vector<CustomFilter> Extended_ChannelMaps;
 	Zeal::EqUI::ContextMenu* ZealMenu = nullptr;
 	void AddOutputText(Zeal::EqUI::ChatWnd*& wnd, std::string msg, short& channel);

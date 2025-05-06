@@ -55,7 +55,7 @@ public:
 	void clean_ui();
 	void draw_icon(int index, float x, float y, float opacity);
 	int get_active_damage_count(Zeal::EqStructures::Entity* ent);
-	FloatingDamage(class ZealService* zeal, class IO_ini* ini);
+	FloatingDamage(class ZealService* zeal);
 	~FloatingDamage();
 private:
 

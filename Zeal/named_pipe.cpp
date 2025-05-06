@@ -189,11 +189,11 @@ void named_pipe::main_loop()
 {
 	update_pipe_handles();  // Handle thread synchronization.
 
-	if (!is_connected() || pipe_delay <= 0) // Don't waste cpu time if not connected or disabled.
+	if (!is_connected() || pipe_delay.get() <= 0) // Don't waste cpu time if not connected or disabled.
 		return;
 
 	static auto last_output = GetTickCount64();
-	if (GetTickCount64() - last_output > pipe_delay)
+	if (GetTickCount64() - last_output > pipe_delay.get())
 	{
 		const auto* raid_info = Zeal::EqGame::RaidInfo;
 		if (raid_info->is_in_raid())
@@ -426,8 +426,7 @@ void named_pipe::write(const char* format, ...)
 
 void named_pipe::update_delay(unsigned new_delay)
 {
-	ZealService::get_instance()->ini->setValue("Zeal", "PipeDelay", new_delay);
-	pipe_delay = new_delay;
+	pipe_delay.set(new_delay);
 	Zeal::EqGame::print_chat("pipe delay is now set to %i", pipe_delay);
 }
 
@@ -445,11 +444,8 @@ void named_pipe::update_pipe_handles() {
 	pipe_handle_queue.clear();
 }
 
-named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
+named_pipe::named_pipe(ZealService* zeal)
 {
-	if (!ini->exists("Zeal", "PipeDelay"))
-		ini->setValue<int>("Zeal", "PipeDelay", 100);
-	pipe_delay = ini->getValue<int>("Zeal", "PipeDelay");
 
 	zeal->callbacks->AddGeneric([this]() { main_loop(); });
 	zeal->commands_hook->Add("/pipedelay", {}, "delay between the pipe loop output in milliseconds",

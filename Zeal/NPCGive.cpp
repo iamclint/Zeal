@@ -143,7 +143,7 @@ void NPCGive::tick()
     }
 }
 
-NPCGive::NPCGive(ZealService* zeal, IO_ini* ini)
+NPCGive::NPCGive(ZealService* zeal)
 {
     zeal->callbacks->AddGeneric([this]() { tick();  });
     zeal->hooks->Add("QtyPickupItem", 0x42F65A, QtyPickupItem, hook_type_detour); //Hook in to end melody as well.

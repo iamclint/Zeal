@@ -17,7 +17,7 @@ public:
 
 	void set_classes();
 	void DoPercentReplacements(std::string& str_data);
-	chat(class ZealService* pHookWrapper, class IO_ini* ini);
+	chat(class ZealService* pHookWrapper);
 	~chat();
 private:
 	void InitPercentReplacements();

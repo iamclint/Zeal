@@ -51,7 +51,7 @@ public:
 	void handle_camera_motion_binds(int cmd, bool is_down);
 	void handle_cycle_camera_views(int cmd, bool is_down);
 	void proc_rmousedown(int x, int y);
-	CameraMods(class ZealService* pHookWrapper, class IO_ini* ini);
+	CameraMods(class ZealService* pHookWrapper);
 	~CameraMods();
 private:
 	bool main_loop_ended = false;

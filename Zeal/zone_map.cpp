@@ -3404,7 +3404,7 @@ void ZoneMap::callback_deactivate_ui()
     }
 }
 
-ZoneMap::ZoneMap(ZealService* zeal, IO_ini* ini)
+ZoneMap::ZoneMap(ZealService* zeal)
 {
     zeal->callbacks->AddGeneric([this]() { callback_render(); }, callback_type::RenderUI);
     zeal->callbacks->AddGeneric([this]() { callback_dx_reset(); }, callback_type::DXReset);

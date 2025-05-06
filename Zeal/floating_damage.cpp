@@ -475,7 +475,7 @@ void FloatingDamage::load_bitmap_font() {
 	}
 }
 
-FloatingDamage::FloatingDamage(ZealService* zeal, IO_ini* ini)
+FloatingDamage::FloatingDamage(ZealService* zeal)
 {
 	//mem::write<BYTE>(0x4A594B, 0x14);
 	zeal->callbacks->AddGeneric([this]() { callback_deferred(); }, callback_type::DrawWindows);
