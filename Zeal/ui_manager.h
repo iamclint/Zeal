@@ -13,7 +13,7 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 #include "EqUI.h"
-class ui_manager
+class UIManager
 {
 public:
 	static constexpr const char* ui_path = "uifiles\\zeal\\";
@@ -48,7 +48,7 @@ public:
 	bool WriteTemporaryUI(const std::string& file_path, std::string ui_path);
 	void RemoveTemporaryUI(const std::string& file_path);
 	void AddXmlInclude(const std::string& name);
-	ui_manager(class ZealService* zeal);
+	UIManager(class ZealService* zeal);
 	bool AlreadyLoadedXml(std::string name);
 	std::shared_ptr<ui_options> options = nullptr;
 	std::shared_ptr<ui_bank> bank = nullptr;

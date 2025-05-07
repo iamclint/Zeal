@@ -3,15 +3,15 @@
 #include "memory.h"
 #include "ZealSettings.h"
 
-class tooltip
+class Tooltip
 {
 public:
 	void set_timer(int hover_timeout);
 	void set_alt_all_containers(bool enabled);
 	ZealSetting<bool> all_containers = { false, "Zeal", "alt_all_containers", false };
 	ZealSetting<int> hover_timeout = { 500, "Zeal", "TooltipTime", false };
-	tooltip(class ZealService* pHookWrapper);
-	~tooltip();
+	Tooltip(class ZealService* pHookWrapper);
+	~Tooltip();
 private:
 	void LoadSettings(class IO_ini* ini);
 };

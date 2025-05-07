@@ -14,23 +14,23 @@ ZealService::ZealService()
 	crash_handler = MakeCheckedShared(CrashHandler);
 	hooks = MakeCheckedShared(HookWrapper);
 	ini = MakeCheckedShared(IO_ini, ZealSetting<bool>::kIniFilename, true); //other functions rely on this hook
-	dx = MakeCheckedShared(directx);
+	dx = MakeCheckedShared(DirectX);
 	//initialize the hooked function classes
 	commands_hook = MakeCheckedShared(ChatCommands); //other classes below rely on this class on initialize
 	callbacks = MakeCheckedShared(CallbackManager); //other functions rely on this hook
-	looting_hook = MakeCheckedShared(looting);
-	labels_hook = MakeCheckedShared(labels);
-	pipe = MakeCheckedShared(named_pipe); //other classes below rely on this class on initialize
+	looting_hook = MakeCheckedShared(Looting);
+	labels_hook = MakeCheckedShared(Labels);
+	pipe = MakeCheckedShared(NamedPipe); //other classes below rely on this class on initialize
 	binds_hook = MakeCheckedShared(Binds);
-	raid_hook = MakeCheckedShared(raid);
-	eqstr_hook = MakeCheckedShared(eqstr);
+	raid_hook = MakeCheckedShared(Raid);
+	eqstr_hook = MakeCheckedShared(EQStr);
 	equip_item_hook = MakeCheckedShared(EquipItem);
 	spell_sets = MakeCheckedShared(SpellSets);
 	item_displays = MakeCheckedShared(ItemDisplay);
-	tooltips = MakeCheckedShared(tooltip);
+	tooltips = MakeCheckedShared(Tooltip);
 	floating_damage = MakeCheckedShared(FloatingDamage);
 	give = MakeCheckedShared(NPCGive);
-	game_patches = MakeCheckedShared(patches);
+	game_patches = MakeCheckedShared(Patches);
 	nameplate = MakeCheckedShared(NamePlate);
 	tells = MakeCheckedShared(TellWindows);
 	helm = MakeCheckedShared(HelmManager);
@@ -41,19 +41,20 @@ ZealService::ZealService()
 	cycle_target = MakeCheckedShared(CycleTarget);
 	assist = MakeCheckedShared(Assist);
 	experience = MakeCheckedShared(Experience);
-	chat_hook = MakeCheckedShared(chat);
+	chat_hook = MakeCheckedShared(Chat);
 	chatfilter_hook = MakeCheckedShared(chatfilter);
 	outputfile = MakeCheckedShared(OutputFile);
 	buff_timers = MakeCheckedShared(BuffTimers);
 	movement = MakeCheckedShared(PlayerMovement);
 	alarm = MakeCheckedShared(Alarm);
 	netstat = MakeCheckedShared(Netstat);
-	ui = MakeCheckedShared(ui_manager);
+	ui = MakeCheckedShared(UIManager);
 	melody = MakeCheckedShared(Melody);
 	autofire = MakeCheckedShared(AutoFire);
 	physics = MakeCheckedShared(Physics);
 	target_ring = MakeCheckedShared(TargetRing);
 	zone_map = MakeCheckedShared(ZoneMap);
+	tick = MakeCheckedShared(Tick);
 	survey = MakeCheckedShared(Survey);
 
 	callbacks->AddGeneric([this]() {

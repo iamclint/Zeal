@@ -47,7 +47,7 @@ void ui_inspect::InitUI()
 	}
 }
 
-ui_inspect::ui_inspect(ZealService* zeal, ui_manager* mgr)
+ui_inspect::ui_inspect(ZealService* zeal, UIManager* mgr)
 {
 	ui = mgr;
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);

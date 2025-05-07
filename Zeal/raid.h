@@ -2,11 +2,11 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 
-class raid
+class Raid
 {
 public:
-	raid(class ZealService* zeal);
-	~raid();
+	Raid(class ZealService* zeal);
+	~Raid();
 private:
 	void callback_main();
 };

@@ -137,7 +137,7 @@ static void __fastcall RaidHandleCreateInviteRaid(void* raid, int unused_edx, ch
 
 int __fastcall WndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI::BasicWnd* sender, int message, int data)
 {
-	ui_manager* ui = ZealService::get_instance()->ui.get();
+	UIManager* ui = ZealService::get_instance()->ui.get();
 	if (ui && Zeal::EqGame::Windows && sender == (Zeal::EqUI::BasicWnd*)Zeal::EqGame::Windows->ColorPicker)
 	{
 		if (message == 0x1E && ui->clicked_button)
@@ -1101,7 +1101,7 @@ static void __fastcall ContainerWndSetContainer(Zeal::EqUI::ContainerWnd* wnd, i
 }
 
 
-ui_options::ui_options(ZealService* zeal, ui_manager* mgr) : ui(mgr)
+ui_options::ui_options(ZealService* zeal, UIManager* mgr) : ui(mgr)
 {
 	wnd = nullptr;
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);

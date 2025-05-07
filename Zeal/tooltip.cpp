@@ -7,18 +7,18 @@
 
 
 
-tooltip::~tooltip()
+Tooltip::~Tooltip()
 {
 
 }
 
-void tooltip::set_timer(int _time)
+void Tooltip::set_timer(int _time)
 {
     hover_timeout.set(_time);
     mem::write<int>(0x59E10D, hover_timeout.get());
 }
 
-void tooltip::set_alt_all_containers(bool enabled)
+void Tooltip::set_alt_all_containers(bool enabled)
 {
     all_containers = enabled;
     if (enabled)
@@ -35,7 +35,7 @@ void tooltip::set_alt_all_containers(bool enabled)
 }
 
 
-tooltip::tooltip(ZealService* zeal)
+Tooltip::Tooltip(ZealService* zeal)
 {
     mem::write<byte>(0x59e112, 0x82); //change from jbe to jb so if you disable the tooltip timer completely it doesnt flash as you move your cursor (unnoticeable change for normal)
     set_alt_all_containers(all_containers.get());

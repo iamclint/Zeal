@@ -61,7 +61,7 @@ HRESULT WINAPI Local_Reset(IDirect3DDevice8* pDevice, D3DPRESENT_PARAMETERS* pPr
     return ret;
 }
 
-void directx::update_device()
+void DirectX::update_device()
 {
     HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
     if (eqfx)
@@ -88,7 +88,7 @@ void directx::update_device()
     }
 }
 
-Vec2 directx::GetScreenRect()
+Vec2 DirectX::GetScreenRect()
 {
     update_device();
     if (!device)
@@ -104,7 +104,7 @@ bool IsOffScreen(Vec2 screenPos, const D3DVIEWPORT8& viewport) {
         screenPos.y < viewport.Y || screenPos.y > viewport.Y + viewport.Height;
 }
 
-IDirect3DDevice8* directx::GetDevice()
+IDirect3DDevice8* DirectX::GetDevice()
 {
     HMODULE eqfx = GetModuleHandleA("eqgfx_dx8.dll");
     if (eqfx)
@@ -114,7 +114,7 @@ IDirect3DDevice8* directx::GetDevice()
     return device;
 }
 
-bool directx::WorldToScreen(Vec3 worldPos, Vec2& screenPos) 
+bool DirectX::WorldToScreen(Vec3 worldPos, Vec2& screenPos) 
 {
     GetDevice();
     if (!device)
@@ -147,7 +147,7 @@ bool directx::WorldToScreen(Vec3 worldPos, Vec2& screenPos)
 //    ZealService::get_instance()->hooks->hook_map["RenderPartialScene"]->original(RenderPartialScene)(a, b, c, d);
 //}
 
-directx::directx()
+DirectX::DirectX()
 {
   /*  FARPROC partial_scene = GetProcAddress(GetModuleHandleA("eqgfx_dx8.dll"), "t3dRenderPartialScene");
     if (partial_scene)

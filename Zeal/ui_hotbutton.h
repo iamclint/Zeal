@@ -24,7 +24,7 @@ public:
 	int last_button = 0;
 	int last_page = 0;
 	bool is_btn_active(Zeal::EqUI::BasicWnd* btn);
-	ui_hotbutton(class ZealService* zeal, class ui_manager* mgr);
+	ui_hotbutton(class ZealService* zeal, class UIManager* mgr);
 	~ui_hotbutton();
 private:
 	std::unordered_map<int, Zeal::EqUI::BasicWnd*> buttons;
@@ -33,5 +33,5 @@ private:
 	void CleanUI();
 	void Render();
 	
-	ui_manager* ui;
+	UIManager* ui;
 };

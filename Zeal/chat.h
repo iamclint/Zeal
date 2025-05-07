@@ -4,7 +4,7 @@
 #include "EqUI.h"
 #include "ZealSettings.h"
 
-class chat
+class Chat
 {
 public:
 
@@ -17,8 +17,8 @@ public:
 
 	void set_classes();
 	void DoPercentReplacements(std::string& str_data);
-	chat(class ZealService* pHookWrapper);
-	~chat();
+	Chat(class ZealService* pHookWrapper);
+	~Chat();
 private:
 	void InitPercentReplacements();
 	std::vector<std::function<void(std::string& str_data)>> percent_replacements;

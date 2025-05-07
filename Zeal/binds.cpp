@@ -393,7 +393,7 @@ void Binds::add_binds()
 
 }
 
-void Binds::add_bind(int cmd, const char* name, const char* short_name, int category, std::function<void(int state)> callback)
+void Binds::add_bind(int cmd, const char* name, const char* short_name, key_category category, std::function<void(int state)> callback)
 {
 
 	char* str = new char[64]; 
@@ -404,7 +404,7 @@ void Binds::add_bind(int cmd, const char* name, const char* short_name, int cate
 	if (!options)
 		return;
 	Zeal::EqGame::EqGameInternal::InitKeyBindStr((options + cmd * 0x8 + 0x20c), 0, (char*)name);
-	*(int*)((options + cmd * 0x8 + 0x210)) = category;
+	*(int*)((options + cmd * 0x8 + 0x210)) = (int)category;
 	KeyMapFunctions[cmd] = callback;
 }
 

@@ -15,7 +15,7 @@
 //
 //}
 
-ui_raid::ui_raid(ZealService* zeal, ui_manager* mgr)
+ui_raid::ui_raid(ZealService* zeal, UIManager* mgr)
 {
 	ui = mgr;
 	//zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);

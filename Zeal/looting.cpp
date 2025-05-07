@@ -17,7 +17,7 @@
 static constexpr int kMaxLinkCount = 10;
 static constexpr int kMaxItemCount = 30;
 
-void looting::link_all(const char* channel) const
+void Looting::link_all(const char* channel) const
 {
 
 	if (!Zeal::EqGame::Windows->Loot || !Zeal::EqGame::Windows->Loot->IsVisible)
@@ -97,7 +97,7 @@ void looting::link_all(const char* channel) const
 	input_wnd->SetFocus();
 }
 
-void looting::set_hide_looted(bool val)
+void Looting::set_hide_looted(bool val)
 {
 	hide_looted = val;
 	ZealService::get_instance()->ini->setValue<bool>("Zeal", "HideLooted", hide_looted);
@@ -108,7 +108,7 @@ void looting::set_hide_looted(bool val)
 		Zeal::EqGame::print_chat("Corpses will no longer be hidden after looting.");
 }
 
-void looting::unhide_last_hidden()
+void Looting::unhide_last_hidden()
 {
 	Zeal::EqStructures::Entity* corpse = nullptr;
 	if (last_hidden_entity && last_hidden_spawnid) {
@@ -125,7 +125,7 @@ void looting::unhide_last_hidden()
 
 }
 
-void looting::set_last_hidden_corpse(Zeal::EqStructures::Entity* corpse)
+void Looting::set_last_hidden_corpse(Zeal::EqStructures::Entity* corpse)
 {
 	last_hidden_entity = corpse;
 	last_hidden_spawnid = corpse ? corpse->SpawnId : 0;
@@ -171,7 +171,7 @@ void __fastcall release_loot(int uk, int lootwnd_ptr)
 	zeal->hooks->hook_map["ReleaseLoot"]->original(release_loot)(uk, lootwnd_ptr);
 }
 
-void looting::handle_hide_looted()
+void Looting::handle_hide_looted()
 {
 	if (!hide_looted)
 		return;
@@ -181,11 +181,11 @@ void looting::handle_hide_looted()
 		set_last_hidden_corpse(corpse);
 }
 
-looting::~looting()
+Looting::~Looting()
 {
 }
 
-void looting::init_ui()
+void Looting::init_ui()
 {
 	load_protected_items();
 }
@@ -214,7 +214,7 @@ void looting::init_ui()
 //li.slot_id = Zeal::EqGame::Windows->Loot->ItemSlotIndex[i];
 //Zeal::EqGame::send_message(0x40a0, (int*)&li, sizeof(li), 1);
 
-void looting::looted_item()
+void Looting::looted_item()
 {
 	if (Zeal::EqGame::get_char_info()->CursorItem) 
 	{
@@ -277,7 +277,7 @@ void looting::looted_item()
 		loot_all = false;
 }
 
-bool looting::parse_loot_last(const std::vector<std::string>& args)
+bool Looting::parse_loot_last(const std::vector<std::string>& args)
 {
 	const char kMarker = 0x12;  // Link marker.
 	int new_value = 0;
@@ -371,7 +371,7 @@ static int __fastcall RightClickedOnPlayerLootCorpse(void* ceverquest_this, int 
 	return zeal->hooks->hook_map["RightClickedOnPlayerLootCorpse"]->original(RightClickedOnPlayerLootCorpse)(ceverquest_this, unused_edx, entity, param);
 }
 
-bool looting::is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINFO* item_info) const
+bool Looting::is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINFO* item_info) const
 {
 	if (!setting_protect_enable.get() || !item_info)
 		return false;
@@ -397,7 +397,7 @@ bool looting::is_item_protected_from_selling(const Zeal::EqStructures::EQITEMINF
 	return false;
 }
 
-bool looting::is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_info) const
+bool Looting::is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_info) const
 {
 	if (!setting_protect_enable.get() || !char_info)
 		return false;
@@ -442,7 +442,7 @@ bool looting::is_cursor_protected(const Zeal::EqStructures::EQCHARINFO* char_inf
 	return false;
 }
 
-bool looting::is_trade_protected(Zeal::EqUI::TradeWnd* wnd) const
+bool Looting::is_trade_protected(Zeal::EqUI::TradeWnd* wnd) const
 {
 	if (!setting_protect_enable.get() || !wnd)
 		return false;
@@ -476,7 +476,7 @@ static std::string get_protected_items_filename()
 	return std::format("./{0}_protected.ini", Zeal::EqGame::get_char_info()->Name);
 }
 
-void looting::load_protected_items()
+void Looting::load_protected_items()
 {
 	std::string filename = get_protected_items_filename();
 	if (filename.empty() || !std::filesystem::exists(filename))
@@ -506,7 +506,7 @@ void looting::load_protected_items()
 	}
 }
 
-void looting::update_protected_item(int item_id, const std::string& name, bool add_only)
+void Looting::update_protected_item(int item_id, const std::string& name, bool add_only)
 {
 	auto it = std::find_if(protected_items.begin(), protected_items.end(),
 		[item_id](ProtectedItem item) {return item.id == item_id; });
@@ -534,7 +534,7 @@ void looting::update_protected_item(int item_id, const std::string& name, bool a
 		Zeal::EqGame::print_chat("Error: Failed to save protected item list");
 }
 
-bool looting::parse_protect(const std::vector<std::string>& args)
+bool Looting::parse_protect(const std::vector<std::string>& args)
 {
 	const char kMarker = 0x12;  // Link marker.
 	int new_value = 0;
@@ -600,7 +600,7 @@ bool looting::parse_protect(const std::vector<std::string>& args)
 }
 
 
-looting::looting(ZealService* zeal)
+Looting::Looting(ZealService* zeal)
 {
 	hide_looted = zeal->ini->getValue<bool>("Zeal", "HideLooted"); //just remembers the state
 	zeal->callbacks->AddGeneric([this]() { init_ui(); }, callback_type::InitUI);

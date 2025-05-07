@@ -312,11 +312,11 @@ int GetGaugeFromEq(int EqType, Zeal::EqUI::CXSTR* str)
 	return result;
 }
 
-void labels::print_debug_info(std::string data)
+void Labels::print_debug_info(std::string data)
 {
 	debug_info = data;
 }
-void labels::print_debug_info(const char* format, ...)
+void Labels::print_debug_info(const char* format, ...)
 {
 	va_list argptr;
 	char buffer[512];
@@ -331,13 +331,13 @@ void labels::print_debug_info(const char* format, ...)
 }
 
 
-void labels::callback_main()
+void Labels::callback_main()
 {
 
 	
 }
 
-bool labels::GetLabel(int EqType, std::string& str)
+bool Labels::GetLabel(int EqType, std::string& str)
 {
 	Zeal::EqUI::CXSTR tmp("");
 	bool override = false;
@@ -350,7 +350,7 @@ bool labels::GetLabel(int EqType, std::string& str)
 	}
 	return val;
 }
-int labels::GetGauge(int EqType, std::string& str)
+int Labels::GetGauge(int EqType, std::string& str)
 {
 	Zeal::EqUI::CXSTR tmp("");
 	int value = GetGaugeFromEq(EqType, (Zeal::EqUI::CXSTR*)&tmp);
@@ -363,12 +363,12 @@ int labels::GetGauge(int EqType, std::string& str)
 }
 
 
-labels::~labels()
+Labels::~Labels()
 {
 
 }
 
-labels::labels(ZealService* zeal)
+Labels::Labels(ZealService* zeal)
 {
 	zeal->commands_hook->Add("/labels", {}, "prints all labels",
 		[this](std::vector<std::string>& args) {

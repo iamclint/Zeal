@@ -6,14 +6,14 @@
 
 
 
-eqstr::~eqstr()
+EQStr::~EQStr()
 {
 
 }
 
 const char* __fastcall GetString(int stringtable, int unused, int string_id, bool* valid)
 {
-	eqstr* t = ZealService::get_instance()->eqstr_hook.get();
+	EQStr* t = ZealService::get_instance()->eqstr_hook.get();
 	if (t->str_replacements.count(string_id) > 0)
 	{
 		if (valid)
@@ -26,7 +26,7 @@ const char* __fastcall GetString(int stringtable, int unused, int string_id, boo
 	return d;
 }
 
-eqstr::eqstr(ZealService* zeal)
+EQStr::EQStr(ZealService* zeal)
 {
 	str_replacements =
 	{

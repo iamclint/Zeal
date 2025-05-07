@@ -10,7 +10,7 @@ public:
 	void ShowButton();
 	void HideButton();
 	std::unordered_map<std::string, int> zones;
-	ui_zoneselect(class ZealService* zeal, class ui_manager* mgr);
+	ui_zoneselect(class ZealService* zeal, class UIManager* mgr);
 	~ui_zoneselect();
 private:
 	Zeal::EqUI::EQWND* wnd = nullptr;
@@ -18,6 +18,6 @@ private:
 	void InitUI();  // Called in InitCharSelectUI().
 	void Deactivate();
 	void CleanUI();
-	ui_manager* ui;
+	UIManager* ui;
 };
 

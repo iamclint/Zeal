@@ -22,24 +22,24 @@ public:
 	std::shared_ptr<CrashHandler> crash_handler = nullptr;
 	std::shared_ptr<IO_ini> ini = nullptr;
 	std::shared_ptr<HookWrapper> hooks = nullptr;
-	std::shared_ptr<named_pipe> pipe = nullptr;
-	std::shared_ptr<looting> looting_hook = nullptr;
-	std::shared_ptr<labels> labels_hook = nullptr;
+	std::shared_ptr<NamedPipe> pipe = nullptr;
+	std::shared_ptr<Looting> looting_hook = nullptr;
+	std::shared_ptr<Labels> labels_hook = nullptr;
 	std::shared_ptr<Binds> binds_hook = nullptr;
 	std::shared_ptr<ChatCommands> commands_hook = nullptr;
 	std::shared_ptr<CallbackManager> callbacks = nullptr;
 	std::shared_ptr<CameraMods> camera_mods = nullptr;
-	std::shared_ptr<raid> raid_hook = nullptr;
-	std::shared_ptr<eqstr> eqstr_hook = nullptr;
+	std::shared_ptr<Raid> raid_hook = nullptr;
+	std::shared_ptr<EQStr> eqstr_hook = nullptr;
 	std::shared_ptr<EquipItem> equip_item_hook = nullptr;
-	std::shared_ptr<chat> chat_hook = nullptr;
+	std::shared_ptr<Chat> chat_hook = nullptr;
 	std::shared_ptr<chatfilter> chatfilter_hook = nullptr;
 	std::shared_ptr<SpellSets> spell_sets = nullptr;
 	std::shared_ptr<ItemDisplay> item_displays = nullptr;
-	std::shared_ptr<tooltip> tooltips = nullptr;
+	std::shared_ptr<Tooltip> tooltips = nullptr;
 	std::shared_ptr<Physics> physics = nullptr;
 	std::shared_ptr<FloatingDamage> floating_damage = nullptr;
-	std::shared_ptr<directx> dx = nullptr;
+	std::shared_ptr<DirectX> dx = nullptr;
 	std::shared_ptr<NPCGive> give = nullptr;
 	std::shared_ptr<NamePlate> nameplate = nullptr;
 	std::shared_ptr<TellWindows> tells = nullptr;
@@ -58,12 +58,12 @@ public:
 	std::shared_ptr<PlayerMovement> movement = nullptr;
 	std::shared_ptr<Alarm> alarm = nullptr;
 	std::shared_ptr<Netstat> netstat = nullptr;
-	std::shared_ptr<ui_manager> ui = nullptr;
+	std::shared_ptr<UIManager> ui = nullptr;
 	std::shared_ptr<Melody> melody = nullptr;
 	std::shared_ptr<AutoFire> autofire = nullptr;
 	std::shared_ptr<TargetRing> target_ring = nullptr;
 	std::shared_ptr<ZoneMap> zone_map = nullptr;
-	std::shared_ptr<patches> game_patches = nullptr;
+	std::shared_ptr<Patches> game_patches = nullptr;
 	std::shared_ptr<EntityManager> entity_manager = nullptr;
 	
 
@@ -88,7 +88,7 @@ template <typename T, typename Parent, typename... Args>
 std::shared_ptr<T> MakeCheckedSharedImpl(const char* file, int line, Parent* parent, Args&&... args)
 {
 	std::shared_ptr<T> ptr;
-
+	static bool HasBeenNotified = false;
 	if constexpr (constructable<T, Parent, Args...>::value) { //if it will accept the this pointer from zeal then pass it in, if not just use the arguments given
 		ptr = std::make_shared<T>(parent, std::forward<Args>(args)...);
 	}
@@ -99,7 +99,8 @@ std::shared_ptr<T> MakeCheckedSharedImpl(const char* file, int line, Parent* par
 	int result2 = HeapValidate(*Zeal::EqGame::Heap, 0, NULL);
 	if (result1 && result2)
 		return ptr;
-
+	if (HasBeenNotified)
+		return ptr;
 	ZealService::heap_failed_line = line;
 	std::stringstream ss;
 	ss << "Heap corruption detected after allocating " << typeid(T).name() << " at " << file << ":" << line << "\n";
@@ -108,7 +109,7 @@ std::shared_ptr<T> MakeCheckedSharedImpl(const char* file, int line, Parent* par
 	int result_id = MessageBoxA(NULL, ss.str().c_str(), "Zeal boot heap check", MB_ABORTRETRYIGNORE | MB_ICONWARNING); 
 	if (result_id == IDABORT)
 		throw std::bad_alloc();// Will crash out the program.
-
+	HasBeenNotified = true;
 	return ptr;
 }
 

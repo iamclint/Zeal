@@ -173,7 +173,7 @@ int __fastcall CastSpellWnd_PostDraw(Zeal::EqUI::CastSpellWnd* this_ptr, void* n
 	return result;
 }
 
-ui_buff::ui_buff(ZealService* zeal, ui_manager* mgr)
+ui_buff::ui_buff(ZealService* zeal, UIManager* mgr)
 {
 	zeal->hooks->Add("BuffWindow_PostDraw", 0x4095FE, BuffWindow_PostDraw, hook_type_detour);
 	zeal->hooks->Add("BuffWindow_Refresh", 0x409334, BuffWindow_Refresh, hook_type_detour);

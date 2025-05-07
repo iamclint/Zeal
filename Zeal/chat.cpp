@@ -91,7 +91,7 @@ std::string replaceUnderscores(const std::smatch& match) {
 UINT32  __fastcall GetRGBAFromIndex(int t, int u, USHORT index)
 {
     ui_options* options = ZealService::get_instance()->ui->options.get();
-    chat* c = ZealService::get_instance()->chat_hook.get();
+    Chat* c = ZealService::get_instance()->chat_hook.get();
 
     switch (index)
     {
@@ -627,13 +627,13 @@ void __fastcall DoPercentConvert(int* t, int u, char* data, int u2)
         hook->original(DoPercentConvert)(t, u, data, u2);
     }
 }
-void chat::DoPercentReplacements(std::string& str_data)
+void Chat::DoPercentReplacements(std::string& str_data)
 {
     for (auto& fn : percent_replacements)
         fn(str_data);
 }
 
-void chat::InitPercentReplacements()
+void Chat::InitPercentReplacements()
 {
     percent_replacements.push_back([](std::string& str_data) { 
         std::string mana; 
@@ -661,7 +661,7 @@ void chat::InitPercentReplacements()
 }
 
 
-chat::chat(ZealService* zeal)
+Chat::Chat(ZealService* zeal)
 {
     //zeal->callbacks->add_packet([this](UINT opcode, char* buffer, UINT size) {
 
@@ -791,7 +791,7 @@ chat::chat(ZealService* zeal)
     zeal->binds_hook->replace_cmd(0x3d, [this](int state) { return ZealService::get_instance()->chat_hook->UseZealInput.get(); });
 
 }
-void chat::set_classes()
+void Chat::set_classes()
 {
     if (UseClassicClassNames.get())
     {
@@ -803,7 +803,7 @@ void chat::set_classes()
     }
 }
 
-chat::~chat()
+Chat::~Chat()
 {
 }
 

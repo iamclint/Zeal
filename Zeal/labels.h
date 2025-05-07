@@ -2,7 +2,7 @@
 #include "hook_wrapper.h"
 #include "memory.h"
 
-class labels
+class Labels
 {
 public:
 	std::string debug_info;
@@ -10,8 +10,8 @@ public:
 	void print_debug_info(const char* format, ...);
 	bool GetLabel(int EqType, std::string& str);
 	int GetGauge(int EqType, std::string& str);
-	labels(class ZealService* zeal);
-	~labels();
+	Labels(class ZealService* zeal);
+	~Labels();
 	void callback_main();
 private:
 };
