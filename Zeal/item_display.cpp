@@ -7,6 +7,8 @@
 #include "string_util.h"
 #include <format>
 #include <regex>
+#include <fstream>
+#undef max
 
 void ItemDisplay::InitUI()
 {
@@ -220,6 +222,47 @@ const Zeal::EqStructures::EQITEMINFO* ItemDisplay::get_cached_item(int item_id) 
 	return nullptr;
 }
 
+static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id, bool scroll_display = false)
+{
+	if (!ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get() ||
+		wnd->DisplayText.Data == nullptr)
+		return false;
+
+	// Could add a memory cache, but the file access seems quick enough.
+	const char* filename = "./uifiles/zeal/spell_info/spell_info.txt";
+	std::ifstream spell_file;
+	spell_file.open(filename);
+	if (spell_file.fail())
+		return false;
+
+	// Scan through file skipping all lines then get the relevant one.
+	for (int i = 0; i < spell_id; ++i) {
+		spell_file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		if (spell_file.eof())
+			return false;
+	}
+	std::string description;
+	if (!std::getline(spell_file, description) || description.empty())
+		return false;  // Failed to read or no data for this spell id.
+
+	const std::string stml_line_break = "<BR>";
+	if (scroll_display)
+		wnd->DisplayText.Append(stml_line_break.c_str());  // Add a line break.
+	else
+		wnd->DisplayText.Set("");  // Replace the SetSpell text entirely with the blob.
+
+	auto lines = Zeal::String::split_text(description, "^");
+	for (auto& line : lines) {
+		if (scroll_display &&
+			(line.starts_with("Skill:") || line.starts_with("Mana Cost:") || line.starts_with("Classes:")))
+			continue;  // Skip redundant lines already in the base display.
+		line += stml_line_break;
+		wnd->DisplayText.Append(line.c_str());
+	}
+
+	return true;
+}
+
 // Generate our customized item description text.
 static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructures::_EQITEMINFO* item) {
 
@@ -240,6 +283,9 @@ static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructure
 	}
 	if (item->NoDrop != 0)
 		wnd->DisplayText.Append("Value: " + CopperToAll(item->Cost) + stml_line_break);
+
+	if (item->Type == 0 && item->Common.Skill == 0x14)
+		UpdateSetSpellTextEnhanced(wnd, item->Common.SpellIdEx, true);
 }
 
 void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused,
@@ -301,6 +347,9 @@ static std::string get_target_type_string(int target_type)
 
 static void UpdateSetSpellText(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id)
 {
+	if (UpdateSetSpellTextEnhanced(wnd, spell_id))
+		return;
+
 	auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
 	if (!spell_mgr || spell_id < 1 || spell_id >= EQ_NUM_SPELLS || wnd->DisplayText.Data == nullptr)
 		return;

@@ -3,6 +3,7 @@
 #include "EqUI.h"
 #include "IO_ini.h"
 #include <vector>
+#include "ZealSettings.h"
 
 class ItemDisplay
 {
@@ -14,6 +15,7 @@ public:
 	bool close_latest_window();
 	void add_to_cache(const Zeal::EqStructures::EQITEMINFO* item);
 	const Zeal::EqStructures::EQITEMINFO* get_cached_item(int item_id) const;
+	ZealSetting<bool> setting_enhanced_spell_info = { true, "Zeal", "EnhancedSpellInfo", false };
 
 private:
 	void InitUI();

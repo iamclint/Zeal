@@ -457,6 +457,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_UseZealAssistOn",		[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_use_zeal_assist_on.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_DetectAssistFailure",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_detect_assist_failure.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SingleClickGiveEnable",  [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->give->setting_enable_give.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_EnhancedSpellInfo",      [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->item_displays->setting_enhanced_spell_info.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_InviteDialog",           [this](Zeal::EqUI::BasicWnd* wnd) { setting_invite_dialog.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_AutoFollowEnable",       [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->game_patches->AutoFollowEnable.set(wnd->Checked); });
 
@@ -807,6 +808,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_UseZealAssistOn", ZealService::get_instance()->assist->setting_use_zeal_assist_on.get());
 	ui->SetChecked("Zeal_DetectAssistFailure", ZealService::get_instance()->assist->setting_detect_assist_failure.get());
 	ui->SetChecked("Zeal_SingleClickGiveEnable", ZealService::get_instance()->give->setting_enable_give.get());
+	ui->SetChecked("Zeal_EnhancedSpellInfo", ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get());
 	ui->SetChecked("Zeal_InviteDialog", setting_invite_dialog.get());
 	ui->SetChecked("Zeal_AutoFollowEnable", ZealService::get_instance()->game_patches->AutoFollowEnable.get());
 
