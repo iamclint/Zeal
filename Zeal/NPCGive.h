@@ -7,7 +7,7 @@
 class NPCGive
 {
 public:
-	NPCGive(class ZealService* pHookWrapper, class IO_ini* ini);
+	NPCGive(class ZealService* pHookWrapper);
 	~NPCGive();
 	void HandleItemPickup();  // For internal callback use only.
 

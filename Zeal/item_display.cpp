@@ -428,7 +428,7 @@ static int __fastcall SpellBookWnd_WndNotification(Zeal::EqUI::SpellBookWnd* wnd
 	return 0;
 }
 
-ItemDisplay::ItemDisplay(ZealService* zeal, IO_ini* ini)
+ItemDisplay::ItemDisplay(ZealService* zeal)
 {
 	windows.clear();
 	zeal->hooks->Add("SetItem", 0x423640, SetItem, hook_type_detour);    // CItemDisplayWnd::SetItem

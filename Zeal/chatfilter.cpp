@@ -447,7 +447,7 @@ char* __fastcall serverGetString(int stringtable, int unused, int string_id, boo
 }
 
 
-chatfilter::chatfilter(ZealService* zeal, IO_ini* ini)
+chatfilter::chatfilter(ZealService* zeal)
 {
     zeal->hooks->Add("DamageOutputText", 0x52A8C1, CChatManager, hook_type_replace_call);
     zeal->callbacks->AddReportSuccessfulHit([this](Zeal::EqStructures::Entity* source, Zeal::EqStructures::Entity* target, WORD type, short spell_id, short damage, char output_text) { 

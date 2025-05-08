@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "ZealSettings.h"
 
-class looting
+class Looting
 {
 public:
 	void set_hide_looted(bool val);
@@ -15,8 +15,8 @@ public:
 	void looted_item();
 	void handle_hide_looted();
 	void set_last_hidden_corpse(Zeal::EqStructures::Entity* corpse);
-	looting(class ZealService* zeal);
-	~looting();
+	Looting(class ZealService* zeal);
+	~Looting();
 
 	ZealSetting<bool> setting_alt_delimiter = { false, "Zeal", "LinkAllAltDelimiter", false };
 	ZealSetting<bool> setting_ctrl_rightclick_loot = { false, "Zeal", "CtrlRightClickLoot", true };

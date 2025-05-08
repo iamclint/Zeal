@@ -28,7 +28,7 @@ void ui_guild::InitUI()
 	members = (Zeal::EqUI::ListWnd*)guild->GetChildItem("MemberList");
 }
 
-ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, ui_manager* mgr)
+ui_guild::ui_guild(ZealService* zeal, IO_ini* ini, UIManager* mgr)
 {
 	ui = mgr;
 	guild = nullptr;

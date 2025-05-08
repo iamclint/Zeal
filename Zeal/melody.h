@@ -11,7 +11,7 @@ public:
 	void handle_stop_cast_callback(BYTE reason, WORD spell_id);
 	void handle_deactivate_ui();
 	bool use_item(int item_index); // asks Melody to handle /useitem command. Returns true if melody handled the command.
-	Melody(class ZealService* pHookWrapper, class IO_ini* ini);
+	Melody(class ZealService* pHookWrapper);
 	~Melody();
 private:
 	void tick();

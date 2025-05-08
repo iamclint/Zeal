@@ -7,7 +7,7 @@
 class Physics
 {
 public:
-	Physics(class ZealService* zeal, class IO_ini* ini);
+	Physics(class ZealService* zeal);
 	~Physics();
 	bool can_move(short spawn_id);
 private:

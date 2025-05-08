@@ -1,10 +1,11 @@
 #pragma once
 #include "hook_wrapper.h"
 #include "memory.h"
+#include "operator_overloads.h"
 #include <functional>
 #include <unordered_map>
 
-enum key_category //this is bitwise so you can do multiple categorys by doing Movement | Target for example
+enum class key_category : int //this is bitwise so you can do multiple categorys by doing Movement | Target for example
 {
 	Movement = 1,
 	Commands = 2,
@@ -15,6 +16,8 @@ enum key_category //this is bitwise so you can do multiple categorys by doing Mo
 	UI = 64,
 	Macros = 128
 };
+
+ENUM_BITMASK_OPERATORS(key_category)
 
 class Binds
 {
@@ -28,7 +31,7 @@ public:
 	std::pair<int, int> last_targets;
 	void read_ini();
 	void add_binds();
-	void add_bind(int index, const char* name, const char* short_name, int category, std::function<void(int state)> callback);
+	void add_bind(int index, const char* name, const char* short_name, key_category category, std::function<void(int state)> callback);
 	void replace_cmd(int cmd, std::function<bool(int state)> callback);
 	void main_loop();
 	void on_zone();

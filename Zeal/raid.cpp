@@ -4,12 +4,12 @@
 #include "EqFunctions.h"
 #include "Zeal.h"
 
-void raid::callback_main()
+void Raid::callback_main()
 {
 
 }
 
-raid::~raid()
+Raid::~Raid()
 {
 
 }
@@ -29,7 +29,7 @@ void __fastcall SetLootTypeResponse(void* t, int unused, int p1)
 	}
 }
 
-raid::raid(ZealService* zeal)
+Raid::Raid(ZealService* zeal)
 {
 	mem::write<byte>(0x49E182, 4); // allow for 4 types in setloottype
 	mem::write<byte>(0x42FAB3, 4); // allow for 4 types being set from the options window

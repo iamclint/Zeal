@@ -161,7 +161,7 @@ ui_zoneselect::~ui_zoneselect()
 {
 
 }
-ui_zoneselect::ui_zoneselect(ZealService* zeal, ui_manager* mgr)
+ui_zoneselect::ui_zoneselect(ZealService* zeal, UIManager* mgr)
 {
 	ui = mgr;
 	zeal->callbacks->AddGeneric([this]() { CleanUI(); }, callback_type::CleanUI);

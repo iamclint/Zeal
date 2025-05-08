@@ -55,7 +55,7 @@ public:
 	std::vector<std::string> get_available_textures() const;
 	void load_texture(const std::string& filename);
 	void render_ring(Vec3 pos, float size, DWORD color, IDirect3DTexture8* texture, float rotationAngle);
-	TargetRing(class ZealService* zeal, class IO_ini* ini);
+	TargetRing(class ZealService* zeal);
 	~TargetRing();
 
 	ZealSetting<bool> enabled = { false, "TargetRing", "Enabled", true, [](bool val) { Zeal::EqGame::print_chat("Target ring is %s", val ? "Enabled" : "Disabled"); } };

@@ -10,7 +10,7 @@ public:
 	bool HandleDoAttack(Zeal::EqStructures::Entity* player, uint8_t type, uint8_t p2, Zeal::EqStructures::Entity* target);
 	void SetAutoFire(bool enabled, bool do_print=false);
 	void Main();
-	AutoFire(class ZealService* zeal, class IO_ini* ini);
+	AutoFire(class ZealService* zeal);
 	~AutoFire();
 private: 
 	bool was_autoattacking = false;

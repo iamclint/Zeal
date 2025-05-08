@@ -65,7 +65,7 @@ int __fastcall MovePlayer(int t, int u, Zeal::EqStructures::Entity* ent)
 		return 1;
 }
 
-Physics::Physics(ZealService* zeal, IO_ini* ini)
+Physics::Physics(ZealService* zeal)
 {
 	zeal->callbacks->AddGeneric([this]() { move_timers.clear(); }, callback_type::Zone);
 

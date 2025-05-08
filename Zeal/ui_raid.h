@@ -5,12 +5,12 @@
 class ui_raid
 {
 public:
-	ui_raid(class ZealService* zeal, class ui_manager* mgr);
+	ui_raid(class ZealService* zeal, class UIManager* mgr);
 	~ui_raid();
 private:
 	void InitUI();
 	void CleanUI();
 	void LoadSettings(class IO_ini* ini);
-	ui_manager* ui;
+	UIManager* ui;
 };
 

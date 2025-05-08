@@ -155,7 +155,7 @@ void log_hook(char* data)
 	zeal->hooks->hook_map["logtextfile"]->original(log_hook)(data);
 }
 
-void named_pipe::chat_msg(const char* data, int color_index)
+void NamedPipe::chat_msg(const char* data, int color_index)
 {
 	if (!is_connected())
 		return;
@@ -185,15 +185,15 @@ bool IsPipeConnected(HANDLE hPipe) {
 	return dwBytesAvailable > 0; // Return true if bytes are available for reading (pipe is connected)
 }
 
-void named_pipe::main_loop()
+void NamedPipe::main_loop()
 {
 	update_pipe_handles();  // Handle thread synchronization.
 
-	if (!is_connected() || pipe_delay <= 0) // Don't waste cpu time if not connected or disabled.
+	if (!is_connected() || pipe_delay.get() <= 0) // Don't waste cpu time if not connected or disabled.
 		return;
 
 	static auto last_output = GetTickCount64();
-	if (GetTickCount64() - last_output > pipe_delay)
+	if (GetTickCount64() - last_output > pipe_delay.get())
 	{
 		const auto* raid_info = Zeal::EqGame::RaidInfo;
 		if (raid_info->is_in_raid())
@@ -389,13 +389,13 @@ bool WriteDataWithRetry(HANDLE h, const std::string& data, OVERLAPPED* pData, LP
 	return false;
 }
 
-void named_pipe::write(std::string data, pipe_data_type data_type)
+void NamedPipe::write(std::string data, pipe_data_type data_type)
 {
 	pipe_data pd(data_type, data);
 	write(pd.serialize().dump());
 }
 
-void named_pipe::write(std::string data)
+void NamedPipe::write(std::string data)
 {
 
 	for (auto& h : pipe_handles)
@@ -414,7 +414,7 @@ void named_pipe::write(std::string data)
 	}
 	pipe_handles.erase(std::remove_if(pipe_handles.begin(), pipe_handles.end(), [](HANDLE x) { return x == INVALID_HANDLE_VALUE; }), pipe_handles.end());
 }
-void named_pipe::write(const char* format, ...)
+void NamedPipe::write(const char* format, ...)
 {
 	va_list argptr;
 	char buffer[512];
@@ -424,32 +424,28 @@ void named_pipe::write(const char* format, ...)
 	write(std::string(buffer));
 }
 
-void named_pipe::update_delay(unsigned new_delay)
+void NamedPipe::update_delay(unsigned new_delay)
 {
-	ZealService::get_instance()->ini->setValue("Zeal", "PipeDelay", new_delay);
-	pipe_delay = new_delay;
+	pipe_delay.set(new_delay);
 	Zeal::EqGame::print_chat("pipe delay is now set to %i", pipe_delay);
 }
 
 // Adds the handle to the thread protected transfer queue.
-void named_pipe::add_new_pipe_handle(const HANDLE& handle) {
+void NamedPipe::add_new_pipe_handle(const HANDLE& handle) {
 	std::scoped_lock lock(pipe_handle_mutex);
 	pipe_handle_queue.push_back(handle);
 }
 
 // Copies handles from thread protected queue to main thread vector.
-void named_pipe::update_pipe_handles() {
+void NamedPipe::update_pipe_handles() {
 	std::scoped_lock lock(pipe_handle_mutex);
 	for (auto& h : pipe_handle_queue)
 		pipe_handles.push_back(h);
 	pipe_handle_queue.clear();
 }
 
-named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
+NamedPipe::NamedPipe(ZealService* zeal)
 {
-	if (!ini->exists("Zeal", "PipeDelay"))
-		ini->setValue<int>("Zeal", "PipeDelay", 100);
-	pipe_delay = ini->getValue<int>("Zeal", "PipeDelay");
 
 	zeal->callbacks->AddGeneric([this]() { main_loop(); });
 	zeal->commands_hook->Add("/pipedelay", {}, "delay between the pipe loop output in milliseconds",
@@ -539,7 +535,7 @@ named_pipe::named_pipe(ZealService* zeal, IO_ini* ini)
 		});
 	pipe_thread.detach();
 }
-named_pipe::~named_pipe()
+NamedPipe::~NamedPipe()
 {
 	end_thread = true;
 	if (pipe_thread.joinable())

@@ -52,7 +52,7 @@ static int32_t __fastcall CanIBreathe(Zeal::EqStructures::EQCHARINFO* self_char_
 	return ZealService::get_instance()->hooks->hook_map["CanIBreathe"]->original(CanIBreathe)(self_char_info, unusedEDX);
 }
 
-void patches::fonts() //this was a test function and I later found out these aren't even used
+void Patches::fonts() //this was a test function and I later found out these aren't even used
 {
 	//const char* driverName = "DISPLAY";
 
@@ -82,7 +82,7 @@ void patches::fonts() //this was a test function and I later found out these are
 
 }
 
-void patches::SetBrownSkeletons()
+void Patches::SetBrownSkeletons()
 {
 	if (BrownSkeletons.get())
 	{
@@ -101,7 +101,7 @@ void patches::SetBrownSkeletons()
 // framerate dependent and causes follow failures.
 // 
 // Both of these things are disabled by this mod, and it also adds an adjustable follow distance.
-void patches::SyncAutoFollow(bool first_boot)
+void Patches::SyncAutoFollow(bool first_boot)
 {
 	// To patch the follow distance, we modify the pointer to a float in an instruction.
 	// We don't modify the value directly since that value is shared elsewhere in the code.
@@ -135,7 +135,7 @@ void patches::SyncAutoFollow(bool first_boot)
 	}
 }
 
-patches::patches()
+Patches::Patches()
 {
 	const char sit_stand_patch[] = { (char)0xEB, (char)0x1A };
 	mem::write(0x42d14d, sit_stand_patch); //fix pet sit shortcut crash (makes default return of function the sit/stand button not sure why its passing in 0)

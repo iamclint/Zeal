@@ -576,7 +576,7 @@ static void __fastcall GetClickedActor(int this_display, int unused_edx, int mou
         *bounding_radius = original_radius;
 }
 
-CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
+CameraMods::CameraMods(ZealService* zeal)
 {
     mem::write<byte>(0x53fa50, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
     mem::write<byte>(0x53f648, Zeal::EqEnums::CameraView::TotalCameras); //allow for strafing whenever in zeal cam
@@ -630,7 +630,7 @@ CameraMods::CameraMods(ZealService* zeal, IO_ini* ini)
             return true; //return true to stop the game from processing any further on this command, false if you want to just add features to an existing cmd
         });
     zeal->commands_hook->Add("/pandelay", { "/pd" }, "Adjust the delay required before left click panning happens in zeal cam.",
-        [this, ini](std::vector<std::string>& args) {
+        [this](std::vector<std::string>& args) {
             int delay = 200;
             if (args.size() == 2)
             {

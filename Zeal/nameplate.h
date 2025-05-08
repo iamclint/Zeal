@@ -32,7 +32,7 @@ public:
 		PvpAlly = 31,
 	};
 
-	NamePlate(class ZealService* zeal, class IO_ini* ini);
+	NamePlate(class ZealService* zeal);
 	~NamePlate();
 
 	// Tint (color) settings.

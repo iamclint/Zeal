@@ -66,6 +66,7 @@
     <ClInclude Include="assist.h" />
     <ClInclude Include="autofire.h" />
     <ClInclude Include="bitmap_font.h" />
+    <ClInclude Include="operator_overloads.h" />
     <ClInclude Include="character_select.h" />
     <ClInclude Include="chatfilter.h" />
     <ClInclude Include="crash_handler.h" />

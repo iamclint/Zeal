@@ -341,7 +341,7 @@ int __fastcall ChatWndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::
     return ZealService::get_instance()->hooks->hook_map["ChatWndNotification"]->original(ChatWndNotification)(wnd, unused, sender, message, data);
 }
 
-TellWindows::TellWindows(ZealService* zeal, IO_ini* ini)
+TellWindows::TellWindows(ZealService* zeal)
 {
     zeal->hooks->Add("GetActiveChatWindow", 0x425D27, GetActiveChatWindow, hook_type_replace_call);//hook to fix item linking to tell windows if always chat here is selected anywhere
     zeal->hooks->Add("DeactivateChatManager", 0x410871, DeactivateChatManager, hook_type_detour);

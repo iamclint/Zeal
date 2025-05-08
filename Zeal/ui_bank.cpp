@@ -79,7 +79,7 @@ void ui_bank::InitUI()
 		btn->vtbl->Deconstructor = ButtonDestructor;
 	}
 }
-ui_bank::ui_bank(ZealService* zeal, ui_manager* mgr)
+ui_bank::ui_bank(ZealService* zeal, UIManager* mgr)
 {
 	ui = mgr;
 	zeal->callbacks->AddGeneric([this]() { InitUI(); }, callback_type::InitUI);

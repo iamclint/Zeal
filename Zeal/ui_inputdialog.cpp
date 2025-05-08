@@ -58,7 +58,7 @@ std::string ui_inputdialog::getTitle() const
 
 int __fastcall IDWndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::EqUI::BasicWnd* sender, int message, int data)
 {
-	ui_manager* ui = ZealService::get_instance()->ui.get();
+	UIManager* ui = ZealService::get_instance()->ui.get();
 	if (sender == ui->inputDialog->button1 || message == 0x6) //message 6 = enter key
 	{
 		if (ui->inputDialog->button_callbacks.first)
@@ -115,7 +115,7 @@ void ui_inputdialog::InitUI()
 	input = (Zeal::EqUI::EditWnd*)wnd->GetChildItem("ZealDialogInput");
 }
 
-ui_inputdialog::ui_inputdialog(ZealService* zeal, ui_manager* mgr)
+ui_inputdialog::ui_inputdialog(ZealService* zeal, UIManager* mgr)
 {
 	ui = mgr;
 	zeal->commands_hook->Add("/testdialog", {}, "test",
