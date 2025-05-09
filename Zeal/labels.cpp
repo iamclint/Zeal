@@ -183,7 +183,7 @@ static int get_attack_timer_gauge(Zeal::EqUI::CXSTR* str)
 		auto primary_item = char_info->InventoryItem[12];  // Primary slot.
 		if (!primary_item || !primary_item->Common.AttackDelay)  // No weapon or not a weapon.
 			attack_delay = Zeal::EqGame::get_hand_to_hand_delay() * 100;
-		else if (primary_item->Common.Skill < 6 || primary_item->Common.Skill == 0xd)
+		else if (primary_item->Common.Skill < 6 || primary_item->Common.Skill == 0x2d)  // Uses patched 0x2d, not 0xd.
 			attack_delay = primary_item->Common.AttackDelay * 100;
 		else if (primary_item->Common.Skill == 0x16)  // Hand-to-hand skilldict lookup.
 			attack_delay = reinterpret_cast<UINT**>(0x007f7aec)[primary_item->Common.AttackDelay][1];
