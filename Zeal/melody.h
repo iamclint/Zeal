@@ -6,7 +6,8 @@
 class Melody
 {
 public:
-	bool start(const std::vector<int>& new_songs); //returns true if no errors
+	bool start(const std::vector<int>& new_songs, bool resume = false); //returns true if no errors
+	void resume(); //continues a stopped melody where it was interrupted (if valid)
 	void end(bool do_print=false);
 	void handle_stop_cast_callback(BYTE reason, WORD spell_id);
 	void handle_deactivate_ui();
@@ -16,6 +17,7 @@ public:
 private:
 	void tick();
 	void stop_current_cast();
+	bool is_active = false; // Set when melody is actively running.
 	int current_index = 0;  // Active song index. -1 if not started yet.
 	std::vector<int> songs; // Gem indices (base 0) for melody.
 	int retry_count = 0; // Tracks unsuccessful song casts.

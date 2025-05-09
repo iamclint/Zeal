@@ -37,7 +37,7 @@ constexpr ULONGLONG MELODY_ZONE_IN_DELAY = 2000; // Minimum wait after zoning be
 constexpr ULONGLONG MELODY_WAIT_TIMEOUT = 1500; // Maximum wait after the casting timer expires before retrying.
 constexpr ULONGLONG USE_ITEM_QUEUE_TIMEOUT = 3650; // Max duration a useitem will stay queued for before giving up (mostly to prevent ultra-stale clicks).
 
-bool Melody::start(const std::vector<int>& new_songs)
+bool Melody::start(const std::vector<int>& new_songs, bool resume)
 {
     if (!Zeal::EqGame::is_in_game())
         return false;
@@ -79,22 +79,42 @@ bool Melody::start(const std::vector<int>& new_songs)
     if (!enter_zone_time)  // Ensure this gets set so melody starts immediately.
         enter_zone_time = GetTickCount64() - MELODY_ZONE_IN_DELAY;
 
+    // Start at the beginning if not resuming or the resumed song list has changed or invalid index.
+    // We are assuming that the new_songs list is the songs list from the resume() call.
+    if (!resume || (new_songs.size() != valid_songs.size()) || (current_index < 0) || (current_index >= valid_songs.size()))
+        current_index = -1;  // Reset to start of the songs list.
+
     songs = valid_songs;
-    current_index = -1;
+    is_active = !songs.empty();
     retry_count = 0;
     casting_melody_spell_id = kInvalidSpellId;
     use_item_index = -1;
-    if (songs.size())
+    if (is_active)
         Zeal::EqGame::print_chat(USERCOLOR_SPELLS, "You begin playing a melody.");
     return true;
 }
 
+void Melody::resume()
+{
+    if (is_active)
+        return;  // Already running, nothing to do.
+
+    start(songs, true);
+}
+
 void Melody::end(bool do_print)
 {
-    if (songs.size())
+    if (is_active)
     {
-        current_index = -1;
-        songs.clear();
+        // songs is left alone and and current_index is rewound (if needed) to before the interrupted song.
+        if (casting_melody_spell_id != kInvalidSpellId)
+        {
+            current_index--;
+            if (current_index < 0) {  // Handle wraparound.
+                current_index = songs.size() - 1;
+            }
+        }
+        is_active = false;
         retry_count = 0;
         casting_melody_spell_id = kInvalidSpellId;
         use_item_index = -1;
@@ -105,7 +125,7 @@ void Melody::end(bool do_print)
 
 bool Melody::use_item(int item_index)
 {
-    if (songs.empty() || item_index < 0 || item_index > 29)
+    if (!is_active || item_index < 0 || item_index > 29)
         return false;
 
     // Set fields so use_item(item_index) will execute during tick().
@@ -117,7 +137,7 @@ bool Melody::use_item(int item_index)
 void Melody::handle_stop_cast_callback(BYTE reason, WORD spell_id)
 {
     // Terminate melody on stop except for missed note (part of reason == 3) rewind attempts.
-    if (reason != 3 || !songs.size())
+    if (reason != 3 || !is_active)
     {
         end(true);
         return;
@@ -188,7 +208,7 @@ static void stop_current_song_client_only()
 
 void Melody::tick()
 {
-    if (!songs.size())
+    if (!is_active)
         return;
 
     Zeal::EqStructures::Entity* self = Zeal::EqGame::get_self();
@@ -303,7 +323,7 @@ void Melody::handle_deactivate_ui()
     enter_zone_time = 0;  // Pauses melody processing loop
 
     // Bail out if melody not active (bard or not) and if not a bard singing a song.
-    if (!songs.size() || !Zeal::EqGame::EqGameInternal::IsPlayerABardAndSingingASong())
+    if (!is_active || !Zeal::EqGame::EqGameInternal::IsPlayerABardAndSingingASong())
         return;
 
     // Re-use the interrupted logic to rewind melody to cleanly continue after zone in.
@@ -320,8 +340,12 @@ Melody::Melody(ZealService* zeal)
     zeal->hooks->Add("StopCast", 0x4cb510, StopCast, hook_type_detour); //Hook in to end melody as well.
     zeal->commands_hook->Add("/melody", {"/mel"}, "Bard only, auto cycles 5 songs of your choice.",
         [this](std::vector<std::string>& args) {
+            if (args.size() > 1 && args[1] == "resume") {
+                resume();  // Continues an interrupted melody.
+                return true;
+            }
 
-            end(true);  //any active melodies are always terminated
+            end(true);  //otherwise any active melodies are always terminated
 
             if (!Zeal::EqGame::get_char_info() || Zeal::EqGame::get_char_info()->Class != Zeal::EqEnums::ClassTypes::Bard)
             {
