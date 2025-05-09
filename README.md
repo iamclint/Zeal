@@ -196,9 +196,10 @@ ___
   - **Description:** controls map enable, size, labels, zoom, and markers
 
 - `/melody`
-  - **Arguments:** `song gem #'s (maximum of 5)`
+  - **Arguments:** `song gem #'s (maximum of 5)`, `resume`
   - **Aliases:** `/mel`
   - **Example:** `/melody 1 4 2 3`
+  - **Example:** `/melody resume` - Resumes an interrupted melody at the interrupted song index.
   - **Description:** plays songs in order until interrupted in any fashion.
 
 - `/mystats`
