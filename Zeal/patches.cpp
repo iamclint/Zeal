@@ -135,6 +135,12 @@ void Patches::SyncAutoFollow(bool first_boot)
 	}
 }
 
+// Returns the class / level / monk-epic dependent hand to hand delay in milliseconds.
+static int get_hand_to_hand_delay_ms()
+{
+	return Zeal::EqGame::get_hand_to_hand_delay() * 100;
+}
+
 Patches::Patches()
 {
 	const char sit_stand_patch[] = { (char)0xEB, (char)0x1A };
@@ -144,6 +150,16 @@ Patches::Patches()
 	//mem::set(0x4b9141, 0x90, 6);
 	SetBrownSkeletons();
 	SyncAutoFollow(true);  // Sync only if non-default.
+
+	//fix attack delay in DoPassageOfTime() for ItemTypeMartial (0x2d) by replacing unused type 0xd.
+	mem::write<BYTE>(0x004c1d97 + 2, 0x2d);  // 004c1d97 80 f9 0d
+
+	//fix hand2hand delay calculation in DoPassageOfTime() for monks and bst
+	//replace a load from the fixed 3500 ms in skill dict with a call to our calculation.
+	const int h2h_addr = 0x004c1dad;  // 10-byte long (7-byte + 3-byte opcodes) load to EAX sequence.
+	unsigned char h2h_patch[10] = {0xe8, 0, 0, 0, 0, 0x90, 0x90, 0x90, 0x90, 0x90};  // call + nops.
+	*reinterpret_cast<int*>(&h2h_patch[1]) = reinterpret_cast<int>(&get_hand_to_hand_delay_ms) - (h2h_addr + 5);
+	mem::write(h2h_addr, h2h_patch);
 
 	//disable client sided mana ticking
 	mem::set(0x4C3F93, 0x90, 7);
