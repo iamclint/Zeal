@@ -76,6 +76,16 @@ int __fastcall IDWndNotification(Zeal::EqUI::BasicWnd* wnd, int unused, Zeal::Eq
 	return reinterpret_cast<int(__thiscall*)(Zeal::EqUI::BasicWnd * wnd, Zeal::EqUI::BasicWnd * sender, int message, int data)>(0x56e920)(wnd, sender, message, data);
 }
 
+// Avoids storing xml defaults loaded in char select to character UI settings.
+static void __fastcall IDStoreIniInfo(Zeal::EqUI::EQWND* wnd, int unused)
+{
+	if (!wnd || (Zeal::EqGame::get_gamestate() != GAMESTATE_INGAME))
+		return;
+
+	reinterpret_cast<void(__fastcall*)(Zeal::EqUI::EQWND* wnd, int unused)>
+		(Zeal::EqUI::EQWND::GetDefaultVTable()->StoreIniInfo)(wnd, unused);
+}
+
 void ui_inputdialog::CleanUI()
 {
 	if (wnd)
@@ -113,6 +123,12 @@ void ui_inputdialog::InitUI()
 	button2 = wnd->GetChildItem("ZealDialogButton2");
 	label = wnd->GetChildItem("ZealDialogMessage");
 	input = (Zeal::EqUI::EditWnd*)wnd->GetChildItem("ZealDialogInput");
+
+	// The charselect is uing the input dialog for zone select before the character
+	// (and thus the UI INI filename) is set, causing the saved location to be ignored
+	// on load and then wiped when stored. 
+	auto vtable = static_cast<Zeal::EqUI::SidlScreenWndVTable*>(wnd->vtbl);
+	vtable->StoreIniInfo = IDStoreIniInfo;
 }
 
 ui_inputdialog::ui_inputdialog(ZealService* zeal, UIManager* mgr)

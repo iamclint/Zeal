@@ -396,12 +396,17 @@ namespace Zeal
 				BasicWnd::SetupCustomVTable(sizeof(SidlScreenWndVTable));
 			}
 
+			static SidlScreenWndVTable* GetDefaultVTable()
+			{
+				auto* sidl_default_vtbl = reinterpret_cast<SidlScreenWndVTable*>(0x005ea98c);
+				return sidl_default_vtbl;
+			}
+
 			// This should only be called immediately before destruction of custom EQWND classes
 			// created with SetupCustomVTable().
 			void DeleteCustomVTable()
 			{
-				auto* sidl_default_vtbl = reinterpret_cast<SidlScreenWndVTable*>(0x005ea98c);
-				BasicWnd::DeleteCustomVTable(sidl_default_vtbl);
+				BasicWnd::DeleteCustomVTable(GetDefaultVTable());
 			}
 		
 			/*0x114*/   DWORD   Selector;
