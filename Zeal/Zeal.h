@@ -5,7 +5,7 @@
 #include <typeinfo>
 #include <memory>
 #include <iostream>
-#define ZEAL_VERSION "0.6.8-beta0"
+#define ZEAL_VERSION "0.6.8-beta1"
 #ifndef ZEAL_BUILD_VERSION  // Set by github actions
 #define ZEAL_BUILD_VERSION "UNOFFICIAL"  // Local build
 #endif
