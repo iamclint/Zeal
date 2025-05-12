@@ -9,4 +9,4 @@ one line per spell id indexed from 0 to 3999 (lines 1 to 4000) using the
 `^` character as a line delimiter.
 
 If enabled, Zeal just extracts the line from the file based on spell ID and
-replaces the window text with it.
+replaces the window text with it (spells) or appends it (items).

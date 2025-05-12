@@ -21,6 +21,7 @@ from the repo using github actions, providing full transparency on the contents.
 - Autostand on move/cast, autosit on camp with export inventory/spellbook option
 - Enhanced chat (% replacements, additional filters and colors, tell windows,
   tab completion, copy and paste)
+- Optional enhanced spell info (spells, scrolls, items) on info displays
 - Notification sounds (tells, group invites)
 - Third party tool support (silent log messages, direct ZealPipes)
 - Various client bug fixes and patches (crashe fixes, helm graphical glitches, etc)

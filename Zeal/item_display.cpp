@@ -222,11 +222,35 @@ const Zeal::EqStructures::EQITEMINFO* ItemDisplay::get_cached_item(int item_id) 
 	return nullptr;
 }
 
-static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id, bool scroll_display = false)
+// Adds information from the spell_info.txt file. If spell_id is non-zero, all of the
+// display wnd text is replaced and the item should be null. If an item is provided,
+// it uses the spell ID from that and appends information relevant to the item type.
+static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id,
+	Zeal::EqStructures::_EQITEMINFO* item = nullptr)
 {
-	if (!ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get() ||
-		wnd->DisplayText.Data == nullptr)
+	if (!ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get() || !wnd ||
+		!wnd->DisplayText.Data || (item && item->Type != 0))
 		return false;
+
+	if (item)
+		spell_id = item->Common.SpellIdEx;
+
+	if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS)
+		return false;
+
+	// Items have abbreviated info appended to the display window.
+	bool is_spell_scroll = (item && item->Common.Skill == 0x14);
+	bool is_proc_effect = (item && item->Common.Skill != 0x14 &&
+		item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCombatProc);
+	bool is_worn_effect = (item && item->Common.Skill != 0x14 &&
+		item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectWorn);
+	bool is_click_effect = (item && item->Common.Skill != 0x14 &&
+		(item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectClick ||
+			item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectMustEquipClick ||
+			item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCanEquipClick));
+	bool is_item = is_spell_scroll || is_proc_effect || is_worn_effect || is_click_effect;
+	if (item && !is_item)
+		return false;  // Not an item with a displayable spell effect.
 
 	// Could add a memory cache, but the file access seems quick enough.
 	const char* filename = "./uifiles/zeal/spell_info/spell_info.txt";
@@ -245,17 +269,35 @@ static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spel
 	if (!std::getline(spell_file, description) || description.empty())
 		return false;  // Failed to read or no data for this spell id.
 
+	bool detrimental = Zeal::EqGame::get_spell_mgr() &&
+		Zeal::EqGame::get_spell_mgr()->Spells[spell_id] &&
+		Zeal::EqGame::get_spell_mgr()->Spells[spell_id]->SpellType == 0;
+
 	const std::string stml_line_break = "<BR>";
-	if (scroll_display)
+	if (is_item)
 		wnd->DisplayText.Append(stml_line_break.c_str());  // Add a line break.
 	else
 		wnd->DisplayText.Set("");  // Replace the SetSpell text entirely with the blob.
 
 	auto lines = Zeal::String::split_text(description, "^");
 	for (auto& line : lines) {
-		if (scroll_display &&
-			(line.starts_with("Skill:") || line.starts_with("Mana Cost:") || line.starts_with("Classes:")))
+		if (is_item &&
+			(line.starts_with("Skill:") || line.starts_with("Mana Cost:") ||
+				line.starts_with("Classes:")))
 			continue;  // Skip redundant lines already in the base display.
+		if ((is_click_effect || is_proc_effect || is_worn_effect) &&
+			line.starts_with("Cast Time:"))
+			continue;  // Skip, shown already for clicks and n/a for worn.
+		if ((is_proc_effect || is_worn_effect) && line.starts_with("Range:"))
+			continue; // Skip, range is ignored for procs and worn effects.
+		// Recast doesn't matter for item effects, replace with effective casting level.
+		if ((is_item && !is_spell_scroll) && line.starts_with("Recast Time:"))
+			line = std::format("Casting level: {}", item->Common.CastingLevel);
+		if (line.starts_with("Resist:") &&	!detrimental)
+			continue;  // Skip resists if not a detrimental spell.
+		if (is_worn_effect && (line.starts_with("Target:") || line.starts_with("Duration:")))
+			continue;  // Skip, these are also ignored for worn effects.
+
 		line += stml_line_break;
 		wnd->DisplayText.Append(line.c_str());
 	}
@@ -284,8 +326,7 @@ static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructure
 	if (item->NoDrop != 0)
 		wnd->DisplayText.Append("Value: " + CopperToAll(item->Cost) + stml_line_break);
 
-	if (item->Type == 0 && item->Common.Skill == 0x14)
-		UpdateSetSpellTextEnhanced(wnd, item->Common.SpellIdEx, true);
+	UpdateSetSpellTextEnhanced(wnd, 0, item);
 }
 
 void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused,
