@@ -83,7 +83,7 @@ namespace Zeal
 			static mem::function<int __fastcall(int, int, int, int)> CXWndShowContextMenu = 0x5A02F0;
 			static mem::function<char __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, int left, int top, int right, int bottom)> CXWndMoveAndInvalidate = 0x00573600;
 			static mem::function<Zeal::EqUI::CXRect* __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect* rect)> CXWndGetMinimizedRect = 0x00573730;
-			static mem::function<int __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, uint32_t unknown3)> CXWndHandleRButtonDown = 0x005703f0;
+			static mem::function<int __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, int32_t mouse_x, int32_t mouse_y, uint32_t unknown3)> CSidlScreenWndHandleRButtonDown = 0x005703f0;
 			static mem::function<void __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX)> CXWndDeactivate = 0x0056e0b0;  // Does nothing.
 			static mem::function<char __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, Zeal::EqUI::CXRect rect)> CXWndOnMove = 0x00402301;
 			static mem::function<int __fastcall(Zeal::EqUI::EQWND* wnd, int unusedEDX, int width, int height)> CXWndOnResize = 0x0056eb00;

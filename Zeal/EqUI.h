@@ -423,7 +423,7 @@ namespace Zeal
 			};
 			/*0x124*/   struct CTextureAnimation*  BackgroundTexture;
 			/*0x128*/   DWORD   Unknown0x128; /* CTextureAnimation */
-			/*0x12c*/   DWORD   ContextMenu;  /* CTextureAnimation its an id for the menu*/
+			/*0x12c*/   int     ContextMenu;  /* CTextureAnimation its an id for the menu*/
 			/*0x130*/	BYTE    Unknown0x130; /* CTextureAnimation */
 			/*0x131*/	BYTE    Unknown0x131; /* CTextureAnimation */
 			/*0x132*/	BYTE    Unknown0x132; /* CTextureAnimation */

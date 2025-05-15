@@ -463,6 +463,7 @@ void ui_options::InitGeneral()
 
 	ui->AddCheckboxCallback(wnd, "Zeal_LinkAllAltDelimiter",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_alt_delimiter.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_CtrlRightClickCorpse",   [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->looting_hook->setting_ctrl_rightclick_loot.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_CtrlContextMenus",       [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->options->setting_ctrl_context_menus.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_EnableContainerLock",    [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->ui->options->setting_enable_container_lock.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_ExportOnCamp",           [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->outputfile->setting_export_on_camp.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SelfClickThru",          [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->camera_mods->setting_selfclickthru.set(wnd->Checked); });
@@ -784,6 +785,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_TellWindowsHist", ZealService::get_instance()->tells->hist_enabled);
 	ui->SetChecked("Zeal_LinkAllAltDelimiter", ZealService::get_instance()->looting_hook->setting_alt_delimiter.get());
 	ui->SetChecked("Zeal_CtrlRightClickCorpse", ZealService::get_instance()->looting_hook->setting_ctrl_rightclick_loot.get());
+	ui->SetChecked("Zeal_CtrlContextMenus", ZealService::get_instance()->ui->options->setting_ctrl_context_menus.get());
 	ui->SetChecked("Zeal_EnableContainerLock", ZealService::get_instance()->ui->options->setting_enable_container_lock.get());
 	ui->SetChecked("Zeal_ExportOnCamp", ZealService::get_instance()->outputfile->setting_export_on_camp.get());
 	ui->SetChecked("Zeal_SelfClickThru", ZealService::get_instance()->camera_mods->setting_selfclickthru.get());
@@ -1102,6 +1104,18 @@ static void __fastcall ContainerWndSetContainer(Zeal::EqUI::ContainerWnd* wnd, i
 		original(ContainerWndSetContainer)(wnd, unused_edx, eq_container, type);
 }
 
+static int __fastcall SidlScreenWndHandleRButtonDown(Zeal::EqUI::EQWND* wnd, int unused_edx, int mouse_x, int mouse_y, unsigned int unknown3)
+{
+	if (ZealService::get_instance()->ui->options->setting_ctrl_context_menus.get())
+	{
+		if (!Zeal::EqGame::get_wnd_manager()->ControlKeyState && Zeal::EqGame::Windows != nullptr
+			&& wnd && wnd->ContextMenu > -1)
+			return 0;  // Bail out to skip popping up the context menu below.
+	}
+
+	return ZealService::get_instance()->hooks->hook_map["SidlScreenWndHandleRButtonDown"]->
+		original(SidlScreenWndHandleRButtonDown)(wnd, unused_edx, mouse_x, mouse_y, unknown3);
+}
 
 ui_options::ui_options(ZealService* zeal, UIManager* mgr) : ui(mgr)
 {
@@ -1113,6 +1127,7 @@ ui_options::ui_options(ZealService* zeal, UIManager* mgr) : ui(mgr)
 	ui->AddXmlInclude("EQUI_ZealOptions.xml");
 	
 	zeal->hooks->Add("ContainerWndSetContainer", 0x0041717d, ContainerWndSetContainer, hook_type_detour);
+	zeal->hooks->Add("SidlScreenWndHandleRButtonDown", 0x005703f0, SidlScreenWndHandleRButtonDown, hook_type_detour);
 
 	zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, const std::string& msg,
 		const short& channel) { if (channel == USERCOLOR_TELL) this->PlayTellSound(); });

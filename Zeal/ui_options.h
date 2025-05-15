@@ -26,6 +26,7 @@ public:
 	~ui_options();
 
 	ZealSetting<bool> setting_enable_container_lock = { false, "Zeal", "EnableContainerLock", false };
+	ZealSetting<bool> setting_ctrl_context_menus = { false, "Zeal", "CtrlContextMenus", false };
 	ZealSetting<bool> setting_invite_dialog = { false, "Zeal", "InviteDialog", false };
 	ZealSetting<std::string> setting_invite_sound = { "", "Zeal", "InviteSound", false,
 		[this](const std::string&) { PlayInviteSound(); } };
