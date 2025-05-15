@@ -3222,7 +3222,7 @@ static int __fastcall HandleRButtonDown(Zeal::EqUI::EQWND* wnd, int unusedEDX, i
     Zeal::EqUI::CXRect rect;
     Zeal::EqGame::EqGameInternal::CXWndGetClientRect(wnd, 0, &rect);
     if (mouse_y < rect.Top)
-        return Zeal::EqGame::EqGameInternal::CXWndHandleRButtonDown(wnd, unusedEDX, mouse_x, mouse_y, unused3);
+        return Zeal::EqGame::EqGameInternal::CSidlScreenWndHandleRButtonDown(wnd, unusedEDX, mouse_x, mouse_y, unused3);
 
     ZealService* zeal = ZealService::get_instance();
     if (zeal && zeal->zone_map)
