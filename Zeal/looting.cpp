@@ -490,9 +490,12 @@ void Looting::load_protected_items()
 
 	protected_items.clear();
 	std::string line;
+	int error_count = 0;
 	while (std::getline(input_file, line))
 	{
-		auto fields = Zeal::String::split_text(line, ",");
+		auto fields = Zeal::String::split_text(line, "^");
+		if (fields.size() != 2)
+			fields = Zeal::String::split_text(line, ",");  // Legacy file support.
 		if (fields.size() == 2) {
 			int item_id = std::stoi(fields.front());
 			if (item_id > 0) {
@@ -500,10 +503,12 @@ void Looting::load_protected_items()
 				continue;  // Keep going.
 			}
 		}
-		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal protect error parsing line: %s", line.c_str());
-		return;
-
+		if (error_count++ == 0)
+			Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal protect error parsing line: %s", line.c_str());
 	}
+	if (error_count)
+		Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "Zeal protect failed to parse %d lines", error_count);
+
 }
 
 void Looting::update_protected_item(int item_id, const std::string& name, bool add_only)
@@ -529,7 +534,7 @@ void Looting::update_protected_item(int item_id, const std::string& name, bool a
 	std::ofstream output_file(get_protected_items_filename());
 	if (output_file.is_open())
 		for (const auto& item : protected_items) 
-			output_file << item.id << "," << item.name << "\n";
+			output_file << item.id << "^" << item.name << "\n";  // Use '^' as delimiter.
 	else
 		Zeal::EqGame::print_chat("Error: Failed to save protected item list");
 }
