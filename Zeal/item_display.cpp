@@ -9,6 +9,7 @@
 #include <regex>
 #include <fstream>
 #undef max
+#undef min
 
 void ItemDisplay::InitUI()
 {
@@ -222,14 +223,67 @@ const Zeal::EqStructures::EQITEMINFO* ItemDisplay::get_cached_item(int item_id) 
 	return nullptr;
 }
 
+static bool is_cloth_caster()
+{
+	auto char_info = Zeal::EqGame::get_char_info();
+	if (!char_info)
+		return false;
+
+	using Zeal::EqEnums::ClassTypes;
+	int cls = char_info->Class;
+	return (cls == ClassTypes::Wizard || cls == ClassTypes::Magician || 
+		cls == ClassTypes::Enchanter || cls == ClassTypes::Necromancer);
+}
+
+// Help the mathematically challenged by calculating the spell effect value and
+// the durations at the casting level and appending it to the string.
+static void add_value_at_level(std::string& line, int level)
+{
+	if (level <= 0 || line.find("(L") == std::string::npos ||
+		!(line.starts_with("  ") || line.starts_with("Duration:")))
+		return;  // Early exit. The affects lines all start with two spaces.
+
+	size_t search_offset = 0;
+	if (line.find("AC for Cloth Casters by") != std::string::npos && !is_cloth_caster())
+	{
+		size_t comma = line.find(",");  // Skip to second (non-cloth) range.
+		if (comma == std::string::npos)
+			return;
+		search_offset = comma + 1;
+	}
+
+	std::smatch match;
+	const char* pattern_str = line.starts_with("Duration:") ?
+		"(\\d+) (\\w+) [^\\(]*\\(L(\\d+)\\) to (\\d+)[^\\(]*\\(L(\\d+)\\)" :
+		"(\\d+)(%?) \\(L(\\d+)\\) to (\\d+)%? \\(L(\\d+)\\)";
+	std::regex pattern(pattern_str);
+	std::string search_line = line.substr(search_offset);
+	if (std::regex_search(search_line, match, pattern) && match.size() == 6)
+	{
+		try {
+			int value1 = std::stoi(match.str(1));
+			int level1 = std::stoi(match.str(3));
+			int value2 = std::stoi(match.str(4));
+			int level2 = std::stoi(match.str(5));
+			int cast_level = std::min(level2, std::max(level1, level));
+			int value = value1 + (value2 - value1) * (cast_level - level1) / (level2 - level1);
+			std::string label = match.str(2) == "ticks" ? (" " + match.str(2)) : match.str(2);
+			line += std::format("<c \"#c0c000\"> [{}{} @ L{}]</c>", value, label, level);  // In yellow.
+		}
+		catch (const std::exception& e) {
+			return; // Just abort the attempt.
+		}
+	}
+}
+
 // Adds information from the spell_info.txt file. If spell_id is non-zero, all of the
 // display wnd text is replaced and the item should be null. If an item is provided,
 // it uses the spell ID from that and appends information relevant to the item type.
 static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id,
-	Zeal::EqStructures::_EQITEMINFO* item = nullptr)
+	Zeal::EqStructures::_EQITEMINFO* item = nullptr, bool buff = false)
 {
 	if (!ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get() || !wnd ||
-		!wnd->DisplayText.Data || (item && item->Type != 0))
+		!wnd->DisplayText.Data || (item && item->Type != 0) || !Zeal::EqGame::get_self())
 		return false;
 
 	if (item)
@@ -279,6 +333,8 @@ static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spel
 	else
 		wnd->DisplayText.Set("");  // Replace the SetSpell text entirely with the blob.
 
+	int level = (is_item && !is_spell_scroll) ?
+		item->Common.CastingLevel : Zeal::EqGame::get_self()->Level;
 	auto lines = Zeal::String::split_text(description, "^");
 	for (auto& line : lines) {
 		if (is_item &&
@@ -292,12 +348,14 @@ static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spel
 			continue; // Skip, range is ignored for procs and worn effects.
 		// Recast doesn't matter for item effects, replace with effective casting level.
 		if ((is_item && !is_spell_scroll) && line.starts_with("Recast Time:"))
-			line = std::format("Casting level: {}", item->Common.CastingLevel);
+			line = std::format("Casting level: {}", level);
 		if (line.starts_with("Resist:") &&	!detrimental)
 			continue;  // Skip resists if not a detrimental spell.
 		if (is_worn_effect && (line.starts_with("Target:") || line.starts_with("Duration:")))
 			continue;  // Skip, these are also ignored for worn effects.
 
+		if (!buff)
+			add_value_at_level(line, level);
 		line += stml_line_break;
 		wnd->DisplayText.Append(line.c_str());
 	}
@@ -386,9 +444,9 @@ static std::string get_target_type_string(int target_type)
 	return std::string("Target: ") + std::string(type);
 }
 
-static void UpdateSetSpellText(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id)
+static void UpdateSetSpellText(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id, bool buff)
 {
-	if (UpdateSetSpellTextEnhanced(wnd, spell_id))
+	if (UpdateSetSpellTextEnhanced(wnd, spell_id, nullptr, buff))
 		return;
 
 	auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
@@ -419,8 +477,11 @@ static void UpdateSetSpellText(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id)
 void __fastcall SetSpell(Zeal::EqUI::ItemDisplayWnd* wnd, int unused, int spell_id, bool show, int unknown)
 {
 	ZealService* zeal = ZealService::get_instance();
+	bool buff = !show;  // Buff bar sets show to false.
+	if (!show)  // Allow enhanced spell info to enable show (else blank).
+		show = ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get();
 	zeal->hooks->hook_map["SetSpell"]->original(SetSpell)(wnd, unused, spell_id, show, unknown);
-	UpdateSetSpellText(wnd, spell_id);
+	UpdateSetSpellText(wnd, spell_id, buff);
 }
 
 void ItemDisplay::CleanUI()
