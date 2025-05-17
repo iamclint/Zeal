@@ -276,21 +276,81 @@ static void add_value_at_level(std::string& line, int level)
 	}
 }
 
-// Adds information from the spell_info.txt file. If spell_id is non-zero, all of the
-// display wnd text is replaced and the item should be null. If an item is provided,
-// it uses the spell ID from that and appends information relevant to the item type.
-static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id,
-	Zeal::EqStructures::_EQITEMINFO* item = nullptr, bool buff = false)
+static std::string get_spell_info(int spell_id)
+{
+	// Could add a memory cache, but the file access seems quick enough.
+	const char* filename = "./uifiles/zeal/spell_info/spell_info.txt";
+	std::ifstream spell_file;
+	spell_file.open(filename);
+	if (spell_file.fail())
+		return "";
+
+	// Scan through file skipping all lines then get the relevant one.
+	for (int i = 0; i < spell_id; ++i) {
+		spell_file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		if (spell_file.eof())
+			return "";
+	}
+	std::string info;
+	if (!std::getline(spell_file, info))
+		return "";  // Failed to read or no data for this spell id.
+
+	return info;
+}
+
+
+// Appends item focus effects to the item display text if enabled, the item has an effect,
+// and the info is available.
+static void append_item_focus_info(Zeal::EqUI::ItemDisplayWnd* wnd,
+	Zeal::EqStructures::_EQITEMINFO* item)
 {
 	if (!ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get() || !wnd ||
-		!wnd->DisplayText.Data || (item && item->Type != 0) || !Zeal::EqGame::get_self())
-		return false;
+		!wnd->DisplayText.Data || !item || item->Type != 0 || !Zeal::EqGame::get_self())
+		return;
 
-	if (item)
-		spell_id = item->Common.SpellIdEx;
+	int focus_spell_id = item ? item->Common.FocusSpellId : 0;
+	if (focus_spell_id < 1 || focus_spell_id >= EQ_NUM_SPELLS)
+		return;  // Not a valid focus effect spell ID.
 
+	std::string focus_name = (Zeal::EqGame::get_spell_mgr() &&
+		Zeal::EqGame::get_spell_mgr()->Spells[focus_spell_id] &&
+		Zeal::EqGame::get_spell_mgr()->Spells[focus_spell_id]->Name) ?
+		Zeal::EqGame::get_spell_mgr()->Spells[focus_spell_id]->Name : "";
+
+	if (focus_name.empty())
+		return;  // Valid focus effects will have names.
+
+	std::string description = get_spell_info(focus_spell_id);
+	if (description.empty())
+		return;  // Failed to read or empty info.
+
+	const std::string stml_line_break = "<BR>";
+	std::string label = std::format("<c \"#ff7eff\">{}:</c>", focus_name);  // In pink/purple.
+	label = stml_line_break + label + stml_line_break;
+	wnd->DisplayText.Append(label.c_str());
+
+	auto lines = Zeal::String::split_text(description, "^");
+	for (auto& line : lines) {
+		if (!line.starts_with("  "))
+			continue;  // Hack way to skip everything but effects.
+		line = "&nbsp;&nbsp;" + line + stml_line_break;
+		wnd->DisplayText.Append(line.c_str());
+	}
+	return;
+}
+
+// Appends item effects (proc, worn, click, spell scroll) to the item display text
+// if enabled and the info is available.
+static void append_item_effect_info(Zeal::EqUI::ItemDisplayWnd* wnd,
+	Zeal::EqStructures::_EQITEMINFO* item)
+{
+	if (!ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get() || !wnd ||
+		!wnd->DisplayText.Data || !item || item->Type != 0 || !Zeal::EqGame::get_self())
+		return;
+
+	int spell_id = item->Common.SpellIdEx;
 	if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS)
-		return false;
+		return;
 
 	// Items have abbreviated info appended to the display window.
 	bool is_spell_scroll = (item && item->Common.Skill == 0x14);
@@ -302,25 +362,68 @@ static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spel
 		(item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectClick ||
 			item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectMustEquipClick ||
 			item->Common.IsStackableEx == Zeal::EqEnums::ItemEffectCanEquipClick));
-	bool is_item = is_spell_scroll || is_proc_effect || is_worn_effect || is_click_effect;
-	if (item && !is_item)
-		return false;  // Not an item with a displayable spell effect.
+	if (!(is_spell_scroll || is_proc_effect || is_worn_effect || is_click_effect))
+		return;  // Not an item with a displayable spell effect.
 
-	// Could add a memory cache, but the file access seems quick enough.
-	const char* filename = "./uifiles/zeal/spell_info/spell_info.txt";
-	std::ifstream spell_file;
-	spell_file.open(filename);
-	if (spell_file.fail())
+	std::string description = get_spell_info(spell_id);
+	if (description.empty())
+		return;  // Failed to read or no data for this spell id.
+
+	bool detrimental = Zeal::EqGame::get_spell_mgr() &&
+		Zeal::EqGame::get_spell_mgr()->Spells[spell_id] &&
+		Zeal::EqGame::get_spell_mgr()->Spells[spell_id]->SpellType == 0;
+
+	const std::string stml_line_break = "<BR>";
+	wnd->DisplayText.Append(stml_line_break.c_str());  // Add a line break.
+
+	int level = is_spell_scroll ? Zeal::EqGame::get_self()->Level :
+		item->Common.CastingLevel;
+	if (!is_spell_scroll)
+		wnd->DisplayText.Append(
+			std::format("Effect casting level: {}{}", level, stml_line_break).c_str());
+
+	auto lines = Zeal::String::split_text(description, "^");
+	for (auto& line : lines) {
+		if (line.starts_with("Skill:") || line.starts_with("Mana Cost:") ||
+				line.starts_with("Classes:") || line.empty())
+			continue;  // Skip redundant lines already in the base display.
+		if ((is_click_effect || is_proc_effect || is_worn_effect) &&
+			line.starts_with("Cast Time:"))
+			continue;  // Skip, shown already for clicks and n/a for worn.
+		if ((is_proc_effect || is_worn_effect) && line.starts_with("Range:"))
+			continue; // Skip, range is ignored for procs and worn effects.
+		if (!is_spell_scroll && line.starts_with("Recast Time:"))
+			continue;  // Recast doesn't matter for item effects.
+		if (line.starts_with("Resist:") && !detrimental)
+			continue;  // Skip resists if not a detrimental spell.
+		if (is_worn_effect && (line.starts_with("Target:") || line.starts_with("Duration:")))
+			continue;  // Skip, these are also ignored for worn effects.
+
+		add_value_at_level(line, level);
+		if (line.starts_with("  "))
+			line = "&nbsp;&nbsp;" + line + stml_line_break;  // Indent effects for items.
+		else
+			line += stml_line_break;
+		wnd->DisplayText.Append(line.c_str());
+	}
+
+	return;
+}
+
+// If enabled and the info is available, replace all of the text in the spell
+// display box with information from the spell_info.txt file.
+static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id,
+	bool buff = false)
+{
+	if (!ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get() || !wnd ||
+		!wnd->DisplayText.Data || !Zeal::EqGame::get_self())
 		return false;
 
-	// Scan through file skipping all lines then get the relevant one.
-	for (int i = 0; i < spell_id; ++i) {
-		spell_file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		if (spell_file.eof())
-			return false;
-	}
-	std::string description;
-	if (!std::getline(spell_file, description) || description.empty())
+	if (spell_id < 1 || spell_id >= EQ_NUM_SPELLS)
+		return false;
+
+	std::string description = get_spell_info(spell_id);
+	if (description.empty())
 		return false;  // Failed to read or no data for this spell id.
 
 	bool detrimental = Zeal::EqGame::get_spell_mgr() &&
@@ -328,34 +431,15 @@ static bool UpdateSetSpellTextEnhanced(Zeal::EqUI::ItemDisplayWnd* wnd, int spel
 		Zeal::EqGame::get_spell_mgr()->Spells[spell_id]->SpellType == 0;
 
 	const std::string stml_line_break = "<BR>";
-	if (is_item)
-		wnd->DisplayText.Append(stml_line_break.c_str());  // Add a line break.
-	else
-		wnd->DisplayText.Set("");  // Replace the SetSpell text entirely with the blob.
+	wnd->DisplayText.Set("");  // Replace the SetSpell text entirely with the blob.
 
-	int level = (is_item && !is_spell_scroll) ?
-		item->Common.CastingLevel : Zeal::EqGame::get_self()->Level;
 	auto lines = Zeal::String::split_text(description, "^");
 	for (auto& line : lines) {
-		if (is_item &&
-			(line.starts_with("Skill:") || line.starts_with("Mana Cost:") ||
-				line.starts_with("Classes:")))
-			continue;  // Skip redundant lines already in the base display.
-		if ((is_click_effect || is_proc_effect || is_worn_effect) &&
-			line.starts_with("Cast Time:"))
-			continue;  // Skip, shown already for clicks and n/a for worn.
-		if ((is_proc_effect || is_worn_effect) && line.starts_with("Range:"))
-			continue; // Skip, range is ignored for procs and worn effects.
-		// Recast doesn't matter for item effects, replace with effective casting level.
-		if ((is_item && !is_spell_scroll) && line.starts_with("Recast Time:"))
-			line = std::format("Casting level: {}", level);
 		if (line.starts_with("Resist:") &&	!detrimental)
 			continue;  // Skip resists if not a detrimental spell.
-		if (is_worn_effect && (line.starts_with("Target:") || line.starts_with("Duration:")))
-			continue;  // Skip, these are also ignored for worn effects.
 
 		if (!buff)
-			add_value_at_level(line, level);
+			add_value_at_level(line, Zeal::EqGame::get_self()->Level);
 		line += stml_line_break;
 		wnd->DisplayText.Append(line.c_str());
 	}
@@ -384,7 +468,8 @@ static void UpdateSetItemText(Zeal::EqUI::ItemDisplayWnd* wnd, Zeal::EqStructure
 	if (item->NoDrop != 0)
 		wnd->DisplayText.Append("Value: " + CopperToAll(item->Cost) + stml_line_break);
 
-	UpdateSetSpellTextEnhanced(wnd, 0, item);
+	append_item_effect_info(wnd, item);
+	append_item_focus_info(wnd, item);
 }
 
 void __fastcall SetItem(Zeal::EqUI::ItemDisplayWnd* wnd, int unused,
@@ -446,7 +531,7 @@ static std::string get_target_type_string(int target_type)
 
 static void UpdateSetSpellText(Zeal::EqUI::ItemDisplayWnd* wnd, int spell_id, bool buff)
 {
-	if (UpdateSetSpellTextEnhanced(wnd, spell_id, nullptr, buff))
+	if (UpdateSetSpellTextEnhanced(wnd, spell_id, buff))
 		return;
 
 	auto* spell_mgr = Zeal::EqGame::get_spell_mgr();
