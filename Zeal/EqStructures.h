@@ -481,7 +481,8 @@ namespace Zeal
 			/* 0x0160 */ short RequiredLevel;
 			/* 0x0162 */ WORD BardType;   // Bard Skill Type (instrument type)
 			/* 0x0164 */ WORD BardValue;  // Bard Skill Amount (instrument modifier)
-			/* 0x0166 */ BYTE Unknown0166[18];  // Total item struct size looks like 0x178.
+			/* 0x0166 */ WORD FocusSpellId;  // Index for focus spell effect.
+			/* 0x0168 */ BYTE Unknown0168[16];  // Total item struct size looks like 0x178.
 		} EQITEMCOMMONINFO, * PEQITEMCOMMONINFO;
 		typedef struct _EQITEMCONTAINERINFO  // EQ_Container class.
 		{
