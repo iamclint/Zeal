@@ -9,12 +9,14 @@ class NPCGive
 public:
 	NPCGive(class ZealService* pHookWrapper);
 	~NPCGive();
-	void HandleItemPickup();  // For internal callback use only.
+	void HandleItemInCursor(); // For internal callback use only.
+	void HandleItemPickup(int from_slot);  // For internal callback use only.
+	void ClearItem();  // Reset the waiting for item flag.
 
 	ZealSetting<bool> setting_enable_give = { false, "SingleClick", "EnableGive", false };
 
 private:
-	bool wait_cursor_item=false;
+	Zeal::EqStructures::EQITEMINFOBASE* wait_cursor_item = nullptr;  // Auto-move item on cursor.
 	int bag_index = 0;  // /singleclick bag <#> with 1-8 valid values. 0 disables.
 	void tick();
 };

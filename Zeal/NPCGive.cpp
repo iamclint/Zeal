@@ -5,11 +5,38 @@
 #include "Zeal.h"
 #include "string_util.h"
 
-
+// Stacked items go through this path which includes the call to CInvSlot::SliderComplete()
+// that will create a new item pointer when a stack is split (like using ctrl on a stack).
+// That stack split puts the item on the cursor immediately w/out a call to MoveItem. If 
+// not split, the MoveItem() call happens to move the existing item to the cursor.
 void __fastcall QtyPickupItem(int cquantitywnd, int unused)
 {
-    ZealService::get_instance()->give->HandleItemPickup();
+    auto char_info = Zeal::EqGame::get_char_info();
+    bool empty_cursor = char_info && char_info->CursorItem == nullptr;
     ZealService::get_instance()->hooks->hook_map["QtyPickupItem"]->original(QtyPickupItem)(cquantitywnd, unused);
+
+    if (char_info && empty_cursor && char_info->CursorItem)
+        ZealService::get_instance()->give->HandleItemInCursor();
+}
+
+// Intercept the MoveItem call to detect the movement of items to the cursor in order to possibly arm the
+// /singleclick logic to auto-move from the cursor to the destination (trade, crafting).
+static void __fastcall CInvSlotMgrMoveItem(void* mgr, int unused_edx, int from_slot, int to_slot,
+    int print_error, int unknown)
+{
+    // The MoveItem is a generic call and we only want to trigger moving items from the cursor and
+    // only from the results of a HandleLButtonUp / SliderComplete parent call. Additionally, the
+    // right click to equip in equip_item.cpp is calling the HandleLButtonUp multiple times in a
+    // row to move so we need to co-exist with that. Those calls are atomic, so the end result
+    // should be an item moving off the cursor which will clear the trigger item state. The 
+    // msg_disarm and the DropItemIntoTrade calls all set print_error == 0, so we filter for that.
+    // Also, we confirm that the from_slot is not the cursor and the to_slot is the cusor.
+    // HandleItemPickup() does additional filtering.
+    ZealService::get_instance()->give->ClearItem();
+    if (from_slot != 0 && to_slot == 0 && print_error == 1 && unknown == 1)
+        ZealService::get_instance()->give->HandleItemPickup(from_slot);
+
+    ZealService::get_instance()->hooks->hook_map["CInvSlotMgrMoveItem"]->original(CInvSlotMgrMoveItem)(mgr, unused_edx, from_slot, to_slot, print_error, unknown);
 }
 
 static bool is_give_or_trade_window_active()
@@ -64,12 +91,67 @@ static Zeal::EqUI::ContainerWnd* get_active_tradeskill_container(int bag_index)
     return nullptr;
 }
 
-void NPCGive::HandleItemPickup()
+void NPCGive::ClearItem()
 {
-    if (setting_enable_give.get() && Zeal::EqGame::is_new_ui() &&
-        (Zeal::EqGame::KeyMods->Shift || Zeal::EqGame::KeyMods->Ctrl) &&
-        (is_give_or_trade_window_active() || get_active_tradeskill_container(bag_index)))
-        wait_cursor_item = true;
+    wait_cursor_item = nullptr;
+}
+
+void NPCGive::HandleItemInCursor()
+{
+    ClearItem();  // Default to resetting the item.
+
+    // Bail out if the cursor has no item or is holding money.
+    auto char_info = Zeal::EqGame::get_char_info();
+    if (!char_info || !char_info->CursorItem || char_info->CursorCopper || char_info->CursorGold
+        || char_info->CursorPlatinum || char_info->CursorSilver)
+        return;
+
+    // Bail out if not enabled, key isn't held, or there's no target option.
+    if (!setting_enable_give.get() || !Zeal::EqGame::is_new_ui() ||
+        !(Zeal::EqGame::KeyMods->Shift || Zeal::EqGame::KeyMods->Ctrl) ||
+        !(is_give_or_trade_window_active() || get_active_tradeskill_container(bag_index)))
+        return;
+
+    wait_cursor_item = char_info->CursorItem;
+}
+
+void NPCGive::HandleItemPickup(int from_slot)
+{
+    ClearItem();  // Default to resetting the item.
+
+    if (from_slot == 0)
+        return;  // Bail out if the cursor is the source.
+
+    // Bail out if the cursor has an item on it or we are holding money.
+    auto char_info = Zeal::EqGame::get_char_info();
+    if (!char_info || char_info->CursorItem || char_info->CursorCopper || char_info->CursorGold
+        || char_info->CursorPlatinum || char_info->CursorSilver)
+        return;
+
+    // Bail out if not enabled, key isn't held, or there's no target option.
+    if (!setting_enable_give.get() || !Zeal::EqGame::is_new_ui() ||
+        !(Zeal::EqGame::KeyMods->Shift || Zeal::EqGame::KeyMods->Ctrl) ||
+        !(is_give_or_trade_window_active() || get_active_tradeskill_container(bag_index)))
+        return;
+
+    // Cache item if the from_slot is a general inventory slot.
+    if (from_slot >= 22 && from_slot <= 29)
+    {
+        wait_cursor_item = char_info->InventoryPackItem[from_slot - 22];
+        return;
+    }
+
+    // Cache item if the from_slot is a general bag slot.
+    // Slot ID for bagged items is 250 + (bag_index*10) + (bag_slot) = [250...329]
+    if (from_slot >= 250 && from_slot < 330)
+    {
+        int bag_index = (from_slot - 250) / 10;
+        int bag_slot = (from_slot - 250) % 10;
+        auto bag = char_info->InventoryPackItem[bag_index];
+        if (!bag || bag->Type != 1 || bag_slot >= bag->Container.Capacity)
+            return;  // Error finding the source bag for the from_slot.
+        wait_cursor_item = bag->Container.Item[bag_slot];
+    }
 }
 
 void NPCGive::tick()
@@ -77,12 +159,13 @@ void NPCGive::tick()
     if (!wait_cursor_item)
         return;
 
-    wait_cursor_item = false;  // Only make a single attempt whenever set.
+    auto target_cursor_item = wait_cursor_item;
+    ClearItem();  // Only make a single attempt whenever set.
 
     // Must be a non-container item on the cursor and still be in the game.
     auto char_info = Zeal::EqGame::get_char_info();
-    if (!char_info || !char_info->CursorItem || char_info->CursorItem->Type != 0 ||
-        char_info->CursorItem->NoDrop == 0 ||  // Extra filtering.
+    if (!char_info || char_info->CursorItem != target_cursor_item ||
+        char_info->CursorItem->Type != 0 || char_info->CursorItem->NoDrop == 0 ||  // Extra filtering.
         !Zeal::EqGame::is_in_game())
         return;
 
@@ -146,7 +229,8 @@ void NPCGive::tick()
 NPCGive::NPCGive(ZealService* zeal)
 {
     zeal->callbacks->AddGeneric([this]() { tick();  });
-    zeal->hooks->Add("QtyPickupItem", 0x42F65A, QtyPickupItem, hook_type_detour); //Hook in to end melody as well.
+    zeal->hooks->Add("QtyPickupItem", 0x42F65A, QtyPickupItem, hook_type_detour);
+    zeal->hooks->Add("CInvSlotMgrMoveItem", 0x00422b1c, CInvSlotMgrMoveItem, hook_type_detour);
     zeal->commands_hook->Add("/singleclick", {},
         "Toggles on and off the single click auto-transfer of stackable items to open give, trade, or crafting windows.",
         [this](std::vector<std::string>& args) {
