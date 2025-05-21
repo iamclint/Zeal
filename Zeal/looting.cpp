@@ -307,11 +307,43 @@ bool Looting::parse_loot_last(const std::vector<std::string>& args)
 	return true;
 }
 
+// Logs any items getting dropped or destroyed.
+static void log_cursor_action(const char* action)
+{
+	const Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+	if (!char_info)
+		return;
+
+	if (char_info->CursorItem)
+	{
+		const auto cursor = char_info->CursorItem;
+		if (cursor->Type == 1)  // Container / bag.
+		{
+			for (int i = 0; i < cursor->Container.Capacity; ++i)
+			{
+				const auto item = cursor->Container.Item[i];
+				if (item && item->Name)
+					Zeal::EqGame::print_chat("%s %s in bag", action, item->Name);
+			}
+		}
+		Zeal::EqGame::print_chat("%s %s", action, cursor->Name ? cursor->Name : "unknown");
+		return;
+	}
+
+	// No cursor item, so check if dropping/destroying money.
+	if (char_info->CursorPlatinum || char_info->CursorGold || char_info->CursorSilver
+		|| char_info->CursorCopper)
+		Zeal::EqGame::print_chat("%s %d pp, %d gp, %d sp, %d cp", action,
+			char_info->CursorPlatinum, char_info->CursorGold, char_info->CursorSilver,
+			char_info->CursorCopper);
+}
+
 static void __fastcall DropHeldItemOnGround(void* ceverquest_this, int unused_edx, int print_message)
 {
 	auto zeal = ZealService::get_instance();
 	if (zeal->looting_hook->is_cursor_protected(Zeal::EqGame::get_char_info()))
 		return;  // Item or money were blocked from dropping.
+	log_cursor_action("Dropping");
 	zeal->hooks->hook_map["DropHeldItemOnGround"]->original(DropHeldItemOnGround)(ceverquest_this,
 		unused_edx, print_message);
 }
@@ -322,6 +354,7 @@ static void __fastcall DropHeldMoneyOnGround(void* ceverquest_this, int unused_e
 	auto zeal = ZealService::get_instance();
 	if (zeal->looting_hook->is_cursor_protected(Zeal::EqGame::get_char_info()))
 		return;  // Item or money were blocked from dropping.
+	log_cursor_action("Dropping");
 	zeal->hooks->hook_map["DropHeldMoneyOnGround"]->original(DropHeldMoneyOnGround)(ceverquest_this,
 		unused_edx, print_message);
 }
@@ -331,6 +364,7 @@ static void __fastcall DestroyHeldItemOrMoney(Zeal::EqStructures::EQCHARINFO* ch
 	ZealService* zeal = ZealService::get_instance();
 	if (zeal->looting_hook->is_cursor_protected(char_info))
 		return;  // Item or money were blocked from destruction.
+	log_cursor_action("Destroying");
 	zeal->hooks->hook_map["DestroyHeldItemOrMoney"]->original(DestroyHeldItemOrMoney)(char_info, unused_edx);
 }
 
