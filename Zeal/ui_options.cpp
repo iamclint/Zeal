@@ -458,6 +458,7 @@ void ui_options::InitGeneral()
 	ui->AddCheckboxCallback(wnd, "Zeal_DetectAssistFailure",	[](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->assist->setting_detect_assist_failure.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_SingleClickGiveEnable",  [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->give->setting_enable_give.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_EnhancedSpellInfo",      [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->item_displays->setting_enhanced_spell_info.set(wnd->Checked); });
+	ui->AddCheckboxCallback(wnd, "Zeal_SlashNotPoke",           [this](Zeal::EqUI::BasicWnd* wnd) { setting_slash_not_poke.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_InviteDialog",           [this](Zeal::EqUI::BasicWnd* wnd) { setting_invite_dialog.set(wnd->Checked); });
 	ui->AddCheckboxCallback(wnd, "Zeal_AutoFollowEnable",       [](Zeal::EqUI::BasicWnd* wnd) { ZealService::get_instance()->game_patches->AutoFollowEnable.set(wnd->Checked); });
 
@@ -811,6 +812,7 @@ void ui_options::UpdateOptionsGeneral()
 	ui->SetChecked("Zeal_DetectAssistFailure", ZealService::get_instance()->assist->setting_detect_assist_failure.get());
 	ui->SetChecked("Zeal_SingleClickGiveEnable", ZealService::get_instance()->give->setting_enable_give.get());
 	ui->SetChecked("Zeal_EnhancedSpellInfo", ZealService::get_instance()->item_displays->setting_enhanced_spell_info.get());
+	ui->SetChecked("Zeal_SlashNotPoke", setting_slash_not_poke.get());
 	ui->SetChecked("Zeal_InviteDialog", setting_invite_dialog.get());
 	ui->SetChecked("Zeal_AutoFollowEnable", ZealService::get_instance()->game_patches->AutoFollowEnable.get());
 
@@ -1117,6 +1119,24 @@ static int __fastcall SidlScreenWndHandleRButtonDown(Zeal::EqUI::EQWND* wnd, int
 		original(SidlScreenWndHandleRButtonDown)(wnd, unused_edx, mouse_x, mouse_y, unknown3);
 }
 
+// Support modifying / substituting animations.
+static bool handle_animation_packet(Zeal::Packets::Animation_Struct* animation)
+{
+	const auto char_info = Zeal::EqGame::get_char_info();
+
+	// Allow changing the default piercing-like 2HB anim with the 2HS one.
+	auto action = static_cast<Zeal::EqEnums::DoAnimation>(animation->action);
+	if (char_info && action == Zeal::EqEnums::DoAnimation::Weapon2H &&
+		ZealService::get_instance()->ui->options->setting_slash_not_poke.get())
+	{
+		const auto weapon = char_info->InventoryItem[Zeal::EqEnums::EquipSlot::Primary];
+		if (Zeal::EqGame::get_weapon_skill(weapon) == Zeal::EqEnums::SkillType::Skill2HBlunt)
+			animation->action = static_cast<BYTE>(Zeal::EqEnums::DoAnimation::Slashing2H);
+	}
+
+	return false;  // Continue processing of the possibly modified animation.
+}
+
 ui_options::ui_options(ZealService* zeal, UIManager* mgr) : ui(mgr)
 {
 	wnd = nullptr;
@@ -1151,6 +1171,13 @@ ui_options::ui_options(ZealService* zeal, UIManager* mgr) : ui(mgr)
 	sound_list.push_back({ 41, "Gurgle" });
 	sound_list.push_back({ 134, "OpenBox" });
 	sound_list.push_back({ 145, "OpenBag" });
+
+	// Support swapping animations (like using 2hs for a 2hb weapon).
+	zeal->callbacks->AddPacket([this](UINT opcode, char* buffer, UINT len) {
+		if (opcode == Zeal::Packets::Animation && len == sizeof(Zeal::Packets::Animation_Struct))
+			return handle_animation_packet(reinterpret_cast<Zeal::Packets::Animation_Struct*>(buffer));
+		return false; // continue processing
+		});
 }
 
 ui_options::~ui_options()

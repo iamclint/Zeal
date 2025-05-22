@@ -388,6 +388,88 @@ namespace Zeal
 			/*00000*/	SkillCount					// move to last position of active enumeration labels
 		};
 
+		enum class DoAnimation: unsigned short {	//type arguments to DoAnim
+			None,											 // 0 jesus arms
+			Kick,
+			Piercing,	//might be piercing?
+			Slashing2H,
+			Weapon2H,
+			Weapon1H,
+			DualWield,
+			Slam,		//slam & Dpunch too
+			Hand2Hand,
+			ShootBow,
+			Unknown10,	// 10 nothing
+			RoundKick,
+			Unknown12,	// 12 nothing
+			Unknown13,	// 13 nothing
+			Falling,
+			Drowning,
+			FeignDeath,
+			Walk,
+			Slippery,
+			ForwardJump,
+			JumpStright, //20
+			Fall,
+			DuckWalk,
+			LadderUp,
+			Duck,
+			SwimStill, // or burn
+			LookAround,
+			RightOn,
+			Shy,
+			Wave,
+			Rude, //30
+			Yawn,
+			Unknown32,
+			Sit,
+			LeftTurn,
+			RightTurn,
+			Kneel,
+			SwimMove,
+			Unknown38,
+			Unknown39,
+			Unknown40, //40
+			Unknown41,
+			BuffCast,
+			HealCast,
+			DamageCast,
+			FlyingKick,
+			TigerClaw,
+			EagleStrike,
+			Agree,
+			Amaze,
+			Plead, //50
+			Clap,
+			Bleed,
+			Blush,
+			Chuckle,
+			Cough,
+			Cringe,
+			HeadSideways,
+			Dance,
+			Veto,
+			Glare, // 60
+			Peer,
+			Knelt,
+			LaughHard,
+			Point,
+			Shrug,
+			Handraise,
+			Salute,
+			Shiver,
+			FootTap,
+			WaistBow,
+			Unknown71,
+			LookAroundIdle,
+			Unknown73,
+			Mounted,
+			Unknown75,
+			Unknown76,
+			FiddleWeapon,
+			MountedFall
+		};
+
 	}
 	namespace EqStructures
 	{

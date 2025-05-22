@@ -2864,7 +2864,7 @@ namespace Zeal
 		}
 
 		// Returns the skill associated with the weapon. Defaults to hand to hand.
-		static Zeal::EqEnums::SkillType get_weapon_skill(const Zeal::EqStructures::EQITEMINFO* weapon)
+		Zeal::EqEnums::SkillType get_weapon_skill(const Zeal::EqStructures::EQITEMINFO* weapon)
 		{
 			if (weapon && weapon->Type == 0) {
 				switch (weapon->Common.Skill)

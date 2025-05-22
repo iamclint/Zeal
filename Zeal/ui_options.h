@@ -32,6 +32,7 @@ public:
 		[this](const std::string&) { PlayInviteSound(); } };
 	ZealSetting<std::string> setting_tell_sound = { "", "Zeal", "TellSound", false,
 		[this](const std::string&) { PlayTellSound(); } };
+	ZealSetting<bool> setting_slash_not_poke = { false, "Zeal", "SlashNotPoke", false };
 
 private:
 	void InitUI();
