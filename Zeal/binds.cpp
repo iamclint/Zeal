@@ -375,6 +375,14 @@ void Binds::add_binds()
 		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
 			ZealService::get_instance()->tells->CloseAllWindows();
 		});
+	add_bind(246, "Loot target", "LootTarget", key_category::Commands, [](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			reinterpret_cast<void(*)(void)>(0x004fb5ae)();  // do_loot().
+		});
+	add_bind(247, "Pet Health", "PetHealth", key_category::Commands, [this](int key_down) {
+		if (key_down && !Zeal::EqGame::EqGameInternal::UI_ChatInputCheck())
+			Zeal::EqGame::pet_command(Zeal::EqEnums::PetCommand::Health, 0);
+		});
 	add_bind(255, "Auto Inventory", "AutoInventory", key_category::Commands | key_category::Macros, [](int key_down)
 	{
 		if (key_down)
