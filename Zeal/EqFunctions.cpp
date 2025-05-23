@@ -2342,6 +2342,7 @@ namespace Zeal
 		{
 			// Holds value of /showname command.
 			//  1 = first names, 2 = first/last names, 3 = first/last/guild names, 4 = everything
+			//  5 = title/first names 6. title/first/last names 7. first/guild names
 			return *reinterpret_cast<int32_t*>(0x007d01e4);
 		}
 		int get_show_pc_names()
