@@ -8,7 +8,7 @@
 // - Options menu toggling of options
 // - Keybind toggling of options
 // - Various states: AFK, LFG, role, anon
-// - /showname command 0, 1, 2, 3 4
+// - /showname command 0, 1, 2, 3, 4, 5, 6, 7
 // - Options mixed with guilds, raids, and pets
 // - Tab cycle targeting updates of text and tint
 
@@ -31,7 +31,7 @@ static int __fastcall SetNameSpriteState(void* this_display, void* unused_edx, Z
 {
 	if (ZealService::get_instance()->nameplate->handle_SetNameSpriteState(this_display, entity, show))
 		return 0;  // The callers of SetNameSpriteState do not check the result so just return 0.
-	
+
 	return ZealService::get_instance()->hooks->hook_map["SetNameSpriteState"]->original(SetNameSpriteState)(this_display, unused_edx, entity, show);
 }
 
@@ -46,6 +46,35 @@ static int __fastcall SetNameSpriteTint_UpdateState(void* this_display, void* no
 		return 1;  // SetNameSpriteTint returns 1 if a tint was applied.
 	}
 	return SetNameSpriteTint(this_display, not_used, entity);
+}
+
+bool NamePlate::handle_shownames_command(const std::vector<std::string>& args)
+{
+	// No arguments - show our custom help message and suppress original
+	if (args.size() < 2) {
+		Zeal::EqGame::print_chat("Format: /shownames <off/1/2/3/4/5/6/7>");
+		return true;  // Suppress the original command
+	}
+
+	// Check if it's one of our extended cases
+	int value;
+	if (Zeal::String::tryParse(args[1], &value)) {
+		if (value == 5) {
+			Zeal::EqGame::print_chat("Title and first names.");
+			return false;  // Let original command run to set the value
+		}
+		else if (value == 6) {
+			Zeal::EqGame::print_chat("Title, first, and last names.");
+			return false;  // Let original command run to set the value
+		}
+		else if (value == 7) {
+			Zeal::EqGame::print_chat("First and guild names.");
+			return false;  // Let original command run to set the value
+		}
+	}
+
+	// For all other cases (off/1/2/3/4), let the original command handle it
+	return false;
 }
 
 NamePlate::NamePlate(ZealService* zeal)
@@ -69,6 +98,11 @@ NamePlate::NamePlate(ZealService* zeal)
 		[this](std::vector<std::string>& args) {
 			parse_args(args);
 			return true;
+		});
+
+	zeal->commands_hook->Add("/shownames", { "/show" }, "Show names command with extended support.",
+		[this](std::vector<std::string>& args) {
+			return handle_shownames_command(args); //Return the result to control suppression, Let the original command run too
 		});
 
 	zeal->callbacks->AddGeneric([this]() { clean_ui(); }, callback_type::InitUI);  // Just release all resources.
@@ -111,6 +145,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 		{"staminabars", &setting_stamina_bars },
 		{"zealfont", &setting_zeal_fonts },
 		{"dropshadow", &setting_drop_shadow },
+		{"extendedshownames", &setting_extended_shownames },
 	};
 
 	if (args.size() == 2 && args[1] == "dump") {
@@ -151,6 +186,7 @@ void NamePlate::parse_args(const std::vector<std::string>& args)
 	Zeal::EqGame::print_chat("tint:  colors, concolors, targetcolor, targetblink, attackonly, charselect");
 	Zeal::EqGame::print_chat("text:  hideself, x, hideraidpets, showpetownername, targetmarker, targethealth, inlineguild");
 	Zeal::EqGame::print_chat("font:  zealfont, dropshadow, healthbars, manabars, staminabars");
+	Zeal::EqGame::print_chat("misc:  extendedshownames");
 	Zeal::EqGame::print_chat("shadows: /nameplate shadowfactor <float> (0.005 to 0.1 range)");
 }
 
@@ -222,7 +258,7 @@ static bool is_hp_updated(const Zeal::EqStructures::Entity* entity)
 // Returns -1 if mana is not available to display.
 static int get_mana_percent(const Zeal::EqStructures::Entity* entity)
 {
-	if (!entity || entity->Type != Zeal::EqEnums::Player ||	!entity->CharInfo)
+	if (!entity || entity->Type != Zeal::EqEnums::Player || !entity->CharInfo)
 		return -1;
 
 	if (entity == Zeal::EqGame::get_self()) {
@@ -299,7 +335,7 @@ void NamePlate::render_ui()
 			int hp_percent = entity->HpCurrent;	// NPC value is stored as a percent.
 			if (entity->Type == Zeal::EqEnums::EntityTypes::Player)
 				hp_percent = (entity->HpCurrent > 0 && entity->HpMax > 0) ?
-					(entity->HpCurrent * 100) / entity->HpMax : 0;
+				(entity->HpCurrent * 100) / entity->HpMax : 0;
 			sprite_font->set_hp_percent(hp_percent);
 		}
 		int mana_percent = setting_mana_bars.get() ? get_mana_percent(entity) : -1;
@@ -594,7 +630,7 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 	const bool is_self = (&entity == Zeal::EqGame::get_self());
 	const bool is_target = (&entity == Zeal::EqGame::get_target());
 	if (!is_target && ((is_self && setting_hide_self.get())
-		 || (setting_hide_raid_pets.get() && Zeal::EqGame::is_raid_pet(entity))))
+		|| (setting_hide_raid_pets.get() && Zeal::EqGame::is_raid_pet(entity))))
 		return std::string();
 
 	if (is_self && setting_x.get())
@@ -602,6 +638,19 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 
 	if (entity.Race >= 0x8cd)  // Some sort of magic higher level races w/out name trimming.
 		return std::string(entity.Name);
+
+	// Helper functions for new showname levels
+	auto should_show_title = [](uint32_t show_name) -> bool {
+		return (show_name == 4) || (show_name == 5) || (show_name == 6);
+		};
+
+	auto should_show_last_name = [](uint32_t show_name) -> bool {
+		return (show_name == 2) || (show_name == 3) || (show_name == 4) || (show_name == 6);
+		};
+
+	auto should_show_guild = [](uint32_t show_name) -> bool {
+		return (show_name == 3) || (show_name == 4) || (show_name == 7);
+		};
 
 	std::string text;
 	if (is_target && setting_target_marker.get())
@@ -627,7 +676,7 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 		Zeal::EqGame::get_self()->ZoneId == 0x97)
 		text += "Trader ";  // String id 0x157f.
 
-	else if (entity.AlternateAdvancementRank > 0 && entity.Gender != 2 && show_name > 3) {
+	else if (entity.AlternateAdvancementRank > 0 && entity.Gender != 2 && should_show_title(show_name)) {
 		text += Zeal::EqGame::get_title_desc(entity.Class, entity.AlternateAdvancementRank, entity.Gender);
 		text += " ";
 	}
@@ -639,13 +688,13 @@ std::string NamePlate::generate_nameplate_text(const Zeal::EqStructures::Entity&
 	if (entity.IsHidden == 0x01)
 		text += ")";
 
-	if (show_name > 1 && entity.LastName[0]) {
+	if (should_show_last_name(show_name) && entity.LastName[0]) {
 		text += " ";
 		text += Zeal::EqGame::trim_name(entity.LastName);
 	}
 
 	const bool is_anonymous = (entity.AnonymousState == 1) ? true : false;
-	const bool show_guild = !is_anonymous && show_name > 2 && entity.GuildId != -1;
+	const bool show_guild = !is_anonymous && should_show_guild(show_name) && entity.GuildId != -1;
 	const bool show_guild_newline = Zeal::EqGame::is_new_ui() && !setting_inline_guild.get();
 	if (show_guild && !show_guild_newline)
 		text += std::format(" <{}>", Zeal::EqGame::get_player_guild_name(entity.GuildId));
@@ -684,7 +733,7 @@ bool NamePlate::handle_SetNameSpriteState(void* this_display, Zeal::EqStructures
 	const char* string_sprite_text = text.c_str();
 	if (setting_zeal_fonts.get() && Zeal::EqGame::get_gamestate() != GAMESTATE_CHARSELECT) {
 		if (!text.empty())
-			nameplate_info_map[entity] = { .text = text, .color = D3DCOLOR_XRGB(255,255,255)};
+			nameplate_info_map[entity] = { .text = text, .color = D3DCOLOR_XRGB(255,255,255) };
 		else {
 			auto it = nameplate_info_map.find(entity);
 			if (it != nameplate_info_map.end())
