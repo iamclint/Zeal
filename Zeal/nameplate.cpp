@@ -335,7 +335,7 @@ void NamePlate::render_ui()
 			int hp_percent = entity->HpCurrent;	// NPC value is stored as a percent.
 			if (entity->Type == Zeal::EqEnums::EntityTypes::Player)
 				hp_percent = (entity->HpCurrent > 0 && entity->HpMax > 0) ?
-				(entity->HpCurrent * 100) / entity->HpMax : 0;
+					(entity->HpCurrent * 100) / entity->HpMax : 0;
 			sprite_font->set_hp_percent(hp_percent);
 		}
 		int mana_percent = setting_mana_bars.get() ? get_mana_percent(entity) : -1;
