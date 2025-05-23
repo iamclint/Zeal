@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "EqStructures.h"
 #include "ZealSettings.h"
-#
+
 #include "bitmap_font.h"
 
 class NamePlate
@@ -18,7 +18,7 @@ public:
 		AFK = 0,
 		LFG = 1,
 		LD = 2,
-		MyGuild= 3,
+		MyGuild = 3,
 		Raid = 4,
 		Group = 5,
 		PVP = 6,
@@ -51,9 +51,26 @@ public:
 	ZealSetting<bool> setting_target_blink = { true, "Zeal", "NameplateTargetBlink", false };
 	ZealSetting<bool> setting_attack_only = { false, "Zeal", "NameplateAttackOnly", false };
 	ZealSetting<bool> setting_inline_guild = { false, "Zeal", "NameplateInlineGuild", false };
-	
+
 	ZealSetting<bool> setting_extended_nameplate = { true, "Zeal", "NameplateExtended", false,
 		[this](bool& val) { mem::write<BYTE>(0x4B0B3D, val ? 0 : 1); }, true };
+
+	
+	// Extended shownames (allows /shownames 5-7)
+	ZealSetting<bool> setting_extended_shownames = { true, "Zeal", "NameplateExtendedShownames", false,
+		[this](bool& val) {
+			if (val) {
+				// Verify we have the expected byte before patching
+				BYTE current_val = 0;
+				mem::get(0x004ff8ff, 1, &current_val); //current_val is 0x05, will change to 0x08 to allow args 5-7 
+				if (current_val == 0x05) {
+					mem::write<BYTE>(0x004ff8ff, 0x08);  // Change CMP ESI,0x5 to CMP ESI,0x8
+				}
+			}
+ else {
+  mem::write<BYTE>(0x004ff8ff, 0x05);  // Restore original value
+}
+}, true };
 
 	// Advanced fonts
 	ZealSetting<bool> setting_health_bars = { false, "Zeal", "NameplateHealthBars", false };
@@ -95,6 +112,7 @@ private:
 	bool is_nameplate_hidden_by_race(const Zeal::EqStructures::Entity& entity) const;
 	bool is_group_member(const Zeal::EqStructures::Entity& entity) const;
 	bool is_raid_member(const Zeal::EqStructures::Entity& entity) const;
+	bool handle_shownames_command(const std::vector<std::string>& args);
 
 	void clean_ui();
 	void render_ui();
