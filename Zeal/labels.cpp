@@ -20,6 +20,16 @@ bool GetLabelFromEq(int EqType, Zeal::EqUI::CXSTR* str, bool* override_color, UL
 		return ZealService::get_instance()->hooks->hook_map["GetLabel"]->original(GetLabelFromEq)(EqType, str, override_color, color);
 	switch (EqType)
 	{
+	case 29:
+		if (str && (!Zeal::EqGame::get_target() || Zeal::EqGame::get_target()->Type > 1))
+		{
+			str->Set(""); // Clear the "0" when there is no target or a corpse.
+			if (override_color)
+				*override_color = false;
+			*reinterpret_cast<int*>(0x00630984) = 0;  // Value is written to a global.
+			return true;
+		}
+		break;
 	case 80:
 	{
 		if (!zeal->experience && Zeal::EqGame::get_char_info())

@@ -135,7 +135,7 @@ namespace Zeal
 		// Checks if the item can currently be equipped in this inventory slot.
 		// This also prevents equipping an offhand while holding a 2Hander. Or equipping a mainhand with an instrument, etc.
 		// Use [1..21] for slot number.
-		bool can_item_equip_in_slot(Zeal::EqStructures::EQCHARINFO* c, Zeal::EqStructures::EQITEMINFO* item, int slot);
+		bool can_item_equip_in_slot(Zeal::EqStructures::EQCHARINFO* c, const Zeal::EqStructures::EQITEMINFO* item, int slot);
 		bool can_equip_item(Zeal::EqStructures::EQITEMINFO* item);
 		void print_debug(const char* format, ...);
 		UINT get_eq_time();
@@ -272,6 +272,7 @@ namespace Zeal
 		int get_mitigation(bool include_cap = false);
 		int get_mitigation_softcap();
 		int get_display_AC();
+		Zeal::EqEnums::SkillType get_weapon_skill(const Zeal::EqStructures::EQITEMINFO* weapon);
 		int get_hand_to_hand_delay();
 		void print_melee_attack_stats(bool primary, const Zeal::EqStructures::EQITEMINFO* weapon = nullptr);
 	}

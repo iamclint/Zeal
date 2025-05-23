@@ -17,9 +17,18 @@ namespace Zeal
             RequestTrade = 0x40D1,
             WearChange = 0x4092,
             Illusion = 0x4091,
+            Animation = 0x40a1,
             Assist = 0x4200,
             Stamina = 0x4157,
             ItemLinkResponse = 0x4264
+        };
+        struct Animation_Struct {
+            /*00*/	UINT16 spawnid;
+            /*02*/	UINT16 target;
+            /*04*/	UINT8  action;
+            /*05*/  UINT8  value;
+            /*06*/	UINT8  unknown06[4];  // Set as UINT8 vs UINT32 to ignore alignment.
+            /*10*/	UINT16 unknown10; // 80 3F
         };
         struct TradeRequest_Struct {
             /*000*/	UINT16 to_id;

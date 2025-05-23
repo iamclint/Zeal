@@ -285,8 +285,8 @@ namespace Zeal
 			FunctionType2 can_use_item = reinterpret_cast<FunctionType2>(0x4BB8E8);
 			return can_use_item(c, item);
 		}
-		bool can_item_equip_in_slot(Zeal::EqStructures::EQCHARINFO* c, Zeal::EqStructures::EQITEMINFO* item, int slot) {
-			using FunctionType = bool(__cdecl*)(Zeal::EqStructures::EQCHARINFO* char_info, UINT equipable_slots, UINT slot, Zeal::EqStructures::EQITEMINFO* iItem);
+		bool can_item_equip_in_slot(Zeal::EqStructures::EQCHARINFO* c, const Zeal::EqStructures::EQITEMINFO* item, int slot) {
+			using FunctionType = bool(__cdecl*)(Zeal::EqStructures::EQCHARINFO* char_info, UINT equipable_slots, UINT slot, const Zeal::EqStructures::EQITEMINFO* iItem);
 			FunctionType check_loc = reinterpret_cast<FunctionType>(0x4F0DB4);
 			return check_loc(c, item->EquipableSlots, slot, item);
 		}
@@ -2864,7 +2864,7 @@ namespace Zeal
 		}
 
 		// Returns the skill associated with the weapon. Defaults to hand to hand.
-		static Zeal::EqEnums::SkillType get_weapon_skill(const Zeal::EqStructures::EQITEMINFO* weapon)
+		Zeal::EqEnums::SkillType get_weapon_skill(const Zeal::EqStructures::EQITEMINFO* weapon)
 		{
 			if (weapon && weapon->Type == 0) {
 				switch (weapon->Common.Skill)
@@ -3322,6 +3322,11 @@ namespace Zeal
 			Zeal::EqGame::print_chat("---- Melee %s: %s ----",
 				primary ? "Primary" : "Secondary",
 				weapon ? weapon->Name : "HandToHand");
+
+			if (weapon && !Zeal::EqGame::can_item_equip_in_slot(char_info, weapon, slot + 1)) {
+				Zeal::EqGame::print_chat("Can not use weapon in this slot.");
+				return;
+			}
 
 			// Now figure out damage
 			int base_damage_raw = get_base_damage(slot, weapon);
