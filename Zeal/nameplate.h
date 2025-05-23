@@ -67,10 +67,10 @@ public:
 					mem::write<BYTE>(0x004ff8ff, 0x08);  // Change CMP ESI,0x5 to CMP ESI,0x8
 				}
 			}
- else {
-  mem::write<BYTE>(0x004ff8ff, 0x05);  // Restore original value
-}
-}, true };
+ 			else {
+				mem::write<BYTE>(0x004ff8ff, 0x05);  // Restore original value
+			}
+		}, true };
 
 	// Advanced fonts
 	ZealSetting<bool> setting_health_bars = { false, "Zeal", "NameplateHealthBars", false };
