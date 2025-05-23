@@ -575,6 +575,7 @@ The Zeal Nameplate options tab is the primary interface, but the redundant comma
 * `/nameplate inlineguild` - Toggles guild name appearing inline or on a separate line
 * `/nameplate zealfont` - Toggles internal client or custom Zeal fonts
 * `/nameplate dropshadow` - Toggles drop shadowing on Zeal fonts
+* `/nameplate setting_extended_shownames` - Toggles availability of extended /Shownames 5, /Shownames 6, and /Shownames 7
 
 #### Changing the Color of Nameplates
 Zeal allows players to change the colors of the Nameplates of Players and NPCs in game.
