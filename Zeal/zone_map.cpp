@@ -1706,6 +1706,7 @@ int ZoneMap::get_zlevel_scale() const {
         case 76:    // hateplane
         case 1076:  // hate_instanced
         case 121:   // crystal
+        case 126:   // mischiefplane
         case 89:    // sebilis
         case 1089:  // sebilis_instanced
             return 20;
