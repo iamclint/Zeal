@@ -50,6 +50,9 @@ static int __fastcall SetNameSpriteTint_UpdateState(void* this_display, void* no
 
 bool NamePlate::handle_shownames_command(const std::vector<std::string>& args)
 {
+	if (!setting_extended_nameplate.get())
+		return false;
+	
 	// No arguments - show our custom help message and suppress original
 	if (args.size() < 2) {
 		Zeal::EqGame::print_chat("Format: /shownames <off/1/2/3/4/5/6/7>");
@@ -100,7 +103,7 @@ NamePlate::NamePlate(ZealService* zeal)
 			return true;
 		});
 
-	zeal->commands_hook->Add("/shownames", { "/show" }, "Show names command with extended support.",
+	zeal->commands_hook->Add("/shownames", { "/show", "/showname" }, "Show names command with extended support.",
 		[this](std::vector<std::string>& args) {
 			return handle_shownames_command(args); //Return the result to control suppression, Let the original command run too
 		});
