@@ -61,11 +61,11 @@ public:
 		[this](bool& val) {
 			if (val) {
 				// Verify we have the expected byte before patching
+				BYTE target_val = val ? 0x08 : 0x05;
 				BYTE current_val = 0;
-				mem::get(0x004ff8ff, 1, &current_val); //current_val is 0x05, will change to 0x08 to allow args 5-7 
-				if (current_val == 0x05) {
-					mem::write<BYTE>(0x004ff8ff, 0x08);  // Change CMP ESI,0x5 to CMP ESI,0x8
-				}
+				mem::get(0x004ff8ff, 1, &current_val);
+				if (current_val != target_val)
+					mem::write<BYTE>(0x004ff8ff, target_val);
 			}
  			else {
 				mem::write<BYTE>(0x004ff8ff, 0x05);  // Restore original value
