@@ -455,12 +455,23 @@ chatfilter::chatfilter(ZealService* zeal)
             isDamage = true; 
             damageData = { source, target, type, spell_id, damage }; 
         }
-        if (spell_id > 0 && damage > 0 && source != Zeal::EqGame::get_self() && target != Zeal::EqGame::get_self())
+        if (spell_id > 0 && source != Zeal::EqGame::get_self() && target != Zeal::EqGame::get_self())
         {
-            isDamage = true;
-            damageData = { source, target, type, spell_id, damage };
-            if (source->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500 || target->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500)
-                Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::strip_name(source->Name), Zeal::EqGame::strip_name(target->Name), damage);
+            if (damage > 0)
+            {
+                isDamage = true;
+                damageData = { source, target, type, spell_id, damage };
+                if (source->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500 || target->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500)
+                    Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::strip_name(source->Name), Zeal::EqGame::strip_name(target->Name), damage);
+            }
+            else if (damage < 0)
+            {
+                if (type >= 244 && type <= 249 && target->Type == Zeal::EqEnums::EntityTypes::NPC && target->PetOwnerSpawnId == 0) // Show DS Damage to NPCs (non-pets)
+                {
+                    if (source->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500 || target->Position.Dist2D(Zeal::EqGame::get_self()->Position) < 500)
+                        Zeal::EqGame::print_chat(USERCOLOR_NON_MELEE, "%s hit %s for %i points of non-melee damage.", Zeal::EqGame::strip_name(source->Name), Zeal::EqGame::strip_name(target->Name), -damage);
+                }
+            }
         }
      });
     Extended_ChannelMaps.push_back(CustomFilter("Random", 0x10000, [this](short& color, std::string data) { return color == USERCOLOR_RANDOM; }));
