@@ -17,7 +17,7 @@ from the repo using github actions, providing full transparency on the contents.
   link all, loot all, raid survey, singleclick, show loot lockouts, etc)
 - Integrated map (see In-game Map section below)
 - Additional ui support (new gauges, bag control & locking, looting, spellsets, targetrings,
-  nameplates, right click to equip, skill window sorting, etc)
+  nameplates, right click to equip, skill window sorting, ctrl for context menus/looting, etc)
 - Autostand on move/cast, autosit on camp with export inventory/spellbook option
 - Enhanced chat (% replacements, additional filters and colors, tell windows,
   tab completion, copy and paste)
@@ -29,11 +29,11 @@ from the repo using github actions, providing full transparency on the contents.
 ### Installation
 #### The easy way
 1. [Download](https://github.com/iamclint/Zeal/releases/latest) the latest official (non-beta) Zeal
-   - Scroll down past the list of changes to the `Assets` section and download the `zeal_v#.#.#_*.zip` file
-   - Ignore the `Source code` files
+   - Use the link at the top or scroll down past the list of changes to the `Assets` section and download the `zeal_v#.#.#_*.zip` file
+   - Ignore the `Source code` zip files
 2. Quit Everquest and extract the zip file contents into your EQ game root directory
-   - Key required files are the `zeal.asi` and the `uifiles/zeal` folder
    - If you have previously installed zeal, deleting the old `uifiles/zeal` is recommended before copying over
+   - For minimalists, the only required files are the `zeal.asi` and the `uifiles/zeal` folder
 3. Recommended: Install a UI skin modified with the extra Zeal UI functionality
    such as mana gauges, experience per hour, loot all / link buttons, etc.
    - If the UI is not updated, there will be some XML error complaints that can be ignored
@@ -383,6 +383,8 @@ ___
 - Pet Follow
 - Pet Back
 - Pet Sit
+- Pet Health
+- Do /loot (targeted corpse)
 - Slow turn left
 - Slow turn right
 - Auto Fire
@@ -848,8 +850,9 @@ Note that some features, such as level recognition, are not currently supported 
 
 The external map files must be placed in a `map_files` directory in the root everquest directory
 with zones named to match their short names (ie `map_files/commons.txt` contains the data for
-West Commonlands).  An optional, `_1.txt` file (ie `map_files/commons_1.txt`) will also be
-parsed if present, so Brewall map files with POIs can be directly dropped in.
+West Commonlands). If that short name file is present, it will also look for an optional `_1.txt`
+file (ie `map_files/commons_1.txt`) and parse it if present. Most Brewall map files with POIs can
+be directly dropped in (although any `_2.txt` or higher will be ignored).
 
 The external map support requires a format compatible with Brewall map data.
 ```

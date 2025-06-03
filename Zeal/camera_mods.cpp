@@ -190,8 +190,8 @@ void CameraMods::proc_mouse()
                     if (camera_view == Zeal::EqEnums::CameraView::ZealCam)
                     {
                         zeal_cam_yaw -= smoothMouseDeltaX;
-                        zeal_cam_yaw = fmodf(zeal_cam_yaw, 512.f); //eventually the player would stop turning but camera would without normalizing
-                        self->Heading = zeal_cam_yaw;
+                        zeal_cam_yaw = fmodf(zeal_cam_yaw + 512.f, 512.f); // Wrap within 0 to 512.
+                        self->Heading = zeal_cam_yaw;  // Should only set between 0 to 512.
                     }
                     else
                         self->Heading += -smoothMouseDeltaX;
