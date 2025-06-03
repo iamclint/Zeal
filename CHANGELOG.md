@@ -2,6 +2,114 @@
 
 Summarizes notable changes to Zeal
 
+## [0.6.8] - 2025/06/02
+
+### New Features:
+
+* New optional enhanced spell info (zeal general options tab)
+  - Uses spell info scraped from Icestorm's yaqds.cc site
+  - Replaces the Spell display window with a new text blob
+  - Appends new info text to spell scroll item display windows
+  - Appends item effects (procs, clickies, worn)
+  - Appends spell info for buffs (caster level is not shown)
+  - Added support for item focus effects (which will become visible
+    once the server enables them)
+
+* New optional enhanced /follow (options tab, command line args):
+  - Disables rapid toggling of run mode to reduce LD / crashes
+  - Skips slow turning to reduce follow failures
+  - Also supports an adjustable follow distance (command line only)
+  - Hat tip to Solar for providing the patches
+
+* Optional invite dialog now has accept / decline buttons and will
+  now auto-dismiss when the player has accepted or declined the invites
+
+* New option to require ctrl-key press to pop-up UI context menus:
+  - Added another zeal general option that enables the requirement
+    of holding down the ctrl key while right clicking on a ui
+    window in order to pop up the default window context menus
+    (to avoid inadvertent menu pop-ups)
+
+* Added new keybinds options for /pet health and /loot
+
+* Added /melody resume support
+  - The `/melody resume` command will resume the last active melody's
+    song list (gem index based) starting at the gem index of the
+    interrupted song.
+  - Supports macros like /stopsong, /cast 6, /melody resume
+
+* Added option (Slash not poke) to use 2hs animation for 2hb
+
+* Dropping or destroying cursor held items is now logged, including
+  listing the contents of bags
+
+* NPC (non-pet) damage from damage shields is now logged
+  - Shows up as "<source> hit <npc> for X points of non-melee damage."
+
+* Added support for /shownames options 5, 6, 7 in both the zeal font generator and the client text
+  - Requires extended shownames to be enabled
+  - Added override to /shownames to display the new options and print out the selected display options
+
+* Added /singleclick support for non-stackable items (like smithing
+  tools). Works the same as stackable items (shift, ctrl, target).
+
+* UI labels:
+  - Label 85 now reports the (total number - number of empty) slots
+  - Also made both label 83 (num empty) and label 85 default as
+    "greyer" white (like wt) and then turn yellow at 1 empty slot
+    and red when 0 empty slots
+
+* Floating combat damage (FCD):
+  - Added two new options checkboxes for filtering out FCD:
+    - Npcs: toggles filtering of NPC damage
+    - Hp updates: toggles filtering of the HP updates
+  - Also adjusted the pet filtering. The player's pet melee
+    damage is now treated like the player's melee damage
+    (filtering, colors). The show pets filter will filter out
+    all other pets (player or npcs).
+
+* Added filter to /mystats melee report to skip the slot if
+  the weapon isn't equippable in that slot
+
+* Modified the target hp percent label to be blank instead of
+    showing "0" when there is no target or targeting a corpse
+
+# Infrastructure / bug fixes:
+
+* Fix auto-z fade for mischiefplane (was defaulting to outdoor zone w/no auto-fade)
+  - Can override with /map level autoz <#>
+
+* Fixed the InputDialog (save spell sets, invites) so the position is properly saved 
+
+* Fixed the camera yaw modf calculation to wrap within 0 to 512, which
+  might fix the intermittent tracking garbage and you can not see your target
+
+* Changed the /protect file format's delimiter to a '^' from a ','
+    to avoid a collision with some item names that include a comma
+
+* Fixed the missing dynamic Zone Select button on the default
+  ui for character select if the zeal.ini does not have a value
+  already set for the zone index (no longer skips the Show() call)
+
+* Fixed client bugs that generate inaccurate attack delay timer values
+  - Primary weapons with ItemTypeMartial (0x2d) are not handled,
+    resulting in 0 attack delay and the melee/range buttons never
+    showing the actual lockout (like Primal Velium Fist Wraps)
+  - It uses the fixed 3500 ms skilldict value for hand to hand
+    delay and does not calculate the correct value for higher level
+    mnks and bsts or for the monk epic weapon
+  - These bugs also impacted the new UI attack recovery timer gauge
+
+* Fixed monk and bst hand2hand delay in recovery gauge
+  - Now uses the accurate /mystats delay calc plus the client bug fixes above
+
+* General code cleanup:
+  - Cleaned up constructors using ini (replaced with zeal settings).
+  - Created template and macros to do a memory check with default constructors.
+  - Added operator_overloads.h to add bitmasking for enum class style enums
+    so we don't have to worry about name collisions.
+
+
 ## [0.6.7] - 2025/04/26
 
 ### New features:
