@@ -309,7 +309,7 @@ void NamePlate::render_ui()
 	auto visible_entities = Zeal::EqGame::get_world_visible_actor_list(kMaxDist, false);
 	auto self = Zeal::EqGame::get_self();
 	if (self && *Zeal::EqGame::camera_view != Zeal::EqEnums::CameraView::FirstPerson &&
-		!Zeal::EqGame::EqGameInternal::is_invisible(self, self))
+		!Zeal::EqGame::EqGameInternal::is_invisible(Zeal::EqGame::Display, 0, self, self))
 		visible_entities.push_back(self);  // Add self nameplate.
 
 	std::vector<RenderInfo> render_list;

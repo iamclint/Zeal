@@ -1056,9 +1056,9 @@ namespace Zeal
 			int AddMenu(ContextMenu* context_menu) const {
 				return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, ContextMenu*)>(0x417ED4)(this, context_menu);
 			}
-			int PopupMenu(int index, CXPoint pt, EQWND* menu)
+			int PopupMenu(int index, CXPoint pt, ContextMenu* menu)
 			{
-				return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int, CXPoint, EQWND*)>(0x41822D)(this, index, pt, menu);
+				return reinterpret_cast<int(__thiscall*)(const CContextMenuManager*, int, CXPoint, ContextMenu*)>(0x41822D)(this, index, pt, menu);
 			}
 			int RemoveMenu(int menu_index, bool remove_children)
 			{

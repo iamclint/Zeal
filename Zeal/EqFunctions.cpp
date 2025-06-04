@@ -511,7 +511,7 @@ namespace Zeal
 		}
 		UINT get_eq_time()
 		{
-			return reinterpret_cast<UINT(__stdcall*)()>(0x4f35c7)();
+			return reinterpret_cast<UINT(__cdecl*)()>(0x4f35c7)();
 		}
 		int get_eq_main()
 		{

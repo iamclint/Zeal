@@ -5,6 +5,14 @@
 #include "SpellCategories.h"
 #include <algorithm>
 
+// Message IDs used in callbacks from context menus.
+static constexpr int kSpellsBaseMsgId = 0x10000;  // Used in single gem selection. 
+static constexpr int kSpellSetSaveMsgId = 0x21000;  // Trigger to start a save.
+static constexpr int kSpellSetBaseMsgId = 0x20000;  // Offset for selecting a set.
+static constexpr int kSpellSetDeleteBaseMsgId = 0x22000;  // Offset for deleting.
+static constexpr int kSpellSetHeaderMsgId = 0x30000;  // Header ID.
+
+// Helper function to verify the spellset name is valid.
 static bool is_valid_name(const std::string& name) {
     if (name.empty() || name.size() > 32)
     {
@@ -14,31 +22,30 @@ static bool is_valid_name(const std::string& name) {
     return true;
 }
 
+// Saves currently memorized spell gems to the spellset name in the ini file.
 void SpellSets::save(const std::string& name)
 {
     if (!is_valid_name(name))
         return;
 
-    set_ini();
+    initialize_ini_filename();
     Zeal::EqGame::print_chat("Saving spellset [%s]", name.c_str());
     for (size_t i = 0; i < EQ_NUM_SPELL_GEMS; i++)
-    {
-        ini->setValue(name, std::to_string(i), Zeal::EqGame::get_self()->CharInfo->MemorizedSpell[i]);
-    }
-    create_context_menus(true);
+        ini.setValue(name, std::to_string(i), Zeal::EqGame::get_char_info()->MemorizedSpell[i]);
+    create_spellsets_menus();  // Updates context menu.
 }
+
+// Removes (deletes) the spellset from the ini file.
 void SpellSets::remove(const std::string& name)
 {
-    set_ini();
+    initialize_ini_filename();
     Zeal::EqGame::print_chat("Removing spellset [%s]", name.c_str());
-    if (!ini->deleteSection(name))
+    if (!ini.deleteSection(name))
         Zeal::EqGame::print_chat("Error removing spellset [%s]", name.c_str());
-    create_context_menus(true);
+    create_spellsets_menus();  // Updates context menu
 }
-void SpellSets::remove_selected()
-{
-    remove(ui_selected_name);
-}
+
+// Loads a spellset from the ini file and initiates memorization.
 void SpellSets::load(const std::string& name)
 {
     bool interrupted = !mem_buffer.empty();
@@ -52,9 +59,8 @@ void SpellSets::load(const std::string& name)
     if (!spell_manager || !Zeal::EqGame::get_char_info())
         return;
 
-    set_ini();
-
-    if (!ini->exists(name, "0"))
+    initialize_ini_filename();
+    if (!ini.exists(name, "0"))
     {
         Zeal::EqGame::print_chat("The spellset [%s] does not exist", name.c_str());
         return;
@@ -63,7 +69,7 @@ void SpellSets::load(const std::string& name)
 
     for (int gem_index = EQ_NUM_SPELL_GEMS - 1; gem_index >= 0; gem_index--)
     {
-      short spell_id = ini->getValue<WORD>(name, std::to_string(gem_index));
+      short spell_id = ini.getValue<WORD>(name, std::to_string(gem_index));
       if (spell_id == -1) { // Empty slot when saved.
           continue;  // Leave it unchanged.
       }
@@ -75,7 +81,7 @@ void SpellSets::load(const std::string& name)
           break;
       }
 
-      short memmed_spell = Zeal::EqGame::get_self()->CharInfo->MemorizedSpell[gem_index];
+      short memmed_spell = Zeal::EqGame::get_char_info()->MemorizedSpell[gem_index];
       if (memmed_spell != spell_id)
       {
           if (memmed_spell != -1)
@@ -87,7 +93,7 @@ void SpellSets::load(const std::string& name)
 
           for (size_t book_index = 0; book_index < EQ_NUM_SPELL_BOOK_SPELLS; book_index++)
           {
-              if (Zeal::EqGame::get_self()->CharInfo->SpellBook[book_index] == spell_id)
+              if (Zeal::EqGame::get_char_info()->SpellBook[book_index] == spell_id)
               {
                   mem_buffer.push_back({ book_index,gem_index });
                   break;
@@ -103,13 +109,8 @@ void SpellSets::load(const std::string& name)
     }
 }
 
-
-void SpellSets::finished_scribing(int a1, int a2)
-{
-    create_context_menus(true);
-}
-
-void SpellSets::finished_memorizing(int a1, int a2)
+// Called after the client finishes the spell memorization process.
+void SpellSets::handle_finished_memorizing(int a1, int a2)
 {
     if (!mem_buffer.size()) 
         return;
@@ -135,32 +136,17 @@ void SpellSets::finished_memorizing(int a1, int a2)
     }
 }
 
-void __fastcall FinishMemorizing(int t, int u, int a1, int a2)
+// Called after scribing a new spell into spellbook.
+void SpellSets::handle_finished_scribing(int a1, int a2)
 {
-    ZealService* zeal = ZealService::get_instance();
-    zeal->spell_sets->finished_memorizing(a1, a2);
-    zeal->hooks->hook_map["FinishMemorizing"]->original(FinishMemorizing)(t, u, a1, a2);
-}
-void __fastcall FinishScribing(int t, int u, int a1, int a2)
-{
-    ZealService* zeal = ZealService::get_instance();
-    zeal->hooks->hook_map["FinishScribing"]->original(FinishScribing)(t, u, a1, a2);
-    zeal->spell_sets->finished_scribing(a1, a2);
+    create_spells_menus();  // Update context menu with new spell.
 }
 
-void SpellSets::callback_main()
-{
-    if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->SpellBook && !Zeal::EqGame::Windows->SpellBook->IsVisible && mem_buffer.size())
-        mem_buffer.clear();
-
-    create_context_menus();
-}
-
+// Helper lookup function for spell information.
 static Zeal::EqStructures::SPELL* GetSpell(int id)
 {
-    Zeal::EqStructures::EQCHARINFO* self_char = Zeal::EqGame::get_self()->CharInfo;
-    id = self_char->SpellBook[id];
-    if (id == 0 || id >= 4000)
+    id = Zeal::EqGame::get_char_info()->SpellBook[id];
+    if (id == 0 || id >= EQ_NUM_SPELLS)
         return 0;
     return Zeal::EqGame::get_spell_mgr()->Spells[id];
 }
@@ -168,14 +154,14 @@ static Zeal::EqStructures::SPELL* GetSpell(int id)
 // Memorization fails (and locks up spellbook state) if the caster level is too low.
 bool SpellSets::check_caster_level(int spell_id) const {
     const auto* spell_manager = Zeal::EqGame::get_spell_mgr();
-    const auto* self_char = Zeal::EqGame::get_char_info();
-    if (!spell_manager || !self_char) {
+    const auto* char_info = Zeal::EqGame::get_char_info();
+    if (!spell_manager || !char_info) {
         Zeal::EqGame::print_chat(USERCOLOR_SHOUT, "SpellSet game state error. Aborting.");
         return false;
     }
 
-    const int spell_level = spell_manager->Spells[spell_id]->ClassLevel[self_char->Class];
-    if (self_char->Level < spell_level)
+    const int spell_level = spell_manager->Spells[spell_id]->ClassLevel[char_info->Class];
+    if (char_info->Level < spell_level)
     {
         Zeal::EqGame::print_chat(USERCOLOR_SHOUT,
             "Stop dying. You will have to achieve level %i to memorize the spell %s",
@@ -186,19 +172,20 @@ bool SpellSets::check_caster_level(int spell_id) const {
     return true;
 }
 
-void SpellSets::handle_menu_mem(int book_index, int gem_index)
+// Handles right click memorization of a single spell gem.
+void SpellSets::memorize_spell(int book_index, int gem_index)
 {
     bool interrupted = !mem_buffer.empty();
     mem_buffer.clear();  // Clear any in-progress reloads.
     Zeal::EqGame::Spells::StopSpellBookAction();
 
     const auto* spell_manager = Zeal::EqGame::get_spell_mgr();
-    const auto* self_char = Zeal::EqGame::get_char_info();
-    if (!spell_manager || !self_char)
+    const auto* char_info = Zeal::EqGame::get_char_info();
+    if (!spell_manager || !char_info)
         return;
     
     // Bail out early if too low level (skips memorization time).
-    const int spell_id = self_char->SpellBook[book_index];
+    const int spell_id = char_info->SpellBook[book_index];
     if (!check_caster_level(spell_id))
         return;
 
@@ -208,26 +195,13 @@ void SpellSets::handle_menu_mem(int book_index, int gem_index)
     Zeal::EqGame::Spells::Memorize(book_index, gem_index);
 }
 
-static int __stdcall SpellSetMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
+// Handles context menu callback for single gem spell selection.
+void SpellSets::handle_spell_gem_menu_notification(int msg_data)
 {
-    int msg_data = (int)data;
-    if (msg_data == 0x21000)
-        ZealService::get_instance()->ui->inputDialog->show("Spell Set", "Save spell set as:", "Save", "Cancel", [](std::string msg) { ZealService::get_instance()->spell_sets->save(msg); }, nullptr, true);
-    else if (msg_data>=0x22000)
-        ZealService::get_instance()->ui->inputDialog->show("Spell Set", "Delete " + ZealService::get_instance()->spell_sets->spellset_map[msg_data - 0x02000] + "?", "Yes", "No", [msg_data](std::string msg) { ZealService::get_instance()->spell_sets->remove(ZealService::get_instance()->spell_sets->spellset_map[msg_data - 0x02000]); }, nullptr, false);
-    else
-        ZealService::get_instance()->spell_sets->load(ZealService::get_instance()->spell_sets->spellset_map[msg_data]);
-    return 1;
-}
-static int __stdcall SpellSetDeleteMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
-{
-    ZealService::get_instance()->spell_sets->remove_selected();
-    return 1;
-}
-static int __stdcall SpellsMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
-{
+    if (spells_menus.empty())
+        return;
+
     ZealService* zeal = ZealService::get_instance();
-    Zeal::EqStructures::EQCHARINFO* self_char = Zeal::EqGame::get_self()->CharInfo;
     int index = -1;
     for (int i = 0; i < 8; i++)
     {
@@ -237,269 +211,369 @@ static int __stdcall SpellsMenuNotification(Zeal::EqUI::EQWND* pWnd, unsigned in
             break;
         }
     }
-    if (index != -1)
+    if (index == -1) {
+        Zeal::EqGame::print_chat("Could not find gem index to update");
+        return;
+    }
+
+    Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+    int spell_id = msg_data - kSpellsBaseMsgId;
+    int book_index = -1;
+    for (int i = 0; i < EQ_NUM_SPELL_BOOK_SPELLS; i++)
     {
-        Zeal::EqStructures::EQCHARINFO* self_char = Zeal::EqGame::get_self()->CharInfo;
-        int spell_id = (DWORD)data - 0x10000;
-        int book_index = -1;
-        for (int i = 0; i < EQ_NUM_SPELL_BOOK_SPELLS; i++)
+        if (char_info->SpellBook[i] == spell_id)
         {
-            if (self_char->SpellBook[i]==spell_id)
-            {
-                book_index = i;
-                break;
-            }
-        }
-        if (book_index != -1)
-        {
-            ZealService::get_instance()->spell_sets->handle_menu_mem(book_index, index);
-        }
-        else
-        {
-            Zeal::EqGame::print_chat("Could not find spell [%i] in your spellbook.", spell_id);
+            book_index = i;
+            break;
         }
     }
+    if (book_index != -1)
+        memorize_spell(book_index, index);
     else
-    {
-        Zeal::EqGame::print_chat("Incorrect gem index [%i].", index);
-    }
-    return 1;
+        Zeal::EqGame::print_chat("Could not find spell [%i] in your spellbook.", spell_id);
 }
 
-
-static int __fastcall SpellGemWnd_HandleRButtonUp(Zeal::EqUI::SpellGemWnd* gem, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
+// Handles context menu callback for spell set selections.
+void SpellSets::handle_spellset_menu_notification(int msg_data)
 {
-    ZealService* zeal = ZealService::get_instance();
-    if (gem->spellicon == -1)
-    {
-        zeal->spell_sets->last_gem_clicked = gem;
-        Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(zeal->spell_sets->SpellMenuIndex, pt, (Zeal::EqUI::EQWND*)zeal->spell_sets->menu);
+    if (spellsets_menus.empty())
+        return;
+
+    // Handle spell set Save trigger.
+    if (msg_data == kSpellSetSaveMsgId) {
+        ZealService::get_instance()->ui->inputDialog->
+            show("Spell Set", "Save spell set as:", "Save", "Cancel",
+                [this](std::string msg) {save(msg); }, nullptr, true);
+        return;
     }
-    return zeal->hooks->hook_map["SpellGemRbutton"]->original(SpellGemWnd_HandleRButtonUp)(gem, unused, pt, flag);
+
+    // Handle spell set Delete triggers.
+    if (msg_data >= kSpellSetDeleteBaseMsgId) {
+        static constexpr int delete_offset = kSpellSetDeleteBaseMsgId - kSpellSetBaseMsgId;
+        ZealService::get_instance()->ui->inputDialog->
+            show("Spell Set", "Delete " + spellsets_map[msg_data - delete_offset] + "?", "Yes", "No",
+                [msg_data, this](std::string msg) {remove(spellsets_map[msg_data - delete_offset]); },
+                nullptr, false);
+        return;
+    }
+
+    // Handle spell set load triggers.
+    ZealService::get_instance()->spell_sets->load(spellsets_map[msg_data]);
 }
 
-static int __fastcall SpellGemWnd_Book_HandleRButtonUp(Zeal::EqUI::EQWND* btn, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
+// Triggers the spell selection context menu after a right click up on a spell gem.
+void SpellSets::handle_spell_gem_rbutton_up(Zeal::EqUI::SpellGemWnd* gem, Zeal::EqUI::CXPoint pt)
 {
-    ZealService* zeal = ZealService::get_instance();
+    if (spells_menus.empty() || !gem || gem->spellicon != -1)
+        return;
 
-    if (!Zeal::EqGame::Windows || !Zeal::EqGame::Windows->SpellGems)
-        return zeal->hooks->hook_map["SpellGemWnd_Book_HandleRButtonUp"]->original(SpellGemWnd_Book_HandleRButtonUp)(btn, unused, pt, flag);
-    if (btn == Zeal::EqGame::Windows->SpellGems->SpellBook)
-        Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(zeal->spell_sets->SpellSetMenuIndex, pt, (Zeal::EqUI::EQWND*)zeal->spell_sets->spellset_menu);
-    return zeal->hooks->hook_map["SpellGemWnd_Book_HandleRButtonUp"]->original(SpellGemWnd_Book_HandleRButtonUp)(btn, unused, pt, flag);
+    last_gem_clicked = gem;  // Saved for use in handle_spell_gem_menu_notification().
+    const auto& pair = spells_menus.back();  // Root menu stored last.
+    Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(pair.index, pt, pair.menu);
 }
 
+// Triggers the spell sets context menu after a right click up on the castwnd's book button.
+void SpellSets::handle_spell_book_rbutton_up(Zeal::EqUI::CXPoint pt) const
+{
+    if (spellsets_menus.empty())
+        return;
+    ZealService* zeal = ZealService::get_instance();
+    const auto& pair = spellsets_menus.back();
+    Zeal::EqGame::Windows->ContextMenuManager->PopupMenu(pair.index, pt, pair.menu);
+}
 
-bool compareBySpellLevel(const Zeal::EqStructures::SPELL* a, const Zeal::EqStructures::SPELL* b) {
-    Zeal::EqStructures::EQCHARINFO* self_char = Zeal::EqGame::get_self()->CharInfo;
-    int aLevel = a->ClassLevel[self_char->Class];
-    int bLevel = b->ClassLevel[self_char->Class];
+// Releases context menu resources.
+void SpellSets::destroy_menus(std::vector<SpellSets::MenuPair>& menus)
+{
+    if (menus.empty() || !Zeal::EqGame::Windows->ContextMenuManager)
+        return;
+
+    for (const auto& pair : menus) {
+        // Only release if there's a match (should always match).
+        if (pair.menu == Zeal::EqGame::Windows->ContextMenuManager->Menus[pair.index])             {
+            // The manager should call the custom destructor and release the resources.
+            Zeal::EqGame::Windows->ContextMenuManager->RemoveMenu(pair.index, true);
+        }
+    }
+
+    menus.clear();
+}
+
+// Initializes the character dependent filename useed to store spell sets.
+void SpellSets::initialize_ini_filename()
+{
+    std::stringstream ss;
+    ss << ".\\" << Zeal::EqGame::get_char_info()->Name << "_spellsets.ini";
+    ini.set(ss.str());
+}
+
+// Helper function that allocates and initializes new context menus.
+static Zeal::EqUI::ContextMenu* CreateContextMenu(void* notificationFunc = nullptr) {
+    auto new_menu = Zeal::EqUI::ContextMenu::Create(0, 0, { 100, 100, 100, 100 });
+    if (!new_menu)
+        throw std::bad_alloc();
+
+    new_menu->HasChildren = true;  // Note: Evaluate if these are still necessary.
+    new_menu->HasSiblings = true;
+    new_menu->Unknown0x015 = 0;
+    new_menu->Unknown0x016 = 0;
+    new_menu->Unknown0x017 = 0;
+    new_menu->fnTable->WndNotification = notificationFunc;
+    return new_menu;
+}
+
+// Registers the menu with the ContextMenuManager and adds it to the menus.
+int SpellSets::add_menu_to_manager(std::vector<SpellSets::MenuPair>& menus, Zeal::EqUI::ContextMenu* new_menu)
+{
+    int addedindex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(new_menu);
+    menus.push_back({ addedindex, new_menu });
+    return addedindex;
+}
+
+// Helper function for sorting the spells within categories.
+static bool compareBySpellLevel(const Zeal::EqStructures::SPELL* a, const Zeal::EqStructures::SPELL* b) {
+    Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+    int aLevel = a->ClassLevel[char_info->Class];
+    int bLevel = b->ClassLevel[char_info->Class];
     if (aLevel != bLevel)
         return aLevel > bLevel;
     return a->Name > b->Name;
 }
 
-void SpellSets::destroy_context_menus()
+// Assembles all spells in the spellbook and returns a categorized structure for the menus.
+std::map<std::string, std::map<std::string, std::list<menudata>>> SpellSets::get_spell_categories()
 {
-    if (!Zeal::EqGame::is_new_ui()) { return; } // prevent callback crashing oldui
-
-    if (Zeal::EqGame::Windows->ContextMenuManager)
-    {
-        int* ptr = reinterpret_cast<int*>(Zeal::EqGame::Windows->ContextMenuManager);
-
-        for (auto it = MenuMap.rbegin(); it != MenuMap.rend(); ++it) {
-            auto [index, cmenu] = *it;
-            // Only release if there's a match (should always match).
-            if (cmenu == Zeal::EqGame::Windows->ContextMenuManager->Menus[index])             {
-                // The manager should call the custom destructor and release the resources.
-                Zeal::EqGame::Windows->ContextMenuManager->RemoveMenu(index, true);
-            }
-        }
+    Zeal::EqStructures::EQCHARINFO* char_info = Zeal::EqGame::get_char_info();
+    std::vector<Zeal::EqStructures::SPELL*> spells;
+    for (int N = 0; N < EQ_NUM_SPELL_BOOK_SPELLS; N++) {
+        if (Zeal::EqStructures::SPELL* pSpell = GetSpell(N))
+            spells.push_back(pSpell);
     }
-    menu = 0;
-    spellset_menu = 0;
-    MenuMap.clear();
+    std::sort(spells.begin(), spells.end(), compareBySpellLevel);
+    std::map<std::string, std::map<std::string, std::list<menudata>>> spell_category;
+    for (auto& s : spells)
+    {
+        SpellCat spell_cat_data = getSpellCategoryAndSubcategory(s->ID);
+        menudata md;
+        md.ID = s->ID;
+        int level = s->ClassLevel[char_info->Class];
+        std::stringstream ss;
+        if (spell_cat_data.NewName != nullptr)
+            ss << level << " - " << spell_cat_data.NewName;
+        else
+            ss << level << " - " << s->Name;
+        md.Name = ss.str();
+
+        std::string category = GetSpellCategoryName(spell_cat_data.Category);
+        std::string subcategory = GetSpellSubCategoryName(spell_cat_data.SubCategory);
+        spell_category[category][subcategory].push_back(md);
+    }
+    return spell_category;
 }
 
-void SpellSets::set_ini()
+// Callback provided to context manager to handle spell gem selection notifications.
+static int __fastcall SpellsMenuNotification(void* menu_this, int unused_edx,
+    Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
 {
-    std::stringstream ss;
-    ss << ".\\" << Zeal::EqGame::get_char_info()->Name << "_spellsets.ini";
-    ini->set(ss.str());
+    ZealService* zeal = ZealService::get_instance();
+    zeal->spell_sets->handle_spell_gem_menu_notification(reinterpret_cast<int>(data));
+    return 1;
 }
 
-static Zeal::EqUI::ContextMenu* InitializeMenu(void* notificationFunc = nullptr) {
-    auto menu = Zeal::EqUI::ContextMenu::Create(0, 0, { 100, 100, 100, 100 });
-    if (!menu)
-        throw std::bad_alloc();
-
-    menu->HasChildren = true;  // Note: Evaluate if these are still necessary.
-    menu->HasSiblings = true;
-    menu->Unknown0x015 = 0;
-    menu->Unknown0x016 = 0;
-    menu->Unknown0x017 = 0;
-    menu->fnTable->WndNotification = notificationFunc;
-    return menu;
-}
-
-int SpellSets::add_menu_to_manager(Zeal::EqUI::ContextMenu* new_menu)
-{
-    int addedindex = Zeal::EqGame::Windows->ContextMenuManager->AddMenu(new_menu);
-    MenuMap[addedindex] = new_menu;
-    return addedindex;
-}
-
-void SpellSets::create_context_menus(bool force)
+// Creates the spells_menus context menus used in spell gem selection.
+void SpellSets::create_spells_menus()
 {
     if (!Zeal::EqGame::is_new_ui()) { return; } // prevent callback crashing oldui
 
-    if (force)
-        destroy_context_menus();
+    destroy_menus(spells_menus);
 
-    if (!menu && Zeal::EqGame::get_self() && Zeal::EqGame::is_in_game())
+    if (!Zeal::EqGame::get_self() || !Zeal::EqGame::get_char_info())
+        return;
+
+    auto spells_root_menu = CreateContextMenu(SpellsMenuNotification);
+
+    const auto& spell_categories = get_spell_categories();
+    for (auto& [cat, sub] : spell_categories)
     {
-        ZealService* zeal = ZealService::get_instance();
-        set_ini();
-
-        if (zeal->hooks->hook_map.count("SpellGemWnd_Book_HandleRButtonUp")==0)
-            zeal->hooks->Add("SpellGemWnd_Book_HandleRButtonUp", &Zeal::EqGame::Windows->SpellGems->SpellBook->vtbl->HandleRButtonUp, SpellGemWnd_Book_HandleRButtonUp, hook_type_vtable);
-
-        Zeal::EqStructures::EQCHARINFO* self_char = Zeal::EqGame::get_self()->CharInfo;
-        std::vector<Zeal::EqStructures::SPELL*> spells;
-        for (int N = 0; N < EQ_NUM_SPELL_BOOK_SPELLS; N++) {
-            if (Zeal::EqStructures::SPELL* pSpell = GetSpell(N))
-            {
-                spells.push_back(pSpell);
-            }
-        }
-        std::sort(spells.begin(), spells.end(), compareBySpellLevel);
-        SpellCategory.clear();
-        for (auto& s : spells) 
+        Zeal::EqUI::ContextMenu* sub_category = CreateContextMenu();
+        for (auto& [subcat, spells] : sub)
         {
-            SpellCat SpellCatData = getSpellCategoryAndSubcategory(s->ID);
-            menudata md;
-            md.ID = s->ID;
-            int Level = s->ClassLevel[self_char->Class];
-            std::stringstream ss;
-            if (SpellCatData.NewName.length())
-                ss << Level << " - " << SpellCatData.NewName;
-            else
-                ss << Level << " - " << s->Name;
-            md.Name = ss.str();
-            
-            std::string category = GetSpellCategoryName(SpellCatData.Category);
-            std::string subcategory = GetSpellSubCategoryName(SpellCatData.SubCategory);
-            SpellCategory[category][subcategory].push_back(md);
+            Zeal::EqUI::ContextMenu* sub_menu = CreateContextMenu();
+            for (auto& sp : spells)
+                sub_menu->AddMenuItem(sp.Name, kSpellsBaseMsgId + sp.ID);
+            sub_category->AddMenuItem(subcat, add_menu_to_manager(spells_menus, sub_menu), false, true);
         }
-        if (!menu)
-            menu = InitializeMenu(SpellsMenuNotification);
-            
-        for (auto& [cat, sub] : SpellCategory)
-        {
-            Zeal::EqUI::ContextMenu* SpellSubCategory = InitializeMenu();
-            for (auto& [subcat, spells] : sub)
-            {
-                Zeal::EqUI::ContextMenu* SpellMenu = InitializeMenu();
-                for (auto& sp : spells)
-                    SpellMenu->AddMenuItem(sp.Name, 0x10000 + sp.ID);
-                SpellSubCategory->AddMenuItem(subcat, add_menu_to_manager(SpellMenu), false, true);
-            }
-            menu->AddMenuItem(cat, add_menu_to_manager(SpellSubCategory), false, true);
-        }
-        SpellMenuIndex = add_menu_to_manager(menu);
+        spells_root_menu->AddMenuItem(cat, add_menu_to_manager(spells_menus, sub_category), false, true);
+    }
+    add_menu_to_manager(spells_menus, spells_root_menu);  // Root menu is added last (at .back()).
+}
 
-        if (!spellset_menu)
-            spellset_menu = InitializeMenu(SpellSetMenuNotification);
+// Callback provided to context manager to handle spell set selection notifications.
+static int __fastcall SpellSetMenuNotification(void* menu_this, int unused_edx,
+    Zeal::EqUI::EQWND* pWnd, unsigned int Message, void* data)
+{
+    int msg_data = (int)data;
+    ZealService::get_instance()->spell_sets->handle_spellset_menu_notification(msg_data);
+    return 1;
+}
 
-        spellsets.clear();
-        spellsets = ini->getSectionNames();
-        std::sort(spellsets.begin(), spellsets.end());
+// Creates the spellsets_menus context menus used to handle spell set selection.
+void SpellSets::create_spellsets_menus()
+{
+    if (!Zeal::EqGame::is_new_ui()) { return; } // prevent callback crashing oldui
+
+    destroy_menus(spellsets_menus);
+
+    if (!Zeal::EqGame::get_self() || !Zeal::EqGame::get_char_info())
+        return;
+
+    initialize_ini_filename();  // Retrieve the spellsets from the file system.
+    std::vector<std::string>  spellsets = ini.getSectionNames();
+    std::sort(spellsets.begin(), spellsets.end());
  
-        int header_index = spellset_menu->AddMenuItem("Spell Sets", 0x30000, false);
-        spellset_menu->EnableLine(header_index, false);
-        //spellset_menu->SetItemColor(header_index, { 255,255,255,255 });
-        for (int i = 0; auto & s : spellsets)
-        {
-            spellset_menu->AddMenuItem(s, 0x20000 + i);
-            spellset_map[0x20000 + i] = s;
-            i++;
-        }
-        spellset_menu->AddSeparator();
-        Zeal::EqUI::ContextMenu* DeleteSubCatMenu = InitializeMenu();
-        for (int i = 0; auto & s : spellsets)
-        {
-            DeleteSubCatMenu->AddMenuItem(s, 0x22000 + i);
-            i++;
-        }
-        spellset_menu->AddMenuItem("Delete", add_menu_to_manager(DeleteSubCatMenu), false, true);
-        spellset_menu->AddSeparator();
-        spellset_menu->AddMenuItem("Save New", 0x21000);
-        SpellSetMenuIndex = add_menu_to_manager(spellset_menu);
+    auto root_menu = CreateContextMenu(SpellSetMenuNotification);
+    int header_index = root_menu->AddMenuItem("Spell Sets", kSpellSetHeaderMsgId, false);
+    root_menu->EnableLine(header_index, false);
+    //spellset_menu->SetItemColor(header_index, { 255,255,255,255 });
+    for (int i = 0; auto & s : spellsets)
+    {
+        root_menu->AddMenuItem(s, kSpellSetBaseMsgId + i);
+        spellsets_map[kSpellSetBaseMsgId + i] = s;
+        i++;
     }
+    root_menu->AddSeparator();
+    Zeal::EqUI::ContextMenu* DeleteSubCatMenu = CreateContextMenu();
+    for (int i = 0; auto & s : spellsets)
+    {
+        DeleteSubCatMenu->AddMenuItem(s, kSpellSetDeleteBaseMsgId + i);
+        i++;
+    }
+    root_menu->AddMenuItem("Delete", add_menu_to_manager(spellsets_menus, DeleteSubCatMenu), false, true);
+    root_menu->AddSeparator();
+    root_menu->AddMenuItem("Save New", kSpellSetSaveMsgId);
+    add_menu_to_manager(spellsets_menus, root_menu);
 }
 
-void SpellSets::CleanUI()
+// Called after client UI is initialized.
+void SpellSets::callback_init_ui()
 {
-    destroy_context_menus();
+    create_spells_menus();  // Create up to date spells from spellbook.
+    create_spellsets_menus();  // Load spellsets from ini.
+}
+
+// Called right before client UI is de-allocated.
+void SpellSets::callback_clean_ui()
+{
+    destroy_menus(spells_menus);
+    destroy_menus(spellsets_menus);
+}
+
+// Main processing loop callback to handle various reasons why memorization could be aborted.
+void SpellSets::callback_main()
+{
+    if (mem_buffer.size() && (!Zeal::EqGame::Windows ||
+        !Zeal::EqGame::Windows->SpellBook ||
+        !Zeal::EqGame::Windows->SpellBook->IsVisible))
+        mem_buffer.clear();  // Abort in-process memorization if spellbook drops.
+}
+
+// Hook called after the client finishes memorizing a spell.
+static void __fastcall FinishMemorizing(int t, int u, int a1, int a2)
+{
+    ZealService* zeal = ZealService::get_instance();
+    zeal->spell_sets->handle_finished_memorizing(a1, a2);
+    zeal->hooks->hook_map["FinishMemorizing"]->original(FinishMemorizing)(t, u, a1, a2);
+}
+
+// Hook called after the client finishes scribing a new spell into the spellbook.
+static void __fastcall FinishScribing(int t, int u, int a1, int a2)
+{
+    ZealService* zeal = ZealService::get_instance();
+    zeal->hooks->hook_map["FinishScribing"]->original(FinishScribing)(t, u, a1, a2);
+    zeal->spell_sets->handle_finished_scribing(a1, a2);
+}
+
+// Hook called after a right click up on a spell gem.
+static int __fastcall SpellGemWnd_HandleRButtonUp(Zeal::EqUI::SpellGemWnd* gem, int unused, Zeal::EqUI::CXPoint pt, unsigned int flag)
+{
+    ZealService* zeal = ZealService::get_instance();
+    zeal->spell_sets->handle_spell_gem_rbutton_up(gem, pt);
+    return zeal->hooks->hook_map["SpellGemRbutton"]->original(SpellGemWnd_HandleRButtonUp)(gem, unused, pt, flag);
+}
+
+// Hook called to deal with UI notification events to the CastSpellWnd.
+// Note: ItemDisplay is re-routing the CastSpellWnd vtable:WndNotification to it's own internal
+// function which will then route non-intercepted calls to the detour below.
+static int __fastcall CastSpellWnd_WndNotification(Zeal::EqUI::CastSpellWnd* wnd, int unused_edx,
+    Zeal::EqUI::BasicWnd* src_wnd, unsigned int flag, void* unknown3)
+{
+    ZealService* zeal = ZealService::get_instance();
+    if (src_wnd && src_wnd == wnd->SpellBook && flag == 0x03) {  // Right button up.
+        Zeal::EqUI::CXPoint pt(*Zeal::EqGame::mouse_client_x, *Zeal::EqGame::mouse_client_y);
+        zeal->spell_sets->handle_spell_book_rbutton_up(pt);
+    }
+    return zeal->hooks->hook_map["CastSpellWnd_WndNotification"]->
+        original(CastSpellWnd_WndNotification)(wnd, unused_edx, src_wnd, flag, unknown3);
 }
 
 SpellSets::SpellSets(ZealService* zeal)
 {
-    menu = 0;
-    original_stance = Stand;
-    spellset_menu = 0;
-    ini = std::shared_ptr<IO_ini>(new IO_ini(".\\spellsets.ini"));
     zeal->callbacks->AddGeneric([this]() { callback_main();  }, callback_type::Render);
-    zeal->callbacks->AddGeneric([this]() { CleanUI();  }, callback_type::CleanUI);
-    //zeal->callbacks->AddGeneric([this]() { callback_characterselect();  }, callback_type::CharacterSelect);
+    zeal->callbacks->AddGeneric([this]() { callback_init_ui(); }, callback_type::InitUI);
+    zeal->callbacks->AddGeneric([this]() { callback_clean_ui();  }, callback_type::CleanUI);
+
     zeal->hooks->Add("FinishMemorizing", 0x434b38, FinishMemorizing, hook_type_detour);
     zeal->hooks->Add("FinishScribing", 0x43501f, FinishScribing, hook_type_detour);
     zeal->hooks->Add("SpellGemRbutton", 0x5A67B0, SpellGemWnd_HandleRButtonUp, hook_type_detour);
-    // wrap it for now to prevent users form crashing themselves on oldui until functionality potentially gets added.
-    if (Zeal::EqGame::is_new_ui())
-    {
-        zeal->commands_hook->Add("/spellset", {"/ss"}, "Load, save, delete or list your spellsets.",
-            [this, zeal](std::vector<std::string>& args) {
-                if (args.size() < 3)
-                {
-                    Zeal::EqGame::print_chat("usage: /spellset save/load/list [name]");
-                }
-                else
-                {
-                    if (Zeal::String::compare_insensitive(args[1], "test"))
-                    {
-                        create_context_menus(true);
-                    }
-                    if (Zeal::String::compare_insensitive(args[1], "save"))
-                    {
-                        save(args[2]);
-                    }
-                    if (Zeal::String::compare_insensitive(args[1], "delete") || Zeal::String::compare_insensitive(args[1], "remove"))
-                    {
-                        remove(args[2]);
-                    }
-                    if (Zeal::String::compare_insensitive(args[1], "load"))
-                    {
-                        load(args[2]);
-                    }
-                    if (Zeal::String::compare_insensitive(args[1], "list"))
-                    {
-                        set_ini();
-                        std::vector<std::string> sets = ini->getSectionNames();
-                        Zeal::EqGame::print_chat("--- spell sets (%i) ---", sets.size());
-                        for (auto& set : sets)
-                        {
-                            Zeal::EqGame::print_chat(set);
-                        }
-                        Zeal::EqGame::print_chat("--- end of spell sets ---", sets.size());
-                    }
-                }
-                return true;
+    zeal->hooks->Add("CastSpellWnd_WndNotification", 0x0040a32a, CastSpellWnd_WndNotification, hook_type_detour);
+
+    // Block registering new command with old UI (not supported)
+    if (!Zeal::EqGame::is_new_ui())
+        return;
+
+    zeal->commands_hook->Add("/spellset", {"/ss"}, "Load, save, delete or list your spellsets.",
+        [this, zeal](std::vector<std::string>& args) {
+            if (args.size() < 3 || !Zeal::EqGame::get_self() || !Zeal::EqGame::get_char_info())
+            {
+                Zeal::EqGame::print_chat("usage: /spellset save/load/list [name]");
             }
-        );
-    };
+            else
+            {
+                if (Zeal::String::compare_insensitive(args[1], "test"))
+                {
+                    create_spells_menus();
+                    create_spellsets_menus();
+                }
+                if (Zeal::String::compare_insensitive(args[1], "save"))
+                {
+                    save(args[2]);
+                }
+                if (Zeal::String::compare_insensitive(args[1], "delete") || Zeal::String::compare_insensitive(args[1], "remove"))
+                {
+                    remove(args[2]);
+                }
+                if (Zeal::String::compare_insensitive(args[1], "load"))
+                {
+                    load(args[2]);
+                }
+                if (Zeal::String::compare_insensitive(args[1], "list"))
+                {
+                    initialize_ini_filename();
+                    std::vector<std::string> sets = ini.getSectionNames();
+                    Zeal::EqGame::print_chat("--- spell sets (%i) ---", sets.size());
+                    for (auto& set : sets)
+                    {
+                        Zeal::EqGame::print_chat(set);
+                    }
+                    Zeal::EqGame::print_chat("--- end of spell sets ---", sets.size());
+                }
+            }
+            return true;
+        }
+    );
 }
+
 SpellSets::~SpellSets()
 {
-    destroy_context_menus();
+    callback_clean_ui();  // Should be a redundant no-op call.
 }
