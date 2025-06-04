@@ -48,7 +48,7 @@ namespace Zeal
 			static mem::function<void __fastcall(int t, int unused, char* data, short color, bool un)> print_chat = 0x537f99;
 			static mem::function<void __fastcall(int t, int unused, char* data, int unknown)> DoPercentConvert = 0x00538110;
 			static mem::function<void __cdecl(const char* data)> eqlog = 0x005240dc;
-			static mem::function<char __stdcall(Zeal::EqStructures::Entity* viewer, Zeal::EqStructures::Entity* target)> is_invisible = 0x4afa90;  // can_target
+			static mem::function<char __fastcall(void* this_display, int unused_edx, Zeal::EqStructures::Entity* viewer, Zeal::EqStructures::Entity* target)> is_invisible = 0x4afa90;  // can_target
 			static mem::function<char __fastcall(int, int, int, int, float*, float, UINT32)> get_world_visible_actor_list = 0x7f9850;
 			static mem::function<char __fastcall(int, int, int, int, float*, float, UINT32)> get_camera_location = 0x7f99d4;
 			static mem::function<char __fastcall(int, int, float, float, float, float, float, float, float*, float*, float* , char) > s3dCollideSphereWithWorld = 0x4b3c45;
@@ -56,14 +56,14 @@ namespace Zeal
 			static mem::function<short __fastcall(int, int)> get_cur_mana = 0x4b9450;
 			static mem::function<int __cdecl(int, Vec3*)> t3dGetRegionNumberFromWorldAndXYZ = 0x0;
 			static mem::function<void __fastcall(DWORD, int unused, DWORD)> ui_something = 0x536bae;
-			static mem::function<float __stdcall(float input_heading)> fix_heading = 0x4a2eed;
-			static mem::function<void __stdcall()> ProcessMouseEvent = 0x525db4;
+			static mem::function<float __fastcall(void* this_display, int unused_edx, float input_heading)> fix_heading = 0x4a2eed;
+			static mem::function<void __cdecl()> ProcessMouseEvent = 0x525db4;
 			static mem::function<void __fastcall(int, int, float)> MouseLook = 0x4db384;
 			static mem::function<void __fastcall(DWORD, int unused, DWORD)> proc_mouse = 0x537707;
 			static mem::function<void __fastcall(DWORD, int unused, int cmd , int str_id, int category)> InitKeyBind = 0x42B21D; //arguments coptionswnd ptr, cmd, string_id, category
 			static mem::function<void __fastcall(DWORD, int unused, char* str)> InitKeyBindStr = 0x576190; //arguments coptionswnd ptr, cmd, string_id, category
 			static mem::function<int __cdecl(Zeal::EqUI::CXSTR*, const char* format)> CXStr_PrintString = 0x578110;
-			static mem::function<int __stdcall()> LoadOptions = 0x536CE0;
+			static mem::function<int __fastcall(void* everquest_this, int unused_edx)> LoadOptions = 0x536CE0;  // CEverQuest::loadOptions()
 			static mem::function<int __fastcall(int t, int unk, int key, int type)> readKeyMapFromIni = 0x525520;
 			static mem::function<void __cdecl(Zeal::EqStructures::EQCHARINFO* _char, Zeal::EqStructures::_EQITEMINFO** Item, int)> auto_inventory = 0x4F0EEB;
 			static mem::function<int __cdecl()> UI_ChatInputCheck = 0x54042d;

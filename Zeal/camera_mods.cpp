@@ -527,11 +527,12 @@ void CameraMods::proc_rmousedown(int x, int y)
     }
 }
 
-void __stdcall procRightMouse(int x, int y)
+// CEverQuest::RMouseDown()
+void __fastcall procRightMouse(void* everquest_this, int unused_edx, int x, int y)
 {
     ZealService* zeal = ZealService::get_instance();
     zeal->camera_mods->proc_rmousedown(x,y);
-    zeal->hooks->hook_map["procRightMouse"]->original(procRightMouse)(x, y);
+    zeal->hooks->hook_map["procRightMouse"]->original(procRightMouse)(everquest_this, unused_edx, x, y);
 }
 
 void CameraMods::callback_endmainloop()

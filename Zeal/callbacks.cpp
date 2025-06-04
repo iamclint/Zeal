@@ -134,12 +134,12 @@ void __fastcall initcharselectui_hk(int t, int u)
 	zeal->callbacks->invoke_generic(callback_type::InitCharSelectUI);
 }
 
-void __stdcall clean_up_ui()
+static void __fastcall CDisplayCleanGameUI(void* cdisplay_this, int unused_edx)
 {
 	CallbackTrace trace("CleanUpUI");
 	ZealService* zeal = ZealService::get_instance();
 	zeal->callbacks->invoke_generic(callback_type::CleanUI);
-	zeal->hooks->hook_map["CleanUpUI"]->original(clean_up_ui)();
+	zeal->hooks->hook_map["CDisplayCleanGameUI"]->original(CDisplayCleanGameUI)(cdisplay_this, unused_edx);
 }
 
 void CallbackManager::invoke_delayed()
@@ -342,7 +342,7 @@ CallbackManager::CallbackManager(ZealService* zeal)
 		zeal->hooks->Add("RenderUI", (DWORD)eqfx+0x6b7f0, render_ui, hook_type_detour);
 	
 	zeal->hooks->Add("EnterZone", 0x53D2C4, enterzone_hk, hook_type_detour);
-	zeal->hooks->Add("CleanUpUI", 0x4A6EBC, clean_up_ui, hook_type_detour);
+	zeal->hooks->Add("CDisplayCleanGameUI", 0x4A6EBC, CDisplayCleanGameUI, hook_type_detour);
 	zeal->hooks->Add("DoCharacterSelection", 0x53b9cf, charselect_hk, hook_type_detour);
 	zeal->hooks->Add("InitGameUI", 0x4a60b5, initgameui_hk, hook_type_detour);
 	zeal->hooks->Add("InitCharSelectUI", 0x4a5f85, initcharselectui_hk, hook_type_detour);
