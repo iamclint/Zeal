@@ -259,7 +259,7 @@ ___
   - **Description:** resets the exp per hour calculations.
 
 - `/rt`
-  - **Description:** targets the last tell or active tell window player
+  - **Description:** targets the last tell or active tell window player, also selects the player in your raid window
 
 - `/run`
   - **Arguments:** none (toggles), `on` (run), `off` (walk)

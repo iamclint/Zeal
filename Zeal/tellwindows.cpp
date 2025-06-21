@@ -353,6 +353,38 @@ TellWindows::TellWindows(ZealService* zeal)
     zeal->callbacks->AddOutputText([this](Zeal::EqUI::ChatWnd*& wnd, std::string& msg, short channel) { this->AddOutputText(wnd, msg, channel); });
     zeal->commands_hook->Add("/rt", {}, "Target the last tell or active tell window player",
         [this](std::vector<std::string>& args) {
+
+            if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->Raid)
+            {
+                Zeal::EqUI::ListWnd* players = (Zeal::EqUI::ListWnd*)Zeal::EqGame::Windows->Raid->GetChildItem("RAID_PlayerList");
+                if (players)
+                {
+                    std::string reply_who = (char*)(0x7CE45C);
+                    if (enabled)
+                    {
+                        if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->ChatManager)
+                        {
+                            Zeal::EqUI::ChatWnd* wnd = Zeal::EqGame::Windows->ChatManager->ChatWindows[Zeal::EqGame::Windows->ChatManager->ActiveChatWnd];
+                            if (IsTellWindow(wnd))
+                            {
+                                std::string window_title = std::string(wnd->Text);
+								reply_who = window_title.substr(1, window_title.length() - 1); //strip the tell window identifier
+                            }
+                        }
+                    }
+
+                    
+                    for (int i = 1; i < players->ItemCount; i++)
+                    {
+                        std::string name = players->GetItemText(i, 1);
+                        if (name == reply_who) {
+                            players->SelectedIndex = i; //select player in raid window
+                            break;
+                        }
+                    }
+                }
+            }
+
             if (enabled)
             {
                 if (Zeal::EqGame::Windows && Zeal::EqGame::Windows->ChatManager)
