@@ -562,7 +562,7 @@ void __fastcall DoCamAI(int display, int u, float p1)
         zeal->camera_mods->update_cam();
 }
 
-static void __fastcall GetClickedActor(int this_display, int unused_edx, int mouse_x, int mouse_y, int get_on_actor)
+static int __fastcall GetClickedActor(int this_display, int unused_edx, int mouse_x, int mouse_y, int get_on_actor)
 {
     auto self = Zeal::EqGame::get_self();
     bool clickthru = !get_on_actor && ZealService::get_instance()->camera_mods->setting_selfclickthru.get();
@@ -572,9 +572,10 @@ static void __fastcall GetClickedActor(int this_display, int unused_edx, int mou
     if (bounding_radius)
         *bounding_radius = 0.001f;  // Small, hard to click value.
     ZealService* zeal = ZealService::get_instance();
-    zeal->hooks->hook_map["GetClickedActor"]->original(GetClickedActor)(this_display, unused_edx, mouse_x, mouse_y, get_on_actor);
+   int rval = zeal->hooks->hook_map["GetClickedActor"]->original(GetClickedActor)(this_display, unused_edx, mouse_x, mouse_y, get_on_actor);
     if (bounding_radius)
         *bounding_radius = original_radius;
+    return rval;
 }
 
 CameraMods::CameraMods(ZealService* zeal)
