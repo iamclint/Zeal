@@ -26,35 +26,6 @@ from the repo using github actions, providing full transparency on the contents.
 - Third party tool support (silent log messages, direct ZealPipes)
 - Various client bug fixes and patches (crashe fixes, helm graphical glitches, etc)
 
-### Installation
-#### The easy way
-1. [Download](https://github.com/iamclint/Zeal/releases/latest) the latest official (non-beta) Zeal
-   - Use the link at the top or scroll down past the list of changes to the `Assets` section and download the `zeal_v#.#.#_*.zip` file
-   - Ignore the `Source code` zip files
-2. Quit Everquest and extract the zip file contents into your EQ game root directory
-   - If you have previously installed zeal, deleting the old `uifiles/zeal` is recommended before copying over
-   - For minimalists, the only required files are the `zeal.asi` and the `uifiles/zeal` folder
-3. Recommended: Install a UI skin modified with the extra Zeal UI functionality
-   such as mana gauges, experience per hour, loot all / link buttons, etc.
-   - If the UI is not updated, there will be some XML error complaints that can be ignored
-   - Check the list below, the Quarm discord `#ui-discussion` channel, or the Quarm guide
-    link below for compatible UI's
-4. Test Zeal installation in game by typing "/zeal version" and "/help zeal".
-5. Configure Zeal using the new Zeal options window and assign new key binds.
-   - The Zeal options window opens in parallel to the EQ options window (Alt-o)
-
-#### If that doesn't work
-Ensure that sound is enabled in the game (the volume level can be set to zero).
-   - Check that `Sound=TRUE` in the `eqclient.ini` in your root Everquest directory
-
-A comprehensive guide, including troubleshooting, can be found at
-https://quarm.guide/install-guides under "Installing Zeal" or a
-simplified checklist under "Checklist for Installing Zeal".
-
-Note that the method Zeal uses to inject itself into the client can trigger the
-heuristics of anti-virus scanners to label it as malware. See trouble-shooting
-guide above if your `Zeal.asi` file keeps disappearing.
-
 #### Description of zip file contents
 1. `Zeal_README.md`: A copy of this readme file
 2. `Zeal.asi`: Executable code that is loaded when EQ sound is enabled
@@ -63,7 +34,7 @@ guide above if your `Zeal.asi` file keeps disappearing.
    - The files in `uifiles/zeal` override `uifiles/default` and `uifiles/<your_skin>`
 5. `crashes/`: Folder with optional crash reporter that will send any captured crash zip logs for review 
 
-#### Storage location of Zeal settings (in eqgame.exe folder)
+#### Storage location of Zeal settings
 1. `zeal.ini`: Contains most of the zeal settings (some common, some per character)
 2. `eqclient.ini`: Contains extended key binds
 3. `UI_<name>_pq.ini`: Configuration of Zeal client windows (map, extra item display, options)
