@@ -1,14 +1,3 @@
-### Description
-Zeal adds quality of life functionality to the legacy (2002) Everquest client
-used by most TAKP EqEMU players. The Miles Sound System used by that client
-supports plug-ins for arbitrary audio filtering, and Zeal injects itself into the
-client like a standard dll by using the .asi extension in the EQ root directory.
-It can then patch itself into the client's processing loop and callbacks to
-add new functionality and smooth out issues in the old client.
-
-Zeal custom code is entirely open source and the releases are built directly
-from the repo using github actions, providing full transparency on the contents.
-
 ### Features
 - Camera motion improvements (major improvements to third person view)
 - Additional key binds (tab targeting, corpse cycling, strafe, pet, map,
@@ -606,7 +595,6 @@ The map is controlled through four interfaces:
 * Key binds for frequent map actions (configure in EQ Options->Keyboard->UI)
 * The /map command
 
-Most of the default map settings are stored in the zeal.ini file of the root Everquest directory.
 The defaults are updated when adjusting settings in the Zeal options map tab. The size and
 position of the internal map window is stored as part of the UI_character.ini files like normal
 game windows. The key binds and /map commands create temporary changes unless the
@@ -819,7 +807,7 @@ not present.
 
 Note that some features, such as level recognition, are not currently supported with external data.
 
-The external map files must be placed in a `map_files` directory in the root everquest directory
+The external map files must be placed in a `map_files` directory in the root directory
 with zones named to match their short names (ie `map_files/commons.txt` contains the data for
 West Commonlands). If that short name file is present, it will also look for an optional `_1.txt`
 file (ie `map_files/commons_1.txt`) and parse it if present. Most Brewall map files with POIs can
